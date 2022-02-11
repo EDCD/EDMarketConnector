@@ -14,6 +14,7 @@ from EDMCLogging import get_main_logger
 logger = get_main_logger()
 
 if TYPE_CHECKING:  # pragma: no cover
+
     def _(x: str) -> str:
         return x
 
@@ -33,7 +34,9 @@ class JournalLock:
 
     def __init__(self) -> None:
         """Initialise where the journal directory and lock file are."""
-        self.journal_dir: str = config.get_str('journaldir') or config.default_journal_dir
+        self.journal_dir: str = (
+            config.get_str("journaldir") or config.default_journal_dir
+        )
         self.journal_dir_path: Optional[pathlib.Path] = None
         self.set_path_from_journaldir()
         self.journal_dir_lockfile_name: Optional[pathlib.Path] = None
@@ -55,16 +58,23 @@ class JournalLock:
 
     def open_journal_dir_lockfile(self) -> bool:
         """Open journal_dir lockfile ready for locking."""
-        self.journal_dir_lockfile_name = self.journal_dir_path / 'edmc-journal-lock.txt'  # type: ignore
-        logger.trace_if('journal-lock', f'journal_dir_lockfile_name = {self.journal_dir_lockfile_name!r}')
+        self.journal_dir_lockfile_name = self.journal_dir_path / "edmc-journal-lock.txt"  # type: ignore
+        logger.trace_if(
+            "journal-lock",
+            f"journal_dir_lockfile_name = {self.journal_dir_lockfile_name!r}",
+        )
         try:
-            self.journal_dir_lockfile = open(self.journal_dir_lockfile_name, mode='w+', encoding='utf-8')
+            self.journal_dir_lockfile = open(
+                self.journal_dir_lockfile_name, mode="w+", encoding="utf-8"
+            )
 
         # Linux CIFS read-only mount throws: OSError(30, 'Read-only file system')
         # Linux no-write-perm directory throws: PermissionError(13, 'Permission denied')
         except Exception as e:  # For remote FS this could be any of a wide range of exceptions
-            logger.warning(f"Couldn't open \"{self.journal_dir_lockfile_name}\" for \"w+\""
-                           f" Aborting duplicate process checks: {e!r}")
+            logger.warning(
+                f'Couldn\'t open "{self.journal_dir_lockfile_name}" for "w+"'
+                f" Aborting duplicate process checks: {e!r}"
+            )
             return False
 
         return True
@@ -94,41 +104,51 @@ class JournalLock:
 
         :return: LockResult - See the class Enum definition
         """
-        if sys.platform == 'win32':
-            logger.trace_if('journal-lock', 'win32, using msvcrt')
+        if sys.platform == "win32":
+            logger.trace_if("journal-lock", "win32, using msvcrt")
             # win32 doesn't have fcntl, so we have to use msvcrt
             import msvcrt
 
             try:
-                msvcrt.locking(self.journal_dir_lockfile.fileno(), msvcrt.LK_NBLCK, 4096)
+                msvcrt.locking(
+                    self.journal_dir_lockfile.fileno(), msvcrt.LK_NBLCK, 4096
+                )
 
             except Exception as e:
-                logger.info(f"Exception: Couldn't lock journal directory \"{self.journal_dir}\""
-                            f", assuming another process running: {e!r}")
+                logger.info(
+                    f'Exception: Couldn\'t lock journal directory "{self.journal_dir}"'
+                    f", assuming another process running: {e!r}"
+                )
                 return JournalLockResult.ALREADY_LOCKED
 
         else:  # pytest coverage only sees this on !win32
-            logger.trace_if('journal-lock', 'NOT win32, using fcntl')
+            logger.trace_if("journal-lock", "NOT win32, using fcntl")
             try:
                 import fcntl
 
             except ImportError:
-                logger.warning("Not on win32 and we have no fcntl, can't use a file lock!"
-                               "Allowing multiple instances!")
+                logger.warning(
+                    "Not on win32 and we have no fcntl, can't use a file lock!"
+                    "Allowing multiple instances!"
+                )
                 return JournalLockResult.LOCKED
 
             try:
                 fcntl.flock(self.journal_dir_lockfile, fcntl.LOCK_EX | fcntl.LOCK_NB)
 
             except Exception as e:
-                logger.info(f"Exception: Couldn't lock journal directory \"{self.journal_dir}\", "
-                            f"assuming another process running: {e!r}")
+                logger.info(
+                    f'Exception: Couldn\'t lock journal directory "{self.journal_dir}", '
+                    f"assuming another process running: {e!r}"
+                )
                 return JournalLockResult.ALREADY_LOCKED
 
-        self.journal_dir_lockfile.write(f"Path: {self.journal_dir}\nPID: {os_getpid()}\n")
+        self.journal_dir_lockfile.write(
+            f"Path: {self.journal_dir}\nPID: {os_getpid()}\n"
+        )
         self.journal_dir_lockfile.flush()
 
-        logger.trace_if('journal-lock', 'Done')
+        logger.trace_if("journal-lock", "Done")
         self.locked = True
 
         return JournalLockResult.LOCKED
@@ -143,8 +163,8 @@ class JournalLock:
             return True  # We weren't locked, and still aren't
 
         unlocked = False
-        if sys.platform == 'win32':
-            logger.trace_if('journal-lock', 'win32, using msvcrt')
+        if sys.platform == "win32":
+            logger.trace_if("journal-lock", "win32, using msvcrt")
             # win32 doesn't have fcntl, so we have to use msvcrt
             import msvcrt
 
@@ -152,34 +172,42 @@ class JournalLock:
                 # Need to seek to the start first, as lock range is relative to
                 # current position
                 self.journal_dir_lockfile.seek(0)
-                msvcrt.locking(self.journal_dir_lockfile.fileno(), msvcrt.LK_UNLCK, 4096)
+                msvcrt.locking(
+                    self.journal_dir_lockfile.fileno(), msvcrt.LK_UNLCK, 4096
+                )
 
             except Exception as e:
-                logger.info(f"Exception: Couldn't unlock journal directory \"{self.journal_dir}\": {e!r}")
+                logger.info(
+                    f'Exception: Couldn\'t unlock journal directory "{self.journal_dir}": {e!r}'
+                )
 
             else:
                 unlocked = True
 
         else:  # pytest coverage only sees this on !win32
-            logger.trace_if('journal-lock', 'NOT win32, using fcntl')
+            logger.trace_if("journal-lock", "NOT win32, using fcntl")
             try:
                 import fcntl
 
             except ImportError:
-                logger.warning("Not on win32 and we have no fcntl, can't use a file lock!")
+                logger.warning(
+                    "Not on win32 and we have no fcntl, can't use a file lock!"
+                )
                 return True  # Lie about being unlocked
 
             try:
                 fcntl.flock(self.journal_dir_lockfile, fcntl.LOCK_UN)
 
             except Exception as e:
-                logger.info(f"Exception: Couldn't unlock journal directory \"{self.journal_dir}\": {e!r}")
+                logger.info(
+                    f'Exception: Couldn\'t unlock journal directory "{self.journal_dir}": {e!r}'
+                )
 
             else:
                 unlocked = True
 
         # Close the file whether or not the unlocking succeeded.
-        if hasattr(self, 'journal_dir_lockfile'):
+        if hasattr(self, "journal_dir_lockfile"):
             self.journal_dir_lockfile.close()
 
         self.journal_dir_lockfile_name = None
@@ -203,15 +231,15 @@ class JournalLock:
             self.parent = parent
             self.callback = callback
             # LANG: Title text on popup when Journal directory already locked
-            self.title(_('Journal directory already locked'))
+            self.title(_("Journal directory already locked"))
 
             # remove decoration
-            if sys.platform == 'win32':
-                self.attributes('-toolwindow', tk.TRUE)
+            if sys.platform == "win32":
+                self.attributes("-toolwindow", tk.TRUE)
 
-            elif sys.platform == 'darwin':
+            elif sys.platform == "darwin":
                 # http://wiki.tcl.tk/13428
-                parent.call('tk::unsupported::MacWindowStyle', 'style', self, 'utility')
+                parent.call("tk::unsupported::MacWindowStyle", "style", self, "utility")
 
             self.resizable(tk.FALSE, tk.FALSE)
 
@@ -220,34 +248,40 @@ class JournalLock:
 
             self.blurb = tk.Label(frame)
             # LANG: Text for when newly selected Journal directory is already locked
-            self.blurb['text'] = _("The new Journal Directory location is already locked.{CR}"
-                                   "You can either attempt to resolve this and then Retry, or choose to Ignore this.")
+            self.blurb["text"] = _(
+                "The new Journal Directory location is already locked.{CR}"
+                "You can either attempt to resolve this and then Retry, or choose to Ignore this."
+            )
             self.blurb.grid(row=1, column=0, columnspan=2, sticky=tk.NSEW)
 
             # LANG: Generic 'Retry' button label
-            self.retry_button = ttk.Button(frame, text=_('Retry'), command=self.retry)
+            self.retry_button = ttk.Button(frame, text=_("Retry"), command=self.retry)
             self.retry_button.grid(row=2, column=0, sticky=tk.EW)
 
             # LANG: Generic 'Ignore' button label
-            self.ignore_button = ttk.Button(frame, text=_('Ignore'), command=self.ignore)
+            self.ignore_button = ttk.Button(
+                frame, text=_("Ignore"), command=self.ignore
+            )
             self.ignore_button.grid(row=2, column=1, sticky=tk.EW)
             self.protocol("WM_DELETE_WINDOW", self._destroy)
 
         def retry(self) -> None:
             """Handle user electing to Retry obtaining the lock."""
-            logger.trace_if('journal-lock_if', 'User selected: Retry')
+            logger.trace_if("journal-lock_if", "User selected: Retry")
             self.destroy()
             self.callback(True, self.parent)
 
         def ignore(self) -> None:
             """Handle user electing to Ignore failure to obtain the lock."""
-            logger.trace_if('journal-lock', 'User selected: Ignore')
+            logger.trace_if("journal-lock", "User selected: Ignore")
             self.destroy()
             self.callback(False, self.parent)
 
         def _destroy(self) -> None:
             """Destroy the Retry/Ignore popup."""
-            logger.trace_if('journal-lock', 'User force-closed popup, treating as Ignore')
+            logger.trace_if(
+                "journal-lock", "User force-closed popup, treating as Ignore"
+            )
             self.ignore()
 
     def update_lock(self, parent: tk.Tk) -> None:
@@ -256,7 +290,7 @@ class JournalLock:
 
         :param parent: - The parent tkinter window.
         """
-        current_journaldir = config.get_str('journaldir') or config.default_journal_dir
+        current_journaldir = config.get_str("journaldir") or config.default_journal_dir
 
         if current_journaldir == self.journal_dir:
             return  # Still the same
@@ -268,7 +302,9 @@ class JournalLock:
 
         if self.obtain_lock() == JournalLockResult.ALREADY_LOCKED:
             # Pop-up message asking for Retry or Ignore
-            self.retry_popup = self.JournalAlreadyLocked(parent, self.retry_lock)  # pragma: no cover
+            self.retry_popup = self.JournalAlreadyLocked(
+                parent, self.retry_lock
+            )  # pragma: no cover
 
     def retry_lock(self, retry: bool, parent: tk.Tk) -> None:  # pragma: no cover
         """
@@ -277,12 +313,12 @@ class JournalLock:
         :param retry: - does the user want to retry?  Comes from the dialogue choice.
         :param parent: - The parent tkinter window.
         """
-        logger.trace_if('journal-lock', f'We should retry: {retry}')
+        logger.trace_if("journal-lock", f"We should retry: {retry}")
 
         if not retry:
             return
 
-        current_journaldir = config.get_str('journaldir') or config.default_journal_dir
+        current_journaldir = config.get_str("journaldir") or config.default_journal_dir
         self.journal_dir = current_journaldir
         self.set_path_from_journaldir()
         if self.obtain_lock() == JournalLockResult.ALREADY_LOCKED:

@@ -9,24 +9,24 @@ macOS uses a 'defaults' object.
 
 __all__ = [
     # defined in the order they appear in the file
-    'GITVERSION_FILE',
-    'appname',
-    'applongname',
-    'appcmdname',
-    'copyright',
-    'update_feed',
-    'update_interval',
-    'debug_senders',
-    'trace_on',
-    'capi_pretend_down',
-    'capi_debug_access_token',
-    'logger',
-    'git_shorthash_from_head',
-    'appversion',
-    'user_agent',
-    'appversion_nobuild',
-    'AbstractConfig',
-    'config'
+    "GITVERSION_FILE",
+    "appname",
+    "applongname",
+    "appcmdname",
+    "copyright",
+    "update_feed",
+    "update_interval",
+    "debug_senders",
+    "trace_on",
+    "capi_pretend_down",
+    "capi_debug_access_token",
+    "logger",
+    "git_shorthash_from_head",
+    "appversion",
+    "user_agent",
+    "appversion_nobuild",
+    "AbstractConfig",
+    "config",
 ]
 
 import abc
@@ -47,17 +47,17 @@ import semantic_version
 from constants import GITVERSION_FILE, applongname, appname
 
 # Any of these may be imported by plugins
-appcmdname = 'EDMC'
+appcmdname = "EDMC"
 # appversion **MUST** follow Semantic Versioning rules:
 # <https://semver.org/#semantic-versioning-specification-semver>
 # Major.Minor.Patch(-prerelease)(+buildmetadata)
 # NB: Do *not* import this, use the functions appversion() and appversion_nobuild()
-_static_appversion = '5.3.0-beta11'
+_static_appversion = "5.3.0-beta11"
 _cached_version: Optional[semantic_version.Version] = None
-copyright = '© 2015-2019 Jonathan Harris, 2020-2022 EDCD'
+copyright = "© 2015-2019 Jonathan Harris, 2020-2022 EDCD"
 
-update_feed = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml'
-update_interval = 8*60*60
+update_feed = "https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml"
+update_interval = 8 * 60 * 60
 # Providers marked to be in debug mode. Generally this is expected to switch to sending data to a log file
 debug_senders: List[str] = []
 # TRACE logging code that should actually be used.  Means not spamming it
@@ -75,7 +75,7 @@ else:
     logger = logging.getLogger(appname)
 
 
-_T = TypeVar('_T')
+_T = TypeVar("_T")
 
 
 ###########################################################################
@@ -90,29 +90,32 @@ def git_shorthash_from_head() -> str:
     shorthash: str = None  # type: ignore
 
     try:
-        git_cmd = subprocess.Popen('git rev-parse --short HEAD'.split(),
-                                   stdout=subprocess.PIPE,
-                                   stderr=subprocess.STDOUT
-                                   )
+        git_cmd = subprocess.Popen(
+            "git rev-parse --short HEAD".split(),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+        )
         out, err = git_cmd.communicate()
 
     except Exception as e:
         logger.info(f"Couldn't run git command for short hash: {e!r}")
 
     else:
-        shorthash = out.decode().rstrip('\n')
-        if re.match(r'^[0-9a-f]{7,}$', shorthash) is None:
-            logger.error(f"'{shorthash}' doesn't look like a valid git short hash, forcing to None")
+        shorthash = out.decode().rstrip("\n")
+        if re.match(r"^[0-9a-f]{7,}$", shorthash) is None:
+            logger.error(
+                f"'{shorthash}' doesn't look like a valid git short hash, forcing to None"
+            )
             shorthash = None  # type: ignore
 
     if shorthash is not None:
         with contextlib.suppress(Exception):
-            result = subprocess.run('git diff --stat HEAD'.split(), capture_output=True)
+            result = subprocess.run("git diff --stat HEAD".split(), capture_output=True)
             if len(result.stdout) > 0:
-                shorthash += '.DIRTY'
+                shorthash += ".DIRTY"
 
             if len(result.stderr) > 0:
-                logger.warning(f'Data from git on stderr:\n{str(result.stderr)}')
+                logger.warning(f"Data from git on stderr:\n{str(result.stderr)}")
 
     return shorthash
 
@@ -127,23 +130,25 @@ def appversion() -> semantic_version.Version:
     if _cached_version is not None:
         return _cached_version
 
-    if getattr(sys, 'frozen', False):
+    if getattr(sys, "frozen", False):
         # Running frozen, so we should have a .gitversion file
         # Yes, .parent because if frozen we're inside library.zip
-        with open(pathlib.Path(sys.path[0]).parent / GITVERSION_FILE, 'r', encoding='utf-8') as gitv:
+        with open(
+            pathlib.Path(sys.path[0]).parent / GITVERSION_FILE, "r", encoding="utf-8"
+        ) as gitv:
             shorthash = gitv.read()
 
     else:
         # Running from source
         shorthash = git_shorthash_from_head()
         if shorthash is None:
-            shorthash = 'UNKNOWN'
+            shorthash = "UNKNOWN"
 
-    _cached_version = semantic_version.Version(f'{_static_appversion}+{shorthash}')
+    _cached_version = semantic_version.Version(f"{_static_appversion}+{shorthash}")
     return _cached_version
 
 
-user_agent = f'EDCD-{appname}-{appversion()}'
+user_agent = f"EDCD-{appname}-{appversion()}"
 
 
 def appversion_nobuild() -> semantic_version.Version:
@@ -155,7 +160,9 @@ def appversion_nobuild() -> semantic_version.Version:
 
     :return: App version without any build meta data.
     """
-    return appversion().truncate('prerelease')
+    return appversion().truncate("prerelease")
+
+
 ###########################################################################
 
 
@@ -293,8 +300,10 @@ class AbstractConfig(abc.ABC):
 
     @staticmethod
     def _suppress_call(
-        func: Callable[..., _T], exceptions: Union[Type[BaseException], List[Type[BaseException]]] = Exception,
-        *args: Any, **kwargs: Any
+        func: Callable[..., _T],
+        exceptions: Union[Type[BaseException], List[Type[BaseException]]] = Exception,
+        *args: Any,
+        **kwargs: Any,
     ) -> Optional[_T]:
         if exceptions is None:
             exceptions = [Exception]
@@ -307,7 +316,9 @@ class AbstractConfig(abc.ABC):
 
         return None
 
-    def get(self, key: str, default: Union[list, str, bool, int] = None) -> Union[list, str, bool, int]:
+    def get(
+        self, key: str, default: Union[list, str, bool, int] = None
+    ) -> Union[list, str, bool, int]:
         """
         Return the data for the requested key, or a default.
 
@@ -316,19 +327,34 @@ class AbstractConfig(abc.ABC):
         :raises OSError: On Windows, if a Registry error occurs.
         :return: The data or the default.
         """
-        warnings.warn(DeprecationWarning('get is Deprecated. use the specific getter for your type'))
-        logger.debug('Attempt to use Deprecated get() method\n' + ''.join(traceback.format_stack()))
+        warnings.warn(
+            DeprecationWarning(
+                "get is Deprecated. use the specific getter for your type"
+            )
+        )
+        logger.debug(
+            "Attempt to use Deprecated get() method\n"
+            + "".join(traceback.format_stack())
+        )
 
-        if (l := self._suppress_call(self.get_list, ValueError, key, default=None)) is not None:
+        if (
+            l := self._suppress_call(self.get_list, ValueError, key, default=None)
+        ) is not None:
             return l
 
-        elif (s := self._suppress_call(self.get_str, ValueError, key, default=None)) is not None:
+        elif (
+            s := self._suppress_call(self.get_str, ValueError, key, default=None)
+        ) is not None:
             return s
 
-        elif (b := self._suppress_call(self.get_bool, ValueError, key, default=None)) is not None:
+        elif (
+            b := self._suppress_call(self.get_bool, ValueError, key, default=None)
+        ) is not None:
             return b
 
-        elif (i := self._suppress_call(self.get_int, ValueError, key, default=None)) is not None:
+        elif (
+            i := self._suppress_call(self.get_int, ValueError, key, default=None)
+        ) is not None:
             return i
 
         return default  # type: ignore
@@ -375,8 +401,11 @@ class AbstractConfig(abc.ABC):
         See get_int for its replacement.
         :raises OSError: On Windows, if a Registry error occurs.
         """
-        warnings.warn(DeprecationWarning('getint is Deprecated. Use get_int instead'))
-        logger.debug('Attempt to use Deprecated getint() method\n' + ''.join(traceback.format_stack()))
+        warnings.warn(DeprecationWarning("getint is Deprecated. Use get_int instead"))
+        logger.debug(
+            "Attempt to use Deprecated getint() method\n"
+            + "".join(traceback.format_stack())
+        )
 
         return self.get_int(key, default=default)
 
@@ -456,18 +485,21 @@ def get_config(*args, **kwargs) -> AbstractConfig:
     """
     if sys.platform == "darwin":
         from .darwin import MacConfig
+
         return MacConfig(*args, **kwargs)
 
     elif sys.platform == "win32":
         from .windows import WinConfig
+
         return WinConfig(*args, **kwargs)
 
     elif sys.platform == "linux":
         from .linux import LinuxConfig
+
         return LinuxConfig(*args, **kwargs)
 
     else:
-        raise ValueError(f'Unknown platform: {sys.platform=}')
+        raise ValueError(f"Unknown platform: {sys.platform=}")
 
 
 config = get_config()

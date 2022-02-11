@@ -15,4 +15,4 @@ class SubA:
 
         :return:
         """
-        self.logger.info('ping!')
+        self.logger.info("ping!")

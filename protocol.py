@@ -20,8 +20,9 @@ logger = get_main_logger()
 
 is_wine = False
 
-if sys.platform == 'win32':
+if sys.platform == "win32":
     from ctypes import windll  # type: ignore
+
     try:
         if windll.ntdll.wine_get_version:
             is_wine = True
@@ -34,10 +35,10 @@ class GenericProtocolHandler:
 
     def __init__(self) -> None:
         self.redirect = protocolhandler_redirect  # Base redirection URL
-        self.master: 'tkinter.Tk' = None  # type: ignore
+        self.master: "tkinter.Tk" = None  # type: ignore
         self.lastpayload = None
 
-    def start(self, master: 'tkinter.Tk') -> None:
+    def start(self, master: "tkinter.Tk") -> None:
         """Start Protocol Handler."""
         self.master = master
 
@@ -49,20 +50,24 @@ class GenericProtocolHandler:
         """Generate an auth event."""
         self.lastpayload = url
 
-        logger.trace_if('frontier-auth', f'Payload: {self.lastpayload}')
+        logger.trace_if("frontier-auth", f"Payload: {self.lastpayload}")
         if not config.shutting_down:
             logger.debug('event_generate("<<CompanionAuthEvent>>")')
-            self.master.event_generate('<<CompanionAuthEvent>>', when="tail")
+            self.master.event_generate("<<CompanionAuthEvent>>", when="tail")
 
 
-if sys.platform == 'darwin' and getattr(sys, 'frozen', False):  # noqa: C901 # its guarding ALL macos stuff.
+if sys.platform == "darwin" and getattr(
+    sys, "frozen", False
+):  # noqa: C901 # its guarding ALL macos stuff.
     import struct
 
     import objc  # type: ignore
     from AppKit import NSAppleEventManager, NSObject  # type: ignore
 
-    kInternetEventClass = kAEGetURL = struct.unpack('>l', b'GURL')[0]  # noqa: N816 # API names
-    keyDirectObject = struct.unpack('>l', b'----')[0]  # noqa: N816 # API names
+    kInternetEventClass = kAEGetURL = struct.unpack(">l", b"GURL")[
+        0
+    ]  # noqa: N816 # API names
+    keyDirectObject = struct.unpack(">l", b"----")[0]  # noqa: N816 # API names
 
     class DarwinProtocolHandler(GenericProtocolHandler):
         """
@@ -73,7 +78,7 @@ if sys.platform == 'darwin' and getattr(sys, 'frozen', False):  # noqa: C901 # i
 
         POLL = 100  # ms
 
-        def start(self, master: 'tkinter.Tk') -> None:
+        def start(self, master: "tkinter.Tk") -> None:
             """Start Protocol Handler."""
             GenericProtocolHandler.start(self, master)
             self.lasturl: Optional[str] = None
@@ -98,14 +103,13 @@ if sys.platform == 'darwin' and getattr(sys, 'frozen', False):  # noqa: C901 # i
             """
             self = objc.super(EventHandler, self).init()
             NSAppleEventManager.sharedAppleEventManager().setEventHandler_andSelector_forEventClass_andEventID_(
-                self,
-                'handleEvent:withReplyEvent:',
-                kInternetEventClass,
-                kAEGetURL
+                self, "handleEvent:withReplyEvent:", kInternetEventClass, kAEGetURL
             )
             return self
 
-        def handleEvent_withReplyEvent_(self, event, replyEvent) -> None:  # noqa: N802 N803 # Required to override
+        def handleEvent_withReplyEvent_(
+            self, event, replyEvent
+        ) -> None:  # noqa: N802 N803 # Required to override
             """Actual event handling from NSAppleEventManager."""
             protocolhandler.lasturl = urllib.parse.unquote(  # type: ignore # Its going to be a DPH in this code
                 event.paramDescriptorForKeyword_(keyDirectObject).stringValue()
@@ -113,20 +117,42 @@ if sys.platform == 'darwin' and getattr(sys, 'frozen', False):  # noqa: C901 # i
 
             protocolhandler.master.after(DarwinProtocolHandler.POLL, protocolhandler.poll)  # type: ignore
 
-
-elif (config.auth_force_edmc_protocol
-      or (
-          sys.platform == 'win32'
-          and getattr(sys, 'frozen', False)
-          and not is_wine
-          and not config.auth_force_localserver
-      )):
+elif config.auth_force_edmc_protocol or (
+    sys.platform == "win32"
+    and getattr(sys, "frozen", False)
+    and not is_wine
+    and not config.auth_force_localserver
+):
     # spell-checker: words HBRUSH HICON WPARAM wstring WNDCLASS HMENU HGLOBAL
     from ctypes import windll  # type: ignore
-    from ctypes import POINTER, WINFUNCTYPE, Structure, byref, c_long, c_void_p, create_unicode_buffer, wstring_at
+    from ctypes import (
+        POINTER,
+        WINFUNCTYPE,
+        Structure,
+        byref,
+        c_long,
+        c_void_p,
+        create_unicode_buffer,
+        wstring_at,
+    )
     from ctypes.wintypes import (
-        ATOM, BOOL, DWORD, HBRUSH, HGLOBAL, HICON, HINSTANCE, HMENU, HWND, INT, LPARAM, LPCWSTR, LPVOID, LPWSTR, MSG,
-        UINT, WPARAM
+        ATOM,
+        BOOL,
+        DWORD,
+        HBRUSH,
+        HGLOBAL,
+        HICON,
+        HINSTANCE,
+        HMENU,
+        HWND,
+        INT,
+        LPARAM,
+        LPCWSTR,
+        LPVOID,
+        LPWSTR,
+        MSG,
+        UINT,
+        WPARAM,
     )
 
     class WNDCLASS(Structure):
@@ -138,22 +164,35 @@ elif (config.auth_force_edmc_protocol
         """
 
         _fields_ = [
-            ('style', UINT),
-            ('lpfnWndProc', WINFUNCTYPE(c_long, HWND, UINT, WPARAM, LPARAM)),
-            ('cbClsExtra', INT),
-            ('cbWndExtra', INT),
-            ('hInstance', HINSTANCE),
-            ('hIcon', HICON),
-            ('hCursor', c_void_p),
-            ('hbrBackground', HBRUSH),
-            ('lpszMenuName', LPCWSTR),
-            ('lpszClassName', LPCWSTR)
+            ("style", UINT),
+            ("lpfnWndProc", WINFUNCTYPE(c_long, HWND, UINT, WPARAM, LPARAM)),
+            ("cbClsExtra", INT),
+            ("cbWndExtra", INT),
+            ("hInstance", HINSTANCE),
+            ("hIcon", HICON),
+            ("hCursor", c_void_p),
+            ("hbrBackground", HBRUSH),
+            ("lpszMenuName", LPCWSTR),
+            ("lpszClassName", LPCWSTR),
         ]
 
     CW_USEDEFAULT = 0x80000000
 
     CreateWindowExW = windll.user32.CreateWindowExW
-    CreateWindowExW.argtypes = [DWORD, LPCWSTR, LPCWSTR, DWORD, INT, INT, INT, INT, HWND, HMENU, HINSTANCE, LPVOID]
+    CreateWindowExW.argtypes = [
+        DWORD,
+        LPCWSTR,
+        LPCWSTR,
+        DWORD,
+        INT,
+        INT,
+        INT,
+        INT,
+        HWND,
+        HMENU,
+        HINSTANCE,
+        LPVOID,
+    ]
     CreateWindowExW.restype = HWND
     RegisterClassW = windll.user32.RegisterClassW
     RegisterClassW.argtypes = [POINTER(WNDCLASS)]
@@ -215,7 +254,9 @@ elif (config.auth_force_edmc_protocol
         topic = create_unicode_buffer(256)
         # Note that lParam is 32 bits, and broken into two 16 bit words. This will break on 64bit as the math is
         # wrong
-        lparam_low = lParam & 0xFFFF  # if nonzero, the target application for which a conversation is requested
+        lparam_low = (
+            lParam & 0xFFFF
+        )  # if nonzero, the target application for which a conversation is requested
         lparam_high = lParam >> 16  # if nonzero, the topic of said conversation
 
         # if either of the words are nonzero, they contain
@@ -227,13 +268,19 @@ elif (config.auth_force_edmc_protocol
         )
 
         topic_is_valid = lparam_high == 0 or (
-            GlobalGetAtomNameW(lparam_high, topic, 256) and topic.value.lower() == 'system'
+            GlobalGetAtomNameW(lparam_high, topic, 256)
+            and topic.value.lower() == "system"
         )
 
         if target_is_valid and topic_is_valid:
             # if everything is happy, send an acknowledgement of the DDE request
             SendMessageW(
-                wParam, WM_DDE_ACK, hwnd, PackDDElParam(WM_DDE_ACK, GlobalAddAtomW(appname), GlobalAddAtomW('System'))
+                wParam,
+                WM_DDE_ACK,
+                hwnd,
+                PackDDElParam(
+                    WM_DDE_ACK, GlobalAddAtomW(appname), GlobalAddAtomW("System")
+                ),
             )
 
             return 0
@@ -250,10 +297,10 @@ elif (config.auth_force_edmc_protocol
             super().__init__()
             self.thread: Optional[threading.Thread] = None
 
-        def start(self, master: 'tkinter.Tk') -> None:
+        def start(self, master: "tkinter.Tk") -> None:
             """Start the DDE thread."""
             super().start(master)
-            self.thread = threading.Thread(target=self.worker, name='DDE worker')
+            self.thread = threading.Thread(target=self.worker, name="DDE worker")
             self.thread.daemon = True
             self.thread.start()
 
@@ -277,29 +324,34 @@ elif (config.auth_force_edmc_protocol
             wndclass.hCursor = None
             wndclass.hbrBackground = None
             wndclass.lpszMenuName = None
-            wndclass.lpszClassName = 'DDEServer'
+            wndclass.lpszClassName = "DDEServer"
 
             if not RegisterClassW(byref(wndclass)):
-                print('Failed to register Dynamic Data Exchange for cAPI')
+                print("Failed to register Dynamic Data Exchange for cAPI")
                 return
 
             # https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-createwindowexw
             hwnd = CreateWindowExW(
-                0,                       # dwExStyle
+                0,  # dwExStyle
                 wndclass.lpszClassName,  # lpClassName
-                "DDE Server",            # lpWindowName
-                0,                       # dwStyle
-                CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,  # X, Y, nWidth, nHeight
+                "DDE Server",  # lpWindowName
+                0,  # dwStyle
+                CW_USEDEFAULT,
+                CW_USEDEFAULT,
+                CW_USEDEFAULT,
+                CW_USEDEFAULT,  # X, Y, nWidth, nHeight
                 self.master.winfo_id(),  # hWndParent # Don't use HWND_MESSAGE since the window won't get DDE broadcasts
-                None,                    # hMenu
-                wndclass.hInstance,      # hInstance
-                None                     # lpParam
+                None,  # hMenu
+                wndclass.hInstance,  # hInstance
+                None,  # lpParam
             )
 
             msg = MSG()
             # Calls GetMessageW: https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getmessagew
             while GetMessageW(byref(msg), None, 0, 0) != 0:
-                logger.trace_if('frontier-auth.windows', f'DDE message of type: {msg.message}')
+                logger.trace_if(
+                    "frontier-auth.windows", f"DDE message of type: {msg.message}"
+                )
                 if msg.message == WM_DDE_EXECUTE:
                     # GlobalLock does some sort of "please dont move this?"
                     # https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-globallock
@@ -307,27 +359,40 @@ elif (config.auth_force_edmc_protocol
                     GlobalUnlock(msg.lParam)  # Unlocks the GlobalLock-ed object
 
                     if args.lower().startswith('open("') and args.endswith('")'):
-                        logger.trace_if('frontier-auth.windows', f'args are: {args}')
+                        logger.trace_if("frontier-auth.windows", f"args are: {args}")
                         url = urllib.parse.unquote(args[6:-2]).strip()
                         if url.startswith(self.redirect):
-                            logger.debug(f'Message starts with {self.redirect}')
+                            logger.debug(f"Message starts with {self.redirect}")
                             self.event(url)
 
-                        SetForegroundWindow(GetParent(self.master.winfo_id()))  # raise app window
+                        SetForegroundWindow(
+                            GetParent(self.master.winfo_id())
+                        )  # raise app window
                         # Send back a WM_DDE_ACK. this is _required_ with WM_DDE_EXECUTE
-                        PostMessageW(msg.wParam, WM_DDE_ACK, hwnd, PackDDElParam(WM_DDE_ACK, 0x80, msg.lParam))
+                        PostMessageW(
+                            msg.wParam,
+                            WM_DDE_ACK,
+                            hwnd,
+                            PackDDElParam(WM_DDE_ACK, 0x80, msg.lParam),
+                        )
 
                     else:
                         # Send back a WM_DDE_ACK. this is _required_ with WM_DDE_EXECUTE
-                        PostMessageW(msg.wParam, WM_DDE_ACK, hwnd, PackDDElParam(WM_DDE_ACK, 0, msg.lParam))
+                        PostMessageW(
+                            msg.wParam,
+                            WM_DDE_ACK,
+                            hwnd,
+                            PackDDElParam(WM_DDE_ACK, 0, msg.lParam),
+                        )
 
                 elif msg.message == WM_DDE_TERMINATE:
                     PostMessageW(msg.wParam, WM_DDE_TERMINATE, hwnd, 0)
 
                 else:
-                    TranslateMessage(byref(msg))  # "Translates virtual key messages into character messages" ???
+                    TranslateMessage(
+                        byref(msg)
+                    )  # "Translates virtual key messages into character messages" ???
                     DispatchMessageW(byref(msg))
-
 
 else:  # Linux / Run from source
 
@@ -342,17 +407,17 @@ else:  # Linux / Run from source
 
         def __init__(self) -> None:
             super().__init__()
-            self.httpd = HTTPServer(('localhost', 0), HTTPRequestHandler)
-            self.redirect = f'http://localhost:{self.httpd.server_port}/auth'
+            self.httpd = HTTPServer(("localhost", 0), HTTPRequestHandler)
+            self.redirect = f"http://localhost:{self.httpd.server_port}/auth"
             if not os.getenv("EDMC_NO_UI"):
-                logger.info(f'Web server listening on {self.redirect}')
+                logger.info(f"Web server listening on {self.redirect}")
 
             self.thread: Optional[threading.Thread] = None
 
         def start(self, master) -> None:
             """Start the HTTP server thread."""
             GenericProtocolHandler.start(self, master)
-            self.thread = threading.Thread(target=self.worker, name='OAuth worker')
+            self.thread = threading.Thread(target=self.worker, name="OAuth worker")
             self.thread.daemon = True
             self.thread.start()
 
@@ -360,20 +425,20 @@ else:  # Linux / Run from source
             """Shutdown the HTTP server thread."""
             thread = self.thread
             if thread:
-                logger.debug('Thread')
+                logger.debug("Thread")
                 self.thread = None
 
                 if self.httpd:
-                    logger.info('Shutting down httpd')
+                    logger.info("Shutting down httpd")
                     self.httpd.shutdown()
 
-                logger.info('Joining thread')
+                logger.info("Joining thread")
                 thread.join()  # Wait for it to quit
 
             else:
-                logger.debug('No thread')
+                logger.debug("No thread")
 
-            logger.debug('Done.')
+            logger.debug("Done.")
 
         def worker(self) -> None:
             """HTTP Worker."""
@@ -385,10 +450,12 @@ else:  # Linux / Run from source
 
         def parse(self) -> bool:
             """Parse a request."""
-            logger.trace_if('frontier-auth.http', f'Got message on path: {self.path}')
+            logger.trace_if("frontier-auth.http", f"Got message on path: {self.path}")
             url = urllib.parse.unquote(self.path)
-            if url.startswith('/auth'):
-                logger.debug('Request starts with /auth, sending to protocolhandler.event()')
+            if url.startswith("/auth"):
+                logger.debug(
+                    "Request starts with /auth, sending to protocolhandler.event()"
+                )
                 protocolhandler.event(url)
                 self.send_response(200)
                 return True
@@ -404,10 +471,16 @@ else:  # Linux / Run from source
         def do_GET(self) -> None:  # noqa: N802 # Required to override
             """Handle GET Request."""
             if self.parse():
-                self.send_header('Content-Type', 'text/html')
+                self.send_header("Content-Type", "text/html")
                 self.end_headers()
-                self.wfile.write('<html><head><title>Authentication successful</title></head>'.encode('utf-8'))
-                self.wfile.write('<body><p>Authentication successful</p></body>'.encode('utf-8'))
+                self.wfile.write(
+                    "<html><head><title>Authentication successful</title></head>".encode(
+                        "utf-8"
+                    )
+                )
+                self.wfile.write(
+                    "<body><p>Authentication successful</p></body>".encode("utf-8")
+                )
             else:
                 self.end_headers()
 
@@ -422,12 +495,13 @@ def get_handler_impl() -> Type[GenericProtocolHandler]:
 
     :return: An instantiatable GenericProtocolHandler
     """
-    if sys.platform == 'darwin' and getattr(sys, 'frozen', False):
+    if sys.platform == "darwin" and getattr(sys, "frozen", False):
         return DarwinProtocolHandler  # pyright: reportUnboundVariable=false
 
-    elif (
-        (sys.platform == 'win32' and config.auth_force_edmc_protocol)
-        or (getattr(sys, 'frozen', False) and not is_wine and not config.auth_force_localserver)
+    elif (sys.platform == "win32" and config.auth_force_edmc_protocol) or (
+        getattr(sys, "frozen", False)
+        and not is_wine
+        and not config.auth_force_localserver
     ):
         return WindowsProtocolHandler
 

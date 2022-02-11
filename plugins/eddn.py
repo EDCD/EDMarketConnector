@@ -33,7 +33,16 @@ from os import SEEK_SET
 from os.path import join
 from platform import system
 from textwrap import dedent
-from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Mapping, MutableMapping, Optional
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    Iterator,
+    List,
+    Mapping,
+    MutableMapping,
+    Optional,
+)
 from typing import OrderedDict as OrderedDictT
 from typing import TextIO, Tuple, Union
 
@@ -52,13 +61,15 @@ from prefs import prefsVersion
 from ttkHyperlinkLabel import HyperlinkLabel
 from util import text
 
-if sys.platform != 'win32':
+if sys.platform != "win32":
     from fcntl import LOCK_EX, LOCK_NB, lockf
 
 
 if TYPE_CHECKING:
+
     def _(x: str) -> str:
         return x
+
 
 logger = get_main_logger()
 
@@ -116,7 +127,7 @@ this = This()
 
 
 # This SKU is tagged on any module or ship that you must have Horizons for.
-HORIZONS_SKU = 'ELITE_HORIZONS_V_PLANETARY_LANDINGS'
+HORIZONS_SKU = "ELITE_HORIZONS_V_PLANETARY_LANDINGS"
 # ELITE_HORIZONS_V_COBRA_MK_IV_1000` is for the Cobra Mk IV, but
 # is also available in the base game, if you have entitlement.
 # `ELITE_HORIZONS_V_GUARDIAN_FSDBOOSTER` is for the Guardian FSD Boosters,
@@ -128,18 +139,21 @@ HORIZONS_SKU = 'ELITE_HORIZONS_V_PLANETARY_LANDINGS'
 
 # TODO: a good few of these methods are static or could be classmethods. they should be created as such.
 
+
 class EDDN:
     """EDDN Data export."""
 
-    DEFAULT_URL = 'https://eddn.edcd.io:4430/upload/'
-    if 'eddn' in debug_senders:
-        DEFAULT_URL = f'http://{edmc_data.DEBUG_WEBSERVER_HOST}:{edmc_data.DEBUG_WEBSERVER_PORT}/eddn'
+    DEFAULT_URL = "https://eddn.edcd.io:4430/upload/"
+    if "eddn" in debug_senders:
+        DEFAULT_URL = f"http://{edmc_data.DEBUG_WEBSERVER_HOST}:{edmc_data.DEBUG_WEBSERVER_PORT}/eddn"
 
-    REPLAYPERIOD = 400  # Roughly two messages per second, accounting for send delays [ms]
+    REPLAYPERIOD = (
+        400  # Roughly two messages per second, accounting for send delays [ms]
+    )
     REPLAYFLUSH = 20  # Update log on disk roughly every 10 seconds
     TIMEOUT = 10  # requests timeout
-    MODULE_RE = re.compile(r'^Hpt_|^Int_|Armour_', re.IGNORECASE)
-    CANONICALISE_RE = re.compile(r'\$(.+)_name;')
+    MODULE_RE = re.compile(r"^Hpt_|^Int_|Armour_", re.IGNORECASE)
+    CANONICALISE_RE = re.compile(r"\$(.+)_name;")
     UNKNOWN_SCHEMA_RE = re.compile(
         r"^FAIL: \[JsonValidationException\('Schema "
         r"https://eddn.edcd.io/schemas/(?P<schema_name>.+)/(?P<schema_version>[0-9]+) is unknown, "
@@ -149,7 +163,7 @@ class EDDN:
     def __init__(self, parent: tk.Tk):
         self.parent: tk.Tk = parent
         self.session = requests.Session()
-        self.session.headers['User-Agent'] = user_agent
+        self.session.headers["User-Agent"] = user_agent
         self.replayfile: Optional[TextIO] = None  # For delayed messages
         self.replaylog: List[str] = []
 
@@ -166,16 +180,18 @@ class EDDN:
         :return: a bool indicating success
         """
         # Try to obtain exclusive access to the journal cache
-        filename = join(config.app_dir, 'replay.jsonl')
+        filename = join(config.app_dir, "replay.jsonl")
         try:
             try:
                 # Try to open existing file
-                self.replayfile = open(filename, 'r+', buffering=1)
+                self.replayfile = open(filename, "r+", buffering=1)
 
             except FileNotFoundError:
-                self.replayfile = open(filename, 'w+', buffering=1)  # Create file
+                self.replayfile = open(filename, "w+", buffering=1)  # Create file
 
-            if sys.platform != 'win32':  # open for writing is automatically exclusive on Windows
+            if (
+                sys.platform != "win32"
+            ):  # open for writing is automatically exclusive on Windows
                 lockf(self.replayfile, LOCK_EX | LOCK_NB)
 
         except OSError:
@@ -193,26 +209,26 @@ class EDDN:
     def flush(self):
         """Flush the replay file, clearing any data currently there that is not in the replaylog list."""
         if self.replayfile is None:
-            logger.error('replayfile is None!')
+            logger.error("replayfile is None!")
             return
 
         self.replayfile.seek(0, SEEK_SET)
         self.replayfile.truncate()
         for line in self.replaylog:
-            self.replayfile.write(f'{line}\n')
+            self.replayfile.write(f"{line}\n")
 
         self.replayfile.flush()
 
     def close(self):
         """Close down the EDDN class instance."""
-        logger.debug('Closing replayfile...')
+        logger.debug("Closing replayfile...")
         if self.replayfile:
             self.replayfile.close()
 
         self.replayfile = None
-        logger.debug('Done.')
+        logger.debug("Done.")
 
-        logger.debug('Closing EDDN requests.Session.')
+        logger.debug("Closing EDDN requests.Session.")
         self.session.close()
 
     def send(self, cmdr: str, msg: Mapping[str, Any]) -> None:
@@ -222,24 +238,34 @@ class EDDN:
         :param cmdr: the CMDR to use as the uploader ID.
         :param msg: the payload to send.
         """
-        should_return, new_data = killswitch.check_killswitch('plugins.eddn.send', msg)
+        should_return, new_data = killswitch.check_killswitch("plugins.eddn.send", msg)
         if should_return:
-            logger.warning('eddn.send has been disabled via killswitch. Returning.')
+            logger.warning("eddn.send has been disabled via killswitch. Returning.")
             return
 
         msg = new_data
 
         uploader_id = cmdr
 
-        to_send: OrderedDictT[str, OrderedDict[str, Any]] = OrderedDict([
-            ('$schemaRef', msg['$schemaRef']),
-            ('header', OrderedDict([
-                ('softwareName',    f'{applongname} [{system() if sys.platform != "darwin" else "Mac OS"}]'),
-                ('softwareVersion', str(appversion_nobuild())),
-                ('uploaderID',      uploader_id),
-            ])),
-            ('message', msg['message']),
-        ])
+        to_send: OrderedDictT[str, OrderedDict[str, Any]] = OrderedDict(
+            [
+                ("$schemaRef", msg["$schemaRef"]),
+                (
+                    "header",
+                    OrderedDict(
+                        [
+                            (
+                                "softwareName",
+                                f'{applongname} [{system() if sys.platform != "darwin" else "Mac OS"}]',
+                            ),
+                            ("softwareVersion", str(appversion_nobuild())),
+                            ("uploaderID", uploader_id),
+                        ]
+                    ),
+                ),
+                ("message", msg["message"]),
+            ]
+        )
 
         # About the smallest request is going to be (newlines added for brevity):
         # {"$schemaRef":"https://eddn.edcd.io/schemas/commodity/3","header":{"softwareName":"E:D Market
@@ -249,46 +275,53 @@ class EDDN:
         #
         # Which comes to 315 bytes (including \n) and compresses to 244 bytes. So lets just compress everything
 
-        encoded, compressed = text.gzip(json.dumps(to_send, separators=(',', ':')), max_size=0)
+        encoded, compressed = text.gzip(
+            json.dumps(to_send, separators=(",", ":")), max_size=0
+        )
         headers: None | dict[str, str] = None
         if compressed:
-            headers = {'Content-Encoding': 'gzip'}
+            headers = {"Content-Encoding": "gzip"}
 
-        r = self.session.post(self.eddn_url, data=encoded, timeout=self.TIMEOUT, headers=headers)
+        r = self.session.post(
+            self.eddn_url, data=encoded, timeout=self.TIMEOUT, headers=headers
+        )
         if r.status_code != requests.codes.ok:
 
             # Check if EDDN is still objecting to an empty commodities list
             if (
-                    r.status_code == 400
-                    and msg['$schemaRef'] == 'https://eddn.edcd.io/schemas/commodity/3'
-                    and msg['message']['commodities'] == []
-                    and r.text == "FAIL: [<ValidationError: '[] is too short'>]"
+                r.status_code == 400
+                and msg["$schemaRef"] == "https://eddn.edcd.io/schemas/commodity/3"
+                and msg["message"]["commodities"] == []
+                and r.text == "FAIL: [<ValidationError: '[] is too short'>]"
             ):
-                logger.trace_if('plugin.eddn', "EDDN is still objecting to empty commodities data")
+                logger.trace_if(
+                    "plugin.eddn", "EDDN is still objecting to empty commodities data"
+                )
                 return  # We want to silence warnings otherwise
 
             if r.status_code == 413:
                 extra_data = {
-                    'schema_ref': msg.get('$schemaRef', 'Unset $schemaRef!'),
-                    'sent_data_len': str(len(encoded)),
+                    "schema_ref": msg.get("$schemaRef", "Unset $schemaRef!"),
+                    "sent_data_len": str(len(encoded)),
                 }
 
-                if '/journal/' in extra_data['schema_ref']:
-                    extra_data['event'] = msg.get('message', {}).get('event', 'No Event Set')
+                if "/journal/" in extra_data["schema_ref"]:
+                    extra_data["event"] = msg.get("message", {}).get(
+                        "event", "No Event Set"
+                    )
 
-                self._log_response(r, header_msg='Got a 413 while POSTing data', **extra_data)
+                self._log_response(
+                    r, header_msg="Got a 413 while POSTing data", **extra_data
+                )
                 return  # drop the error
 
             if not self.UNKNOWN_SCHEMA_RE.match(r.text):
-                self._log_response(r, header_msg='Status from POST wasn\'t 200 (OK)')
+                self._log_response(r, header_msg="Status from POST wasn't 200 (OK)")
 
         r.raise_for_status()
 
     def _log_response(
-        self,
-        response: requests.Response,
-        header_msg='Failed to POST to EDDN',
-        **kwargs
+        self, response: requests.Response, header_msg="Failed to POST to EDDN", **kwargs
     ) -> None:
         """
         Log a response object with optional additional data.
@@ -298,34 +331,42 @@ class EDDN:
         :param kwargs: Any other notes to add, will be added below the main data in the same format.
         """
         additional_data = "\n".join(
-            f'''{name.replace('_', ' ').title():<8}:\t{value}''' for name, value in kwargs.items()
+            f"""{name.replace('_', ' ').title():<8}:\t{value}"""
+            for name, value in kwargs.items()
         )
 
-        logger.debug(dedent(f'''\
+        logger.debug(
+            dedent(
+                f"""\
         {header_msg}:
         Status  :\t{response.status_code}
         URL     :\t{response.url}
         Headers :\t{response.headers}
         Content :\t{response.text}
-        ''')+additional_data)
+        """
+            )
+            + additional_data
+        )
 
     def sendreplay(self) -> None:  # noqa: CCR001
         """Send cached Journal lines to EDDN."""
         if not self.replayfile:
             return  # Probably closing app
 
-        status: tk.Widget = self.parent.children['status']
+        status: tk.Widget = self.parent.children["status"]
 
         if not self.replaylog:
-            status['text'] = ''
+            status["text"] = ""
             return
 
-        localized: str = _('Sending data to EDDN...')  # LANG: Status text shown while attempting to send data
+        localized: str = _(
+            "Sending data to EDDN..."
+        )  # LANG: Status text shown while attempting to send data
         if len(self.replaylog) == 1:
-            status['text'] = localized
+            status["text"] = localized
 
         else:
-            status['text'] = f'{localized.replace("...", "")} [{len(self.replaylog)}]'
+            status["text"] = f'{localized.replace("...", "")} [{len(self.replaylog)}]'
 
         self.parent.update_idletasks()
 
@@ -342,7 +383,7 @@ class EDDN:
 
         except json.JSONDecodeError as e:
             # Couldn't decode - shouldn't happen!
-            logger.debug(f'\n{self.replaylog[0]}\n', exc_info=e)
+            logger.debug(f"\n{self.replaylog[0]}\n", exc_info=e)
             # Discard and continue
             self.replaylog.pop(0)
 
@@ -351,10 +392,10 @@ class EDDN:
             #       to send an old message that's now invalid.
 
             # Rewrite old schema name
-            if msg['$schemaRef'].startswith('http://schemas.elite-markets.net/eddn/'):
-                msg['$schemaRef'] = str(msg['$schemaRef']).replace(
-                    'http://schemas.elite-markets.net/eddn/',
-                    'https://eddn.edcd.io/schemas/'
+            if msg["$schemaRef"].startswith("http://schemas.elite-markets.net/eddn/"):
+                msg["$schemaRef"] = str(msg["$schemaRef"]).replace(
+                    "http://schemas.elite-markets.net/eddn/",
+                    "https://eddn.edcd.io/schemas/",
                 )
 
             try:
@@ -365,8 +406,10 @@ class EDDN:
 
             except requests.exceptions.HTTPError as e:
                 if unknown_schema := self.UNKNOWN_SCHEMA_RE.match(e.response.text):
-                    logger.debug(f"EDDN doesn't (yet?) know about schema: {unknown_schema['schema_name']}"
-                                 f"/{unknown_schema['schema_version']}")
+                    logger.debug(
+                        f"EDDN doesn't (yet?) know about schema: {unknown_schema['schema_name']}"
+                        f"/{unknown_schema['schema_version']}"
+                    )
                     # NB: This dropping is to cater for the time when EDDN
                     #     doesn't *yet* support a new schema.
                     self.replaylog.pop(0)  # Drop the message
@@ -374,22 +417,24 @@ class EDDN:
 
                 elif e.response.status_code == 400:
                     # EDDN straight up says no, so drop the message
-                    logger.debug(f"EDDN responded '400' to the message, dropping:\n{msg!r}")
+                    logger.debug(
+                        f"EDDN responded '400' to the message, dropping:\n{msg!r}"
+                    )
                     self.replaylog.pop(0)  # Drop the message
                     self.flush()  # Truncates the file, then writes the extant data
 
                 else:
-                    status['text'] = self.http_error_to_log(e)
+                    status["text"] = self.http_error_to_log(e)
 
             except requests.exceptions.RequestException as e:
-                logger.debug('Failed sending', exc_info=e)
+                logger.debug("Failed sending", exc_info=e)
                 # LANG: Error while trying to send data to EDDN
-                status['text'] = _("Error: Can't connect to EDDN")
+                status["text"] = _("Error: Can't connect to EDDN")
                 return  # stop sending
 
             except Exception as e:
-                logger.debug('Failed sending', exc_info=e)
-                status['text'] = str(e)
+                logger.debug("Failed sending", exc_info=e)
+                status["text"] = str(e)
                 return  # stop sending
 
         self.parent.after(self.REPLAYPERIOD, self.sendreplay)
@@ -400,22 +445,28 @@ class EDDN:
         status_code = exception.errno
 
         if status_code == 429:  # HTTP UPGRADE REQUIRED
-            logger.warning('EDMC is sending schemas that are too old')
+            logger.warning("EDMC is sending schemas that are too old")
             # LANG: EDDN has banned this version of our client
-            return _('EDDN Error: EDMC is too old for EDDN. Please update.')
+            return _("EDDN Error: EDMC is too old for EDDN. Please update.")
 
         elif status_code == 400:
             # we a validation check or something else.
-            logger.warning(f'EDDN Error: {status_code} -- {exception.response}')
+            logger.warning(f"EDDN Error: {status_code} -- {exception.response}")
             # LANG: EDDN returned an error that indicates something about what we sent it was wrong
-            return _('EDDN Error: Validation Failed (EDMC Too Old?). See Log')
+            return _("EDDN Error: Validation Failed (EDMC Too Old?). See Log")
 
         else:
-            logger.warning(f'Unknown status code from EDDN: {status_code} -- {exception.response}')
+            logger.warning(
+                f"Unknown status code from EDDN: {status_code} -- {exception.response}"
+            )
             # LANG: EDDN returned some sort of HTTP error, one we didn't expect. {STATUS} contains a number
-            return _('EDDN Error: Returned {STATUS} status code').format(STATUS=status_code)
+            return _("EDDN Error: Returned {STATUS} status code").format(
+                STATUS=status_code
+            )
 
-    def export_commodities(self, data: Mapping[str, Any], is_beta: bool) -> None:  # noqa: CCR001
+    def export_commodities(
+        self, data: Mapping[str, Any], is_beta: bool
+    ) -> None:  # noqa: CCR001
         """
         Update EDDN with the commodities on the current (lastStarport) station.
 
@@ -430,30 +481,33 @@ class EDDN:
         """
         modules, ships = self.safe_modules_and_ships(data)
         horizons: bool = capi_is_horizons(
-            data['lastStarport'].get('economies', {}),
-            modules,
-            ships
+            data["lastStarport"].get("economies", {}), modules, ships
         )
         commodities: List[OrderedDictT[str, Any]] = []
-        for commodity in data['lastStarport'].get('commodities') or []:
+        for commodity in data["lastStarport"].get("commodities") or []:
             # Check 'marketable' and 'not prohibited'
-            if (category_map.get(commodity['categoryname'], True)
-                    and not commodity.get('legality')):
-                commodities.append(OrderedDict([
-                    ('name',          commodity['name'].lower()),
-                    ('meanPrice',     int(commodity['meanPrice'])),
-                    ('buyPrice',      int(commodity['buyPrice'])),
-                    ('stock',         int(commodity['stock'])),
-                    ('stockBracket',  commodity['stockBracket']),
-                    ('sellPrice',     int(commodity['sellPrice'])),
-                    ('demand',        int(commodity['demand'])),
-                    ('demandBracket', commodity['demandBracket']),
-                ]))
+            if category_map.get(commodity["categoryname"], True) and not commodity.get(
+                "legality"
+            ):
+                commodities.append(
+                    OrderedDict(
+                        [
+                            ("name", commodity["name"].lower()),
+                            ("meanPrice", int(commodity["meanPrice"])),
+                            ("buyPrice", int(commodity["buyPrice"])),
+                            ("stock", int(commodity["stock"])),
+                            ("stockBracket", commodity["stockBracket"]),
+                            ("sellPrice", int(commodity["sellPrice"])),
+                            ("demand", int(commodity["demand"])),
+                            ("demandBracket", commodity["demandBracket"]),
+                        ]
+                    )
+                )
 
-                if commodity['statusFlags']:
-                    commodities[-1]['statusFlags'] = commodity['statusFlags']
+                if commodity["statusFlags"]:
+                    commodities[-1]["statusFlags"] = commodity["statusFlags"]
 
-        commodities.sort(key=lambda c: c['name'])
+        commodities.sort(key=lambda c: c["name"])
 
         # This used to have a check `commodities and ` at the start so as to
         # not send an empty commodities list, as the EDDN Schema doesn't allow
@@ -462,28 +516,36 @@ class EDDN:
         # none and that really does need to be recorded over EDDN so that, e.g.
         # EDDB can update in a timely manner.
         if this.commodities != commodities:
-            message: OrderedDictT[str, Any] = OrderedDict([
-                ('timestamp',   data['timestamp']),
-                ('systemName',  data['lastSystem']['name']),
-                ('stationName', data['lastStarport']['name']),
-                ('marketId',    data['lastStarport']['id']),
-                ('commodities', commodities),
-                ('horizons',    horizons),
-                ('odyssey',     this.odyssey),
-            ])
+            message: OrderedDictT[str, Any] = OrderedDict(
+                [
+                    ("timestamp", data["timestamp"]),
+                    ("systemName", data["lastSystem"]["name"]),
+                    ("stationName", data["lastStarport"]["name"]),
+                    ("marketId", data["lastStarport"]["id"]),
+                    ("commodities", commodities),
+                    ("horizons", horizons),
+                    ("odyssey", this.odyssey),
+                ]
+            )
 
-            if 'economies' in data['lastStarport']:
-                message['economies'] = sorted(
-                    (x for x in (data['lastStarport']['economies'] or {}).values()), key=lambda x: x['name']
+            if "economies" in data["lastStarport"]:
+                message["economies"] = sorted(
+                    (x for x in (data["lastStarport"]["economies"] or {}).values()),
+                    key=lambda x: x["name"],
                 )
 
-            if 'prohibited' in data['lastStarport']:
-                message['prohibited'] = sorted(x for x in (data['lastStarport']['prohibited'] or {}).values())
+            if "prohibited" in data["lastStarport"]:
+                message["prohibited"] = sorted(
+                    x for x in (data["lastStarport"]["prohibited"] or {}).values()
+                )
 
-            self.send(data['commander']['name'], {
-                '$schemaRef': f'https://eddn.edcd.io/schemas/commodity/3{"/test" if is_beta else ""}',
-                'message':    message,
-            })
+            self.send(
+                data["commander"]["name"],
+                {
+                    "$schemaRef": f'https://eddn.edcd.io/schemas/commodity/3{"/test" if is_beta else ""}',
+                    "message": message,
+                },
+            )
 
         this.commodities = commodities
 
@@ -498,32 +560,34 @@ class EDDN:
         :param data: The raw CAPI data.
         :return: Sanity-checked data.
         """
-        modules: Dict[str, Any] = data['lastStarport'].get('modules')
+        modules: Dict[str, Any] = data["lastStarport"].get("modules")
         if modules is None or not isinstance(modules, dict):
             if modules is None:
-                logger.debug('modules was None.  FC or Damaged Station?')
+                logger.debug("modules was None.  FC or Damaged Station?")
 
             elif isinstance(modules, list):
                 if len(modules) == 0:
-                    logger.debug('modules is empty list. FC or Damaged Station?')
+                    logger.debug("modules is empty list. FC or Damaged Station?")
 
                 else:
-                    logger.error(f'modules is non-empty list: {modules!r}')
+                    logger.error(f"modules is non-empty list: {modules!r}")
 
             else:
-                logger.error(f'modules was not None, a list, or a dict! type = {type(modules)}')
+                logger.error(
+                    f"modules was not None, a list, or a dict! type = {type(modules)}"
+                )
             # Set a safe value
             modules = {}
 
-        ships: Dict[str, Any] = data['lastStarport'].get('ships')
+        ships: Dict[str, Any] = data["lastStarport"].get("ships")
         if ships is None or not isinstance(ships, dict):
             if ships is None:
-                logger.debug('ships was None')
+                logger.debug("ships was None")
 
             else:
-                logger.error(f'ships was neither None nor a Dict! Type = {type(ships)}')
+                logger.error(f"ships was neither None nor a Dict! Type = {type(ships)}")
             # Set a safe value
-            ships = {'shipyard_list': {}, 'unavailable_list': []}
+            ships = {"shipyard_list": {}, "unavailable_list": []}
 
         return modules, ships
 
@@ -545,35 +609,42 @@ class EDDN:
         # Horizons flag - will hit at least Int_PlanetApproachSuite other than at engineer bases ("Colony"),
         # prison or rescue Megaships, or under Pirate Attack etc
         horizons: bool = capi_is_horizons(
-            data['lastStarport'].get('economies', {}),
-            modules,
-            ships
+            data["lastStarport"].get("economies", {}), modules, ships
         )
 
         to_search: Iterator[Mapping[str, Any]] = filter(
-            lambda m: self.MODULE_RE.search(m['name']) and m.get('sku') in (None, HORIZONS_SKU)
-                                                       and m['name'] != 'Int_PlanetApproachSuite',  # noqa: E131
-            modules.values()
+            lambda m: self.MODULE_RE.search(m["name"])
+            and m.get("sku") in (None, HORIZONS_SKU)
+            and m["name"] != "Int_PlanetApproachSuite",  # noqa: E131
+            modules.values(),
         )
 
         outfitting: List[str] = sorted(
-            self.MODULE_RE.sub(lambda match: match.group(0).capitalize(), mod['name'].lower()) for mod in to_search
+            self.MODULE_RE.sub(
+                lambda match: match.group(0).capitalize(), mod["name"].lower()
+            )
+            for mod in to_search
         )
 
         # Don't send empty modules list - schema won't allow it
         if outfitting and this.outfitting != (horizons, outfitting):
-            self.send(data['commander']['name'], {
-                '$schemaRef': f'https://eddn.edcd.io/schemas/outfitting/2{"/test" if is_beta else ""}',
-                'message': OrderedDict([
-                    ('timestamp',   data['timestamp']),
-                    ('systemName',  data['lastSystem']['name']),
-                    ('stationName', data['lastStarport']['name']),
-                    ('marketId',    data['lastStarport']['id']),
-                    ('horizons',    horizons),
-                    ('modules',     outfitting),
-                    ('odyssey',     this.odyssey),
-                ]),
-            })
+            self.send(
+                data["commander"]["name"],
+                {
+                    "$schemaRef": f'https://eddn.edcd.io/schemas/outfitting/2{"/test" if is_beta else ""}',
+                    "message": OrderedDict(
+                        [
+                            ("timestamp", data["timestamp"]),
+                            ("systemName", data["lastSystem"]["name"]),
+                            ("stationName", data["lastStarport"]["name"]),
+                            ("marketId", data["lastStarport"]["id"]),
+                            ("horizons", horizons),
+                            ("modules", outfitting),
+                            ("odyssey", this.odyssey),
+                        ]
+                    ),
+                },
+            )
 
         this.outfitting = (horizons, outfitting)
 
@@ -593,35 +664,43 @@ class EDDN:
         modules, ships = self.safe_modules_and_ships(data)
 
         horizons: bool = capi_is_horizons(
-            data['lastStarport'].get('economies', {}),
-            modules,
-            ships
+            data["lastStarport"].get("economies", {}), modules, ships
         )
 
         shipyard: List[Mapping[str, Any]] = sorted(
             itertools.chain(
-                (ship['name'].lower() for ship in (ships['shipyard_list'] or {}).values()),
-                (ship['name'].lower() for ship in ships['unavailable_list'] or {}),
+                (
+                    ship["name"].lower()
+                    for ship in (ships["shipyard_list"] or {}).values()
+                ),
+                (ship["name"].lower() for ship in ships["unavailable_list"] or {}),
             )
         )
         # Don't send empty ships list - shipyard data is only guaranteed present if user has visited the shipyard.
         if shipyard and this.shipyard != (horizons, shipyard):
-            self.send(data['commander']['name'], {
-                '$schemaRef': f'https://eddn.edcd.io/schemas/shipyard/2{"/test" if is_beta else ""}',
-                'message': OrderedDict([
-                    ('timestamp',   data['timestamp']),
-                    ('systemName',  data['lastSystem']['name']),
-                    ('stationName', data['lastStarport']['name']),
-                    ('marketId',    data['lastStarport']['id']),
-                    ('horizons',    horizons),
-                    ('ships',       shipyard),
-                    ('odyssey',     this.odyssey),
-                ]),
-            })
+            self.send(
+                data["commander"]["name"],
+                {
+                    "$schemaRef": f'https://eddn.edcd.io/schemas/shipyard/2{"/test" if is_beta else ""}',
+                    "message": OrderedDict(
+                        [
+                            ("timestamp", data["timestamp"]),
+                            ("systemName", data["lastSystem"]["name"]),
+                            ("stationName", data["lastStarport"]["name"]),
+                            ("marketId", data["lastStarport"]["id"]),
+                            ("horizons", horizons),
+                            ("ships", shipyard),
+                            ("odyssey", this.odyssey),
+                        ]
+                    ),
+                },
+            )
 
         this.shipyard = (horizons, shipyard)
 
-    def export_journal_commodities(self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]) -> None:
+    def export_journal_commodities(
+        self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]
+    ) -> None:
         """
         Update EDDN with Journal commodities data from the current station (lastStarport).
 
@@ -635,17 +714,25 @@ class EDDN:
         :param is_beta: whether or not we're in beta mode
         :param entry: the journal entry containing the commodities data
         """
-        items: List[Mapping[str, Any]] = entry.get('Items') or []
-        commodities: List[OrderedDictT[str, Any]] = sorted((OrderedDict([
-            ('name',          self.canonicalise(commodity['Name'])),
-            ('meanPrice',     commodity['MeanPrice']),
-            ('buyPrice',      commodity['BuyPrice']),
-            ('stock',         commodity['Stock']),
-            ('stockBracket',  commodity['StockBracket']),
-            ('sellPrice',     commodity['SellPrice']),
-            ('demand',        commodity['Demand']),
-            ('demandBracket', commodity['DemandBracket']),
-        ]) for commodity in items), key=lambda c: c['name'])
+        items: List[Mapping[str, Any]] = entry.get("Items") or []
+        commodities: List[OrderedDictT[str, Any]] = sorted(
+            (
+                OrderedDict(
+                    [
+                        ("name", self.canonicalise(commodity["Name"])),
+                        ("meanPrice", commodity["MeanPrice"]),
+                        ("buyPrice", commodity["BuyPrice"]),
+                        ("stock", commodity["Stock"]),
+                        ("stockBracket", commodity["StockBracket"]),
+                        ("sellPrice", commodity["SellPrice"]),
+                        ("demand", commodity["Demand"]),
+                        ("demandBracket", commodity["DemandBracket"]),
+                    ]
+                )
+                for commodity in items
+            ),
+            key=lambda c: c["name"],
+        )
 
         # This used to have a check `commodities and ` at the start so as to
         # not send an empty commodities list, as the EDDN Schema doesn't allow
@@ -654,22 +741,29 @@ class EDDN:
         # none and that really does need to be recorded over EDDN so that, e.g.
         # EDDB can update in a timely manner.
         if this.commodities != commodities:
-            self.send(cmdr, {
-                '$schemaRef': f'https://eddn.edcd.io/schemas/commodity/3{"/test" if is_beta else ""}',
-                'message': OrderedDict([
-                    ('timestamp',   entry['timestamp']),
-                    ('systemName',  entry['StarSystem']),
-                    ('stationName', entry['StationName']),
-                    ('marketId',    entry['MarketID']),
-                    ('commodities', commodities),
-                    ('horizons',    this.horizons),
-                    ('odyssey',     this.odyssey),
-                ]),
-            })
+            self.send(
+                cmdr,
+                {
+                    "$schemaRef": f'https://eddn.edcd.io/schemas/commodity/3{"/test" if is_beta else ""}',
+                    "message": OrderedDict(
+                        [
+                            ("timestamp", entry["timestamp"]),
+                            ("systemName", entry["StarSystem"]),
+                            ("stationName", entry["StationName"]),
+                            ("marketId", entry["MarketID"]),
+                            ("commodities", commodities),
+                            ("horizons", this.horizons),
+                            ("odyssey", this.odyssey),
+                        ]
+                    ),
+                },
+            )
 
         this.commodities = commodities
 
-    def export_journal_outfitting(self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]) -> None:
+    def export_journal_outfitting(
+        self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]
+    ) -> None:
         """
         Update EDDN with Journal oufitting data from the current station (lastStarport).
 
@@ -683,32 +777,39 @@ class EDDN:
         :param is_beta: Whether or not we're in beta mode
         :param entry: The relevant journal entry
         """
-        modules: List[Mapping[str, Any]] = entry.get('Items', [])
-        horizons: bool = entry.get('Horizons', False)
+        modules: List[Mapping[str, Any]] = entry.get("Items", [])
+        horizons: bool = entry.get("Horizons", False)
         # outfitting = sorted([self.MODULE_RE.sub(lambda m: m.group(0).capitalize(), module['Name'])
         # for module in modules if module['Name'] != 'int_planetapproachsuite'])
         outfitting: List[str] = sorted(
-            self.MODULE_RE.sub(lambda m: m.group(0).capitalize(), mod['Name']) for mod in
-            filter(lambda m: m['Name'] != 'int_planetapproachsuite', modules)
+            self.MODULE_RE.sub(lambda m: m.group(0).capitalize(), mod["Name"])
+            for mod in filter(lambda m: m["Name"] != "int_planetapproachsuite", modules)
         )
         # Don't send empty modules list - schema won't allow it
         if outfitting and this.outfitting != (horizons, outfitting):
-            self.send(cmdr, {
-                '$schemaRef': f'https://eddn.edcd.io/schemas/outfitting/2{"/test" if is_beta else ""}',
-                'message': OrderedDict([
-                    ('timestamp',   entry['timestamp']),
-                    ('systemName',  entry['StarSystem']),
-                    ('stationName', entry['StationName']),
-                    ('marketId',    entry['MarketID']),
-                    ('horizons',    horizons),
-                    ('modules',     outfitting),
-                    ('odyssey',     entry['odyssey'])
-                ]),
-            })
+            self.send(
+                cmdr,
+                {
+                    "$schemaRef": f'https://eddn.edcd.io/schemas/outfitting/2{"/test" if is_beta else ""}',
+                    "message": OrderedDict(
+                        [
+                            ("timestamp", entry["timestamp"]),
+                            ("systemName", entry["StarSystem"]),
+                            ("stationName", entry["StationName"]),
+                            ("marketId", entry["MarketID"]),
+                            ("horizons", horizons),
+                            ("modules", outfitting),
+                            ("odyssey", entry["odyssey"]),
+                        ]
+                    ),
+                },
+            )
 
         this.outfitting = (horizons, outfitting)
 
-    def export_journal_shipyard(self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]) -> None:
+    def export_journal_shipyard(
+        self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]
+    ) -> None:
         """
         Update EDDN with Journal shipyard data from the current station (lastStarport).
 
@@ -722,27 +823,34 @@ class EDDN:
         :param is_beta: Whether or not we're in beta mode
         :param entry: the relevant journal entry
         """
-        ships: List[Mapping[str, Any]] = entry.get('PriceList') or []
-        horizons: bool = entry.get('Horizons', False)
-        shipyard = sorted(ship['ShipType'] for ship in ships)
+        ships: List[Mapping[str, Any]] = entry.get("PriceList") or []
+        horizons: bool = entry.get("Horizons", False)
+        shipyard = sorted(ship["ShipType"] for ship in ships)
         # Don't send empty ships list - shipyard data is only guaranteed present if user has visited the shipyard.
         if shipyard and this.shipyard != (horizons, shipyard):
-            self.send(cmdr, {
-                '$schemaRef': f'https://eddn.edcd.io/schemas/shipyard/2{"/test" if is_beta else ""}',
-                'message': OrderedDict([
-                    ('timestamp',   entry['timestamp']),
-                    ('systemName',  entry['StarSystem']),
-                    ('stationName', entry['StationName']),
-                    ('marketId',    entry['MarketID']),
-                    ('horizons',    horizons),
-                    ('ships',       shipyard),
-                    ('odyssey',     entry['odyssey'])
-                ]),
-            })
+            self.send(
+                cmdr,
+                {
+                    "$schemaRef": f'https://eddn.edcd.io/schemas/shipyard/2{"/test" if is_beta else ""}',
+                    "message": OrderedDict(
+                        [
+                            ("timestamp", entry["timestamp"]),
+                            ("systemName", entry["StarSystem"]),
+                            ("stationName", entry["StationName"]),
+                            ("marketId", entry["MarketID"]),
+                            ("horizons", horizons),
+                            ("ships", shipyard),
+                            ("odyssey", entry["odyssey"]),
+                        ]
+                    ),
+                },
+            )
 
         # this.shipyard = (horizons, shipyard)
 
-    def export_journal_entry(self, cmdr: str, entry: Mapping[str, Any], msg: Mapping[str, Any]) -> None:
+    def export_journal_entry(
+        self, cmdr: str, entry: Mapping[str, Any], msg: Mapping[str, Any]
+    ) -> None:
         """
         Update EDDN with an event from the journal.
 
@@ -756,23 +864,28 @@ class EDDN:
         if self.replayfile or self.load_journal_replay():
             # Store the entry
             self.replaylog.append(json.dumps([cmdr, msg]))
-            self.replayfile.write(f'{self.replaylog[-1]}\n')  # type: ignore
+            self.replayfile.write(f"{self.replaylog[-1]}\n")  # type: ignore
 
             if (
-                entry['event'] == 'Docked' or (entry['event'] == 'Location' and entry['Docked']) or not
-                (config.get_int('output') & config.OUT_SYS_DELAY)
+                entry["event"] == "Docked"
+                or (entry["event"] == "Location" and entry["Docked"])
+                or not (config.get_int("output") & config.OUT_SYS_DELAY)
             ):
-                self.parent.after(self.REPLAYPERIOD, self.sendreplay)  # Try to send this and previous entries
+                self.parent.after(
+                    self.REPLAYPERIOD, self.sendreplay
+                )  # Try to send this and previous entries
 
         else:
             # Can't access replay file! Send immediately.
             # LANG: Status text shown while attempting to send data
-            self.parent.children['status']['text'] = _('Sending data to EDDN...')
+            self.parent.children["status"]["text"] = _("Sending data to EDDN...")
             self.parent.update_idletasks()
             self.send(cmdr, msg)
-            self.parent.children['status']['text'] = ''
+            self.parent.children["status"]["text"] = ""
 
-    def export_journal_generic(self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]) -> None:
+    def export_journal_generic(
+        self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]
+    ) -> None:
         """
         Send an EDDN event on the journal schema.
 
@@ -781,16 +894,16 @@ class EDDN:
         :param entry: the journal entry to send
         """
         msg = {
-            '$schemaRef': f'https://eddn.edcd.io/schemas/journal/1{"/test" if is_beta else ""}',
-            'message': entry
+            "$schemaRef": f'https://eddn.edcd.io/schemas/journal/1{"/test" if is_beta else ""}',
+            "message": entry,
         }
         this.eddn.export_journal_entry(cmdr, entry, msg)
 
     def entry_augment_system_data(
-            self,
-            entry: MutableMapping[str, Any],
-            system_name: str,
-            system_coordinates: list
+        self,
+        entry: MutableMapping[str, Any],
+        system_name: str,
+        system_coordinates: list,
     ) -> Union[str, MutableMapping[str, Any]]:
         """
         Augment a journal entry with necessary system data.
@@ -802,39 +915,56 @@ class EDDN:
         """
         # If 'SystemName' or 'System' is there, it's directly from a journal event.
         # If they're not there *and* 'StarSystem' isn't either, then we add the latter.
-        if 'SystemName' not in entry and 'System' not in entry and 'StarSystem' not in entry:
-            if system_name is None or not isinstance(system_name, str) or system_name == '':
+        if (
+            "SystemName" not in entry
+            and "System" not in entry
+            and "StarSystem" not in entry
+        ):
+            if (
+                system_name is None
+                or not isinstance(system_name, str)
+                or system_name == ""
+            ):
                 # Bad assumptions if this is the case
-                logger.warning(f'No system name in entry, and system_name was not set either!  entry:\n{entry!r}\n')
+                logger.warning(
+                    f"No system name in entry, and system_name was not set either!  entry:\n{entry!r}\n"
+                )
                 return "passed-in system_name is empty, can't add System"
 
             else:
-                entry['StarSystem'] = system_name
+                entry["StarSystem"] = system_name
 
-        if 'SystemAddress' not in entry:
+        if "SystemAddress" not in entry:
             if this.systemaddress is None:
                 logger.warning("this.systemaddress is None, can't add SystemAddress")
                 return "this.systemaddress is None, can't add SystemAddress"
 
-            entry['SystemAddress'] = this.systemaddress
+            entry["SystemAddress"] = this.systemaddress
 
-        if 'StarPos' not in entry:
+        if "StarPos" not in entry:
             # Prefer the passed-in, probably monitor.state version
             if system_coordinates is not None:
-                entry['StarPos'] = system_coordinates
+                entry["StarPos"] = system_coordinates
 
             # TODO: Deprecate in-plugin tracking
             elif this.coordinates is not None:
-                entry['StarPos'] = list(this.coordinates)
+                entry["StarPos"] = list(this.coordinates)
 
             else:
-                logger.warning("Neither this_coordinates or this.coordinates set, can't add StarPos")
-                return 'No source for adding StarPos to approachsettlement/1 !'
+                logger.warning(
+                    "Neither this_coordinates or this.coordinates set, can't add StarPos"
+                )
+                return "No source for adding StarPos to approachsettlement/1 !"
 
         return entry
 
     def export_journal_fssdiscoveryscan(
-            self, cmdr: str, system_name: str, system_starpos: list, is_beta: bool, entry: Mapping[str, Any]
+        self,
+        cmdr: str,
+        system_name: str,
+        system_starpos: list,
+        is_beta: bool,
+        entry: Mapping[str, Any],
     ) -> Optional[str]:
         """
         Send an FSSDiscoveryScan to EDDN on the correct schema.
@@ -848,7 +978,7 @@ class EDDN:
         #######################################################################
         # Elisions
         entry = filter_localised(entry)
-        entry.pop('Progress')
+        entry.pop("Progress")
         #######################################################################
 
         #######################################################################
@@ -862,15 +992,20 @@ class EDDN:
         #######################################################################
 
         msg = {
-            '$schemaRef': f'https://eddn.edcd.io/schemas/fssdiscoveryscan/1{"/test" if is_beta else ""}',
-            'message': entry
+            "$schemaRef": f'https://eddn.edcd.io/schemas/fssdiscoveryscan/1{"/test" if is_beta else ""}',
+            "message": entry,
         }
 
         this.eddn.export_journal_entry(cmdr, entry, msg)
         return None
 
     def export_journal_navbeaconscan(
-            self, cmdr: str, system_name: str, system_starpos: list, is_beta: bool, entry: Mapping[str, Any]
+        self,
+        cmdr: str,
+        system_name: str,
+        system_starpos: list,
+        is_beta: bool,
+        entry: Mapping[str, Any],
     ) -> Optional[str]:
         """
         Send an NavBeaconScan to EDDN on the correct schema.
@@ -898,15 +1033,19 @@ class EDDN:
         #######################################################################
 
         msg = {
-            '$schemaRef': f'https://eddn.edcd.io/schemas/navbeaconscan/1{"/test" if is_beta else ""}',
-            'message': entry
+            "$schemaRef": f'https://eddn.edcd.io/schemas/navbeaconscan/1{"/test" if is_beta else ""}',
+            "message": entry,
         }
 
         this.eddn.export_journal_entry(cmdr, entry, msg)
         return None
 
     def export_journal_codexentry(  # noqa: CCR001
-            self, cmdr: str, system_starpos: list, is_beta: bool, entry: MutableMapping[str, Any]
+        self,
+        cmdr: str,
+        system_starpos: list,
+        is_beta: bool,
+        entry: MutableMapping[str, Any],
     ) -> Optional[str]:
         """
         Send a CodexEntry to EDDN on the correct schema.
@@ -938,7 +1077,7 @@ class EDDN:
         # Elisions
         entry = filter_localised(entry)
         # Keys specific to this event
-        for k in ('IsNewEntry', 'NewTraitsDiscovered'):
+        for k in ("IsNewEntry", "NewTraitsDiscovered"):
             if k in entry:
                 del entry[k]
         #######################################################################
@@ -947,7 +1086,9 @@ class EDDN:
         # Augmentations
         #######################################################################
         # General 'system' augmentations
-        ret = this.eddn.entry_augment_system_data(entry, entry['System'], system_starpos)
+        ret = this.eddn.entry_augment_system_data(
+            entry, entry["System"], system_starpos
+        )
         if isinstance(ret, str):
             return ret
 
@@ -955,39 +1096,45 @@ class EDDN:
 
         # Set BodyName if it's available from Status.json
         if this.status_body_name is None or not isinstance(this.status_body_name, str):
-            logger.warning(f'this.status_body_name was not set properly:'
-                           f' "{this.status_body_name}" ({type(this.status_body_name)})')
+            logger.warning(
+                f"this.status_body_name was not set properly:"
+                f' "{this.status_body_name}" ({type(this.status_body_name)})'
+            )
 
         else:
-            entry['BodyName'] = this.status_body_name
+            entry["BodyName"] = this.status_body_name
             # Only set BodyID if journal BodyName matches the Status.json one.
             # This avoids binary body issues.
             if this.status_body_name == this.body_name:
                 if this.body_id is not None and isinstance(this.body_id, int):
-                    entry['BodyID'] = this.body_id
+                    entry["BodyID"] = this.body_id
 
                 else:
-                    logger.warning(f'this.body_id was not set properly: "{this.body_id}" ({type(this.body_id)})')
+                    logger.warning(
+                        f'this.body_id was not set properly: "{this.body_id}" ({type(this.body_id)})'
+                    )
         #######################################################################
 
         for k, v in entry.items():
-            if v is None or isinstance(v, str) and v == '':
-                logger.warning(f'post-processing entry contains entry["{k}"] = {v} {(type(v))}')
+            if v is None or isinstance(v, str) and v == "":
+                logger.warning(
+                    f'post-processing entry contains entry["{k}"] = {v} {(type(v))}'
+                )
                 # We should drop this message and VERY LOUDLY inform the
                 # user, in the hopes they'll open a bug report with the
                 # raw Journal event that caused this.
-                return 'CodexEntry had empty string, PLEASE ALERT THE EDMC DEVELOPERS'
+                return "CodexEntry had empty string, PLEASE ALERT THE EDMC DEVELOPERS"
 
         msg = {
-            '$schemaRef': f'https://eddn.edcd.io/schemas/codexentry/1{"/test" if is_beta else ""}',
-            'message': entry
+            "$schemaRef": f'https://eddn.edcd.io/schemas/codexentry/1{"/test" if is_beta else ""}',
+            "message": entry,
         }
 
         this.eddn.export_journal_entry(cmdr, entry, msg)
         return None
 
     def export_journal_scanbarycentre(
-            self, cmdr: str, system_starpos: list, is_beta: bool, entry: Mapping[str, Any]
+        self, cmdr: str, system_starpos: list, is_beta: bool, entry: Mapping[str, Any]
     ) -> Optional[str]:
         """
         Send a ScanBaryCentre to EDDN on the correct schema.
@@ -1019,7 +1166,9 @@ class EDDN:
         #######################################################################
         # Augmentations
         #######################################################################
-        ret = this.eddn.entry_augment_system_data(entry, entry['StarSystem'], system_starpos)
+        ret = this.eddn.entry_augment_system_data(
+            entry, entry["StarSystem"], system_starpos
+        )
         if isinstance(ret, str):
             return ret
 
@@ -1027,15 +1176,15 @@ class EDDN:
         #######################################################################
 
         msg = {
-            '$schemaRef': f'https://eddn.edcd.io/schemas/scanbarycentre/1{"/test" if is_beta else ""}',
-            'message': entry
+            "$schemaRef": f'https://eddn.edcd.io/schemas/scanbarycentre/1{"/test" if is_beta else ""}',
+            "message": entry,
         }
 
         this.eddn.export_journal_entry(cmdr, entry, msg)
         return None
 
     def export_journal_navroute(
-            self, cmdr: str, is_beta: bool, entry: MutableMapping[str, Any]
+        self, cmdr: str, is_beta: bool, entry: MutableMapping[str, Any]
     ) -> Optional[str]:
         """
         Send a NavRoute to EDDN on the correct schema.
@@ -1071,7 +1220,7 @@ class EDDN:
         #  }
 
         # Sanity check - Ref Issue 1342
-        if 'Route' not in entry:
+        if "Route" not in entry:
             logger.warning(f"NavRoute didn't contain a Route array!\n{entry!r}")
             # LANG: No 'Route' found in NavRoute.json file
             return _("No 'Route' array in NavRoute.json contents")
@@ -1080,11 +1229,11 @@ class EDDN:
         # Elisions
         #######################################################################
         # WORKAROUND WIP EDDN schema | 2021-10-17: This will reject with the Odyssey or Horizons flags present
-        if 'odyssey' in entry:
-            del entry['odyssey']
+        if "odyssey" in entry:
+            del entry["odyssey"]
 
-        if 'horizons' in entry:
-            del entry['horizons']
+        if "horizons" in entry:
+            del entry["horizons"]
 
         # END WORKAROUND
         #######################################################################
@@ -1096,15 +1245,20 @@ class EDDN:
         #######################################################################
 
         msg = {
-            '$schemaRef': f'https://eddn.edcd.io/schemas/navroute/1{"/test" if is_beta else ""}',
-            'message': entry
+            "$schemaRef": f'https://eddn.edcd.io/schemas/navroute/1{"/test" if is_beta else ""}',
+            "message": entry,
         }
 
         this.eddn.export_journal_entry(cmdr, entry, msg)
         return None
 
     def export_journal_approachsettlement(
-        self, cmdr: str, system_name: str, system_starpos: list, is_beta: bool, entry: MutableMapping[str, Any]
+        self,
+        cmdr: str,
+        system_name: str,
+        system_starpos: list,
+        is_beta: bool,
+        entry: MutableMapping[str, Any],
     ) -> Optional[str]:
         """
         Send an ApproachSettlement to EDDN on the correct schema.
@@ -1138,8 +1292,8 @@ class EDDN:
         #######################################################################
 
         msg = {
-            '$schemaRef': f'https://eddn.edcd.io/schemas/approachsettlement/1{"/test" if is_beta else ""}',
-            'message': entry
+            "$schemaRef": f'https://eddn.edcd.io/schemas/approachsettlement/1{"/test" if is_beta else ""}',
+            "message": entry,
         }
 
         this.eddn.export_journal_entry(cmdr, entry, msg)
@@ -1158,6 +1312,7 @@ class EDDN:
 
 # Plugin callbacks
 
+
 def plugin_start3(plugin_dir: str) -> str:
     """
     Start this plugin.
@@ -1165,7 +1320,7 @@ def plugin_start3(plugin_dir: str) -> str:
     :param plugin_dir: `str` - The full path to this plugin's directory.
     :return: `str` - Name of this plugin to use in UI.
     """
-    return 'EDDN'
+    return "EDDN"
 
 
 def plugin_app(parent: tk.Tk) -> Optional[tk.Frame]:
@@ -1186,7 +1341,9 @@ def plugin_app(parent: tk.Tk) -> Optional[tk.Frame]:
     # Try to obtain exclusive lock on journal cache, even if we don't need it yet
     if not this.eddn.load_journal_replay():
         # Shouldn't happen - don't bother localizing
-        this.parent.children['status']['text'] = 'Error: Is another copy of this app already running?'
+        this.parent.children["status"][
+            "text"
+        ] = "Error: Is another copy of this app already running?"
 
     if config.eddn_tracking_ui:
         this.ui = tk.Frame(parent)
@@ -1194,19 +1351,23 @@ def plugin_app(parent: tk.Tk) -> Optional[tk.Frame]:
         row = this.ui.grid_size()[1]
         journal_body_name_label = tk.Label(this.ui, text="J:BodyName:")
         journal_body_name_label.grid(row=row, column=0, sticky=tk.W)
-        this.ui_j_body_name = tk.Label(this.ui, name='eddn_track_j_body_name', anchor=tk.W)
+        this.ui_j_body_name = tk.Label(
+            this.ui, name="eddn_track_j_body_name", anchor=tk.W
+        )
         this.ui_j_body_name.grid(row=row, column=1, sticky=tk.E)
         row += 1
 
         journal_body_id_label = tk.Label(this.ui, text="J:BodyID:")
         journal_body_id_label.grid(row=row, column=0, sticky=tk.W)
-        this.ui_j_body_id = tk.Label(this.ui, name='eddn_track_j_body_id', anchor=tk.W)
+        this.ui_j_body_id = tk.Label(this.ui, name="eddn_track_j_body_id", anchor=tk.W)
         this.ui_j_body_id.grid(row=row, column=1, sticky=tk.E)
         row += 1
 
         status_body_name_label = tk.Label(this.ui, text="S:BodyName:")
         status_body_name_label.grid(row=row, column=0, sticky=tk.W)
-        this.ui_s_body_name = tk.Label(this.ui, name='eddn_track_s_body_name', anchor=tk.W)
+        this.ui_s_body_name = tk.Label(
+            this.ui, name="eddn_track_s_body_name", anchor=tk.W
+        )
         this.ui_s_body_name.grid(row=row, column=1, sticky=tk.E)
         row += 1
 
@@ -1220,17 +1381,17 @@ def tracking_ui_update() -> None:
     if not config.eddn_tracking_ui:
         return
 
-    this.ui_j_body_name['text'] = '≪None≫'
+    this.ui_j_body_name["text"] = "≪None≫"
     if this.body_name is not None:
-        this.ui_j_body_name['text'] = this.body_name
+        this.ui_j_body_name["text"] = this.body_name
 
-    this.ui_j_body_id['text'] = '≪None≫'
+    this.ui_j_body_id["text"] = "≪None≫"
     if this.body_id is not None:
-        this.ui_j_body_id['text'] = str(this.body_id)
+        this.ui_j_body_id["text"] = str(this.body_id)
 
-    this.ui_s_body_name['text'] = '≪None≫'
+    this.ui_s_body_name["text"] = "≪None≫"
     if this.status_body_name is not None:
-        this.ui_s_body_name['text'] = this.status_body_name
+        this.ui_s_body_name["text"] = this.status_body_name
 
     this.ui.update_idletasks()
 
@@ -1247,29 +1408,31 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:
     PADX = 10  # noqa: N806
     BUTTONX = 12  # noqa: N806 # indent Checkbuttons and Radiobuttons
 
-    if prefsVersion.shouldSetDefaults('0.0.0.0', not bool(config.get_int('output'))):
-        output: int = (config.OUT_MKT_EDDN | config.OUT_SYS_EDDN)  # default settings
+    if prefsVersion.shouldSetDefaults("0.0.0.0", not bool(config.get_int("output"))):
+        output: int = config.OUT_MKT_EDDN | config.OUT_SYS_EDDN  # default settings
 
     else:
-        output = config.get_int('output')
+        output = config.get_int("output")
 
     eddnframe = nb.Frame(parent)
 
     HyperlinkLabel(
         eddnframe,
-        text='Elite Dangerous Data Network',
-        background=nb.Label().cget('background'),
-        url='https://github.com/EDSM-NET/EDDN/wiki',
-        underline=True
-    ).grid(padx=PADX, sticky=tk.W)  # Don't translate
+        text="Elite Dangerous Data Network",
+        background=nb.Label().cget("background"),
+        url="https://github.com/EDSM-NET/EDDN/wiki",
+        underline=True,
+    ).grid(
+        padx=PADX, sticky=tk.W
+    )  # Don't translate
 
     this.eddn_station = tk.IntVar(value=(output & config.OUT_MKT_EDDN) and 1)
     this.eddn_station_button = nb.Checkbutton(
         eddnframe,
         # LANG: Enable EDDN support for station data checkbox label
-        text=_('Send station data to the Elite Dangerous Data Network'),
+        text=_("Send station data to the Elite Dangerous Data Network"),
         variable=this.eddn_station,
-        command=prefsvarchanged
+        command=prefsvarchanged,
     )  # Output setting
 
     this.eddn_station_button.grid(padx=BUTTONX, pady=(5, 0), sticky=tk.W)
@@ -1278,9 +1441,9 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:
     this.eddn_system_button = nb.Checkbutton(
         eddnframe,
         # LANG: Enable EDDN support for system and other scan data checkbox label
-        text=_('Send system and scan data to the Elite Dangerous Data Network'),
+        text=_("Send system and scan data to the Elite Dangerous Data Network"),
         variable=this.eddn_system,
-        command=prefsvarchanged
+        command=prefsvarchanged,
     )
 
     this.eddn_system_button.grid(padx=BUTTONX, pady=(5, 0), sticky=tk.W)
@@ -1289,8 +1452,8 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:
     this.eddn_delay_button = nb.Checkbutton(
         eddnframe,
         # LANG: EDDN delay sending until docked option is on, this message notes that a send was skipped due to this
-        text=_('Delay sending until docked'),
-        variable=this.eddn_delay
+        text=_("Delay sending until docked"),
+        variable=this.eddn_delay,
     )
     this.eddn_delay_button.grid(padx=BUTTONX, sticky=tk.W)
 
@@ -1303,9 +1466,11 @@ def prefsvarchanged(event=None) -> None:
 
     :param event: tkinter event ?
     """
-    this.eddn_station_button['state'] = tk.NORMAL
-    this.eddn_system_button['state'] = tk.NORMAL
-    this.eddn_delay_button['state'] = this.eddn.replayfile and this.eddn_system.get() and tk.NORMAL or tk.DISABLED
+    this.eddn_station_button["state"] = tk.NORMAL
+    this.eddn_system_button["state"] = tk.NORMAL
+    this.eddn_delay_button["state"] = (
+        this.eddn.replayfile and this.eddn_system.get() and tk.NORMAL or tk.DISABLED
+    )
 
 
 def prefs_changed(cmdr: str, is_beta: bool) -> None:
@@ -1316,20 +1481,27 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
     :param is_beta: `bool` - True if this is a beta version of the Game.
     """
     config.set(
-        'output',
-        (config.get_int('output')
-         & (config.OUT_MKT_TD | config.OUT_MKT_CSV | config.OUT_SHIP | config.OUT_MKT_MANUAL)) +
-        (this.eddn_station.get() and config.OUT_MKT_EDDN) +
-        (this.eddn_system.get() and config.OUT_SYS_EDDN) +
-        (this.eddn_delay.get() and config.OUT_SYS_DELAY)
+        "output",
+        (
+            config.get_int("output")
+            & (
+                config.OUT_MKT_TD
+                | config.OUT_MKT_CSV
+                | config.OUT_SHIP
+                | config.OUT_MKT_MANUAL
+            )
+        )
+        + (this.eddn_station.get() and config.OUT_MKT_EDDN)
+        + (this.eddn_system.get() and config.OUT_SYS_EDDN)
+        + (this.eddn_delay.get() and config.OUT_SYS_DELAY),
     )
 
 
 def plugin_stop() -> None:
     """Handle stopping this plugin."""
-    logger.debug('Calling this.eddn.close()')
+    logger.debug("Calling this.eddn.close()")
     this.eddn.close()
-    logger.debug('Done.')
+    logger.debug("Done.")
 
 
 # Recursively filter '*_Localised' keys from dict
@@ -1342,14 +1514,14 @@ def filter_localised(d: Mapping[str, Any]) -> OrderedDictT[str, Any]:
     """
     filtered: OrderedDictT[str, Any] = OrderedDict()
     for k, v in d.items():
-        if k.endswith('_Localised'):
+        if k.endswith("_Localised"):
             pass
 
-        elif hasattr(v, 'items'):  # dict -> recurse
+        elif hasattr(v, "items"):  # dict -> recurse
             filtered[k] = filter_localised(v)
 
         elif isinstance(v, list):  # list of dicts -> recurse
-            filtered[k] = [filter_localised(x) if hasattr(x, 'items') else x for x in v]
+            filtered[k] = [filter_localised(x) if hasattr(x, "items") else x for x in v]
 
         else:
             filtered[k] = v
@@ -1358,12 +1530,12 @@ def filter_localised(d: Mapping[str, Any]) -> OrderedDictT[str, Any]:
 
 
 def journal_entry(  # noqa: C901, CCR001
-        cmdr: str,
-        is_beta: bool,
-        system: str,
-        station: str,
-        entry: MutableMapping[str, Any],
-        state: Mapping[str, Any]
+    cmdr: str,
+    is_beta: bool,
+    system: str,
+    station: str,
+    entry: MutableMapping[str, Any],
+    state: Mapping[str, Any],
 ) -> Optional[str]:
     """
     Process a new Journal entry.
@@ -1376,59 +1548,63 @@ def journal_entry(  # noqa: C901, CCR001
     :param state: `dict` - Current `monitor.state` data.
     :return: `str` - Error message, or `None` if no errors.
     """
-    should_return, new_data = killswitch.check_killswitch('plugins.eddn.journal', entry)
+    should_return, new_data = killswitch.check_killswitch("plugins.eddn.journal", entry)
     if should_return:
-        plug.show_error(_('EDDN journal handler disabled. See Log.'))  # LANG: Killswitch disabled EDDN
+        plug.show_error(
+            _("EDDN journal handler disabled. See Log.")
+        )  # LANG: Killswitch disabled EDDN
         return None
 
-    should_return, new_data = killswitch.check_killswitch(f'plugins.eddn.journal.event.{entry["event"]}', new_data)
+    should_return, new_data = killswitch.check_killswitch(
+        f'plugins.eddn.journal.event.{entry["event"]}', new_data
+    )
     if should_return:
         return None
 
     entry = new_data
-    event_name = entry['event'].lower()
+    event_name = entry["event"].lower()
 
-    this.on_foot = state['OnFoot']
+    this.on_foot = state["OnFoot"]
 
     # Note if we're under Horizons and/or Odyssey
     # The only event these are already in is `LoadGame` which isn't sent to EDDN.
-    this.horizons = entry['horizons'] = state['Horizons']
-    this.odyssey = entry['odyssey'] = state['Odyssey']
+    this.horizons = entry["horizons"] = state["Horizons"]
+    this.odyssey = entry["odyssey"] = state["Odyssey"]
 
     # Track location
-    if event_name in ('location', 'fsdjump', 'docked', 'carrierjump'):
-        if event_name in ('location', 'carrierjump'):
-            if entry.get('BodyType') == 'Planet':
-                this.body_name = entry.get('Body')
-                this.body_id = entry.get('BodyID')
+    if event_name in ("location", "fsdjump", "docked", "carrierjump"):
+        if event_name in ("location", "carrierjump"):
+            if entry.get("BodyType") == "Planet":
+                this.body_name = entry.get("Body")
+                this.body_id = entry.get("BodyID")
 
             else:
                 this.body_name = None
 
-        elif event_name == 'fsdjump':
+        elif event_name == "fsdjump":
             this.body_name = None
             this.body_id = None
 
-        if 'StarPos' in entry:
-            this.coordinates = tuple(entry['StarPos'])
+        if "StarPos" in entry:
+            this.coordinates = tuple(entry["StarPos"])
 
-        elif this.systemaddress != entry.get('SystemAddress'):
+        elif this.systemaddress != entry.get("SystemAddress"):
             this.coordinates = None  # Docked event doesn't include coordinates
 
-        if 'SystemAddress' not in entry:
+        if "SystemAddress" not in entry:
             logger.warning(f'"location" event without SystemAddress !!!:\n{entry}\n')
 
         # But we'll still *use* the value, because if a 'location' event doesn't
         # have this we've still moved and now don't know where and MUST NOT
         # continue to use any old value.
         # Yes, explicitly state `None` here, so it's crystal clear.
-        this.systemaddress = entry.get('SystemAddress', None)  # type: ignore
+        this.systemaddress = entry.get("SystemAddress", None)  # type: ignore
 
-    elif event_name == 'approachbody':
-        this.body_name = entry['Body']
-        this.body_id = entry.get('BodyID')
+    elif event_name == "approachbody":
+        this.body_name = entry["Body"]
+        this.body_id = entry.get("BodyID")
 
-    elif event_name == 'leavebody':
+    elif event_name == "leavebody":
         # NB: **NOT** SupercruiseEntry, because we won't get a fresh
         #     ApproachBody if we don't leave Orbital Cruise and land again.
         # *This* is triggered when you go above Orbital Cruise altitude.
@@ -1436,147 +1612,182 @@ def journal_entry(  # noqa: C901, CCR001
         this.body_name = None
         this.body_id = None
 
-    elif event_name == 'music':
-        if entry['MusicTrack'] == 'MainMenu':
+    elif event_name == "music":
+        if entry["MusicTrack"] == "MainMenu":
             this.body_name = None
             this.body_id = None
             this.status_body_name = None
 
     # Events with their own EDDN schema
-    if config.get_int('output') & config.OUT_SYS_EDDN and not state['Captain']:
+    if config.get_int("output") & config.OUT_SYS_EDDN and not state["Captain"]:
 
-        if event_name == 'fssdiscoveryscan':
-            return this.eddn.export_journal_fssdiscoveryscan(cmdr, system, state['StarPos'], is_beta, entry)
+        if event_name == "fssdiscoveryscan":
+            return this.eddn.export_journal_fssdiscoveryscan(
+                cmdr, system, state["StarPos"], is_beta, entry
+            )
 
-        elif event_name == 'navbeaconscan':
-            return this.eddn.export_journal_navbeaconscan(cmdr, system, state['StarPos'], is_beta, entry)
+        elif event_name == "navbeaconscan":
+            return this.eddn.export_journal_navbeaconscan(
+                cmdr, system, state["StarPos"], is_beta, entry
+            )
 
-        elif event_name == 'codexentry':
-            return this.eddn.export_journal_codexentry(cmdr, state['StarPos'], is_beta, entry)
+        elif event_name == "codexentry":
+            return this.eddn.export_journal_codexentry(
+                cmdr, state["StarPos"], is_beta, entry
+            )
 
-        elif event_name == 'scanbarycentre':
-            return this.eddn.export_journal_scanbarycentre(cmdr, state['StarPos'], is_beta, entry)
+        elif event_name == "scanbarycentre":
+            return this.eddn.export_journal_scanbarycentre(
+                cmdr, state["StarPos"], is_beta, entry
+            )
 
-        elif event_name == 'navroute':
+        elif event_name == "navroute":
             return this.eddn.export_journal_navroute(cmdr, is_beta, entry)
 
-        elif event_name == 'approachsettlement':
+        elif event_name == "approachsettlement":
             return this.eddn.export_journal_approachsettlement(
-                cmdr,
-                system,
-                state['StarPos'],
-                is_beta,
-                entry
+                cmdr, system, state["StarPos"], is_beta, entry
             )
 
     # Send journal schema events to EDDN, but not when on a crew
-    if (config.get_int('output') & config.OUT_SYS_EDDN and not state['Captain'] and
-        (event_name in ('location', 'fsdjump', 'docked', 'scan', 'saasignalsfound', 'carrierjump')) and
-            ('StarPos' in entry or this.coordinates)):
+    if (
+        config.get_int("output") & config.OUT_SYS_EDDN
+        and not state["Captain"]
+        and (
+            event_name
+            in (
+                "location",
+                "fsdjump",
+                "docked",
+                "scan",
+                "saasignalsfound",
+                "carrierjump",
+            )
+        )
+        and ("StarPos" in entry or this.coordinates)
+    ):
 
         # strip out properties disallowed by the schema
         for thing in (
-            'ActiveFine',
-            'CockpitBreach',
-            'BoostUsed',
-            'FuelLevel',
-            'FuelUsed',
-            'JumpDist',
-            'Latitude',
-            'Longitude',
-            'Wanted'
+            "ActiveFine",
+            "CockpitBreach",
+            "BoostUsed",
+            "FuelLevel",
+            "FuelUsed",
+            "JumpDist",
+            "Latitude",
+            "Longitude",
+            "Wanted",
         ):
             entry.pop(thing, None)
 
-        if 'Factions' in entry:
+        if "Factions" in entry:
             # Filter faction state to comply with schema restrictions regarding personal data. `entry` is a shallow copy
             # so replace 'Factions' value rather than modify in-place.
-            entry['Factions'] = [
+            entry["Factions"] = [
                 {
-                    k: v for k, v in f.items() if k not in (
-                        'HappiestSystem', 'HomeSystem', 'MyReputation', 'SquadronFaction'
+                    k: v
+                    for k, v in f.items()
+                    if k
+                    not in (
+                        "HappiestSystem",
+                        "HomeSystem",
+                        "MyReputation",
+                        "SquadronFaction",
                     )
                 }
-                for f in entry['Factions']
+                for f in entry["Factions"]
             ]
 
         # add planet to Docked event for planetary stations if known
-        if event_name == 'docked' and this.body_name:
-            entry['Body'] = this.body_name
-            entry['BodyType'] = 'Planet'
+        if event_name == "docked" and this.body_name:
+            entry["Body"] = this.body_name
+            entry["BodyType"] = "Planet"
 
         # add mandatory StarSystem, StarPos and SystemAddress properties to Scan events
-        if 'StarSystem' not in entry:
+        if "StarSystem" not in entry:
             if not system:
                 logger.warning("system is falsey, can't add StarSystem")
                 return "system is falsey, can't add StarSystem"
 
-            entry['StarSystem'] = system
+            entry["StarSystem"] = system
 
-        if 'StarPos' not in entry:
+        if "StarPos" not in entry:
             if not this.coordinates:
                 logger.warning("this.coordinates is falsey, can't add StarPos")
                 return "this.coordinates is falsey, can't add StarPos"
 
             # Gazelle[TD] reported seeing a lagged Scan event with incorrect
             # augmented StarPos: <https://github.com/EDCD/EDMarketConnector/issues/961>
-            if this.systemaddress is None or this.systemaddress != entry['SystemAddress']:
-                logger.warning("event has no StarPos, but SystemAddress isn't current location")
+            if (
+                this.systemaddress is None
+                or this.systemaddress != entry["SystemAddress"]
+            ):
+                logger.warning(
+                    "event has no StarPos, but SystemAddress isn't current location"
+                )
                 return "Wrong System! Delayed Scan event?"
 
-            entry['StarPos'] = list(this.coordinates)
+            entry["StarPos"] = list(this.coordinates)
 
-        if 'SystemAddress' not in entry:
+        if "SystemAddress" not in entry:
             if not this.systemaddress:
                 logger.warning("this.systemaddress is falsey, can't add SystemAddress")
                 return "this.systemaddress is falsey, can't add SystemAddress"
 
-            entry['SystemAddress'] = this.systemaddress
+            entry["SystemAddress"] = this.systemaddress
 
         try:
             this.eddn.export_journal_generic(cmdr, is_beta, filter_localised(entry))
 
         except requests.exceptions.RequestException as e:
-            logger.debug('Failed in export_journal_entry', exc_info=e)
-            return _("Error: Can't connect to EDDN")  # LANG: Error while trying to send data to EDDN
+            logger.debug("Failed in export_journal_entry", exc_info=e)
+            return _(
+                "Error: Can't connect to EDDN"
+            )  # LANG: Error while trying to send data to EDDN
 
         except Exception as e:
-            logger.debug('Failed in export_journal_entry', exc_info=e)
+            logger.debug("Failed in export_journal_entry", exc_info=e)
             return str(e)
 
-    elif (config.get_int('output') & config.OUT_MKT_EDDN and not state['Captain'] and
-            event_name in ('market', 'outfitting', 'shipyard')):
+    elif (
+        config.get_int("output") & config.OUT_MKT_EDDN
+        and not state["Captain"]
+        and event_name in ("market", "outfitting", "shipyard")
+    ):
         # Market.json, Outfitting.json or Shipyard.json to process
 
         try:
-            if this.marketId != entry['MarketID']:
+            if this.marketId != entry["MarketID"]:
                 this.commodities = this.outfitting = this.shipyard = None
-                this.marketId = entry['MarketID']
+                this.marketId = entry["MarketID"]
 
-            journaldir = config.get_str('journaldir')
-            if journaldir is None or journaldir == '':
+            journaldir = config.get_str("journaldir")
+            if journaldir is None or journaldir == "":
                 journaldir = config.default_journal_dir
 
             path = pathlib.Path(journaldir) / f'{entry["event"]}.json'
 
-            with path.open('rb') as f:
+            with path.open("rb") as f:
                 # Don't assume we can definitely stomp entry & event_name here
                 entry_augment = json.load(f)
-                event_name_augment = entry_augment['event'].lower()
-                entry_augment['odyssey'] = this.odyssey
+                event_name_augment = entry_augment["event"].lower()
+                entry_augment["odyssey"] = this.odyssey
 
-                if event_name_augment == 'market':
+                if event_name_augment == "market":
                     this.eddn.export_journal_commodities(cmdr, is_beta, entry_augment)
 
-                elif event_name_augment == 'outfitting':
+                elif event_name_augment == "outfitting":
                     this.eddn.export_journal_outfitting(cmdr, is_beta, entry_augment)
 
-                elif event_name_augment == 'shipyard':
+                elif event_name_augment == "shipyard":
                     this.eddn.export_journal_shipyard(cmdr, is_beta, entry_augment)
 
         except requests.exceptions.RequestException as e:
             logger.debug(f'Failed exporting {entry["event"]}', exc_info=e)
-            return _("Error: Can't connect to EDDN")  # LANG: Error while trying to send data to EDDN
+            return _(
+                "Error: Can't connect to EDDN"
+            )  # LANG: Error while trying to send data to EDDN
 
         except Exception as e:
             logger.debug(f'Failed exporting {entry["event"]}', exc_info=e)
@@ -1595,32 +1806,39 @@ def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:  # noqa: CCR001
     :param is_beta: bool - True if this is a beta version of the Game.
     :return: str - Error message, or `None` if no errors.
     """
-    if (data['commander'].get('docked') or (this.on_foot and monitor.station)
-            and config.get_int('output') & config.OUT_MKT_EDDN):
+    if (
+        data["commander"].get("docked")
+        or (this.on_foot and monitor.station)
+        and config.get_int("output") & config.OUT_MKT_EDDN
+    ):
         try:
-            if this.marketId != data['lastStarport']['id']:
+            if this.marketId != data["lastStarport"]["id"]:
                 this.commodities = this.outfitting = this.shipyard = None
-                this.marketId = data['lastStarport']['id']
+                this.marketId = data["lastStarport"]["id"]
 
-            status = this.parent.children['status']
-            old_status = status['text']
+            status = this.parent.children["status"]
+            old_status = status["text"]
             if not old_status:
-                status['text'] = _('Sending data to EDDN...')  # LANG: Status text shown while attempting to send data
+                status["text"] = _(
+                    "Sending data to EDDN..."
+                )  # LANG: Status text shown while attempting to send data
                 status.update_idletasks()
 
             this.eddn.export_commodities(data, is_beta)
             this.eddn.export_outfitting(data, is_beta)
             this.eddn.export_shipyard(data, is_beta)
             if not old_status:
-                status['text'] = ''
+                status["text"] = ""
                 status.update_idletasks()
 
         except requests.RequestException as e:
-            logger.debug('Failed exporting data', exc_info=e)
-            return _("Error: Can't connect to EDDN")  # LANG: Error while trying to send data to EDDN
+            logger.debug("Failed exporting data", exc_info=e)
+            return _(
+                "Error: Can't connect to EDDN"
+            )  # LANG: Error while trying to send data to EDDN
 
         except Exception as e:
-            logger.debug('Failed exporting data', exc_info=e)
+            logger.debug("Failed exporting data", exc_info=e)
             return str(e)
 
     return None
@@ -1629,7 +1847,9 @@ def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:  # noqa: CCR001
 MAP_STR_ANY = Mapping[str, Any]
 
 
-def capi_is_horizons(economies: MAP_STR_ANY, modules: MAP_STR_ANY, ships: MAP_STR_ANY) -> bool:
+def capi_is_horizons(
+    economies: MAP_STR_ANY, modules: MAP_STR_ANY, ships: MAP_STR_ANY
+) -> bool:
     """
     Indicate if the supplied data indicates a player has Horizons access.
 
@@ -1652,30 +1872,39 @@ def capi_is_horizons(economies: MAP_STR_ANY, modules: MAP_STR_ANY, ships: MAP_ST
     ship_horizons = False
 
     if isinstance(economies, dict):
-        economies_colony = any(economy['name'] == 'Colony' for economy in economies.values())
+        economies_colony = any(
+            economy["name"] == "Colony" for economy in economies.values()
+        )
 
     else:
-        logger.error(f'economies type is {type(economies)}')
+        logger.error(f"economies type is {type(economies)}")
 
     if isinstance(modules, dict):
-        modules_horizons = any(module.get('sku') == HORIZONS_SKU for module in modules.values())
+        modules_horizons = any(
+            module.get("sku") == HORIZONS_SKU for module in modules.values()
+        )
 
     else:
-        logger.error(f'modules type is {type(modules)}')
+        logger.error(f"modules type is {type(modules)}")
 
     if isinstance(ships, dict):
-        if ships.get('shipyard_list') is not None:
-            if isinstance(ships.get('shipyard_list'), dict):
-                ship_horizons = any(ship.get('sku') == HORIZONS_SKU for ship in ships['shipyard_list'].values())
+        if ships.get("shipyard_list") is not None:
+            if isinstance(ships.get("shipyard_list"), dict):
+                ship_horizons = any(
+                    ship.get("sku") == HORIZONS_SKU
+                    for ship in ships["shipyard_list"].values()
+                )
 
             else:
-                logger.debug('ships["shipyard_list"] is not dict - FC or Damaged Station?')
+                logger.debug(
+                    'ships["shipyard_list"] is not dict - FC or Damaged Station?'
+                )
 
         else:
             logger.debug('ships["shipyard_list"] is None - FC or Damaged Station?')
 
     else:
-        logger.error(f'ships type is {type(ships)}')
+        logger.error(f"ships type is {type(ships)}")
 
     return economies_colony or modules_horizons or ship_horizons
 
@@ -1689,11 +1918,13 @@ def dashboard_entry(cmdr: str, is_beta: bool, entry: Dict[str, Any]) -> None:
     :param entry: The latest Status.json data.
     """
     this.status_body_name = None
-    if 'BodyName' in entry:
-        if not isinstance(entry['BodyName'], str):
-            logger.warning(f'BodyName was present but not a string! "{entry["BodyName"]}" ({type(entry["BodyName"])})')
+    if "BodyName" in entry:
+        if not isinstance(entry["BodyName"], str):
+            logger.warning(
+                f'BodyName was present but not a string! "{entry["BodyName"]}" ({type(entry["BodyName"])})'
+            )
 
         else:
-            this.status_body_name = entry['BodyName']
+            this.status_body_name = entry["BodyName"]
 
     tracking_ui_update()

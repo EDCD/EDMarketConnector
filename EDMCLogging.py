@@ -43,6 +43,7 @@ import pathlib
 import tempfile
 from contextlib import suppress
 from fnmatch import fnmatch
+
 # So that any warning about accessing a protected member is only in one place.
 from sys import _getframe as getframe
 from threading import get_native_id as thread_native_id
@@ -86,10 +87,7 @@ logging.addLevelName(LEVEL_TRACE_ALL, "TRACE_ALL")
 logging.TRACE = LEVEL_TRACE  # type: ignore
 logging.TRACE_ALL = LEVEL_TRACE_ALL  # type: ignore
 logging.Logger.trace = lambda self, message, *args, **kwargs: self._log(  # type: ignore
-    logging.TRACE,  # type: ignore
-    message,
-    args,
-    **kwargs
+    logging.TRACE, message, args, **kwargs  # type: ignore
 )
 
 # MAGIC n/a | 2022-01-20: We want logging timestamps to be in UTC, not least because the game journals log in UTC.
@@ -99,7 +97,9 @@ logging.Logger.trace = lambda self, message, *args, **kwargs: self._log(  # type
 logging.Formatter.converter = gmtime
 
 
-def _trace_if(self: logging.Logger, condition: str, message: str, *args, **kwargs) -> None:
+def _trace_if(
+    self: logging.Logger, condition: str, message: str, *args, **kwargs
+) -> None:
     if any(fnmatch(condition, p) for p in config_mod.trace_on):
         self._log(logging.TRACE, message, args, **kwargs)  # type: ignore # we added it
         return
@@ -167,13 +167,15 @@ class Logger:
         # This should be affected by the user configured log level
         self.logger_channel.setLevel(loglevel)
 
-        self.logger_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(process)d:%(thread)d:%(osthreadid)d %(module)s.%(qualname)s:%(lineno)d: %(message)s')  # noqa: E501
-        self.logger_formatter.default_time_format = '%Y-%m-%d %H:%M:%S'
+        self.logger_formatter = logging.Formatter(
+            "%(asctime)s - %(levelname)s - %(process)d:%(thread)d:%(osthreadid)d %(module)s.%(qualname)s:%(lineno)d: %(message)s"
+        )  # noqa: E501
+        self.logger_formatter.default_time_format = "%Y-%m-%d %H:%M:%S"
         # MAGIC n/a | 2022-01-20: As of Python 3.10.2 you can *not* use either `%s.%03.d` in default_time_format
         # MAGIC-CONT: (throws exceptions), *or* use `%Z` in default_time_msec (more exceptions).
         # MAGIC-CONT: ' UTC' is hard-coded here - we know we're using the local machine's idea of UTC/GMT because we
         # MAGIC-CONT: cause logging.Formatter() to use `gmtime()` - see MAGIC comment in this file's top-level code.
-        self.logger_formatter.default_msec_format = '%s.%03d UTC'
+        self.logger_formatter.default_msec_format = "%s.%03d UTC"
 
         self.logger_channel.setFormatter(self.logger_formatter)
         self.logger.addHandler(self.logger_channel)
@@ -183,30 +185,30 @@ class Logger:
         # rotated versions.
         # This is {logger_name} so that EDMC.py logs to a different file.
         logfile_rotating = pathlib.Path(tempfile.gettempdir())
-        logfile_rotating = logfile_rotating / f'{appname}'
+        logfile_rotating = logfile_rotating / f"{appname}"
         logfile_rotating.mkdir(exist_ok=True)
-        logfile_rotating = logfile_rotating / f'{logger_name}-debug.log'
+        logfile_rotating = logfile_rotating / f"{logger_name}-debug.log"
 
         self.logger_channel_rotating = logging.handlers.RotatingFileHandler(
             logfile_rotating,
-            mode='a',
+            mode="a",
             maxBytes=1024 * 1024,  # 1MiB
             backupCount=10,
-            encoding='utf-8',
-            delay=False
+            encoding="utf-8",
+            delay=False,
         )
         # Yes, we always want these rotated files to be at TRACE level
         self.logger_channel_rotating.setLevel(logging.TRACE)  # type: ignore
         self.logger_channel_rotating.setFormatter(self.logger_formatter)
         self.logger.addHandler(self.logger_channel_rotating)
 
-    def get_logger(self) -> 'LoggerMixin':
+    def get_logger(self) -> "LoggerMixin":
         """
         Obtain the self.logger of the class instance.
 
         Not to be confused with logging.getLogger().
         """
-        return cast('LoggerMixin', self.logger)
+        return cast("LoggerMixin", self.logger)
 
     def get_streamhandler(self) -> logging.Handler:
         """
@@ -239,7 +241,9 @@ class Logger:
             logger.trace("Not changing log level because it's TRACE")  # type: ignore
 
 
-def get_plugin_logger(plugin_name: str, loglevel: int = _default_loglevel) -> 'LoggerMixin':
+def get_plugin_logger(
+    plugin_name: str, loglevel: int = _default_loglevel
+) -> "LoggerMixin":
     """
     Return a logger suitable for a plugin.
 
@@ -265,17 +269,17 @@ def get_plugin_logger(plugin_name: str, loglevel: int = _default_loglevel) -> 'L
     :param loglevel: Optional logLevel for this Logger.
     :return: logging.Logger instance, all set up.
     """
-    if not os.getenv('EDMC_NO_UI'):
+    if not os.getenv("EDMC_NO_UI"):
         base_logger_name = appname
     else:
         base_logger_name = appcmdname
 
-    plugin_logger = logging.getLogger(f'{base_logger_name}.{plugin_name}')
+    plugin_logger = logging.getLogger(f"{base_logger_name}.{plugin_name}")
     plugin_logger.setLevel(loglevel)
 
     plugin_logger.addFilter(EDMCContextFilter())
 
-    return cast('LoggerMixin', plugin_logger)
+    return cast("LoggerMixin", plugin_logger)
 
 
 class EDMCContextFilter(logging.Filter):
@@ -306,26 +310,32 @@ class EDMCContextFilter(logging.Filter):
         :param record: The LogRecord we're "filtering"
         :return: bool - Always true in order for this record to be logged.
         """
-        (class_name, qualname, module_name) = self.caller_attributes(module_name=getattr(record, 'module'))
+        (class_name, qualname, module_name) = self.caller_attributes(
+            module_name=getattr(record, "module")
+        )
 
         # Only set if we got a useful value
         if module_name:
-            setattr(record, 'module', module_name)
+            setattr(record, "module", module_name)
 
         # Only set if not already provided by logging itself
-        if getattr(record, 'class', None) is None:
-            setattr(record, 'class', class_name)
+        if getattr(record, "class", None) is None:
+            setattr(record, "class", class_name)
 
         # Only set if not already provided by logging itself
-        if getattr(record, 'qualname', None) is None:
-            setattr(record, 'qualname', qualname)
+        if getattr(record, "qualname", None) is None:
+            setattr(record, "qualname", qualname)
 
-        setattr(record, 'osthreadid', thread_native_id())
+        setattr(record, "osthreadid", thread_native_id())
 
         return True
 
     @classmethod
-    def caller_attributes(cls, module_name: str = '') -> Tuple[str, str, str]:  # noqa: CCR001, E501, C901 # this is as refactored as is sensible
+    def caller_attributes(
+        cls, module_name: str = ""
+    ) -> Tuple[
+        str, str, str
+    ]:  # noqa: CCR001, E501, C901 # this is as refactored as is sensible
         """
         Determine extra or changed fields for the caller.
 
@@ -340,7 +350,7 @@ class EDMCContextFilter(logging.Filter):
         """
         frame = cls.find_caller_frame()
 
-        caller_qualname = caller_class_names = ''
+        caller_qualname = caller_class_names = ""
         if frame:
             # <https://stackoverflow.com/questions/2203424/python-how-to-retrieve-class-information-from-a-frame-object#2220759>
             try:
@@ -349,30 +359,36 @@ class EDMCContextFilter(logging.Filter):
 
             except Exception:
                 # Separate from the print below to guarantee we see at least this much.
-                print('EDMCLogging:EDMCContextFilter:caller_attributes(): Failed in `inspect.getframinfo(frame)`')
+                print(
+                    "EDMCLogging:EDMCContextFilter:caller_attributes(): Failed in `inspect.getframinfo(frame)`"
+                )
 
                 # We want to *attempt* to show something about the nature of 'frame',
                 # but at this point we can't trust it will work.
                 try:
-                    print(f'frame: {frame}')
+                    print(f"frame: {frame}")
 
                 except Exception:
                     pass
 
                 # We've given up, so just return '??' to signal we couldn't get the info
-                return '??', '??', module_name
+                return "??", "??", module_name
             try:
                 args, _, _, value_dict = inspect.getargvalues(frame)
-                if len(args) and args[0] in ('self', 'cls'):
-                    frame_class: 'object' = value_dict[args[0]]
+                if len(args) and args[0] in ("self", "cls"):
+                    frame_class: "object" = value_dict[args[0]]
 
                     if frame_class:
                         # See https://en.wikipedia.org/wiki/Name_mangling#Python for how name mangling works.
                         # For more detail, see _Py_Mangle in CPython's Python/compile.c.
                         name = frame_info.function
                         class_name = frame_class.__class__.__name__.lstrip("_")
-                        if name.startswith("__") and not name.endswith("__") and class_name:
-                            name = f'_{class_name}{frame_info.function}'
+                        if (
+                            name.startswith("__")
+                            and not name.endswith("__")
+                            and class_name
+                        ):
+                            name = f"_{class_name}{frame_info.function}"
 
                         # Find __qualname__ of the caller
                         fn = inspect.getattr_static(frame_class, name, None)
@@ -394,61 +410,76 @@ class EDMCContextFilter(logging.Filter):
                                 class_name = str(frame_class)
                                 # If somehow you make your __class__ or __class__.__qualname__ recursive,
                                 # I'll be impressed.
-                                if hasattr(frame_class, '__class__') and hasattr(frame_class.__class__, "__qualname__"):
+                                if hasattr(frame_class, "__class__") and hasattr(
+                                    frame_class.__class__, "__qualname__"
+                                ):
                                     class_name = frame_class.__class__.__qualname__
                                     caller_qualname = f"{class_name}.{name}(property)"
 
                                 else:
-                                    caller_qualname = f"<property {name} on {class_name}>"
+                                    caller_qualname = (
+                                        f"<property {name} on {class_name}>"
+                                    )
 
-                            elif not hasattr(fn, '__qualname__'):
+                            elif not hasattr(fn, "__qualname__"):
                                 caller_qualname = name
 
-                            elif hasattr(fn, '__qualname__') and fn.__qualname__:
+                            elif hasattr(fn, "__qualname__") and fn.__qualname__:
                                 caller_qualname = fn.__qualname__
 
                         # Find containing class name(s) of caller, if any
                         if (
-                            frame_class.__class__ and hasattr(frame_class.__class__, '__qualname__')
+                            frame_class.__class__
+                            and hasattr(frame_class.__class__, "__qualname__")
                             and frame_class.__class__.__qualname__
                         ):
                             caller_class_names = frame_class.__class__.__qualname__
 
                 # It's a call from the top level module file
-                elif frame_info.function == '<module>':
-                    caller_class_names = '<none>'
-                    caller_qualname = value_dict['__name__']
+                elif frame_info.function == "<module>":
+                    caller_class_names = "<none>"
+                    caller_qualname = value_dict["__name__"]
 
-                elif frame_info.function != '':
-                    caller_class_names = '<none>'
+                elif frame_info.function != "":
+                    caller_class_names = "<none>"
                     caller_qualname = frame_info.function
 
                 module_name = cls.munge_module_name(frame_info, module_name)
 
             except Exception as e:
-                print('ALERT!  Something went VERY wrong in handling finding info to log')
-                print('ALERT!  Information is as follows')
+                print(
+                    "ALERT!  Something went VERY wrong in handling finding info to log"
+                )
+                print("ALERT!  Information is as follows")
                 with suppress(Exception):
 
-                    print(f'ALERT!  {e=}')
+                    print(f"ALERT!  {e=}")
                     print_exc()
-                    print(f'ALERT!  {frame=}')
+                    print(f"ALERT!  {frame=}")
                     with suppress(Exception):
-                        print(f'ALERT!  {fn=}')  # type: ignore
+                        print(f"ALERT!  {fn=}")  # type: ignore
                     with suppress(Exception):
-                        print(f'ALERT!  {cls=}')
+                        print(f"ALERT!  {cls=}")
 
             finally:  # Ensure this always happens
                 # https://docs.python.org/3.7/library/inspect.html#the-interpreter-stack
                 del frame
 
-        if caller_qualname == '':
-            print('ALERT!  Something went wrong with finding caller qualname for logging!')
-            caller_qualname = '<ERROR in EDMCLogging.caller_class_and_qualname() for "qualname">'
+        if caller_qualname == "":
+            print(
+                "ALERT!  Something went wrong with finding caller qualname for logging!"
+            )
+            caller_qualname = (
+                '<ERROR in EDMCLogging.caller_class_and_qualname() for "qualname">'
+            )
 
-        if caller_class_names == '':
-            print('ALERT!  Something went wrong with finding caller class name(s) for logging!')
-            caller_class_names = '<ERROR in EDMCLogging.caller_class_and_qualname() for "class">'
+        if caller_class_names == "":
+            print(
+                "ALERT!  Something went wrong with finding caller class name(s) for logging!"
+            )
+            caller_class_names = (
+                '<ERROR in EDMCLogging.caller_class_and_qualname() for "class">'
+            )
 
         return caller_class_names, caller_qualname, module_name
 
@@ -462,19 +493,21 @@ class EDMCContextFilter(logging.Filter):
         # Go up through stack frames until we find the first with a
         # type(f_locals.self) of logging.Logger.  This should be the start
         # of the frames internal to logging.
-        frame: 'FrameType' = getframe(0)
+        frame: "FrameType" = getframe(0)
         while frame:
-            if isinstance(frame.f_locals.get('self'), logging.Logger):
-                frame = cast('FrameType', frame.f_back)  # Want to start on the next frame below
+            if isinstance(frame.f_locals.get("self"), logging.Logger):
+                frame = cast(
+                    "FrameType", frame.f_back
+                )  # Want to start on the next frame below
                 break
-            frame = cast('FrameType', frame.f_back)
+            frame = cast("FrameType", frame.f_back)
         # Now continue up through frames until we find the next one where
         # that is *not* true, as it should be the call site of the logger
         # call
         while frame:
-            if not isinstance(frame.f_locals.get('self'), logging.Logger):
+            if not isinstance(frame.f_locals.get("self"), logging.Logger):
                 break  # We've found the frame we want
-            frame = cast('FrameType', frame.f_back)
+            frame = cast("FrameType", frame.f_back)
         return frame
 
     @classmethod
@@ -497,58 +530,58 @@ class EDMCContextFilter(logging.Filter):
         internal_plugin_dir = pathlib.Path(config.internal_plugin_dir_path).expanduser()
         # Find the first parent called 'plugins'
         plugin_top = file_name
-        while plugin_top and plugin_top.name != '':
-            if plugin_top.parent.name == 'plugins':
+        while plugin_top and plugin_top.name != "":
+            if plugin_top.parent.name == "plugins":
                 break
 
             plugin_top = plugin_top.parent
 
         # Check we didn't walk up to the root/anchor
-        if plugin_top.name != '':
+        if plugin_top.name != "":
             # Check we're still inside config.plugin_dir
             if plugin_top.parent == plugin_dir:
                 # In case of deeper callers we need a range of the file_name
                 pt_len = len(plugin_top.parts)
-                name_path = '.'.join(file_name.parts[(pt_len - 1):-1])
-                module_name = f'<plugins>.{name_path}.{module_name}'
+                name_path = ".".join(file_name.parts[(pt_len - 1) : -1])
+                module_name = f"<plugins>.{name_path}.{module_name}"
 
             # Check we're still inside the installation folder.
             elif file_name.parent == internal_plugin_dir:
                 # Is this a deeper caller ?
                 pt_len = len(plugin_top.parts)
-                name_path = '.'.join(file_name.parts[(pt_len - 1):-1])
+                name_path = ".".join(file_name.parts[(pt_len - 1) : -1])
 
                 # Pre-pend 'plugins.<plugin folder>.' to module
-                if name_path == '':
+                if name_path == "":
                     # No sub-folder involved so module_name is sufficient
-                    module_name = f'plugins.{module_name}'
+                    module_name = f"plugins.{module_name}"
 
                 else:
                     # Sub-folder(s) involved, so include them
-                    module_name = f'plugins.{name_path}.{module_name}'
+                    module_name = f"plugins.{name_path}.{module_name}"
 
         return module_name
 
 
-def get_main_logger(sublogger_name: str = '') -> 'LoggerMixin':
+def get_main_logger(sublogger_name: str = "") -> "LoggerMixin":
     """Return the correct logger for how the program is being run."""
     if not os.getenv("EDMC_NO_UI"):
         # GUI app being run
-        return cast('LoggerMixin', logging.getLogger(appname))
+        return cast("LoggerMixin", logging.getLogger(appname))
     else:
         # Must be the CLI
-        return cast('LoggerMixin', logging.getLogger(appcmdname))
+        return cast("LoggerMixin", logging.getLogger(appcmdname))
 
 
 # Singleton
-loglevel = config.get_str('loglevel')
+loglevel = config.get_str("loglevel")
 if not loglevel:
     loglevel = logging.INFO
 
-if not os.getenv('EDMC_NO_UI'):
+if not os.getenv("EDMC_NO_UI"):
     base_logger_name = appname
 else:
     base_logger_name = appcmdname
 
 edmclogger = Logger(base_logger_name, loglevel=loglevel)
-logger: 'LoggerMixin' = edmclogger.get_logger()
+logger: "LoggerMixin" = edmclogger.get_logger()

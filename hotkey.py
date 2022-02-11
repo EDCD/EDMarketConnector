@@ -38,13 +38,29 @@ class AbstractHotkeyMgr(abc.ABC):
         pass
 
 
-if sys.platform == 'darwin':
+if sys.platform == "darwin":
 
     import objc
     from AppKit import (
-        NSAlternateKeyMask, NSApplication, NSBeep, NSClearLineFunctionKey, NSCommandKeyMask, NSControlKeyMask,
-        NSDeleteFunctionKey, NSDeviceIndependentModifierFlagsMask, NSEvent, NSF1FunctionKey, NSF35FunctionKey,
-        NSFlagsChanged, NSKeyDown, NSKeyDownMask, NSKeyUp, NSNumericPadKeyMask, NSShiftKeyMask, NSSound, NSWorkspace
+        NSAlternateKeyMask,
+        NSApplication,
+        NSBeep,
+        NSClearLineFunctionKey,
+        NSCommandKeyMask,
+        NSControlKeyMask,
+        NSDeleteFunctionKey,
+        NSDeviceIndependentModifierFlagsMask,
+        NSEvent,
+        NSF1FunctionKey,
+        NSF35FunctionKey,
+        NSFlagsChanged,
+        NSKeyDown,
+        NSKeyDownMask,
+        NSKeyUp,
+        NSNumericPadKeyMask,
+        NSShiftKeyMask,
+        NSSound,
+        NSWorkspace,
     )
 
 
@@ -54,19 +70,42 @@ class MacHotkeyMgr(AbstractHotkeyMgr):
     POLL = 250
     # https://developer.apple.com/library/mac/documentation/Cocoa/Reference/ApplicationKit/Classes/NSEvent_Class/#//apple_ref/doc/constant_group/Function_Key_Unicodes
     DISPLAY = {
-        0x03: u'⌅', 0x09: u'⇥', 0xd: u'↩', 0x19: u'⇤', 0x1b: u'esc', 0x20: u'⏘', 0x7f: u'⌫',
-        0xf700: u'↑', 0xf701: u'↓', 0xf702: u'←', 0xf703: u'→',
-        0xf727: u'Ins',
-        0xf728: u'⌦', 0xf729: u'↖', 0xf72a: u'Fn', 0xf72b: u'↘',
-        0xf72c: u'⇞', 0xf72d: u'⇟', 0xf72e: u'PrtScr', 0xf72f: u'ScrollLock',
-        0xf730: u'Pause', 0xf731: u'SysReq', 0xf732: u'Break', 0xf733: u'Reset',
-        0xf739: u'⌧',
+        0x03: "⌅",
+        0x09: "⇥",
+        0xD: "↩",
+        0x19: "⇤",
+        0x1B: "esc",
+        0x20: "⏘",
+        0x7F: "⌫",
+        0xF700: "↑",
+        0xF701: "↓",
+        0xF702: "←",
+        0xF703: "→",
+        0xF727: "Ins",
+        0xF728: "⌦",
+        0xF729: "↖",
+        0xF72A: "Fn",
+        0xF72B: "↘",
+        0xF72C: "⇞",
+        0xF72D: "⇟",
+        0xF72E: "PrtScr",
+        0xF72F: "ScrollLock",
+        0xF730: "Pause",
+        0xF731: "SysReq",
+        0xF732: "Break",
+        0xF733: "Reset",
+        0xF739: "⌧",
     }
     (ACQUIRE_INACTIVE, ACQUIRE_ACTIVE, ACQUIRE_NEW) = range(3)
 
     def __init__(self):
-        self.MODIFIERMASK = NSShiftKeyMask | NSControlKeyMask | NSAlternateKeyMask | NSCommandKeyMask \
-                            | NSNumericPadKeyMask
+        self.MODIFIERMASK = (
+            NSShiftKeyMask
+            | NSControlKeyMask
+            | NSAlternateKeyMask
+            | NSCommandKeyMask
+            | NSNumericPadKeyMask
+        )
         self.root = None
 
         self.keycode = 0
@@ -80,10 +119,10 @@ class MacHotkeyMgr(AbstractHotkeyMgr):
         self.tkProcessKeyEvent_old = None
 
         self.snd_good = NSSound.alloc().initWithContentsOfFile_byReference_(
-            pathlib.Path(config.respath_path) / 'snd_good.wav', False
+            pathlib.Path(config.respath_path) / "snd_good.wav", False
         )
         self.snd_bad = NSSound.alloc().initWithContentsOfFile_byReference_(
-            pathlib.Path(config.respath_path) / 'snd_bad.wav', False
+            pathlib.Path(config.respath_path) / "snd_bad.wav", False
         )
 
     def register(self, root: tk.Tk, keycode, modifiers) -> None:
@@ -106,13 +145,13 @@ class MacHotkeyMgr(AbstractHotkeyMgr):
 
         # Monkey-patch tk (tkMacOSXKeyEvent.c)
         if not self.tkProcessKeyEvent_old:
-            sel = b'tkProcessKeyEvent:'
+            sel = b"tkProcessKeyEvent:"
             cls = NSApplication.sharedApplication().class__()  # type: ignore
             self.tkProcessKeyEvent_old = NSApplication.sharedApplication().methodForSelector_(sel)  # type: ignore
             newmethod = objc.selector(  # type: ignore
                 self.tkProcessKeyEvent,
                 selector=self.tkProcessKeyEvent_old.selector,
-                signature=self.tkProcessKeyEvent_old.signature
+                signature=self.tkProcessKeyEvent_old.signature,
             )
             objc.classAddMethod(cls, sel, newmethod)  # type: ignore
 
@@ -131,15 +170,18 @@ class MacHotkeyMgr(AbstractHotkeyMgr):
         """
         if self.acquire_state:
             if the_event.type() == NSFlagsChanged:
-                self.acquire_key = the_event.modifierFlags() & NSDeviceIndependentModifierFlagsMask
+                self.acquire_key = (
+                    the_event.modifierFlags() & NSDeviceIndependentModifierFlagsMask
+                )
                 self.acquire_state = MacHotkeyMgr.ACQUIRE_NEW
                 # suppress the event by not chaining the old function
                 return the_event
 
             elif the_event.type() in (NSKeyDown, NSKeyUp):
                 c = the_event.charactersIgnoringModifiers()
-                self.acquire_key = (c and ord(c[0]) or 0) | \
-                                   (the_event.modifierFlags() & NSDeviceIndependentModifierFlagsMask)
+                self.acquire_key = (c and ord(c[0]) or 0) | (
+                    the_event.modifierFlags() & NSDeviceIndependentModifierFlagsMask
+                )
                 self.acquire_state = MacHotkeyMgr.ACQUIRE_NEW
                 # suppress the event by not chaining the old function
                 return the_event
@@ -157,13 +199,15 @@ class MacHotkeyMgr(AbstractHotkeyMgr):
                 the_event.charactersIgnoringModifiers(),
                 the_event.charactersIgnoringModifiers(),
                 the_event.isARepeat(),
-                the_event.keyCode()
+                the_event.keyCode(),
             )
         return self.tkProcessKeyEvent_old(cls, the_event)
 
     def _observe(self):
         # Must be called after root.mainloop() so that the app's message loop has been created
-        self.observer = NSEvent.addGlobalMonitorForEventsMatchingMask_handler_(NSKeyDownMask, self._handler)
+        self.observer = NSEvent.addGlobalMonitorForEventsMatchingMask_handler_(
+            NSKeyDownMask, self._handler
+        )
 
     def _poll(self):
         if config.shutting_down:
@@ -173,7 +217,7 @@ class MacHotkeyMgr(AbstractHotkeyMgr):
         # cause Python to crash, so poll.
         if self.activated:
             self.activated = False
-            self.root.event_generate('<<Invoke>>', when="tail")
+            self.root.event_generate("<<Invoke>>", when="tail")
 
         if self.keycode or self.modifiers:
             self.root.after(MacHotkeyMgr.POLL, self._poll)
@@ -183,18 +227,23 @@ class MacHotkeyMgr(AbstractHotkeyMgr):
         self.keycode = None
         self.modifiers = None
 
-    if sys.platform == 'darwin':  # noqa: C901
+    if sys.platform == "darwin":  # noqa: C901
+
         @objc.callbackFor(NSEvent.addGlobalMonitorForEventsMatchingMask_handler_)
         def _handler(self, event) -> None:
             # use event.charactersIgnoringModifiers to handle composing characters like Alt-e
-            if ((event.modifierFlags() & self.MODIFIERMASK) == self.modifiers
-                    and ord(event.charactersIgnoringModifiers()[0]) == self.keycode):
-                if config.get_int('hotkey_always'):
+            if (event.modifierFlags() & self.MODIFIERMASK) == self.modifiers and ord(
+                event.charactersIgnoringModifiers()[0]
+            ) == self.keycode:
+                if config.get_int("hotkey_always"):
                     self.activated = True
 
                 else:  # Only trigger if game client is front process
                     front = NSWorkspace.sharedWorkspace().frontmostApplication()
-                    if front and front.bundleIdentifier() == 'uk.co.frontier.EliteDangerous':
+                    if (
+                        front
+                        and front.bundleIdentifier() == "uk.co.frontier.EliteDangerous"
+                    ):
                         self.activated = True
 
         def acquire_start(self) -> None:
@@ -216,7 +265,7 @@ class MacHotkeyMgr(AbstractHotkeyMgr):
             if self.acquire_state:
                 if self.acquire_state == MacHotkeyMgr.ACQUIRE_NEW:
                     # Abuse tkEvent's keycode field to hold our acquired key & modifier
-                    self.root.event_generate('<KeyPress>', keycode=self.acquire_key)
+                    self.root.event_generate("<KeyPress>", keycode=self.acquire_key)
                     self.acquire_state = MacHotkeyMgr.ACQUIRE_ACTIVE
                 self.root.after(50, self._acquire_poll)
 
@@ -227,20 +276,34 @@ class MacHotkeyMgr(AbstractHotkeyMgr):
             :param event: tk event ?
             :return: False to retain previous, None to not use, else (keycode, modifiers)
             """
-            (keycode, modifiers) = (event.keycode & 0xffff, event.keycode & 0xffff0000)  # Set by _acquire_poll()
-            if (keycode
-                    and not (modifiers & (NSShiftKeyMask | NSControlKeyMask | NSAlternateKeyMask | NSCommandKeyMask))):
-                if keycode == 0x1b:  # Esc = retain previous
+            (keycode, modifiers) = (
+                event.keycode & 0xFFFF,
+                event.keycode & 0xFFFF0000,
+            )  # Set by _acquire_poll()
+            if keycode and not (
+                modifiers
+                & (
+                    NSShiftKeyMask
+                    | NSControlKeyMask
+                    | NSAlternateKeyMask
+                    | NSCommandKeyMask
+                )
+            ):
+                if keycode == 0x1B:  # Esc = retain previous
                     self.acquire_state = MacHotkeyMgr.ACQUIRE_INACTIVE
                     return False
 
                 # BkSp, Del, Clear = clear hotkey
-                elif keycode in [0x7f, ord(NSDeleteFunctionKey), ord(NSClearLineFunctionKey)]:
+                elif keycode in [
+                    0x7F,
+                    ord(NSDeleteFunctionKey),
+                    ord(NSClearLineFunctionKey),
+                ]:
                     self.acquire_state = MacHotkeyMgr.ACQUIRE_INACTIVE
                     return None
 
                 # don't allow keys needed for typing in System Map
-                elif keycode in [0x13, 0x20, 0x2d] or 0x61 <= keycode <= 0x7a:
+                elif keycode in [0x13, 0x20, 0x2D] or 0x61 <= keycode <= 0x7A:
                     NSBeep()
                     self.acquire_state = MacHotkeyMgr.ACQUIRE_INACTIVE
                     return None
@@ -255,27 +318,27 @@ class MacHotkeyMgr(AbstractHotkeyMgr):
             :param modifiers:
             :return: string form
             """
-            text = ''
+            text = ""
             if modifiers & NSControlKeyMask:
-                text += u'⌃'
+                text += "⌃"
 
             if modifiers & NSAlternateKeyMask:
-                text += u'⌥'
+                text += "⌥"
 
             if modifiers & NSShiftKeyMask:
-                text += u'⇧'
+                text += "⇧"
 
             if modifiers & NSCommandKeyMask:
-                text += u'⌘'
+                text += "⌘"
 
-            if (modifiers & NSNumericPadKeyMask) and keycode <= 0x7f:
-                text += u'№'
+            if (modifiers & NSNumericPadKeyMask) and keycode <= 0x7F:
+                text += "№"
 
             if not keycode:
                 pass
 
             elif ord(NSF1FunctionKey) <= keycode <= ord(NSF35FunctionKey):
-                text += f'F{keycode + 1 - ord(NSF1FunctionKey)}'
+                text += f"F{keycode + 1 - ord(NSF1FunctionKey)}"
 
             elif keycode in MacHotkeyMgr.DISPLAY:  # specials
                 text += MacHotkeyMgr.DISPLAY[keycode]
@@ -283,11 +346,11 @@ class MacHotkeyMgr(AbstractHotkeyMgr):
             elif keycode < 0x20:  # control keys
                 text += chr(keycode + 0x40)
 
-            elif keycode < 0xf700:  # key char
+            elif keycode < 0xF700:  # key char
                 text += chr(keycode).upper()
 
             else:
-                text += u'⁈'
+                text += "⁈"
 
             return text
 
@@ -300,7 +363,7 @@ class MacHotkeyMgr(AbstractHotkeyMgr):
         self.snd_bad.play()
 
 
-if sys.platform == 'win32':
+if sys.platform == "win32":
 
     import atexit
     import ctypes
@@ -329,27 +392,27 @@ if sys.platform == 'win32':
     GetKeyState = ctypes.windll.user32.GetKeyState
     MapVirtualKey = ctypes.windll.user32.MapVirtualKeyW
     VK_BACK = 0x08
-    VK_CLEAR = 0x0c
-    VK_RETURN = 0x0d
+    VK_CLEAR = 0x0C
+    VK_RETURN = 0x0D
     VK_SHIFT = 0x10
     VK_CONTROL = 0x11
     VK_MENU = 0x12
     VK_CAPITAL = 0x14
-    VK_MODECHANGE = 0x1f
-    VK_ESCAPE = 0x1b
+    VK_MODECHANGE = 0x1F
+    VK_ESCAPE = 0x1B
     VK_SPACE = 0x20
-    VK_DELETE = 0x2e
-    VK_LWIN = 0x5b
-    VK_RWIN = 0x5c
+    VK_DELETE = 0x2E
+    VK_LWIN = 0x5B
+    VK_RWIN = 0x5C
     VK_NUMPAD0 = 0x60
-    VK_DIVIDE = 0x6f
+    VK_DIVIDE = 0x6F
     VK_F1 = 0x70
     VK_F24 = 0x87
-    VK_OEM_MINUS = 0xbd
+    VK_OEM_MINUS = 0xBD
     VK_NUMLOCK = 0x90
     VK_SCROLL = 0x91
-    VK_PROCESSKEY = 0xe5
-    VK_OEM_CLEAR = 0xfe
+    VK_PROCESSKEY = 0xE5
+    VK_OEM_CLEAR = 0xFE
 
     GetForegroundWindow = ctypes.windll.user32.GetForegroundWindow
     GetWindowText = ctypes.windll.user32.GetWindowTextW
@@ -369,56 +432,45 @@ if sys.platform == 'win32':
             if GetWindowText(h, buf, title_length):
                 return buf.value
 
-        return ''
+        return ""
 
     class MOUSEINPUT(ctypes.Structure):
         """Mouse Input structure."""
 
         _fields_ = [
-            ('dx', LONG),
-            ('dy', LONG),
-            ('mouseData', DWORD),
-            ('dwFlags', DWORD),
-            ('time', DWORD),
-            ('dwExtraInfo', ctypes.POINTER(ULONG))
+            ("dx", LONG),
+            ("dy", LONG),
+            ("mouseData", DWORD),
+            ("dwFlags", DWORD),
+            ("time", DWORD),
+            ("dwExtraInfo", ctypes.POINTER(ULONG)),
         ]
 
     class KEYBDINPUT(ctypes.Structure):
         """Keyboard Input structure."""
 
         _fields_ = [
-            ('wVk', WORD),
-            ('wScan', WORD),
-            ('dwFlags', DWORD),
-            ('time', DWORD),
-            ('dwExtraInfo', ctypes.POINTER(ULONG))
+            ("wVk", WORD),
+            ("wScan", WORD),
+            ("dwFlags", DWORD),
+            ("time", DWORD),
+            ("dwExtraInfo", ctypes.POINTER(ULONG)),
         ]
 
     class HARDWAREINPUT(ctypes.Structure):
         """Hardware Input structure."""
 
-        _fields_ = [
-            ('uMsg', DWORD),
-            ('wParamL', WORD),
-            ('wParamH', WORD)
-        ]
+        _fields_ = [("uMsg", DWORD), ("wParamL", WORD), ("wParamH", WORD)]
 
     class INPUTUNION(ctypes.Union):
         """Input union."""
 
-        _fields_ = [
-            ('mi', MOUSEINPUT),
-            ('ki', KEYBDINPUT),
-            ('hi', HARDWAREINPUT)
-        ]
+        _fields_ = [("mi", MOUSEINPUT), ("ki", KEYBDINPUT), ("hi", HARDWAREINPUT)]
 
     class INPUT(ctypes.Structure):
         """Input structure."""
 
-        _fields_ = [
-            ('type', DWORD),
-            ('union', INPUTUNION)
-        ]
+        _fields_ = [("type", DWORD), ("union", INPUTUNION)]
 
     SendInput = ctypes.windll.user32.SendInput
     SendInput.argtypes = [ctypes.c_uint, ctypes.POINTER(INPUT), ctypes.c_int]
@@ -434,22 +486,45 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
     # https://msdn.microsoft.com/en-us/library/windows/desktop/dd375731%28v=vs.85%29.aspx
     # Limit ourselves to symbols in Windows 7 Segoe UI
     DISPLAY = {
-        0x03: 'Break', 0x08: 'Bksp', 0x09: u'↹', 0x0c: 'Clear', 0x0d: u'↵', 0x13: 'Pause',
-        0x14: u'Ⓐ', 0x1b: 'Esc',
-        0x20: u'⏘', 0x21: 'PgUp', 0x22: 'PgDn', 0x23: 'End', 0x24: 'Home',
-        0x25: u'←', 0x26: u'↑', 0x27: u'→', 0x28: u'↓',
-        0x2c: 'PrtScn', 0x2d: 'Ins', 0x2e: 'Del', 0x2f: 'Help',
-        0x5d: u'▤', 0x5f: u'☾',
-        0x90: u'➀', 0x91: 'ScrLk',
-        0xa6: u'⇦', 0xa7: u'⇨', 0xa9: u'⊗', 0xab: u'☆', 0xac: u'⌂', 0xb4: u'✉',
+        0x03: "Break",
+        0x08: "Bksp",
+        0x09: "↹",
+        0x0C: "Clear",
+        0x0D: "↵",
+        0x13: "Pause",
+        0x14: "Ⓐ",
+        0x1B: "Esc",
+        0x20: "⏘",
+        0x21: "PgUp",
+        0x22: "PgDn",
+        0x23: "End",
+        0x24: "Home",
+        0x25: "←",
+        0x26: "↑",
+        0x27: "→",
+        0x28: "↓",
+        0x2C: "PrtScn",
+        0x2D: "Ins",
+        0x2E: "Del",
+        0x2F: "Help",
+        0x5D: "▤",
+        0x5F: "☾",
+        0x90: "➀",
+        0x91: "ScrLk",
+        0xA6: "⇦",
+        0xA7: "⇨",
+        0xA9: "⊗",
+        0xAB: "☆",
+        0xAC: "⌂",
+        0xB4: "✉",
     }
 
     def __init__(self) -> None:
         self.root: tk.Tk = None  # type: ignore
         self.thread: threading.Thread = None  # type: ignore
-        with open(pathlib.Path(config.respath) / 'snd_good.wav', 'rb') as sg:
+        with open(pathlib.Path(config.respath) / "snd_good.wav", "rb") as sg:
             self.snd_good = sg.read()
-        with open(pathlib.Path(config.respath) / 'snd_bad.wav', 'rb') as sb:
+        with open(pathlib.Path(config.respath) / "snd_bad.wav", "rb") as sb:
             self.snd_bad = sb.read()
         atexit.register(self.unregister)
 
@@ -458,66 +533,67 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
         self.root = root
 
         if self.thread:
-            logger.debug('Was already registered, unregistering...')
+            logger.debug("Was already registered, unregistering...")
             self.unregister()
 
         if keycode or modifiers:
-            logger.debug('Creating thread worker...')
+            logger.debug("Creating thread worker...")
             self.thread = threading.Thread(
                 target=self.worker,
                 name=f'Hotkey "{keycode}:{modifiers}"',
-                args=(keycode, modifiers)
+                args=(keycode, modifiers),
             )
             self.thread.daemon = True
-            logger.debug('Starting thread worker...')
+            logger.debug("Starting thread worker...")
             self.thread.start()
-            logger.debug('Done.')
+            logger.debug("Done.")
 
     def unregister(self) -> None:
         """Unregister the hotkey handling."""
         thread = self.thread
 
         if thread:
-            logger.debug('Thread is/was running')
+            logger.debug("Thread is/was running")
             self.thread = None  # type: ignore
-            logger.debug('Telling thread WM_QUIT')
+            logger.debug("Telling thread WM_QUIT")
             PostThreadMessage(thread.ident, WM_QUIT, 0, 0)
-            logger.debug('Joining thread')
+            logger.debug("Joining thread")
             thread.join()  # Wait for it to unregister hotkey and quit
 
         else:
-            logger.debug('No thread')
+            logger.debug("No thread")
 
-        logger.debug('Done.')
+        logger.debug("Done.")
 
     def worker(self, keycode, modifiers) -> None:  # noqa: CCR001
         """Handle hotkeys."""
-        logger.debug('Begin...')
+        logger.debug("Begin...")
         # Hotkey must be registered by the thread that handles it
         if not RegisterHotKey(None, 1, modifiers | MOD_NOREPEAT, keycode):
             logger.debug("We're not the right thread?")
             self.thread = None  # type: ignore
             return
 
-        fake = INPUT(INPUT_KEYBOARD, INPUTUNION(ki=KEYBDINPUT(keycode, keycode, 0, 0, None)))
+        fake = INPUT(
+            INPUT_KEYBOARD, INPUTUNION(ki=KEYBDINPUT(keycode, keycode, 0, 0, None))
+        )
 
         msg = MSG()
-        logger.debug('Entering GetMessage() loop...')
+        logger.debug("Entering GetMessage() loop...")
         while GetMessage(ctypes.byref(msg), None, 0, 0) != 0:
-            logger.debug('Got message')
+            logger.debug("Got message")
             if msg.message == WM_HOTKEY:
-                logger.debug('WM_HOTKEY')
+                logger.debug("WM_HOTKEY")
 
-                if (
-                        config.get_int('hotkey_always')
-                        or window_title(GetForegroundWindow()).startswith('Elite - Dangerous')
-                ):
+                if config.get_int("hotkey_always") or window_title(
+                    GetForegroundWindow()
+                ).startswith("Elite - Dangerous"):
                     if not config.shutting_down:
-                        logger.debug('Sending event <<Invoke>>')
-                        self.root.event_generate('<<Invoke>>', when="tail")
+                        logger.debug("Sending event <<Invoke>>")
+                        self.root.event_generate("<<Invoke>>", when="tail")
 
                 else:
-                    logger.debug('Passing key on')
+                    logger.debug("Passing key on")
                     UnregisterHotKey(None, 1)
                     SendInput(1, fake, ctypes.sizeof(INPUT))
                     if not RegisterHotKey(None, 1, modifiers | MOD_NOREPEAT, keycode):
@@ -525,22 +601,22 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
                         break
 
             elif msg.message == WM_SND_GOOD:
-                logger.debug('WM_SND_GOOD')
+                logger.debug("WM_SND_GOOD")
                 winsound.PlaySound(self.snd_good, winsound.SND_MEMORY)  # synchronous
 
             elif msg.message == WM_SND_BAD:
-                logger.debug('WM_SND_BAD')
+                logger.debug("WM_SND_BAD")
                 winsound.PlaySound(self.snd_bad, winsound.SND_MEMORY)  # synchronous
 
             else:
-                logger.debug('Something else')
+                logger.debug("Something else")
                 TranslateMessage(ctypes.byref(msg))
                 DispatchMessage(ctypes.byref(msg))
 
-        logger.debug('Exited GetMessage() loop.')
+        logger.debug("Exited GetMessage() loop.")
         UnregisterHotKey(None, 1)
         self.thread = None  # type: ignore
-        logger.debug('Done.')
+        logger.debug("Done.")
 
     def acquire_start(self) -> None:
         """Start acquiring hotkey state via polling."""
@@ -561,11 +637,13 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
         :param event: tk event ?
         :return: False to retain previous, None to not use, else (keycode, modifiers)
         """
-        modifiers = ((GetKeyState(VK_MENU) & 0x8000) and MOD_ALT) \
-            | ((GetKeyState(VK_CONTROL) & 0x8000) and MOD_CONTROL) \
-            | ((GetKeyState(VK_SHIFT) & 0x8000) and MOD_SHIFT) \
-            | ((GetKeyState(VK_LWIN) & 0x8000) and MOD_WIN) \
+        modifiers = (
+            ((GetKeyState(VK_MENU) & 0x8000) and MOD_ALT)
+            | ((GetKeyState(VK_CONTROL) & 0x8000) and MOD_CONTROL)
+            | ((GetKeyState(VK_SHIFT) & 0x8000) and MOD_SHIFT)
+            | ((GetKeyState(VK_LWIN) & 0x8000) and MOD_WIN)
             | ((GetKeyState(VK_RWIN) & 0x8000) and MOD_WIN)
+        )
         keycode = event.keycode
 
         if keycode in [VK_SHIFT, VK_CONTROL, VK_MENU, VK_LWIN, VK_RWIN]:
@@ -575,16 +653,26 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
             if keycode == VK_ESCAPE:  # Esc = retain previous
                 return False
 
-            elif keycode in [VK_BACK, VK_DELETE, VK_CLEAR, VK_OEM_CLEAR]:  # BkSp, Del, Clear = clear hotkey
+            elif keycode in [
+                VK_BACK,
+                VK_DELETE,
+                VK_CLEAR,
+                VK_OEM_CLEAR,
+            ]:  # BkSp, Del, Clear = clear hotkey
                 return None
 
-            elif keycode in [VK_RETURN, VK_SPACE, VK_OEM_MINUS] or ord('A') <= keycode <= ord(
-                    'Z'):  # don't allow keys needed for typing in System Map
+            elif keycode in [VK_RETURN, VK_SPACE, VK_OEM_MINUS] or ord(
+                "A"
+            ) <= keycode <= ord(
+                "Z"
+            ):  # don't allow keys needed for typing in System Map
                 winsound.MessageBeep()
                 return None
 
-            elif (keycode in [VK_NUMLOCK, VK_SCROLL, VK_PROCESSKEY]
-                  or VK_CAPITAL <= keycode <= VK_MODECHANGE):  # ignore unmodified mode switch keys
+            elif (
+                keycode in [VK_NUMLOCK, VK_SCROLL, VK_PROCESSKEY]
+                or VK_CAPITAL <= keycode <= VK_MODECHANGE
+            ):  # ignore unmodified mode switch keys
                 return (0, modifiers)
 
         # See if the keycode is usable and available
@@ -604,27 +692,27 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
         :param modifiers:
         :return: string form
         """
-        text = ''
+        text = ""
         if modifiers & MOD_WIN:
-            text += u'❖+'
+            text += "❖+"
 
         if modifiers & MOD_CONTROL:
-            text += u'Ctrl+'
+            text += "Ctrl+"
 
         if modifiers & MOD_ALT:
-            text += u'Alt+'
+            text += "Alt+"
 
         if modifiers & MOD_SHIFT:
-            text += u'⇧+'
+            text += "⇧+"
 
         if VK_NUMPAD0 <= keycode <= VK_DIVIDE:
-            text += u'№'
+            text += "№"
 
         if not keycode:
             pass
 
         elif VK_F1 <= keycode <= VK_F24:
-            text += f'F{keycode + 1 - VK_F1}'
+            text += f"F{keycode + 1 - VK_F1}"
 
         elif keycode in WindowsHotkeyMgr.DISPLAY:  # specials
             text += WindowsHotkeyMgr.DISPLAY[keycode]
@@ -632,7 +720,7 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
         else:
             c = MapVirtualKey(keycode, 2)  # printable ?
             if not c:  # oops not printable
-                text += u'⁈'
+                text += "⁈"
 
             elif c < 0x20:  # control keys
                 text += chr(c + 0x40)
@@ -686,17 +774,17 @@ def get_hotkeymgr() -> AbstractHotkeyMgr:
     :return: Appropriate class instance.
     :raises ValueError: If unsupported platform.
     """
-    if sys.platform == 'darwin':
+    if sys.platform == "darwin":
         return MacHotkeyMgr()
 
-    elif sys.platform == 'win32':
+    elif sys.platform == "win32":
         return WindowsHotkeyMgr()
 
-    elif sys.platform == 'linux':
+    elif sys.platform == "linux":
         return LinuxHotKeyMgr()
 
     else:
-        raise ValueError(f'Unknown platform: {sys.platform}')
+        raise ValueError(f"Unknown platform: {sys.platform}")
 
 
 # singleton

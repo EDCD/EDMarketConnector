@@ -3,10 +3,12 @@ from __future__ import annotations
 
 from gzip import compress
 
-__all__ = ['gzip']
+__all__ = ["gzip"]
 
 
-def gzip(data: str | bytes, max_size: int = 512, encoding='utf-8') -> tuple[bytes, bool]:
+def gzip(
+    data: str | bytes, max_size: int = 512, encoding="utf-8"
+) -> tuple[bytes, bool]:
     """
     Compress the given data if the max size is greater than specified.
 

@@ -23,14 +23,15 @@ PLUGINS_not_py3 = []
 
 # For asynchronous error display
 last_error = {
-    'msg':  None,
-    'root': None,
+    "msg": None,
+    "root": None,
 }
 
 
 class Plugin(object):
-
-    def __init__(self, name: str, loadfile: str, plugin_logger: Optional[logging.Logger]):
+    def __init__(
+        self, name: str, loadfile: str, plugin_logger: Optional[logging.Logger]
+    ):
         """
         Load a single plugin
         :param name: module name
@@ -46,23 +47,28 @@ class Plugin(object):
         if loadfile:
             logger.info(f'loading plugin "{name.replace(".", "_")}" from "{loadfile}"')
             try:
-                module = importlib.machinery.SourceFileLoader('plugin_{}'.format(
-                    name.encode(encoding='ascii', errors='replace').decode('utf-8').replace('.', '_')),
-                    loadfile).load_module()
-                if getattr(module, 'plugin_start3', None):
+                module = importlib.machinery.SourceFileLoader(
+                    "plugin_{}".format(
+                        name.encode(encoding="ascii", errors="replace")
+                        .decode("utf-8")
+                        .replace(".", "_")
+                    ),
+                    loadfile,
+                ).load_module()
+                if getattr(module, "plugin_start3", None):
                     newname = module.plugin_start3(os.path.dirname(loadfile))
                     self.name = newname and str(newname) or name
                     self.module = module
-                elif getattr(module, 'plugin_start', None):
-                    logger.warning(f'plugin {name} needs migrating\n')
+                elif getattr(module, "plugin_start", None):
+                    logger.warning(f"plugin {name} needs migrating\n")
                     PLUGINS_not_py3.append(self)
                 else:
-                    logger.error(f'plugin {name} has no plugin_start3() function')
+                    logger.error(f"plugin {name} has no plugin_start3() function")
             except Exception as e:
                 logger.exception(f': Failed for Plugin "{name}"')
                 raise
         else:
-            logger.info(f'plugin {name} disabled')
+            logger.info(f"plugin {name} disabled")
 
     def _get_func(self, funcname):
         """
@@ -78,14 +84,18 @@ class Plugin(object):
         :param parent: the parent frame for this entry.
         :returns: None, a tk Widget, or a pair of tk.Widgets
         """
-        plugin_app = self._get_func('plugin_app')
+        plugin_app = self._get_func("plugin_app")
         if plugin_app:
             try:
                 appitem = plugin_app(parent)
                 if appitem is None:
                     return None
                 elif isinstance(appitem, tuple):
-                    if len(appitem) != 2 or not isinstance(appitem[0], tk.Widget) or not isinstance(appitem[1], tk.Widget):
+                    if (
+                        len(appitem) != 2
+                        or not isinstance(appitem[0], tk.Widget)
+                        or not isinstance(appitem[1], tk.Widget)
+                    ):
                         raise AssertionError
                 elif not isinstance(appitem, tk.Widget):
                     raise AssertionError
@@ -103,7 +113,7 @@ class Plugin(object):
         :param is_beta: whether the player is in a Beta universe.
         :returns: a myNotebook Frame
         """
-        plugin_prefs = self._get_func('plugin_prefs')
+        plugin_prefs = self._get_func("plugin_prefs")
         if plugin_prefs:
             try:
                 frame = plugin_prefs(parent, cmdr, is_beta)
@@ -119,30 +129,44 @@ def load_plugins(master):
     """
     Find and load all plugins
     """
-    last_error['root'] = master
+    last_error["root"] = master
 
     internal = []
     for name in sorted(os.listdir(config.internal_plugin_dir_path)):
-        if name.endswith('.py') and not name[0] in ['.', '_']:
+        if name.endswith(".py") and not name[0] in [".", "_"]:
             try:
-                plugin = Plugin(name[:-3], os.path.join(config.internal_plugin_dir_path, name), logger)
+                plugin = Plugin(
+                    name[:-3],
+                    os.path.join(config.internal_plugin_dir_path, name),
+                    logger,
+                )
                 plugin.folder = None  # Suppress listing in Plugins prefs tab
                 internal.append(plugin)
             except Exception as e:
                 logger.exception(f'Failure loading internal Plugin "{name}"')
-    PLUGINS.extend(sorted(internal, key=lambda p: operator.attrgetter('name')(p).lower()))
+    PLUGINS.extend(
+        sorted(internal, key=lambda p: operator.attrgetter("name")(p).lower())
+    )
 
     # Add plugin folder to load path so packages can be loaded from plugin folder
     sys.path.append(config.plugin_dir)
 
     found = []
     # Load any plugins that are also packages first
-    for name in sorted(os.listdir(config.plugin_dir_path),
-                       key=lambda n: (not os.path.isfile(os.path.join(config.plugin_dir_path, n, '__init__.py')), n.lower())):
-        if not os.path.isdir(os.path.join(config.plugin_dir_path, name)) or name[0] in ['.', '_']:
+    for name in sorted(
+        os.listdir(config.plugin_dir_path),
+        key=lambda n: (
+            not os.path.isfile(os.path.join(config.plugin_dir_path, n, "__init__.py")),
+            n.lower(),
+        ),
+    ):
+        if not os.path.isdir(os.path.join(config.plugin_dir_path, name)) or name[0] in [
+            ".",
+            "_",
+        ]:
             pass
-        elif name.endswith('.disabled'):
-            name, discard = name.rsplit('.', 1)
+        elif name.endswith(".disabled"):
+            name, discard = name.rsplit(".", 1)
             found.append(Plugin(name, None, logger))
         else:
             try:
@@ -154,11 +178,17 @@ def load_plugins(master):
                 import EDMCLogging
 
                 plugin_logger = EDMCLogging.get_plugin_logger(name)
-                found.append(Plugin(name, os.path.join(config.plugin_dir_path, name, 'load.py'), plugin_logger))
+                found.append(
+                    Plugin(
+                        name,
+                        os.path.join(config.plugin_dir_path, name, "load.py"),
+                        plugin_logger,
+                    )
+                )
             except Exception as e:
                 logger.exception(f'Failure loading found Plugin "{name}"')
                 pass
-    PLUGINS.extend(sorted(found, key=lambda p: operator.attrgetter('name')(p).lower()))
+    PLUGINS.extend(sorted(found, key=lambda p: operator.attrgetter("name")(p).lower()))
 
 
 def provides(fn_name):
@@ -186,7 +216,9 @@ def invoke(plugin_name, fallback, fn_name, *args):
             return plugin._get_func(fn_name)(*args)
     for plugin in PLUGINS:
         if plugin.name == fallback:
-            assert plugin._get_func(fn_name), plugin.name  # fallback plugin should provide the function
+            assert plugin._get_func(
+                fn_name
+            ), plugin.name  # fallback plugin should provide the function
             return plugin._get_func(fn_name)(*args)
 
 
@@ -198,7 +230,7 @@ def notify_stop():
     """
     error = None
     for plugin in PLUGINS:
-        plugin_stop = plugin._get_func('plugin_stop')
+        plugin_stop = plugin._get_func("plugin_stop")
         if plugin_stop:
             try:
                 logger.info(f'Asking plugin "{plugin.name}" to stop...')
@@ -207,7 +239,7 @@ def notify_stop():
             except Exception as e:
                 logger.exception(f'Plugin "{plugin.name}" failed')
 
-    logger.info('Done')
+    logger.info("Done")
 
     return error
 
@@ -220,7 +252,7 @@ def notify_prefs_cmdr_changed(cmdr, is_beta):
     :param is_beta: whether the player is in a Beta universe.
     """
     for plugin in PLUGINS:
-        prefs_cmdr_changed = plugin._get_func('prefs_cmdr_changed')
+        prefs_cmdr_changed = plugin._get_func("prefs_cmdr_changed")
         if prefs_cmdr_changed:
             try:
                 prefs_cmdr_changed(cmdr, is_beta)
@@ -238,7 +270,7 @@ def notify_prefs_changed(cmdr, is_beta):
     :param is_beta: whether the player is in a Beta universe.
     """
     for plugin in PLUGINS:
-        prefs_changed = plugin._get_func('prefs_changed')
+        prefs_changed = plugin._get_func("prefs_changed")
         if prefs_changed:
             try:
                 prefs_changed(cmdr, is_beta)
@@ -257,16 +289,18 @@ def notify_journal_entry(cmdr, is_beta, system, station, entry, state):
     :param is_beta: whether the player is in a Beta universe.
     :returns: Error message from the first plugin that returns one (if any)
     """
-    if entry['event'] in ('Location'):
-        logger.trace_if('journal.locations', 'Notifying plugins of "Location" event')
+    if entry["event"] in ("Location"):
+        logger.trace_if("journal.locations", 'Notifying plugins of "Location" event')
 
     error = None
     for plugin in PLUGINS:
-        journal_entry = plugin._get_func('journal_entry')
+        journal_entry = plugin._get_func("journal_entry")
         if journal_entry:
             try:
                 # Pass a copy of the journal entry in case the callee modifies it
-                newerror = journal_entry(cmdr, is_beta, system, station, dict(entry), dict(state))
+                newerror = journal_entry(
+                    cmdr, is_beta, system, station, dict(entry), dict(state)
+                )
                 error = error or newerror
             except Exception as e:
                 logger.exception(f'Plugin "{plugin.name}" failed')
@@ -285,15 +319,19 @@ def notify_journal_entry_cqc(cmdr, is_beta, entry, state):
 
     error = None
     for plugin in PLUGINS:
-        cqc_callback = plugin._get_func('journal_entry_cqc')
+        cqc_callback = plugin._get_func("journal_entry_cqc")
         if cqc_callback is not None and callable(cqc_callback):
             try:
                 # Pass a copy of the journal entry in case the callee modifies it
-                newerror = cqc_callback(cmdr, is_beta, copy.deepcopy(entry), copy.deepcopy(state))
+                newerror = cqc_callback(
+                    cmdr, is_beta, copy.deepcopy(entry), copy.deepcopy(state)
+                )
                 error = error or newerror
 
             except Exception:
-                logger.exception(f'Plugin "{plugin.name}" failed while handling CQC mode journal entry')
+                logger.exception(
+                    f'Plugin "{plugin.name}" failed while handling CQC mode journal entry'
+                )
 
     return error
 
@@ -308,7 +346,7 @@ def notify_dashboard_entry(cmdr, is_beta, entry):
     """
     error = None
     for plugin in PLUGINS:
-        status = plugin._get_func('dashboard_entry')
+        status = plugin._get_func("dashboard_entry")
         if status:
             try:
                 # Pass a copy of the status entry in case the callee modifies it
@@ -328,7 +366,7 @@ def notify_newdata(data, is_beta):
     """
     error = None
     for plugin in PLUGINS:
-        cmdr_data = plugin._get_func('cmdr_data')
+        cmdr_data = plugin._get_func("cmdr_data")
         if cmdr_data:
             try:
                 newerror = cmdr_data(data, is_beta)
@@ -350,6 +388,6 @@ def show_error(err):
         logger.info(f'Called during shutdown: "{str(err)}"')
         return
 
-    if err and last_error['root']:
-        last_error['msg'] = str(err)
-        last_error['root'].event_generate('<<PluginError>>', when="tail")
+    if err and last_error["root"]:
+        last_error["msg"] = str(err)
+        last_error["root"].event_generate("<<PluginError>>", when="tail")

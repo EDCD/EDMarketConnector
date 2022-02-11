@@ -24,14 +24,22 @@ if __name__ == "__main__":
 
     def add(modules, name, attributes) -> None:
         """Add the given module to the modules dict."""
-        assert name not in modules or modules[name] == attributes, f'{name}: {modules.get(name)} != {attributes}'
+        assert (
+            name not in modules or modules[name] == attributes
+        ), f"{name}: {modules.get(name)} != {attributes}"
         assert name not in modules, name
         modules[name] = attributes
 
     # Regenerate coriolis-data distribution
-    subprocess.check_call('npm install', cwd='coriolis-data', shell=True, stdout=sys.stdout, stderr=sys.stderr)
+    subprocess.check_call(
+        "npm install",
+        cwd="coriolis-data",
+        shell=True,
+        stdout=sys.stdout,
+        stderr=sys.stderr,
+    )
 
-    data = json.load(open('coriolis-data/dist/index.json'))
+    data = json.load(open("coriolis-data/dist/index.json"))
 
     # Symbolic name from in-game name
     reverse_ship_map = {v: k for k, v in list(ship_name_map.items())}
@@ -42,58 +50,70 @@ if __name__ == "__main__":
     modules = {}
 
     # Ship and armour masses
-    for m in list(data['Ships'].values()):
-        name = coriolis_ship_map.get(m['properties']['name'], str(m['properties']['name']))
+    for m in list(data["Ships"].values()):
+        name = coriolis_ship_map.get(
+            m["properties"]["name"], str(m["properties"]["name"])
+        )
         assert name in reverse_ship_map, name
-        ships[name] = {'hullMass': m['properties']['hullMass']}
+        ships[name] = {"hullMass": m["properties"]["hullMass"]}
         for i in range(len(bulkheads)):
-            modules['_'.join([reverse_ship_map[name], 'armour', bulkheads[i]])] = {'mass': m['bulkheads'][i]['mass']}
+            modules["_".join([reverse_ship_map[name], "armour", bulkheads[i]])] = {
+                "mass": m["bulkheads"][i]["mass"]
+            }
 
-    ships = OrderedDict([(k, ships[k]) for k in sorted(ships)])  # sort for easier diffing
-    pickle.dump(ships, open('ships.p', 'wb'))
+    ships = OrderedDict(
+        [(k, ships[k]) for k in sorted(ships)]
+    )  # sort for easier diffing
+    pickle.dump(ships, open("ships.p", "wb"))
 
     # Module masses
-    for cat in list(data['Modules'].values()):
+    for cat in list(data["Modules"].values()):
         for grp, mlist in list(cat.items()):
             for m in mlist:
-                assert 'symbol' in m, m
-                key = str(m['symbol'].lower())
-                if grp == 'fsd':
+                assert "symbol" in m, m
+                key = str(m["symbol"].lower())
+                if grp == "fsd":
                     modules[key] = {
-                        'mass':       m['mass'],
-                        'optmass':    m['optmass'],
-                        'maxfuel':    m['maxfuel'],
-                        'fuelmul':    m['fuelmul'],
-                        'fuelpower':  m['fuelpower'],
+                        "mass": m["mass"],
+                        "optmass": m["optmass"],
+                        "maxfuel": m["maxfuel"],
+                        "fuelmul": m["fuelmul"],
+                        "fuelpower": m["fuelpower"],
                     }
-                elif grp == 'gfsb':
+                elif grp == "gfsb":
                     modules[key] = {
-                        'mass':       m['mass'],
-                        'jumpboost':  m['jumpboost'],
+                        "mass": m["mass"],
+                        "jumpboost": m["jumpboost"],
                     }
                 else:
-                    modules[key] = {'mass': m.get('mass', 0)}  # Some modules don't have mass
+                    modules[key] = {
+                        "mass": m.get("mass", 0)
+                    }  # Some modules don't have mass
 
     # Pre 3.3 modules
-    add(modules, 'int_stellarbodydiscoveryscanner_standard',      {'mass': 2})
-    add(modules, 'int_stellarbodydiscoveryscanner_intermediate',  {'mass': 2})
-    add(modules, 'int_stellarbodydiscoveryscanner_advanced',      {'mass': 2})
+    add(modules, "int_stellarbodydiscoveryscanner_standard", {"mass": 2})
+    add(modules, "int_stellarbodydiscoveryscanner_intermediate", {"mass": 2})
+    add(modules, "int_stellarbodydiscoveryscanner_advanced", {"mass": 2})
 
     # Missing
-    add(modules, 'hpt_dumbfiremissilerack_fixed_small_advanced',  {'mass': 2})
-    add(modules, 'hpt_dumbfiremissilerack_fixed_medium_advanced', {'mass': 4})
-    add(modules, 'hpt_multicannon_fixed_small_advanced',          {'mass': 2})
-    add(modules, 'hpt_multicannon_fixed_medium_advanced',         {'mass': 4})
+    add(modules, "hpt_dumbfiremissilerack_fixed_small_advanced", {"mass": 2})
+    add(modules, "hpt_dumbfiremissilerack_fixed_medium_advanced", {"mass": 4})
+    add(modules, "hpt_multicannon_fixed_small_advanced", {"mass": 2})
+    add(modules, "hpt_multicannon_fixed_medium_advanced", {"mass": 4})
 
-    modules = OrderedDict([(k, modules[k]) for k in sorted(modules)])  # sort for easier diffing
-    pickle.dump(modules, open('modules.p', 'wb'))
+    modules = OrderedDict(
+        [(k, modules[k]) for k in sorted(modules)]
+    )  # sort for easier diffing
+    pickle.dump(modules, open("modules.p", "wb"))
 
     # Check data is present for all modules
-    with open('outfitting.csv') as csvfile:
-        reader = csv.DictReader(csvfile, restval='')
+    with open("outfitting.csv") as csvfile:
+        reader = csv.DictReader(csvfile, restval="")
         for row in reader:
             try:
-                module = outfitting.lookup({'id': row['id'], 'name': row['symbol']}, ship_name_map)
+                module = outfitting.lookup(
+                    {"id": row["id"], "name": row["symbol"]}, ship_name_map
+                )
             except AssertionError:
-                print(row['symbol'])
+                print(row["symbol"])
                 print_exc()

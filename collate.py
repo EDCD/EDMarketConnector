@@ -25,7 +25,7 @@ import outfitting
 from edmc_data import companion_category_map, ship_name_map
 
 
-def __make_backup(file_name: pathlib.Path, suffix: str = '.bak') -> None:
+def __make_backup(file_name: pathlib.Path, suffix: str = ".bak") -> None:
     """
     Rename the given file to $file.bak, removing any existing $file.bak. Assumes $file exists on disk.
 
@@ -47,10 +47,10 @@ def addcommodities(data) -> None:  # noqa: CCR001
     Assumes that the commodity data has already been 'fixed up'
     :param data: - Fixed up commodity data.
     """
-    if not data['lastStarport'].get('commodities'):
+    if not data["lastStarport"].get("commodities"):
         return
 
-    commodityfile = pathlib.Path('FDevIDs/commodity.csv')
+    commodityfile = pathlib.Path("FDevIDs/commodity.csv")
     commodities = {}
 
     # slurp existing
@@ -58,24 +58,27 @@ def addcommodities(data) -> None:  # noqa: CCR001
         with open(commodityfile) as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
-                commodities[int(row['id'])] = row  # index by int for easier lookup and sorting
+                commodities[
+                    int(row["id"])
+                ] = row  # index by int for easier lookup and sorting
 
     size_pre = len(commodities)
 
-    for commodity in data['lastStarport'].get('commodities'):
-        key = int(commodity['id'])
+    for commodity in data["lastStarport"].get("commodities"):
+        key = int(commodity["id"])
         new = {
-            'id':        commodity['id'],
-            'symbol':    commodity['name'],
-            'category':  companion_category_map.get(commodity['categoryname']) or commodity['categoryname'],
-            'name':      commodity.get('locName') or 'Limpets',
+            "id": commodity["id"],
+            "symbol": commodity["name"],
+            "category": companion_category_map.get(commodity["categoryname"])
+            or commodity["categoryname"],
+            "name": commodity.get("locName") or "Limpets",
         }
 
         old = commodities.get(key)
 
-        if old and companion_category_map.get(commodity['categoryname'], True):
-            if new['symbol'] != old['symbol'] or new['name'] != old['name']:
-                raise ValueError(f'{key}: {new!r} != {old!r}')
+        if old and companion_category_map.get(commodity["categoryname"], True):
+            if new["symbol"] != old["symbol"] or new["name"] != old["name"]:
+                raise ValueError(f"{key}: {new!r} != {old!r}")
 
         commodities[key] = new
 
@@ -85,38 +88,51 @@ def addcommodities(data) -> None:  # noqa: CCR001
     if isfile(commodityfile):
         __make_backup(commodityfile)
 
-    with open(commodityfile, 'w', newline='\n') as csvfile:
-        writer = csv.DictWriter(csvfile, ['id', 'symbol', 'category', 'name'])
+    with open(commodityfile, "w", newline="\n") as csvfile:
+        writer = csv.DictWriter(csvfile, ["id", "symbol", "category", "name"])
         writer.writeheader()
 
         for key in sorted(commodities):
             writer.writerow(commodities[key])
 
-    print(f'Added {len(commodities) - size_pre} new commodities')
+    print(f"Added {len(commodities) - size_pre} new commodities")
 
 
 def addmodules(data):  # noqa: C901, CCR001
     """Keep a summary of modules found."""
-    if not data['lastStarport'].get('modules'):
+    if not data["lastStarport"].get("modules"):
         return
 
-    outfile = 'outfitting.csv'
+    outfile = "outfitting.csv"
     modules = {}
-    fields = ('id', 'symbol', 'category', 'name', 'mount', 'guidance', 'ship', 'class', 'rating', 'entitlement')
+    fields = (
+        "id",
+        "symbol",
+        "category",
+        "name",
+        "mount",
+        "guidance",
+        "ship",
+        "class",
+        "rating",
+        "entitlement",
+    )
 
     # slurp existing
     if isfile(outfile):
         with open(outfile) as csvfile:
-            reader = csv.DictReader(csvfile, restval='')
+            reader = csv.DictReader(csvfile, restval="")
             for row in reader:
-                modules[int(row['id'])] = row  # index by int for easier lookup and sorting
+                modules[
+                    int(row["id"])
+                ] = row  # index by int for easier lookup and sorting
 
     size_pre = len(modules)
 
-    for key, module in data['lastStarport'].get('modules').items():
+    for key, module in data["lastStarport"].get("modules").items():
         # sanity check
         key = int(key)
-        if key != module.get('id'):
+        if key != module.get("id"):
             raise ValueError(f'id: {key} != {module["id"]}')
 
         try:
@@ -135,8 +151,10 @@ def addmodules(data):  # noqa: C901, CCR001
                     if not old.get(thing) and new.get(thing):
                         size_pre -= 1
 
-                    elif str(new.get(thing, '')) != old.get(thing):
-                        raise ValueError(f'{key}: {thing} {new.get(thing)!r}!={old.get(thing)!r}')
+                    elif str(new.get(thing, "")) != old.get(thing):
+                        raise ValueError(
+                            f"{key}: {thing} {new.get(thing)!r}!={old.get(thing)!r}"
+                        )
 
             modules[key] = new
 
@@ -146,39 +164,47 @@ def addmodules(data):  # noqa: C901, CCR001
     if isfile(outfile):
         __make_backup(outfile)
 
-    with open(outfile, 'w', newline='\n') as csvfile:
-        writer = csv.DictWriter(csvfile, fields, extrasaction='ignore')
+    with open(outfile, "w", newline="\n") as csvfile:
+        writer = csv.DictWriter(csvfile, fields, extrasaction="ignore")
         writer.writeheader()
 
         for key in sorted(modules):
             writer.writerow(modules[key])
 
-    print(f'Added {len(modules) - size_pre} new modules')
+    print(f"Added {len(modules) - size_pre} new modules")
 
 
 def addships(data) -> None:  # noqa: CCR001
     """Keep a summary of ships found."""
-    if not data['lastStarport'].get('ships'):
+    if not data["lastStarport"].get("ships"):
         return
 
-    shipfile = pathlib.Path('shipyard.csv')
+    shipfile = pathlib.Path("shipyard.csv")
     ships = {}
-    fields = ('id', 'symbol', 'name')
+    fields = ("id", "symbol", "name")
 
     # slurp existing
     if isfile(shipfile):
         with open(shipfile) as csvfile:
-            reader = csv.DictReader(csvfile, restval='')
+            reader = csv.DictReader(csvfile, restval="")
             for row in reader:
-                ships[int(row['id'])] = row  # index by int for easier lookup and sorting
+                ships[
+                    int(row["id"])
+                ] = row  # index by int for easier lookup and sorting
 
     size_pre = len(ships)
 
-    data_ships = data['lastStarport']['ships']
-    for ship in tuple(data_ships.get('shipyard_list', {}).values()) + data_ships.get('unavailable_list'):
+    data_ships = data["lastStarport"]["ships"]
+    for ship in tuple(data_ships.get("shipyard_list", {}).values()) + data_ships.get(
+        "unavailable_list"
+    ):
         # sanity check
-        key = int(ship['id'])
-        new = {'id': key, 'symbol': ship['name'], 'name': ship_name_map.get(ship['name'].lower())}
+        key = int(ship["id"])
+        new = {
+            "id": key,
+            "symbol": ship["name"],
+            "name": ship_name_map.get(ship["name"].lower()),
+        }
         if new:
             old = ships.get(key)
             if old:
@@ -188,8 +214,10 @@ def addships(data) -> None:  # noqa: CCR001
                         ships[key] = new
                         size_pre -= 1
 
-                    elif str(new.get(thing, '')) != old.get(thing):
-                        raise ValueError(f'{key}: {thing} {new.get(thing)!r} != {old.get(thing)!r}')
+                    elif str(new.get(thing, "")) != old.get(thing):
+                        raise ValueError(
+                            f"{key}: {thing} {new.get(thing)!r} != {old.get(thing)!r}"
+                        )
 
             ships[key] = new
 
@@ -199,19 +227,19 @@ def addships(data) -> None:  # noqa: CCR001
     if isfile(shipfile):
         __make_backup(shipfile)
 
-    with open(shipfile, 'w', newline='\n') as csvfile:
-        writer = csv.DictWriter(csvfile, ['id', 'symbol', 'name'])
+    with open(shipfile, "w", newline="\n") as csvfile:
+        writer = csv.DictWriter(csvfile, ["id", "symbol", "name"])
         writer.writeheader()
 
         for key in sorted(ships):
             writer.writerow(ships[key])
 
-    print(f'Added {len(ships) - size_pre} new ships')
+    print(f"Added {len(ships) - size_pre} new ships")
 
 
 if __name__ == "__main__":
     if len(sys.argv) <= 1:
-        print('Usage: collate.py [dump.json]')
+        print("Usage: collate.py [dump.json]")
         sys.exit()
 
     # read from dumped json file(s)
@@ -221,30 +249,30 @@ if __name__ == "__main__":
         with open(file_name) as f:
             print(file_name)
             data = json.load(f)
-            data = data['data']
+            data = data["data"]
 
-        if not data['commander'].get('docked'):
-            print('Not docked!')
+        if not data["commander"].get("docked"):
+            print("Not docked!")
             continue
 
-        elif not data.get('lastStarport'):
-            print('No starport!')
+        elif not data.get("lastStarport"):
+            print("No starport!")
             continue
 
-        if data['lastStarport'].get('commodities'):
+        if data["lastStarport"].get("commodities"):
             addcommodities(data)
 
         else:
-            print('No market')
+            print("No market")
 
-        if data['lastStarport'].get('modules'):
+        if data["lastStarport"].get("modules"):
             addmodules(data)
 
         else:
-            print('No outfitting')
+            print("No outfitting")
 
-        if data['lastStarport'].get('ships'):
+        if data["lastStarport"].get("ships"):
             addships(data)
 
         else:
-            print('No shipyard')
+            print("No shipyard")

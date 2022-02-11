@@ -3,13 +3,17 @@ import sys
 from typing import Any, Dict, List, Union
 
 from Foundation import (  # type: ignore
-    NSApplicationSupportDirectory, NSBundle, NSDocumentDirectory, NSSearchPathForDirectoriesInDomains, NSUserDefaults,
-    NSUserDomainMask
+    NSApplicationSupportDirectory,
+    NSBundle,
+    NSDocumentDirectory,
+    NSSearchPathForDirectoriesInDomains,
+    NSUserDefaults,
+    NSUserDomainMask,
 )
 
 from config import AbstractConfig, appname, logger
 
-assert sys.platform == 'darwin'
+assert sys.platform == "darwin"
 
 
 class MacConfig(AbstractConfig):
@@ -26,33 +30,44 @@ class MacConfig(AbstractConfig):
         self.app_dir_path = support_path / appname
         self.app_dir_path.mkdir(exist_ok=True)
 
-        self.plugin_dir_path = self.app_dir_path / 'plugins'
+        self.plugin_dir_path = self.app_dir_path / "plugins"
         self.plugin_dir_path.mkdir(exist_ok=True)
 
         # Bundle IDs identify a singled app though out a system
 
-        if getattr(sys, 'frozen', False):
+        if getattr(sys, "frozen", False):
             exe_dir = pathlib.Path(sys.executable).parent
-            self.internal_plugin_dir_path = exe_dir.parent / 'Library' / 'plugins'
-            self.respath_path = exe_dir.parent / 'Resources'
+            self.internal_plugin_dir_path = exe_dir.parent / "Library" / "plugins"
+            self.respath_path = exe_dir.parent / "Resources"
             self.identifier = NSBundle.mainBundle().bundleIdentifier()
 
         else:
             file_dir = pathlib.Path(__file__).parent.parent
-            self.internal_plugin_dir_path = file_dir / 'plugins'
+            self.internal_plugin_dir_path = file_dir / "plugins"
             self.respath_path = file_dir
 
-            self.identifier = f'uk.org.marginal.{appname.lower()}'
-            NSBundle.mainBundle().infoDictionary()['CFBundleIdentifier'] = self.identifier
+            self.identifier = f"uk.org.marginal.{appname.lower()}"
+            NSBundle.mainBundle().infoDictionary()[
+                "CFBundleIdentifier"
+            ] = self.identifier
 
-        self.default_journal_dir_path = support_path / 'Frontier Developments' / 'Elite Dangerous'
+        self.default_journal_dir_path = (
+            support_path / "Frontier Developments" / "Elite Dangerous"
+        )
         self._defaults: Any = NSUserDefaults.standardUserDefaults()
         self._settings: Dict[str, Union[int, str, list]] = dict(
             self._defaults.persistentDomainForName_(self.identifier) or {}
         )  # make writeable
 
-        if (out_dir := self.get_str('out_dir')) is None or not pathlib.Path(out_dir).exists():
-            self.set('outdir', NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, True)[0])
+        if (out_dir := self.get_str("out_dir")) is None or not pathlib.Path(
+            out_dir
+        ).exists():
+            self.set(
+                "outdir",
+                NSSearchPathForDirectoriesInDomains(
+                    NSDocumentDirectory, NSUserDomainMask, True
+                )[0],
+            )
 
     def __raw_get(self, key: str) -> Union[None, list, str, int]:
         """
@@ -84,7 +99,9 @@ class MacConfig(AbstractConfig):
             return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
 
         if not isinstance(res, str):
-            raise ValueError(f'unexpected data returned from __raw_get: {type(res)=} {res}')
+            raise ValueError(
+                f"unexpected data returned from __raw_get: {type(res)=} {res}"
+            )
 
         return res
 
@@ -99,7 +116,7 @@ class MacConfig(AbstractConfig):
             return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
 
         elif not isinstance(res, list):
-            raise ValueError(f'__raw_get returned unexpected type {type(res)=} {res!r}')
+            raise ValueError(f"__raw_get returned unexpected type {type(res)=} {res!r}")
 
         return res
 
@@ -114,13 +131,15 @@ class MacConfig(AbstractConfig):
             return default
 
         elif not isinstance(res, (str, int)):
-            raise ValueError(f'__raw_get returned unexpected type {type(res)=} {res!r}')
+            raise ValueError(f"__raw_get returned unexpected type {type(res)=} {res!r}")
 
         try:
             return int(res)
 
         except ValueError as e:
-            logger.error(f'__raw_get returned {res!r} which cannot be parsed to an int: {e}')
+            logger.error(
+                f"__raw_get returned {res!r} which cannot be parsed to an int: {e}"
+            )
             return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
 
     def get_bool(self, key: str, *, default: bool = None) -> bool:
@@ -134,7 +153,7 @@ class MacConfig(AbstractConfig):
             return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
 
         elif not isinstance(res, bool):
-            raise ValueError(f'__raw_get returned unexpected type {type(res)=} {res!r}')
+            raise ValueError(f"__raw_get returned unexpected type {type(res)=} {res!r}")
 
         return res
 
@@ -145,10 +164,10 @@ class MacConfig(AbstractConfig):
         Implements :meth:`AbstractConfig.set`.
         """
         if self._settings is None:
-            raise ValueError('attempt to use a closed _settings')
+            raise ValueError("attempt to use a closed _settings")
 
         if not isinstance(val, (bool, str, int, list)):
-            raise ValueError(f'Unexpected type for value {type(val)=}')
+            raise ValueError(f"Unexpected type for value {type(val)=}")
 
         self._settings[key] = val
 
