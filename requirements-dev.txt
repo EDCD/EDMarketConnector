@@ -2,6 +2,11 @@
 # Using legacy 'setup.py install' for flake8-annotations-coverage, since package 'wheel' is not installed.
 wheel
 
+# We can't rely on just picking this up from either the base (not venv),
+# or venv-init-time version.  Specify here so that dependabot will prod us
+# about new versions.
+setupttools=60.8.2
+
 # Static analysis tools
 flake8==4.0.1
 flake8-annotations-coverage==0.0.5
