@@ -49,7 +49,7 @@ jobs:
 
       - name: Create pull request against target branch
         if: steps.check_for_changes.outputs.changes == 'true'
-        uses: actions/github-script@v5
+        uses: actions/github-script@v6
         with:
           github-token: ${{ inputs.github_token }}
           script: |
@@ -64,7 +64,7 @@ jobs:
 
       - name: Add labels
         if: steps.check_for_changes.outputs.changes == 'true'
-        uses: actions/github-script@v5
+        uses: actions/github-script@v6
         with:
           github-token: ${{ inputs.github_token }}
           script: |
