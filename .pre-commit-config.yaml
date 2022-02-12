@@ -1,6 +1,11 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
+# This can be used to check how pre-commit is being run
+# - repo: meta
+#   hooks:
+#   - id: identity
+
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: 'v4.1.0'
     hooks:
@@ -44,6 +49,9 @@ repos:
     rev: 'v0.931'
     hooks:
       - id: mypy
+        # verbose: true
+        # log_file: 'pre-commit_mypy.log'
+        additional_dependencies: [ types-requests ]
         # args: [ "--follow-imports", "skip", "--ignore-missing-imports", "--scripts-are-modules" ]
 
 ### # pydocstyle.exe <file>

@@ -1145,6 +1145,44 @@ class EDDN:
         this.eddn.export_journal_entry(cmdr, entry, msg)
         return None
 
+    def export_journal_fssallbodiesfound(
+        self, cmdr: str, system_name: str, system_starpos: list, is_beta: bool, entry: MutableMapping[str, Any]
+    ) -> Optional[str]:
+        """
+        Send an FSSAllBodiesFound message to EDDN on the correct schema.
+
+        :param cmdr: the commander under which this upload is made
+        :param system_name: Name of current star system
+        :param system_starpos: Coordinates of current star system
+        :param is_beta: whether or not we are in beta mode
+        :param entry: the journal entry to send
+        """
+        # {
+        #   "Count": 3,
+        #   "SystemAddress": 9466778822057,
+        #   "SystemName": "LP 704-74",
+        #   "event": "FSSAllBodiesFound",
+        #   "timestamp": "2022-02-09T18:15:14Z"
+        # }
+        #######################################################################
+        # Augmentations
+        #######################################################################
+        # In this case should add StarSystem and StarPos
+        ret = this.eddn.entry_augment_system_data(entry, system_name, system_starpos)
+        if isinstance(ret, str):
+            return ret
+
+        entry = ret
+        #######################################################################
+
+        msg = {
+            '$schemaRef': f'https://eddn.edcd.io/schemas/fssallbodiesfound/1{"/test" if is_beta else ""}',
+            'message': entry
+        }
+
+        this.eddn.export_journal_entry(cmdr, entry, msg)
+        return None
+
     def canonicalise(self, item: str) -> str:
         """
         Canonicalise the given commodity name.
@@ -1462,6 +1500,15 @@ def journal_entry(  # noqa: C901, CCR001
 
         elif event_name == 'approachsettlement':
             return this.eddn.export_journal_approachsettlement(
+                cmdr,
+                system,
+                state['StarPos'],
+                is_beta,
+                entry
+            )
+
+        elif event_name == 'fssallbodiesfound':
+            return this.eddn.export_journal_fssallbodiesfound(
                 cmdr,
                 system,
                 state['StarPos'],
