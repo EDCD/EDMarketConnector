@@ -72,8 +72,9 @@ repos:
     hooks:
       - id: python-safety-dependencies-check 
         entry: safety
-        args: [check, --bare, -r]
+        args: [check, --bare, --file]
         language: system
+        files: requirements-dev.txt, requirements.txt
 
 # Check translation comments are up to date
 - repo: local
