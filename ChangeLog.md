@@ -27,6 +27,32 @@ produce the Windows executables and installer.
 
 ---
 
+Pre-Release 5.3.0-beta11
+===
+
+* EDND: Implement forthcoming approachsettlement/1 schema.
+
+* EDND: Implement forthcoming fssallbodiesfound/1 schema.
+
+* Inara: Only send a `setCommanderCredits` message at game login.  Yes, you
+    will **NEED** to relog to send an updated balance.  This is the only way
+    in which to sanely keep the 'Total Assets' value on Inara from bouncing
+    around.  Refer to [Inara:API:docs:setCommanderCredits](https://inara.cz/inara-api-docs/#event-1).
+
+    Closes [#1401](https://github.com/EDCD/EDMarketConnector/issues/1401).
+
+Plugin Developers
+---
+
+* It's unlikely to affect you, but our `requirements-dev.txt` now explicitly
+    cites a specific version of `setuptools`.  This was necessary to ensure we
+    have a version that works with `py2exe` for the windows build process.
+
+    If anything this will ensure you have a *more up to date* version of
+    `setuptools` installed.
+
+---
+
 Pre-Release 5.3.0-beta10
 ===
 
@@ -40,6 +66,8 @@ Pre-Release 5.3.0-beta9
 ===
 
 * Inara: Fix for always sending a Rank Progress of 0%.
+
+    Closes [#1378](https://github.com/EDCD/EDMarketConnector/issues/1378).
 
 ---
 
