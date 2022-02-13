@@ -2,6 +2,11 @@
 # Using legacy 'setup.py install' for flake8-annotations-coverage, since package 'wheel' is not installed.
 wheel
 
+# We can't rely on just picking this up from either the base (not venv),
+# or venv-init-time version.  Specify here so that dependabot will prod us
+# about new versions.
+setuptools==60.8.2
+
 # Static analysis tools
 flake8==4.0.1
 flake8-annotations-coverage==0.0.5
@@ -30,7 +35,9 @@ grip==4.6.0
 # Used to put together a WiX configuration from template/auto-gen
 lxml==4.7.1
 # We only need py2exe on windows.
-py2exe==0.11.0.1; sys_platform == 'win32'
+# Pre-release version addressing semantic_version 2.9.0+ issues:
+# <https://github.com/py2exe/py2exe/issues/126>
+py2exe==0.11.1.0; sys_platform == 'win32'
 
 # Testing
 pytest==7.0.0
