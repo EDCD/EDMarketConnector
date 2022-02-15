@@ -9,6 +9,28 @@
 #  4) Ensure the EDSM API call(back) for setting the image at end of system
 #    text is always fired.  i.e. CAPI cmdr_data() processing.
 
+# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $#
+# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $#
+#
+# This is an EDMC 'core' plugin.
+#
+# All EDMC plugins are *dynamically* loaded at run-time.
+#
+# We build for Windows using `py2exe`.
+#
+# `py2exe` can't possibly know about anything in the dynamically loaded
+# core plugins.
+#
+# Thus you **MUST** check if any imports you add in this file are only
+# referenced in this file (or only in any other core plugin), and if so...
+#
+#     YOU MUST ENSURE THAT PERTINENT ADJUSTMENTS ARE MADE IN `setup.py`
+#     SO AS TO ENSURE THE FILES ARE ACTUALLY PRESENT IN AN END-USER
+#     INSTALLATION ON WINDOWS.
+#
+#
+# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $#
+# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $#
 import json
 import threading
 import tkinter as tk
@@ -23,7 +45,7 @@ import killswitch
 import myNotebook as nb  # noqa: N813
 import plug
 from companion import CAPIData
-from config import applongname, appversion, config, debug_senders
+from config import applongname, appversion, config, debug_senders, user_agent
 from edmc_data import DEBUG_WEBSERVER_HOST, DEBUG_WEBSERVER_PORT
 from EDMCLogging import get_main_logger
 from ttkHyperlinkLabel import HyperlinkLabel
@@ -49,6 +71,7 @@ class This:
         self.shutting_down = False  # Plugin is shutting down.
 
         self.session: requests.Session = requests.Session()
+        self.session.headers['User-Agent'] = user_agent
         self.queue: Queue = Queue()		# Items to be sent to EDSM by worker thread
         self.discarded_events: Set[str] = []  # List discarded events from EDSM
         self.lastlookup: requests.Response  # Result of last system lookup

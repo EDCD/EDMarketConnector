@@ -12,7 +12,6 @@ import warnings
 from collections import OrderedDict
 from contextlib import suppress
 from os.path import basename, dirname, isdir, isfile, join
-from sys import platform
 from typing import TYPE_CHECKING, Dict, Iterable, Optional, Set, TextIO, Union, cast
 
 if TYPE_CHECKING:
@@ -37,12 +36,12 @@ LANGUAGE_ID = '!Language'
 LOCALISATION_DIR = 'L10n'
 
 
-if platform == 'darwin':
+if sys.platform == 'darwin':
     from Foundation import (  # type: ignore # exists on Darwin
         NSLocale, NSNumberFormatter, NSNumberFormatterDecimalStyle
     )
 
-elif platform == 'win32':
+elif sys.platform == 'win32':
     import ctypes
     from ctypes.wintypes import BOOL, DWORD, LPCVOID, LPCWSTR, LPWSTR
     if TYPE_CHECKING:
@@ -176,7 +175,7 @@ class _Translations:
     def available(self) -> Set[str]:
         """Return a list of available language codes."""
         path = self.respath()
-        if getattr(sys, 'frozen', False) and platform == 'darwin':
+        if getattr(sys, 'frozen', False) and sys.platform == 'darwin':
             available = {
                 x[:-len('.lproj')] for x in os.listdir(path)
                 if x.endswith('.lproj') and isfile(join(x, 'Localizable.strings'))
@@ -204,7 +203,7 @@ class _Translations:
     def respath(self) -> pathlib.Path:
         """Path to localisation files."""
         if getattr(sys, 'frozen', False):
-            if platform == 'darwin':
+            if sys.platform == 'darwin':
                 return (pathlib.Path(sys.executable).parents[0] / os.pardir / 'Resources').resolve()
 
             return pathlib.Path(dirname(sys.executable)) / LOCALISATION_DIR
@@ -233,7 +232,7 @@ class _Translations:
             except OSError:
                 logger.exception(f'could not open {f}')
 
-        elif getattr(sys, 'frozen', False) and platform == 'darwin':
+        elif getattr(sys, 'frozen', False) and sys.platform == 'darwin':
             return (self.respath() / f'{lang}.lproj' / 'Localizable.strings').open('r', encoding='utf-16')
 
         return (self.respath() / f'{lang}.strings').open('r', encoding='utf-8')
@@ -243,7 +242,7 @@ class _Locale:
     """Locale holds a few utility methods to convert data to and from localized versions."""
 
     def __init__(self) -> None:
-        if platform == 'darwin':
+        if sys.platform == 'darwin':
             self.int_formatter = NSNumberFormatter.alloc().init()
             self.int_formatter.setNumberStyle_(NSNumberFormatterDecimalStyle)
             self.float_formatter = NSNumberFormatter.alloc().init()
@@ -276,7 +275,7 @@ class _Locale:
         if decimals == 0 and not isinstance(number, numbers.Integral):
             number = int(round(number))
 
-        if platform == 'darwin':
+        if sys.platform == 'darwin':
             if not decimals and isinstance(number, numbers.Integral):
                 return self.int_formatter.stringFromNumber_(number)
 
@@ -298,7 +297,7 @@ class _Locale:
         :param string: The string to convert
         :return: None if the string cannot be parsed, otherwise an int or float dependant on input data.
         """
-        if platform == 'darwin':
+        if sys.platform == 'darwin':
             return self.float_formatter.numberFromString_(string)
 
         with suppress(ValueError):
@@ -309,7 +308,7 @@ class _Locale:
 
         return None
 
-    def preferred_languages(self) -> Iterable[str]:
+    def preferred_languages(self) -> Iterable[str]:  # noqa: CCR001
         """
         Return a list of preferred language codes.
 
@@ -320,34 +319,46 @@ class _Locale:
 
         :return: The preferred language list
         """
-        if platform == 'darwin':
-            return NSLocale.preferredLanguages()
+        languages: Iterable[str]
+        if sys.platform == 'darwin':
+            languages = NSLocale.preferredLanguages()
 
-        elif platform != 'win32':
+        elif sys.platform != 'win32':
             # POSIX
             lang = locale.getlocale()[0]
-            return lang and [lang.replace('_', '-')] or []
+            languages = lang and [lang.replace('_', '-')] or []
 
-        def wszarray_to_list(array):
-            offset = 0
-            while offset < len(array):
-                sz = ctypes.wstring_at(ctypes.addressof(array) + offset*2)
-                if sz:
-                    yield sz
-                    offset += len(sz)+1
+        else:
+            def wszarray_to_list(array):
+                offset = 0
+                while offset < len(array):
+                    sz = ctypes.wstring_at(ctypes.addressof(array) + offset*2)
+                    if sz:
+                        yield sz
+                        offset += len(sz)+1
 
-                else:
-                    break
+                    else:
+                        break
 
-        num = ctypes.c_ulong()
-        size = ctypes.c_ulong(0)
-        if GetUserPreferredUILanguages(MUI_LANGUAGE_NAME, ctypes.byref(num), None, ctypes.byref(size)) and size.value:
-            buf = ctypes.create_unicode_buffer(size.value)
+            num = ctypes.c_ulong()
+            size = ctypes.c_ulong(0)
+            languages = []
+            if GetUserPreferredUILanguages(
+                    MUI_LANGUAGE_NAME, ctypes.byref(num), None, ctypes.byref(size)
+            ) and size.value:
+                buf = ctypes.create_unicode_buffer(size.value)
 
-            if GetUserPreferredUILanguages(MUI_LANGUAGE_NAME, ctypes.byref(num), ctypes.byref(buf), ctypes.byref(size)):
-                return wszarray_to_list(buf)
+                if GetUserPreferredUILanguages(
+                        MUI_LANGUAGE_NAME, ctypes.byref(num), ctypes.byref(buf), ctypes.byref(size)
+                ):
+                    languages = wszarray_to_list(buf)
 
-        return []
+        # HACK: <n/a> | 2021-12-11: OneSky calls "Chinese Simplified" "zh-Hans"
+        #    in the name of the file, but that will be zh-CN in terms of
+        #    locale.  So map zh-CN -> zh-Hans
+        languages = ['zh-Hans' if lang == 'zh-CN' else lang for lang in languages]
+
+        return languages
 
 
 # singletons

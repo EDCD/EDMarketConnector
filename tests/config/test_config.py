@@ -1,4 +1,12 @@
-"""Test the config system."""
+"""
+Test the config system.
+
+Note: These tests to arbitrary reads and writes to an existing config, including
+key deletions. Said modifications are to keys that are generated internally.
+
+Most of these tests are parity tests with the "old" config, and likely one day can be
+entirely removed.
+"""
 from __future__ import annotations
 
 import contextlib
@@ -19,7 +27,7 @@ print(sys.path)
 
 from _old_config import old_config  # noqa: E402
 
-from config import LinuxConfig, config  # noqa: E402
+from config import config  # noqa: E402
 
 
 def _fuzz_list(length: int) -> List[str]:
@@ -77,6 +85,11 @@ class TestNewConfig:
 
     def __update_linuxconfig(self) -> None:
         """On linux config uses ConfigParser, which doesn't update from disk changes. Force the update here."""
+        if sys.platform != 'linux':
+            return
+
+        from config.linux import LinuxConfig
+
         if isinstance(config, LinuxConfig) and config.config is not None:
             config.config.read(config.filename)
 
@@ -163,6 +176,10 @@ class TestOldNewConfig:
 
     def __update_linuxconfig(self) -> None:
         """On linux config uses ConfigParser, which doesn't update from disk changes. Force the update here."""
+        if sys.platform != 'linux':
+            return
+
+        from config.linux import LinuxConfig
         if isinstance(config, LinuxConfig) and config.config is not None:
             config.config.read(config.filename)
 
