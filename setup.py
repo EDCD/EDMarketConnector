@@ -191,6 +191,8 @@ elif sys.platform == 'win32':
             'dist_dir': dist_dir,
             'optimize': 2,
             'packages': [
+                'asyncio',  # No longer auto as of py3.10+py2exe 0.11
+                'multiprocessing',  # No longer auto as of py3.10+py2exe 0.11
                 'sqlite3',  # Included for plugins
                 'util',  # 2022-02-01 only imported in plugins/eddn.py
             ],
