@@ -30,9 +30,9 @@ produce the Windows executables and installer.
 Pre-Release 5.3.0-beta11
 ===
 
-* EDND: Implement forthcoming approachsettlement/1 schema.
+* EDDN: Implement forthcoming approachsettlement/1 schema.
 
-* EDND: Implement forthcoming fssallbodiesfound/1 schema.
+* EDDN: Implement forthcoming fssallbodiesfound/1 schema.
 
 * Inara: Only send a `setCommanderCredits` message at game login.  Yes, you
     will **NEED** to relog to send an updated balance.  This is the only way
