@@ -250,6 +250,9 @@
 /* eddn.py: EDDN returned some sort of HTTP error, one we didn't expect. {STATUS} contains a number; In files: eddn.py:344; */
 "EDDN Error: Returned {STATUS} status code" = "Błąd EDDN: Zwrócono kod {STATUS}";
 
+/* eddn.py: No 'Route' found in NavRoute.json file; In files: eddn.py:970; */
+"No 'Route' array in NavRoute.json contents" = "Brak tablicy \"Route\" wewnątrz NavRoute.json";
+
 /* eddn.py: Enable EDDN support for station data checkbox label; In files: eddn.py:1121; */
 "Send station data to the Elite Dangerous Data Network" = "Wyślij dane do Elite Dangerous Data Network";
 
