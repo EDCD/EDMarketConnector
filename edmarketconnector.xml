@@ -36,17 +36,17 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 5.2.4</title>
+			<title>Release 5.3.0</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
 
 <ul>
 <li>
-<p>We now test against, and package with, Python 3.9.8.</p>
+<p>We now test against, and package with, Python 3.10.2.</p>
 <p><strong>As a consequence of this we no longer support Windows 7.<br>
 This is due to
-<a href="https://www.python.org/downloads/windows/" rel="nofollow">Python 3.9.x itself not supporting Windows 7</a>.
+<a href="https://www.python.org/downloads/windows/" rel="nofollow">Python 3.10.x itself not supporting Windows 7</a>.
 The application (both EDMarketConnector.exe and EDMC.exe) will crash on
 startup due to a missing DLL.</strong></p>
 <p>This should have no other impact on users or plugin developers, other
@@ -55,6 +55,170 @@ Python 3.7 series.</p>
 <p>Developers can check the contents of the <code>.python-version</code> file
 in the source (it's not distributed with the Windows installer) for the
 currently used version in a given branch.</p>
+</li>
+</ul>
+
+<h2>Release 5.3.0</h2>
+<p>As has sadly become routine now, please read
+<a href="https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting#installer-and-or-executables-flagged-as-malicious-viruses">our statement about malware false positives</a>
+affecting our installers and/or the files they contain.  We are as confident
+as we can be, without detailed auditing of python.org's releases and all
+the py2exe source and releases, that there is no malware in the files we make
+available.</p>
+<p>This release is primarily aimed at fixing some more egregious bugs,
+shortcomings and annoyances with the application.  It also adds support for
+two additional
+<a href="https://github.com/EDCD/EDDN/blob/live/README.md">EDDN</a>
+schemas.</p>
+<ul>
+<li>
+<p>We now test and build using Python 3.10.2.  We do not <em>yet</em> make use of any
+features specific to Python 3.10 (or 3.9).  Let us restate that we
+absolutely reserve the right to commence doing so.</p>
+</li>
+<li>
+<p>We now set a custom User-Agent header in all web requests, i.e. to EDDN,
+EDSM and the like.  This is of the form:</p>
+<p><code>EDCD-EDMarketConnector-&lt;version&gt;</code></p>
+</li>
+<li>
+<p>"File" -&gt; "Status" will now show the new Odyssey ranks, both the new
+categories and the new 'prestige' ranks, e.g. 'Elite I'.</p>
+<p><strong>NB: Due to an oversight there are currently no translations for these.</strong></p>
+<p>Closes <a href="https://github.com/EDCD/EDMarketConnector/issues/1369">#1369</a>.</p>
+</li>
+<li>
+<p>Running <code>EDMarketConnector.exe --reset-ui</code> will now also reset any changes to
+the application "UI Scale" or geometry (position and size).</p>
+<p>Closes <a href="https://github.com/EDCD/EDMarketConnector/issues/1155">#1155</a>.</p>
+</li>
+<li>
+<p>We now use UTC-based timestamps in the application's log files.  Prior to
+this change it was the "local time", but without any indication of the
+applied timezone.  Each line's timestamp has <code> UTC</code> as a suffix now.  We
+are assuming that your local clock is correct <em>and</em> the timezone is set
+correctly, such that Python's <code>time.gmtime()</code> yields UTC times.</p>
+<p>This should make it easier to correlate application logfiles with in-game
+time and/or third-party service timestamps.</p>
+</li>
+<li>
+<p>The process used to build the Windows installers should now always pick up
+all the necessary files automatically.  Prior to this we used a manual
+process to update the installer configuration which was prone to both user
+error and neglecting to update it as necessary.</p>
+</li>
+<li>
+<p>If the application fails to load valid data from the <code>NavRoute.json</code> file
+when processing a Journal <code>NavRoute</code> event, it will attempt to retry this
+operation a number of times as it processes subsequent Journal events.</p>
+<p>This should hopefully work around a race condition where the game might
+not have yet updated <code>NavRoute.json</code> at all, or has truncated it to empty,
+when we first attempt this.</p>
+<p>We will also now <em>NOT</em> attempt to load <code>NavRoute.json</code> during the startup
+'Journal catch-up' mode, which only sets internal state.</p>
+<p>Closes <a href="https://github.com/EDCD/EDMarketConnector/issues/1155">#1348</a>.</p>
+</li>
+<li>
+<p>Inara: Use the <code>&lt;journal log&gt;-&gt;Statistics-&gt;Bank_Account-&gt;Current_Wealth</code>
+value when sending a <code>setCommanderCredits</code> message to Inara to set
+<code>commanderAssets</code>.</p>
+<p>In addition, a <code>setCommanderCredits</code> message at game login <strong>will now only
+ever be sent at game login</strong>.  Yes, you will <strong>NEED</strong> to relog to send an
+updated balance.  This is the only way in which to sanely keep the
+'Total Assets' value on Inara from bouncing around.</p>
+<p>Refer to <a href="https://inara.cz/inara-api-docs/#event-1" rel="nofollow">Inara:API:docs:setCommanderCredits</a>.</p>
+<p>Closes <a href="https://github.com/EDCD/EDMarketConnector/issues/1401">#1401</a>.</p>
+</li>
+<li>
+<p>Inara: Send a <code>setCommanderRankPilot</code> message when the player logs in to the
+game on-foot.  Previously you would <em>HAVE</em> to be in a ship at login time
+for this to be sent.</p>
+<p>Thus, you can now relog on-foot in order to update Inara with any Rank up
+or progress since the session started.</p>
+<p>Closes <a href="https://github.com/EDCD/EDMarketConnector/issues/1378">#1378</a>.</p>
+</li>
+<li>
+<p>Inara: Fix for always sending a Rank Progress of 0%.</p>
+<p>Closes <a href="https://github.com/EDCD/EDMarketConnector/issues/1378">#1378</a>.</p>
+</li>
+<li>
+<p>Inara: You should once more see updates for any materials used in
+Engineering.  The bug was in our more general Journal event processing
+code pertaining to <code>EngineerCraft</code> events, such that the state passed to
+the Inara plugin hadn't been updated.</p>
+<p>Such updates should happen 'immediately', but take into account that there
+can be a delay of up to 35 seconds for any data sent to Inara, due to how
+we avoid breaking the "2 messages a minute" limit on the Inara API.</p>
+<p>Closes <a href="https://github.com/EDCD/EDMarketConnector/issues/1395">#1395</a>.</p>
+</li>
+<li>
+<p>EDDN: Implement new <a href="https://github.com/EDCD/EDDN/blob/live/schemas/approachsettlement-README.md">approachsettlement/1</a>
+schema.</p>
+</li>
+<li>
+<p>EDDN: Implement new <a href="https://github.com/EDCD/EDDN/blob/live/schemas/fssallbodiesfound-README.md">fssallbodiesfound/1</a>
+schema.</p>
+</li>
+<li>
+<p>EDDN: We now compress all outgoing messages.  This might help get some
+particularly large <code>navroute</code> messages go through.</p>
+<p>If any message is now rejected as 'too large' we will drop it, and thus
+not retry it later.  The application logs will reflect this.</p>
+<p>NB: The EDDN Gateway was updated to allow messages up to 1 MiB in size
+anyway.  The old limit was 100 KiB.</p>
+<p>Closes <a href="https://github.com/EDCD/EDMarketConnector/issues/1390">#1390</a>.</p>
+</li>
+<li>
+<p>EDDN: In an attempt to diagnose some errors observed on the EDDN Gateway
+with respect to messages sent from this application some additional checks
+and logging have been added.</p>
+<p><strong>NB: After some thorough investigation it was concluded that these EDDN
+errors were likely the result of long-delayed messages due to use of
+the "Delay sending until docked" option.</strong></p>
+<p>There should be no functional changes for users.  But if you see any of
+the following in this application's log files <strong>PLEASE OPEN
+<a href="https://github.com/EDCD/EDMarketConnector/issues/new?assignees=&amp;labels=bug%2C+unconfirmed&amp;template=bug_report.md&amp;title=">AN ISSUE ON GITHUB</a>
+with all the requested information</strong>, so that we can correct the relevant
+code:</p>
+<ul>
+<li><code>No system name in entry, and system_name was not set either!  entry: ...</code></li>
+<li><code>BodyName was present but not a string! ...</code></li>
+<li><code>post-processing entry contains entry ...</code></li>
+<li><code>this.body_id was not set properly: ...</code></li>
+<li><code>system is falsey, can't add StarSystem</code></li>
+<li><code>this.coordinates is falsey, can't add StarPos</code></li>
+<li><code>this.systemaddress is falsey, can't add SystemAddress</code></li>
+<li><code>this.status_body_name was not set properly: ...</code></li>
+</ul>
+<p>You might also see any of the following in the application status text
+(bottom of the window):</p>
+<ul>
+<li><code>passed-in system_name is empty, can't add System</code></li>
+<li><code>CodexEntry had empty string, PLEASE ALERT THE EDMC DEVELOPERS</code></li>
+<li><code>system is falsey, can't add StarSystem</code></li>
+<li><code>this.coordinates is falsey, can't add StarPos</code></li>
+<li><code>this.systemaddress is falsey, can't add SystemAddress</code></li>
+</ul>
+<p>Ref: <a href="https://github.com/EDCD/EDMarketConnector/issues/1403">#1403</a>
+<a href="https://github.com/EDCD/EDMarketConnector/issues/1393">#1393</a>.</p>
+</li>
+</ul>
+<h2>
+<a id="user-content-translations" class="anchor" href="#translations" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Translations</h2>
+<ul>
+<li>
+<p>Use a different workaround for OneSky (translations website) using "zh-Hans"
+for Chinese (Simplified), whereas Windows will call this "zh-CN". This is
+in-code and documented with a comment, as opposed to some 'magic' in the
+Windows Installer configuration that had no such documentation. It's less
+fragile than relying on that, or developers using a script/documented
+process to rename the file.</p>
+</li>
+<li>
+<p>As noted above we forgot to upload to
+<a href="https://marginal.oneskyapp.com/collaboration/project/52710" rel="nofollow">OneSky</a>
+after adding the Odyssey new ranks/categories.  This has now been done,
+and some new phrases await translation.</p>
 </li>
 </ul>
 
@@ -1130,11 +1294,11 @@ about this:
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.2.4/EDMarketConnector_win_5.2.4.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.3.0/EDMarketConnector_win_5.3.0.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="5.2.4"
-				length="10555392"
+				sparkle:version="5.3.0"
+				length="16707584"
 				type="application/octet-stream"
 			/>
 		</item>
