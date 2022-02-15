@@ -27,101 +27,54 @@ produce the Windows executables and installer.
 
 ---
 
-Pre-Release 5.3.0-beta11
+Release 5.3.0
 ===
-
-* EDDN: Implement forthcoming approachsettlement/1 schema.
-
-* EDDN: Implement forthcoming fssallbodiesfound/1 schema.
-
-* Inara: Only send a `setCommanderCredits` message at game login.  Yes, you
-    will **NEED** to relog to send an updated balance.  This is the only way
-    in which to sanely keep the 'Total Assets' value on Inara from bouncing
-    around.  Refer to [Inara:API:docs:setCommanderCredits](https://inara.cz/inara-api-docs/#event-1).
-
-    Closes [#1401](https://github.com/EDCD/EDMarketConnector/issues/1401).
-
-Plugin Developers
----
-
-* It's unlikely to affect you, but our `requirements-dev.txt` now explicitly
-    cites a specific version of `setuptools`.  This was necessary to ensure we
-    have a version that works with `py2exe` for the windows build process.
-
-    If anything this will ensure you have a *more up to date* version of
-    `setuptools` installed.
-
----
-
-Pre-Release 5.3.0-beta10
-===
-
-* Revert `semantic_version` python module to v2.8.5, as v2.9.0 doesn't get
-    correctly included by py2exe.  This leads to application crash at startup
-    when using the Windows .exe.
-
----
-
-Pre-Release 5.3.0-beta9
-===
-
-* Inara: Fix for always sending a Rank Progress of 0%.
-
-    Closes [#1378](https://github.com/EDCD/EDMarketConnector/issues/1378).
-
----
-
-Pre-Release 5.3.0-beta8
-===
-
-This release is simply to check we've correctly updated the windows-build
-configuration to pull in `FDevIDs` when the build is performed on GitHub.
-
----
-
-Pre-Release 5.3.0-beta7
-===
-
-**NB: Due to [this issue with GitHub's Actions](https://github.com/actions/virtual-environments/issues/5023)
-we were unable to build this version on GitHub.  THE INSTALLER FOR THIS
-RELEASE WAS BUILT ON A DEVELOPER'S OWN MACHINE.  THERE IS NO REASON TO BELIEVE
-THAT THIS IN ANY WAY INCREASES THE RISK OF IT ACTUALLY CONTAINING MALWARE.**
 
 As has sadly become routine now, please read
 [our statement about malware false positives](https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting#installer-and-or-executables-flagged-as-malicious-viruses)
 affecting our installers and/or the files they contain.  We are as confident
-as we can be, without detailed auditing of python.org's releases and all of
+as we can be, without detailed auditing of python.org's releases and all
 the py2exe source and releases, that there is no malware in the files we make
 available.
 
+This release is primarily aimed at fixing some more egregious bugs,
+shortcomings and annoyances with the application.  It also adds support for
+two additional
+[EDDN](https://github.com/EDCD/EDDN/blob/live/README.md)
+schemas.
+
 * We now test and build using Python 3.10.2.  We do not *yet* make use of any
-   features specific to Python 3.10 (or 3.9).  Let us restate that we
-   absolutely reserve the right to commence doing so.
+    features specific to Python 3.10 (or 3.9).  Let us restate that we
+    absolutely reserve the right to commence doing so.
+
+* We now set a custom User-Agent header in all web requests, i.e. to EDDN,
+    EDSM and the like.  This is of the form:
+
+    `EDCD-EDMarketConnector-<version>`
 
 * "File" -> "Status" will now show the new Odyssey ranks, both the new
-  categories and the new 'prestige' ranks, e.g. 'Elite I'.  Closes
-  [#1369](https://github.com/EDCD/EDMarketConnector/issues/1369).
+    categories and the new 'prestige' ranks, e.g. 'Elite I'.
+
+    Closes [#1369](https://github.com/EDCD/EDMarketConnector/issues/1369).
 
 * Running `EDMarketConnector.exe --reset-ui` will now also reset any changes to
-  the application "UI Scale" or geometry (position and size).  Closes
-  [#1155](https://github.com/EDCD/EDMarketConnector/issues/1155).
+    the application "UI Scale" or geometry (position and size).
+
+    Closes [#1155](https://github.com/EDCD/EDMarketConnector/issues/1155).
 
 * We now use UTC-based timestamps in the application's log files.  Prior to
-  this change it was the "local time", but without any indication of the
-  applied timezone.  Each line's timestamp has ` UTC` as a suffix now.  We
-  are assuming that your local clock is correct *and* the timezone is set
-  correctly, such that Python's `time.gmtime()` yields UTC times.
+    this change it was the "local time", but without any indication of the
+    applied timezone.  Each line's timestamp has ` UTC` as a suffix now.  We
+    are assuming that your local clock is correct *and* the timezone is set
+    correctly, such that Python's `time.gmtime()` yields UTC times.
 
-  This should make it easier to correlate application logfiles with in-game
-  time and/or third-party service timestamps.
-
-* All communication with remote web servers and APIs now uses the same custom
-   "User-Agent" header to make attribution to this application clear.
+    This should make it easier to correlate application logfiles with in-game
+    time and/or third-party service timestamps.
 
 * The process used to build the Windows installers should now always pick up
-   all the necessary files automatically.  Prior to this we used a manual
-   process to update the installer configuration which was prone to both user
-   error and neglecting to update it as necessary.
+    all the necessary files automatically.  Prior to this we used a manual
+    process to update the installer configuration which was prone to both user
+    error and neglecting to update it as necessary.
 
 * If the application fails to load valid data from the `NavRoute.json` file
     when processing a Journal `NavRoute` event, it will attempt to retry this
@@ -140,10 +93,15 @@ available.
     value when sending a `setCommanderCredits` message to Inara to set
     `commanderAssets`.
 
-    This should cause Inara and EDMC to agree on the Commander's current total
-    assets credits figure, and thus prevent it bouncing between two values.
+    In addition, a `setCommanderCredits` message at game login **will now only
+    ever be sent at game login**.  Yes, you will **NEED** to relog to send an
+    updated balance.  This is the only way in which to sanely keep the
+    'Total Assets' value on Inara from bouncing around.
+
+    Refer to [Inara:API:docs:setCommanderCredits](https://inara.cz/inara-api-docs/#event-1).
 
     Closes [#1401](https://github.com/EDCD/EDMarketConnector/issues/1401).
+
 * Inara: Send a `setCommanderRankPilot` message when the player logs in to the
     game on-foot.  Previously you would *HAVE* to be in a ship at login time
     for this to be sent.
@@ -153,17 +111,9 @@ available.
 
     Closes [#1378](https://github.com/EDCD/EDMarketConnector/issues/1378).
 
-* Inara: We will now send the new idea of "credits in the Commander's wallet"
-    when the delta from the last sent value is either 5% *or* at least
-    10 million.  It used to require a strict 5% difference, which meant needing
-    very large deltas if you had a large credit balance.
+* Inara: Fix for always sending a Rank Progress of 0%.
 
-    The intention of the 5% is so that newer/poorer commanders still get
-    updates at an acceptable frequency, with the 10 million alternative trigger
-    allowing richer commanders to also experience more frequent updates than
-    was previously the case.
-
-    Close [#1255](https://github.com/EDCD/EDMarketConnector/issues/1255).
+    Closes [#1378](https://github.com/EDCD/EDMarketConnector/issues/1378).
 
 * Inara: You should once more see updates for any materials used in
     Engineering.  The bug was in our more general Journal event processing
@@ -176,24 +126,30 @@ available.
 
     Closes [#1395](https://github.com/EDCD/EDMarketConnector/issues/1395).
 
+* EDDN: Implement new [approachsettlement/1](https://github.com/EDCD/EDDN/blob/live/schemas/approachsettlement-README.md)
+    schema.
+
+* EDDN: Implement new [fssallbodiesfound/1](https://github.com/EDCD/EDDN/blob/live/schemas/fssallbodiesfound-README.md)
+    schema.
+
 * EDDN: We now compress all outgoing messages.  This might help get some
-  particularly large `navroute` messages go through.
+    particularly large `navroute` messages go through.
 
-  If any message is now rejected as 'too large' we will drop it, and thus
-  not retry it later.  The application logs will reflect this.
+    If any message is now rejected as 'too large' we will drop it, and thus
+    not retry it later.  The application logs will reflect this.
 
-  NB: The EDDN Gateway was updated to allow messages up to 1 MiB in size
-  anyway.  The old limit was 100 KiB.
+    NB: The EDDN Gateway was updated to allow messages up to 1 MiB in size
+    anyway.  The old limit was 100 KiB.
 
-  Closes [#1390](https://github.com/EDCD/EDMarketConnector/issues/1390).
+    Closes [#1390](https://github.com/EDCD/EDMarketConnector/issues/1390).
 
 * EDDN: In an attempt to diagnose some errors observed on the EDDN Gateway
     with respect to messages sent from this application some additional checks
     and logging have been added.
 
     **NB: After some thorough investigation it was concluded that these EDDN
-          errors were likely the result of long-delayed messages due to use of
-          the "Delay sending until docked" option.**
+    errors were likely the result of long-delayed messages due to use of
+    the "Delay sending until docked" option.**
 
     There should be no functional changes for users.  But if you see any of
     the following in this application's log files **PLEASE OPEN
@@ -209,7 +165,7 @@ available.
     - `this.coordinates is falsey, can't add StarPos`
     - `this.systemaddress is falsey, can't add SystemAddress`
     - `this.status_body_name was not set properly: ...`
-  
+
     You might also see any of the following in the application status text
     (bottom of the window):
 
@@ -222,8 +178,37 @@ available.
     Ref: [#1403](https://github.com/EDCD/EDMarketConnector/issues/1403)
     [#1393](https://github.com/EDCD/EDMarketConnector/issues/1393).
 
+Translations
+---
+
+* Use a different workaround for OneSky (translations website) using "zh-Hans"
+    for Chinese (Simplified), whereas Windows will call this "zh-CN". This is
+    in-code and documented with a comment, as opposed to some 'magic' in the
+    Windows Installer configuration that had no such documentation. It's less
+    fragile than relying on that, or developers using a script/documented
+    process to rename the file.
+
 Plugin Developers
 ---
+
+We now test against, and package with Python 3.10.2.
+
+* We've made no explicit changes to the Python stdlib, or other modules, we
+    currently offer, but we did have to start explicitly including
+    `asyncio` and `multiprocessing` due to using a newer version of `py2exe`
+    for the windows build.
+
+* We will now include in the Windows installer *all* of the files that `py2exe`
+    places in the build directory.  This is vulnerable to a later version of
+    our code, python and/or py2exe no longer causing inclusion of a module.
+
+    We have endeavoured to ensure this release contains *at least* all of the
+    same modules that 5.2.4 did.
+
+    We are looking into
+    [including all of Python stdlib](https://github.com/EDCD/EDMarketConnector/issues/1327),
+    but if there's a particular part of this we don't package then please ask
+    us to by opening an issue on GitHub.
 
 * We now have an `.editorconfig` file which will instruct your editor/IDE to
     change some settings pertaining to things like indentation and line wrap,
@@ -250,62 +235,14 @@ Plugin Developers
     Developers of third-party plugins should never have been using these files
     anyway, so this shouldn't break anything for them.
 
-* We will now include in the Windows installer *all* of the files that `py2exe`
-    places in the build directory.  We still do *not* yet include *all* of the
-    Python 'stdlib', so open an issue on GitHub if something you need is
-    missing.
+* It's unlikely to affect you, but our `requirements-dev.txt` now explicitly
+    cites a specific version of `setuptools`.  This was necessary to ensure we
+    have a version that works with `py2exe` for the windows build process.
+
+    If anything this will ensure you have a *more up to date* version of
+    `setuptools` installed.
 
 ---
-5.3.0-beta3 through 5.3.0-beta6 were used internally, no public pre-releases.
-
----
-
-Pre-Release 5.3.0-beta2
-===
-
-In terms of application functionality this is identical to 5.3.0-beta1. The
-only changes are related to the process of building the Windows installer.
-
-- Ensure we always package all files into the Windows installer.
-- Use a different workaround for OneSky (translations website) using "zh-Hans"
-   for Chinese (Simplified), whereas Windows will call this "zh-CN". This is
-   in-code and documented with a comment, as opposed to some 'magic' in the
-   Windows Installer configuration that had no such documentation. It's less
-   fragile than relying on that, or developers using a script/documented
-   process to rename the file.
-
-Pre-Release 5.3.0-beta1
-===
-
-This is a test release to ensure packaging with Python 3.10.1 is working 
-correctly.  There is also a small change to metadata in any remote web 
-request we make.
-
-* We now set a custom User-Agent header in all web requests, i.e. to EDDN, 
-  EDSM and the like.  This is of the form:
-
-    `EDCD-EDMarketConnector-<version>`
-
-Developers
----
-
-We now test against, and package with Python 3.10.1.
-
-We've made no explicit changes to the Python stdlib, or other modules, we
-currently offer.  However, the newer [py2exe](https://github.com/py2exe/py2exe/)
-we now use has decided we no longer need:
-
-  - _aynscio.pyd
-  - _multiprocessing.pyd
-  - _overlapped.pyd
-
-so those are no longer included in the Windows installers.  We are looking into
-[including all of Python stdlib](https://github.com/EDCD/EDMarketConnector/issues/1327)
-so this would be resolved by that.
-
-If your plugin utilises any module/package that requires per-architecture 
-libraries then you should check it has Python 3.10 wheels available.
-
 ---
 
 Release 5.2.4
