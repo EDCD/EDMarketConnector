@@ -2,11 +2,11 @@
 
 import json
 import pathlib
+import sys
 import time
 import tkinter as tk
 from calendar import timegm
 from os.path import getsize, isdir, isfile
-from sys import platform
 from typing import Any, Dict
 
 from config import config
@@ -14,11 +14,11 @@ from EDMCLogging import get_main_logger
 
 logger = get_main_logger()
 
-if platform == 'darwin':
+if sys.platform == 'darwin':
     from watchdog.events import FileSystemEventHandler
     from watchdog.observers import Observer
 
-elif platform == 'win32':
+elif sys.platform == 'win32':
     from watchdog.events import FileSystemEventHandler
     from watchdog.observers import Observer
 
@@ -71,26 +71,25 @@ class Dashboard(FileSystemEventHandler):
         # File system events are unreliable/non-existent over network drives on Linux.
         # We can't easily tell whether a path points to a network drive, so assume
         # any non-standard logdir might be on a network drive and poll instead.
-        polling = platform != 'win32'
-        if not polling and not self.observer:
+        if not (sys.platform != 'win32') and not self.observer:
             logger.debug('Setting up observer...')
             self.observer = Observer()
             self.observer.daemon = True
             self.observer.start()
             logger.debug('Done')
 
-        elif polling and self.observer:
+        elif (sys.platform != 'win32') and self.observer:
             logger.debug('Using polling, stopping observer...')
             self.observer.stop()
             self.observer = None  # type: ignore
             logger.debug('Done')
 
-        if not self.observed and not polling:
+        if not self.observed and not (sys.platform != 'win32'):
             logger.debug('Starting observer...')
             self.observed = self.observer.schedule(self, self.currentdir)
             logger.debug('Done')
 
-        logger.info(f'{polling and "Polling" or "Monitoring"} Dashboard "{self.currentdir}"')
+        logger.info(f'{(sys.platform != "win32") and "Polling" or "Monitoring"} Dashboard "{self.currentdir}"')
 
         # Even if we're not intending to poll, poll at least once to process pre-existing
         # data and to check whether the watchdog thread has crashed due to events not

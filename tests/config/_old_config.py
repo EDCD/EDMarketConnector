@@ -4,7 +4,6 @@ import warnings
 from configparser import NoOptionError
 from os import getenv, makedirs, mkdir, pardir
 from os.path import dirname, expanduser, isdir, join, normpath
-from sys import platform
 from typing import TYPE_CHECKING, Optional, Union
 
 from config import applongname, appname, update_interval
@@ -12,13 +11,13 @@ from EDMCLogging import get_main_logger
 
 logger = get_main_logger()
 
-if platform == 'darwin':
+if sys.platform == 'darwin':
     from Foundation import (  # type: ignore
         NSApplicationSupportDirectory, NSBundle, NSDocumentDirectory, NSSearchPathForDirectoriesInDomains,
         NSUserDefaults, NSUserDomainMask
     )
 
-elif platform == 'win32':
+elif sys.platform == 'win32':
     import ctypes
     import uuid
     from ctypes.wintypes import DWORD, HANDLE, HKEY, LONG, LPCVOID, LPCWSTR
@@ -90,7 +89,7 @@ elif platform == 'win32':
         CoTaskMemFree(buf)  # and free original
         return retval
 
-elif platform == 'linux':
+elif sys.platform == 'linux':
     import codecs
     from configparser import RawConfigParser
 
@@ -114,7 +113,7 @@ class OldConfig():
     OUT_SYS_EDDN = 2048
     OUT_SYS_DELAY = 4096
 
-    if platform == 'darwin':  # noqa: C901 # It's gating *all* the functions
+    if sys.platform == 'darwin':  # noqa: C901 # It's gating *all* the functions
 
         def __init__(self):
             self.app_dir = join(
@@ -199,7 +198,7 @@ class OldConfig():
             self.save()
             self.defaults = None
 
-    elif platform == 'win32':
+    elif sys.platform == 'win32':
 
         def __init__(self):
             self.app_dir = join(known_folder_path(FOLDERID_LocalAppData), appname)  # type: ignore # Not going to change
@@ -362,7 +361,7 @@ class OldConfig():
             RegCloseKey(self.hkey)
             self.hkey = None
 
-    elif platform == 'linux':
+    elif sys.platform == 'linux':
         SECTION = 'config'
 
         def __init__(self):

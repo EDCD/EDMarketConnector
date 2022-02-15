@@ -17,7 +17,8 @@ this document aims to enable anyone to quickly get up to speed on how to:
  available versions and asks the user to upgrade.
 
 Note that for Windows only a 32-bit application is supported at this time.
-This is principally due to the Windows Registry handling in config.py.
+This is principally due to the Windows Registry handling in
+`config/windows.py`.
 
 
 # Environment
@@ -103,7 +104,7 @@ that.
  registry entries on Windows.
 
 1. Application names, version and URL of the file with latest release
- information. These are all in the `config.py` file.  See the
+ information. These are all in the `config/__init__.py` file.  See the
  `from config import ...` lines in setup.py.
     1. `appname`: The short appname, e.g. 'EDMarketConnector'
     2. `applongname`: The long appname, e.g. 'E:D Market Connector'
@@ -206,24 +207,24 @@ following.
 
 1. You should by this time know what changes are going into the release, and
 which branch (stable or beta) you'll be ultimately updating.
-1. So as to make backing out any mistakes easier create a new branch for this
+2. So as to make backing out any mistakes easier create a new branch for this
 release, using a name like `release-4.0.2`.  Do not use the tag
 `Release/4.0.2` form, that could cause confusion.
     1. `git checkout stable` # Or whichever other branch is appropriate.
     1. `git pull origin` # Ensures local branch is up to date.
     1. `git checkout -b release-4.0.2`
 
-1. Get all the relevant code changes into this branch.  This might mean
+3. Get all the relevant code changes into this branch.  This might mean
 merging from another branch, such as an issue-specific one, or possibly
 cherry-picking commits.  See [Contributing Guidelines](../Contributing.md)
 for how such branches should be named.
 
-1. You should have already decided on the new
-[Version String](#Version-Strings), as it's specified in `config.py`.  You'll
-need to redo the `.msi` build if you forgot. **Remember to do a fresh git
-commit for this change.**
+4. You should have already decided on the new
+[Version String](#Version-Strings), as it's specified in `config/__init__.py`.
+You'll need to redo the `.msi` build if you forgot. **Remember to do a fresh
+git commit for this change.**
 
-1. Prepare a changelog text for the release.  You'll need this both for the
+5. Prepare a changelog text for the release.  You'll need this both for the
 GitHub release and the contents of the `edmarketconnector.xml` file if making
 a `stable` release, as well as any social media posts you make.
     1. The primary location of the changelog is [Changelog.md](../Changelog.md) -
@@ -408,7 +409,7 @@ changelog text to the correct section(s):
 
     `https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml`
 
-   as per `config.py` `update_feed`.
+   as per `config/__init__.py` `update_feed`.
 
    NB: It can take some time for GitHub to show the changed
    edmarketconnector.xml contents to all users.
@@ -438,6 +439,8 @@ When changing the Python version (Major.Minor.Patch) used:
 
    1. `.github/workflows/windows-build.yml` needs updating to have the GitHub
    based build use the correct version.
+   2. `ChangeLog.md` - The `We now test against, and package with, Python
+       M.m.P.` line.
 
 1. Major or Minor level changes:
 
@@ -446,3 +449,5 @@ When changing the Python version (Major.Minor.Patch) used:
        pythonXX.dll file.
     3. `.pre-commit-config.yaml` will need the `default_language_version`
        section updated to the appropriate version.
+    4. All `.github/workflows/` files will need to be citing the correct
+       version in any `uses: actions/setup-python` section.

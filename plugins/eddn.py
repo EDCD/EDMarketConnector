@@ -1,5 +1,27 @@
 """Handle exporting data to EDDN."""
 
+# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $#
+# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $#
+#
+# This is an EDMC 'core' plugin.
+#
+# All EDMC plugins are *dynamically* loaded at run-time.
+#
+# We build for Windows using `py2exe`.
+#
+# `py2exe` can't possibly know about anything in the dynamically loaded
+# core plugins.
+#
+# Thus you **MUST** check if any imports you add in this file are only
+# referenced in this file (or only in any other core plugin), and if so...
+#
+#     YOU MUST ENSURE THAT PERTINENT ADJUSTMENTS ARE MADE IN `setup.py`
+#     SO AS TO ENSURE THE FILES ARE ACTUALLY PRESENT IN AN END-USER
+#     INSTALLATION ON WINDOWS.
+#
+#
+# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $#
+# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $#
 import itertools
 import json
 import pathlib
@@ -10,6 +32,7 @@ from collections import OrderedDict
 from os import SEEK_SET
 from os.path import join
 from platform import system
+from textwrap import dedent
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Mapping, MutableMapping, Optional
 from typing import OrderedDict as OrderedDictT
 from typing import TextIO, Tuple, Union
@@ -21,12 +44,13 @@ import killswitch
 import myNotebook as nb  # noqa: N813
 import plug
 from companion import CAPIData, category_map
-from config import applongname, appversion_nobuild, config, debug_senders
+from config import applongname, appversion_nobuild, config, debug_senders, user_agent
 from EDMCLogging import get_main_logger
 from monitor import monitor
 from myNotebook import Frame
 from prefs import prefsVersion
 from ttkHyperlinkLabel import HyperlinkLabel
+from util import text
 
 if sys.platform != 'win32':
     from fcntl import LOCK_EX, LOCK_NB, lockf
@@ -125,6 +149,7 @@ class EDDN:
     def __init__(self, parent: tk.Tk):
         self.parent: tk.Tk = parent
         self.session = requests.Session()
+        self.session.headers['User-Agent'] = user_agent
         self.replayfile: Optional[TextIO] = None  # For delayed messages
         self.replaylog: List[str] = []
 
@@ -167,6 +192,10 @@ class EDDN:
 
     def flush(self):
         """Flush the replay file, clearing any data currently there that is not in the replaylog list."""
+        if self.replayfile is None:
+            logger.error('replayfile is None!')
+            return
+
         self.replayfile.seek(0, SEEK_SET)
         self.replayfile.truncate()
         for line in self.replaylog:
@@ -212,7 +241,20 @@ class EDDN:
             ('message', msg['message']),
         ])
 
-        r = self.session.post(self.eddn_url, data=json.dumps(to_send), timeout=self.TIMEOUT)
+        # About the smallest request is going to be (newlines added for brevity):
+        # {"$schemaRef":"https://eddn.edcd.io/schemas/commodity/3","header":{"softwareName":"E:D Market
+        # Connector Windows","softwareVersion":"5.3.0-beta4extra","uploaderID":"abcdefghijklm"},"messag
+        # e":{"systemName":"delphi","stationName":"The Oracle","marketId":128782803,"timestamp":"2022-0
+        # 1-26T12:00:00Z","commodities":[]}}
+        #
+        # Which comes to 315 bytes (including \n) and compresses to 244 bytes. So lets just compress everything
+
+        encoded, compressed = text.gzip(json.dumps(to_send, separators=(',', ':')), max_size=0)
+        headers: None | dict[str, str] = None
+        if compressed:
+            headers = {'Content-Encoding': 'gzip'}
+
+        r = self.session.post(self.eddn_url, data=encoded, timeout=self.TIMEOUT, headers=headers)
         if r.status_code != requests.codes.ok:
 
             # Check if EDDN is still objecting to an empty commodities list
@@ -225,17 +267,47 @@ class EDDN:
                 logger.trace_if('plugin.eddn', "EDDN is still objecting to empty commodities data")
                 return  # We want to silence warnings otherwise
 
+            if r.status_code == 413:
+                extra_data = {
+                    'schema_ref': msg.get('$schemaRef', 'Unset $schemaRef!'),
+                    'sent_data_len': str(len(encoded)),
+                }
+
+                if '/journal/' in extra_data['schema_ref']:
+                    extra_data['event'] = msg.get('message', {}).get('event', 'No Event Set')
+
+                self._log_response(r, header_msg='Got a 413 while POSTing data', **extra_data)
+                return  # drop the error
+
             if not self.UNKNOWN_SCHEMA_RE.match(r.text):
-                logger.debug(
-                    f'''Status from POST wasn't OK:
-Status\t{r.status_code}
-URL\t{r.url}
-Headers\t{r.headers}
-Content:\n{r.text}
-Msg:\n{msg}'''
-                )
+                self._log_response(r, header_msg='Status from POST wasn\'t 200 (OK)')
 
         r.raise_for_status()
+
+    def _log_response(
+        self,
+        response: requests.Response,
+        header_msg='Failed to POST to EDDN',
+        **kwargs
+    ) -> None:
+        """
+        Log a response object with optional additional data.
+
+        :param response: The response to log
+        :param header_msg: A header message to add to the log, defaults to 'Failed to POST to EDDN'
+        :param kwargs: Any other notes to add, will be added below the main data in the same format.
+        """
+        additional_data = "\n".join(
+            f'''{name.replace('_', ' ').title():<8}:\t{value}''' for name, value in kwargs.items()
+        )
+
+        logger.debug(dedent(f'''\
+        {header_msg}:
+        Status  :\t{response.status_code}
+        URL     :\t{response.url}
+        Headers :\t{response.headers}
+        Content :\t{response.text}
+        ''')+additional_data)
 
     def sendreplay(self) -> None:  # noqa: CCR001
         """Send cached Journal lines to EDDN."""
@@ -717,20 +789,27 @@ Msg:\n{msg}'''
     def entry_augment_system_data(
             self,
             entry: MutableMapping[str, Any],
-            system_name: str
+            system_name: str,
+            system_coordinates: list
     ) -> Union[str, MutableMapping[str, Any]]:
         """
         Augment a journal entry with necessary system data.
 
         :param entry: The journal entry to be augmented.
         :param system_name: Name of current star system.
-        :param systemname_field_name: Name of journal key for system name.
+        :param system_coordinates: Coordinates of current star system.
         :return: The augmented version of entry.
         """
         # If 'SystemName' or 'System' is there, it's directly from a journal event.
         # If they're not there *and* 'StarSystem' isn't either, then we add the latter.
         if 'SystemName' not in entry and 'System' not in entry and 'StarSystem' not in entry:
-            entry['StarSystem'] = system_name
+            if system_name is None or not isinstance(system_name, str) or system_name == '':
+                # Bad assumptions if this is the case
+                logger.warning(f'No system name in entry, and system_name was not set either!  entry:\n{entry!r}\n')
+                return "passed-in system_name is empty, can't add System"
+
+            else:
+                entry['StarSystem'] = system_name
 
         if 'SystemAddress' not in entry:
             if this.systemaddress is None:
@@ -740,21 +819,29 @@ Msg:\n{msg}'''
             entry['SystemAddress'] = this.systemaddress
 
         if 'StarPos' not in entry:
-            if not this.coordinates:
-                logger.warning("this.coordinates is None, can't add StarPos")
-                return "this.coordinates is None, can't add StarPos"
+            # Prefer the passed-in, probably monitor.state version
+            if system_coordinates is not None:
+                entry['StarPos'] = system_coordinates
 
-            entry['StarPos'] = list(this.coordinates)
+            # TODO: Deprecate in-plugin tracking
+            elif this.coordinates is not None:
+                entry['StarPos'] = list(this.coordinates)
+
+            else:
+                logger.warning("Neither this_coordinates or this.coordinates set, can't add StarPos")
+                return 'No source for adding StarPos to approachsettlement/1 !'
 
         return entry
 
     def export_journal_fssdiscoveryscan(
-            self, cmdr: str, system: str, is_beta: bool, entry: Mapping[str, Any]
+            self, cmdr: str, system_name: str, system_starpos: list, is_beta: bool, entry: Mapping[str, Any]
     ) -> Optional[str]:
         """
         Send an FSSDiscoveryScan to EDDN on the correct schema.
 
         :param cmdr: the commander under which this upload is made
+        :param system_name: Name of current star system
+        :param system_starpos: Coordinates of current star system
         :param is_beta: whether or not we are in beta mode
         :param entry: the journal entry to send
         """
@@ -767,7 +854,7 @@ Msg:\n{msg}'''
         #######################################################################
         # Augmentations
         #######################################################################
-        ret = this.eddn.entry_augment_system_data(entry, system)
+        ret = this.eddn.entry_augment_system_data(entry, system_name, system_starpos)
         if isinstance(ret, str):
             return ret
 
@@ -783,13 +870,14 @@ Msg:\n{msg}'''
         return None
 
     def export_journal_navbeaconscan(
-            self, cmdr: str, system_name: str, is_beta: bool, entry: Mapping[str, Any]
+            self, cmdr: str, system_name: str, system_starpos: list, is_beta: bool, entry: Mapping[str, Any]
     ) -> Optional[str]:
         """
         Send an NavBeaconScan to EDDN on the correct schema.
 
         :param cmdr: the commander under which this upload is made
         :param system_name: Name of the current system.
+        :param system_starpos: Coordinates of current star system
         :param is_beta: whether or not we are in beta mode
         :param entry: the journal entry to send
         """
@@ -802,7 +890,7 @@ Msg:\n{msg}'''
         #######################################################################
         # Augmentations
         #######################################################################
-        ret = this.eddn.entry_augment_system_data(entry, system_name)
+        ret = this.eddn.entry_augment_system_data(entry, system_name, system_starpos)
         if isinstance(ret, str):
             return ret
 
@@ -817,13 +905,14 @@ Msg:\n{msg}'''
         this.eddn.export_journal_entry(cmdr, entry, msg)
         return None
 
-    def export_journal_codexentry(
-            self, cmdr: str, is_beta: bool, entry: MutableMapping[str, Any]
+    def export_journal_codexentry(  # noqa: CCR001
+            self, cmdr: str, system_starpos: list, is_beta: bool, entry: MutableMapping[str, Any]
     ) -> Optional[str]:
         """
         Send a CodexEntry to EDDN on the correct schema.
 
         :param cmdr: the commander under which this upload is made
+        :param system_starpos: Coordinates of current star system
         :param is_beta: whether or not we are in beta mode
         :param entry: the journal entry to send
         """
@@ -858,20 +947,36 @@ Msg:\n{msg}'''
         # Augmentations
         #######################################################################
         # General 'system' augmentations
-        ret = this.eddn.entry_augment_system_data(entry, entry['System'])
+        ret = this.eddn.entry_augment_system_data(entry, entry['System'], system_starpos)
         if isinstance(ret, str):
             return ret
 
         entry = ret
 
         # Set BodyName if it's available from Status.json
-        if this.status_body_name is not None:
+        if this.status_body_name is None or not isinstance(this.status_body_name, str):
+            logger.warning(f'this.status_body_name was not set properly:'
+                           f' "{this.status_body_name}" ({type(this.status_body_name)})')
+
+        else:
             entry['BodyName'] = this.status_body_name
             # Only set BodyID if journal BodyName matches the Status.json one.
             # This avoids binary body issues.
             if this.status_body_name == this.body_name:
-                entry['BodyID'] = this.body_id
+                if this.body_id is not None and isinstance(this.body_id, int):
+                    entry['BodyID'] = this.body_id
+
+                else:
+                    logger.warning(f'this.body_id was not set properly: "{this.body_id}" ({type(this.body_id)})')
         #######################################################################
+
+        for k, v in entry.items():
+            if v is None or isinstance(v, str) and v == '':
+                logger.warning(f'post-processing entry contains entry["{k}"] = {v} {(type(v))}')
+                # We should drop this message and VERY LOUDLY inform the
+                # user, in the hopes they'll open a bug report with the
+                # raw Journal event that caused this.
+                return 'CodexEntry had empty string, PLEASE ALERT THE EDMC DEVELOPERS'
 
         msg = {
             '$schemaRef': f'https://eddn.edcd.io/schemas/codexentry/1{"/test" if is_beta else ""}',
@@ -882,12 +987,13 @@ Msg:\n{msg}'''
         return None
 
     def export_journal_scanbarycentre(
-            self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]
+            self, cmdr: str, system_starpos: list, is_beta: bool, entry: Mapping[str, Any]
     ) -> Optional[str]:
         """
         Send a ScanBaryCentre to EDDN on the correct schema.
 
         :param cmdr: the commander under which this upload is made
+        :param system_starpos: Coordinates of current star system
         :param is_beta: whether or not we are in beta mode
         :param entry: the journal entry to send
         """
@@ -913,7 +1019,7 @@ Msg:\n{msg}'''
         #######################################################################
         # Augmentations
         #######################################################################
-        ret = this.eddn.entry_augment_system_data(entry, entry['StarSystem'])
+        ret = this.eddn.entry_augment_system_data(entry, entry['StarSystem'], system_starpos)
         if isinstance(ret, str):
             return ret
 
@@ -935,6 +1041,7 @@ Msg:\n{msg}'''
         Send a NavRoute to EDDN on the correct schema.
 
         :param cmdr: the commander under which this upload is made
+        :param system_starpos: Coordinates of current star system
         :param is_beta: whether or not we are in beta mode
         :param entry: the journal entry to send
         """
@@ -990,6 +1097,86 @@ Msg:\n{msg}'''
 
         msg = {
             '$schemaRef': f'https://eddn.edcd.io/schemas/navroute/1{"/test" if is_beta else ""}',
+            'message': entry
+        }
+
+        this.eddn.export_journal_entry(cmdr, entry, msg)
+        return None
+
+    def export_journal_approachsettlement(
+        self, cmdr: str, system_name: str, system_starpos: list, is_beta: bool, entry: MutableMapping[str, Any]
+    ) -> Optional[str]:
+        """
+        Send an ApproachSettlement to EDDN on the correct schema.
+
+        :param cmdr: the commander under which this upload is made
+        :param system_name: Name of current star system
+        :param system_starpos: Coordinates of current star system
+        :param is_beta: whether or not we are in beta mode
+        :param entry: the journal entry to send
+        """
+        # {
+        #   "BodyID": 32,
+        #   "BodyName": "Ix 5 a a",
+        #   "Latitude": 17.090912,
+        #   "Longitude": 160.236679,
+        #   "MarketID": 3915738368,
+        #   "Name": "Arnold Defence Base",
+        #   "SystemAddress": 2381282543963,
+        #   "event": "ApproachSettlement",
+        #   "timestamp": "2021-10-14T12:37:54Z"
+        # }
+        #######################################################################
+        # Augmentations
+        #######################################################################
+        # In this case should add StarSystem and StarPos
+        ret = this.eddn.entry_augment_system_data(entry, system_name, system_starpos)
+        if isinstance(ret, str):
+            return ret
+
+        entry = ret
+        #######################################################################
+
+        msg = {
+            '$schemaRef': f'https://eddn.edcd.io/schemas/approachsettlement/1{"/test" if is_beta else ""}',
+            'message': entry
+        }
+
+        this.eddn.export_journal_entry(cmdr, entry, msg)
+        return None
+
+    def export_journal_fssallbodiesfound(
+        self, cmdr: str, system_name: str, system_starpos: list, is_beta: bool, entry: MutableMapping[str, Any]
+    ) -> Optional[str]:
+        """
+        Send an FSSAllBodiesFound message to EDDN on the correct schema.
+
+        :param cmdr: the commander under which this upload is made
+        :param system_name: Name of current star system
+        :param system_starpos: Coordinates of current star system
+        :param is_beta: whether or not we are in beta mode
+        :param entry: the journal entry to send
+        """
+        # {
+        #   "Count": 3,
+        #   "SystemAddress": 9466778822057,
+        #   "SystemName": "LP 704-74",
+        #   "event": "FSSAllBodiesFound",
+        #   "timestamp": "2022-02-09T18:15:14Z"
+        # }
+        #######################################################################
+        # Augmentations
+        #######################################################################
+        # In this case should add StarSystem and StarPos
+        ret = this.eddn.entry_augment_system_data(entry, system_name, system_starpos)
+        if isinstance(ret, str):
+            return ret
+
+        entry = ret
+        #######################################################################
+
+        msg = {
+            '$schemaRef': f'https://eddn.edcd.io/schemas/fssallbodiesfound/1{"/test" if is_beta else ""}',
             'message': entry
         }
 
@@ -1237,6 +1424,7 @@ def journal_entry(  # noqa: C901, CCR001
         return None
 
     entry = new_data
+    event_name = entry['event'].lower()
 
     this.on_foot = state['OnFoot']
 
@@ -1246,8 +1434,8 @@ def journal_entry(  # noqa: C901, CCR001
     this.odyssey = entry['odyssey'] = state['Odyssey']
 
     # Track location
-    if entry['event'] in ('Location', 'FSDJump', 'Docked', 'CarrierJump'):
-        if entry['event'] in ('Location', 'CarrierJump'):
+    if event_name in ('location', 'fsdjump', 'docked', 'carrierjump'):
+        if event_name in ('location', 'carrierjump'):
             if entry.get('BodyType') == 'Planet':
                 this.body_name = entry.get('Body')
                 this.body_id = entry.get('BodyID')
@@ -1255,7 +1443,7 @@ def journal_entry(  # noqa: C901, CCR001
             else:
                 this.body_name = None
 
-        elif entry['event'] == 'FSDJump':
+        elif event_name == 'fsdjump':
             this.body_name = None
             this.body_id = None
 
@@ -1265,13 +1453,20 @@ def journal_entry(  # noqa: C901, CCR001
         elif this.systemaddress != entry.get('SystemAddress'):
             this.coordinates = None  # Docked event doesn't include coordinates
 
-        this.systemaddress = entry.get('SystemAddress')  # type: ignore
+        if 'SystemAddress' not in entry:
+            logger.warning(f'"location" event without SystemAddress !!!:\n{entry}\n')
 
-    elif entry['event'] == 'ApproachBody':
+        # But we'll still *use* the value, because if a 'location' event doesn't
+        # have this we've still moved and now don't know where and MUST NOT
+        # continue to use any old value.
+        # Yes, explicitly state `None` here, so it's crystal clear.
+        this.systemaddress = entry.get('SystemAddress', None)  # type: ignore
+
+    elif event_name == 'approachbody':
         this.body_name = entry['Body']
         this.body_id = entry.get('BodyID')
 
-    elif entry['event'] == 'LeaveBody':
+    elif event_name == 'leavebody':
         # NB: **NOT** SupercruiseEntry, because we won't get a fresh
         #     ApproachBody if we don't leave Orbital Cruise and land again.
         # *This* is triggered when you go above Orbital Cruise altitude.
@@ -1279,7 +1474,7 @@ def journal_entry(  # noqa: C901, CCR001
         this.body_name = None
         this.body_id = None
 
-    elif entry['event'] == 'Music':
+    elif event_name == 'music':
         if entry['MusicTrack'] == 'MainMenu':
             this.body_name = None
             this.body_id = None
@@ -1287,24 +1482,43 @@ def journal_entry(  # noqa: C901, CCR001
 
     # Events with their own EDDN schema
     if config.get_int('output') & config.OUT_SYS_EDDN and not state['Captain']:
-        if entry['event'].lower() == 'fssdiscoveryscan':
-            return this.eddn.export_journal_fssdiscoveryscan(cmdr, system, is_beta, entry)
 
-        if entry['event'].lower() == 'navbeaconscan':
-            return this.eddn.export_journal_navbeaconscan(cmdr, system, is_beta, entry)
+        if event_name == 'fssdiscoveryscan':
+            return this.eddn.export_journal_fssdiscoveryscan(cmdr, system, state['StarPos'], is_beta, entry)
 
-        if entry['event'].lower() == 'codexentry':
-            return this.eddn.export_journal_codexentry(cmdr, is_beta, entry)
+        elif event_name == 'navbeaconscan':
+            return this.eddn.export_journal_navbeaconscan(cmdr, system, state['StarPos'], is_beta, entry)
 
-        if entry['event'].lower() == 'scanbarycentre':
-            return this.eddn.export_journal_scanbarycentre(cmdr, is_beta, entry)
+        elif event_name == 'codexentry':
+            return this.eddn.export_journal_codexentry(cmdr, state['StarPos'], is_beta, entry)
 
-        if entry['event'].lower() == 'navroute':
+        elif event_name == 'scanbarycentre':
+            return this.eddn.export_journal_scanbarycentre(cmdr, state['StarPos'], is_beta, entry)
+
+        elif event_name == 'navroute':
             return this.eddn.export_journal_navroute(cmdr, is_beta, entry)
+
+        elif event_name == 'approachsettlement':
+            return this.eddn.export_journal_approachsettlement(
+                cmdr,
+                system,
+                state['StarPos'],
+                is_beta,
+                entry
+            )
+
+        elif event_name == 'fssallbodiesfound':
+            return this.eddn.export_journal_fssallbodiesfound(
+                cmdr,
+                system,
+                state['StarPos'],
+                is_beta,
+                entry
+            )
 
     # Send journal schema events to EDDN, but not when on a crew
     if (config.get_int('output') & config.OUT_SYS_EDDN and not state['Captain'] and
-        (entry['event'] in ('Location', 'FSDJump', 'Docked', 'Scan', 'SAASignalsFound', 'CarrierJump')) and
+        (event_name in ('location', 'fsdjump', 'docked', 'scan', 'saasignalsfound', 'carrierjump')) and
             ('StarPos' in entry or this.coordinates)):
 
         # strip out properties disallowed by the schema
@@ -1334,22 +1548,22 @@ def journal_entry(  # noqa: C901, CCR001
             ]
 
         # add planet to Docked event for planetary stations if known
-        if entry['event'] == 'Docked' and this.body_name:
+        if event_name == 'docked' and this.body_name:
             entry['Body'] = this.body_name
             entry['BodyType'] = 'Planet'
 
         # add mandatory StarSystem, StarPos and SystemAddress properties to Scan events
         if 'StarSystem' not in entry:
             if not system:
-                logger.warning("system is None, can't add StarSystem")
-                return "system is None, can't add StarSystem"
+                logger.warning("system is falsey, can't add StarSystem")
+                return "system is falsey, can't add StarSystem"
 
             entry['StarSystem'] = system
 
         if 'StarPos' not in entry:
             if not this.coordinates:
-                logger.warning("this.coordinates is None, can't add StarPos")
-                return "this.coordinates is None, can't add StarPos"
+                logger.warning("this.coordinates is falsey, can't add StarPos")
+                return "this.coordinates is falsey, can't add StarPos"
 
             # Gazelle[TD] reported seeing a lagged Scan event with incorrect
             # augmented StarPos: <https://github.com/EDCD/EDMarketConnector/issues/961>
@@ -1361,8 +1575,8 @@ def journal_entry(  # noqa: C901, CCR001
 
         if 'SystemAddress' not in entry:
             if not this.systemaddress:
-                logger.warning("this.systemaddress is None, can't add SystemAddress")
-                return "this.systemaddress is None, can't add SystemAddress"
+                logger.warning("this.systemaddress is falsey, can't add SystemAddress")
+                return "this.systemaddress is falsey, can't add SystemAddress"
 
             entry['SystemAddress'] = this.systemaddress
 
@@ -1378,7 +1592,7 @@ def journal_entry(  # noqa: C901, CCR001
             return str(e)
 
     elif (config.get_int('output') & config.OUT_MKT_EDDN and not state['Captain'] and
-            entry['event'] in ('Market', 'Outfitting', 'Shipyard')):
+            event_name in ('market', 'outfitting', 'shipyard')):
         # Market.json, Outfitting.json or Shipyard.json to process
 
         try:
@@ -1393,16 +1607,19 @@ def journal_entry(  # noqa: C901, CCR001
             path = pathlib.Path(journaldir) / f'{entry["event"]}.json'
 
             with path.open('rb') as f:
-                entry = json.load(f)
-                entry['odyssey'] = this.odyssey
-                if entry['event'] == 'Market':
-                    this.eddn.export_journal_commodities(cmdr, is_beta, entry)
+                # Don't assume we can definitely stomp entry & event_name here
+                entry_augment = json.load(f)
+                event_name_augment = entry_augment['event'].lower()
+                entry_augment['odyssey'] = this.odyssey
 
-                elif entry['event'] == 'Outfitting':
-                    this.eddn.export_journal_outfitting(cmdr, is_beta, entry)
+                if event_name_augment == 'market':
+                    this.eddn.export_journal_commodities(cmdr, is_beta, entry_augment)
 
-                elif entry['event'] == 'Shipyard':
-                    this.eddn.export_journal_shipyard(cmdr, is_beta, entry)
+                elif event_name_augment == 'outfitting':
+                    this.eddn.export_journal_outfitting(cmdr, is_beta, entry_augment)
+
+                elif event_name_augment == 'shipyard':
+                    this.eddn.export_journal_shipyard(cmdr, is_beta, entry_augment)
 
         except requests.exceptions.RequestException as e:
             logger.debug(f'Failed exporting {entry["event"]}', exc_info=e)
@@ -1518,10 +1735,12 @@ def dashboard_entry(cmdr: str, is_beta: bool, entry: Dict[str, Any]) -> None:
     :param is_beta: Whether non-live game version was detected.
     :param entry: The latest Status.json data.
     """
+    this.status_body_name = None
     if 'BodyName' in entry:
-        this.status_body_name = entry['BodyName']
+        if not isinstance(entry['BodyName'], str):
+            logger.warning(f'BodyName was present but not a string! "{entry["BodyName"]}" ({type(entry["BodyName"])})')
 
-    else:
-        this.status_body_name = None
+        else:
+            this.status_body_name = entry['BodyName']
 
     tracking_ui_update()
