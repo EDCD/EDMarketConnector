@@ -55,6 +55,8 @@ schemas.
 * "File" -> "Status" will now show the new Odyssey ranks, both the new
     categories and the new 'prestige' ranks, e.g. 'Elite I'.
 
+    **NB: Due to an oversight there are currently no translations for these.**
+
     Closes [#1369](https://github.com/EDCD/EDMarketConnector/issues/1369).
 
 * Running `EDMarketConnector.exe --reset-ui` will now also reset any changes to
@@ -187,6 +189,11 @@ Translations
     Windows Installer configuration that had no such documentation. It's less
     fragile than relying on that, or developers using a script/documented
     process to rename the file.
+
+* As noted above we forgot to upload to
+    [OneSky](https://marginal.oneskyapp.com/collaboration/project/52710)
+    after adding the Odyssey new ranks/categories.  This has now been done,
+    and some new phrases await translation.
 
 Plugin Developers
 ---
