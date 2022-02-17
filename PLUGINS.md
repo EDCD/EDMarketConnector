@@ -38,6 +38,8 @@ Please be sure to read the [Avoiding potential pitfalls](#avoiding-potential-pit
 section, else you might inadvertently cause issues for the core
 EDMarketConnector code including whole application crashes.
 
+## Being aware of core application changes
+
 It is highly advisable to ensure you are aware of all EDMarketConnector 
 releases, including the pre-releases.  The -beta and -rc changelogs will 
 contain valuable information about any forthcoming changes that affect plugins.
@@ -54,6 +56,11 @@ The easiest way is:
 
 And, of course, either ensure you check your GitHub messages regularly, or 
 have it set up to email you such notifications.
+
+You should also keep an eye on [our GitHub Discussions](https://github.com/EDCD/EDMarketConnector/discussions)
+in case there are any proposed changes to EDMC plugin functionality.  You can
+do this by ensuring 'Discussions' is also ticked when following the steps
+above to set up a 'Custom' watch on this repository.
 
 ---
 
