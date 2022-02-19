@@ -326,7 +326,7 @@ class _Theme(object):
                                      highlightbackground=self.current['disabledforeground'])
 
         except Exception:
-            logger.exception('Plugin widget issue ?')
+            logger.exception(f'Plugin widget issue ? {widget=}')
 
     # Apply configured theme
 
