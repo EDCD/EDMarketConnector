@@ -1126,6 +1126,27 @@ class EDDN:
         #   "event": "ApproachSettlement",
         #   "timestamp": "2021-10-14T12:37:54Z"
         # }
+
+        #######################################################################
+        # Bugs
+        #######################################################################
+        # WORKAROUND 3.8.0.404 | 2022-02-18: ApproachSettlement missing coords
+        # As of Horizons ("gameversion":"3.8.0.404", "build":"r280105/r0 ")
+        # if you log back in (certainly a game client restart) at a
+        # Planetary Port, then the ApproachSettlement event written will be
+        # missing the Latitude and Longitude.
+        # Ref: https://github.com/EDCD/EDMarketConnector/issues/1476
+        if any(
+            k not in entry for k in ('Latitude', 'Longitude')
+        ):
+            logger.debug(
+                f'ApproachSettlement without at least one of Latitude or Longitude:\n{entry}\n'
+            )
+            # No need to alert the user, it will only annoy them
+            return ""
+        # WORKAROUND END
+        #######################################################################
+
         #######################################################################
         # Augmentations
         #######################################################################
