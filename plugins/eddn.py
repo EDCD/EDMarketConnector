@@ -829,7 +829,7 @@ class EDDN:
 
             else:
                 logger.warning("Neither this_coordinates or this.coordinates set, can't add StarPos")
-                return 'No source for adding StarPos to approachsettlement/1 !'
+                return 'No source for adding StarPos to EDDN message !'
 
         return entry
 
