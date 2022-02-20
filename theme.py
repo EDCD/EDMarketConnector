@@ -195,17 +195,35 @@ class _Theme(object):
     def _enter(self, event, image):
         widget = event.widget
         if widget and widget['state'] != tk.DISABLED:
-            widget.configure(state=tk.ACTIVE)
+            try:
+                widget.configure(state=tk.ACTIVE)
+
+            except Exception:
+                logger.exception(f'Failure setting widget active: {widget=}')
+
             if image:
-                image.configure(foreground=self.current['activeforeground'],
-                                background=self.current['activebackground'])
+                try:
+                    image.configure(foreground=self.current['activeforeground'],
+                                    background=self.current['activebackground'])
+
+                except Exception:
+                    logger.exception(f'Failure configuring image: {image=}')
 
     def _leave(self, event, image):
         widget = event.widget
         if widget and widget['state'] != tk.DISABLED:
-            widget.configure(state=tk.NORMAL)
+            try:
+                widget.configure(state=tk.NORMAL)
+
+            except Exception:
+                logger.exception(f'Failure setting widget normal: {widget=}')
+
             if image:
-                image.configure(foreground=self.current['foreground'], background=self.current['background'])
+                try:
+                    image.configure(foreground=self.current['foreground'], background=self.current['background'])
+
+                except Exception:
+                    logger.exception(f'Failure configuring image: {image=}')
 
     # Set up colors
     def _colors(self, root, theme):
