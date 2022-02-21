@@ -36,7 +36,7 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 5.3.0</title>
+			<title>Release 5.3.1</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
@@ -57,6 +57,31 @@ in the source (it's not distributed with the Windows installer) for the
 currently used version in a given branch.</p>
 </li>
 </ul>
+
+<h2>Release 5.3.1</h2>
+<p>This release addresses some issues with newer EDDN code which could cause    erroneous alerts to the player, or sending of bad messages.</p>                 <ul>                                                                            <li>                                                                            <p>EDDN: Cope with <code>ApproachSettlement</code> on login occurring before <code>Location</code>,
+such that we don't yet know the name of the star system the player is in.</p>   <p>Closes <a href="https://github.com/EDCD/EDMarketConnector/pull/1484">#1484</a></p>
+</li>                                                                           <li>                                                                            <p>EDDN: Cope with <code>ApproachSettlement</code> missing planetary coordinates on login
+at/near a settlement in Horizons.</p>                                           <p>Closes <a href="https://github.com/EDCD/EDMarketConnector/pull/1476">#1476</a></p>
+</li>                                                                           <li>                                                                            <p>EDDN: Change the <code>CodexEntry</code> "empty string" checks to only apply to those
+values where the schema enforces "must be at least one character".</p>          <p>This prevents the big 'CodexEntry had empty string, PLEASE ALERT THE EDMC    DEVELOPERS' message from triggering on, e.g. <code>NearestDestination</code> being
+empty, which the schema allows.</p>                                             <p>Closes <a href="https://github.com/EDCD/EDMarketConnector/issues/1481">#1481</a></p>
+</li>                                                                           </ul>                                                                           <h2>                                                                            <a id="user-content-plugin-developers" class="anchor" href="#plugin-developers" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Plugin Developers</h2>
+<ul>                                                                            <li>
+<p>If you use a sub-class for a widget the core code will no longer break if
+your code raises an exception.  e.g. a plugin was failing due to Python
+3.10 using <code>collections.abc</code> instead of <code>collections</code>, and the plugin's
+custom widget had a <code>configure()</code> method which was called by the core
+theme code on startup or theme change.  This then caused the whole
+application UI to never show up on startup.</p>
+<p>This also applies if you set up a button such that enter/leave on it, i.e.
+mouse in/out, causes the <code>theme.py</code> code for that to trigger.</p>
+<p>So, now in such cases the main UI should actually show up, although your
+plugin's UI might look weird due to theming not being properly applied.</p>
+<p>The plugin exception <strong>WILL</strong> be logged, at ERROR level.</p>
+</li>
+</ul>
+
 
 <h2>Release 5.3.0</h2>
 <p>As has sadly become routine now, please read
@@ -1294,11 +1319,11 @@ about this:
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.3.0/EDMarketConnector_win_5.3.0.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.3.1/EDMarketConnector_win_5.3.1.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="5.3.0"
-				length="16707584"
+				sparkle:version="5.3.1"
+				length="16711680"
 				type="application/octet-stream"
 			/>
 		</item>
