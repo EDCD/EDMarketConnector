@@ -27,6 +27,51 @@ produce the Windows executables and installer.
 
 ---
 
+Release 5.3.1
+===
+
+This release addresses some issues with newer EDDN code which could cause
+erroneous alerts to the player, or sending of bad messages.
+
+* EDDN: Cope with `ApproachSettlement` on login occurring before `Location`,
+    such that we don't yet know the name of the star system the player is in.
+
+    Closes [#1484](https://github.com/EDCD/EDMarketConnector/pull/1484)
+
+* EDDN: Cope with `ApproachSettlement` missing planetary coordinates on login
+    at/near a settlement in Horizons.
+
+    Closes [#1476](https://github.com/EDCD/EDMarketConnector/pull/1476)
+
+* EDDN: Change the `CodexEntry` "empty string" checks to only apply to those
+    values where the schema enforces "must be at least one character".
+
+    This prevents the big 'CodexEntry had empty string, PLEASE ALERT THE EDMC
+    DEVELOPERS' message from triggering on, e.g. `NearestDestination` being
+    empty, which the schema allows.
+
+    Closes [#1481](https://github.com/EDCD/EDMarketConnector/issues/1481)
+
+Plugin Developers
+---
+
+* If you use a sub-class for a widget the core code will no longer break if
+    your code raises an exception.  e.g. a plugin was failing due to Python
+    3.10 using `collections.abc` instead of `collections`, and the plugin's
+    custom widget had a `configure()` method which was called by the core
+    theme code on startup or theme change.  This then caused the whole
+    application UI to never show up on startup.
+
+    This also applies if you set up a button such that enter/leave on it, i.e.
+    mouse in/out, causes the `theme.py` code for that to trigger.
+
+    So, now in such cases the main UI should actually show up, although your
+    plugin's UI might look weird due to theming not being properly applied.
+
+    The plugin exception **WILL** be logged, at ERROR level.
+
+---
+
 Release 5.3.0
 ===
 
