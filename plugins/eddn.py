@@ -829,7 +829,7 @@ class EDDN:
 
             else:
                 logger.warning("Neither this_coordinates or this.coordinates set, can't add StarPos")
-                return 'No source for adding StarPos to approachsettlement/1 !'
+                return 'No source for adding StarPos to EDDN message !'
 
         return entry
 
@@ -1520,6 +1520,12 @@ def journal_entry(  # noqa: C901, CCR001
             return this.eddn.export_journal_navroute(cmdr, is_beta, entry)
 
         elif event_name == 'approachsettlement':
+            # An `ApproachSettlement` can appear *before* `Location` if you
+            # logged at one.  We won't have necessary augmentation data
+            # at this point, so bail.
+            if system is None:
+                return ""
+
             return this.eddn.export_journal_approachsettlement(
                 cmdr,
                 system,
@@ -1527,6 +1533,14 @@ def journal_entry(  # noqa: C901, CCR001
                 is_beta,
                 entry
             )
+
+        # NB: If adding FSSSignalDiscovered these absolutely come in at login
+        #     time **BEFORE** the `Location` event, so we won't yet know things
+        #     like SystemNane, or StarPos.
+        #     We can either have the "now send the batch" code add such (but
+        #     that has corner cases around changing systems in the meantime),
+        #     drop those events, or if the schema allows, send without those
+        #     augmentations.
 
         elif event_name == 'fssallbodiesfound':
             return this.eddn.export_journal_fssallbodiesfound(
