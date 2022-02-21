@@ -970,13 +970,22 @@ class EDDN:
                     logger.warning(f'this.body_id was not set properly: "{this.body_id}" ({type(this.body_id)})')
         #######################################################################
 
-        for k, v in entry.items():
+        # Check just the top-level strings with minLength=1 in the schema
+        for k in ('System', 'Name', 'Region', 'Category', 'SubCategory'):
+            v = entry[k]
             if v is None or isinstance(v, str) and v == '':
                 logger.warning(f'post-processing entry contains entry["{k}"] = {v} {(type(v))}')
                 # We should drop this message and VERY LOUDLY inform the
                 # user, in the hopes they'll open a bug report with the
                 # raw Journal event that caused this.
                 return 'CodexEntry had empty string, PLEASE ALERT THE EDMC DEVELOPERS'
+
+        # Also check traits
+        if 'Traits' in entry:
+            for v in entry['Traits']:
+                if v is None or isinstance(v, str) and v == '':
+                    logger.warning(f'post-processing entry[\'Traits\'] contains {v} {(type(v))}\n{entry["Traits"]}\n')
+                    return 'CodexEntry Trait had empty string, PLEASE ALERT THE EDMC DEVELOPERS'
 
         msg = {
             '$schemaRef': f'https://eddn.edcd.io/schemas/codexentry/1{"/test" if is_beta else ""}',
