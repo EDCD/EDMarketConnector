@@ -829,7 +829,7 @@ class EDDN:
 
             else:
                 logger.warning("Neither this_coordinates or this.coordinates set, can't add StarPos")
-                return 'No source for adding StarPos to approachsettlement/1 !'
+                return 'No source for adding StarPos to EDDN message !'
 
         return entry
 
@@ -970,13 +970,22 @@ class EDDN:
                     logger.warning(f'this.body_id was not set properly: "{this.body_id}" ({type(this.body_id)})')
         #######################################################################
 
-        for k, v in entry.items():
+        # Check just the top-level strings with minLength=1 in the schema
+        for k in ('System', 'Name', 'Region', 'Category', 'SubCategory'):
+            v = entry[k]
             if v is None or isinstance(v, str) and v == '':
                 logger.warning(f'post-processing entry contains entry["{k}"] = {v} {(type(v))}')
                 # We should drop this message and VERY LOUDLY inform the
                 # user, in the hopes they'll open a bug report with the
                 # raw Journal event that caused this.
                 return 'CodexEntry had empty string, PLEASE ALERT THE EDMC DEVELOPERS'
+
+        # Also check traits
+        if 'Traits' in entry:
+            for v in entry['Traits']:
+                if v is None or isinstance(v, str) and v == '':
+                    logger.warning(f'post-processing entry[\'Traits\'] contains {v} {(type(v))}\n{entry["Traits"]}\n')
+                    return 'CodexEntry Trait had empty string, PLEASE ALERT THE EDMC DEVELOPERS'
 
         msg = {
             '$schemaRef': f'https://eddn.edcd.io/schemas/codexentry/1{"/test" if is_beta else ""}',
@@ -1126,6 +1135,27 @@ class EDDN:
         #   "event": "ApproachSettlement",
         #   "timestamp": "2021-10-14T12:37:54Z"
         # }
+
+        #######################################################################
+        # Bugs
+        #######################################################################
+        # WORKAROUND 3.8.0.404 | 2022-02-18: ApproachSettlement missing coords
+        # As of Horizons ("gameversion":"3.8.0.404", "build":"r280105/r0 ")
+        # if you log back in (certainly a game client restart) at a
+        # Planetary Port, then the ApproachSettlement event written will be
+        # missing the Latitude and Longitude.
+        # Ref: https://github.com/EDCD/EDMarketConnector/issues/1476
+        if any(
+            k not in entry for k in ('Latitude', 'Longitude')
+        ):
+            logger.debug(
+                f'ApproachSettlement without at least one of Latitude or Longitude:\n{entry}\n'
+            )
+            # No need to alert the user, it will only annoy them
+            return ""
+        # WORKAROUND END
+        #######################################################################
+
         #######################################################################
         # Augmentations
         #######################################################################
@@ -1499,6 +1529,12 @@ def journal_entry(  # noqa: C901, CCR001
             return this.eddn.export_journal_navroute(cmdr, is_beta, entry)
 
         elif event_name == 'approachsettlement':
+            # An `ApproachSettlement` can appear *before* `Location` if you
+            # logged at one.  We won't have necessary augmentation data
+            # at this point, so bail.
+            if system is None:
+                return ""
+
             return this.eddn.export_journal_approachsettlement(
                 cmdr,
                 system,
@@ -1506,6 +1542,14 @@ def journal_entry(  # noqa: C901, CCR001
                 is_beta,
                 entry
             )
+
+        # NB: If adding FSSSignalDiscovered these absolutely come in at login
+        #     time **BEFORE** the `Location` event, so we won't yet know things
+        #     like SystemNane, or StarPos.
+        #     We can either have the "now send the batch" code add such (but
+        #     that has corner cases around changing systems in the meantime),
+        #     drop those events, or if the schema allows, send without those
+        #     augmentations.
 
         elif event_name == 'fssallbodiesfound':
             return this.eddn.export_journal_fssallbodiesfound(
