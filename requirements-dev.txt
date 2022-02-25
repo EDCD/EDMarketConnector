@@ -9,7 +9,7 @@ setuptools==60.9.3
 
 # Static analysis tools
 flake8==4.0.1
-flake8-annotations-coverage==0.0.5
+flake8-annotations-coverage==0.0.6
 flake8-cognitive-complexity==0.1.0
 flake8-comprehensions==3.8.0
 flake8-docstrings==1.6.0
