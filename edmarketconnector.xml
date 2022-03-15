@@ -36,7 +36,7 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 5.3.1</title>
+			<title>Release 5.3.3</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
@@ -57,6 +57,23 @@ in the source (it's not distributed with the Windows installer) for the
 currently used version in a given branch.</p>
 </li>
 </ul>
+
+<h2>Release 5.3.3</h2>
+<p>Unfortunately 5.3.2 failed to fully address the issues caused by the different
+Journal filenames when using the Odyssey Update 11 client.  It's fine if you
+run EDMarketConnector first and <em>then</em> the game, as the code path that detects
+a new file always does just that.</p>
+<p>But the code for EDMarketConnector startup to find the current newest Journal
+file relied on sorting the filenames and that would mean the new-style names
+would always sort as 'oldest'.</p>
+<p>This release fixes that code to properly use the file modification timestamp
+to determine the newest file on startup.</p>
+
+
+<h2>Release 5.3.2</h2>
+<p>This release contains one change to cope with how Frontier decided to name
+the Journal files differently in the Update 11 Odyssey client.</p>
+
 
 <h2>Release 5.3.1</h2>
 <p>This release addresses some issues with newer EDDN code which could cause    erroneous alerts to the player, or sending of bad messages.</p>                 <ul>                                                                            <li>                                                                            <p>EDDN: Cope with <code>ApproachSettlement</code> on login occurring before <code>Location</code>,
@@ -1319,11 +1336,11 @@ about this:
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.3.1/EDMarketConnector_win_5.3.1.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.3.3/EDMarketConnector_win_5.3.3.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="5.3.1"
-				length="16711680"
+				sparkle:version="5.3.3"
+				length="16707584"
 				type="application/octet-stream"
 			/>
 		</item>
