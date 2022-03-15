@@ -12,7 +12,7 @@ import threading
 from calendar import timegm
 from collections import OrderedDict, defaultdict
 from os import SEEK_END, SEEK_SET, listdir
-from os.path import basename, expanduser, isdir, join
+from os.path import basename, expanduser, getctime, isdir, join
 from time import gmtime, localtime, mktime, sleep, strftime, strptime, time
 from typing import TYPE_CHECKING, Any, BinaryIO, Dict, List, MutableMapping, Optional
 from typing import OrderedDict as OrderedDictT
@@ -215,15 +215,10 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         self.currentdir = logdir
 
-        # Latest pre-existing logfile - e.g. if E:D is already running. Assumes logs sort alphabetically.
+        # Latest pre-existing logfile - e.g. if E:D is already running.
         # Do this before setting up the observer in case the journal directory has gone away
         try:  # TODO: This should be replaced with something specific ONLY wrapping listdir
-            logfiles = sorted(
-                (x for x in listdir(self.currentdir) if self._RE_LOGFILE.search(x)),
-                key=lambda x: x.split('.')[1:]
-            )
-
-            self.logfile = join(self.currentdir, logfiles[-1]) if logfiles else None  # type: ignore
+            self.logfile = self.journal_newest_filename(self.currentdir)
 
         except Exception:
             logger.exception('Failed to find latest logfile')
@@ -265,6 +260,24 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         logger.debug('Done.')
         return True
+
+    def journal_newest_filename(self, journals_dir) -> Optional[str]:
+        """
+        Determine the newest Journal file name.
+
+        :param journals_dir: The directory to check
+        :return: The `str` form of the full path to the newest Journal file
+        """
+        journal_files = (x for x in listdir(journals_dir) if self._RE_LOGFILE.search(x))
+        if journal_files:
+            # Odyssey Update 11 has, e.g.    Journal.2022-03-15T152503.01.log
+            # Horizons Update 11 equivalent: Journal.220315152335.01.log
+            # So we can no longer use a naive sort.
+            journals_dir_path = pathlib.Path(journals_dir)
+            journal_files = (journals_dir_path / pathlib.Path(x) for x in journal_files)
+            return str(max(journal_files, key=getctime))
+
+        return None
 
     def stop(self) -> None:
         """Stop journal monitoring."""
@@ -417,20 +430,15 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             # Check whether new log file started, e.g. client (re)started.
             if emitter and emitter.is_alive():
-                newlogfile = self.logfile  # updated by on_created watchdog callback
+                new_journal_file = self.logfile  # updated by on_created watchdog callback
             else:
                 # Poll
                 try:
-                    logfiles = sorted(
-                        (x for x in listdir(self.currentdir) if self._RE_LOGFILE.search(x)),
-                        key=lambda x: x.split('.')[1:]
-                    )
-
-                    newlogfile = join(self.currentdir, logfiles[-1]) if logfiles else None  # type: ignore
+                    new_journal_file = self.journal_newest_filename(self.currentdir)
 
                 except Exception:
                     logger.exception('Failed to find latest logfile')
-                    newlogfile = None
+                    new_journal_file = None
 
             if logfile:
                 loghandle.seek(0, SEEK_END)		  # required to make macOS notice log change over SMB
@@ -456,11 +464,11 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
                 log_pos = loghandle.tell()
 
-            if logfile != newlogfile:
+            if logfile != new_journal_file:
                 for _ in range(10):
                     logger.trace_if('journal.file', "****")
-                logger.info(f'New Journal File. Was "{logfile}", now "{newlogfile}"')
-                logfile = newlogfile
+                logger.info(f'New Journal File. Was "{logfile}", now "{new_journal_file}"')
+                logfile = new_journal_file
                 if loghandle:
                     loghandle.close()
 
