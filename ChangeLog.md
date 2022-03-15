@@ -27,6 +27,12 @@ produce the Windows executables and installer.
 
 ---
 
+Release 5.3.2
+===
+
+This release contains one change to cope with how Frontier decided to name
+the Journal files differently in the Update 11 Odyssey client.
+
 Release 5.3.1
 ===
 
