@@ -27,6 +27,21 @@ produce the Windows executables and installer.
 
 ---
 
+Release 5.3.3
+===
+
+Unfortunately 5.3.2 failed to fully address the issues caused by the different
+Journal filenames when using the Odyssey Update 11 client.  It's fine if you
+run EDMarketConnector first and *then* the game, as the code path that detects
+a new file always does just that.
+
+But the code for EDMarketConnector startup to find the current newest Journal
+file relied on sorting the filenames and that would mean the new-style names
+would always sort as 'oldest'.
+
+This release fixes that code to properly use the file modification timestamp
+to determine the newest file on startup.
+
 Release 5.3.2
 ===
 
