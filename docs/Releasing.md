@@ -40,8 +40,8 @@ You will need several pieces of software installed, or the files from their
  auto-select some others).  NB: If you have need to uninstall this it's
  "Windows Software Development Kit - Windows 10.0.19041.1" in
  "Apps & Features", *not* "Windows SDK AddOn".
-1. [Python](https://python.org): 32-bit version of Python 3.9 for Windows.
- [v3.9.5](https://www.python.org/downloads/release/python-395/) is the most
+1. [Python](https://python.org): 32-bit version of Python 3.10 for Windows.
+ [v3.10.3](https://www.python.org/downloads/release/python-3103/) is the most
  recently tested version.  You need the `Windows x86 executable installer`
  file, for the 32-bit version.  Double-check the version against the
    `.python.version` file, as it should always contain the intended version.
