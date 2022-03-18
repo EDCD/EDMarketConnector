@@ -7,9 +7,8 @@ import json
 import locale
 import os
 import queue
-import re
 import sys
-from os.path import getmtime, join
+from os.path import getmtime
 from time import sleep, time
 from typing import TYPE_CHECKING, Any, List, Optional
 
@@ -64,8 +63,6 @@ l10n.Translations.install_dummy()
 
 SERVER_RETRY = 5  # retry pause for Companion servers [s]
 EXIT_SUCCESS, EXIT_SERVER, EXIT_CREDENTIALS, EXIT_VERIFICATION, EXIT_LAGGING, EXIT_SYS_ERR, EXIT_ARGS = range(7)
-
-JOURNAL_RE = re.compile(r'^Journal(Beta)?\.[0-9]{12}\.[0-9]{2}\.log$')
 
 
 def versioncmp(versionstring) -> List:
@@ -225,10 +222,7 @@ sys.path: {sys.path}'''
                     monitor.currentdir = config.default_journal_dir
 
                 logger.debug(f'logdir = "{monitor.currentdir}"')
-                logfiles = sorted((x for x in os.listdir(monitor.currentdir) if JOURNAL_RE.search(x)),
-                                  key=lambda x: x.split('.')[1:])
-
-                logfile = join(monitor.currentdir, logfiles[-1])
+                logfile = monitor.journal_newest_filename(monitor.currentdir)
 
                 logger.debug(f'Using logfile "{logfile}"')
                 with open(logfile, 'r', encoding='utf-8') as loghandle:
