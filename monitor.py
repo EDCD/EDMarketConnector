@@ -2236,7 +2236,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         if self._navroute_retries_remaining == 0:
             return False
 
-        logger.info(f'Navroute read retry [{self._navroute_retries_remaining}]')
+        logger.debug(f'Navroute read retry [{self._navroute_retries_remaining}]')
         self._navroute_retries_remaining -= 1
 
         if self._last_navroute_journal_timestamp is None:
