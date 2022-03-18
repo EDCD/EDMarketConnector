@@ -268,6 +268,10 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         :param journals_dir: The directory to check
         :return: The `str` form of the full path to the newest Journal file
         """
+        # os.listdir(None) returns CWD's contents
+        if journals_dir is None:
+            return None
+
         journal_files = (x for x in listdir(journals_dir) if self._RE_LOGFILE.search(x))
         if journal_files:
             # Odyssey Update 11 has, e.g.    Journal.2022-03-15T152503.01.log
