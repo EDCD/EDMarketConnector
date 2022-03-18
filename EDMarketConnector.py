@@ -1672,15 +1672,19 @@ class AppWindow(object):
 
     def exit_tray(self, systray: 'SysTrayIcon') -> None:
         """Tray icon is shutting down."""
-        exit_thread = threading.Thread(target=self.onexit)
-        exit_thread.setDaemon(True)
+        exit_thread = threading.Thread(
+            target=self.onexit,
+            daemon=True,
+        )
         exit_thread.start()
 
     def onexit(self, event=None) -> None:
         """Application shutdown procedure."""
         if sys.platform == 'win32':
-            shutdown_thread = threading.Thread(target=self.systray.shutdown)
-            shutdown_thread.setDaemon(True)
+            shutdown_thread = threading.Thread(
+                target=self.systray.shutdown,
+                daemon=True,
+            )
             shutdown_thread.start()
 
         config.set_shutdown()  # Signal we're in shutdown now.
