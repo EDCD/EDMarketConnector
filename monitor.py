@@ -430,7 +430,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             # Check whether new log file started, e.g. client (re)started.
             if emitter and emitter.is_alive():
-                new_journal_file = self.logfile  # updated by on_created watchdog callback
+                new_journal_file: Optional[str] = self.logfile  # updated by on_created watchdog callback
+
             else:
                 # Poll
                 try:
