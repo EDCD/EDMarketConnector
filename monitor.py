@@ -268,6 +268,10 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         :param journals_dir: The directory to check
         :return: The `str` form of the full path to the newest Journal file
         """
+        # os.listdir(None) returns CWD's contents
+        if journals_dir is None:
+            return None
+
         journal_files = (x for x in listdir(journals_dir) if self._RE_LOGFILE.search(x))
         if journal_files:
             # Odyssey Update 11 has, e.g.    Journal.2022-03-15T152503.01.log
@@ -430,7 +434,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             # Check whether new log file started, e.g. client (re)started.
             if emitter and emitter.is_alive():
-                new_journal_file = self.logfile  # updated by on_created watchdog callback
+                new_journal_file: Optional[str] = self.logfile  # updated by on_created watchdog callback
+
             else:
                 # Poll
                 try:
@@ -2231,7 +2236,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         if self._navroute_retries_remaining == 0:
             return False
 
-        logger.info(f'Navroute read retry [{self._navroute_retries_remaining}]')
+        logger.debug(f'Navroute read retry [{self._navroute_retries_remaining}]')
         self._navroute_retries_remaining -= 1
 
         if self._last_navroute_journal_timestamp is None:
