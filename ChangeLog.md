@@ -9,7 +9,7 @@ produce the Windows executables and installer.
 
 ---
 
-* We now test against, and package with, Python 3.10.2.
+* We now test against, and package with, Python 3.10.3.
 
   **As a consequence of this we no longer support Windows 7.  
   This is due to
@@ -26,6 +26,19 @@ produce the Windows executables and installer.
   currently used version in a given branch.
 
 ---
+
+* We now test against, and package with, Python 3.10.3.
+
+Release 5.3.4
+===
+
+Whilst EDMarketConnector.exe was fixed for the Odyssey Update 11 difference in
+Journal file names, EDMC.exe was not.
+
+* Use the new common function for finding latest journal file in EDMC.py.
+* Quietens some NavRoute related logging for the benefit of EDMC.py.  This is
+  now at DEBUG level, rather than INFO.
+
 
 Release 5.3.3
 ===
