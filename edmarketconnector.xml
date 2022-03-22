@@ -36,27 +36,22 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 5.3.3</title>
+			<title>Release 5.3.4</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
 
+<p>We now test against, and package with, Python 3.10.3.</p>
+<p><strong>As a consequence of this we no longer support Windows 7.</strong><br>
+
+<h2>Release 5.3.4</h2>
+<p>Whilst EDMarketConnector.exe was fixed for the Odyssey Update 11 difference in Journal file names, EDMC.exe was not.   If you're wondering, that's the command-line utility that, for instance, Trade Computer Extensions uses to obtain data.</p>
 <ul>
-<li>
-<p>We now test against, and package with, Python 3.10.2.</p>
-<p><strong>As a consequence of this we no longer support Windows 7.<br>
-This is due to
-<a href="https://www.python.org/downloads/windows/" rel="nofollow">Python 3.10.x itself not supporting Windows 7</a>.
-The application (both EDMarketConnector.exe and EDMC.exe) will crash on
-startup due to a missing DLL.</strong></p>
-<p>This should have no other impact on users or plugin developers, other
-than the latter now being free to use features that were introduced since the
-Python 3.7 series.</p>
-<p>Developers can check the contents of the <code>.python-version</code> file
-in the source (it's not distributed with the Windows installer) for the
-currently used version in a given branch.</p>
-</li>
+<li>Use the new common function for finding latest journal file in EDMC.py.</li>
+<li>Quietens some NavRoute related logging for the benefit of EDMC.py.  This is
+now at DEBUG level, rather than INFO.</li>
 </ul>
+
 
 <h2>Release 5.3.3</h2>
 <p>Unfortunately 5.3.2 failed to fully address the issues caused by the different
@@ -1336,11 +1331,11 @@ about this:
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.3.3/EDMarketConnector_win_5.3.3.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.3.4/EDMarketConnector_win_5.3.4.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="5.3.3"
-				length="16707584"
+				sparkle:version="5.3.4"
+				length="16723968"
 				type="application/octet-stream"
 			/>
 		</item>
