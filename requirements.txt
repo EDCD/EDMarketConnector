@@ -1,6 +1,6 @@
 certifi==2021.10.8
 requests==2.27.1
-watchdog==2.1.6
+watchdog==2.1.7
 # Commented out because this doesn't package well with py2exe
 infi.systray==0.1.12; sys_platform == 'win32'
 # argh==0.26.2 watchdog dep
