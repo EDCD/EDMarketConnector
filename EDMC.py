@@ -62,7 +62,8 @@ Locale LC_TIME: {locale.getlocale(locale.LC_TIME)}'''
 l10n.Translations.install_dummy()
 
 SERVER_RETRY = 5  # retry pause for Companion servers [s]
-EXIT_SUCCESS, EXIT_SERVER, EXIT_CREDENTIALS, EXIT_VERIFICATION, EXIT_LAGGING, EXIT_SYS_ERR, EXIT_ARGS = range(7)
+EXIT_SUCCESS, EXIT_SERVER, EXIT_CREDENTIALS, EXIT_VERIFICATION, EXIT_LAGGING, EXIT_SYS_ERR, EXIT_ARGS, \
+    EXIT_JOURNAL_READ_ERR, EXIT_COMMANDER_UNKNOWN = range(9)
 
 
 def versioncmp(versionstring) -> List:
@@ -234,11 +235,11 @@ sys.path: {sys.path}'''
 
             except Exception:
                 logger.exception("Can't read Journal file")
-                sys.exit(EXIT_SYS_ERR)
+                sys.exit(EXIT_JOURNAL_READ_ERR)
 
             if not monitor.cmdr:
                 logger.error('Not available while E:D is at the main menu')
-                sys.exit(EXIT_SYS_ERR)
+                sys.exit(EXIT_COMMANDER_UNKNOWN)
 
             # Get data from Companion API
             if args.p:
