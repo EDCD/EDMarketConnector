@@ -41,7 +41,7 @@ jobs:
           python setup.py py2exe
 
       - name: Upload build files
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: Built files
           path: EDMarketConnector_win*.msi
