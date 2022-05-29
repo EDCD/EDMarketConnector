@@ -1697,6 +1697,7 @@ def journal_entry(  # noqa: C901, CCR001
         # The generic journal schema is for events:
         #   Docked, FSDJump, Scan, Location, SAASignalsFound, CarrierJump
         # (Also CodexEntry, but that has its own schema and handling).
+        # Journals 2021-08-23 to 2022-05-29
         #                   StarSystem  SystemAddress  StarPos
         # Docked                Y             Y           N
         # FSDJump               Y             Y           Y
@@ -1704,7 +1705,12 @@ def journal_entry(  # noqa: C901, CCR001
         # Location              Y             Y           Y
         # SAASignalsFound       N             Y           N
         # CarrierJump           Y             Y           Y
-        # add mandatory StarSystem, StarPos and SystemAddress properties to Scan events
+
+        if 'SystemAddress' not in entry:
+            logger.warning("journal schema event doesn't contain SystemAddress when it should, aborting")
+            return "No SystemAddress in event, aborting send"
+
+        # add mandatory StarSystem and StarPos properties to events
         if 'StarSystem' not in entry:
             if not system:
                 logger.warning("system is falsey, can't add StarSystem")
@@ -1724,13 +1730,6 @@ def journal_entry(  # noqa: C901, CCR001
                 return "Wrong System! Delayed Scan event?"
 
             entry['StarPos'] = list(this.coordinates)
-
-        if 'SystemAddress' not in entry:
-            if not this.systemaddress:
-                logger.warning("this.systemaddress is falsey, can't add SystemAddress")
-                return "this.systemaddress is falsey, can't add SystemAddress"
-
-            entry['SystemAddress'] = this.systemaddress
 
         try:
             this.eddn.export_journal_generic(cmdr, is_beta, filter_localised(entry))
