@@ -1712,6 +1712,10 @@ def journal_entry(  # noqa: C901, CCR001
 
         # add mandatory StarSystem and StarPos properties to events
         if 'StarSystem' not in entry:
+            if this.systemaddress is None or this.systemaddress != entry['SystemAddress']:
+                logger.warning("event has no StarSystem, but SystemAddress isn't current location")
+                return "Wrong System! Delayed Scan event?"
+
             if not system:
                 logger.warning("system is falsey, can't add StarSystem")
                 return "system is falsey, can't add StarSystem"
