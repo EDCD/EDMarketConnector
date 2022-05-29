@@ -1248,7 +1248,12 @@ class EDDN:
         #######################################################################
         # Augmentations
         #######################################################################
-        # In this case should add StarPos
+        # In this case should add SystemName and StarPos, but only if the
+        # SystemAddress of where we think we are matches.
+        if this.systemaddress is None or this.systemaddress != entry['SystemAddress']:
+            logger.warning("SystemAddress isn't current location! Can't add augmentations!")
+            return 'Wrong System! Missed jump ?'
+
         ret = this.eddn.entry_augment_system_data(entry, system_name, system_starpos)
         if isinstance(ret, str):
             return ret
@@ -1610,6 +1615,7 @@ def journal_entry(  # noqa: C901, CCR001
                 is_beta,
                 entry
             )
+
         elif event_name == 'fssbodysignals':
             return this.eddn.export_journal_fssbodysignals(
                 cmdr,
