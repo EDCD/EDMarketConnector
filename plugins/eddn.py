@@ -1694,6 +1694,16 @@ def journal_entry(  # noqa: C901, CCR001
             entry['Body'] = this.body_name
             entry['BodyType'] = 'Planet'
 
+        # The generic journal schema is for events:
+        #   Docked, FSDJump, Scan, Location, SAASignalsFound, CarrierJump
+        # (Also CodexEntry, but that has its own schema and handling).
+        #                   StarSystem  SystemAddress  StarPos
+        # Docked                Y             Y           N
+        # FSDJump               Y             Y           Y
+        # Scan                  Y             Y           N
+        # Location              Y             Y           Y
+        # SAASignalsFound       N             Y           N
+        # CarrierJump           Y             Y           Y
         # add mandatory StarSystem, StarPos and SystemAddress properties to Scan events
         if 'StarSystem' not in entry:
             if not system:
