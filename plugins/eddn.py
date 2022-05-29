@@ -946,7 +946,12 @@ class EDDN:
         #######################################################################
         # Augmentations
         #######################################################################
-        # General 'system' augmentations
+        # In this case should add StarPos, but only if the
+        # SystemAddress of where we think we are matches.
+        if this.systemaddress is None or this.systemaddress != entry['SystemAddress']:
+            logger.warning("SystemAddress isn't current location! Can't add augmentations!")
+            return 'Wrong System! Missed jump ?'
+
         ret = this.eddn.entry_augment_system_data(entry, entry['System'], system_starpos)
         if isinstance(ret, str):
             return ret
