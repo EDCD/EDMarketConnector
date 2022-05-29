@@ -1213,6 +1213,62 @@ class EDDN:
         this.eddn.export_journal_entry(cmdr, entry, msg)
         return None
 
+    def export_journal_fssbodysignals(
+        self, cmdr: str, system_name: str, system_starpos: list, is_beta: bool, entry: MutableMapping[str, Any]
+    ) -> Optional[str]:
+        """
+        Send an FSSBodySignals message to EDDN on the correct schema.
+
+        :param cmdr: the commander under which this upload is made
+        :param system_name: Name of current star system
+        :param system_starpos: Coordinates of current star system
+        :param is_beta: whether or not we are in beta mode
+        :param entry: the journal entry to send
+        """
+        # {
+        #   "timestamp" : "2022-03-15T13:07:51Z",
+        #   "event" : "FSSBodySignals",
+        #   "BodyName" : "Phroi Blou BQ-Y d1162 1 a",
+        #   "BodyID" : 12,
+        #   "SystemAddress" : 39935704602251,
+        #   "Signals" : [
+        #     {
+        #       "Type" : "$SAA_SignalType_Geological;",
+        #       "Type_Localised" : "Geological",
+        #       "Count" : 3
+        #     }
+        #   ]
+        # }
+
+        #######################################################################
+        # Elisions
+        entry = filter_localised(entry)
+        #######################################################################
+
+        #######################################################################
+        # Augmentations
+        #######################################################################
+        # In this case should add SystemName and StarPos, but only if the
+        # SystemAddress of where we think we are matches.
+        if this.systemaddress is None or this.systemaddress != entry['SystemAddress']:
+            logger.warning("SystemAddress isn't current location! Can't add augmentations!")
+            return 'Wrong System! Missed jump ?'
+
+        ret = this.eddn.entry_augment_system_data(entry, system_name, system_starpos)
+        if isinstance(ret, str):
+            return ret
+
+        entry = ret
+        #######################################################################
+
+        msg = {
+            '$schemaRef': f'https://eddn.edcd.io/schemas/fssbodysignals/1{"/test" if is_beta else ""}',
+            'message': entry
+        }
+
+        this.eddn.export_journal_entry(cmdr, entry, msg)
+        return None
+
     def canonicalise(self, item: str) -> str:
         """
         Canonicalise the given commodity name.
@@ -1545,7 +1601,7 @@ def journal_entry(  # noqa: C901, CCR001
 
         # NB: If adding FSSSignalDiscovered these absolutely come in at login
         #     time **BEFORE** the `Location` event, so we won't yet know things
-        #     like SystemNane, or StarPos.
+        #     like SystemName, or StarPos.
         #     We can either have the "now send the batch" code add such (but
         #     that has corner cases around changing systems in the meantime),
         #     drop those events, or if the schema allows, send without those
@@ -1553,6 +1609,15 @@ def journal_entry(  # noqa: C901, CCR001
 
         elif event_name == 'fssallbodiesfound':
             return this.eddn.export_journal_fssallbodiesfound(
+                cmdr,
+                system,
+                state['StarPos'],
+                is_beta,
+                entry
+            )
+
+        elif event_name == 'fssbodysignals':
+            return this.eddn.export_journal_fssbodysignals(
                 cmdr,
                 system,
                 state['StarPos'],
