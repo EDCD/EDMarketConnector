@@ -1707,30 +1707,31 @@ def journal_entry(  # noqa: C901, CCR001
         # CarrierJump           Y             Y           Y
 
         if 'SystemAddress' not in entry:
-            logger.warning("journal schema event doesn't contain SystemAddress when it should, aborting")
+            logger.warning(f"journal schema event({entry['event']}) doesn't contain SystemAddress when it should, "
+                           "aborting")
             return "No SystemAddress in event, aborting send"
 
         # add mandatory StarSystem and StarPos properties to events
         if 'StarSystem' not in entry:
             if this.systemaddress is None or this.systemaddress != entry['SystemAddress']:
-                logger.warning("event has no StarSystem, but SystemAddress isn't current location")
+                logger.warning(f"event({entry['event']}) has no StarSystem, but SystemAddress isn't current location")
                 return "Wrong System! Delayed Scan event?"
 
             if not system:
-                logger.warning("system is falsey, can't add StarSystem")
+                logger.warning(f"system is falsey, can't add StarSystem to {entry['event']} event")
                 return "system is falsey, can't add StarSystem"
 
             entry['StarSystem'] = system
 
         if 'StarPos' not in entry:
             if not this.coordinates:
-                logger.warning("this.coordinates is falsey, can't add StarPos")
+                logger.warning(f"this.coordinates is falsey, can't add StarPos to {entry['event']} event")
                 return "this.coordinates is falsey, can't add StarPos"
 
             # Gazelle[TD] reported seeing a lagged Scan event with incorrect
             # augmented StarPos: <https://github.com/EDCD/EDMarketConnector/issues/961>
             if this.systemaddress is None or this.systemaddress != entry['SystemAddress']:
-                logger.warning("event has no StarPos, but SystemAddress isn't current location")
+                logger.warning(f"event({entry['event']}) has no StarPos, but SystemAddress isn't current location")
                 return "Wrong System! Delayed Scan event?"
 
             entry['StarPos'] = list(this.coordinates)
