@@ -976,15 +976,20 @@ class EDDN:
                            f' "{this.status_body_name}" ({type(this.status_body_name)})')
 
         else:
-            entry['BodyName'] = this.status_body_name
-            # Only set BodyID if journal BodyName matches the Status.json one.
-            # This avoids binary body issues.
-            if this.status_body_name == this.body_name:
-                if this.body_id is not None and isinstance(this.body_id, int):
-                    entry['BodyID'] = this.body_id
+            # In case Frontier add it in
+            if entry.get('BodyName', None) is None:
+                entry['BodyName'] = this.status_body_name
 
-                else:
-                    logger.warning(f'this.body_id was not set properly: "{this.body_id}" ({type(this.body_id)})')
+            # Frontier are adding this in Odyssey Update 12
+            if entry.get('BodyID', None) is None:
+                # Only set BodyID if journal BodyName matches the Status.json one.
+                # This avoids binary body issues.
+                if this.status_body_name == this.body_name:
+                    if this.body_id is not None and isinstance(this.body_id, int):
+                        entry['BodyID'] = this.body_id
+
+                    else:
+                        logger.warning(f'this.body_id was not set properly: "{this.body_id}" ({type(this.body_id)})')
         #######################################################################
 
         # Check just the top-level strings with minLength=1 in the schema
