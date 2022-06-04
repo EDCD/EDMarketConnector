@@ -977,11 +977,11 @@ class EDDN:
 
         else:
             # In case Frontier add it in
-            if entry.get('BodyName', None) is None:
+            if 'BodyName' not in entry:
                 entry['BodyName'] = this.status_body_name
 
             # Frontier are adding this in Odyssey Update 12
-            if entry.get('BodyID', None) is None:
+            if 'BodyID' not in entry:
                 # Only set BodyID if journal BodyName matches the Status.json one.
                 # This avoids binary body issues.
                 if this.status_body_name == this.body_name:
