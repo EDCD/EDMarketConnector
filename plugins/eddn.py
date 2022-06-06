@@ -1558,7 +1558,19 @@ def journal_entry(  # noqa: C901, CCR001
     this.odyssey = entry['odyssey'] = state['Odyssey']
 
     # Track location
-    if event_name in ('location', 'fsdjump', 'docked', 'carrierjump'):
+    if event_name == 'supercruiseexit':
+        # For any orbital station we have no way of determining the body
+        # it orbits:
+        #
+        #   In-ship Status.json doesn't specify this.
+        #   On-foot Status.json lists the station itself as Body.
+        #   Location for stations (on-foot or in-ship) has station as Body.
+        #   SupercruiseExit (own ship or taxi) lists the station as the Body.
+        if entry['BodyType'] == 'Station':
+            this.body_name = None
+            this.body_id = None
+
+    elif event_name in ('location', 'fsdjump', 'docked', 'carrierjump'):
         if event_name in ('location', 'carrierjump'):
             if entry.get('BodyType') == 'Planet':
                 this.body_name = entry.get('Body')
