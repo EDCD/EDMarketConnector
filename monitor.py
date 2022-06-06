@@ -31,6 +31,7 @@ from EDMCLogging import get_main_logger
 logger = get_main_logger()
 STARTUP = 'journal.startup'
 MAX_NAVROUTE_DISCREPANCY = 5  # Timestamp difference in seconds
+MAX_FCMATERIALS_DISCREPANCY = 5  # Timestamp difference in seconds
 
 if TYPE_CHECKING:
     def _(x: str) -> str:
@@ -126,6 +127,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         self._navroute_retries_remaining = 0
         self._last_navroute_journal_timestamp: Optional[float] = None
+
+        self._fcmaterials_retries_remaining = 0
+        self._last_fcmaterials_journal_timestamp: Optional[float] = None
 
         self.__init_state()
 
@@ -1360,6 +1364,16 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 if self.__navroute_retry():
                     entry = self.state['NavRoute']
 
+            elif event_type == 'fcmaterials' and not self.catching_up:
+                # assume we've failed out the gate, then pull it back if things are fine
+                self._last_fcmaterials_journal_timestamp = mktime(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
+                self._fcmaterials_retries_remaining = 11
+
+                # Added in ED 4.0.0.1300 - Fleet Carrier Materials market in FCMaterials.json
+                # rather than duplicating this, lets just call the function
+                if fcmaterials := self.__fcmaterials_retry():
+                    entry = fcmaterials
+
             elif event_type == 'moduleinfo':
                 with open(join(self.currentdir, 'ModulesInfo.json'), 'rb') as mf:  # type: ignore
                     try:
@@ -2227,6 +2241,32 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         return data
 
+    def _parse_fcmaterials_file(self) -> Optional[dict[str, Any]]:
+        """Read and parse FCMaterials.json."""
+        if self.currentdir is None:
+            raise ValueError('currentdir unset')
+
+        try:
+
+            with open(join(self.currentdir, 'FCMaterials.json'), 'r') as f:
+                raw = f.read()
+
+        except Exception as e:
+            logger.exception(f'Could not open FCMaterials file. Bailing: {e}')
+            return None
+
+        try:
+            data = json.loads(raw)
+
+        except json.JSONDecodeError:
+            logger.exception('Failed to decode FCMaterials.json', exc_info=True)
+            return None
+
+        if 'timestamp' not in data:  # quick sanity check
+            return None
+
+        return data
+
     @staticmethod
     def _parse_journal_timestamp(source: str) -> float:
         return mktime(strptime(source, '%Y-%m-%dT%H:%M:%SZ'))
@@ -2266,6 +2306,41 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self._navroute_retries_remaining = 0
         self._last_navroute_journal_timestamp = None
         return True
+
+    def __fcmaterials_retry(self) -> Optional[Dict[str, Any]]:
+        """Retry reading FCMaterials files."""
+        if self._fcmaterials_retries_remaining == 0:
+            return None
+
+        logger.debug(f'FCMaterials read retry [{self._fcmaterials_retries_remaining}]')
+        self._fcmaterials_retries_remaining -= 1
+
+        if self._last_fcmaterials_journal_timestamp is None:
+            logger.critical('Asked to retry for FCMaterials but also no set time to compare? This is a bug.')
+            return None
+
+        if (file := self._parse_fcmaterials_file()) is None:
+            logger.debug(
+                'Failed to parse FCMaterials.json. '
+                + ('Trying again' if self._fcmaterials_retries_remaining > 0 else 'Giving up')
+            )
+            return None
+
+        # _parse_fcmaterials_file verifies that this exists for us
+        file_time = self._parse_journal_timestamp(file['timestamp'])
+        if abs(file_time - self._last_fcmaterials_journal_timestamp) > MAX_FCMATERIALS_DISCREPANCY:
+            logger.debug(
+                f'Time discrepancy of more than {MAX_FCMATERIALS_DISCREPANCY}s --'
+                f' ({abs(file_time - self._last_fcmaterials_journal_timestamp)}).'
+                f' {"Trying again" if self._fcmaterials_retries_remaining > 0 else "Giving up"}.'
+            )
+            return None
+
+        # everything is good, lets set what we need to and make sure we dont try again
+        logger.info('Successfully read FCMaterials file for last FCMaterials event.')
+        self._fcmaterials_retries_remaining = 0
+        self._last_fcmaterials_journal_timestamp = None
+        return file
 
 
 # singleton
