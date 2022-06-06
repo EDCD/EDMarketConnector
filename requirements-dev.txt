@@ -5,7 +5,9 @@ wheel
 # We can't rely on just picking this up from either the base (not venv),
 # or venv-init-time version.  Specify here so that dependabot will prod us
 # about new versions.
-setuptools==62.3.2
+## Anything later than 60.10.0 complains about auto-discovering multiple
+## packages. ref: <https://github.com/py2exe/py2exe/issues/136>
+setuptools==60.10.0
 
 # Static analysis tools
 flake8==4.0.1
