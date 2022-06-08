@@ -433,13 +433,13 @@ If you are making a pre-release then:
 
 When changing the Python version (Major.Minor.Patch) used:
 
-1. Change the contents of `.python-version` so that pyenv notices.
+1. Change the contents of `.python-version` so that pyenv notices.  All of
+  the GitHub workflows now reference this via the `setup-python`
+  `python-version-file` directive.
 
 1. Any version change:
 
-   1. `.github/workflows/windows-build.yml` needs updating to have the GitHub
-   based build use the correct version.
-   2. `ChangeLog.md` - The `We now test against, and package with, Python
+   1. `ChangeLog.md` - The `We now test against, and package with, Python
        M.m.P.` line.
 
 1. Major or Minor level changes:
@@ -449,5 +449,3 @@ When changing the Python version (Major.Minor.Patch) used:
        pythonXX.dll file.
     3. `.pre-commit-config.yaml` will need the `default_language_version`
        section updated to the appropriate version.
-    4. All `.github/workflows/` files will need to be citing the correct
-       version in any `uses: actions/setup-python` section.
