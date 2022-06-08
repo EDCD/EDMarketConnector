@@ -7,7 +7,7 @@ wheel
 # about new versions.
 ## Anything later than 60.10.0 complains about auto-discovering multiple
 ## packages. ref: <https://github.com/py2exe/py2exe/issues/136>
-setuptools==60.10.0
+setuptools==62.3.3
 
 # Static analysis tools
 flake8==4.0.1
