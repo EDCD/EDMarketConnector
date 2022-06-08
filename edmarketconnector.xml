@@ -36,13 +36,50 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 5.3.4</title>
+			<title>Release 5.4.0</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
 
-<p>We now test against, and package with, Python 3.10.3.</p>
+<p>We now test against, and package with, Python 3.10.4.</p>
 <p><strong>As a consequence of this we no longer support Windows 7.</strong><br>
+
+<h2>Release 5.4.0</h2>
+<ul>
+<li>We now test against, and package with, Python 3.10.4.</li>
+<li>New EDDN schema <code>fssbodysignals</code> is now supported.</li>
+<li>Odyssey Update 12 will add <code>BodyID</code> to <code>CodexEntry</code> journal events, so don't
+overwrite this with an augmentation if it is already present.  We've also
+added the same for <code>BodyName</code> in case Frontier ever add that.</li>
+<li>
+<a href="https://github.com/EDCD/EDMarketConnector/issues/24">Translations</a> updated.
+Thanks again to all the contributors.</li>
+</ul>
+<h2>
+<a id="user-content-bug-fixes" class="anchor" href="#bug-fixes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Bug Fixes</h2>
+<ul>
+<li>Cross-check the <code>MarketID</code> in CAPI data, not only the station name, to ensure
+the data is for the correct station.  Closes <a href="https://github.com/EDCD/EDMarketConnector/issues/1572">#1572</a>.</li>
+<li>Location cross-check paranoia added to several EDDN message types to ensure
+no bad data is sent.</li>
+<li>Ensure we don't send bad BodyID/Name for an orbital station if the player
+uses a taxi.
+Closes <a href="https://github.com/EDCD/EDMarketConnector/issues/1522">#1522</a>.</li>
+</ul>
+<h2>
+<a id="user-content-developers" class="anchor" href="#developers" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Developers</h2>
+<ul>
+<li>Odyssey Update 12 adds a new Journal event, and file, <code>FCMaterials.json</code>,
+detailing the available trades at a Fleet Carrier's bar tender.  Support has
+been added for this.  Plugin developers are sent an <code>FCMaterials</code> event
+with the full contents of the file.</li>
+</ul>
+<h2>
+<a id="user-content-edmcexe" class="anchor" href="#edmcexe" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>EDMC.exe</h2>
+<p>This now uses specific exit codes in all cases, rather than a generic
+<code>EXIT_SYS_ERR</code> (6) for some cases.  See the appropriate line in EDMC.py for
+details.</p>
+
 
 <h2>Release 5.3.4</h2>
 <p>Whilst EDMarketConnector.exe was fixed for the Odyssey Update 11 difference in Journal file names, EDMC.exe was not.   If you're wondering, that's the command-line utility that, for instance, Trade Computer Extensions uses to obtain data.</p>
@@ -1331,11 +1368,11 @@ about this:
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.3.4/EDMarketConnector_win_5.3.4.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.4.0/EDMarketConnector_win_5.4.0.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="5.3.4"
-				length="16723968"
+				sparkle:version="5.4.0"
+				length="16809984"
 				type="application/octet-stream"
 			/>
 		</item>
