@@ -27,7 +27,7 @@ produce the Windows executables and installer.
 
 ---
 
-Pre-Release 5.4.0-beta0
+Release 5.4.0
 ===
 
 * We now test against, and package with, Python 3.10.4.
@@ -35,6 +35,9 @@ Pre-Release 5.4.0-beta0
 * Odyssey Update 12 will add `BodyID` to `CodexEntry` journal events, so don't
   overwrite this with an augmentation if it is already present.  We've also
   added the same for `BodyName` in case Frontier ever add that.
+* [Translations](https://github.com/EDCD/EDMarketConnector/issues/24) updated. 
+  Thanks again to all the contributors.
+
 Bug Fixes
 ---
 * Cross-check the `MarketID` in CAPI data, not only the station name, to ensure
@@ -57,6 +60,8 @@ EDMC.exe
 This now uses specific exit codes in all cases, rather than a generic
 `EXIT_SYS_ERR` (6) for some cases.  See the appropriate line in EDMC.py for
 details.
+
+---
 
 Release 5.3.4
 ===
