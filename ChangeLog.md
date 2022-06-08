@@ -27,10 +27,41 @@ produce the Windows executables and installer.
 
 ---
 
-Pre-Release 5.4.0-beta0
+Release 5.4.0
 ===
 
 * We now test against, and package with, Python 3.10.4.
+* New EDDN schema `fssbodysignals` is now supported.
+* Odyssey Update 12 will add `BodyID` to `CodexEntry` journal events, so don't
+  overwrite this with an augmentation if it is already present.  We've also
+  added the same for `BodyName` in case Frontier ever add that.
+* [Translations](https://github.com/EDCD/EDMarketConnector/issues/24) updated. 
+  Thanks again to all the contributors.
+
+Bug Fixes
+---
+* Cross-check the `MarketID` in CAPI data, not only the station name, to ensure
+  the data is for the correct station.  Closes [#1572](https://github.com/EDCD/EDMarketConnector/issues/1572).
+* Location cross-check paranoia added to several EDDN message types to ensure
+  no bad data is sent.
+* Ensure we don't send bad BodyID/Name for an orbital station if the player
+  uses a taxi.
+  Closes [#1522](https://github.com/EDCD/EDMarketConnector/issues/1522).
+
+Developers
+---
+* Odyssey Update 12 adds a new Journal event, and file, `FCMaterials.json`,
+  detailing the available trades at a Fleet Carrier's bar tender.  Support has
+  been added for this.  Plugin developers are sent an `FCMaterials` event
+  with the full contents of the file.
+
+EDMC.exe
+---
+This now uses specific exit codes in all cases, rather than a generic
+`EXIT_SYS_ERR` (6) for some cases.  See the appropriate line in EDMC.py for
+details.
+
+---
 
 Release 5.3.4
 ===
