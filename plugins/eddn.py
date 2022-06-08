@@ -854,6 +854,12 @@ class EDDN:
         #######################################################################
         # Augmentations
         #######################################################################
+        # In this case should add StarPos, but only if the
+        # SystemAddress of where we think we are matches.
+        if this.systemaddress is None or this.systemaddress != entry['SystemAddress']:
+            logger.warning("SystemAddress isn't current location! Can't add augmentations!")
+            return 'Wrong System! Missed jump ?'
+
         ret = this.eddn.entry_augment_system_data(entry, system_name, system_starpos)
         if isinstance(ret, str):
             return ret
@@ -890,6 +896,12 @@ class EDDN:
         #######################################################################
         # Augmentations
         #######################################################################
+        # In this case should add StarSystem and StarPos, but only if the
+        # SystemAddress of where we think we are matches.
+        if this.systemaddress is None or this.systemaddress != entry['SystemAddress']:
+            logger.warning("SystemAddress isn't current location! Can't add augmentations!")
+            return 'Wrong System! Missed jump ?'
+
         ret = this.eddn.entry_augment_system_data(entry, system_name, system_starpos)
         if isinstance(ret, str):
             return ret
@@ -946,7 +958,12 @@ class EDDN:
         #######################################################################
         # Augmentations
         #######################################################################
-        # General 'system' augmentations
+        # In this case should add StarPos, but only if the
+        # SystemAddress of where we think we are matches.
+        if this.systemaddress is None or this.systemaddress != entry['SystemAddress']:
+            logger.warning("SystemAddress isn't current location! Can't add augmentations!")
+            return 'Wrong System! Missed jump ?'
+
         ret = this.eddn.entry_augment_system_data(entry, entry['System'], system_starpos)
         if isinstance(ret, str):
             return ret
@@ -959,15 +976,20 @@ class EDDN:
                            f' "{this.status_body_name}" ({type(this.status_body_name)})')
 
         else:
-            entry['BodyName'] = this.status_body_name
-            # Only set BodyID if journal BodyName matches the Status.json one.
-            # This avoids binary body issues.
-            if this.status_body_name == this.body_name:
-                if this.body_id is not None and isinstance(this.body_id, int):
-                    entry['BodyID'] = this.body_id
+            # In case Frontier add it in
+            if 'BodyName' not in entry:
+                entry['BodyName'] = this.status_body_name
 
-                else:
-                    logger.warning(f'this.body_id was not set properly: "{this.body_id}" ({type(this.body_id)})')
+            # Frontier are adding this in Odyssey Update 12
+            if 'BodyID' not in entry:
+                # Only set BodyID if journal BodyName matches the Status.json one.
+                # This avoids binary body issues.
+                if this.status_body_name == this.body_name:
+                    if this.body_id is not None and isinstance(this.body_id, int):
+                        entry['BodyID'] = this.body_id
+
+                    else:
+                        logger.warning(f'this.body_id was not set properly: "{this.body_id}" ({type(this.body_id)})')
         #######################################################################
 
         # Check just the top-level strings with minLength=1 in the schema
@@ -1028,6 +1050,12 @@ class EDDN:
         #######################################################################
         # Augmentations
         #######################################################################
+        # In this case should add StarPos, but only if the
+        # SystemAddress of where we think we are matches.
+        if this.systemaddress is None or this.systemaddress != entry['SystemAddress']:
+            logger.warning("SystemAddress isn't current location! Can't add augmentations!")
+            return 'Wrong System! Missed jump ?'
+
         ret = this.eddn.entry_augment_system_data(entry, entry['StarSystem'], system_starpos)
         if isinstance(ret, str):
             return ret
@@ -1159,7 +1187,12 @@ class EDDN:
         #######################################################################
         # Augmentations
         #######################################################################
-        # In this case should add StarSystem and StarPos
+        # In this case should add SystemName and StarPos, but only if the
+        # SystemAddress of where we think we are matches.
+        if this.systemaddress is None or this.systemaddress != entry['SystemAddress']:
+            logger.warning("SystemAddress isn't current location! Can't add augmentations!")
+            return 'Wrong System! Missed jump ?'
+
         ret = this.eddn.entry_augment_system_data(entry, system_name, system_starpos)
         if isinstance(ret, str):
             return ret
@@ -1197,7 +1230,12 @@ class EDDN:
         #######################################################################
         # Augmentations
         #######################################################################
-        # In this case should add StarSystem and StarPos
+        # In this case should add StarPos, but only if the
+        # SystemAddress of where we think we are matches.
+        if this.systemaddress is None or this.systemaddress != entry['SystemAddress']:
+            logger.warning("SystemAddress isn't current location! Can't add augmentations!")
+            return 'Wrong System! Missed jump ?'
+
         ret = this.eddn.entry_augment_system_data(entry, system_name, system_starpos)
         if isinstance(ret, str):
             return ret
@@ -1207,6 +1245,62 @@ class EDDN:
 
         msg = {
             '$schemaRef': f'https://eddn.edcd.io/schemas/fssallbodiesfound/1{"/test" if is_beta else ""}',
+            'message': entry
+        }
+
+        this.eddn.export_journal_entry(cmdr, entry, msg)
+        return None
+
+    def export_journal_fssbodysignals(
+        self, cmdr: str, system_name: str, system_starpos: list, is_beta: bool, entry: MutableMapping[str, Any]
+    ) -> Optional[str]:
+        """
+        Send an FSSBodySignals message to EDDN on the correct schema.
+
+        :param cmdr: the commander under which this upload is made
+        :param system_name: Name of current star system
+        :param system_starpos: Coordinates of current star system
+        :param is_beta: whether or not we are in beta mode
+        :param entry: the journal entry to send
+        """
+        # {
+        #   "timestamp" : "2022-03-15T13:07:51Z",
+        #   "event" : "FSSBodySignals",
+        #   "BodyName" : "Phroi Blou BQ-Y d1162 1 a",
+        #   "BodyID" : 12,
+        #   "SystemAddress" : 39935704602251,
+        #   "Signals" : [
+        #     {
+        #       "Type" : "$SAA_SignalType_Geological;",
+        #       "Type_Localised" : "Geological",
+        #       "Count" : 3
+        #     }
+        #   ]
+        # }
+
+        #######################################################################
+        # Elisions
+        entry = filter_localised(entry)
+        #######################################################################
+
+        #######################################################################
+        # Augmentations
+        #######################################################################
+        # In this case should add SystemName and StarPos, but only if the
+        # SystemAddress of where we think we are matches.
+        if this.systemaddress is None or this.systemaddress != entry['SystemAddress']:
+            logger.warning("SystemAddress isn't current location! Can't add augmentations!")
+            return 'Wrong System! Missed jump ?'
+
+        ret = this.eddn.entry_augment_system_data(entry, system_name, system_starpos)
+        if isinstance(ret, str):
+            return ret
+
+        entry = ret
+        #######################################################################
+
+        msg = {
+            '$schemaRef': f'https://eddn.edcd.io/schemas/fssbodysignals/1{"/test" if is_beta else ""}',
             'message': entry
         }
 
@@ -1464,7 +1558,19 @@ def journal_entry(  # noqa: C901, CCR001
     this.odyssey = entry['odyssey'] = state['Odyssey']
 
     # Track location
-    if event_name in ('location', 'fsdjump', 'docked', 'carrierjump'):
+    if event_name == 'supercruiseexit':
+        # For any orbital station we have no way of determining the body
+        # it orbits:
+        #
+        #   In-ship Status.json doesn't specify this.
+        #   On-foot Status.json lists the station itself as Body.
+        #   Location for stations (on-foot or in-ship) has station as Body.
+        #   SupercruiseExit (own ship or taxi) lists the station as the Body.
+        if entry['BodyType'] == 'Station':
+            this.body_name = None
+            this.body_id = None
+
+    elif event_name in ('location', 'fsdjump', 'docked', 'carrierjump'):
         if event_name in ('location', 'carrierjump'):
             if entry.get('BodyType') == 'Planet':
                 this.body_name = entry.get('Body')
@@ -1545,7 +1651,7 @@ def journal_entry(  # noqa: C901, CCR001
 
         # NB: If adding FSSSignalDiscovered these absolutely come in at login
         #     time **BEFORE** the `Location` event, so we won't yet know things
-        #     like SystemNane, or StarPos.
+        #     like SystemName, or StarPos.
         #     We can either have the "now send the batch" code add such (but
         #     that has corner cases around changing systems in the meantime),
         #     drop those events, or if the schema allows, send without those
@@ -1553,6 +1659,15 @@ def journal_entry(  # noqa: C901, CCR001
 
         elif event_name == 'fssallbodiesfound':
             return this.eddn.export_journal_fssallbodiesfound(
+                cmdr,
+                system,
+                state['StarPos'],
+                is_beta,
+                entry
+            )
+
+        elif event_name == 'fssbodysignals':
+            return this.eddn.export_journal_fssbodysignals(
                 cmdr,
                 system,
                 state['StarPos'],
@@ -1596,33 +1711,47 @@ def journal_entry(  # noqa: C901, CCR001
             entry['Body'] = this.body_name
             entry['BodyType'] = 'Planet'
 
-        # add mandatory StarSystem, StarPos and SystemAddress properties to Scan events
+        # The generic journal schema is for events:
+        #   Docked, FSDJump, Scan, Location, SAASignalsFound, CarrierJump
+        # (Also CodexEntry, but that has its own schema and handling).
+        # Journals 2021-08-23 to 2022-05-29
+        #                   StarSystem  SystemAddress  StarPos
+        # Docked                Y             Y           N
+        # FSDJump               Y             Y           Y
+        # Scan                  Y             Y           N
+        # Location              Y             Y           Y
+        # SAASignalsFound       N             Y           N
+        # CarrierJump           Y             Y           Y
+
+        if 'SystemAddress' not in entry:
+            logger.warning(f"journal schema event({entry['event']}) doesn't contain SystemAddress when it should, "
+                           "aborting")
+            return "No SystemAddress in event, aborting send"
+
+        # add mandatory StarSystem and StarPos properties to events
         if 'StarSystem' not in entry:
+            if this.systemaddress is None or this.systemaddress != entry['SystemAddress']:
+                logger.warning(f"event({entry['event']}) has no StarSystem, but SystemAddress isn't current location")
+                return "Wrong System! Delayed Scan event?"
+
             if not system:
-                logger.warning("system is falsey, can't add StarSystem")
+                logger.warning(f"system is falsey, can't add StarSystem to {entry['event']} event")
                 return "system is falsey, can't add StarSystem"
 
             entry['StarSystem'] = system
 
         if 'StarPos' not in entry:
             if not this.coordinates:
-                logger.warning("this.coordinates is falsey, can't add StarPos")
+                logger.warning(f"this.coordinates is falsey, can't add StarPos to {entry['event']} event")
                 return "this.coordinates is falsey, can't add StarPos"
 
             # Gazelle[TD] reported seeing a lagged Scan event with incorrect
             # augmented StarPos: <https://github.com/EDCD/EDMarketConnector/issues/961>
             if this.systemaddress is None or this.systemaddress != entry['SystemAddress']:
-                logger.warning("event has no StarPos, but SystemAddress isn't current location")
+                logger.warning(f"event({entry['event']}) has no StarPos, but SystemAddress isn't current location")
                 return "Wrong System! Delayed Scan event?"
 
             entry['StarPos'] = list(this.coordinates)
-
-        if 'SystemAddress' not in entry:
-            if not this.systemaddress:
-                logger.warning("this.systemaddress is falsey, can't add SystemAddress")
-                return "this.systemaddress is falsey, can't add SystemAddress"
-
-            entry['SystemAddress'] = this.systemaddress
 
         try:
             this.eddn.export_journal_generic(cmdr, is_beta, filter_localised(entry))

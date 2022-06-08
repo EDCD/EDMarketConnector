@@ -1,8 +1,38 @@
 /* Language name */
 "!Language" = "Slovenščina";
 
-/* companion.py: Generic "something went wrong with Frontier Auth" error; In files: companion.py:265; */
-"Error: Invalid Credentials" = "Napaka: napačno uporabniški ime ali geslo";
+/* eddn.py: Status text shown while attempting to send data; In files: eddn.py:212; eddn.py:584; eddn.py:925; load.py:215; load.py:593; load.py:940; eddn.py:252; eddn.py:699; eddn.py:1439; */
+"Sending data to EDDN..." = "Pošiljam podatke na EDDN";
+
+/* eddn.py: Error while trying to send data to EDDN; In files: eddn.py:257; eddn.py:864; eddn.py:898; eddn.py:937; load.py:260; load.py:878; load.py:913; load.py:952; eddn.py:316; eddn.py:1375; eddn.py:1410; eddn.py:1451; */
+"Error: Can't connect to EDDN" = "Napaka: povezava z EDDN ni mogoča";
+
+/* eddn.py: Enable EDDN support for station data checkbox label; In files: eddn.py:663; load.py:672; eddn.py:1122; */
+"Send station data to the Elite Dangerous Data Network" = "Pošlji podatke postaje na EDDN";
+
+/* edsm.py: Settings>EDSM - Label on header/URL to EDSM API key page; In files: edsm.py:206; load.py:206; edsm.py:247; */
+"Elite Dangerous Star Map credentials" = "EDStarMap uporabniški podatki";
+
+/* edsm.py: Game Commander name label in EDSM settings; theme.py: Label for commander name in main window; EDMarketConnector.py: Label for commander name in main window; stats.py: Cmdr stats; In files: edsm.py:216; load.py:216; edsm.py:258; theme.py:227; EDMarketConnector.py:822; stats.py:59; */
+"Cmdr" = "Cmdr";
+
+/* edsm.py: EDSM Commander name label in EDSM settings; In files: edsm.py:223; load.py:223; edsm.py:266; */
+"Commander Name" = "Commander ime";
+
+/* edsm.py: EDSM API key label; inara.py: Inara API key label; In files: edsm.py:230; inara.py:233; load.py:230; load.py:233; edsm.py:274; inara.py:243; */
+"API Key" = "API ključ";
+
+/* edsm.py: We have no data on the current commander; prefs.py: No hotkey/shortcut set; stats.py: No rank; In files: edsm.py:256; load.py:256; edsm.py:301; prefs.py:520; prefs.py:1174; prefs.py:1207; stats.py:156; stats.py:175; stats.py:194; stats.py:211; */
+"None" = "Brez";
+
+/* edsm.py: EDSM Plugin - Error message from EDSM API; In files: edsm.py:622; edsm.py:724; load.py:627; load.py:729; edsm.py:747; edsm.py:875; */
+"Error: EDSM {MSG}" = "Napaka: EDSM {MSG}";
+
+/* edsm.py: EDSM Plugin - Error connecting to EDSM API; In files: edsm.py:658; edsm.py:720; load.py:663; load.py:725; edsm.py:784; edsm.py:870; */
+"Error: Can't connect to EDSM" = "Napaka: Povezava z EDSM ni mogoča";
+
+/* ttkHyperlinkLabel.py: Label for 'Copy' as in 'Copy and Paste'; EDMarketConnector.py: Label for 'Copy' as in 'Copy and Paste'; In files: ttkHyperlinkLabel.py:42; EDMarketConnector.py:866; */
+"Copy" = "Kopiraj";
 
 /* EDMarketConnector.py: Update button in main window; In files: EDMarketConnector.py:529; EDMarketConnector.py:828; EDMarketConnector.py:1520; */
 "Update" = "Osveži";
@@ -10,22 +40,19 @@
 /* EDMarketConnector.py: Appearance - Label for checkbox to select if application always on top; prefs.py: Appearance - Label for checkbox to select if application always on top; In files: EDMarketConnector.py:612; prefs.py:867; */
 "Always on top" = "Vedno na vrhu";
 
-/* EDMarketConnector.py: Label for commander name in main window; edsm.py: Game Commander name label in EDSM settings; stats.py: Cmdr stats; theme.py: Label for commander name in main window; In files: EDMarketConnector.py:822; edsm.py:257; stats.py:52; theme.py:227; */
-"Cmdr" = "Cmdr";
-
 /* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: Multicrew role label in main window; In files: EDMarketConnector.py:824; EDMarketConnector.py:1279; */
 "Role" = "Vloga";
 
-/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: 'Ship' label in main UI; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:824; EDMarketConnector.py:1289; EDMarketConnector.py:1312; stats.py:367; */
+/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: 'Ship' label in main UI; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:824; EDMarketConnector.py:1289; EDMarketConnector.py:1312; stats.py:409; */
 "Ship" = "Ladja";
 
-/* EDMarketConnector.py: Label for 'System' line in main UI; prefs.py: Configuration - Label for selection of 'System' provider website; stats.py: Main window; In files: EDMarketConnector.py:826; prefs.py:607; stats.py:369; */
+/* EDMarketConnector.py: Label for 'System' line in main UI; prefs.py: Configuration - Label for selection of 'System' provider website; stats.py: Main window; In files: EDMarketConnector.py:826; prefs.py:607; stats.py:411; */
 "System" = "Sistem";
 
-/* EDMarketConnector.py: Label for 'Station' line in main UI; prefs.py: Configuration - Label for selection of 'Station' provider website; prefs.py: Appearance - Example 'Normal' text; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:827; prefs.py:625; prefs.py:762; stats.py:370; */
+/* EDMarketConnector.py: Label for 'Station' line in main UI; prefs.py: Configuration - Label for selection of 'Station' provider website; prefs.py: Appearance - Example 'Normal' text; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:827; prefs.py:625; prefs.py:762; stats.py:412; */
 "Station" = "Postaja";
 
-/* EDMarketConnector.py: 'File' menu title on OSX; EDMarketConnector.py: 'File' menu title; EDMarketConnector.py: 'File' menu; In files: EDMarketConnector.py:830; EDMarketConnector.py:845; EDMarketConnector.py:848; EDMarketConnector.py:2015; */
+/* EDMarketConnector.py: 'File' menu title on OSX; EDMarketConnector.py: 'File' menu title; EDMarketConnector.py: 'File' menu; In files: EDMarketConnector.py:830; EDMarketConnector.py:845; EDMarketConnector.py:848; EDMarketConnector.py:2019; */
 "File" = "Datoteka";
 
 /* EDMarketConnector.py: 'Edit' menu title on OSX; EDMarketConnector.py: 'Edit' menu title; In files: EDMarketConnector.py:831; EDMarketConnector.py:846; EDMarketConnector.py:849; */
@@ -49,7 +76,7 @@
 /* EDMarketConnector.py: File > Save Raw Data...; In files: EDMarketConnector.py:840; EDMarketConnector.py:854; */
 "Save Raw Data..." = "Shrani Izvirne Podatke...";
 
-/* EDMarketConnector.py: File > Status; stats.py: Status dialog title; In files: EDMarketConnector.py:841; EDMarketConnector.py:853; stats.py:364; */
+/* EDMarketConnector.py: File > Status; stats.py: Status dialog title; In files: EDMarketConnector.py:841; EDMarketConnector.py:853; stats.py:406; */
 "Status" = "Status";
 
 /* EDMarketConnector.py: Help > Privacy Policy; In files: EDMarketConnector.py:842; EDMarketConnector.py:860; */
@@ -58,7 +85,7 @@
 /* EDMarketConnector.py: Help > Release Notes; In files: EDMarketConnector.py:843; EDMarketConnector.py:861; EDMarketConnector.py:1600; */
 "Release Notes" = "Opombe ob izdaji";
 
-/* EDMarketConnector.py: File > Settings; prefs.py: File > Settings (macOS); In files: EDMarketConnector.py:855; EDMarketConnector.py:2016; prefs.py:255; */
+/* EDMarketConnector.py: File > Settings; prefs.py: File > Settings (macOS); In files: EDMarketConnector.py:855; EDMarketConnector.py:2020; prefs.py:255; */
 "Settings" = "Nastavitve";
 
 /* EDMarketConnector.py: File > Exit; In files: EDMarketConnector.py:856; */
@@ -66,9 +93,6 @@
 
 /* EDMarketConnector.py: Help > Documentation; In files: EDMarketConnector.py:859; */
 "Documentation" = "Dokumentacija";
-
-/* EDMarketConnector.py: Label for 'Copy' as in 'Copy and Paste'; ttkHyperlinkLabel.py: Label for 'Copy' as in 'Copy and Paste'; In files: EDMarketConnector.py:866; ttkHyperlinkLabel.py:42; */
-"Copy" = "Kopiraj";
 
 /* EDMarketConnector.py: Status - Attempting to get a Frontier Auth Access Token; In files: EDMarketConnector.py:872; */
 "Logging in..." = "Prijava v teku... ";
@@ -88,13 +112,13 @@
 /* EDMarketConnector.py: Status - Attempting to retrieve data from Frontier CAPI; In files: EDMarketConnector.py:1006; */
 "Fetching data..." = "Nalagam podatke...";
 
-/* EDMarketConnector.py: We didn't have the commander name when we should have; stats.py: Unknown commander; In files: EDMarketConnector.py:1051; stats.py:298; */
+/* EDMarketConnector.py: We didn't have the commander name when we should have; stats.py: Unknown commander; In files: EDMarketConnector.py:1051; stats.py:335; */
 "Who are you?!" = "Kdo si";
 
-/* EDMarketConnector.py: We don't know where the commander is, when we should; stats.py: Unknown location; In files: EDMarketConnector.py:1057; stats.py:308; */
+/* EDMarketConnector.py: We don't know where the commander is, when we should; stats.py: Unknown location; In files: EDMarketConnector.py:1057; stats.py:345; */
 "Where are you?!" = "Kje se nahajaš";
 
-/* EDMarketConnector.py: We don't know what ship the commander is in, when we should; stats.py: Unknown ship; In files: EDMarketConnector.py:1064; stats.py:316; */
+/* EDMarketConnector.py: We don't know what ship the commander is in, when we should; stats.py: Unknown ship; In files: EDMarketConnector.py:1064; stats.py:353; */
 "What are you flying?!" = "S čim letiš";
 
 /* EDMarketConnector.py: Time when we last obtained Frontier CAPI data; In files: EDMarketConnector.py:1226; */
@@ -106,35 +130,11 @@
 /* EDMarketConnector.py: Generic 'OK' button label; prefs.py: 'OK' button on Settings/Preferences window; In files: EDMarketConnector.py:1626; prefs.py:306; */
 "OK" = "Potrdi";
 
+/* companion.py: Generic "something went wrong with Frontier Auth" error; In files: companion.py:263; */
+"Error: Invalid Credentials" = "Napaka: napačno uporabniški ime ali geslo";
+
 /* l10n.py: The system default language choice in Settings > Appearance; prefs.py: Settings > Configuration - Label on 'reset journal files location to default' button; prefs.py: The system default language choice in Settings > Appearance; prefs.py: Label for 'Default' theme radio button; In files: l10n.py:194; prefs.py:468; prefs.py:702; prefs.py:735; */
 "Default" = "Privzeta";
-
-/* eddn.py: Status text shown while attempting to send data; In files: eddn.py:251; eddn.py:698; eddn.py:1438; */
-"Sending data to EDDN..." = "Pošiljam podatke na EDDN";
-
-/* eddn.py: Error while trying to send data to EDDN; In files: eddn.py:315; eddn.py:1374; eddn.py:1409; eddn.py:1450; */
-"Error: Can't connect to EDDN" = "Napaka: povezava z EDDN ni mogoča";
-
-/* eddn.py: Enable EDDN support for station data checkbox label; In files: eddn.py:1121; */
-"Send station data to the Elite Dangerous Data Network" = "Pošlji podatke postaje na EDDN";
-
-/* edsm.py: Settings>EDSM - Label on header/URL to EDSM API key page; In files: edsm.py:246; */
-"Elite Dangerous Star Map credentials" = "EDStarMap uporabniški podatki";
-
-/* edsm.py: EDSM Commander name label in EDSM settings; In files: edsm.py:265; */
-"Commander Name" = "Commander ime";
-
-/* edsm.py: EDSM API key label; inara.py: Inara API key label; In files: edsm.py:273; inara.py:243; */
-"API Key" = "API ključ";
-
-/* edsm.py: We have no data on the current commander; prefs.py: No hotkey/shortcut set; stats.py: No rank; In files: edsm.py:300; prefs.py:520; prefs.py:1174; prefs.py:1207; stats.py:119; stats.py:138; stats.py:157; stats.py:174; */
-"None" = "Brez";
-
-/* edsm.py: EDSM Plugin - Error message from EDSM API; In files: edsm.py:746; edsm.py:874; */
-"Error: EDSM {MSG}" = "Napaka: EDSM {MSG}";
-
-/* edsm.py: EDSM Plugin - Error connecting to EDSM API; In files: edsm.py:783; edsm.py:869; */
-"Error: Can't connect to EDSM" = "Napaka: Povezava z EDSM ni mogoča";
 
 /* prefs.py: File > Preferences menu entry for macOS; In files: prefs.py:251; */
 "Preferences" = "Nastavitve";
@@ -205,230 +205,230 @@
 /* prefs.py: Label for Settings > Appearance tab; In files: prefs.py:885; */
 "Appearance" = "Videz";
 
-/* stats.py: Cmdr stats; In files: stats.py:53; */
+/* stats.py: Cmdr stats; In files: stats.py:60; */
 "Balance" = "Ravnotežje";
 
-/* stats.py: Cmdr stats; In files: stats.py:54; */
+/* stats.py: Cmdr stats; In files: stats.py:61; */
 "Loan" = "Posojilo";
 
-/* stats.py: Ranking; In files: stats.py:59; */
-"Combat" = "Combat";
-
-/* stats.py: Ranking; In files: stats.py:60; */
-"Trade" = "Trgovanje";
-
-/* stats.py: Ranking; In files: stats.py:61; */
-"Explorer" = "Explorer";
-
-/* stats.py: Ranking; In files: stats.py:62; */
-"CQC" = "CQC";
-
-/* stats.py: Ranking; In files: stats.py:63; */
-"Federation" = "Federacija";
-
-/* stats.py: Ranking; In files: stats.py:64; */
-"Empire" = "Cesarstvo";
-
-/* stats.py: Ranking; In files: stats.py:65; */
-"Powerplay" = "Igra moči";
-
-/* stats.py: Combat rank; In files: stats.py:73; */
-"Harmless" = "Harmless";
-
-/* stats.py: Combat rank; In files: stats.py:74; */
-"Mostly Harmless" = "Mostly Harmless";
-
-/* stats.py: Combat rank; In files: stats.py:75; */
-"Novice" = "Novice";
-
-/* stats.py: Combat rank; In files: stats.py:76; */
-"Competent" = "Competent";
-
-/* stats.py: Combat rank; In files: stats.py:77; */
-"Expert" = "Expert";
-
-/* stats.py: Combat rank; stats.py: Empire rank; In files: stats.py:78; stats.py:141; */
-"Master" = "Master";
-
-/* stats.py: Combat rank; In files: stats.py:79; */
-"Dangerous" = "Dangerous";
-
-/* stats.py: Combat rank; In files: stats.py:80; */
-"Deadly" = "Deadly";
-
-/* stats.py: Top rank; In files: stats.py:81; stats.py:92; stats.py:103; stats.py:114; */
+/* stats.py: Top rank; In files: stats.py:65; */
 "Elite" = "Elite";
 
-/* stats.py: Trade rank; In files: stats.py:84; */
+/* stats.py: Ranking; In files: stats.py:76; */
+"Combat" = "Combat";
+
+/* stats.py: Ranking; In files: stats.py:77; */
+"Trade" = "Trgovanje";
+
+/* stats.py: Ranking; In files: stats.py:78; */
+"Explorer" = "Explorer";
+
+/* stats.py: Ranking; In files: stats.py:81; */
+"CQC" = "CQC";
+
+/* stats.py: Ranking; In files: stats.py:82; */
+"Federation" = "Federacija";
+
+/* stats.py: Ranking; In files: stats.py:83; */
+"Empire" = "Cesarstvo";
+
+/* stats.py: Ranking; In files: stats.py:84; */
+"Powerplay" = "Igra moči";
+
+/* stats.py: Combat rank; In files: stats.py:93; */
+"Harmless" = "Harmless";
+
+/* stats.py: Combat rank; In files: stats.py:94; */
+"Mostly Harmless" = "Mostly Harmless";
+
+/* stats.py: Combat rank; In files: stats.py:95; */
+"Novice" = "Novice";
+
+/* stats.py: Combat rank; In files: stats.py:96; */
+"Competent" = "Competent";
+
+/* stats.py: Combat rank; In files: stats.py:97; */
+"Expert" = "Expert";
+
+/* stats.py: Combat rank; stats.py: Empire rank; In files: stats.py:98; stats.py:178; */
+"Master" = "Master";
+
+/* stats.py: Combat rank; In files: stats.py:99; */
+"Dangerous" = "Dangerous";
+
+/* stats.py: Combat rank; In files: stats.py:100; */
+"Deadly" = "Deadly";
+
+/* stats.py: Trade rank; In files: stats.py:103; */
 "Penniless" = "Peniless";
 
-/* stats.py: Trade rank; In files: stats.py:85; */
+/* stats.py: Trade rank; In files: stats.py:104; */
 "Mostly Penniless" = "Mostly peniless";
 
-/* stats.py: Trade rank; In files: stats.py:86; */
+/* stats.py: Trade rank; In files: stats.py:105; */
 "Peddler" = "Peddler";
 
-/* stats.py: Trade rank; In files: stats.py:87; */
+/* stats.py: Trade rank; In files: stats.py:106; */
 "Dealer" = "Dealer";
 
-/* stats.py: Trade rank; In files: stats.py:88; */
+/* stats.py: Trade rank; In files: stats.py:107; */
 "Merchant" = "Merchant";
 
-/* stats.py: Trade rank; In files: stats.py:89; */
+/* stats.py: Trade rank; In files: stats.py:108; */
 "Broker" = "Broker";
 
-/* stats.py: Trade rank; In files: stats.py:90; */
+/* stats.py: Trade rank; In files: stats.py:109; */
 "Entrepreneur" = "Enterpreneur";
 
-/* stats.py: Trade rank; In files: stats.py:91; */
+/* stats.py: Trade rank; In files: stats.py:110; */
 "Tycoon" = "Tycoon";
 
-/* stats.py: Explorer rank; In files: stats.py:95; */
+/* stats.py: Explorer rank; In files: stats.py:113; */
 "Aimless" = "Aimless";
 
-/* stats.py: Explorer rank; In files: stats.py:96; */
+/* stats.py: Explorer rank; In files: stats.py:114; */
 "Mostly Aimless" = "Mostly Aimless";
 
-/* stats.py: Explorer rank; In files: stats.py:97; */
+/* stats.py: Explorer rank; In files: stats.py:115; */
 "Scout" = "Scout";
 
-/* stats.py: Explorer rank; In files: stats.py:98; */
+/* stats.py: Explorer rank; In files: stats.py:116; */
 "Surveyor" = "Surveyor";
 
-/* stats.py: Explorer rank; In files: stats.py:99; */
+/* stats.py: Explorer rank; In files: stats.py:117; */
 "Trailblazer" = "Trailblazer";
 
-/* stats.py: Explorer rank; In files: stats.py:100; */
+/* stats.py: Explorer rank; In files: stats.py:118; */
 "Pathfinder" = "Pathfinder";
 
-/* stats.py: Explorer rank; In files: stats.py:101; */
+/* stats.py: Explorer rank; In files: stats.py:119; */
 "Ranger" = "Ranger";
 
-/* stats.py: Explorer rank; In files: stats.py:102; */
+/* stats.py: Explorer rank; In files: stats.py:120; */
 "Pioneer" = "Pioneer";
 
-/* stats.py: CQC rank; In files: stats.py:106; */
+/* stats.py: CQC rank; In files: stats.py:144; */
 "Helpless" = "Helpless";
 
-/* stats.py: CQC rank; In files: stats.py:107; */
+/* stats.py: CQC rank; In files: stats.py:145; */
 "Mostly Helpless" = "Mostly Helpless";
 
-/* stats.py: CQC rank; In files: stats.py:108; */
+/* stats.py: CQC rank; In files: stats.py:146; */
 "Amateur" = "Amateur";
 
-/* stats.py: CQC rank; In files: stats.py:109; */
+/* stats.py: CQC rank; In files: stats.py:147; */
 "Semi Professional" = "Semi Professional";
 
-/* stats.py: CQC rank; In files: stats.py:110; */
+/* stats.py: CQC rank; In files: stats.py:148; */
 "Professional" = "Professional";
 
-/* stats.py: CQC rank; In files: stats.py:111; */
+/* stats.py: CQC rank; In files: stats.py:149; */
 "Champion" = "Champion";
 
-/* stats.py: CQC rank; In files: stats.py:112; */
+/* stats.py: CQC rank; In files: stats.py:150; */
 "Hero" = "Hero";
 
-/* stats.py: CQC rank; In files: stats.py:113; */
+/* stats.py: CQC rank; In files: stats.py:151; */
 "Gladiator" = "Gladiator";
 
-/* stats.py: Federation rank; In files: stats.py:120; */
+/* stats.py: Federation rank; In files: stats.py:157; */
 "Recruit" = "Recruit";
 
-/* stats.py: Federation rank; In files: stats.py:121; */
+/* stats.py: Federation rank; In files: stats.py:158; */
 "Cadet" = "Cadet";
 
-/* stats.py: Federation rank; In files: stats.py:122; */
+/* stats.py: Federation rank; In files: stats.py:159; */
 "Midshipman" = "Midshipman";
 
-/* stats.py: Federation rank; In files: stats.py:123; */
+/* stats.py: Federation rank; In files: stats.py:160; */
 "Petty Officer" = "Petty Officer";
 
-/* stats.py: Federation rank; In files: stats.py:124; */
+/* stats.py: Federation rank; In files: stats.py:161; */
 "Chief Petty Officer" = "Chief Petty Officer";
 
-/* stats.py: Federation rank; In files: stats.py:125; */
+/* stats.py: Federation rank; In files: stats.py:162; */
 "Warrant Officer" = "Warrant Officer";
 
-/* stats.py: Federation rank; In files: stats.py:126; */
+/* stats.py: Federation rank; In files: stats.py:163; */
 "Ensign" = "Ensign";
 
-/* stats.py: Federation rank; In files: stats.py:127; */
+/* stats.py: Federation rank; In files: stats.py:164; */
 "Lieutenant" = "LIeutenant";
 
-/* stats.py: Federation rank; In files: stats.py:128; */
+/* stats.py: Federation rank; In files: stats.py:165; */
 "Lieutenant Commander" = "Lieutenant Commander";
 
-/* stats.py: Federation rank; In files: stats.py:129; */
+/* stats.py: Federation rank; In files: stats.py:166; */
 "Post Commander" = "Post Commander";
 
-/* stats.py: Federation rank; In files: stats.py:130; */
+/* stats.py: Federation rank; In files: stats.py:167; */
 "Post Captain" = "Post Captain";
 
-/* stats.py: Federation rank; In files: stats.py:131; */
+/* stats.py: Federation rank; In files: stats.py:168; */
 "Rear Admiral" = "Read Admiral";
 
-/* stats.py: Federation rank; In files: stats.py:132; */
+/* stats.py: Federation rank; In files: stats.py:169; */
 "Vice Admiral" = "Vice Admiral";
 
-/* stats.py: Federation rank; In files: stats.py:133; */
+/* stats.py: Federation rank; In files: stats.py:170; */
 "Admiral" = "Admiral";
 
-/* stats.py: Empire rank; In files: stats.py:139; */
+/* stats.py: Empire rank; In files: stats.py:176; */
 "Outsider" = "Outsider";
 
-/* stats.py: Empire rank; In files: stats.py:140; */
+/* stats.py: Empire rank; In files: stats.py:177; */
 "Serf" = "Serif";
 
-/* stats.py: Empire rank; In files: stats.py:142; */
+/* stats.py: Empire rank; In files: stats.py:179; */
 "Squire" = "Squire";
 
-/* stats.py: Empire rank; In files: stats.py:143; */
+/* stats.py: Empire rank; In files: stats.py:180; */
 "Knight" = "Knight";
 
-/* stats.py: Empire rank; In files: stats.py:144; */
+/* stats.py: Empire rank; In files: stats.py:181; */
 "Lord" = "Lord";
 
-/* stats.py: Empire rank; In files: stats.py:145; */
+/* stats.py: Empire rank; In files: stats.py:182; */
 "Baron" = "Baron";
 
-/* stats.py: Empire rank; In files: stats.py:146; */
+/* stats.py: Empire rank; In files: stats.py:183; */
 "Viscount" = "Viscount";
 
-/* stats.py: Empire rank; In files: stats.py:147; */
+/* stats.py: Empire rank; In files: stats.py:184; */
 "Count" = "Count";
 
-/* stats.py: Empire rank; In files: stats.py:148; */
+/* stats.py: Empire rank; In files: stats.py:185; */
 "Earl" = "Earl";
 
-/* stats.py: Empire rank; In files: stats.py:149; */
+/* stats.py: Empire rank; In files: stats.py:186; */
 "Marquis" = "Marquis";
 
-/* stats.py: Empire rank; In files: stats.py:150; */
+/* stats.py: Empire rank; In files: stats.py:187; */
 "Duke" = "Duke";
 
-/* stats.py: Empire rank; In files: stats.py:151; */
+/* stats.py: Empire rank; In files: stats.py:188; */
 "Prince" = "Prince";
 
-/* stats.py: Empire rank; In files: stats.py:152; */
+/* stats.py: Empire rank; In files: stats.py:189; */
 "King" = "King";
 
-/* stats.py: Power rank; In files: stats.py:158; */
+/* stats.py: Power rank; In files: stats.py:195; */
 "Rating 1" = "Ocena 1";
 
-/* stats.py: Power rank; In files: stats.py:159; */
+/* stats.py: Power rank; In files: stats.py:196; */
 "Rating 2" = "Ocena 2";
 
-/* stats.py: Power rank; In files: stats.py:160; */
+/* stats.py: Power rank; In files: stats.py:197; */
 "Rating 3" = "Ocena 3";
 
-/* stats.py: Power rank; In files: stats.py:161; */
+/* stats.py: Power rank; In files: stats.py:198; */
 "Rating 4" = "Ocena 4";
 
-/* stats.py: Power rank; In files: stats.py:162; */
+/* stats.py: Power rank; In files: stats.py:199; */
 "Rating 5" = "Ocena 5";
 
-/* stats.py: Status dialog subtitle - CR value of ship; In files: stats.py:371; */
+/* stats.py: Status dialog subtitle - CR value of ship; In files: stats.py:413; */
 "Value" = "Vrednost";
 
-/* stats.py: Status dialog title; In files: stats.py:380; */
+/* stats.py: Status dialog title; In files: stats.py:422; */
 "Ships" = "Ladje";
