@@ -256,6 +256,8 @@ class EDDN:
             headers = {'Content-Encoding': 'gzip'}
 
         r = self.session.post(self.eddn_url, data=encoded, timeout=self.TIMEOUT, headers=headers)
+        logger.trace_if('plugin.eddn', f"EDDN response {r.status_code} to data: {json.dumps(to_send)}")
+        logger.trace_if('plugin.eddn', f"EDDN response {r.text}")
         if r.status_code != requests.codes.ok:
 
             # Check if EDDN is still objecting to an empty commodities list
@@ -1310,7 +1312,7 @@ class EDDN:
 
     def batch_journal_fsssignaldiscovered(
         self, cmdr: str, system_name: str, system_starpos: list, is_beta: bool, entry: MutableMapping[str, Any]
-        ) -> Optional[str]:
+    ) -> Optional[str]:
         """
         Augment and keep FSSSignalDiscovered journal events
 
@@ -1320,7 +1322,7 @@ class EDDN:
         :param is_beta: whether or not we are in beta mode
         :param entry: the journal entry to batch
         """
-        #{
+        # {
         #  "timestamp": "2021-01-15T02:54:18Z",
         #  "event": "FSSSignalDiscovered",
         #  "SystemAddress": 1900279744859,
@@ -1332,30 +1334,29 @@ class EDDN:
         #  "SpawningFaction": "Free Marlinists of Carinae",
         #  "ThreatLevel": 0,
         #  "TimeRemaining": 718.508789
-        #}
+        # }
         #######################################################################
-        #logger.trace_if("plugin.eddn", entry)
         # Elisions
         entry = filter_localised(entry)
         if "USSType" in entry and entry["USSType"] == "$USS_Type_MissionTarget;":
             logger.warning("USSType is $USS_Type_MissionTarget;, dropping")
             return 'Dropping $USS_Type_MissionTarget;'
-        # Can check SystemAddress here, but we'll remove it from this signal list, to be added to the outer batched message
+        # Can check SystemAddress here, but we'll remove it from this signal list, to be added to the batch
         if this.systemaddress is None or this.systemaddress != entry['SystemAddress']:
             logger.warning("SystemAddress isn't current location! Can't add augmentations!")
             return 'Wrong System! Missed jump ?'
 
         # Horizons/Odyssey will be readded later
-        for removekey in ["TimeRemaining", "horizons", "odyssey", "SystemAddress" ]:
+        for removekey in ["TimeRemaining", "horizons", "odyssey", "SystemAddress"]:
             if removekey in entry:
                 entry.pop(removekey)
         #######################################################################
 
         if not self.fsssignals:
-          self.fsssignals = []
+            self.fsssignals = []
         if entry is not None and entry != "":
-          logger.trace_if("plugin.eddn", f"Appending FSSSignalDiscovered entry: {json.dumps(entry)}")
-          self.fsssignals.append(entry)
+            logger.trace_if("plugin.eddn", f"Appending FSSSignalDiscovered entry: {json.dumps(entry)}")
+            self.fsssignals.append(entry)
 
     def export_journal_fsssignaldiscovered(
         self, cmdr: str, system_name: str, system_starpos: list, is_beta: bool, entry: MutableMapping[str, Any]
@@ -1373,7 +1374,7 @@ class EDDN:
         msg = {
             '$schemaRef': f'https://eddn.edcd.io/schemas/fsssignaldiscovered/1{"/test" if is_beta else ""}',
             'message': {
-              "event":"FSSSignalDiscovered",
+              "event": "FSSSignalDiscovered",
               "signals": self.fsssignals
             }
         }
