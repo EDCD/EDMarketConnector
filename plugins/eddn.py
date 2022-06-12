@@ -256,8 +256,6 @@ class EDDN:
             headers = {'Content-Encoding': 'gzip'}
 
         r = self.session.post(self.eddn_url, data=encoded, timeout=self.TIMEOUT, headers=headers)
-        logger.trace_if('plugin.eddn', f"EDDN response {r.status_code} to data: {json.dumps(to_send)}")
-        logger.trace_if('plugin.eddn', f"EDDN response {r.text}")
         if r.status_code != requests.codes.ok:
 
             # Check if EDDN is still objecting to an empty commodities list
