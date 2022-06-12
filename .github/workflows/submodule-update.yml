@@ -1,0 +1,82 @@
+---
+name: Submodule Updates
+
+on:
+  # We might want this on a schedule once this is in `main`
+  push:
+    branches: [ develop ]
+
+jobs:
+  check_submodules:
+    name: Pull Request for updated submodules
+    runs-on: ubuntu-latest
+    env:
+      PARENT_REPOSITORY: 'EDCD/EDMarketConnector'
+      CHECKOUT_BRANCH: 'develop'
+      PR_AGAINST_BRANCH: 'develop'
+      OWNER: 'EDCD'
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: Update submodules
+        shell: bash
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git submodule update --remote
+
+      - name: Check for changes
+        id: check_for_changes
+        continue-on-error: true
+        run: |
+          changes=$(git status --porcelain)
+          if [ -n "${changes}" ];
+          then
+            echo '::set-output changes=true'
+          fi
+          echo '::set-output changes=false'
+          exit 0
+      
+      - name: Create submodules changes branch
+        if: steps.check_for_changes.outputs.changes == 'true'
+        run: |
+          git checkout -b $GITHUB_RUN_ID
+          git commit -am "updating submodules"
+          git push --set-upstream origin $GITHUB_RUN_ID
+
+      - name: Create pull request against target branch
+        if: steps.check_for_changes.outputs.changes == 'true'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ inputs.github_token }}
+          script: |
+            await github.rest.pulls.create({
+              owner: '${{ inputs.owner }}',
+              repo: '${{ inputs.parent_repository }}'.split('/')[1].trim(),
+              head: process.env.GITHUB_RUN_ID,
+              base: '${{ inputs.pr_against_branch }}',
+              title: `[Auto-generated] Submodule Updates ${process.env.GITHUB_RUN_ID}`,
+              body: `[Auto-generated] Submodule Updates ${process.env.GITHUB_RUN_ID}`,
+            });
+
+      - name: Add labels
+        if: steps.check_for_changes.outputs.changes == 'true'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ inputs.github_token }}
+          script: |
+            const res = await github.rest.issues.listForRepo({
+              owner: '${{ inputs.owner }}',
+              repo: '${{ inputs.parent_repository }}'.split('/')[1].trim(),
+            });
+            const pr = res.data.filter(i => i.title.includes(process.env.GITHUB_RUN_ID));
+            const prNumber = pr[0].number;  
+            await github.rest.issues.addLabels({
+              issue_number: prNumber,
+              owner: '${{ inputs.owner }}',
+              repo: '${{ inputs.parent_repository }}'.split('/')[1].trim(),
+              labels: ['${{ inputs.label }}']
+            });

@@ -1,8 +1,9 @@
 """CMDR Status information."""
 import csv
+import json
+import sys
 import tkinter
 import tkinter as tk
-from sys import platform
 from tkinter import ttk
 from typing import TYPE_CHECKING, Any, AnyStr, Callable, Dict, List, NamedTuple, Optional, Sequence, cast
 
@@ -10,6 +11,7 @@ import companion
 import EDMCLogging
 import myNotebook as nb  # noqa: N813
 from edmc_data import ship_name_map
+from hotkey import hotkeymgr
 from l10n import Locale
 from monitor import monitor
 
@@ -18,11 +20,9 @@ logger = EDMCLogging.get_main_logger()
 if TYPE_CHECKING:
     def _(x: str) -> str: ...
 
-if platform == 'win32':
+if sys.platform == 'win32':
     import ctypes
     from ctypes.wintypes import HWND, POINT, RECT, SIZE, UINT
-    if TYPE_CHECKING:
-        import ctypes.windll  # type: ignore # Fake this into existing, its really a magic dll thing
 
     try:
         CalculatePopupWindowPosition = ctypes.windll.user32.CalculatePopupWindowPosition
@@ -36,6 +36,13 @@ if platform == 'win32':
 
     except Exception:  # Not supported under Wine 4.0
         CalculatePopupWindowPosition = None  # type: ignore
+
+
+CR_LINES_START = 1
+CR_LINES_END = 3
+RANK_LINES_START = 3
+RANK_LINES_END = 9
+POWERPLAY_LINES_START = 9
 
 
 def status(data: Dict[str, Any]) -> List[List[str]]:
@@ -52,20 +59,33 @@ def status(data: Dict[str, Any]) -> List[List[str]]:
         [_('Loan'),    str(data['commander'].get('debt', 0))],     # LANG: Cmdr stats
     ]
 
+    _ELITE_RANKS = [  # noqa: N806 # Its a constant, just needs to be updated at runtime
+        _('Elite'),      # LANG: Top rank
+        _('Elite I'),    # LANG: Top rank +1
+        _('Elite II'),   # LANG: Top rank +2
+        _('Elite III'),  # LANG: Top rank +3
+        _('Elite IV'),   # LANG: Top rank +4
+        _('Elite V'),    # LANG: Top rank +5
+    ]
+
     RANKS = [  # noqa: N806 # Its a constant, just needs to be updated at runtime
         # in output order
-        (_('Combat'), 'combat'),          # LANG: Ranking
-        (_('Trade'), 'trade'),            # LANG: Ranking
-        (_('Explorer'), 'explore'),       # LANG: Ranking
-        (_('CQC'), 'cqc'),                # LANG: Ranking
-        (_('Federation'), 'federation'),  # LANG: Ranking
-        (_('Empire'), 'empire'),          # LANG: Ranking
-        (_('Powerplay'), 'power'),        # LANG: Ranking
-        # ???            , 'crime'),      # LANG: Ranking
-        # ???            , 'service'),    # LANG: Ranking
+        # Names we show people, vs internal names
+        (_('Combat'), 'combat'),                # LANG: Ranking
+        (_('Trade'), 'trade'),                  # LANG: Ranking
+        (_('Explorer'), 'explore'),             # LANG: Ranking
+        (_('Mercenary'), 'soldier'),            # LANG: Ranking
+        (_('Exobiologist'), 'exobiologist'),    # LANG: Ranking
+        (_('CQC'), 'cqc'),                      # LANG: Ranking
+        (_('Federation'), 'federation'),        # LANG: Ranking
+        (_('Empire'), 'empire'),                # LANG: Ranking
+        (_('Powerplay'), 'power'),              # LANG: Ranking
+        # ???            , 'crime'),            # LANG: Ranking
+        # ???            , 'service'),          # LANG: Ranking
     ]
 
     RANK_NAMES = {  # noqa: N806 # Its a constant, just needs to be updated at runtime
+        # These names are the fdev side name (but lower()ed)
         # http://elite-dangerous.wikia.com/wiki/Pilots_Federation#Ranks
         'combat': [
             _('Harmless'),                # LANG: Combat rank
@@ -76,8 +96,7 @@ def status(data: Dict[str, Any]) -> List[List[str]]:
             _('Master'),                  # LANG: Combat rank
             _('Dangerous'),               # LANG: Combat rank
             _('Deadly'),                  # LANG: Combat rank
-            _('Elite'),                   # LANG: Top rank
-        ],
+        ] + _ELITE_RANKS,
         'trade': [
             _('Penniless'),               # LANG: Trade rank
             _('Mostly Penniless'),        # LANG: Trade rank
@@ -87,8 +106,7 @@ def status(data: Dict[str, Any]) -> List[List[str]]:
             _('Broker'),                  # LANG: Trade rank
             _('Entrepreneur'),            # LANG: Trade rank
             _('Tycoon'),                  # LANG: Trade rank
-            _('Elite')                    # LANG: Top rank
-        ],
+        ] + _ELITE_RANKS,
         'explore': [
             _('Aimless'),                 # LANG: Explorer rank
             _('Mostly Aimless'),          # LANG: Explorer rank
@@ -98,8 +116,28 @@ def status(data: Dict[str, Any]) -> List[List[str]]:
             _('Pathfinder'),              # LANG: Explorer rank
             _('Ranger'),                  # LANG: Explorer rank
             _('Pioneer'),                 # LANG: Explorer rank
-            _('Elite')                    # LANG: Top rank
-        ],
+
+        ] + _ELITE_RANKS,
+        'soldier': [
+            _('Defenceless'),               # LANG: Mercenary rank
+            _('Mostly Defenceless'),        # LANG: Mercenary rank
+            _('Rookie'),                    # LANG: Mercenary rank
+            _('Soldier'),                   # LANG: Mercenary rank
+            _('Gunslinger'),                # LANG: Mercenary rank
+            _('Warrior'),                   # LANG: Mercenary rank
+            _('Gunslinger'),                # LANG: Mercenary rank
+            _('Deadeye'),                   # LANG: Mercenary rank
+        ] + _ELITE_RANKS,
+        'exobiologist': [
+            _('Directionless'),             # LANG: Exobiologist rank
+            _('Mostly Directionless'),      # LANG: Exobiologist rank
+            _('Compiler'),                  # LANG: Exobiologist rank
+            _('Collector'),                 # LANG: Exobiologist rank
+            _('Cataloguer'),                # LANG: Exobiologist rank
+            _('Taxonomist'),                # LANG: Exobiologist rank
+            _('Ecologist'),                 # LANG: Exobiologist rank
+            _('Geneticist'),                # LANG: Exobiologist rank
+        ] + _ELITE_RANKS,
         'cqc': [
             _('Helpless'),                # LANG: CQC rank
             _('Mostly Helpless'),         # LANG: CQC rank
@@ -109,8 +147,7 @@ def status(data: Dict[str, Any]) -> List[List[str]]:
             _('Champion'),                # LANG: CQC rank
             _('Hero'),                    # LANG: CQC rank
             _('Gladiator'),               # LANG: CQC rank
-            _('Elite')                    # LANG: Top rank
-        ],
+        ] + _ELITE_RANKS,
 
         # http://elite-dangerous.wikia.com/wiki/Federation#Ranks
         'federation': [
@@ -273,47 +310,49 @@ class StatsDialog():
     def showstats(self) -> None:
         """Show the status window for the current cmdr."""
         if not monitor.cmdr:
+            hotkeymgr.play_bad()
+            # LANG: Current commander unknown when trying to use 'File' > 'Status'
+            self.status['text'] = _("Status: Don't yet know your Commander name")
             return
 
-        # LANG: Fetching data from Frontier CAPI in order to display on File > Status
-        self.status['text'] = _('Fetching data...')
-        self.parent.update_idletasks()
-
-        try:
-            data = companion.session.profile()
-
-        except companion.ServerError as e:
-            self.status['text'] = str(e)
+        # TODO: This needs to use cached data
+        if companion.session.FRONTIER_CAPI_PATH_PROFILE not in companion.session.capi_raw_data:
+            logger.info('No cached data, aborting...')
+            hotkeymgr.play_bad()
+            # LANG: No Frontier CAPI data yet when trying to use 'File' > 'Status'
+            self.status['text'] = _("Status: No CAPI data yet")
             return
 
-        except Exception as e:
-            logger.exception("error while attempting to show status")
-            self.status['text'] = str(e)
-            return
+        capi_data = json.loads(
+            companion.session.capi_raw_data[companion.session.FRONTIER_CAPI_PATH_PROFILE].raw_data
+        )
 
-        if not data.get('commander') or not data['commander'].get('name', '').strip():
+        if not capi_data.get('commander') or not capi_data['commander'].get('name', '').strip():
             # Shouldn't happen
             # LANG: Unknown commander
             self.status['text'] = _("Who are you?!")
 
         elif (
-            not data.get('lastSystem')
-            or not data['lastSystem'].get('name', '').strip()
-            or not data.get('lastStarport')
-            or not data['lastStarport'].get('name', '').strip()
+            not capi_data.get('lastSystem')
+            or not capi_data['lastSystem'].get('name', '').strip()
+            or not capi_data.get('lastStarport')
+            or not capi_data['lastStarport'].get('name', '').strip()
         ):
             # Shouldn't happen
             # LANG: Unknown location
             self.status['text'] = _("Where are you?!")
 
-        elif not data.get('ship') or not data['ship'].get('modules') or not data['ship'].get('name', '').strip():
+        elif (
+            not capi_data.get('ship') or not capi_data['ship'].get('modules')
+            or not capi_data['ship'].get('name', '').strip()
+        ):
             # Shouldn't happen
             # LANG: Unknown ship
             self.status['text'] = _("What are you flying?!")
 
         else:
             self.status['text'] = ''
-            StatsResults(self.parent, data)
+            StatsResults(self.parent, capi_data)
 
 
 class StatsResults(tk.Toplevel):
@@ -331,15 +370,15 @@ class StatsResults(tk.Toplevel):
             self.transient(parent)
 
         # position over parent
-        if platform != 'darwin' or parent.winfo_rooty() > 0:  # http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
+        if sys.platform != 'darwin' or parent.winfo_rooty() > 0:  # http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
             self.geometry(f"+{parent.winfo_rootx()}+{parent.winfo_rooty()}")
 
         # remove decoration
         self.resizable(tk.FALSE, tk.FALSE)
-        if platform == 'win32':
+        if sys.platform == 'win32':
             self.attributes('-toolwindow', tk.TRUE)
 
-        elif platform == 'darwin':
+        elif sys.platform == 'darwin':
             # http://wiki.tcl.tk/13428
             parent.call('tk::unsupported::MacWindowStyle', 'style', self, 'utility')
 
@@ -349,11 +388,16 @@ class StatsResults(tk.Toplevel):
         notebook = nb.Notebook(frame)
 
         page = self.addpage(notebook)
-        for thing in stats[1:3]:
+        for thing in stats[CR_LINES_START:CR_LINES_END]:
             # assumes things two and three are money
             self.addpagerow(page, [thing[0], self.credits(int(thing[1]))], with_copy=True)
 
-        for thing in stats[3:]:
+        self.addpagespacer(page)
+        for thing in stats[RANK_LINES_START:RANK_LINES_END]:
+            self.addpagerow(page, thing, with_copy=True)
+
+        self.addpagespacer(page)
+        for thing in stats[POWERPLAY_LINES_START:]:
             self.addpagerow(page, thing, with_copy=True)
 
         ttk.Frame(page).grid(pady=5)   # bottom spacer
@@ -375,7 +419,7 @@ class StatsResults(tk.Toplevel):
         ttk.Frame(page).grid(pady=5)         # bottom spacer
         notebook.add(page, text=_('Ships'))  # LANG: Status dialog title
 
-        if platform != 'darwin':
+        if sys.platform != 'darwin':
             buttonframe = ttk.Frame(frame)
             buttonframe.grid(padx=10, pady=(0, 10), sticky=tk.NSEW)  # type: ignore # the tuple is supported
             buttonframe.columnconfigure(0, weight=1)
@@ -387,7 +431,7 @@ class StatsResults(tk.Toplevel):
         self.grab_set()
 
         # Ensure fully on-screen
-        if platform == 'win32' and CalculatePopupWindowPosition:
+        if sys.platform == 'win32' and CalculatePopupWindowPosition:
             position = RECT()
             GetWindowRect(GetParent(self.winfo_id()), position)
             if CalculatePopupWindowPosition(

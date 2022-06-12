@@ -6,9 +6,9 @@ import argparse
 import json
 import locale
 import os
-import re
+import queue
 import sys
-from os.path import getmtime, join
+from os.path import getmtime
 from time import sleep, time
 from typing import TYPE_CHECKING, Any, List, Optional
 
@@ -62,9 +62,8 @@ Locale LC_TIME: {locale.getlocale(locale.LC_TIME)}'''
 l10n.Translations.install_dummy()
 
 SERVER_RETRY = 5  # retry pause for Companion servers [s]
-EXIT_SUCCESS, EXIT_SERVER, EXIT_CREDENTIALS, EXIT_VERIFICATION, EXIT_LAGGING, EXIT_SYS_ERR, EXIT_ARGS = range(7)
-
-JOURNAL_RE = re.compile(r'^Journal(Beta)?\.[0-9]{12}\.[0-9]{2}\.log$')
+EXIT_SUCCESS, EXIT_SERVER, EXIT_CREDENTIALS, EXIT_VERIFICATION, EXIT_LAGGING, EXIT_SYS_ERR, EXIT_ARGS, \
+    EXIT_JOURNAL_READ_ERR, EXIT_COMMANDER_UNKNOWN = range(9)
 
 
 def versioncmp(versionstring) -> List:
@@ -224,10 +223,7 @@ sys.path: {sys.path}'''
                     monitor.currentdir = config.default_journal_dir
 
                 logger.debug(f'logdir = "{monitor.currentdir}"')
-                logfiles = sorted((x for x in os.listdir(monitor.currentdir) if JOURNAL_RE.search(x)),
-                                  key=lambda x: x.split('.')[1:])
-
-                logfile = join(monitor.currentdir, logfiles[-1])
+                logfile = monitor.journal_newest_filename(monitor.currentdir)
 
                 logger.debug(f'Using logfile "{logfile}"')
                 with open(logfile, 'r', encoding='utf-8') as loghandle:
@@ -239,11 +235,11 @@ sys.path: {sys.path}'''
 
             except Exception:
                 logger.exception("Can't read Journal file")
-                sys.exit(EXIT_SYS_ERR)
+                sys.exit(EXIT_JOURNAL_READ_ERR)
 
             if not monitor.cmdr:
                 logger.error('Not available while E:D is at the main menu')
-                sys.exit(EXIT_SYS_ERR)
+                sys.exit(EXIT_COMMANDER_UNKNOWN)
 
             # Get data from Companion API
             if args.p:
@@ -270,8 +266,38 @@ sys.path: {sys.path}'''
 
                 companion.session.login(monitor.cmdr, monitor.is_beta)
 
+            ###################################################################
+            # Initiate CAPI queries
             querytime = int(time())
-            data = companion.session.station()
+            companion.session.station(query_time=querytime)
+
+            # Wait for the response
+            _capi_request_timeout = 60
+            try:
+                capi_response = companion.session.capi_response_queue.get(
+                    block=True, timeout=_capi_request_timeout
+                )
+
+            except queue.Empty:
+                logger.error(f'CAPI requests timed out after {_capi_request_timeout} seconds')
+                sys.exit(EXIT_SERVER)
+
+            ###################################################################
+
+            # noinspection DuplicatedCode
+            if isinstance(capi_response, companion.EDMCCAPIFailedRequest):
+                logger.trace_if('capi.worker', f'Failed Request: {capi_response.message}')
+                if capi_response.exception:
+                    raise capi_response.exception
+
+                else:
+                    raise ValueError(capi_response.message)
+
+            logger.trace_if('capi.worker', 'Answer is not a Failure')
+            if not isinstance(capi_response, companion.EDMCCAPIResponse):
+                raise ValueError(f"Response was neither CAPIFailedRequest nor EDMCAPIResponse: {type(capi_response)}")
+
+            data = capi_response.capi_data
             config.set('querytime', querytime)
 
         # Validation
@@ -279,10 +305,10 @@ sys.path: {sys.path}'''
             logger.error("No data['command']['name'] from CAPI")
             sys.exit(EXIT_SERVER)
 
-        elif not deep_get(data, 'lastSystem', 'name') or \
-                data['commander'].get('docked') and not \
-                deep_get(data, 'lastStarport', 'name'):  # Only care if docked
-
+        elif (
+            not deep_get(data, 'lastSystem', 'name') or
+            data['commander'].get('docked') and not deep_get(data, 'lastStarport', 'name')
+        ):  # Only care if docked
             logger.error("No data['lastSystem']['name'] from CAPI")
             sys.exit(EXIT_SERVER)
 
@@ -294,21 +320,20 @@ sys.path: {sys.path}'''
             pass  # Skip further validation
 
         elif data['commander']['name'] != monitor.cmdr:
-            logger.error(f'Commander "{data["commander"]["name"]}" from CAPI doesn\'t match "{monitor.cmdr}" from Journal')  # noqa: E501
-            sys.exit(EXIT_CREDENTIALS)
+            raise companion.CmdrError()
 
-        elif data['lastSystem']['name'] != monitor.system or \
-                ((data['commander']['docked'] and data['lastStarport']['name'] or None) != monitor.station) or \
-                data['ship']['id'] != monitor.state['ShipID'] or \
-                data['ship']['name'].lower() != monitor.state['ShipType']:
-
-            logger.error('Mismatch(es) between CAPI and Journal for at least one of: StarSystem, Last Star Port, Ship ID or Ship Name/Type')  # noqa: E501
-            sys.exit(EXIT_LAGGING)
+        elif (
+            data['lastSystem']['name'] != monitor.system or
+            ((data['commander']['docked'] and data['lastStarport']['name'] or None) != monitor.station) or
+            data['ship']['id'] != monitor.state['ShipID'] or
+            data['ship']['name'].lower() != monitor.state['ShipType']
+        ):
+            raise companion.ServerLagging()
 
         # stuff we can do when not docked
         if args.d:
             logger.debug(f'Writing raw JSON data to "{args.d}"')
-            out = json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': '))
+            out = json.dumps(dict(data), ensure_ascii=False, indent=2, sort_keys=True, separators=(',', ': '))
             with open(args.d, 'wb') as f:
                 f.write(out.encode("utf-8"))
 
@@ -408,20 +433,43 @@ sys.path: {sys.path}'''
             try:
                 eddn_sender = eddn.EDDN(None)
                 logger.debug('Sending Market, Outfitting and Shipyard data to EDDN...')
-                eddn_sender.export_commodities(data, monitor.is_beta)
-                eddn_sender.export_outfitting(data, monitor.is_beta)
-                eddn_sender.export_shipyard(data, monitor.is_beta)
+                eddn_sender.export_commodities(data, monitor.is_beta, monitor.state['Odyssey'])
+                eddn_sender.export_outfitting(data, monitor.is_beta, monitor.state['Odyssey'])
+                eddn_sender.export_shipyard(data, monitor.is_beta, monitor.state['Odyssey'])
 
             except Exception:
                 logger.exception('Failed to send data to EDDN')
 
     except companion.ServerError:
-        logger.error('Frontier CAPI Server returned an error')
+        logger.exception('Frontier CAPI Server returned an error')
+        sys.exit(EXIT_SERVER)
+
+    except companion.ServerConnectionError:
+        logger.exception('Exception while contacting server')
         sys.exit(EXIT_SERVER)
 
     except companion.CredentialsError:
         logger.error('Frontier CAPI Server: Invalid Credentials')
         sys.exit(EXIT_CREDENTIALS)
+
+    # Companion API problem
+    except companion.ServerLagging:
+        logger.error(
+            'Mismatch(es) between CAPI and Journal for at least one of: '
+            'StarSystem, Last Star Port, Ship ID or Ship Name/Type'
+        )
+        sys.exit(EXIT_SERVER)
+
+    except companion.CmdrError:  # Companion API return doesn't match Journal
+        logger.error(
+            f'Commander "{data["commander"]["name"]}" from CAPI doesn\'t match '
+            f'"{monitor.cmdr}" from Journal'
+        )
+        sys.exit(EXIT_SERVER)
+
+    except Exception:
+        logger.exception('"other" exception')
+        sys.exit(EXIT_SERVER)
 
 
 if __name__ == '__main__':

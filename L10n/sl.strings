@@ -1,431 +1,434 @@
 /* Language name */
 "!Language" = "Slovenščina";
 
-/* companion.py: Generic "something went wrong with Frontier Auth" error; In files: companion.py:214; */
-"Error: Invalid Credentials" = "Napaka: napačno uporabniški ime ali geslo";
-
-/* EDMarketConnector.py: Update button in main window; In files: EDMarketConnector.py:424; EDMarketConnector.py:718; EDMarketConnector.py:1302; */
-"Update" = "Osveži";
-
-/* EDMarketConnector.py: Appearance - Label for checkbox to select if application always on top; prefs.py: Appearance - Label for checkbox to select if application always on top; In files: EDMarketConnector.py:507; prefs.py:843; */
-"Always on top" = "Vedno na vrhu";
-
-/* EDMarketConnector.py: Label for commander name in main window; edsm.py: Game Commander name label in EDSM settings; stats.py: Cmdr stats; theme.py: Label for commander name in main window; In files: EDMarketConnector.py:712; edsm.py:219; stats.py:50; theme.py:227; */
-"Cmdr" = "Cmdr";
-
-/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: Multicrew role label in main window; In files: EDMarketConnector.py:714; EDMarketConnector.py:1072; */
-"Role" = "Vloga";
-
-/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: 'Ship' label in main UI; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:714; EDMarketConnector.py:1082; EDMarketConnector.py:1105; stats.py:363; */
-"Ship" = "Ladja";
-
-/* EDMarketConnector.py: Label for 'System' line in main UI; prefs.py: Configuration - Label for selection of 'System' provider website; stats.py: Main window; In files: EDMarketConnector.py:716; prefs.py:605; stats.py:365; */
-"System" = "Sistem";
-
-/* EDMarketConnector.py: Label for 'Station' line in main UI; prefs.py: Configuration - Label for selection of 'Station' provider website; prefs.py: Appearance - Example 'Normal' text; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:717; prefs.py:623; prefs.py:738; stats.py:366; */
-"Station" = "Postaja";
-
-/* EDMarketConnector.py: 'File' menu title on OSX; EDMarketConnector.py: 'File' menu title; EDMarketConnector.py: 'File' menu; In files: EDMarketConnector.py:720; EDMarketConnector.py:735; EDMarketConnector.py:738; EDMarketConnector.py:1791; */
-"File" = "Datoteka";
-
-/* EDMarketConnector.py: 'Edit' menu title on OSX; EDMarketConnector.py: 'Edit' menu title; In files: EDMarketConnector.py:721; EDMarketConnector.py:736; EDMarketConnector.py:739; */
-"Edit" = "Uredi";
-
-/* EDMarketConnector.py: 'View' menu title on OSX; In files: EDMarketConnector.py:722; */
-"View" = "Pogled";
-
-/* EDMarketConnector.py: 'Window' menu title on OSX; In files: EDMarketConnector.py:723; */
-"Window" = "Okno";
-
-/* EDMarketConnector.py: Help' menu title on OSX; EDMarketConnector.py: 'Help' menu title; In files: EDMarketConnector.py:724; EDMarketConnector.py:737; EDMarketConnector.py:740; */
-"Help" = "Pomoč";
-
-/* EDMarketConnector.py: App menu entry on OSX; EDMarketConnector.py: Help > About App; In files: EDMarketConnector.py:727; EDMarketConnector.py:753; EDMarketConnector.py:1347; */
-"About {APP}" = "O {APP}";
-
-/* EDMarketConnector.py: Help > Check for Updates...; In files: EDMarketConnector.py:729; EDMarketConnector.py:752; */
-"Check for Updates..." = "Preveri posodobitve...";
-
-/* EDMarketConnector.py: File > Save Raw Data...; In files: EDMarketConnector.py:730; EDMarketConnector.py:744; */
-"Save Raw Data..." = "Shrani Izvirne Podatke...";
-
-/* EDMarketConnector.py: File > Status; stats.py: Status dialog title; In files: EDMarketConnector.py:731; EDMarketConnector.py:743; stats.py:360; */
-"Status" = "Status";
-
-/* EDMarketConnector.py: Help > Privacy Policy; In files: EDMarketConnector.py:732; EDMarketConnector.py:750; */
-"Privacy Policy" = "Pravilnik o zasebnosti";
-
-/* EDMarketConnector.py: Help > Release Notes; In files: EDMarketConnector.py:733; EDMarketConnector.py:751; EDMarketConnector.py:1381; */
-"Release Notes" = "Opombe ob izdaji";
-
-/* EDMarketConnector.py: File > Settings; prefs.py: File > Settings (macOS); In files: EDMarketConnector.py:745; EDMarketConnector.py:1792; prefs.py:254; */
-"Settings" = "Nastavitve";
-
-/* EDMarketConnector.py: File > Exit; In files: EDMarketConnector.py:746; */
-"Exit" = "Izhod";
-
-/* EDMarketConnector.py: Help > Documentation; In files: EDMarketConnector.py:749; */
-"Documentation" = "Dokumentacija";
-
-/* EDMarketConnector.py: Label for 'Copy' as in 'Copy and Paste'; ttkHyperlinkLabel.py: Label for 'Copy' as in 'Copy and Paste'; In files: EDMarketConnector.py:756; ttkHyperlinkLabel.py:42; */
-"Copy" = "Kopiraj";
-
-/* EDMarketConnector.py: Status - Attempting to get a Frontier Auth Access Token; In files: EDMarketConnector.py:762; */
-"Logging in..." = "Prijava v teku... ";
-
-/* EDMarketConnector.py: Successfully authenticated with the Frontier website; In files: EDMarketConnector.py:778; EDMarketConnector.py:1215; */
-"Authentication successful" = "Preverjanje pristnosti je bilo uspešno";
-
-/* EDMarketConnector.py: Player is not docked at a station, when we expect them to be; In files: EDMarketConnector.py:809; */
-"You're not docked at a station!" = "Nahajš se v postaji!";
-
-/* EDMarketConnector.py: Status - Either no market or no modules data for station from Frontier CAPI; In files: EDMarketConnector.py:817; */
-"Station doesn't have anything!" = "Postaja nima ničesar";
-
-/* EDMarketConnector.py: Status - No station market data from Frontier CAPI; In files: EDMarketConnector.py:822; */
-"Station doesn't have a market!" = "Postaja nima trga";
-
-/* EDMarketConnector.py: Status - Attempting to retrieve data from Frontier CAPI; EDMarketConnector.py: Status - Attempting to retrieve data from Frontier CAPI to save to file; stats.py: Fetching data from Frontier CAPI in order to display on File > Status; In files: EDMarketConnector.py:867; EDMarketConnector.py:1428; stats.py:279; */
-"Fetching data..." = "Nalagam podatke...";
-
-/* EDMarketConnector.py: We didn't have the commander name when we should have; stats.py: Unknown commander; In files: EDMarketConnector.py:884; stats.py:297; */
-"Who are you?!" = "Kdo si";
-
-/* EDMarketConnector.py: We don't know where the commander is, when we should; stats.py: Unknown location; In files: EDMarketConnector.py:890; stats.py:307; */
-"Where are you?!" = "Kje se nahajaš";
-
-/* EDMarketConnector.py: We don't know what ship the commander is in, when we should; stats.py: Unknown ship; In files: EDMarketConnector.py:894; stats.py:312; */
-"What are you flying?!" = "S čim letiš";
-
-/* EDMarketConnector.py: Time when we last obtained Frontier CAPI data; In files: EDMarketConnector.py:1026; */
-"Last updated at %H:%M:%S" = "Zadnja osvežitev podatkov %H:%M:%S ";
-
-/* EDMarketConnector.py: Cooldown on 'Update' button; In files: EDMarketConnector.py:1298; */
-"cooldown {SS}s" = "Posodobitev v {SS}s";
-
-/* EDMarketConnector.py: Generic 'OK' button label; prefs.py: 'OK' button on Settings/Preferences window; In files: EDMarketConnector.py:1407; prefs.py:304; */
-"OK" = "Potrdi";
-
-/* l10n.py: The system default language choice in Settings > Appearance; prefs.py: Settings > Configuration - Label on 'reset journal files location to default' button; prefs.py: The system default language choice in Settings > Appearance; prefs.py: Label for 'Default' theme radio button; In files: l10n.py:194; prefs.py:466; prefs.py:678; prefs.py:711; */
-"Default" = "Privzeta";
-
-/* eddn.py: Status text shown while attempting to send data; In files: eddn.py:215; eddn.py:619; eddn.py:969; */
+/* eddn.py: Status text shown while attempting to send data; In files: eddn.py:212; eddn.py:584; eddn.py:925; load.py:215; load.py:593; load.py:940; eddn.py:252; eddn.py:699; eddn.py:1439; */
 "Sending data to EDDN..." = "Pošiljam podatke na EDDN";
 
-/* eddn.py: Error while trying to send data to EDDN; In files: eddn.py:264; eddn.py:907; eddn.py:942; eddn.py:981; */
+/* eddn.py: Error while trying to send data to EDDN; In files: eddn.py:257; eddn.py:864; eddn.py:898; eddn.py:937; load.py:260; load.py:878; load.py:913; load.py:952; eddn.py:316; eddn.py:1375; eddn.py:1410; eddn.py:1451; */
 "Error: Can't connect to EDDN" = "Napaka: povezava z EDDN ni mogoča";
 
-/* eddn.py: Enable EDDN support for station data checkbox label; In files: eddn.py:699; */
+/* eddn.py: Enable EDDN support for station data checkbox label; In files: eddn.py:663; load.py:672; eddn.py:1122; */
 "Send station data to the Elite Dangerous Data Network" = "Pošlji podatke postaje na EDDN";
 
-/* edsm.py: Settings>EDSM - Label on header/URL to EDSM API key page; In files: edsm.py:208; */
+/* edsm.py: Settings>EDSM - Label on header/URL to EDSM API key page; In files: edsm.py:206; load.py:206; edsm.py:247; */
 "Elite Dangerous Star Map credentials" = "EDStarMap uporabniški podatki";
 
-/* edsm.py: EDSM Commander name label in EDSM settings; In files: edsm.py:227; */
+/* edsm.py: Game Commander name label in EDSM settings; theme.py: Label for commander name in main window; EDMarketConnector.py: Label for commander name in main window; stats.py: Cmdr stats; In files: edsm.py:216; load.py:216; edsm.py:258; theme.py:227; EDMarketConnector.py:822; stats.py:59; */
+"Cmdr" = "Cmdr";
+
+/* edsm.py: EDSM Commander name label in EDSM settings; In files: edsm.py:223; load.py:223; edsm.py:266; */
 "Commander Name" = "Commander ime";
 
-/* edsm.py: EDSM API key label; inara.py: Inara API key label; In files: edsm.py:235; inara.py:237; */
+/* edsm.py: EDSM API key label; inara.py: Inara API key label; In files: edsm.py:230; inara.py:233; load.py:230; load.py:233; edsm.py:274; inara.py:243; */
 "API Key" = "API ključ";
 
-/* edsm.py: We have no data on the current commander; prefs.py: No hotkey/shortcut set; stats.py: No rank; In files: edsm.py:262; prefs.py:518; prefs.py:1156; prefs.py:1189; stats.py:117; stats.py:136; stats.py:155; stats.py:172; */
+/* edsm.py: We have no data on the current commander; prefs.py: No hotkey/shortcut set; stats.py: No rank; In files: edsm.py:256; load.py:256; edsm.py:301; prefs.py:520; prefs.py:1174; prefs.py:1207; stats.py:156; stats.py:175; stats.py:194; stats.py:211; */
 "None" = "Brez";
 
-/* edsm.py: EDSM Plugin - Error message from EDSM API; In files: edsm.py:640; edsm.py:745; */
+/* edsm.py: EDSM Plugin - Error message from EDSM API; In files: edsm.py:622; edsm.py:724; load.py:627; load.py:729; edsm.py:747; edsm.py:875; */
 "Error: EDSM {MSG}" = "Napaka: EDSM {MSG}";
 
-/* edsm.py: EDSM Plugin - Error connecting to EDSM API; In files: edsm.py:677; edsm.py:740; */
+/* edsm.py: EDSM Plugin - Error connecting to EDSM API; In files: edsm.py:658; edsm.py:720; load.py:663; load.py:725; edsm.py:784; edsm.py:870; */
 "Error: Can't connect to EDSM" = "Napaka: Povezava z EDSM ni mogoča";
 
-/* prefs.py: File > Preferences menu entry for macOS; In files: prefs.py:250; */
+/* ttkHyperlinkLabel.py: Label for 'Copy' as in 'Copy and Paste'; EDMarketConnector.py: Label for 'Copy' as in 'Copy and Paste'; In files: ttkHyperlinkLabel.py:42; EDMarketConnector.py:866; */
+"Copy" = "Kopiraj";
+
+/* EDMarketConnector.py: Update button in main window; In files: EDMarketConnector.py:529; EDMarketConnector.py:828; EDMarketConnector.py:1520; */
+"Update" = "Osveži";
+
+/* EDMarketConnector.py: Appearance - Label for checkbox to select if application always on top; prefs.py: Appearance - Label for checkbox to select if application always on top; In files: EDMarketConnector.py:612; prefs.py:867; */
+"Always on top" = "Vedno na vrhu";
+
+/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: Multicrew role label in main window; In files: EDMarketConnector.py:824; EDMarketConnector.py:1279; */
+"Role" = "Vloga";
+
+/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: 'Ship' label in main UI; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:824; EDMarketConnector.py:1289; EDMarketConnector.py:1312; stats.py:409; */
+"Ship" = "Ladja";
+
+/* EDMarketConnector.py: Label for 'System' line in main UI; prefs.py: Configuration - Label for selection of 'System' provider website; stats.py: Main window; In files: EDMarketConnector.py:826; prefs.py:607; stats.py:411; */
+"System" = "Sistem";
+
+/* EDMarketConnector.py: Label for 'Station' line in main UI; prefs.py: Configuration - Label for selection of 'Station' provider website; prefs.py: Appearance - Example 'Normal' text; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:827; prefs.py:625; prefs.py:762; stats.py:412; */
+"Station" = "Postaja";
+
+/* EDMarketConnector.py: 'File' menu title on OSX; EDMarketConnector.py: 'File' menu title; EDMarketConnector.py: 'File' menu; In files: EDMarketConnector.py:830; EDMarketConnector.py:845; EDMarketConnector.py:848; EDMarketConnector.py:2019; */
+"File" = "Datoteka";
+
+/* EDMarketConnector.py: 'Edit' menu title on OSX; EDMarketConnector.py: 'Edit' menu title; In files: EDMarketConnector.py:831; EDMarketConnector.py:846; EDMarketConnector.py:849; */
+"Edit" = "Uredi";
+
+/* EDMarketConnector.py: 'View' menu title on OSX; In files: EDMarketConnector.py:832; */
+"View" = "Pogled";
+
+/* EDMarketConnector.py: 'Window' menu title on OSX; In files: EDMarketConnector.py:833; */
+"Window" = "Okno";
+
+/* EDMarketConnector.py: Help' menu title on OSX; EDMarketConnector.py: 'Help' menu title; In files: EDMarketConnector.py:834; EDMarketConnector.py:847; EDMarketConnector.py:850; */
+"Help" = "Pomoč";
+
+/* EDMarketConnector.py: App menu entry on OSX; EDMarketConnector.py: Help > About App; In files: EDMarketConnector.py:837; EDMarketConnector.py:863; EDMarketConnector.py:1566; */
+"About {APP}" = "O {APP}";
+
+/* EDMarketConnector.py: Help > Check for Updates...; In files: EDMarketConnector.py:839; EDMarketConnector.py:862; */
+"Check for Updates..." = "Preveri posodobitve...";
+
+/* EDMarketConnector.py: File > Save Raw Data...; In files: EDMarketConnector.py:840; EDMarketConnector.py:854; */
+"Save Raw Data..." = "Shrani Izvirne Podatke...";
+
+/* EDMarketConnector.py: File > Status; stats.py: Status dialog title; In files: EDMarketConnector.py:841; EDMarketConnector.py:853; stats.py:406; */
+"Status" = "Status";
+
+/* EDMarketConnector.py: Help > Privacy Policy; In files: EDMarketConnector.py:842; EDMarketConnector.py:860; */
+"Privacy Policy" = "Pravilnik o zasebnosti";
+
+/* EDMarketConnector.py: Help > Release Notes; In files: EDMarketConnector.py:843; EDMarketConnector.py:861; EDMarketConnector.py:1600; */
+"Release Notes" = "Opombe ob izdaji";
+
+/* EDMarketConnector.py: File > Settings; prefs.py: File > Settings (macOS); In files: EDMarketConnector.py:855; EDMarketConnector.py:2020; prefs.py:255; */
+"Settings" = "Nastavitve";
+
+/* EDMarketConnector.py: File > Exit; In files: EDMarketConnector.py:856; */
+"Exit" = "Izhod";
+
+/* EDMarketConnector.py: Help > Documentation; In files: EDMarketConnector.py:859; */
+"Documentation" = "Dokumentacija";
+
+/* EDMarketConnector.py: Status - Attempting to get a Frontier Auth Access Token; In files: EDMarketConnector.py:872; */
+"Logging in..." = "Prijava v teku... ";
+
+/* EDMarketConnector.py: Successfully authenticated with the Frontier website; In files: EDMarketConnector.py:888; EDMarketConnector.py:1431; */
+"Authentication successful" = "Preverjanje pristnosti je bilo uspešno";
+
+/* EDMarketConnector.py: Player is not docked at a station, when we expect them to be; In files: EDMarketConnector.py:919; */
+"You're not docked at a station!" = "Nahajš se v postaji!";
+
+/* EDMarketConnector.py: Status - Either no market or no modules data for station from Frontier CAPI; In files: EDMarketConnector.py:927; */
+"Station doesn't have anything!" = "Postaja nima ničesar";
+
+/* EDMarketConnector.py: Status - No station market data from Frontier CAPI; In files: EDMarketConnector.py:932; */
+"Station doesn't have a market!" = "Postaja nima trga";
+
+/* EDMarketConnector.py: Status - Attempting to retrieve data from Frontier CAPI; In files: EDMarketConnector.py:1006; */
+"Fetching data..." = "Nalagam podatke...";
+
+/* EDMarketConnector.py: We didn't have the commander name when we should have; stats.py: Unknown commander; In files: EDMarketConnector.py:1051; stats.py:335; */
+"Who are you?!" = "Kdo si";
+
+/* EDMarketConnector.py: We don't know where the commander is, when we should; stats.py: Unknown location; In files: EDMarketConnector.py:1057; stats.py:345; */
+"Where are you?!" = "Kje se nahajaš";
+
+/* EDMarketConnector.py: We don't know what ship the commander is in, when we should; stats.py: Unknown ship; In files: EDMarketConnector.py:1064; stats.py:353; */
+"What are you flying?!" = "S čim letiš";
+
+/* EDMarketConnector.py: Time when we last obtained Frontier CAPI data; In files: EDMarketConnector.py:1226; */
+"Last updated at %H:%M:%S" = "Zadnja osvežitev podatkov %H:%M:%S ";
+
+/* EDMarketConnector.py: Cooldown on 'Update' button; In files: EDMarketConnector.py:1514; */
+"cooldown {SS}s" = "Posodobitev v {SS}s";
+
+/* EDMarketConnector.py: Generic 'OK' button label; prefs.py: 'OK' button on Settings/Preferences window; In files: EDMarketConnector.py:1626; prefs.py:306; */
+"OK" = "Potrdi";
+
+/* companion.py: Generic "something went wrong with Frontier Auth" error; In files: companion.py:263; */
+"Error: Invalid Credentials" = "Napaka: napačno uporabniški ime ali geslo";
+
+/* l10n.py: The system default language choice in Settings > Appearance; prefs.py: Settings > Configuration - Label on 'reset journal files location to default' button; prefs.py: The system default language choice in Settings > Appearance; prefs.py: Label for 'Default' theme radio button; In files: l10n.py:194; prefs.py:468; prefs.py:702; prefs.py:735; */
+"Default" = "Privzeta";
+
+/* prefs.py: File > Preferences menu entry for macOS; In files: prefs.py:251; */
 "Preferences" = "Nastavitve";
 
-/* prefs.py: Settings > Output - choosing what data to save to files; In files: prefs.py:346; */
+/* prefs.py: Settings > Output - choosing what data to save to files; In files: prefs.py:348; */
 "Please choose what data to save" = "Izberite podatke, ki jih želite shraniti";
 
-/* prefs.py: Settings > Output option; In files: prefs.py:352; */
+/* prefs.py: Settings > Output option; In files: prefs.py:354; */
 "Market data in CSV format file" = "Podatki trga v CSV formatu";
 
-/* prefs.py: Settings > Output option; In files: prefs.py:361; */
+/* prefs.py: Settings > Output option; In files: prefs.py:363; */
 "Market data in Trade Dangerous format file" = "Podatki trga v Trade Dangerous formatu";
 
-/* prefs.py: Settings > Output option; In files: prefs.py:371; */
+/* prefs.py: Settings > Output option; In files: prefs.py:373; */
 "Ship loadout" = "Oprema ladje";
 
-/* prefs.py: Settings > Output - Label for "where files are located"; In files: prefs.py:390; prefs.py:409; */
+/* prefs.py: Settings > Output - Label for "where files are located"; In files: prefs.py:392; prefs.py:411; */
 "File location" = "Lokacija datoteke";
 
-/* prefs.py: macOS Preferences - files location selection button; In files: prefs.py:398; prefs.py:448; */
+/* prefs.py: macOS Preferences - files location selection button; In files: prefs.py:400; prefs.py:450; */
 "Change..." = "Spremeni...";
 
-/* prefs.py: NOT-macOS Settings - files location selection button; prefs.py: NOT-macOS Setting - files location selection button; In files: prefs.py:401; prefs.py:451; */
+/* prefs.py: NOT-macOS Settings - files location selection button; prefs.py: NOT-macOS Setting - files location selection button; In files: prefs.py:403; prefs.py:453; */
 "Browse..." = "Prebrskaj...";
 
-/* prefs.py: Label for 'Output' Settings/Preferences tab; In files: prefs.py:416; */
+/* prefs.py: Label for 'Output' Settings/Preferences tab; In files: prefs.py:418; */
 "Output" = "Izpis";
 
-/* prefs.py: Hotkey/Shortcut settings prompt on OSX; In files: prefs.py:482; */
+/* prefs.py: Hotkey/Shortcut settings prompt on OSX; In files: prefs.py:484; */
 "Keyboard shortcut" = "Bližnjica";
 
-/* prefs.py: Hotkey/Shortcut settings prompt on Windows; In files: prefs.py:484; */
+/* prefs.py: Hotkey/Shortcut settings prompt on Windows; In files: prefs.py:486; */
 "Hotkey" = "Bližnjica";
 
-/* prefs.py: macOS Preferences > Configuration - restart the app message; In files: prefs.py:493; */
+/* prefs.py: macOS Preferences > Configuration - restart the app message; In files: prefs.py:495; */
 "Re-start {APP} to use shortcuts" = "Ponovno poženi {APP} za uporabo bližnjic";
 
-/* prefs.py: macOS - Configuration - need to grant the app permission for keyboard shortcuts; In files: prefs.py:502; */
+/* prefs.py: macOS - Configuration - need to grant the app permission for keyboard shortcuts; In files: prefs.py:504; */
 "{APP} needs permission to use shortcuts" = "{APP} potrebuje dovoljenja za uporabo bližnjic";
 
-/* prefs.py: Shortcut settings button on OSX; In files: prefs.py:507; */
+/* prefs.py: Shortcut settings button on OSX; In files: prefs.py:509; */
 "Open System Preferences" = "Odpri sistemske nastavitve";
 
-/* prefs.py: Configuration - Act on hotkey only when ED is in foreground; In files: prefs.py:529; */
+/* prefs.py: Configuration - Act on hotkey only when ED is in foreground; In files: prefs.py:531; */
 "Only when Elite: Dangerous is the active app" = "Samo ko je Elite:Dangerous aktivna aplikacija ";
 
-/* prefs.py: Configuration - play sound when hotkey used; In files: prefs.py:540; */
+/* prefs.py: Configuration - play sound when hotkey used; In files: prefs.py:542; */
 "Play sound" = "Sproži zvok";
 
-/* prefs.py: Label for 'Configuration' tab in Settings; In files: prefs.py:672; */
+/* prefs.py: Label for 'Configuration' tab in Settings; In files: prefs.py:674; */
 "Configuration" = "Konfiguracija";
 
-/* prefs.py: Appearance - Label for selection of application display language; In files: prefs.py:696; */
+/* prefs.py: Preferences privacy tab title; In files: prefs.py:696; */
+"Privacy" = "Privatno";
+
+/* prefs.py: Appearance - Label for selection of application display language; In files: prefs.py:720; */
 "Language" = "Jezik";
 
-/* prefs.py: Label for Settings > Appearance > Theme selection; In files: prefs.py:706; */
+/* prefs.py: Label for Settings > Appearance > Theme selection; In files: prefs.py:730; */
 "Theme" = "Tema";
 
-/* prefs.py: Label for 'Dark' theme radio button; In files: prefs.py:717; */
+/* prefs.py: Label for 'Dark' theme radio button; In files: prefs.py:741; */
 "Dark" = "Temno";
 
-/* prefs.py: Label for 'Transparent' theme radio button; In files: prefs.py:724; */
+/* prefs.py: Label for 'Transparent' theme radio button; In files: prefs.py:748; */
 "Transparent" = "Prosojno";
 
-/* prefs.py: Label for Settings > Appearance tab; In files: prefs.py:860; */
+/* prefs.py: Label for Settings > Appearance tab; In files: prefs.py:885; */
 "Appearance" = "Videz";
 
-/* stats.py: Cmdr stats; In files: stats.py:51; */
+/* stats.py: Cmdr stats; In files: stats.py:60; */
 "Balance" = "Ravnotežje";
 
-/* stats.py: Cmdr stats; In files: stats.py:52; */
+/* stats.py: Cmdr stats; In files: stats.py:61; */
 "Loan" = "Posojilo";
 
-/* stats.py: Ranking; In files: stats.py:57; */
-"Combat" = "Combat";
-
-/* stats.py: Ranking; In files: stats.py:58; */
-"Trade" = "Trgovanje";
-
-/* stats.py: Ranking; In files: stats.py:59; */
-"Explorer" = "Explorer";
-
-/* stats.py: Ranking; In files: stats.py:60; */
-"CQC" = "CQC";
-
-/* stats.py: Ranking; In files: stats.py:61; */
-"Federation" = "Federacija";
-
-/* stats.py: Ranking; In files: stats.py:62; */
-"Empire" = "Cesarstvo";
-
-/* stats.py: Ranking; In files: stats.py:63; */
-"Powerplay" = "Igra moči";
-
-/* stats.py: Combat rank; In files: stats.py:71; */
-"Harmless" = "Harmless";
-
-/* stats.py: Combat rank; In files: stats.py:72; */
-"Mostly Harmless" = "Mostly Harmless";
-
-/* stats.py: Combat rank; In files: stats.py:73; */
-"Novice" = "Novice";
-
-/* stats.py: Combat rank; In files: stats.py:74; */
-"Competent" = "Competent";
-
-/* stats.py: Combat rank; In files: stats.py:75; */
-"Expert" = "Expert";
-
-/* stats.py: Combat rank; stats.py: Empire rank; In files: stats.py:76; stats.py:139; */
-"Master" = "Master";
-
-/* stats.py: Combat rank; In files: stats.py:77; */
-"Dangerous" = "Dangerous";
-
-/* stats.py: Combat rank; In files: stats.py:78; */
-"Deadly" = "Deadly";
-
-/* stats.py: Top rank; In files: stats.py:79; stats.py:90; stats.py:101; stats.py:112; */
+/* stats.py: Top rank; In files: stats.py:65; */
 "Elite" = "Elite";
 
-/* stats.py: Trade rank; In files: stats.py:82; */
+/* stats.py: Ranking; In files: stats.py:76; */
+"Combat" = "Combat";
+
+/* stats.py: Ranking; In files: stats.py:77; */
+"Trade" = "Trgovanje";
+
+/* stats.py: Ranking; In files: stats.py:78; */
+"Explorer" = "Explorer";
+
+/* stats.py: Ranking; In files: stats.py:81; */
+"CQC" = "CQC";
+
+/* stats.py: Ranking; In files: stats.py:82; */
+"Federation" = "Federacija";
+
+/* stats.py: Ranking; In files: stats.py:83; */
+"Empire" = "Cesarstvo";
+
+/* stats.py: Ranking; In files: stats.py:84; */
+"Powerplay" = "Igra moči";
+
+/* stats.py: Combat rank; In files: stats.py:93; */
+"Harmless" = "Harmless";
+
+/* stats.py: Combat rank; In files: stats.py:94; */
+"Mostly Harmless" = "Mostly Harmless";
+
+/* stats.py: Combat rank; In files: stats.py:95; */
+"Novice" = "Novice";
+
+/* stats.py: Combat rank; In files: stats.py:96; */
+"Competent" = "Competent";
+
+/* stats.py: Combat rank; In files: stats.py:97; */
+"Expert" = "Expert";
+
+/* stats.py: Combat rank; stats.py: Empire rank; In files: stats.py:98; stats.py:178; */
+"Master" = "Master";
+
+/* stats.py: Combat rank; In files: stats.py:99; */
+"Dangerous" = "Dangerous";
+
+/* stats.py: Combat rank; In files: stats.py:100; */
+"Deadly" = "Deadly";
+
+/* stats.py: Trade rank; In files: stats.py:103; */
 "Penniless" = "Peniless";
 
-/* stats.py: Trade rank; In files: stats.py:83; */
+/* stats.py: Trade rank; In files: stats.py:104; */
 "Mostly Penniless" = "Mostly peniless";
 
-/* stats.py: Trade rank; In files: stats.py:84; */
+/* stats.py: Trade rank; In files: stats.py:105; */
 "Peddler" = "Peddler";
 
-/* stats.py: Trade rank; In files: stats.py:85; */
+/* stats.py: Trade rank; In files: stats.py:106; */
 "Dealer" = "Dealer";
 
-/* stats.py: Trade rank; In files: stats.py:86; */
+/* stats.py: Trade rank; In files: stats.py:107; */
 "Merchant" = "Merchant";
 
-/* stats.py: Trade rank; In files: stats.py:87; */
+/* stats.py: Trade rank; In files: stats.py:108; */
 "Broker" = "Broker";
 
-/* stats.py: Trade rank; In files: stats.py:88; */
+/* stats.py: Trade rank; In files: stats.py:109; */
 "Entrepreneur" = "Enterpreneur";
 
-/* stats.py: Trade rank; In files: stats.py:89; */
+/* stats.py: Trade rank; In files: stats.py:110; */
 "Tycoon" = "Tycoon";
 
-/* stats.py: Explorer rank; In files: stats.py:93; */
+/* stats.py: Explorer rank; In files: stats.py:113; */
 "Aimless" = "Aimless";
 
-/* stats.py: Explorer rank; In files: stats.py:94; */
+/* stats.py: Explorer rank; In files: stats.py:114; */
 "Mostly Aimless" = "Mostly Aimless";
 
-/* stats.py: Explorer rank; In files: stats.py:95; */
+/* stats.py: Explorer rank; In files: stats.py:115; */
 "Scout" = "Scout";
 
-/* stats.py: Explorer rank; In files: stats.py:96; */
+/* stats.py: Explorer rank; In files: stats.py:116; */
 "Surveyor" = "Surveyor";
 
-/* stats.py: Explorer rank; In files: stats.py:97; */
+/* stats.py: Explorer rank; In files: stats.py:117; */
 "Trailblazer" = "Trailblazer";
 
-/* stats.py: Explorer rank; In files: stats.py:98; */
+/* stats.py: Explorer rank; In files: stats.py:118; */
 "Pathfinder" = "Pathfinder";
 
-/* stats.py: Explorer rank; In files: stats.py:99; */
+/* stats.py: Explorer rank; In files: stats.py:119; */
 "Ranger" = "Ranger";
 
-/* stats.py: Explorer rank; In files: stats.py:100; */
+/* stats.py: Explorer rank; In files: stats.py:120; */
 "Pioneer" = "Pioneer";
 
-/* stats.py: CQC rank; In files: stats.py:104; */
+/* stats.py: CQC rank; In files: stats.py:144; */
 "Helpless" = "Helpless";
 
-/* stats.py: CQC rank; In files: stats.py:105; */
+/* stats.py: CQC rank; In files: stats.py:145; */
 "Mostly Helpless" = "Mostly Helpless";
 
-/* stats.py: CQC rank; In files: stats.py:106; */
+/* stats.py: CQC rank; In files: stats.py:146; */
 "Amateur" = "Amateur";
 
-/* stats.py: CQC rank; In files: stats.py:107; */
+/* stats.py: CQC rank; In files: stats.py:147; */
 "Semi Professional" = "Semi Professional";
 
-/* stats.py: CQC rank; In files: stats.py:108; */
+/* stats.py: CQC rank; In files: stats.py:148; */
 "Professional" = "Professional";
 
-/* stats.py: CQC rank; In files: stats.py:109; */
+/* stats.py: CQC rank; In files: stats.py:149; */
 "Champion" = "Champion";
 
-/* stats.py: CQC rank; In files: stats.py:110; */
+/* stats.py: CQC rank; In files: stats.py:150; */
 "Hero" = "Hero";
 
-/* stats.py: CQC rank; In files: stats.py:111; */
+/* stats.py: CQC rank; In files: stats.py:151; */
 "Gladiator" = "Gladiator";
 
-/* stats.py: Federation rank; In files: stats.py:118; */
+/* stats.py: Federation rank; In files: stats.py:157; */
 "Recruit" = "Recruit";
 
-/* stats.py: Federation rank; In files: stats.py:119; */
+/* stats.py: Federation rank; In files: stats.py:158; */
 "Cadet" = "Cadet";
 
-/* stats.py: Federation rank; In files: stats.py:120; */
+/* stats.py: Federation rank; In files: stats.py:159; */
 "Midshipman" = "Midshipman";
 
-/* stats.py: Federation rank; In files: stats.py:121; */
+/* stats.py: Federation rank; In files: stats.py:160; */
 "Petty Officer" = "Petty Officer";
 
-/* stats.py: Federation rank; In files: stats.py:122; */
+/* stats.py: Federation rank; In files: stats.py:161; */
 "Chief Petty Officer" = "Chief Petty Officer";
 
-/* stats.py: Federation rank; In files: stats.py:123; */
+/* stats.py: Federation rank; In files: stats.py:162; */
 "Warrant Officer" = "Warrant Officer";
 
-/* stats.py: Federation rank; In files: stats.py:124; */
+/* stats.py: Federation rank; In files: stats.py:163; */
 "Ensign" = "Ensign";
 
-/* stats.py: Federation rank; In files: stats.py:125; */
+/* stats.py: Federation rank; In files: stats.py:164; */
 "Lieutenant" = "LIeutenant";
 
-/* stats.py: Federation rank; In files: stats.py:126; */
+/* stats.py: Federation rank; In files: stats.py:165; */
 "Lieutenant Commander" = "Lieutenant Commander";
 
-/* stats.py: Federation rank; In files: stats.py:127; */
+/* stats.py: Federation rank; In files: stats.py:166; */
 "Post Commander" = "Post Commander";
 
-/* stats.py: Federation rank; In files: stats.py:128; */
+/* stats.py: Federation rank; In files: stats.py:167; */
 "Post Captain" = "Post Captain";
 
-/* stats.py: Federation rank; In files: stats.py:129; */
+/* stats.py: Federation rank; In files: stats.py:168; */
 "Rear Admiral" = "Read Admiral";
 
-/* stats.py: Federation rank; In files: stats.py:130; */
+/* stats.py: Federation rank; In files: stats.py:169; */
 "Vice Admiral" = "Vice Admiral";
 
-/* stats.py: Federation rank; In files: stats.py:131; */
+/* stats.py: Federation rank; In files: stats.py:170; */
 "Admiral" = "Admiral";
 
-/* stats.py: Empire rank; In files: stats.py:137; */
+/* stats.py: Empire rank; In files: stats.py:176; */
 "Outsider" = "Outsider";
 
-/* stats.py: Empire rank; In files: stats.py:138; */
+/* stats.py: Empire rank; In files: stats.py:177; */
 "Serf" = "Serif";
 
-/* stats.py: Empire rank; In files: stats.py:140; */
+/* stats.py: Empire rank; In files: stats.py:179; */
 "Squire" = "Squire";
 
-/* stats.py: Empire rank; In files: stats.py:141; */
+/* stats.py: Empire rank; In files: stats.py:180; */
 "Knight" = "Knight";
 
-/* stats.py: Empire rank; In files: stats.py:142; */
+/* stats.py: Empire rank; In files: stats.py:181; */
 "Lord" = "Lord";
 
-/* stats.py: Empire rank; In files: stats.py:143; */
+/* stats.py: Empire rank; In files: stats.py:182; */
 "Baron" = "Baron";
 
-/* stats.py: Empire rank; In files: stats.py:144; */
+/* stats.py: Empire rank; In files: stats.py:183; */
 "Viscount" = "Viscount";
 
-/* stats.py: Empire rank; In files: stats.py:145; */
+/* stats.py: Empire rank; In files: stats.py:184; */
 "Count" = "Count";
 
-/* stats.py: Empire rank; In files: stats.py:146; */
+/* stats.py: Empire rank; In files: stats.py:185; */
 "Earl" = "Earl";
 
-/* stats.py: Empire rank; In files: stats.py:147; */
+/* stats.py: Empire rank; In files: stats.py:186; */
 "Marquis" = "Marquis";
 
-/* stats.py: Empire rank; In files: stats.py:148; */
+/* stats.py: Empire rank; In files: stats.py:187; */
 "Duke" = "Duke";
 
-/* stats.py: Empire rank; In files: stats.py:149; */
+/* stats.py: Empire rank; In files: stats.py:188; */
 "Prince" = "Prince";
 
-/* stats.py: Empire rank; In files: stats.py:150; */
+/* stats.py: Empire rank; In files: stats.py:189; */
 "King" = "King";
 
-/* stats.py: Power rank; In files: stats.py:156; */
+/* stats.py: Power rank; In files: stats.py:195; */
 "Rating 1" = "Ocena 1";
 
-/* stats.py: Power rank; In files: stats.py:157; */
+/* stats.py: Power rank; In files: stats.py:196; */
 "Rating 2" = "Ocena 2";
 
-/* stats.py: Power rank; In files: stats.py:158; */
+/* stats.py: Power rank; In files: stats.py:197; */
 "Rating 3" = "Ocena 3";
 
-/* stats.py: Power rank; In files: stats.py:159; */
+/* stats.py: Power rank; In files: stats.py:198; */
 "Rating 4" = "Ocena 4";
 
-/* stats.py: Power rank; In files: stats.py:160; */
+/* stats.py: Power rank; In files: stats.py:199; */
 "Rating 5" = "Ocena 5";
 
-/* stats.py: Status dialog subtitle - CR value of ship; In files: stats.py:367; */
+/* stats.py: Status dialog subtitle - CR value of ship; In files: stats.py:413; */
 "Value" = "Vrednost";
 
-/* stats.py: Status dialog title; In files: stats.py:376; */
+/* stats.py: Status dialog title; In files: stats.py:422; */
 "Ships" = "Ladje";

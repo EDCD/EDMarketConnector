@@ -1,10 +1,12 @@
 """Simple HTTP listener to be used with debugging various EDMC sends."""
+import gzip
 import json
 import pathlib
 import tempfile
 import threading
+import zlib
 from http import server
-from typing import Any, Callable, Tuple, Union
+from typing import Any, Callable, Literal, Tuple, Union
 from urllib.parse import parse_qs
 
 from config import appname
@@ -30,8 +32,11 @@ class LoggingHandler(server.BaseHTTPRequestHandler):
     def do_POST(self) -> None:  # noqa: N802 # I cant change it
         """Handle POST."""
         logger.info(f"Received a POST for {self.path!r}!")
-        data = self.rfile.read(int(self.headers['Content-Length'])).decode('utf-8', errors='replace')
-        to_save = data
+        data_raw: bytes = self.rfile.read(int(self.headers['Content-Length']))
+
+        encoding = self.headers.get('Content-Encoding')
+
+        to_save = data = self.get_printable(data_raw, encoding)
 
         target_path = self.path
         if len(target_path) > 1 and target_path[0] == '/':
@@ -42,7 +47,7 @@ class LoggingHandler(server.BaseHTTPRequestHandler):
 
         response: Union[Callable[[str], str], str, None] = DEFAULT_RESPONSES.get(target_path)
         if callable(response):
-            response = response(data)
+            response = response(to_save)
 
         self.send_response_only(200, "OK")
         if response is not None:
@@ -64,11 +69,36 @@ class LoggingHandler(server.BaseHTTPRequestHandler):
         target_file = output_data_path / (safe_file_name(target_path) + '.log')
         if target_file.parent != output_data_path:
             logger.warning(f"REFUSING TO WRITE FILE THAT ISN'T IN THE RIGHT PLACE! {target_file=}")
-            logger.warning(f'DATA FOLLOWS\n{data}')
+            logger.warning(f'DATA FOLLOWS\n{data}')  # type: ignore # mypy thinks data is a byte string here
             return
 
         with output_lock, target_file.open('a') as f:
             f.write(to_save + "\n\n")
+
+    @staticmethod
+    def get_printable(data: bytes, compression: Literal['deflate'] | Literal['gzip'] | str | None = None) -> str:
+        """
+        Convert an incoming data stream into a string.
+
+        :param data: The data to convert
+        :param compression: The compression to remove, defaults to None
+        :raises ValueError: If compression is unknown
+        :return: printable strings
+        """
+        ret: bytes = b''
+        if compression is None:
+            ret = data
+
+        elif compression == 'deflate':
+            ret = zlib.decompress(data)
+
+        elif compression == 'gzip':
+            ret = gzip.decompress(data)
+
+        else:
+            raise ValueError(f'Unknown encoding for data {compression!r}')
+
+        return ret.decode('utf-8', errors='replace')
 
 
 def safe_file_name(name: str):
@@ -103,6 +133,7 @@ def generate_inara_response(raw_data: str) -> str:
 
 
 def extract_edsm_data(data: str) -> dict[str, Any]:
+    """Extract relevant data from edsm data."""
     res = parse_qs(data)
     return {name: data[0] for name, data in res.items()}
 

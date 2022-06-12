@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<?define PRODUCTNAME = "EDMarketConnector"?>
+<?define PRODUCTLONGNAME = "Elite Dangerous Market Connector"?>
+<?define PRODUCTVERSION = "!(bind.fileVersion.EDMarketConnector.exe)" ?>
+<?define UPGRADECODE = "9df571ae-d56d-46e6-af79-4e72ad54efe6" ?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Product Id="*"
+             Name="$(var.PRODUCTLONGNAME)"
+             Version="$(var.PRODUCTVERSION)"
+             UpgradeCode="$(var.UPGRADECODE)"
+             Language="!(bind.fileLanguage.EDMarketConnector.exe)"
+             Manufacturer="EDCD">
+
+        <Package Id="*" Keywords="Installer"
+                 InstallScope="perMachine"
+                 Description="$(var.PRODUCTLONGNAME) installer"
+                 InstallerVersion="300" Compressed="yes"
+                 Platform="x86"
+                 Languages="1033,1029,1031,1034,1035,1036,1038,1040,1041,1043,1045,1046,1049,1058,1062,2052,2070,2074,6170,1060,1053,18,0" />
+                 <!--        en   cs,  de   es   fi   fr   hu   it   ja   nl   pl  pt-BR ru   uk  lv zh-CN pt-PT sr-Latn sr-Latn-BA sl sv-SE ko neutral -->
+                 <!-- https://msdn.microsoft.com/en-gb/goglobal/bb964664.aspx -->
+
+        <!-- Always reinstall since patching is problematic -->
+        <!-- http://www.joyofsetup.com/2010/01/16/major-upgrades-now-easier-than-ever/ -->
+        <MajorUpgrade AllowSameVersionUpgrades="yes" DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+
+        <Media Id="1" Cabinet="product.cab" EmbedCab="yes" />
+
+        <Icon Id="EDMarketConnector.exe" SourceFile="EDMarketConnector.ico"/>
+
+        <!-- For Add/Remove programs -->
+        <Property Id="ARPPRODUCTICON" Value="EDMarketConnector.exe" />
+        <Property Id="ARPNOMODIFY" Value="yes" Secure="yes" />    <!-- Remove modify - also set by WixUI_Minimal -->
+        <Property Id="ARPHELPLINK" Value="https://github.com/EDCD/EDMarketConnector/wiki" />
+
+        <!-- Set INSTALLDIR from ARPINSTALLLOCATION if replacing/upgrading -->
+        <!-- https://wyrdfish.wordpress.com/2012/07/20/msi-writing-guidelines-this-may-be-out-of-date/ -->
+        <Property Id="ARPINSTALLLOCATION">
+            <RegistrySearch Id="GetARPINSTALLLOCATION"
+                            Root="HKLM"
+                            Key="Software\Microsoft\Windows\CurrentVersion\Uninstall\[WIX_UPGRADE_DETECTED]"
+                            Name="InstallLocation"
+                            Type="raw" />
+        </Property>
+        <CustomAction Id="SetINSTALLDIR" Property="INSTALLDIR" Value="[ARPINSTALLLOCATION]" />
+        <InstallUISequence>
+            <Custom Action="SetINSTALLDIR" After="AppSearch">
+                WIX_UPGRADE_DETECTED AND ARPINSTALLLOCATION
+            </Custom>
+        </InstallUISequence>
+        <InstallExecuteSequence>
+            <Custom Action="SetINSTALLDIR" After="AppSearch">
+                WIX_UPGRADE_DETECTED AND ARPINSTALLLOCATION
+            </Custom>
+        </InstallExecuteSequence>
+
+        <!-- Set ARPINSTALLLOCATION from INSTALLDIR if new install -->
+        <!-- http://blogs.technet.com/b/alexshev/archive/2008/02/09/from-msi-to-wix-part-2.aspx -->
+        <CustomAction Id="SetARPINSTALLLOCATION" Property="ARPINSTALLLOCATION" Value="[INSTALLDIR]" />
+        <InstallExecuteSequence>
+            <Custom Action="SetARPINSTALLLOCATION" After="InstallValidate">
+                NOT Installed
+            </Custom>
+        </InstallExecuteSequence>
+
+        <!-- Launch app after upgrade -->
+        <Property Id="LAUNCH" Value="yes" />
+        <CustomAction Id="DoLaunch"
+                      Directory="INSTALLDIR"
+                      ExeCommand='"[INSTALLDIR]EDMarketConnector.exe"'
+                      Return="asyncNoWait"
+                      Execute="deferred"
+                      Impersonate="yes"
+                      />
+        <InstallExecuteSequence>
+            <!-- http://alekdavis.blogspot.co.uk/2013/05/wix-woes-what-is-your-installer-doing.html -->
+            <Custom Action="DoLaunch" Before="InstallFinalize">
+                NOT Installed AND LAUNCH ~= "yes"
+            </Custom>
+        </InstallExecuteSequence>
+
+        <Directory Id="TARGETDIR" Name="SourceDir">
+
+            <!-- http://wixtoolset.org/documentation/manual/v3/howtos/files_and_registry/write_a_registry_entry.html -->
+            <Component Id="RegistryEntries" Guid="*">
+                <RegistryKey Root="HKCR" Key="edmc">
+                    <RegistryValue Type="string" Value="$(var.PRODUCTLONGNAME)"/>
+                    <RegistryValue Type="string" Name="URL Protocol" Value=""/>
+                    <RegistryKey Key="DefaultIcon">
+                        <RegistryValue Type="string" Value="[INSTALLDIR]EDMarketConnector.exe,0"/>
+                    </RegistryKey>
+                    <RegistryKey Key="shell">
+                        <RegistryKey Key="open">
+                            <RegistryKey Key="command">
+                                <RegistryValue Type="string" Value='"[INSTALLDIR]EDMarketConnector.exe" "%1"'/>
+                            </RegistryKey>
+                            <RegistryKey Key="ddeexec">
+                                <RegistryValue Type="string" Value='Open("%1")'/>
+                            </RegistryKey>
+                        </RegistryKey>
+                    </RegistryKey>
+                </RegistryKey>
+            </Component>
+
+            <!-- Contents auto-generated with heat.exe, see setup.py -->
+            <Directory Id="ProgramFilesFolder">
+            </Directory>
+
+            <Directory Id="ProgramMenuFolder" Name="Programs">
+            </Directory>
+
+        </Directory>
+
+        <!-- Contents auto-generated in setup.py -->
+        <Feature Id='Complete' Level='1'>
+        </Feature>
+
+    </Product>
+</Wix>
+
+<!-- Local Variables: -->
+<!-- tab-width: 4     -->
+<!-- End:             -->

@@ -16,10 +16,13 @@ jobs:
         shell: powershell
 
     steps:
-      - uses: actions/checkout@v2.3.4
-      - uses: actions/setup-python@v2.2.2
+      - uses: actions/checkout@v3
         with:
-          python-version: "3.9.6"
+          submodules: true
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version-file: '.python-version'
           architecture: "x86"
 
       - name: Install python tools
@@ -38,7 +41,7 @@ jobs:
           python setup.py py2exe
 
       - name: Upload build files
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: Built files
           path: EDMarketConnector_win*.msi
@@ -51,7 +54,7 @@ jobs:
 
     steps:
       - name: Download binary
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: Built files
           path: ./

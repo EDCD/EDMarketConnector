@@ -1,509 +1,503 @@
 /* Language name */
 "!Language" = "Magyar";
 
-
-/* OLD: Raised when cannot contact the Companion API server. [companion.py] */
-"Error: Frontier server is down" = "Hiba:Frontier szerver nem elérhető";
-/* companion.py: Frontier CAPI data doesn't agree with latest Journal game location; In files: companion.py:190; */
-"Error: Frontier server is lagging" = "Hiba:Frontier szerver laggol";
-
-/* companion.py: Generic "something went wrong with Frontier Auth" error; In files: companion.py:214; */
-"Error: Invalid Credentials" = "Hiba:Érvénytelen hitelesítő adatok";
-
-/* companion.py: Frontier CAPI authorisation not for currently game-active commander; In files: companion.py:230; */
-"Error: Wrong Cmdr" = "Hiba:Rossz parancsnok";
-
-
-/* [inara.py] */
-"Error: Can't connect to Inara" = "Hiba:Nem lehet kapcsolódni az Inarához";
-/* EDMarketConnector.py: Update button in main window; In files: EDMarketConnector.py:424; EDMarketConnector.py:718; EDMarketConnector.py:1302; */
-"Update" = "Frissítés";
-
-/* EDMarketConnector.py: Appearance - Label for checkbox to select if application always on top; prefs.py: Appearance - Label for checkbox to select if application always on top; In files: EDMarketConnector.py:507; prefs.py:843; */
-"Always on top" = "Mindig felül";
-
-/* EDMarketConnector.py: Label for commander name in main window; edsm.py: Game Commander name label in EDSM settings; stats.py: Cmdr stats; theme.py: Label for commander name in main window; In files: EDMarketConnector.py:712; edsm.py:219; stats.py:50; theme.py:227; */
-"Cmdr" = "Parancsnok";
-
-/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: Multicrew role label in main window; In files: EDMarketConnector.py:714; EDMarketConnector.py:1072; */
-"Role" = "Szerep";
-
-/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: 'Ship' label in main UI; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:714; EDMarketConnector.py:1082; EDMarketConnector.py:1105; stats.py:363; */
-"Ship" = "Hajó";
-
-/* EDMarketConnector.py: Label for 'System' line in main UI; prefs.py: Configuration - Label for selection of 'System' provider website; stats.py: Main window; In files: EDMarketConnector.py:716; prefs.py:605; stats.py:365; */
-"System" = "Rendszer";
-
-/* EDMarketConnector.py: Label for 'Station' line in main UI; prefs.py: Configuration - Label for selection of 'Station' provider website; prefs.py: Appearance - Example 'Normal' text; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:717; prefs.py:623; prefs.py:738; stats.py:366; */
-"Station" = "Állomás";
-
-/* EDMarketConnector.py: 'File' menu title on OSX; EDMarketConnector.py: 'File' menu title; EDMarketConnector.py: 'File' menu; In files: EDMarketConnector.py:720; EDMarketConnector.py:735; EDMarketConnector.py:738; EDMarketConnector.py:1791; */
-"File" = "Fájl";
-
-/* EDMarketConnector.py: 'Edit' menu title on OSX; EDMarketConnector.py: 'Edit' menu title; In files: EDMarketConnector.py:721; EDMarketConnector.py:736; EDMarketConnector.py:739; */
-"Edit" = "Szerkeszt";
-
-/* EDMarketConnector.py: 'View' menu title on OSX; In files: EDMarketConnector.py:722; */
-"View" = "Nézet";
-
-/* EDMarketConnector.py: 'Window' menu title on OSX; In files: EDMarketConnector.py:723; */
-"Window" = "Ablak";
-
-/* EDMarketConnector.py: Help' menu title on OSX; EDMarketConnector.py: 'Help' menu title; In files: EDMarketConnector.py:724; EDMarketConnector.py:737; EDMarketConnector.py:740; */
-"Help" = "Segítség";
-
-/* EDMarketConnector.py: App menu entry on OSX; EDMarketConnector.py: Help > About App; In files: EDMarketConnector.py:727; EDMarketConnector.py:753; EDMarketConnector.py:1347; */
-"About {APP}" = "Az {APP} névjegye";
-
-/* EDMarketConnector.py: Help > Check for Updates...; In files: EDMarketConnector.py:729; EDMarketConnector.py:752; */
-"Check for Updates..." = "Frissítések keresése";
-
-/* EDMarketConnector.py: File > Save Raw Data...; In files: EDMarketConnector.py:730; EDMarketConnector.py:744; */
-"Save Raw Data..." = "Nyers adat elmentése";
-
-/* EDMarketConnector.py: File > Status; stats.py: Status dialog title; In files: EDMarketConnector.py:731; EDMarketConnector.py:743; stats.py:360; */
-"Status" = "Státusz";
-
-/* EDMarketConnector.py: Help > Privacy Policy; In files: EDMarketConnector.py:732; EDMarketConnector.py:750; */
-"Privacy Policy" = "Adatvédelmi irányelvek";
-
-/* EDMarketConnector.py: Help > Release Notes; In files: EDMarketConnector.py:733; EDMarketConnector.py:751; EDMarketConnector.py:1381; */
-"Release Notes" = "Kiadási megjegyzések";
-
-/* EDMarketConnector.py: File > Settings; prefs.py: File > Settings (macOS); In files: EDMarketConnector.py:745; EDMarketConnector.py:1792; prefs.py:254; */
-"Settings" = "Beállítások";
-
-/* EDMarketConnector.py: File > Exit; In files: EDMarketConnector.py:746; */
-"Exit" = "Kilépés";
-
-/* EDMarketConnector.py: Help > Documentation; In files: EDMarketConnector.py:749; */
-"Documentation" = "Dokumentáció";
-
-/* EDMarketConnector.py: Label for 'Copy' as in 'Copy and Paste'; ttkHyperlinkLabel.py: Label for 'Copy' as in 'Copy and Paste'; In files: EDMarketConnector.py:756; ttkHyperlinkLabel.py:42; */
-"Copy" = "Másol";
-
-/* EDMarketConnector.py: Status - Attempting to get a Frontier Auth Access Token; In files: EDMarketConnector.py:762; */
-"Logging in..." = "Bejelentkezés";
-
-/* EDMarketConnector.py: Successfully authenticated with the Frontier website; In files: EDMarketConnector.py:778; EDMarketConnector.py:1215; */
-"Authentication successful" = "A hitelesítés sikerült";
-
-/* EDMarketConnector.py: Player is not docked at a station, when we expect them to be; In files: EDMarketConnector.py:809; */
-"You're not docked at a station!" = " Nem dokkoltál az állomáson";
-
-/* EDMarketConnector.py: Status - Either no market or no modules data for station from Frontier CAPI; In files: EDMarketConnector.py:817; */
-"Station doesn't have anything!" = "Az állomáson nincs semmi!";
-
-/* EDMarketConnector.py: Status - No station market data from Frontier CAPI; In files: EDMarketConnector.py:822; */
-"Station doesn't have a market!" = "Nincs piac az állomáson!";
-
-/* EDMarketConnector.py: Status - Attempting to retrieve data from Frontier CAPI; EDMarketConnector.py: Status - Attempting to retrieve data from Frontier CAPI to save to file; stats.py: Fetching data from Frontier CAPI in order to display on File > Status; In files: EDMarketConnector.py:867; EDMarketConnector.py:1428; stats.py:279; */
-"Fetching data..." = "Adatok lekérése";
-
-/* EDMarketConnector.py: We didn't have the commander name when we should have; stats.py: Unknown commander; In files: EDMarketConnector.py:884; stats.py:297; */
-"Who are you?!" = "Ki vagy?";
-
-/* EDMarketConnector.py: We don't know where the commander is, when we should; stats.py: Unknown location; In files: EDMarketConnector.py:890; stats.py:307; */
-"Where are you?!" = "Hol vagy?";
-
-/* EDMarketConnector.py: We don't know what ship the commander is in, when we should; stats.py: Unknown ship; In files: EDMarketConnector.py:894; stats.py:312; */
-"What are you flying?!" = "Mivel repülsz?";
-
-/* EDMarketConnector.py: Time when we last obtained Frontier CAPI data; In files: EDMarketConnector.py:1026; */
-"Last updated at %H:%M:%S" = "Utoljára frissítve %H:%M:%S";
-
-/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1052; */
-"Fighter" = "Vadászgép";
-
-/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1053; */
-"Gunner" = "Lövész";
-
-/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1054; */
-"Helm" = "Kormányos";
-
-/* EDMarketConnector.py: Cooldown on 'Update' button; In files: EDMarketConnector.py:1298; */
-"cooldown {SS}s" = "Lehűl {SS} másodperc";
-
-/* EDMarketConnector.py: Generic 'OK' button label; prefs.py: 'OK' button on Settings/Preferences window; In files: EDMarketConnector.py:1407; prefs.py:304; */
-"OK" = "Ok";
-
-/* EDMarketConnector.py: Settings > Plugins tab; prefs.py: Label on Settings > Plugins tab; In files: EDMarketConnector.py:1790; prefs.py:953; */
-"Plugins" = "Pluginok";
-
-/* l10n.py: The system default language choice in Settings > Appearance; prefs.py: Settings > Configuration - Label on 'reset journal files location to default' button; prefs.py: The system default language choice in Settings > Appearance; prefs.py: Label for 'Default' theme radio button; In files: l10n.py:194; prefs.py:466; prefs.py:678; prefs.py:711; */
-"Default" = "Alap";
-
-/* eddn.py: Status text shown while attempting to send data; In files: eddn.py:215; eddn.py:619; eddn.py:969; */
+/* eddn.py: Status text shown while attempting to send data; In files: eddn.py:212; eddn.py:584; eddn.py:925; load.py:215; load.py:593; load.py:940; eddn.py:252; eddn.py:699; eddn.py:1439; */
 "Sending data to EDDN..." = "Adatok küldése az EDDN-nek...";
 
-/* eddn.py: Error while trying to send data to EDDN; In files: eddn.py:264; eddn.py:907; eddn.py:942; eddn.py:981; */
+/* eddn.py: Error while trying to send data to EDDN; In files: eddn.py:257; eddn.py:864; eddn.py:898; eddn.py:937; load.py:260; load.py:878; load.py:913; load.py:952; eddn.py:316; eddn.py:1375; eddn.py:1410; eddn.py:1451; */
 "Error: Can't connect to EDDN" = "Hiba:Nem lehet kapcsolódni az EDDN-hez";
 
-/* eddn.py: Enable EDDN support for station data checkbox label; In files: eddn.py:699; */
+/* eddn.py: Enable EDDN support for station data checkbox label; In files: eddn.py:663; load.py:672; eddn.py:1122; */
 "Send station data to the Elite Dangerous Data Network" = "Állomás adatok küldése az EDDN-nek";
 
-/* eddn.py: Enable EDDN support for system and other scan data checkbox label; In files: eddn.py:710; */
+/* eddn.py: Enable EDDN support for system and other scan data checkbox label; In files: eddn.py:673; load.py:682; eddn.py:1133; */
 "Send system and scan data to the Elite Dangerous Data Network" = "Rendszer és szken adatok küldése az EDDN-nek";
 
-/* eddn.py: EDDN delay sending until docked option is on, this message notes that a send was skipped due to this; In files: eddn.py:721; */
+/* eddn.py: EDDN delay sending until docked option is on, this message notes that a send was skipped due to this; In files: eddn.py:683; load.py:692; eddn.py:1144; */
 "Delay sending until docked" = "Küldés késletetése amig dokkolsz";
 
-/* edsm.py: Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:198; */
+/* edsm.py: Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:197; load.py:197; edsm.py:237; */
 "Send flight log and Cmdr status to EDSM" = "Repülési napló és Parancsnok státusz küldése az EDSM-nek";
 
-/* edsm.py: Settings>EDSM - Label on header/URL to EDSM API key page; In files: edsm.py:208; */
+/* edsm.py: Settings>EDSM - Label on header/URL to EDSM API key page; In files: edsm.py:206; load.py:206; edsm.py:247; */
 "Elite Dangerous Star Map credentials" = "Elite Dangerous Csillag térkép hitelesítése";
 
-/* edsm.py: EDSM Commander name label in EDSM settings; In files: edsm.py:227; */
+/* edsm.py: Game Commander name label in EDSM settings; theme.py: Label for commander name in main window; EDMarketConnector.py: Label for commander name in main window; stats.py: Cmdr stats; In files: edsm.py:216; load.py:216; edsm.py:258; theme.py:227; EDMarketConnector.py:822; stats.py:59; */
+"Cmdr" = "Parancsnok";
+
+/* edsm.py: EDSM Commander name label in EDSM settings; In files: edsm.py:223; load.py:223; edsm.py:266; */
 "Commander Name" = "Parancsnok név";
 
-/* edsm.py: EDSM API key label; inara.py: Inara API key label; In files: edsm.py:235; inara.py:237; */
+/* edsm.py: EDSM API key label; inara.py: Inara API key label; In files: edsm.py:230; inara.py:233; load.py:230; load.py:233; edsm.py:274; inara.py:243; */
 "API Key" = "API kulcs";
 
-/* edsm.py: We have no data on the current commander; prefs.py: No hotkey/shortcut set; stats.py: No rank; In files: edsm.py:262; prefs.py:518; prefs.py:1156; prefs.py:1189; stats.py:117; stats.py:136; stats.py:155; stats.py:172; */
+/* edsm.py: We have no data on the current commander; prefs.py: No hotkey/shortcut set; stats.py: No rank; In files: edsm.py:256; load.py:256; edsm.py:301; prefs.py:520; prefs.py:1174; prefs.py:1207; stats.py:156; stats.py:175; stats.py:194; stats.py:211; */
 "None" = "Egyik sem";
 
-/* edsm.py: EDSM Plugin - Error message from EDSM API; In files: edsm.py:640; edsm.py:745; */
+/* edsm.py: EDSM Plugin - Error message from EDSM API; In files: edsm.py:622; edsm.py:724; load.py:627; load.py:729; edsm.py:747; edsm.py:875; */
 "Error: EDSM {MSG}" = "Hiba:EDSM {MSG}";
 
-/* edsm.py: EDSM Plugin - Error connecting to EDSM API; In files: edsm.py:677; edsm.py:740; */
+/* edsm.py: EDSM Plugin - Error connecting to EDSM API; In files: edsm.py:658; edsm.py:720; load.py:663; load.py:725; edsm.py:784; edsm.py:870; */
 "Error: Can't connect to EDSM" = "Hiba:nem lehet kapcsólodni az EDSM-hez";
 
-/* inara.py: Checkbox to enable INARA API Usage; In files: inara.py:216; */
+/* inara.py: Checkbox to enable INARA API Usage; In files: inara.py:215; load.py:215; inara.py:222; */
 "Send flight log and Cmdr status to Inara" = "Repülési napló és Parancsnok státusz küldése az Inarának";
 
-/* inara.py: Text for INARA API keys link ( goes to https://inara.cz/settings-api ); In files: inara.py:228; */
+/* inara.py: Text for INARA API keys link ( goes to https://inara.cz/settings-api ); In files: inara.py:225; load.py:225; inara.py:234; */
 "Inara credentials" = "Inara hitelesitő adatok";
 
-
-/* Raised when the Companion API server thinks that the user has not purchased E:D. i.e. doesn't have the correct 'SKU'. [companion.py] */
-"Error: Frontier server SKU problem" = "Hiba:Frontier szerver SKU probléma";
-/* inara.py: INARA API returned some kind of error (error message will be contained in {MSG}); In files: inara.py:1549; inara.py:1562; */
+/* inara.py: INARA API returned some kind of error (error message will be contained in {MSG}); In files: inara.py:1316; inara.py:1328; load.py:1319; load.py:1331; inara.py:1587; inara.py:1600; */
 "Error: Inara {MSG}" = "Hiba:Inara {MSG}";
 
-/* prefs.py: File > Preferences menu entry for macOS; In files: prefs.py:250; */
+/* ttkHyperlinkLabel.py: Label for 'Copy' as in 'Copy and Paste'; EDMarketConnector.py: Label for 'Copy' as in 'Copy and Paste'; In files: ttkHyperlinkLabel.py:42; EDMarketConnector.py:866; */
+"Copy" = "Másol";
+
+/* EDMarketConnector.py: Update button in main window; In files: EDMarketConnector.py:529; EDMarketConnector.py:828; EDMarketConnector.py:1520; */
+"Update" = "Frissítés";
+
+/* EDMarketConnector.py: Appearance - Label for checkbox to select if application always on top; prefs.py: Appearance - Label for checkbox to select if application always on top; In files: EDMarketConnector.py:612; prefs.py:867; */
+"Always on top" = "Mindig felül";
+
+/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: Multicrew role label in main window; In files: EDMarketConnector.py:824; EDMarketConnector.py:1279; */
+"Role" = "Szerep";
+
+/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: 'Ship' label in main UI; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:824; EDMarketConnector.py:1289; EDMarketConnector.py:1312; stats.py:409; */
+"Ship" = "Hajó";
+
+/* EDMarketConnector.py: Label for 'System' line in main UI; prefs.py: Configuration - Label for selection of 'System' provider website; stats.py: Main window; In files: EDMarketConnector.py:826; prefs.py:607; stats.py:411; */
+"System" = "Rendszer";
+
+/* EDMarketConnector.py: Label for 'Station' line in main UI; prefs.py: Configuration - Label for selection of 'Station' provider website; prefs.py: Appearance - Example 'Normal' text; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:827; prefs.py:625; prefs.py:762; stats.py:412; */
+"Station" = "Állomás";
+
+/* EDMarketConnector.py: 'File' menu title on OSX; EDMarketConnector.py: 'File' menu title; EDMarketConnector.py: 'File' menu; In files: EDMarketConnector.py:830; EDMarketConnector.py:845; EDMarketConnector.py:848; EDMarketConnector.py:2019; */
+"File" = "Fájl";
+
+/* EDMarketConnector.py: 'Edit' menu title on OSX; EDMarketConnector.py: 'Edit' menu title; In files: EDMarketConnector.py:831; EDMarketConnector.py:846; EDMarketConnector.py:849; */
+"Edit" = "Szerkeszt";
+
+/* EDMarketConnector.py: 'View' menu title on OSX; In files: EDMarketConnector.py:832; */
+"View" = "Nézet";
+
+/* EDMarketConnector.py: 'Window' menu title on OSX; In files: EDMarketConnector.py:833; */
+"Window" = "Ablak";
+
+/* EDMarketConnector.py: Help' menu title on OSX; EDMarketConnector.py: 'Help' menu title; In files: EDMarketConnector.py:834; EDMarketConnector.py:847; EDMarketConnector.py:850; */
+"Help" = "Segítség";
+
+/* EDMarketConnector.py: App menu entry on OSX; EDMarketConnector.py: Help > About App; In files: EDMarketConnector.py:837; EDMarketConnector.py:863; EDMarketConnector.py:1566; */
+"About {APP}" = "Az {APP} névjegye";
+
+/* EDMarketConnector.py: Help > Check for Updates...; In files: EDMarketConnector.py:839; EDMarketConnector.py:862; */
+"Check for Updates..." = "Frissítések keresése";
+
+/* EDMarketConnector.py: File > Save Raw Data...; In files: EDMarketConnector.py:840; EDMarketConnector.py:854; */
+"Save Raw Data..." = "Nyers adat elmentése";
+
+/* EDMarketConnector.py: File > Status; stats.py: Status dialog title; In files: EDMarketConnector.py:841; EDMarketConnector.py:853; stats.py:406; */
+"Status" = "Státusz";
+
+/* EDMarketConnector.py: Help > Privacy Policy; In files: EDMarketConnector.py:842; EDMarketConnector.py:860; */
+"Privacy Policy" = "Adatvédelmi irányelvek";
+
+/* EDMarketConnector.py: Help > Release Notes; In files: EDMarketConnector.py:843; EDMarketConnector.py:861; EDMarketConnector.py:1600; */
+"Release Notes" = "Kiadási megjegyzések";
+
+/* EDMarketConnector.py: File > Settings; prefs.py: File > Settings (macOS); In files: EDMarketConnector.py:855; EDMarketConnector.py:2020; prefs.py:255; */
+"Settings" = "Beállítások";
+
+/* EDMarketConnector.py: File > Exit; In files: EDMarketConnector.py:856; */
+"Exit" = "Kilépés";
+
+/* EDMarketConnector.py: Help > Documentation; In files: EDMarketConnector.py:859; */
+"Documentation" = "Dokumentáció";
+
+/* EDMarketConnector.py: Status - Attempting to get a Frontier Auth Access Token; In files: EDMarketConnector.py:872; */
+"Logging in..." = "Bejelentkezés";
+
+/* EDMarketConnector.py: Successfully authenticated with the Frontier website; In files: EDMarketConnector.py:888; EDMarketConnector.py:1431; */
+"Authentication successful" = "A hitelesítés sikerült";
+
+/* EDMarketConnector.py: Player is not docked at a station, when we expect them to be; In files: EDMarketConnector.py:919; */
+"You're not docked at a station!" = " Nem dokkoltál az állomáson";
+
+/* EDMarketConnector.py: Status - Either no market or no modules data for station from Frontier CAPI; In files: EDMarketConnector.py:927; */
+"Station doesn't have anything!" = "Az állomáson nincs semmi!";
+
+/* EDMarketConnector.py: Status - No station market data from Frontier CAPI; In files: EDMarketConnector.py:932; */
+"Station doesn't have a market!" = "Nincs piac az állomáson!";
+
+/* EDMarketConnector.py: Status - Attempting to retrieve data from Frontier CAPI; In files: EDMarketConnector.py:1006; */
+"Fetching data..." = "Adatok lekérése";
+
+/* EDMarketConnector.py: We didn't have the commander name when we should have; stats.py: Unknown commander; In files: EDMarketConnector.py:1051; stats.py:335; */
+"Who are you?!" = "Ki vagy?";
+
+/* EDMarketConnector.py: We don't know where the commander is, when we should; stats.py: Unknown location; In files: EDMarketConnector.py:1057; stats.py:345; */
+"Where are you?!" = "Hol vagy?";
+
+/* EDMarketConnector.py: We don't know what ship the commander is in, when we should; stats.py: Unknown ship; In files: EDMarketConnector.py:1064; stats.py:353; */
+"What are you flying?!" = "Mivel repülsz?";
+
+/* EDMarketConnector.py: Time when we last obtained Frontier CAPI data; In files: EDMarketConnector.py:1226; */
+"Last updated at %H:%M:%S" = "Utoljára frissítve %H:%M:%S";
+
+/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1254; */
+"Fighter" = "Vadászgép";
+
+/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1255; */
+"Gunner" = "Lövész";
+
+/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1256; */
+"Helm" = "Kormányos";
+
+/* EDMarketConnector.py: Cooldown on 'Update' button; In files: EDMarketConnector.py:1514; */
+"cooldown {SS}s" = "Lehűl {SS} másodperc";
+
+/* EDMarketConnector.py: Generic 'OK' button label; prefs.py: 'OK' button on Settings/Preferences window; In files: EDMarketConnector.py:1626; prefs.py:306; */
+"OK" = "Ok";
+
+/* EDMarketConnector.py: Settings > Plugins tab; prefs.py: Label on Settings > Plugins tab; In files: EDMarketConnector.py:2018; prefs.py:978; */
+"Plugins" = "Pluginok";
+
+/* companion.py: Frontier CAPI data doesn't agree with latest Journal game location; In files: companion.py:237; */
+"Error: Frontier server is lagging" = "Hiba:Frontier szerver laggol";
+
+/* companion.py: Generic "something went wrong with Frontier Auth" error; In files: companion.py:263; */
+"Error: Invalid Credentials" = "Hiba:Érvénytelen hitelesítő adatok";
+
+/* companion.py: Frontier CAPI authorisation not for currently game-active commander; In files: companion.py:288; */
+"Error: Wrong Cmdr" = "Hiba:Rossz parancsnok";
+
+/* l10n.py: The system default language choice in Settings > Appearance; prefs.py: Settings > Configuration - Label on 'reset journal files location to default' button; prefs.py: The system default language choice in Settings > Appearance; prefs.py: Label for 'Default' theme radio button; In files: l10n.py:194; prefs.py:468; prefs.py:702; prefs.py:735; */
+"Default" = "Alap";
+
+/* prefs.py: File > Preferences menu entry for macOS; In files: prefs.py:251; */
 "Preferences" = "Beállítások";
 
-/* prefs.py: Settings > Output - choosing what data to save to files; In files: prefs.py:346; */
+/* prefs.py: Settings > Output - choosing what data to save to files; In files: prefs.py:348; */
 "Please choose what data to save" = "Kérem válassza ki a menteni kivánt adatokat.";
 
-/* prefs.py: Settings > Output option; In files: prefs.py:352; */
+/* prefs.py: Settings > Output option; In files: prefs.py:354; */
 "Market data in CSV format file" = "Piaci adat CSV fájlban";
 
-/* prefs.py: Settings > Output option; In files: prefs.py:361; */
+/* prefs.py: Settings > Output option; In files: prefs.py:363; */
 "Market data in Trade Dangerous format file" = "Piaci adat Trade Dangerous fájlban";
 
-/* prefs.py: Settings > Output option; In files: prefs.py:371; */
+/* prefs.py: Settings > Output option; In files: prefs.py:373; */
 "Ship loadout" = "Hajó felszerelése";
 
-/* prefs.py: Settings > Output option; In files: prefs.py:381; */
+/* prefs.py: Settings > Output option; In files: prefs.py:383; */
 "Automatically update on docking" = "Automatikusan frissit dokkolásnál";
 
-/* prefs.py: Settings > Output - Label for "where files are located"; In files: prefs.py:390; prefs.py:409; */
+/* prefs.py: Settings > Output - Label for "where files are located"; In files: prefs.py:392; prefs.py:411; */
 "File location" = "Fálj helye";
 
-/* prefs.py: macOS Preferences - files location selection button; In files: prefs.py:398; prefs.py:448; */
+/* prefs.py: macOS Preferences - files location selection button; In files: prefs.py:400; prefs.py:450; */
 "Change..." = "Módosítás...";
 
-/* prefs.py: NOT-macOS Settings - files location selection button; prefs.py: NOT-macOS Setting - files location selection button; In files: prefs.py:401; prefs.py:451; */
+/* prefs.py: NOT-macOS Settings - files location selection button; prefs.py: NOT-macOS Setting - files location selection button; In files: prefs.py:403; prefs.py:453; */
 "Browse..." = "Böngész";
 
-/* prefs.py: Label for 'Output' Settings/Preferences tab; In files: prefs.py:416; */
+/* prefs.py: Label for 'Output' Settings/Preferences tab; In files: prefs.py:418; */
 "Output" = "Kimenet";
 
-/* prefs.py: Settings > Configuration - Label for Journal files location; In files: prefs.py:442; prefs.py:457; */
+/* prefs.py: Settings > Configuration - Label for Journal files location; In files: prefs.py:444; prefs.py:459; */
 "E:D journal file location" = "E:D journal fájl helye";
 
-/* prefs.py: Hotkey/Shortcut settings prompt on OSX; In files: prefs.py:482; */
+/* prefs.py: Hotkey/Shortcut settings prompt on OSX; In files: prefs.py:484; */
 "Keyboard shortcut" = "Billentyűparancsok";
 
-/* prefs.py: Hotkey/Shortcut settings prompt on Windows; In files: prefs.py:484; */
+/* prefs.py: Hotkey/Shortcut settings prompt on Windows; In files: prefs.py:486; */
 "Hotkey" = "Gyorsgomb";
 
-/* prefs.py: macOS Preferences > Configuration - restart the app message; In files: prefs.py:493; */
+/* prefs.py: macOS Preferences > Configuration - restart the app message; In files: prefs.py:495; */
 "Re-start {APP} to use shortcuts" = "Újranidítás {APP} parancsikonok használatával";
 
-/* prefs.py: macOS - Configuration - need to grant the app permission for keyboard shortcuts; In files: prefs.py:502; */
+/* prefs.py: macOS - Configuration - need to grant the app permission for keyboard shortcuts; In files: prefs.py:504; */
 "{APP} needs permission to use shortcuts" = "{APP} engedély szükséges a parancsikon használatához";
 
-/* prefs.py: Shortcut settings button on OSX; In files: prefs.py:507; */
+/* prefs.py: Shortcut settings button on OSX; In files: prefs.py:509; */
 "Open System Preferences" = "Rendszerbeállítások megnyitáss";
 
-/* prefs.py: Configuration - Act on hotkey only when ED is in foreground; In files: prefs.py:529; */
+/* prefs.py: Configuration - Act on hotkey only when ED is in foreground; In files: prefs.py:531; */
 "Only when Elite: Dangerous is the active app" = "Csak ha az Elite Dangerous fut";
 
-/* prefs.py: Configuration - play sound when hotkey used; In files: prefs.py:540; */
+/* prefs.py: Configuration - play sound when hotkey used; In files: prefs.py:542; */
 "Play sound" = "Zene be";
 
-/* prefs.py: Label for preferred shipyard, system and station 'providers'; In files: prefs.py:568; */
+/* prefs.py: Label for preferred shipyard, system and station 'providers'; In files: prefs.py:570; */
 "Preferred websites" = "Preferált weboldalak";
 
-/* prefs.py: Label for Shipyard provider selection; In files: prefs.py:579; */
+/* prefs.py: Label for Shipyard provider selection; In files: prefs.py:581; */
 "Shipyard" = "Hajógyár";
 
-/* prefs.py: Label for 'Configuration' tab in Settings; In files: prefs.py:672; */
+/* prefs.py: Label for 'Configuration' tab in Settings; In files: prefs.py:674; */
 "Configuration" = "Konfiguráció";
 
-/* prefs.py: Label for Settings > Appeareance > selection of 'normal' text colour; In files: prefs.py:685; */
+/* prefs.py: Preferences privacy tab title; In files: prefs.py:696; */
+"Privacy" = "Titkosítás";
+
+/* prefs.py: Label for Settings > Appeareance > selection of 'normal' text colour; In files: prefs.py:709; */
 "Normal text" = "Normál txt";
 
-/* prefs.py: Label for Settings > Appeareance > selection of 'highlightes' text colour; In files: prefs.py:687; */
+/* prefs.py: Label for Settings > Appeareance > selection of 'highlightes' text colour; In files: prefs.py:711; */
 "Highlighted text" = "Kiemelt szöveg";
 
-/* prefs.py: Appearance - Label for selection of application display language; In files: prefs.py:696; */
+/* prefs.py: Appearance - Label for selection of application display language; In files: prefs.py:720; */
 "Language" = "Nyelv";
 
-/* prefs.py: Label for Settings > Appearance > Theme selection; In files: prefs.py:706; */
+/* prefs.py: Label for Settings > Appearance > Theme selection; In files: prefs.py:730; */
 "Theme" = "Téma";
 
-/* prefs.py: Label for 'Dark' theme radio button; In files: prefs.py:717; */
+/* prefs.py: Label for 'Dark' theme radio button; In files: prefs.py:741; */
 "Dark" = "Sötét";
 
-/* prefs.py: Label for 'Transparent' theme radio button; In files: prefs.py:724; */
+/* prefs.py: Label for 'Transparent' theme radio button; In files: prefs.py:748; */
 "Transparent" = "Átlárható";
 
-/* prefs.py: Label for Settings > Appearance tab; In files: prefs.py:860; */
+/* prefs.py: Label for Settings > Appearance tab; In files: prefs.py:885; */
 "Appearance" = "Megjelenés";
 
-/* prefs.py: Label for location of third-party plugins folder; In files: prefs.py:875; */
+/* prefs.py: Label for location of third-party plugins folder; In files: prefs.py:900; */
 "Plugins folder" = "Plugin mappa";
 
-/* prefs.py: Label on button used to open a filesystem folder; In files: prefs.py:882; */
+/* prefs.py: Label on button used to open a filesystem folder; In files: prefs.py:907; */
 "Open" = "Nyisd ki";
 
-/* prefs.py: Tip/label about how to disable plugins; In files: prefs.py:890; */
+/* prefs.py: Tip/label about how to disable plugins; In files: prefs.py:915; */
 "Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "Tipp:a pluginokat kikapcsolhatod hozzà{CR}adsz a mappa nevében egy '{EXT}'";
 
-/* prefs.py: Label on list of enabled plugins; In files: prefs.py:901; */
+/* prefs.py: Label on list of enabled plugins; In files: prefs.py:926; */
 "Enabled Plugins" = "Pluginok engedélyezése";
 
-/* prefs.py: Lable on list of user-disabled plugins; In files: prefs.py:944; */
+/* prefs.py: Lable on list of user-disabled plugins; In files: prefs.py:969; */
 "Disabled Plugins" = "Plugin kikapcsolása";
 
-/* stats.py: Cmdr stats; In files: stats.py:51; */
+/* stats.py: Cmdr stats; In files: stats.py:60; */
 "Balance" = "Egyenleg";
 
-/* stats.py: Cmdr stats; In files: stats.py:52; */
+/* stats.py: Cmdr stats; In files: stats.py:61; */
 "Loan" = "Kölcsön";
 
-/* stats.py: Ranking; In files: stats.py:57; */
-"Combat" = "Harc";
-
-/* stats.py: Ranking; In files: stats.py:58; */
-"Trade" = "Kereskedés";
-
-/* stats.py: Ranking; In files: stats.py:59; */
-"Explorer" = "Felfedező";
-
-/* stats.py: Ranking; In files: stats.py:60; */
-"CQC" = "CQC";
-
-/* stats.py: Ranking; In files: stats.py:61; */
-"Federation" = "Föderáció";
-
-/* stats.py: Ranking; In files: stats.py:62; */
-"Empire" = "Birodalom";
-
-/* stats.py: Ranking; In files: stats.py:63; */
-"Powerplay" = "Powerplay";
-
-/* stats.py: Combat rank; In files: stats.py:71; */
-"Harmless" = "ártalmatlan";
-
-/* stats.py: Combat rank; In files: stats.py:72; */
-"Mostly Harmless" = "Többnyire ártalmatlan";
-
-/* stats.py: Combat rank; In files: stats.py:73; */
-"Novice" = "Kezdő";
-
-/* stats.py: Combat rank; In files: stats.py:74; */
-"Competent" = "Képesített";
-
-/* stats.py: Combat rank; In files: stats.py:75; */
-"Expert" = "Szakértő";
-
-/* stats.py: Combat rank; stats.py: Empire rank; In files: stats.py:76; stats.py:139; */
-"Master" = "Mester";
-
-/* stats.py: Combat rank; In files: stats.py:77; */
-"Dangerous" = "Veszélyes";
-
-/* stats.py: Combat rank; In files: stats.py:78; */
-"Deadly" = "Halálos";
-
-/* stats.py: Top rank; In files: stats.py:79; stats.py:90; stats.py:101; stats.py:112; */
+/* stats.py: Top rank; In files: stats.py:65; */
 "Elite" = "Elit";
 
-/* stats.py: Trade rank; In files: stats.py:82; */
+/* stats.py: Ranking; In files: stats.py:76; */
+"Combat" = "Harc";
+
+/* stats.py: Ranking; In files: stats.py:77; */
+"Trade" = "Kereskedés";
+
+/* stats.py: Ranking; In files: stats.py:78; */
+"Explorer" = "Felfedező";
+
+/* stats.py: Ranking; In files: stats.py:81; */
+"CQC" = "CQC";
+
+/* stats.py: Ranking; In files: stats.py:82; */
+"Federation" = "Föderáció";
+
+/* stats.py: Ranking; In files: stats.py:83; */
+"Empire" = "Birodalom";
+
+/* stats.py: Ranking; In files: stats.py:84; */
+"Powerplay" = "Powerplay";
+
+/* stats.py: Combat rank; In files: stats.py:93; */
+"Harmless" = "ártalmatlan";
+
+/* stats.py: Combat rank; In files: stats.py:94; */
+"Mostly Harmless" = "Többnyire ártalmatlan";
+
+/* stats.py: Combat rank; In files: stats.py:95; */
+"Novice" = "Kezdő";
+
+/* stats.py: Combat rank; In files: stats.py:96; */
+"Competent" = "Képesített";
+
+/* stats.py: Combat rank; In files: stats.py:97; */
+"Expert" = "Szakértő";
+
+/* stats.py: Combat rank; stats.py: Empire rank; In files: stats.py:98; stats.py:178; */
+"Master" = "Mester";
+
+/* stats.py: Combat rank; In files: stats.py:99; */
+"Dangerous" = "Veszélyes";
+
+/* stats.py: Combat rank; In files: stats.py:100; */
+"Deadly" = "Halálos";
+
+/* stats.py: Trade rank; In files: stats.py:103; */
 "Penniless" = "Nincstelen";
 
-/* stats.py: Trade rank; In files: stats.py:83; */
+/* stats.py: Trade rank; In files: stats.py:104; */
 "Mostly Penniless" = "Többnyire nincstelen";
 
-/* stats.py: Trade rank; In files: stats.py:84; */
+/* stats.py: Trade rank; In files: stats.py:105; */
 "Peddler" = "Házaló ügynők";
 
-/* stats.py: Trade rank; In files: stats.py:85; */
+/* stats.py: Trade rank; In files: stats.py:106; */
 "Dealer" = "Kereskedő";
 
-/* stats.py: Trade rank; In files: stats.py:86; */
+/* stats.py: Trade rank; In files: stats.py:107; */
 "Merchant" = "Kereskedő";
 
-/* stats.py: Trade rank; In files: stats.py:87; */
+/* stats.py: Trade rank; In files: stats.py:108; */
 "Broker" = "Bróker";
 
-/* stats.py: Trade rank; In files: stats.py:88; */
+/* stats.py: Trade rank; In files: stats.py:109; */
 "Entrepreneur" = "Vállalkozó";
 
-/* stats.py: Trade rank; In files: stats.py:89; */
+/* stats.py: Trade rank; In files: stats.py:110; */
 "Tycoon" = "Iparmágnás";
 
-/* stats.py: Explorer rank; In files: stats.py:93; */
+/* stats.py: Explorer rank; In files: stats.py:113; */
 "Aimless" = "Céltalan";
 
-/* stats.py: Explorer rank; In files: stats.py:94; */
+/* stats.py: Explorer rank; In files: stats.py:114; */
 "Mostly Aimless" = "Tøbnyire céltalan";
 
-/* stats.py: Explorer rank; In files: stats.py:95; */
+/* stats.py: Explorer rank; In files: stats.py:115; */
 "Scout" = "Felderítő";
 
-/* stats.py: Explorer rank; In files: stats.py:96; */
+/* stats.py: Explorer rank; In files: stats.py:116; */
 "Surveyor" = "Megfigyelő";
 
-/* stats.py: Explorer rank; In files: stats.py:97; */
+/* stats.py: Explorer rank; In files: stats.py:117; */
 "Trailblazer" = "Útkereső";
 
-/* stats.py: Explorer rank; In files: stats.py:98; */
+/* stats.py: Explorer rank; In files: stats.py:118; */
 "Pathfinder" = "Útkereső";
 
-/* stats.py: Explorer rank; In files: stats.py:99; */
+/* stats.py: Explorer rank; In files: stats.py:119; */
 "Ranger" = "Vándor";
 
-/* stats.py: Explorer rank; In files: stats.py:100; */
+/* stats.py: Explorer rank; In files: stats.py:120; */
 "Pioneer" = "Utász";
 
-/* stats.py: CQC rank; In files: stats.py:104; */
+/* stats.py: CQC rank; In files: stats.py:144; */
 "Helpless" = "tehetetlen";
 
-/* stats.py: CQC rank; In files: stats.py:105; */
+/* stats.py: CQC rank; In files: stats.py:145; */
 "Mostly Helpless" = "Többnyire  tehetetlen";
 
-/* stats.py: CQC rank; In files: stats.py:106; */
+/* stats.py: CQC rank; In files: stats.py:146; */
 "Amateur" = "Amatőr";
 
-/* stats.py: CQC rank; In files: stats.py:107; */
+/* stats.py: CQC rank; In files: stats.py:147; */
 "Semi Professional" = "Fél profi";
 
-/* stats.py: CQC rank; In files: stats.py:108; */
+/* stats.py: CQC rank; In files: stats.py:148; */
 "Professional" = "Szakember";
 
-/* stats.py: CQC rank; In files: stats.py:109; */
+/* stats.py: CQC rank; In files: stats.py:149; */
 "Champion" = "Bajnok";
 
-/* stats.py: CQC rank; In files: stats.py:110; */
+/* stats.py: CQC rank; In files: stats.py:150; */
 "Hero" = "Hős";
 
-/* stats.py: CQC rank; In files: stats.py:111; */
+/* stats.py: CQC rank; In files: stats.py:151; */
 "Gladiator" = "Gladiátor";
 
-/* stats.py: Federation rank; In files: stats.py:118; */
+/* stats.py: Federation rank; In files: stats.py:157; */
 "Recruit" = "Újonc";
 
-/* stats.py: Federation rank; In files: stats.py:119; */
+/* stats.py: Federation rank; In files: stats.py:158; */
 "Cadet" = "Kadét";
 
-/* stats.py: Federation rank; In files: stats.py:120; */
+/* stats.py: Federation rank; In files: stats.py:159; */
 "Midshipman" = "Tengerészkadét";
 
-/* stats.py: Federation rank; In files: stats.py:121; */
+/* stats.py: Federation rank; In files: stats.py:160; */
 "Petty Officer" = "Tizedes";
 
-/* stats.py: Federation rank; In files: stats.py:122; */
+/* stats.py: Federation rank; In files: stats.py:161; */
 "Chief Petty Officer" = "Törzs zászlós";
 
-/* stats.py: Federation rank; In files: stats.py:123; */
+/* stats.py: Federation rank; In files: stats.py:162; */
 "Warrant Officer" = "Tiszthelyettes";
 
-/* stats.py: Federation rank; In files: stats.py:124; */
+/* stats.py: Federation rank; In files: stats.py:163; */
 "Ensign" = "Zászlós";
 
-/* stats.py: Federation rank; In files: stats.py:125; */
+/* stats.py: Federation rank; In files: stats.py:164; */
 "Lieutenant" = "Hadnagy";
 
-/* stats.py: Federation rank; In files: stats.py:126; */
+/* stats.py: Federation rank; In files: stats.py:165; */
 "Lieutenant Commander" = "Főhadnagy";
 
-/* stats.py: Federation rank; In files: stats.py:127; */
+/* stats.py: Federation rank; In files: stats.py:166; */
 "Post Commander" = "Ezredes";
 
-/* stats.py: Federation rank; In files: stats.py:128; */
+/* stats.py: Federation rank; In files: stats.py:167; */
 "Post Captain" = "Ellentengernagy";
 
-/* stats.py: Federation rank; In files: stats.py:129; */
+/* stats.py: Federation rank; In files: stats.py:168; */
 "Rear Admiral" = "FőEllentengernagy";
 
-/* stats.py: Federation rank; In files: stats.py:130; */
+/* stats.py: Federation rank; In files: stats.py:169; */
 "Vice Admiral" = "Altengernagy";
 
-/* stats.py: Federation rank; In files: stats.py:131; */
+/* stats.py: Federation rank; In files: stats.py:170; */
 "Admiral" = "Admirális";
 
-/* stats.py: Empire rank; In files: stats.py:137; */
+/* stats.py: Empire rank; In files: stats.py:176; */
 "Outsider" = "Kivűlálló";
 
-/* stats.py: Empire rank; In files: stats.py:138; */
+/* stats.py: Empire rank; In files: stats.py:177; */
 "Serf" = "Jobbágy";
 
-/* stats.py: Empire rank; In files: stats.py:140; */
+/* stats.py: Empire rank; In files: stats.py:179; */
 "Squire" = "Földesúr";
 
-/* stats.py: Empire rank; In files: stats.py:141; */
+/* stats.py: Empire rank; In files: stats.py:180; */
 "Knight" = "Lovag";
 
-/* stats.py: Empire rank; In files: stats.py:142; */
+/* stats.py: Empire rank; In files: stats.py:181; */
 "Lord" = "Lord";
 
-/* stats.py: Empire rank; In files: stats.py:143; */
+/* stats.py: Empire rank; In files: stats.py:182; */
 "Baron" = "Báró";
 
-/* stats.py: Empire rank; In files: stats.py:144; */
+/* stats.py: Empire rank; In files: stats.py:183; */
 "Viscount" = "Vicomte";
 
-/* stats.py: Empire rank; In files: stats.py:145; */
+/* stats.py: Empire rank; In files: stats.py:184; */
 "Count" = "Számol";
 
-/* stats.py: Empire rank; In files: stats.py:146; */
+/* stats.py: Empire rank; In files: stats.py:185; */
 "Earl" = "Gróf";
 
-/* stats.py: Empire rank; In files: stats.py:147; */
+/* stats.py: Empire rank; In files: stats.py:186; */
 "Marquis" = "Őrgróf";
 
-/* stats.py: Empire rank; In files: stats.py:148; */
+/* stats.py: Empire rank; In files: stats.py:187; */
 "Duke" = "Herceg";
 
-/* stats.py: Empire rank; In files: stats.py:149; */
+/* stats.py: Empire rank; In files: stats.py:188; */
 "Prince" = "Herceg";
 
-/* stats.py: Empire rank; In files: stats.py:150; */
+/* stats.py: Empire rank; In files: stats.py:189; */
 "King" = "Király";
 
-/* stats.py: Power rank; In files: stats.py:156; */
+/* stats.py: Power rank; In files: stats.py:195; */
 "Rating 1" = "Osztákgozás 1";
 
-/* stats.py: Power rank; In files: stats.py:157; */
+/* stats.py: Power rank; In files: stats.py:196; */
 "Rating 2" = "Osztályozás 2";
 
-/* stats.py: Power rank; In files: stats.py:158; */
+/* stats.py: Power rank; In files: stats.py:197; */
 "Rating 3" = "Osztályozás 3";
 
-/* stats.py: Power rank; In files: stats.py:159; */
+/* stats.py: Power rank; In files: stats.py:198; */
 "Rating 4" = "Osztályozás 4";
 
-/* stats.py: Power rank; In files: stats.py:160; */
+/* stats.py: Power rank; In files: stats.py:199; */
 "Rating 5" = "Osztályozás 5";
 
-/* stats.py: Status dialog subtitle - CR value of ship; In files: stats.py:367; */
+/* stats.py: Status dialog subtitle - CR value of ship; In files: stats.py:413; */
 "Value" = "Érték";
 
-/* stats.py: Status dialog title; In files: stats.py:376; */
+/* stats.py: Status dialog title; In files: stats.py:422; */
 "Ships" = "Hajók";

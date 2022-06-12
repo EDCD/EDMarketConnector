@@ -38,6 +38,8 @@ Please be sure to read the [Avoiding potential pitfalls](#avoiding-potential-pit
 section, else you might inadvertently cause issues for the core
 EDMarketConnector code including whole application crashes.
 
+## Being aware of core application changes
+
 It is highly advisable to ensure you are aware of all EDMarketConnector 
 releases, including the pre-releases.  The -beta and -rc changelogs will 
 contain valuable information about any forthcoming changes that affect plugins.
@@ -54,6 +56,11 @@ The easiest way is:
 
 And, of course, either ensure you check your GitHub messages regularly, or 
 have it set up to email you such notifications.
+
+You should also keep an eye on [our GitHub Discussions](https://github.com/EDCD/EDMarketConnector/discussions)
+in case there are any proposed changes to EDMC plugin functionality.  You can
+do this by ensuring 'Discussions' is also ticked when following the steps
+above to set up a 'Custom' watch on this repository.
 
 ---
 
@@ -86,9 +93,16 @@ from the original files unless specified as allowed in this section.
 
 `import plug` - For using `plug.show_error()` only.
 
-`from monitor import game_running` - in case a plugin needs to know if we
+ Use `monitor.game_running()` as follows in case a plugin needs to know if we
  think the game is running.  *NB: This is a function, and should be called as
  such.  Using the bare word `game_running` will always be `True`.*
+ 
+```
+from monitor import monitor
+...
+if monitor.game_running():
+  ...
+``` 
 
 `import timeout_session` - provides a method called `new_session` that creates
 a requests.session with a default timeout on all requests. Recommended to
@@ -326,7 +340,7 @@ should treat it as a variable.
 ```python
    from config import config
 
-    if config.shutting_down:
+    if config.shutting_down():
        # During shutdown
 ```
 
@@ -336,9 +350,9 @@ this context you're testing if the function exists, and that is always True.
 So instead use:
 
 ```python
-   from config import shutting_down
+   from config import config
 
-    if shutting_down:
+    if config.shutting_down:
         # During shutdown
 ```
 
@@ -659,13 +673,12 @@ New in version 5.0.1:
 `Odyssey` boolean based on the presence of such a flag in the `LoadGame` 
 event.  Defaults to `False`, i.e. if no such key in the event.
 
-The previously undocumented`Horizons` boolean is similarly from `LoadGame`, 
-but blindly retrieves the value rather than having a strict default.  There's
+The previously undocumented `Horizons` boolean is similarly from `LoadGame`, 
+but blindly retrieves the value rather than having a strict default.  There'd
 be an exception if it wasn't there, and the value would be `None`.  Note that
 this is **NOT** the same as the return from
-[plugins/eddn.py:is_horizons()](./plugins/eddn.py). That function is necessary
-because CAPI data doesn't (didn't always?) have an indication of Horizons or
-not.
+[plugins/eddn.py:capi_is_horizons()](./plugins/eddn.py). That function is
+necessary because CAPI data doesn't have a simple indication of Horizons-ness.
 
 New in version 5.0.3:
 
@@ -1008,9 +1021,19 @@ well as the `__pycache__` directory.
 
 ## Packaging extra modules
 EDMarketConnector's Windows installs only package a minimal set of modules.
-All of the 'stdlib' of Python is provided, plus any modules the core
-application code uses and a small number of additional modules for the
-use of plugins.  See
+
+Any modules the core application code uses will naturally be packaged, and
+we explicitly include a small number of additional modules for the use of
+plugins.
+
+Whilst we would like to make all of the `stdlib` of Python available it is 
+not automatically packaged into our releases by py2exe.  We hope to address 
+this in the 5.3 release series.  In the meantime, if there's anything 
+missing that you'd like to use, please ask.  Yes, this very much means you 
+need to test your plugins against a Windows installation of the application 
+to be sure it will work.
+
+See
 [Plugins:Available imports](https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#available-imports)
 for a list.
 

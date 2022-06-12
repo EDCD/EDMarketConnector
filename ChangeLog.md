@@ -9,11 +9,11 @@ produce the Windows executables and installer.
 
 ---
 
-* We now test against, and package with, Python 3.9.6.
+* We now test against, and package with, Python 3.10.4.
 
   **As a consequence of this we no longer support Windows 7.  
   This is due to
-  [Python 3.9.x itself not supporting Windows 7](https://www.python.org/downloads/windows/).
+  [Python 3.10.x itself not supporting Windows 7](https://www.python.org/downloads/windows/).
   The application (both EDMarketConnector.exe and EDMC.exe) will crash on
   startup due to a missing DLL.**
 
@@ -24,6 +24,531 @@ produce the Windows executables and installer.
   Developers can check the contents of the `.python-version` file
   in the source (it's not distributed with the Windows installer) for the
   currently used version in a given branch.
+
+---
+
+Release 5.4.0
+===
+
+* We now test against, and package with, Python 3.10.4.
+* New EDDN schema `fssbodysignals` is now supported.
+* Odyssey Update 12 will add `BodyID` to `CodexEntry` journal events, so don't
+  overwrite this with an augmentation if it is already present.  We've also
+  added the same for `BodyName` in case Frontier ever add that.
+* [Translations](https://github.com/EDCD/EDMarketConnector/issues/24) updated. 
+  Thanks again to all the contributors.
+
+Bug Fixes
+---
+* Cross-check the `MarketID` in CAPI data, not only the station name, to ensure
+  the data is for the correct station.  Closes [#1572](https://github.com/EDCD/EDMarketConnector/issues/1572).
+* Location cross-check paranoia added to several EDDN message types to ensure
+  no bad data is sent.
+* Ensure we don't send bad BodyID/Name for an orbital station if the player
+  uses a taxi.
+  Closes [#1522](https://github.com/EDCD/EDMarketConnector/issues/1522).
+
+Developers
+---
+* Odyssey Update 12 adds a new Journal event, and file, `FCMaterials.json`,
+  detailing the available trades at a Fleet Carrier's bar tender.  Support has
+  been added for this.  Plugin developers are sent an `FCMaterials` event
+  with the full contents of the file.
+
+EDMC.exe
+---
+This now uses specific exit codes in all cases, rather than a generic
+`EXIT_SYS_ERR` (6) for some cases.  See the appropriate line in EDMC.py for
+details.
+
+---
+
+Release 5.3.4
+===
+
+Whilst EDMarketConnector.exe was fixed for the Odyssey Update 11 difference in
+Journal file names, EDMC.exe was not.
+
+* Use the new common function for finding latest journal file in EDMC.py.
+* Quietens some NavRoute related logging for the benefit of EDMC.py.  This is
+  now at DEBUG level, rather than INFO.
+
+
+Release 5.3.3
+===
+
+Unfortunately 5.3.2 failed to fully address the issues caused by the different
+Journal filenames when using the Odyssey Update 11 client.  It's fine if you
+run EDMarketConnector first and *then* the game, as the code path that detects
+a new file always does just that.
+
+But the code for EDMarketConnector startup to find the current newest Journal
+file relied on sorting the filenames and that would mean the new-style names
+would always sort as 'oldest'.
+
+This release fixes that code to properly use the file modification timestamp
+to determine the newest file on startup.
+
+Release 5.3.2
+===
+
+This release contains one change to cope with how Frontier decided to name
+the Journal files differently in the Update 11 Odyssey client.
+
+Release 5.3.1
+===
+
+This release addresses some issues with newer EDDN code which could cause
+erroneous alerts to the player, or sending of bad messages.
+
+* EDDN: Cope with `ApproachSettlement` on login occurring before `Location`,
+    such that we don't yet know the name of the star system the player is in.
+
+    Closes [#1484](https://github.com/EDCD/EDMarketConnector/pull/1484)
+
+* EDDN: Cope with `ApproachSettlement` missing planetary coordinates on login
+    at/near a settlement in Horizons.
+
+    Closes [#1476](https://github.com/EDCD/EDMarketConnector/pull/1476)
+
+* EDDN: Change the `CodexEntry` "empty string" checks to only apply to those
+    values where the schema enforces "must be at least one character".
+
+    This prevents the big 'CodexEntry had empty string, PLEASE ALERT THE EDMC
+    DEVELOPERS' message from triggering on, e.g. `NearestDestination` being
+    empty, which the schema allows.
+
+    Closes [#1481](https://github.com/EDCD/EDMarketConnector/issues/1481)
+
+Plugin Developers
+---
+
+* If you use a sub-class for a widget the core code will no longer break if
+    your code raises an exception.  e.g. a plugin was failing due to Python
+    3.10 using `collections.abc` instead of `collections`, and the plugin's
+    custom widget had a `configure()` method which was called by the core
+    theme code on startup or theme change.  This then caused the whole
+    application UI to never show up on startup.
+
+    This also applies if you set up a button such that enter/leave on it, i.e.
+    mouse in/out, causes the `theme.py` code for that to trigger.
+
+    So, now in such cases the main UI should actually show up, although your
+    plugin's UI might look weird due to theming not being properly applied.
+
+    The plugin exception **WILL** be logged, at ERROR level.
+
+---
+
+Release 5.3.0
+===
+
+As has sadly become routine now, please read
+[our statement about malware false positives](https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting#installer-and-or-executables-flagged-as-malicious-viruses)
+affecting our installers and/or the files they contain.  We are as confident
+as we can be, without detailed auditing of python.org's releases and all
+the py2exe source and releases, that there is no malware in the files we make
+available.
+
+This release is primarily aimed at fixing some more egregious bugs,
+shortcomings and annoyances with the application.  It also adds support for
+two additional
+[EDDN](https://github.com/EDCD/EDDN/blob/live/README.md)
+schemas.
+
+* We now test and build using Python 3.10.2.  We do not *yet* make use of any
+    features specific to Python 3.10 (or 3.9).  Let us restate that we
+    absolutely reserve the right to commence doing so.
+
+* We now set a custom User-Agent header in all web requests, i.e. to EDDN,
+    EDSM and the like.  This is of the form:
+
+    `EDCD-EDMarketConnector-<version>`
+
+* "File" -> "Status" will now show the new Odyssey ranks, both the new
+    categories and the new 'prestige' ranks, e.g. 'Elite I'.
+
+    **NB: Due to an oversight there are currently no translations for these.**
+
+    Closes [#1369](https://github.com/EDCD/EDMarketConnector/issues/1369).
+
+* Running `EDMarketConnector.exe --reset-ui` will now also reset any changes to
+    the application "UI Scale" or geometry (position and size).
+
+    Closes [#1155](https://github.com/EDCD/EDMarketConnector/issues/1155).
+
+* We now use UTC-based timestamps in the application's log files.  Prior to
+    this change it was the "local time", but without any indication of the
+    applied timezone.  Each line's timestamp has ` UTC` as a suffix now.  We
+    are assuming that your local clock is correct *and* the timezone is set
+    correctly, such that Python's `time.gmtime()` yields UTC times.
+
+    This should make it easier to correlate application logfiles with in-game
+    time and/or third-party service timestamps.
+
+* The process used to build the Windows installers should now always pick up
+    all the necessary files automatically.  Prior to this we used a manual
+    process to update the installer configuration which was prone to both user
+    error and neglecting to update it as necessary.
+
+* If the application fails to load valid data from the `NavRoute.json` file
+    when processing a Journal `NavRoute` event, it will attempt to retry this
+    operation a number of times as it processes subsequent Journal events.
+
+    This should hopefully work around a race condition where the game might
+    not have yet updated `NavRoute.json` at all, or has truncated it to empty,
+    when we first attempt this.
+
+    We will also now *NOT* attempt to load `NavRoute.json` during the startup
+    'Journal catch-up' mode, which only sets internal state.
+
+    Closes [#1348](https://github.com/EDCD/EDMarketConnector/issues/1155).
+
+* Inara: Use the `<journal log>->Statistics->Bank_Account->Current_Wealth`
+    value when sending a `setCommanderCredits` message to Inara to set
+    `commanderAssets`.
+
+    In addition, a `setCommanderCredits` message at game login **will now only
+    ever be sent at game login**.  Yes, you will **NEED** to relog to send an
+    updated balance.  This is the only way in which to sanely keep the
+    'Total Assets' value on Inara from bouncing around.
+
+    Refer to [Inara:API:docs:setCommanderCredits](https://inara.cz/inara-api-docs/#event-1).
+
+    Closes [#1401](https://github.com/EDCD/EDMarketConnector/issues/1401).
+
+* Inara: Send a `setCommanderRankPilot` message when the player logs in to the
+    game on-foot.  Previously you would *HAVE* to be in a ship at login time
+    for this to be sent.
+
+    Thus, you can now relog on-foot in order to update Inara with any Rank up
+    or progress since the session started.
+
+    Closes [#1378](https://github.com/EDCD/EDMarketConnector/issues/1378).
+
+* Inara: Fix for always sending a Rank Progress of 0%.
+
+    Closes [#1378](https://github.com/EDCD/EDMarketConnector/issues/1378).
+
+* Inara: You should once more see updates for any materials used in
+    Engineering.  The bug was in our more general Journal event processing
+    code pertaining to `EngineerCraft` events, such that the state passed to
+    the Inara plugin hadn't been updated.
+
+    Such updates should happen 'immediately', but take into account that there
+    can be a delay of up to 35 seconds for any data sent to Inara, due to how
+    we avoid breaking the "2 messages a minute" limit on the Inara API.
+
+    Closes [#1395](https://github.com/EDCD/EDMarketConnector/issues/1395).
+
+* EDDN: Implement new [approachsettlement/1](https://github.com/EDCD/EDDN/blob/live/schemas/approachsettlement-README.md)
+    schema.
+
+* EDDN: Implement new [fssallbodiesfound/1](https://github.com/EDCD/EDDN/blob/live/schemas/fssallbodiesfound-README.md)
+    schema.
+
+* EDDN: We now compress all outgoing messages.  This might help get some
+    particularly large `navroute` messages go through.
+
+    If any message is now rejected as 'too large' we will drop it, and thus
+    not retry it later.  The application logs will reflect this.
+
+    NB: The EDDN Gateway was updated to allow messages up to 1 MiB in size
+    anyway.  The old limit was 100 KiB.
+
+    Closes [#1390](https://github.com/EDCD/EDMarketConnector/issues/1390).
+
+* EDDN: In an attempt to diagnose some errors observed on the EDDN Gateway
+    with respect to messages sent from this application some additional checks
+    and logging have been added.
+
+    **NB: After some thorough investigation it was concluded that these EDDN
+    errors were likely the result of long-delayed messages due to use of
+    the "Delay sending until docked" option.**
+
+    There should be no functional changes for users.  But if you see any of
+    the following in this application's log files **PLEASE OPEN
+    [AN ISSUE ON GITHUB](https://github.com/EDCD/EDMarketConnector/issues/new?assignees=&labels=bug%2C+unconfirmed&template=bug_report.md&title=)
+    with all the requested information**, so that we can correct the relevant
+    code:
+
+    - `No system name in entry, and system_name was not set either!  entry: ...`
+    - `BodyName was present but not a string! ...`
+    - `post-processing entry contains entry ...`
+    - `this.body_id was not set properly: ...`
+    - `system is falsey, can't add StarSystem`
+    - `this.coordinates is falsey, can't add StarPos`
+    - `this.systemaddress is falsey, can't add SystemAddress`
+    - `this.status_body_name was not set properly: ...`
+
+    You might also see any of the following in the application status text
+    (bottom of the window):
+
+    - `passed-in system_name is empty, can't add System`
+    - `CodexEntry had empty string, PLEASE ALERT THE EDMC DEVELOPERS`
+    - `system is falsey, can't add StarSystem`
+    - `this.coordinates is falsey, can't add StarPos`
+    - `this.systemaddress is falsey, can't add SystemAddress`
+
+    Ref: [#1403](https://github.com/EDCD/EDMarketConnector/issues/1403)
+    [#1393](https://github.com/EDCD/EDMarketConnector/issues/1393).
+
+Translations
+---
+
+* Use a different workaround for OneSky (translations website) using "zh-Hans"
+    for Chinese (Simplified), whereas Windows will call this "zh-CN". This is
+    in-code and documented with a comment, as opposed to some 'magic' in the
+    Windows Installer configuration that had no such documentation. It's less
+    fragile than relying on that, or developers using a script/documented
+    process to rename the file.
+
+* As noted above we forgot to upload to
+    [OneSky](https://marginal.oneskyapp.com/collaboration/project/52710)
+    after adding the Odyssey new ranks/categories.  This has now been done,
+    and some new phrases await translation.
+
+Plugin Developers
+---
+
+We now test against, and package with Python 3.10.2.
+
+* We've made no explicit changes to the Python stdlib, or other modules, we
+    currently offer, but we did have to start explicitly including
+    `asyncio` and `multiprocessing` due to using a newer version of `py2exe`
+    for the windows build.
+
+* We will now include in the Windows installer *all* of the files that `py2exe`
+    places in the build directory.  This is vulnerable to a later version of
+    our code, python and/or py2exe no longer causing inclusion of a module.
+
+    We have endeavoured to ensure this release contains *at least* all of the
+    same modules that 5.2.4 did.
+
+    We are looking into
+    [including all of Python stdlib](https://github.com/EDCD/EDMarketConnector/issues/1327),
+    but if there's a particular part of this we don't package then please ask
+    us to by opening an issue on GitHub.
+
+* We now have an `.editorconfig` file which will instruct your editor/IDE to
+    change some settings pertaining to things like indentation and line wrap,
+    assuming your editor/IDE supports the file.
+
+    See [Contributing.md->Text formatting](Contributing.md#text-formatting).
+
+* As noted above, prior to this version we weren't properly monitoring
+    `EngineerCraft` events.  This caused the `state` passed to plugins to not
+    contain the correct 'materials' (Raw, Manufactured, Encoded) counts.
+
+* `config.py` has been refactored into a sub-directory, with the per-OS code
+    split into separate files.  There *shouldn't* be any changes necessary to
+    how you utilise this, e.g. to determine the application version.
+
+    All forms of any `import` statement that worked before should have
+    unchanged functionality.
+
+* We now include [FDevIDS](https://github.com/EDCD/FDevIDs) as a
+    sub-repository, and use its files directly for keeping some game data up to
+    date.  This should hopefully mean we include, e.g. new ships and modules
+    for loadout exports in a more timely manner.
+
+    Developers of third-party plugins should never have been using these files
+    anyway, so this shouldn't break anything for them.
+
+* It's unlikely to affect you, but our `requirements-dev.txt` now explicitly
+    cites a specific version of `setuptools`.  This was necessary to ensure we
+    have a version that works with `py2exe` for the windows build process.
+
+    If anything this will ensure you have a *more up to date* version of
+    `setuptools` installed.
+
+---
+---
+
+Release 5.2.4
+===
+This is a *very* minor update that simply imports the latest versions of
+data files so that some niche functionality works properly.
+
+* Update `commodity.csv` and `rare_commodity.csv` from the latest
+  [EDCD/FDevIDs](https://github.com/EDCD/FDevIDs) versions.  This addresses
+  an issue with export of market data in Trade Dangerous format containing
+  `OnionHeadC` rather than the correct name, `Onionhead Gamma Strain`, that
+  Trade Dangerous is expecting.
+
+  This will only have affected Trade Dangerous users who use EDMarketConnector
+  as a source of market data.
+
+---
+
+Release 5.2.3
+===
+
+This release fixes one bug and fixes some example code.
+
+* Odyssey changed the order of some Journal events.  This caused our logic 
+  for tracking the following to break, and thus not report them ever to Inara:
+
+    - Ship Combat, Trade and Exploration ranks.
+    - On-foot Combat and Exobiologist ranks.
+    - Engineer unlocks and progress.
+    - Reputations with Major Factions (Superpowers).
+  
+  This is now fixed and the current state of all of these will be correctly 
+  reported to Inara if you have API access for it configured.
+
+Developers
+---
+
+* Now built using Python 3.9.9.
+
+* Updated [PLUGINS.md](https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#packaging-extra-modules)
+  to state that we don't actually include *all* of Python's standard library.
+
+* The [click_counter](https://github.com/EDCD/EDMarketConnector/tree/main/docs/examples/click_counter)
+  example plugin code has been corrected to both actually work fully, and pass
+  our linting.
+
+---
+
+Release 5.2.2
+===
+
+This release adds one new feature and addresses some bugs.  We've also 
+updated to using Python 3.9.8.
+
+* Windows now has "minimize to system tray" support.
+
+    - The system tray icon will always be present.
+    - There is a new option on the Settings > Appearance tab - 
+     `Minimize to system tray`.
+    - When this new option is active, minimizing the application will *also* 
+      hide the taskbar icon.
+    - When the new option is not active, the application will minimize to the 
+      taskbar as normal.
+
+Bug Fixex
+---
+
+* If a CAPI query failed in such a way that no `requests.Response` object 
+  was made available we attempted to blindly dump the non-existent object.  
+  We now check that it actually exists, and log the specifics of the exception.
+
+* A user experienced the game writing a NavRoute.json file without a 
+  `Route` array, which caused the application to attempt sending a badly formed
+  `navroute` message to EDDN.  That message was then remembered and constantly 
+  retried.
+
+    - We now sanity check the NavRoute.json contents to be sure there *is* a
+      `Route` array, even if it is empty.  If it's not present no attempt 
+      to send the EDDN message will be made.
+      
+      If this scenario occurs the user will see a status line message `No 
+      'Route' array in NavRoute.json contents`.
+
+    - For any EDDN message that receives a 400 status back we will drop it 
+      from the replay log.
+
+Release 5.2.1
+===
+
+This release primarily addresses the issue of the program asking for 
+Frontier authorization much too often.
+
+* Actually utilise the Frontier Refresh Token when the CAPI response is 
+  "Unauthorized".  The re-factoring of this code to make CAPI queries 
+  threaded inadvertently prevented this.
+
+Release 5.2.0
+===
+
+* The 'Update' button is disabled if CQC/Arena is detected.
+
+* Frontier CAPI queries now run in their own thread.  There should be no
+  change in functionality for users.   This affects both EDMarketConnector 
+  (GUI) and EDMC (command-line).
+
+* `File` > `Status` will now use cached CAPI data, rather than causing a fresh
+  query.  **Currently if data has not yet been cached nothing will happen when
+  trying to use this**.
+
+* Trying to use `File` > `Status` when the current commander is unknown, or
+  there is has been no CAPI data retrieval yet, will now result in the 'bad'
+  sound being played and an appropriate status line message.
+
+* `File` > `Save Raw Data` also now uses the cached CAPI data, rather than 
+  causing a fresh query.  This will write an empty JSON `{}` if no data is
+  yet available.
+ 
+* New [docs/Licenses/](docs/Licenses/) directory containing all relevant 
+  third-party licenses for the software this application uses.
+
+* `Settings` > `Output` > `File Location` 'Browse' button will now always be
+  available, even if no output options are active.
+
+* The 'no git installed' logging when running from source is now at INFO 
+  level, not ERROR.  This will look less scary.
+
+* EDMarketConnetor command-line arguments have been re-ordered into
+  logical groups for `--help` output.
+
+* Support added for several new EDDN schemas relating to specific Journal 
+  events.  The live EDDN server has been updated to support these.
+
+  Schema support added for:
+  - `codexentry/1`
+  - `fssdiscoveryscan/1`
+  - `navbeaconscan/1`
+  - `navroute/1`
+  - `scanbarycentre/1`
+
+* If a message to EDDN gets an 'unknown schema' response it will **NOT** be
+  saved in the replaylog for later retries, instead being discarded.
+
+Bug Fixes
+---
+
+* Pressing the 'Update' button when in space (not docked, not on a body
+  surface) will no longer cause a spurious "Docked but unknown station: EDO
+  Settlement?" message.
+
+* A bug preventing `--force-localserver-auth` from working has been fixed.
+  
+* `horizons` and `odyssey` flags should now always be set properly on *all*
+  EDDN messages.  The `horizons` flag was missing from some.
+
+Developers
+---
+
+* Now built using Python 3.9.7.
+
+* New `journal_entry_cqc()` function for plugins to receive journal events
+  *specifically and **only** when the player is in CQC/Arena*.  This allows 
+  for tracking things that happen in CQC/Arena without polluting 
+  `journal_entry()`.  See [PLUGINS.md](PLUGINS.md) for details.
+
+* Command-line argument `--trace-all` to force all possible `--trace-on` to be
+  active.
+
+* Contributing.md has been updated for how to properly use `trace_on()`.
+
+* EDMC.(py,exe) now also makes use of `--trace-on`.
+
+* EDMarketConnector now has `--capi-pretend-down` to act as if the CAPI
+  server is down.
+
+* Killswitches now have support for removing key/values entirely, or forcing
+  the value.  See [docs/Killswitches.md](docs/Killswitches.md) for details.
+
+* `state['Odyssey']` added, set from `LoadGame` journal event.
+
+* You can now test against a different EDDN server using `--eddn-url` 
+  command-line argument.  This needs to be the *full* 'upload' URL, i.e. for
+  the live instance this is `https://eddn.edcd.io:4430/upload/`.
+
+* New command-line argument `--eddn-tracking-ui` to track the EDDN plugin's
+  idea of the current BodyName and BodyID, from both the Journal and 
+  Status.json.
 
 ---
 

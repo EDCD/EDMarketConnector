@@ -1,164 +1,56 @@
 /* Language name */
 "!Language" = "Українська";
 
+/* eddn.py: Status text shown while attempting to send data; In files: eddn.py:212; eddn.py:584; eddn.py:925; load.py:215; load.py:593; load.py:940; eddn.py:252; eddn.py:699; eddn.py:1439; */
+"Sending data to EDDN..." = "Відправка даних до EDDN...";
 
-/* OLD: Raised when cannot contact the Companion API server. [companion.py] */
-"Error: Frontier server is down" = "Помилка, Сервер гри не доступний!";
-/* companion.py: Frontier CAPI data doesn't agree with latest Journal game location; In files: companion.py:190; */
-"Error: Frontier server is lagging" = "Помилка: З`єднання з сервером гри з затримками!";
+/* eddn.py: Error while trying to send data to EDDN; In files: eddn.py:257; eddn.py:864; eddn.py:898; eddn.py:937; load.py:260; load.py:878; load.py:913; load.py:952; eddn.py:316; eddn.py:1375; eddn.py:1410; eddn.py:1451; */
+"Error: Can't connect to EDDN" = "Помилка: Немає зв'язку з EDDN!";
 
-/* companion.py: Generic "something went wrong with Frontier Auth" error; In files: companion.py:214; */
-"Error: Invalid Credentials" = "Помилка: Невірні облікові дані!";
+/* eddn.py: Enable EDDN support for station data checkbox label; In files: eddn.py:663; load.py:672; eddn.py:1122; */
+"Send station data to the Elite Dangerous Data Network" = "Надсилати дані станцій до Elite Dangerous Data Network";
 
-/* companion.py: Frontier CAPI authorisation not for currently game-active commander; In files: companion.py:230; */
-"Error: Wrong Cmdr" = "Помилка! Не той обліковий запис!";
+/* eddn.py: Enable EDDN support for system and other scan data checkbox label; In files: eddn.py:673; load.py:682; eddn.py:1133; */
+"Send system and scan data to the Elite Dangerous Data Network" = "Відправляти систему і результати сканування в Elite Dangerous Data Network";
 
-/* companion.py: Generic error prefix - following text is from Frontier auth service; In files: companion.py:341; companion.py:422; */
-"Error" = "Помилка";
+/* eddn.py: EDDN delay sending until docked option is on, this message notes that a send was skipped due to this; In files: eddn.py:683; load.py:692; eddn.py:1144; */
+"Delay sending until docked" = "Відкласти відправку даних до стикування";
 
+/* edsm.py: Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:197; load.py:197; edsm.py:237; */
+"Send flight log and Cmdr status to EDSM" = "Відправляти дані бортового журналу до EDSM";
 
-/* [inara.py] */
-"Error: Can't connect to Inara" = "Помилка: Немає з'єднання з Inara";
-/* companion.py: Frontier auth, no 'usr' section in returned data; companion.py: Frontier auth, no 'customer_id' in 'usr' section in returned data; In files: companion.py:380; companion.py:385; */
-"Error: Couldn't check token customer_id" = "Помилка: Не вдалося перевірити токен customer_id";
+/* edsm.py: Settings>EDSM - Label on header/URL to EDSM API key page; In files: edsm.py:206; load.py:206; edsm.py:247; */
+"Elite Dangerous Star Map credentials" = "Дані Elite Dangerous Star Map";
 
-/* companion.py: Frontier auth customer_id doesn't match game session FID; In files: companion.py:391; */
-"Error: customer_id doesn't match!" = "Error: customer_id не співпадає!";
-
-/* companion.py: Failed to get Access Token from Frontier Auth service; In files: companion.py:413; */
-"Error: unable to get token" = "Помилка: не вдалося отримати токен";
-
-/* EDMarketConnector.py: Update button in main window; In files: EDMarketConnector.py:424; EDMarketConnector.py:718; EDMarketConnector.py:1302; */
-"Update" = "Оновлення";
-
-/* EDMarketConnector.py: Appearance - Label for checkbox to select if application always on top; prefs.py: Appearance - Label for checkbox to select if application always on top; In files: EDMarketConnector.py:507; prefs.py:843; */
-"Always on top" = "Поверх інших вікон";
-
-/* EDMarketConnector.py: Unknown suit; In files: EDMarketConnector.py:636; */
-"Unknown" = "Невідомо";
-
-/* EDMarketConnector.py: Label for commander name in main window; edsm.py: Game Commander name label in EDSM settings; stats.py: Cmdr stats; theme.py: Label for commander name in main window; In files: EDMarketConnector.py:712; edsm.py:219; stats.py:50; theme.py:227; */
+/* edsm.py: Game Commander name label in EDSM settings; theme.py: Label for commander name in main window; EDMarketConnector.py: Label for commander name in main window; stats.py: Cmdr stats; In files: edsm.py:216; load.py:216; edsm.py:258; theme.py:227; EDMarketConnector.py:822; stats.py:59; */
 "Cmdr" = "Км-др";
 
-/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: Multicrew role label in main window; In files: EDMarketConnector.py:714; EDMarketConnector.py:1072; */
-"Role" = "Посада";
+/* edsm.py: EDSM Commander name label in EDSM settings; In files: edsm.py:223; load.py:223; edsm.py:266; */
+"Commander Name" = "Ім`я пілота";
 
-/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: 'Ship' label in main UI; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:714; EDMarketConnector.py:1082; EDMarketConnector.py:1105; stats.py:363; */
-"Ship" = "Корабель";
+/* edsm.py: EDSM API key label; inara.py: Inara API key label; In files: edsm.py:230; inara.py:233; load.py:230; load.py:233; edsm.py:274; inara.py:243; */
+"API Key" = "API Ключ";
 
-/* EDMarketConnector.py: Label for 'Suit' line in main UI; In files: EDMarketConnector.py:715; */
-"Suit" = "Костюм";
+/* edsm.py: We have no data on the current commander; prefs.py: No hotkey/shortcut set; stats.py: No rank; In files: edsm.py:256; load.py:256; edsm.py:301; prefs.py:520; prefs.py:1174; prefs.py:1207; stats.py:156; stats.py:175; stats.py:194; stats.py:211; */
+"None" = "Нічого";
 
-/* EDMarketConnector.py: Label for 'System' line in main UI; prefs.py: Configuration - Label for selection of 'System' provider website; stats.py: Main window; In files: EDMarketConnector.py:716; prefs.py:605; stats.py:365; */
-"System" = "Система";
+/* edsm.py: EDSM Plugin - Error message from EDSM API; In files: edsm.py:622; edsm.py:724; load.py:627; load.py:729; edsm.py:747; edsm.py:875; */
+"Error: EDSM {MSG}" = "Помилка: EDSM {MSG}!";
 
-/* EDMarketConnector.py: Label for 'Station' line in main UI; prefs.py: Configuration - Label for selection of 'Station' provider website; prefs.py: Appearance - Example 'Normal' text; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:717; prefs.py:623; prefs.py:738; stats.py:366; */
-"Station" = "Станція";
+/* edsm.py: EDSM Plugin - Error connecting to EDSM API; In files: edsm.py:658; edsm.py:720; load.py:663; load.py:725; edsm.py:784; edsm.py:870; */
+"Error: Can't connect to EDSM" = "Помилка: Немає з`єднання з EDSM!";
 
-/* EDMarketConnector.py: 'File' menu title on OSX; EDMarketConnector.py: 'File' menu title; EDMarketConnector.py: 'File' menu; In files: EDMarketConnector.py:720; EDMarketConnector.py:735; EDMarketConnector.py:738; EDMarketConnector.py:1791; */
-"File" = "Файл";
+/* inara.py: Checkbox to enable INARA API Usage; In files: inara.py:215; load.py:215; inara.py:222; */
+"Send flight log and Cmdr status to Inara" = "Відправляти дані бортового журналу до Inara";
 
-/* EDMarketConnector.py: 'Edit' menu title on OSX; EDMarketConnector.py: 'Edit' menu title; In files: EDMarketConnector.py:721; EDMarketConnector.py:736; EDMarketConnector.py:739; */
-"Edit" = "Редагувати";
+/* inara.py: Text for INARA API keys link ( goes to https://inara.cz/settings-api ); In files: inara.py:225; load.py:225; inara.py:234; */
+"Inara credentials" = "Обліковий запис Inara";
 
-/* EDMarketConnector.py: 'View' menu title on OSX; In files: EDMarketConnector.py:722; */
-"View" = "Вид";
+/* inara.py: INARA API returned some kind of error (error message will be contained in {MSG}); In files: inara.py:1316; inara.py:1328; load.py:1319; load.py:1331; inara.py:1587; inara.py:1600; */
+"Error: Inara {MSG}" = "Помилка: Inara {MSG}";
 
-/* EDMarketConnector.py: 'Window' menu title on OSX; In files: EDMarketConnector.py:723; */
-"Window" = "Вікно";
-
-/* EDMarketConnector.py: Help' menu title on OSX; EDMarketConnector.py: 'Help' menu title; In files: EDMarketConnector.py:724; EDMarketConnector.py:737; EDMarketConnector.py:740; */
-"Help" = "Довідка";
-
-/* EDMarketConnector.py: App menu entry on OSX; EDMarketConnector.py: Help > About App; In files: EDMarketConnector.py:727; EDMarketConnector.py:753; EDMarketConnector.py:1347; */
-"About {APP}" = "Про {APP}";
-
-/* EDMarketConnector.py: Help > Check for Updates...; In files: EDMarketConnector.py:729; EDMarketConnector.py:752; */
-"Check for Updates..." = "Перевірка оновлень...";
-
-/* EDMarketConnector.py: File > Save Raw Data...; In files: EDMarketConnector.py:730; EDMarketConnector.py:744; */
-"Save Raw Data..." = "Зберегти необроблені дані...";
-
-/* EDMarketConnector.py: File > Status; stats.py: Status dialog title; In files: EDMarketConnector.py:731; EDMarketConnector.py:743; stats.py:360; */
-"Status" = "Статус";
-
-/* EDMarketConnector.py: Help > Privacy Policy; In files: EDMarketConnector.py:732; EDMarketConnector.py:750; */
-"Privacy Policy" = "Політика конфіденційності";
-
-/* EDMarketConnector.py: Help > Release Notes; In files: EDMarketConnector.py:733; EDMarketConnector.py:751; EDMarketConnector.py:1381; */
-"Release Notes" = "Інформація про реліз";
-
-/* EDMarketConnector.py: File > Settings; prefs.py: File > Settings (macOS); In files: EDMarketConnector.py:745; EDMarketConnector.py:1792; prefs.py:254; */
-"Settings" = "Налаштування";
-
-/* EDMarketConnector.py: File > Exit; In files: EDMarketConnector.py:746; */
-"Exit" = "Вихід";
-
-/* EDMarketConnector.py: Help > Documentation; In files: EDMarketConnector.py:749; */
-"Documentation" = "Документація";
-
-/* EDMarketConnector.py: Label for 'Copy' as in 'Copy and Paste'; ttkHyperlinkLabel.py: Label for 'Copy' as in 'Copy and Paste'; In files: EDMarketConnector.py:756; ttkHyperlinkLabel.py:42; */
-"Copy" = "Копіювати";
-
-/* EDMarketConnector.py: Status - Attempting to get a Frontier Auth Access Token; In files: EDMarketConnector.py:762; */
-"Logging in..." = "Вхід в...";
-
-/* EDMarketConnector.py: Successfully authenticated with the Frontier website; In files: EDMarketConnector.py:778; EDMarketConnector.py:1215; */
-"Authentication successful" = "Автентифікацію пройдено успішно";
-
-/* EDMarketConnector.py: Player is not docked at a station, when we expect them to be; In files: EDMarketConnector.py:809; */
-"You're not docked at a station!" = "Ви не стиковані з станцією!";
-
-/* EDMarketConnector.py: Status - Either no market or no modules data for station from Frontier CAPI; In files: EDMarketConnector.py:817; */
-"Station doesn't have anything!" = "На станції немає нічого!";
-
-/* EDMarketConnector.py: Status - No station market data from Frontier CAPI; In files: EDMarketConnector.py:822; */
-"Station doesn't have a market!" = "На станції немає ринку!";
-
-/* EDMarketConnector.py: Status - Attempting to retrieve data from Frontier CAPI; EDMarketConnector.py: Status - Attempting to retrieve data from Frontier CAPI to save to file; stats.py: Fetching data from Frontier CAPI in order to display on File > Status; In files: EDMarketConnector.py:867; EDMarketConnector.py:1428; stats.py:279; */
-"Fetching data..." = "Отримання даних...";
-
-/* EDMarketConnector.py: No data was returned for the commander from the Frontier CAPI; In files: EDMarketConnector.py:880; */
+/* EDMarketConnector.py: No data was returned for the commander from the Frontier CAPI; In files: test_ast_stuff.py:2; EDMarketConnector.py:1047; */
 "CAPI: No commander data returned" = "CAPI: Не отримано данних пілота";
-
-/* EDMarketConnector.py: We didn't have the commander name when we should have; stats.py: Unknown commander; In files: EDMarketConnector.py:884; stats.py:297; */
-"Who are you?!" = "Хто ти?!";
-
-/* EDMarketConnector.py: We don't know where the commander is, when we should; stats.py: Unknown location; In files: EDMarketConnector.py:890; stats.py:307; */
-"Where are you?!" = "Де ми?!";
-
-/* EDMarketConnector.py: We don't know what ship the commander is in, when we should; stats.py: Unknown ship; In files: EDMarketConnector.py:894; stats.py:312; */
-"What are you flying?!" = "На чому летимо?!";
-
-/* EDMarketConnector.py: Time when we last obtained Frontier CAPI data; In files: EDMarketConnector.py:1026; */
-"Last updated at %H:%M:%S" = "Останнє оновлення було %H:%M:%S";
-
-/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1052; */
-"Fighter" = "Винищувач";
-
-/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1053; */
-"Gunner" = "Стрілець";
-
-/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1054; */
-"Helm" = "Керівник";
-
-/* EDMarketConnector.py: Cooldown on 'Update' button; In files: EDMarketConnector.py:1298; */
-"cooldown {SS}s" = "очікування {SS} сек";
-
-/* EDMarketConnector.py: Generic 'OK' button label; prefs.py: 'OK' button on Settings/Preferences window; In files: EDMarketConnector.py:1407; prefs.py:304; */
-"OK" = "Згода";
-
-/* EDMarketConnector.py: The application is shutting down; In files: EDMarketConnector.py:1489; */
-"Shutting down..." = "Закриття...";
-
-/* EDMarketConnector.py: Popup-text about 'active' plugins without Python 3.x support; In files: EDMarketConnector.py:1780:1786; */
-"One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "Один або кілька увімкнених плагінів ще не підтримують Python 3.x. Перегляньте список на вкладці '{PLUGINS}'  в '{FILE}' > '{SETTINGS}'. Ви повинні перевірити, чи є в наявності оновлена ​​версія, інакше повідомити розробника плагіну про те, що їм потрібно оновити код для Python 3.x.\n\nВи можете відключити плагін, перейменувавши його папку додавши '{DISABLED}' в кінці назви.";
-
-/* EDMarketConnector.py: Settings > Plugins tab; prefs.py: Label on Settings > Plugins tab; In files: EDMarketConnector.py:1790; prefs.py:953; */
-"Plugins" = "Плагіни";
-
-/* EDMarketConnector.py: Popup window title for list of 'enabled' plugins that don't work with Python 3.x; In files: EDMarketConnector.py:1801; */
-"EDMC: Plugins Without Python 3.x Support" = "EDMC: Плагіни без підтримки Python 3.x!";
 
 /* journal_lock.py: Title text on popup when Journal directory already locked; In files: journal_lock.py:206; */
 "Journal directory already locked" = "Каталог журналу вже заблокований";
@@ -172,410 +64,512 @@
 /* journal_lock.py: Generic 'Ignore' button label; In files: journal_lock.py:232; */
 "Ignore" = "Ігнорувати";
 
-/* l10n.py: The system default language choice in Settings > Appearance; prefs.py: Settings > Configuration - Label on 'reset journal files location to default' button; prefs.py: The system default language choice in Settings > Appearance; prefs.py: Label for 'Default' theme radio button; In files: l10n.py:194; prefs.py:466; prefs.py:678; prefs.py:711; */
+/* ttkHyperlinkLabel.py: Label for 'Copy' as in 'Copy and Paste'; EDMarketConnector.py: Label for 'Copy' as in 'Copy and Paste'; In files: ttkHyperlinkLabel.py:42; EDMarketConnector.py:866; */
+"Copy" = "Копіювати";
+
+/* EDMarketConnector.py: Update button in main window; In files: EDMarketConnector.py:529; EDMarketConnector.py:828; EDMarketConnector.py:1520; */
+"Update" = "Оновлення";
+
+/* EDMarketConnector.py: Appearance - Label for checkbox to select if application always on top; prefs.py: Appearance - Label for checkbox to select if application always on top; In files: EDMarketConnector.py:612; prefs.py:867; */
+"Always on top" = "Поверх інших вікон";
+
+/* EDMarketConnector.py: Unknown suit; In files: EDMarketConnector.py:746; */
+"Unknown" = "Невідомо";
+
+/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: Multicrew role label in main window; In files: EDMarketConnector.py:824; EDMarketConnector.py:1279; */
+"Role" = "Посада";
+
+/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: 'Ship' label in main UI; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:824; EDMarketConnector.py:1289; EDMarketConnector.py:1312; stats.py:409; */
+"Ship" = "Корабель";
+
+/* EDMarketConnector.py: Label for 'Suit' line in main UI; In files: EDMarketConnector.py:825; */
+"Suit" = "Костюм";
+
+/* EDMarketConnector.py: Label for 'System' line in main UI; prefs.py: Configuration - Label for selection of 'System' provider website; stats.py: Main window; In files: EDMarketConnector.py:826; prefs.py:607; stats.py:411; */
+"System" = "Система";
+
+/* EDMarketConnector.py: Label for 'Station' line in main UI; prefs.py: Configuration - Label for selection of 'Station' provider website; prefs.py: Appearance - Example 'Normal' text; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:827; prefs.py:625; prefs.py:762; stats.py:412; */
+"Station" = "Станція";
+
+/* EDMarketConnector.py: 'File' menu title on OSX; EDMarketConnector.py: 'File' menu title; EDMarketConnector.py: 'File' menu; In files: EDMarketConnector.py:830; EDMarketConnector.py:845; EDMarketConnector.py:848; EDMarketConnector.py:2019; */
+"File" = "Файл";
+
+/* EDMarketConnector.py: 'Edit' menu title on OSX; EDMarketConnector.py: 'Edit' menu title; In files: EDMarketConnector.py:831; EDMarketConnector.py:846; EDMarketConnector.py:849; */
+"Edit" = "Редагувати";
+
+/* EDMarketConnector.py: 'View' menu title on OSX; In files: EDMarketConnector.py:832; */
+"View" = "Вид";
+
+/* EDMarketConnector.py: 'Window' menu title on OSX; In files: EDMarketConnector.py:833; */
+"Window" = "Вікно";
+
+/* EDMarketConnector.py: Help' menu title on OSX; EDMarketConnector.py: 'Help' menu title; In files: EDMarketConnector.py:834; EDMarketConnector.py:847; EDMarketConnector.py:850; */
+"Help" = "Довідка";
+
+/* EDMarketConnector.py: App menu entry on OSX; EDMarketConnector.py: Help > About App; In files: EDMarketConnector.py:837; EDMarketConnector.py:863; EDMarketConnector.py:1566; */
+"About {APP}" = "Про {APP}";
+
+/* EDMarketConnector.py: Help > Check for Updates...; In files: EDMarketConnector.py:839; EDMarketConnector.py:862; */
+"Check for Updates..." = "Перевірка оновлень...";
+
+/* EDMarketConnector.py: File > Save Raw Data...; In files: EDMarketConnector.py:840; EDMarketConnector.py:854; */
+"Save Raw Data..." = "Зберегти необроблені дані...";
+
+/* EDMarketConnector.py: File > Status; stats.py: Status dialog title; In files: EDMarketConnector.py:841; EDMarketConnector.py:853; stats.py:406; */
+"Status" = "Статус";
+
+/* EDMarketConnector.py: Help > Privacy Policy; In files: EDMarketConnector.py:842; EDMarketConnector.py:860; */
+"Privacy Policy" = "Політика конфіденційності";
+
+/* EDMarketConnector.py: Help > Release Notes; In files: EDMarketConnector.py:843; EDMarketConnector.py:861; EDMarketConnector.py:1600; */
+"Release Notes" = "Інформація про реліз";
+
+/* EDMarketConnector.py: File > Settings; prefs.py: File > Settings (macOS); In files: EDMarketConnector.py:855; EDMarketConnector.py:2020; prefs.py:255; */
+"Settings" = "Налаштування";
+
+/* EDMarketConnector.py: File > Exit; In files: EDMarketConnector.py:856; */
+"Exit" = "Вихід";
+
+/* EDMarketConnector.py: Help > Documentation; In files: EDMarketConnector.py:859; */
+"Documentation" = "Документація";
+
+/* EDMarketConnector.py: Status - Attempting to get a Frontier Auth Access Token; In files: EDMarketConnector.py:872; */
+"Logging in..." = "Вхід в...";
+
+/* EDMarketConnector.py: Successfully authenticated with the Frontier website; In files: EDMarketConnector.py:888; EDMarketConnector.py:1431; */
+"Authentication successful" = "Автентифікацію пройдено успішно";
+
+/* EDMarketConnector.py: Player is not docked at a station, when we expect them to be; In files: EDMarketConnector.py:919; */
+"You're not docked at a station!" = "Ви не стиковані з станцією!";
+
+/* EDMarketConnector.py: Status - Either no market or no modules data for station from Frontier CAPI; In files: EDMarketConnector.py:927; */
+"Station doesn't have anything!" = "На станції немає нічого!";
+
+/* EDMarketConnector.py: Status - No station market data from Frontier CAPI; In files: EDMarketConnector.py:932; */
+"Station doesn't have a market!" = "На станції немає ринку!";
+
+/* EDMarketConnector.py: Status - Attempting to retrieve data from Frontier CAPI; In files: EDMarketConnector.py:1006; */
+"Fetching data..." = "Отримання даних...";
+
+/* EDMarketConnector.py: We didn't have the commander name when we should have; stats.py: Unknown commander; In files: EDMarketConnector.py:1051; stats.py:335; */
+"Who are you?!" = "Хто ти?!";
+
+/* EDMarketConnector.py: We don't know where the commander is, when we should; stats.py: Unknown location; In files: EDMarketConnector.py:1057; stats.py:345; */
+"Where are you?!" = "Де ми?!";
+
+/* EDMarketConnector.py: We don't know what ship the commander is in, when we should; stats.py: Unknown ship; In files: EDMarketConnector.py:1064; stats.py:353; */
+"What are you flying?!" = "На чому летимо?!";
+
+/* EDMarketConnector.py: Time when we last obtained Frontier CAPI data; In files: EDMarketConnector.py:1226; */
+"Last updated at %H:%M:%S" = "Останнє оновлення було %H:%M:%S";
+
+/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1254; */
+"Fighter" = "Винищувач";
+
+/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1255; */
+"Gunner" = "Стрілець";
+
+/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1256; */
+"Helm" = "Керівник";
+
+/* EDMarketConnector.py: Cooldown on 'Update' button; In files: EDMarketConnector.py:1514; */
+"cooldown {SS}s" = "очікування {SS} сек";
+
+/* EDMarketConnector.py: Generic 'OK' button label; prefs.py: 'OK' button on Settings/Preferences window; In files: EDMarketConnector.py:1626; prefs.py:306; */
+"OK" = "Згода";
+
+/* EDMarketConnector.py: The application is shutting down; In files: EDMarketConnector.py:1693; */
+"Shutting down..." = "Закриття...";
+
+/* EDMarketConnector.py: Popup-text about 'active' plugins without Python 3.x support; In files: EDMarketConnector.py:2008:2014; */
+"One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "Один або кілька увімкнених плагінів ще не підтримують Python 3.x. Перегляньте список на вкладці '{PLUGINS}'  в '{FILE}' > '{SETTINGS}'. Ви повинні перевірити, чи є в наявності оновлена ​​версія, інакше повідомити розробника плагіну про те, що їм потрібно оновити код для Python 3.x.\n\nВи можете відключити плагін, перейменувавши його папку додавши '{DISABLED}' в кінці назви.";
+
+/* EDMarketConnector.py: Settings > Plugins tab; prefs.py: Label on Settings > Plugins tab; In files: EDMarketConnector.py:2018; prefs.py:978; */
+"Plugins" = "Плагіни";
+
+/* EDMarketConnector.py: Popup window title for list of 'enabled' plugins that don't work with Python 3.x; In files: EDMarketConnector.py:2029; */
+"EDMC: Plugins Without Python 3.x Support" = "EDMC: Плагіни без підтримки Python 3.x!";
+
+/* companion.py: Frontier CAPI data doesn't agree with latest Journal game location; In files: companion.py:237; */
+"Error: Frontier server is lagging" = "Помилка: З`єднання з сервером гри з затримками!";
+
+/* companion.py: Generic "something went wrong with Frontier Auth" error; In files: companion.py:263; */
+"Error: Invalid Credentials" = "Помилка: Невірні облікові дані!";
+
+/* companion.py: Frontier CAPI authorisation not for currently game-active commander; In files: companion.py:288; */
+"Error: Wrong Cmdr" = "Помилка! Не той обліковий запис!";
+
+/* companion.py: Generic error prefix - following text is from Frontier auth service; In files: companion.py:414; companion.py:499; */
+"Error" = "Помилка";
+
+/* companion.py: Frontier auth, no 'usr' section in returned data; companion.py: Frontier auth, no 'customer_id' in 'usr' section in returned data; In files: companion.py:457; companion.py:462; */
+"Error: Couldn't check token customer_id" = "Помилка: Не вдалося перевірити токен customer_id";
+
+/* companion.py: Frontier auth customer_id doesn't match game session FID; In files: companion.py:468; */
+"Error: customer_id doesn't match!" = "Error: customer_id не співпадає!";
+
+/* companion.py: Failed to get Access Token from Frontier Auth service; In files: companion.py:490; */
+"Error: unable to get token" = "Помилка: не вдалося отримати токен";
+
+/* l10n.py: The system default language choice in Settings > Appearance; prefs.py: Settings > Configuration - Label on 'reset journal files location to default' button; prefs.py: The system default language choice in Settings > Appearance; prefs.py: Label for 'Default' theme radio button; In files: l10n.py:194; prefs.py:468; prefs.py:702; prefs.py:735; */
 "Default" = "Стандартне налаштування";
 
-/* eddn.py: Status text shown while attempting to send data; In files: eddn.py:215; eddn.py:619; eddn.py:969; */
-"Sending data to EDDN..." = "Відправка даних до EDDN...";
-
-/* eddn.py: Error while trying to send data to EDDN; In files: eddn.py:264; eddn.py:907; eddn.py:942; eddn.py:981; */
-"Error: Can't connect to EDDN" = "Помилка: Немає зв'язку з EDDN!";
-
-/* eddn.py: Enable EDDN support for station data checkbox label; In files: eddn.py:699; */
-"Send station data to the Elite Dangerous Data Network" = "Надсилати дані станцій до Elite Dangerous Data Network";
-
-/* eddn.py: Enable EDDN support for system and other scan data checkbox label; In files: eddn.py:710; */
-"Send system and scan data to the Elite Dangerous Data Network" = "Відправляти систему і результати сканування в Elite Dangerous Data Network";
-
-/* eddn.py: EDDN delay sending until docked option is on, this message notes that a send was skipped due to this; In files: eddn.py:721; */
-"Delay sending until docked" = "Відкласти відправку даних до стикування";
-
-/* edsm.py: Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:198; */
-"Send flight log and Cmdr status to EDSM" = "Відправляти дані бортового журналу до EDSM";
-
-/* edsm.py: Settings>EDSM - Label on header/URL to EDSM API key page; In files: edsm.py:208; */
-"Elite Dangerous Star Map credentials" = "Дані Elite Dangerous Star Map";
-
-/* edsm.py: EDSM Commander name label in EDSM settings; In files: edsm.py:227; */
-"Commander Name" = "Ім`я пілота";
-
-/* edsm.py: EDSM API key label; inara.py: Inara API key label; In files: edsm.py:235; inara.py:237; */
-"API Key" = "API Ключ";
-
-/* edsm.py: We have no data on the current commander; prefs.py: No hotkey/shortcut set; stats.py: No rank; In files: edsm.py:262; prefs.py:518; prefs.py:1156; prefs.py:1189; stats.py:117; stats.py:136; stats.py:155; stats.py:172; */
-"None" = "Нічого";
-
-/* edsm.py: EDSM Plugin - Error message from EDSM API; In files: edsm.py:640; edsm.py:745; */
-"Error: EDSM {MSG}" = "Помилка: EDSM {MSG}!";
-
-/* edsm.py: EDSM Plugin - Error connecting to EDSM API; In files: edsm.py:677; edsm.py:740; */
-"Error: Can't connect to EDSM" = "Помилка: Немає з`єднання з EDSM!";
-
-/* inara.py: Checkbox to enable INARA API Usage; In files: inara.py:216; */
-"Send flight log and Cmdr status to Inara" = "Відправляти дані бортового журналу до Inara";
-
-/* inara.py: Text for INARA API keys link ( goes to https://inara.cz/settings-api ); In files: inara.py:228; */
-"Inara credentials" = "Обліковий запис Inara";
-
-
-/* Raised when the Companion API server thinks that the user has not purchased E:D. i.e. doesn't have the correct 'SKU'. [companion.py] */
-"Error: Frontier server SKU problem" = "Помилка! Проблема SKU сервера Frontier";
-/* inara.py: INARA API returned some kind of error (error message will be contained in {MSG}); In files: inara.py:1549; inara.py:1562; */
-"Error: Inara {MSG}" = "Помилка: Inara {MSG}";
-
-/* prefs.py: File > Preferences menu entry for macOS; In files: prefs.py:250; */
+/* prefs.py: File > Preferences menu entry for macOS; In files: prefs.py:251; */
 "Preferences" = "Уподобання";
 
-/* prefs.py: Settings > Output - choosing what data to save to files; In files: prefs.py:346; */
+/* prefs.py: Settings > Output - choosing what data to save to files; In files: prefs.py:348; */
 "Please choose what data to save" = "Оберіть дані які буде збережено";
 
-/* prefs.py: Settings > Output option; In files: prefs.py:352; */
+/* prefs.py: Settings > Output option; In files: prefs.py:354; */
 "Market data in CSV format file" = "Ринкові дані у форматі CSV файлу";
 
-/* prefs.py: Settings > Output option; In files: prefs.py:361; */
+/* prefs.py: Settings > Output option; In files: prefs.py:363; */
 "Market data in Trade Dangerous format file" = "Ринкові дані у форматі Trade Dangerous файлу";
 
-/* prefs.py: Settings > Output option; In files: prefs.py:371; */
+/* prefs.py: Settings > Output option; In files: prefs.py:373; */
 "Ship loadout" = "Технічні дані корабля";
 
-/* prefs.py: Settings > Output option; In files: prefs.py:381; */
+/* prefs.py: Settings > Output option; In files: prefs.py:383; */
 "Automatically update on docking" = "Автоматичне оновлювання при стикуванні зі станцією";
 
-/* prefs.py: Settings > Output - Label for "where files are located"; In files: prefs.py:390; prefs.py:409; */
+/* prefs.py: Settings > Output - Label for "where files are located"; In files: prefs.py:392; prefs.py:411; */
 "File location" = "Розташування файлу";
 
-/* prefs.py: macOS Preferences - files location selection button; In files: prefs.py:398; prefs.py:448; */
+/* prefs.py: macOS Preferences - files location selection button; In files: prefs.py:400; prefs.py:450; */
 "Change..." = "Внесення змін...";
 
-/* prefs.py: NOT-macOS Settings - files location selection button; prefs.py: NOT-macOS Setting - files location selection button; In files: prefs.py:401; prefs.py:451; */
+/* prefs.py: NOT-macOS Settings - files location selection button; prefs.py: NOT-macOS Setting - files location selection button; In files: prefs.py:403; prefs.py:453; */
 "Browse..." = "Перегляд...";
 
-/* prefs.py: Label for 'Output' Settings/Preferences tab; In files: prefs.py:416; */
+/* prefs.py: Label for 'Output' Settings/Preferences tab; In files: prefs.py:418; */
 "Output" = "Вивід";
 
-/* prefs.py: Settings > Configuration - Label for Journal files location; In files: prefs.py:442; prefs.py:457; */
+/* prefs.py: Settings > Configuration - Label for Journal files location; In files: prefs.py:444; prefs.py:459; */
 "E:D journal file location" = "Розташування файлу-журналу E:D";
 
-/* prefs.py: Hotkey/Shortcut settings prompt on OSX; In files: prefs.py:482; */
+/* prefs.py: Hotkey/Shortcut settings prompt on OSX; In files: prefs.py:484; */
 "Keyboard shortcut" = "Сполучення клавіш";
 
-/* prefs.py: Hotkey/Shortcut settings prompt on Windows; In files: prefs.py:484; */
+/* prefs.py: Hotkey/Shortcut settings prompt on Windows; In files: prefs.py:486; */
 "Hotkey" = "Гаряча клавіша";
 
-/* prefs.py: macOS Preferences > Configuration - restart the app message; In files: prefs.py:493; */
+/* prefs.py: macOS Preferences > Configuration - restart the app message; In files: prefs.py:495; */
 "Re-start {APP} to use shortcuts" = "Перезавантажте {APP} для використання ярликів";
 
-/* prefs.py: macOS - Configuration - need to grant the app permission for keyboard shortcuts; In files: prefs.py:502; */
+/* prefs.py: macOS - Configuration - need to grant the app permission for keyboard shortcuts; In files: prefs.py:504; */
 "{APP} needs permission to use shortcuts" = "{APP} необхідні дозволи для використання ярликів";
 
-/* prefs.py: Shortcut settings button on OSX; In files: prefs.py:507; */
+/* prefs.py: Shortcut settings button on OSX; In files: prefs.py:509; */
 "Open System Preferences" = "Відкрити налаштування системи";
 
-/* prefs.py: Configuration - Act on hotkey only when ED is in foreground; In files: prefs.py:529; */
+/* prefs.py: Configuration - Act on hotkey only when ED is in foreground; In files: prefs.py:531; */
 "Only when Elite: Dangerous is the active app" = "Тільки тоді, коли Elite: Dangerous є активним додатком";
 
-/* prefs.py: Configuration - play sound when hotkey used; In files: prefs.py:540; */
+/* prefs.py: Configuration - play sound when hotkey used; In files: prefs.py:542; */
 "Play sound" = "Грати звук";
 
-/* prefs.py: Configuration - disable checks for app updates when in-game; In files: prefs.py:555; */
+/* prefs.py: Configuration - disable checks for app updates when in-game; In files: prefs.py:557; */
 "Disable Automatic Application Updates Check when in-game" = "Вимкнути автоматичні перевірки оновлення додатку, коли в грі";
 
-/* prefs.py: Label for preferred shipyard, system and station 'providers'; In files: prefs.py:568; */
+/* prefs.py: Label for preferred shipyard, system and station 'providers'; In files: prefs.py:570; */
 "Preferred websites" = "Обрані веб-сайти";
 
-/* prefs.py: Label for Shipyard provider selection; In files: prefs.py:579; */
+/* prefs.py: Label for Shipyard provider selection; In files: prefs.py:581; */
 "Shipyard" = "Корабельна верф";
 
-/* prefs.py: Label for checkbox to utilise alternative Coriolis URL method; In files: prefs.py:591; */
+/* prefs.py: Label for checkbox to utilise alternative Coriolis URL method; In files: prefs.py:593; */
 "Use alternate URL method" = "Використовувати альтернативний URL-метод";
 
-/* prefs.py: Configuration - Label for selection of Log Level; In files: prefs.py:644; */
+/* prefs.py: Configuration - Label for selection of Log Level; In files: prefs.py:646; */
 "Log Level" = "Рівень подробиць журналу";
 
-/* prefs.py: Label for 'Configuration' tab in Settings; In files: prefs.py:672; */
+/* prefs.py: Label for 'Configuration' tab in Settings; In files: prefs.py:674; */
 "Configuration" = "Конфігурація";
 
-/* prefs.py: Label for Settings > Appeareance > selection of 'normal' text colour; In files: prefs.py:685; */
+/* prefs.py: Preferences privacy tab title; In files: prefs.py:696; */
+"Privacy" = "Конфіденційність";
+
+/* prefs.py: Label for Settings > Appeareance > selection of 'normal' text colour; In files: prefs.py:709; */
 "Normal text" = "Нормальний текст";
 
-/* prefs.py: Label for Settings > Appeareance > selection of 'highlightes' text colour; In files: prefs.py:687; */
+/* prefs.py: Label for Settings > Appeareance > selection of 'highlightes' text colour; In files: prefs.py:711; */
 "Highlighted text" = "Виділений текст";
 
-/* prefs.py: Appearance - Label for selection of application display language; In files: prefs.py:696; */
+/* prefs.py: Appearance - Label for selection of application display language; In files: prefs.py:720; */
 "Language" = "Мова";
 
-/* prefs.py: Label for Settings > Appearance > Theme selection; In files: prefs.py:706; */
+/* prefs.py: Label for Settings > Appearance > Theme selection; In files: prefs.py:730; */
 "Theme" = "Тема";
 
-/* prefs.py: Label for 'Dark' theme radio button; In files: prefs.py:717; */
+/* prefs.py: Label for 'Dark' theme radio button; In files: prefs.py:741; */
 "Dark" = "Темний";
 
-/* prefs.py: Label for 'Transparent' theme radio button; In files: prefs.py:724; */
+/* prefs.py: Label for 'Transparent' theme radio button; In files: prefs.py:748; */
 "Transparent" = "Прозора";
 
-/* prefs.py: Appearance - Label for selection of UI scaling; In files: prefs.py:770; */
+/* prefs.py: Appearance - Label for selection of UI scaling; In files: prefs.py:794; */
 "UI Scale Percentage" = "Відсоток шкали інтерфейсу користувача";
 
-/* prefs.py: Appearance - Help/hint text for UI scaling selection; In files: prefs.py:791; */
+/* prefs.py: Appearance - Help/hint text for UI scaling selection; In files: prefs.py:815; */
 "100 means Default{CR}Restart Required for{CR}changes to take effect!" = "100 означає, що {CR} потрібно перезапустити за замовчуванням, щоб зміни вступили в силу {CR}!";
 
-/* prefs.py: Appearance - Label for selection of main window transparency; In files: prefs.py:801; */
+/* prefs.py: Appearance - Label for selection of main window transparency; In files: prefs.py:825; */
 "Main window transparency" = "Прозорість головного вікна";
 
-/* prefs.py: Appearance - Help/hint text for Main window transparency selection; In files: prefs.py:821:824; */
+/* prefs.py: Appearance - Help/hint text for Main window transparency selection; In files: prefs.py:845:848; */
 "100 means fully opaque.{CR}Window is updated in real time" = "100 означає повністю непрозоре. {CR} Вікно буде оновлюватись в режимі реального часу";
 
-/* prefs.py: Label for Settings > Appearance tab; In files: prefs.py:860; */
+/* prefs.py: Appearance option for Windows "minimize to system tray"; In files: prefs.py:877; */
+"Minimize to system tray" = "Згорнути програму";
+
+/* prefs.py: Label for Settings > Appearance tab; In files: prefs.py:885; */
 "Appearance" = "Зовнішній вигляд";
 
-/* prefs.py: Label for location of third-party plugins folder; In files: prefs.py:875; */
+/* prefs.py: Label for location of third-party plugins folder; In files: prefs.py:900; */
 "Plugins folder" = "Сховище плагінів";
 
-/* prefs.py: Label on button used to open a filesystem folder; In files: prefs.py:882; */
+/* prefs.py: Label on button used to open a filesystem folder; In files: prefs.py:907; */
 "Open" = "Відкрити";
 
-/* prefs.py: Tip/label about how to disable plugins; In files: prefs.py:890; */
+/* prefs.py: Tip/label about how to disable plugins; In files: prefs.py:915; */
 "Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "Підказка: Ви можете відключити плагін через {CR} додання '{EXT}' до назви папки";
 
-/* prefs.py: Label on list of enabled plugins; In files: prefs.py:901; */
+/* prefs.py: Label on list of enabled plugins; In files: prefs.py:926; */
 "Enabled Plugins" = "Увімкнені плагіни";
 
-/* prefs.py: Plugins - Label for list of 'enabled' plugins that don't work with Python 3.x; In files: prefs.py:921; */
+/* prefs.py: Plugins - Label for list of 'enabled' plugins that don't work with Python 3.x; In files: prefs.py:946; */
 "Plugins Without Python 3.x Support:" = "Плагіни без підтримки Python 3.x:";
 
-/* prefs.py: Plugins - Label on URL to documentation about migrating plugins from Python 2.7; In files: prefs.py:929; */
+/* prefs.py: Plugins - Label on URL to documentation about migrating plugins from Python 2.7; In files: prefs.py:954; */
 "Information on migrating plugins" = "Інформація про міграцію плагінів";
 
-/* prefs.py: Lable on list of user-disabled plugins; In files: prefs.py:944; */
+/* prefs.py: Lable on list of user-disabled plugins; In files: prefs.py:969; */
 "Disabled Plugins" = "Вимкнені плагіни";
 
-/* stats.py: Cmdr stats; In files: stats.py:51; */
+/* stats.py: Cmdr stats; In files: stats.py:60; */
 "Balance" = "Баланс";
 
-/* stats.py: Cmdr stats; In files: stats.py:52; */
+/* stats.py: Cmdr stats; In files: stats.py:61; */
 "Loan" = "Борг";
 
-/* stats.py: Ranking; In files: stats.py:57; */
-"Combat" = "Бойовий";
-
-/* stats.py: Ranking; In files: stats.py:58; */
-"Trade" = "Торговий";
-
-/* stats.py: Ranking; In files: stats.py:59; */
-"Explorer" = "Дослідницький";
-
-/* stats.py: Ranking; In files: stats.py:60; */
-"CQC" = "Близький бій (CQC)";
-
-/* stats.py: Ranking; In files: stats.py:61; */
-"Federation" = "Федерація";
-
-/* stats.py: Ranking; In files: stats.py:62; */
-"Empire" = "Імперія";
-
-/* stats.py: Ranking; In files: stats.py:63; */
-"Powerplay" = "Змагання";
-
-/* stats.py: Combat rank; In files: stats.py:71; */
-"Harmless" = "Безпечний";
-
-/* stats.py: Combat rank; In files: stats.py:72; */
-"Mostly Harmless" = "Здебільшого Безпечний";
-
-/* stats.py: Combat rank; In files: stats.py:73; */
-"Novice" = "Новачок";
-
-/* stats.py: Combat rank; In files: stats.py:74; */
-"Competent" = "Компетентний";
-
-/* stats.py: Combat rank; In files: stats.py:75; */
-"Expert" = "Експерт";
-
-/* stats.py: Combat rank; stats.py: Empire rank; In files: stats.py:76; stats.py:139; */
-"Master" = "Майстер";
-
-/* stats.py: Combat rank; In files: stats.py:77; */
-"Dangerous" = "Небезпечний";
-
-/* stats.py: Combat rank; In files: stats.py:78; */
-"Deadly" = "Убивчий";
-
-/* stats.py: Top rank; In files: stats.py:79; stats.py:90; stats.py:101; stats.py:112; */
+/* stats.py: Top rank; In files: stats.py:65; */
 "Elite" = "Еліта";
 
-/* stats.py: Trade rank; In files: stats.py:82; */
+/* stats.py: Ranking; In files: stats.py:76; */
+"Combat" = "Бойовий";
+
+/* stats.py: Ranking; In files: stats.py:77; */
+"Trade" = "Торговий";
+
+/* stats.py: Ranking; In files: stats.py:78; */
+"Explorer" = "Дослідницький";
+
+/* stats.py: Ranking; In files: stats.py:81; */
+"CQC" = "Близький бій (CQC)";
+
+/* stats.py: Ranking; In files: stats.py:82; */
+"Federation" = "Федерація";
+
+/* stats.py: Ranking; In files: stats.py:83; */
+"Empire" = "Імперія";
+
+/* stats.py: Ranking; In files: stats.py:84; */
+"Powerplay" = "Змагання";
+
+/* stats.py: Combat rank; In files: stats.py:93; */
+"Harmless" = "Безпечний";
+
+/* stats.py: Combat rank; In files: stats.py:94; */
+"Mostly Harmless" = "Здебільшого Безпечний";
+
+/* stats.py: Combat rank; In files: stats.py:95; */
+"Novice" = "Новачок";
+
+/* stats.py: Combat rank; In files: stats.py:96; */
+"Competent" = "Компетентний";
+
+/* stats.py: Combat rank; In files: stats.py:97; */
+"Expert" = "Експерт";
+
+/* stats.py: Combat rank; stats.py: Empire rank; In files: stats.py:98; stats.py:178; */
+"Master" = "Майстер";
+
+/* stats.py: Combat rank; In files: stats.py:99; */
+"Dangerous" = "Небезпечний";
+
+/* stats.py: Combat rank; In files: stats.py:100; */
+"Deadly" = "Убивчий";
+
+/* stats.py: Trade rank; In files: stats.py:103; */
 "Penniless" = "Злидень";
 
-/* stats.py: Trade rank; In files: stats.py:83; */
+/* stats.py: Trade rank; In files: stats.py:104; */
 "Mostly Penniless" = "Здебільшого Нужденний";
 
-/* stats.py: Trade rank; In files: stats.py:84; */
+/* stats.py: Trade rank; In files: stats.py:105; */
 "Peddler" = "Штовхач";
 
-/* stats.py: Trade rank; In files: stats.py:85; */
+/* stats.py: Trade rank; In files: stats.py:106; */
 "Dealer" = "Дилер";
 
-/* stats.py: Trade rank; In files: stats.py:86; */
+/* stats.py: Trade rank; In files: stats.py:107; */
 "Merchant" = "Торговець";
 
-/* stats.py: Trade rank; In files: stats.py:87; */
+/* stats.py: Trade rank; In files: stats.py:108; */
 "Broker" = "Брокер";
 
-/* stats.py: Trade rank; In files: stats.py:88; */
+/* stats.py: Trade rank; In files: stats.py:109; */
 "Entrepreneur" = "Підприємець";
 
-/* stats.py: Trade rank; In files: stats.py:89; */
+/* stats.py: Trade rank; In files: stats.py:110; */
 "Tycoon" = "Магнат";
 
-/* stats.py: Explorer rank; In files: stats.py:93; */
+/* stats.py: Explorer rank; In files: stats.py:113; */
 "Aimless" = "Безцільний";
 
-
-/* Appearance setting. [EDMarketConnector.py] */
-"Minimize to system tray" = "Згорнути програму";
-/* stats.py: Explorer rank; In files: stats.py:94; */
+/* stats.py: Explorer rank; In files: stats.py:114; */
 "Mostly Aimless" = "Здебільшого Безцільний";
 
-/* stats.py: Explorer rank; In files: stats.py:95; */
+/* stats.py: Explorer rank; In files: stats.py:115; */
 "Scout" = "Розвідник";
 
-/* stats.py: Explorer rank; In files: stats.py:96; */
+/* stats.py: Explorer rank; In files: stats.py:116; */
 "Surveyor" = "Геодезист";
 
-/* stats.py: Explorer rank; In files: stats.py:97; */
+/* stats.py: Explorer rank; In files: stats.py:117; */
 "Trailblazer" = "Новатор";
 
-/* stats.py: Explorer rank; In files: stats.py:98; */
+/* stats.py: Explorer rank; In files: stats.py:118; */
 "Pathfinder" = "Слідопит";
 
-/* stats.py: Explorer rank; In files: stats.py:99; */
+/* stats.py: Explorer rank; In files: stats.py:119; */
 "Ranger" = "Рейнджер";
 
-/* stats.py: Explorer rank; In files: stats.py:100; */
+/* stats.py: Explorer rank; In files: stats.py:120; */
 "Pioneer" = "Піонер";
 
-/* stats.py: CQC rank; In files: stats.py:104; */
+/* stats.py: CQC rank; In files: stats.py:144; */
 "Helpless" = "Безпорадний";
 
-/* stats.py: CQC rank; In files: stats.py:105; */
+/* stats.py: CQC rank; In files: stats.py:145; */
 "Mostly Helpless" = "Здебільшого Безпомічний";
 
-/* stats.py: CQC rank; In files: stats.py:106; */
+/* stats.py: CQC rank; In files: stats.py:146; */
 "Amateur" = "Аматор";
 
-/* stats.py: CQC rank; In files: stats.py:107; */
+/* stats.py: CQC rank; In files: stats.py:147; */
 "Semi Professional" = "Напів-професійний";
 
-/* stats.py: CQC rank; In files: stats.py:108; */
+/* stats.py: CQC rank; In files: stats.py:148; */
 "Professional" = "Професійний";
 
-/* stats.py: CQC rank; In files: stats.py:109; */
+/* stats.py: CQC rank; In files: stats.py:149; */
 "Champion" = "Чемпіон";
 
-/* stats.py: CQC rank; In files: stats.py:110; */
+/* stats.py: CQC rank; In files: stats.py:150; */
 "Hero" = "Герой";
 
-/* stats.py: CQC rank; In files: stats.py:111; */
+/* stats.py: CQC rank; In files: stats.py:151; */
 "Gladiator" = "Гладіатор";
 
-/* stats.py: Federation rank; In files: stats.py:118; */
+/* stats.py: Federation rank; In files: stats.py:157; */
 "Recruit" = "Рекрут";
 
-/* stats.py: Federation rank; In files: stats.py:119; */
+/* stats.py: Federation rank; In files: stats.py:158; */
 "Cadet" = "Кадет";
 
-/* stats.py: Federation rank; In files: stats.py:120; */
+/* stats.py: Federation rank; In files: stats.py:159; */
 "Midshipman" = "Гардемарин";
 
-/* stats.py: Federation rank; In files: stats.py:121; */
+/* stats.py: Federation rank; In files: stats.py:160; */
 "Petty Officer" = "Унтер Офіцер";
 
-/* stats.py: Federation rank; In files: stats.py:122; */
+/* stats.py: Federation rank; In files: stats.py:161; */
 "Chief Petty Officer" = "Старший Унтер Офіцер";
 
-/* stats.py: Federation rank; In files: stats.py:123; */
+/* stats.py: Federation rank; In files: stats.py:162; */
 "Warrant Officer" = "Старший сержант";
 
-/* stats.py: Federation rank; In files: stats.py:124; */
+/* stats.py: Federation rank; In files: stats.py:163; */
 "Ensign" = "Прапорщик";
 
-/* stats.py: Federation rank; In files: stats.py:125; */
+/* stats.py: Federation rank; In files: stats.py:164; */
 "Lieutenant" = "Лейтенант";
 
-/* stats.py: Federation rank; In files: stats.py:126; */
+/* stats.py: Federation rank; In files: stats.py:165; */
 "Lieutenant Commander" = "Капітан III рангу";
 
-/* stats.py: Federation rank; In files: stats.py:127; */
+/* stats.py: Federation rank; In files: stats.py:166; */
 "Post Commander" = "Капітан II рангу";
 
-/* stats.py: Federation rank; In files: stats.py:128; */
+/* stats.py: Federation rank; In files: stats.py:167; */
 "Post Captain" = "Капітан I рангу";
 
-/* stats.py: Federation rank; In files: stats.py:129; */
+/* stats.py: Federation rank; In files: stats.py:168; */
 "Rear Admiral" = "Контр-адмірал";
 
-/* stats.py: Federation rank; In files: stats.py:130; */
+/* stats.py: Federation rank; In files: stats.py:169; */
 "Vice Admiral" = "Віце-адмірал";
 
-/* stats.py: Federation rank; In files: stats.py:131; */
+/* stats.py: Federation rank; In files: stats.py:170; */
 "Admiral" = "Адмірал";
 
-/* stats.py: Empire rank; In files: stats.py:137; */
+/* stats.py: Empire rank; In files: stats.py:176; */
 "Outsider" = "Чужинець";
 
-/* stats.py: Empire rank; In files: stats.py:138; */
+/* stats.py: Empire rank; In files: stats.py:177; */
 "Serf" = "Кріпак";
 
-/* stats.py: Empire rank; In files: stats.py:140; */
+/* stats.py: Empire rank; In files: stats.py:179; */
 "Squire" = "Зброєносець";
 
-/* stats.py: Empire rank; In files: stats.py:141; */
+/* stats.py: Empire rank; In files: stats.py:180; */
 "Knight" = "Лицар";
 
-/* stats.py: Empire rank; In files: stats.py:142; */
+/* stats.py: Empire rank; In files: stats.py:181; */
 "Lord" = "Пан";
 
-/* stats.py: Empire rank; In files: stats.py:143; */
+/* stats.py: Empire rank; In files: stats.py:182; */
 "Baron" = "Барон";
 
-/* stats.py: Empire rank; In files: stats.py:144; */
+/* stats.py: Empire rank; In files: stats.py:183; */
 "Viscount" = "Віконт";
 
-/* stats.py: Empire rank; In files: stats.py:145; */
+/* stats.py: Empire rank; In files: stats.py:184; */
 "Count" = "Граф";
 
-/* stats.py: Empire rank; In files: stats.py:146; */
+/* stats.py: Empire rank; In files: stats.py:185; */
 "Earl" = "Дворянин";
 
-/* stats.py: Empire rank; In files: stats.py:147; */
+/* stats.py: Empire rank; In files: stats.py:186; */
 "Marquis" = "Маркіз";
 
-/* stats.py: Empire rank; In files: stats.py:148; */
+/* stats.py: Empire rank; In files: stats.py:187; */
 "Duke" = "Герцог";
 
-/* stats.py: Empire rank; In files: stats.py:149; */
+/* stats.py: Empire rank; In files: stats.py:188; */
 "Prince" = "Принц";
 
-/* stats.py: Empire rank; In files: stats.py:150; */
+/* stats.py: Empire rank; In files: stats.py:189; */
 "King" = "Цар";
 
-/* stats.py: Power rank; In files: stats.py:156; */
+/* stats.py: Power rank; In files: stats.py:195; */
 "Rating 1" = "Рейтинг 1";
 
-/* stats.py: Power rank; In files: stats.py:157; */
+/* stats.py: Power rank; In files: stats.py:196; */
 "Rating 2" = "Рейтинг 2";
 
-/* stats.py: Power rank; In files: stats.py:158; */
+/* stats.py: Power rank; In files: stats.py:197; */
 "Rating 3" = "Рейтинг 3";
 
-/* stats.py: Power rank; In files: stats.py:159; */
+/* stats.py: Power rank; In files: stats.py:198; */
 "Rating 4" = "Рейтинг 4";
 
-/* stats.py: Power rank; In files: stats.py:160; */
+/* stats.py: Power rank; In files: stats.py:199; */
 "Rating 5" = "Рейтинг 5";
 
-/* stats.py: Status dialog subtitle - CR value of ship; In files: stats.py:367; */
+/* stats.py: Status dialog subtitle - CR value of ship; In files: stats.py:413; */
 "Value" = "Вартість";
 
-/* stats.py: Status dialog title; In files: stats.py:376; */
+/* stats.py: Status dialog title; In files: stats.py:422; */
 "Ships" = "Кораблі";

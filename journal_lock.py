@@ -1,10 +1,10 @@
 """Implements locking of Journal directory."""
 
 import pathlib
+import sys
 import tkinter as tk
 from enum import Enum
 from os import getpid as os_getpid
-from sys import platform
 from tkinter import ttk
 from typing import TYPE_CHECKING, Callable, Optional
 
@@ -94,7 +94,7 @@ class JournalLock:
 
         :return: LockResult - See the class Enum definition
         """
-        if platform == 'win32':
+        if sys.platform == 'win32':
             logger.trace_if('journal-lock', 'win32, using msvcrt')
             # win32 doesn't have fcntl, so we have to use msvcrt
             import msvcrt
@@ -143,7 +143,7 @@ class JournalLock:
             return True  # We weren't locked, and still aren't
 
         unlocked = False
-        if platform == 'win32':
+        if sys.platform == 'win32':
             logger.trace_if('journal-lock', 'win32, using msvcrt')
             # win32 doesn't have fcntl, so we have to use msvcrt
             import msvcrt
@@ -206,10 +206,10 @@ class JournalLock:
             self.title(_('Journal directory already locked'))
 
             # remove decoration
-            if platform == 'win32':
+            if sys.platform == 'win32':
                 self.attributes('-toolwindow', tk.TRUE)
 
-            elif platform == 'darwin':
+            elif sys.platform == 'darwin':
                 # http://wiki.tcl.tk/13428
                 parent.call('tk::unsupported::MacWindowStyle', 'style', self, 'utility')
 

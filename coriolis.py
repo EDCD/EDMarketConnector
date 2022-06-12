@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
-"""Build ship and module databases from https://github.com/EDCD/coriolis-data/ ."""
+"""
+Build ship and module databases from https://github.com/EDCD/coriolis-data/ .
+
+This script also utilise the file outfitting.csv.   Due to how collate.py
+both reads and writes to this file a local copy is used, in the root of the
+project structure, is used for this purpose.  If you want to utilise the
+FDevIDs/ version of the file, copy it over the local one.
+"""
 
 
 import csv
