@@ -1379,9 +1379,9 @@ class EDDN:
             }
         }
         # Readd Horizons and Odyssey to the outer message not each signal
-        for gamever in [ "horizons", "odyssey" ]:
-          if gamever in entry and gamever not in msg:
-              msg[gamever] = entry[gamever]
+        for gamever in ["horizons", "odyssey"]:
+            if gamever in entry and gamever not in msg:
+                msg[gamever] = entry[gamever]
 
         # Another SystemAddress check, however: some events won't have it. Is it an issue?
         if this.systemaddress is None or ('SystemAddress' in entry and this.systemaddress != entry['SystemAddress']):
