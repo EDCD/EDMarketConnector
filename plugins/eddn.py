@@ -152,6 +152,7 @@ class EDDN:
         self.session.headers['User-Agent'] = user_agent
         self.replayfile: Optional[TextIO] = None  # For delayed messages
         self.replaylog: List[str] = []
+        self.fsssignals: Optional[Mapping[str, Any]] = None
 
         if config.eddn_url is not None:
             self.eddn_url = config.eddn_url
@@ -1307,6 +1308,94 @@ class EDDN:
         this.eddn.export_journal_entry(cmdr, entry, msg)
         return None
 
+    def batch_journal_fsssignaldiscovered(
+        self, cmdr: str, system_name: str, system_starpos: list, is_beta: bool, entry: MutableMapping[str, Any]
+        ) -> Optional[str]:
+        """
+        Augment and keep FSSSignalDiscovered journal events
+
+        :param cmdr: the commander under which this upload is made
+        :param system_name: Name of current star system
+        :param system_starpos: Coordinates of current star system
+        :param is_beta: whether or not we are in beta mode
+        :param entry: the journal entry to batch
+        """
+        #{
+        #  "timestamp": "2021-01-15T02:54:18Z",
+        #  "event": "FSSSignalDiscovered",
+        #  "SystemAddress": 1900279744859,
+        #  "SignalName": "$USS_HighGradeEmissions;",
+        #  "SignalName_Localised": "Unidentified signal source",
+        #  "USSType": "$USS_Type_ValuableSalvage;",
+        #  "USSType_Localised": "Encoded emissions",
+        #  "SpawningState": "",
+        #  "SpawningFaction": "Free Marlinists of Carinae",
+        #  "ThreatLevel": 0,
+        #  "TimeRemaining": 718.508789
+        #}
+        #######################################################################
+        #logger.trace_if("plugin.eddn", entry)
+        # Elisions
+        entry = filter_localised(entry)
+        if "USSType" in entry and entry["USSType"] == "$USS_Type_MissionTarget;":
+            logger.warning("USSType is $USS_Type_MissionTarget;, dropping")
+            return 'Dropping $USS_Type_MissionTarget;'
+        # Can check SystemAddress here, but we'll remove it from this signal list, to be added to the outer batched message
+        if this.systemaddress is None or this.systemaddress != entry['SystemAddress']:
+            logger.warning("SystemAddress isn't current location! Can't add augmentations!")
+            return 'Wrong System! Missed jump ?'
+
+        # Horizons/Odyssey will be readded later
+        for removekey in ["TimeRemaining", "horizons", "odyssey", "SystemAddress" ]:
+            if removekey in entry:
+                entry.pop(removekey)
+        #######################################################################
+
+        if not self.fsssignals:
+          self.fsssignals = []
+        if entry is not None and entry != "":
+          logger.trace_if("plugin.eddn", f"Appending FSSSignalDiscovered entry: {json.dumps(entry)}")
+          self.fsssignals.append(entry)
+
+    def export_journal_fsssignaldiscovered(
+        self, cmdr: str, system_name: str, system_starpos: list, is_beta: bool, entry: MutableMapping[str, Any]
+    ) -> Optional[str]:
+        logger.trace_if("plugin.eddn", f"This non-FSSS entry is {json.dumps(entry)}")
+        """
+        Send an FSSSignalDiscovered message to EDDN on the correct schema.
+
+        :param cmdr: the commander under which this upload is made
+        :param system_name: Name of current star system
+        :param system_starpos: Coordinates of current star system
+        :param is_beta: whether or not we are in beta mode
+        :param entry: the non-FSSSignalDiscovered journal entry that triggered this batch send
+        """
+        msg = {
+            '$schemaRef': f'https://eddn.edcd.io/schemas/fsssignaldiscovered/1{"/test" if is_beta else ""}',
+            'message': {
+              "event":"FSSSignalDiscovered",
+              "signals": self.fsssignals
+            }
+        }
+        # Readd Horizons and Odyssey to the outer message not each signal
+        for gamever in [ "horizons", "odyssey" ]:
+          if gamever in entry and gamever not in msg:
+              msg[gamever] = entry[gamever]
+
+        # Another SystemAddress check, however: some events won't have it. Is it an issue?
+        if this.systemaddress is None or ('SystemAddress' in entry and this.systemaddress != entry['SystemAddress']):
+            logger.warning("SystemAddress isn't current location! Can't add augmentations!")
+            return 'Wrong System! Missed jump ?'
+
+        ret = this.eddn.entry_augment_system_data(msg, system_name, system_starpos)
+        if isinstance(ret, str):
+            return ret
+
+        logger.trace_if("plugin.eddn", f"FSSSignalDiscovered batch is {json.dumps(msg)}")
+        this.eddn.export_journal_entry(cmdr, self.fsssignals[-1], msg)
+        self.fsssignals = None
+        return None
+
     def canonicalise(self, item: str) -> str:
         """
         Canonicalise the given commodity name.
@@ -1657,6 +1746,18 @@ def journal_entry(  # noqa: C901, CCR001
         #     drop those events, or if the schema allows, send without those
         #     augmentations.
 
+        elif event_name == 'fsssignaldiscovered':
+            # Drop the event if we don't know system/starpos. Do something else?
+            if system is None or 'StarPos' not in state or state['StarPos'] is None:
+                return ""
+            this.eddn.batch_journal_fsssignaldiscovered(
+                cmdr,
+                system,
+                state['StarPos'],
+                is_beta,
+                entry
+            )
+
         elif event_name == 'fssallbodiesfound':
             return this.eddn.export_journal_fssallbodiesfound(
                 cmdr,
@@ -1668,6 +1769,15 @@ def journal_entry(  # noqa: C901, CCR001
 
         elif event_name == 'fssbodysignals':
             return this.eddn.export_journal_fssbodysignals(
+                cmdr,
+                system,
+                state['StarPos'],
+                is_beta,
+                entry
+            )
+        # Simple queue: send batched FSSSignalDiscovereds once a non-FSSSignalDiscovered is observed
+        if event_name != 'fsssignaldiscovered' and this.eddn.fsssignals is not None and len(this.eddn.fsssignals) > 0:
+            return this.eddn.export_journal_fsssignaldiscovered(
                 cmdr,
                 system,
                 state['StarPos'],
