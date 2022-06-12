@@ -1337,7 +1337,7 @@ class EDDN:
         # Elisions
         entry = filter_localised(entry)
         if "USSType" in entry and entry["USSType"] == "$USS_Type_MissionTarget;":
-            logger.warning("USSType is $USS_Type_MissionTarget;, dropping")
+            logger.debug("USSType is $USS_Type_MissionTarget;, dropping")
             return 'Dropping $USS_Type_MissionTarget;'
         # Can check SystemAddress here, but we'll remove it from this signal list, to be added to the batch
         if this.systemaddress is None or this.systemaddress != entry['SystemAddress']:
