@@ -1334,48 +1334,75 @@ class EDDN:
         :param is_beta: whether or not we are in beta mode
         :param entry: the non-FSSSignalDiscovered journal entry that triggered this batch send
         """
-        logger.trace_if("plugin.eddn", f"This non-FSSS entry is {json.dumps(entry)}")
+        logger.trace_if("plugin.eddn.fsssignaldiscovered", f"This other event is: {json.dumps(entry)}")
         #######################################################################
-        # Elisions
-        entry = filter_localised(entry)
-        if "USSType" in entry and entry["USSType"] == "$USS_Type_MissionTarget;":
-            logger.debug("USSType is $USS_Type_MissionTarget;, dropping")
-            return 'Dropping $USS_Type_MissionTarget;'
-        # Can check SystemAddress here, but we'll remove it from this signal list, to be added to the batch
-        if this.systemaddress is None or this.systemaddress != entry['SystemAddress']:
-            logger.warning("SystemAddress isn't current location! Can't add augmentations!")
+        # Location cross-check and augmentation setup
+        #######################################################################
+        # Determine if this is Horizons order or Odyssey order
+        if entry['event'] in ('Location', 'FSDJump', 'CarrierJump'):
+            # Odyssey order, use this new event's data for cross-check
+            aug_systemaddress = entry['SystemAddress']
+            aug_starsystem = entry['StarSystem']
+            aug_starpos = entry['StarPos']
+
+        else:
+            # Horizons order, so use tracked data for cross-check
+            aug_systemaddress = this.systemaddress
+            aug_starsystem = system_name
+            aug_starpos = system_starpos
+
+        if aug_systemaddress != self.fss_signals[0]['SystemAddress']:
+            logger.warning("First signal's SystemAddress doesn't match current location: "
+                           f"{self.fss_signals[0]['SystemAddress']} != {aug_systemaddress}")
+            self.fss_signals = []
             return 'Wrong System! Missed jump ?'
-
-        # Horizons/Odyssey will be readded later
-        for removekey in ["TimeRemaining", "horizons", "odyssey", "SystemAddress"]:
-            if removekey in entry:
-                entry.pop(removekey)
         #######################################################################
 
-        msg = {
+        # Build basis of message
+        msg: Dict = {
             '$schemaRef': f'https://eddn.edcd.io/schemas/fsssignaldiscovered/1{"/test" if is_beta else ""}',
             'message': {
-              "event": "FSSSignalDiscovered",
-              "signals": self.fss_signals
+                "event": "FSSSignalDiscovered",
+                "timestamp": self.fss_signals[0]['timestamp'],
+                "SystemAddress": aug_systemaddress,
+                "StarSystem": aug_starsystem,
+                "StarPos": aug_starpos,
+                "signals": [],
             }
         }
-        # Readd Horizons and Odyssey to the outer message not each signal
-        for gamever in ["horizons", "odyssey"]:
-            if gamever in entry and gamever not in msg:
-                msg[gamever] = entry[gamever]
 
-        # Another SystemAddress check, however: some events won't have it. Is it an issue?
-        if this.systemaddress is None or ('SystemAddress' in entry and this.systemaddress != entry['SystemAddress']):
-            logger.warning("SystemAddress isn't current location! Can't add augmentations!")
-            return 'Wrong System! Missed jump ?'
+        # Now add the signals, checking each is for the correct system, dropping
+        # any that aren't, and applying necessary elisions.
+        for s in self.fss_signals:
+            if s['SystemAddress'] != aug_systemaddress:
+                logger.warning("Signal's SystemAddress not current system, dropping: "
+                               f"{s['SystemAddress']} != {aug_systemaddress}")
+                continue
 
-        ret = this.eddn.entry_augment_system_data(msg, system_name, system_starpos)
-        if isinstance(ret, str):
-            return ret
+            # Remove any _Localised keys (would only be in a USS signal)
+            s = filter_localised(s)
 
-        logger.trace_if("plugin.eddn", f"FSSSignalDiscovered batch is {json.dumps(msg)}")
-        this.eddn.export_journal_entry(cmdr, self.fss_signals[-1], msg)
+            # Drop Mission USS signals.
+            if "USSType" in s and s["USSType"] == "$USS_Type_MissionTarget;":
+                logger.trace_if("plugin.eddn.fsssignaldiscovered", "USSType is $USS_Type_MissionTarget;, dropping")
+                continue
+
+            # Remove any `TimeRemaining` (USS) or `SystemAddress` keys
+            s.pop('TimeRemaining', None)
+            s.pop('SystemAddress', None)
+
+            msg['message']['signals'].append(s)
+
+        # `horizons` and `odyssey` augmentations
+        msg['message']['horizons'] = entry['Horizons']
+        msg['message']['odyssey'] = entry['Odyssey']
+
+        logger.trace_if("plugin.eddn.fsssignaldiscovered", f"FSSSignalDiscovered batch is {json.dumps(msg)}")
+
+        # Fake an 'entry' as it's only there for some "should we send replay?" checks in the called function.
+        this.eddn.export_journal_entry(cmdr, {'entry': 'send_fsssignaldiscovered'}, msg)
         self.fss_signals = []
+
         return None
 
     def canonicalise(self, item: str) -> str:
@@ -1628,6 +1655,18 @@ def journal_entry(  # noqa: C901, CCR001
     this.horizons = entry['horizons'] = state['Horizons']
     this.odyssey = entry['odyssey'] = state['Odyssey']
 
+    # Simple queue: send batched FSSSignalDiscovered once a non-FSSSignalDiscovered is observed
+    if event_name != 'fsssignaldiscovered' and this.eddn.fss_signals:
+        # We can't return here, we still might need to otherwise process this event,
+        # so errors will never be shown to the user.
+        this.eddn.export_journal_fsssignaldiscovered(
+            cmdr,
+            system,
+            state['StarPos'],
+            is_beta,
+            entry
+        )
+
     # Track location
     if event_name == 'supercruiseexit':
         # For any orbital station we have no way of determining the body
@@ -1734,15 +1773,6 @@ def journal_entry(  # noqa: C901, CCR001
 
         elif event_name == 'fssbodysignals':
             return this.eddn.export_journal_fssbodysignals(
-                cmdr,
-                system,
-                state['StarPos'],
-                is_beta,
-                entry
-            )
-        # Simple queue: send batched FSSSignalDiscovereds once a non-FSSSignalDiscovered is observed
-        if event_name != 'fsssignaldiscovered' and this.eddn.fss_signals is not None and len(this.eddn.fss_signals) > 0:
-            return this.eddn.export_journal_fsssignaldiscovered(
                 cmdr,
                 system,
                 state['StarPos'],
