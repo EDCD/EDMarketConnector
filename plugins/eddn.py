@@ -1387,20 +1387,23 @@ class EDDN:
                 logger.trace_if("plugin.eddn.fsssignaldiscovered", "USSType is $USS_Type_MissionTarget;, dropping")
                 continue
 
-            # Remove any `TimeRemaining` (USS) or `SystemAddress` keys
+            # Remove any key/values that shouldn't be there per signal
+            s.pop('event', None)
+            s.pop('horizons', None)
+            s.pop('odyssey', None)
             s.pop('TimeRemaining', None)
             s.pop('SystemAddress', None)
 
             msg['message']['signals'].append(s)
 
         # `horizons` and `odyssey` augmentations
-        msg['message']['horizons'] = entry['Horizons']
-        msg['message']['odyssey'] = entry['Odyssey']
+        msg['message']['horizons'] = entry['horizons']
+        msg['message']['odyssey'] = entry['odyssey']
 
         logger.trace_if("plugin.eddn.fsssignaldiscovered", f"FSSSignalDiscovered batch is {json.dumps(msg)}")
 
         # Fake an 'entry' as it's only there for some "should we send replay?" checks in the called function.
-        this.eddn.export_journal_entry(cmdr, {'entry': 'send_fsssignaldiscovered'}, msg)
+        this.eddn.export_journal_entry(cmdr, {'event': 'send_fsssignaldiscovered'}, msg)
         self.fss_signals = []
 
         return None
