@@ -62,6 +62,7 @@ DISCARDED_EVENTS_SLEEP = 10
 
 # trace-if events
 CMDR_EVENTS = 'plugin.edsm.cmdr-events'
+CMDR_CREDS = 'plugin.edsm.cmdr-credentials'
 
 
 class This:
@@ -386,7 +387,7 @@ def credentials(cmdr: str) -> Optional[Tuple[str, str]]:
     :param cmdr: The commander to get credentials for
     :return: The credentials, or None
     """
-    logger.trace_if(CMDR_EVENTS, f'{cmdr=}')
+    logger.trace_if(CMDR_CREDS, f'{cmdr=}')
 
     # Credentials for cmdr
     if not cmdr:
@@ -405,12 +406,12 @@ def credentials(cmdr: str) -> Optional[Tuple[str, str]]:
         if idx >= len(edsm_usernames) or idx >= len(edsm_apikeys):
             return None
 
-        logger.trace_if(CMDR_EVENTS, f'{cmdr=}: returning ({edsm_usernames[idx]=}, {edsm_apikeys[idx]=})')
+        logger.trace_if(CMDR_CREDS, f'{cmdr=}: returning ({edsm_usernames[idx]=}, {edsm_apikeys[idx]=})')
 
         return (edsm_usernames[idx], edsm_apikeys[idx])
 
     else:
-        logger.trace_if(CMDR_EVENTS, f'{cmdr=}: returning None')
+        logger.trace_if(CMDR_CREDS, f'{cmdr=}: returning None')
         return None
 
 
