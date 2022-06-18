@@ -36,13 +36,40 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 5.4.0</title>
+			<title>Release 5.4.1</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
 
-<p>We now test against, and package with, Python 3.10.4.</p>
+<p>We now test against, and package with, Python 3.10.5.</p>
 <p><strong>As a consequence of this we no longer support Windows 7.</strong><br>
+
+<h2>Release 5.4.1</h2>
+<ul>
+<li>
+<p>If for any reason <code>EDMarketConnector.exe</code> fails to shutdown and exit when
+asked to by the upgrade process this should no longer result in a spontaneous
+system reboot.  Closes <a href="https://github.com/EDCD/EDMarketConnector/issues/1492">#1492</a>.</p>
+<p>A manual reboot will still be required to complete the EDMarketConnector
+upgrade process and we make no guarantees about the stability of the
+application until this is done.</p>
+</li>
+<li>
+<p>The new EDDN <code>fsssignaldiscovered/1</code> schema has been implemented.</p>
+</li>
+<li>
+<p>EDSM trace level logging will no longer log API credentials unless explicitly
+asked to, separately from other EDSM API trace logging.</p>
+</li>
+</ul>
+<h2>
+<a id="user-content-bug-fixes" class="anchor" href="#bug-fixes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Bug Fixes</h2>
+<ul>
+<li>EDDN: Ensure we always remove all <code>_Localised</code> suffix keys in data.  This
+was missed in some recent new schemas and turned out to be an issue for at
+least <code>approachsettlement/1</code>.</li>
+</ul>
+<hr>
 
 <h2>Release 5.4.0</h2>
 <ul>
@@ -1368,11 +1395,11 @@ about this:
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.4.0/EDMarketConnector_win_5.4.0.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.4.1/EDMarketConnector_win_5.4.1.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="5.4.0"
-				length="16809984"
+				sparkle:version="5.4.1"
+				length="16879616"
 				type="application/octet-stream"
 			/>
 		</item>
