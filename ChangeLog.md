@@ -9,7 +9,7 @@ produce the Windows executables and installer.
 
 ---
 
-* We now test against, and package with, Python 3.10.4.
+* We now test against, and package with, Python 3.10.5.
 
   **As a consequence of this we no longer support Windows 7.  
   This is due to
@@ -24,6 +24,30 @@ produce the Windows executables and installer.
   Developers can check the contents of the `.python-version` file
   in the source (it's not distributed with the Windows installer) for the
   currently used version in a given branch.
+
+---
+
+Release 5.4.1
+===
+
+* We now test against, and package with, Python 3.10.5.
+* If for any reason `EDMarketConnector.exe` fails to shutdown and exit when
+  asked to by the upgrade process this should no longer result in a spontaneous
+  system reboot.  Closes [#1492](https://github.com/EDCD/EDMarketConnector/issues/1492).
+
+  A manual reboot will still be required to complete the EDMarketConnector
+  upgrade process and we make no guarantees about the stability of the
+  application until this is done.
+* The new EDDN `fsssignaldiscovered/1` schema has been implemented.
+* EDSM trace level logging will no longer log API credentials unless explicitly
+  asked to, separately from other EDSM API trace logging.
+
+Bug Fixes
+---
+
+* EDDN: Ensure we always remove all `_Localised` suffix keys in data.  This
+  was missed in some recent new schemas and turned out to be an issue for at
+  least `approachsettlement/1`.
 
 ---
 

@@ -20,9 +20,9 @@ jobs:
         with:
           submodules: true
 
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v4
         with:
-          python-version: "3.10.4"
+          python-version-file: '.python-version'
           architecture: "x86"
 
       - name: Install python tools

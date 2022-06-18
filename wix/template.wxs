@@ -44,6 +44,11 @@
                             Name="InstallLocation"
                             Type="raw" />
         </Property>
+
+        <!-- Attempt to **NEVER** cause a reboot, e.g. if EDMarketConnector.exe
+             doesn't exit, and thus the installer can't properly replace it. -->
+        <Property Id="REBOOT" Value="ReallySuppress" />
+
         <CustomAction Id="SetINSTALLDIR" Property="INSTALLDIR" Value="[ARPINSTALLLOCATION]" />
         <InstallUISequence>
             <Custom Action="SetINSTALLDIR" After="AppSearch">
