@@ -1364,6 +1364,10 @@ class EDDN:
 
         else:
             # Horizons order, so use tracked data for cross-check
+            if this.systemaddress is None or system_name is None or system_starpos is None:
+                logger.error(f'Location tracking failure: {this.systemaddress=}, {system_name=}, {system_starpos=}')
+                return 'Current location not tracked properly, started after game?'
+
             aug_systemaddress = this.systemaddress
             aug_starsystem = system_name
             aug_starpos = system_starpos
