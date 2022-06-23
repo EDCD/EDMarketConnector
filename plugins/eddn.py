@@ -1396,13 +1396,13 @@ class EDDN:
                                f"{s['SystemAddress']} != {aug_systemaddress}")
                 continue
 
-            # Remove any _Localised keys (would only be in a USS signal)
-            s = filter_localised(s)
-
             # Drop Mission USS signals.
             if "USSType" in s and s["USSType"] == "$USS_Type_MissionTarget;":
                 logger.trace_if("plugin.eddn.fsssignaldiscovered", "USSType is $USS_Type_MissionTarget;, dropping")
                 continue
+
+            # Remove any _Localised keys (would only be in a USS signal)
+            s = filter_localised(s)
 
             # Remove any key/values that shouldn't be there per signal
             s.pop('event', None)
@@ -1412,6 +1412,12 @@ class EDDN:
             s.pop('SystemAddress', None)
 
             msg['message']['signals'].append(s)
+
+        if not msg['message']['signals']:
+            # No signals passed checks, so drop them all and return
+            logger.debug('No signals after checks, so sending no message')
+            self.fss_signals = []
+            return None
 
         # `horizons` and `odyssey` augmentations
         msg['message']['horizons'] = entry['horizons']
