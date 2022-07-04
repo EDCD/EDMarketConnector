@@ -268,6 +268,7 @@ setup(
     ],
     data_files=DATA_FILES,
     options=OPTIONS,
+    py_modules=[],
 )
 
 package_filename = None
