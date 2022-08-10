@@ -698,6 +698,18 @@ New in version 5.1.1:
 `state` now has a `ShipLockerJSON` member containing the un-changed, loaded,
 JSON from the `ShipLockerJSON.json` file.
 
+New in version 5.4.2+:
+
+We now handle the 'Update 13' `NavRouteClear` event by detecting if that's what
+is in the `NavRoute.json` file.  If this is the case then we log that, **but
+do NOT clear `state['NavRoute']`**.  Plugins will get sent the Journal
+`NavRouteClear` event anyway, and there might be some value to them retaining
+access to the prior plotted route.
+
+NB: It *is* possible, if a player is quick enough, to plot and clear a route
+before we load it, in which case we'd be retaining the *previous* plotted
+route.
+
 ___
 
 ##### Synthetic Events

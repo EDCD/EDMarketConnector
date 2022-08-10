@@ -1111,8 +1111,10 @@ class EDDN:
         # Sanity check - Ref Issue 1342
         if 'Route' not in entry:
             logger.warning(f"NavRoute didn't contain a Route array!\n{entry!r}")
-            # LANG: No 'Route' found in NavRoute.json file
-            return _("No 'Route' array in NavRoute.json contents")
+            # This can happen if first-load of the file failed, and we're simply
+            # passing through the bare Journal event, so no need to alert
+            # the user.
+            return None
 
         #######################################################################
         # Elisions
