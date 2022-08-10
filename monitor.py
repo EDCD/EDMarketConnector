@@ -1469,7 +1469,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                                 self.state[category].pop(material)
 
                 module = self.state['Modules'][entry['Slot']]
-                assert(module['Item'] == self.canonicalise(entry['Module']))
+                assert module['Item'] == self.canonicalise(entry['Module'])
                 module['Engineering'] = {
                     'Engineer':      entry['Engineer'],
                     'EngineerID':    entry['EngineerID'],
@@ -2300,9 +2300,15 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             )
             return False
 
-        # everything is good, lets set what we need to and make sure we dont try again
-        logger.info('Successfully read NavRoute file for last NavRoute event.')
-        self.state['NavRoute'] = file
+        # Handle it being `NavRouteClear`d already
+        if file['event'].lower() == 'navrouteclear':
+            logger.info('NavRoute file contained a NavRouteClear')
+            # We do *NOT* copy into/clear the `self.state['NavRoute']`
+        else:
+            # everything is good, lets set what we need to and make sure we dont try again
+            logger.info('Successfully read NavRoute file for last NavRoute event.')
+            self.state['NavRoute'] = file
+
         self._navroute_retries_remaining = 0
         self._last_navroute_journal_timestamp = None
         return True
