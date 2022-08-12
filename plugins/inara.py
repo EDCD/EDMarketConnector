@@ -669,10 +669,13 @@ def journal_entry(  # noqa: C901, CCR001
                     to_send = {
                         'starsystemName':       system,
                         'stationName':          entry['Name'],
-                        'marketID':             entry['MarketID'],
                         'starsystemBodyName':   entry['BodyName'],
                         'starsystemBodyCoords': [entry['Latitude'], entry['Longitude']]
                     }
+                    # Not present on, e.g. Ancient Ruins
+                    if market_id := entry.get('MarketID') is not None:
+                        to_send['marketID'] = market_id
+
                     new_add_event('setCommanderTravelLocation', entry['timestamp'], to_send)
 
             elif event_name == 'FSDJump':
