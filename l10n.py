@@ -284,10 +284,10 @@ class _Locale:
             return self.float_formatter.stringFromNumber_(number)
 
         if not decimals and isinstance(number, numbers.Integral):
-            return locale.format('%d', number, True)
+            return locale.format_string('%d', number, True)
 
         else:
-            return locale.format('%.*f', (decimals, number), True)  # type: ignore  # It ends up working out
+            return locale.format_string('%.*f', (decimals, number), True)
 
     def number_from_string(self, string: str) -> Union[int, float, None]:
         """
