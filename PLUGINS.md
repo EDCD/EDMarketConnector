@@ -562,7 +562,7 @@ for an example of these techniques.
 ```python
 def journal_entry(
     cmdr: str, is_beta: bool, system: str, station: str, entry: Dict[str, Any], state: Dict[str, Any]
-) -> None:
+) -> Optional[str]:
     if entry['event'] == 'FSDJump':
         # We arrived at a new system!
         if 'StarPos' in entry:
@@ -779,7 +779,7 @@ Examples of this are:
 ### Journal entry in CQC
 New in version 5.2.0
 ```python
-def journal_entry_cqc(cmdr: str, is_beta: bool, entry: Dict[str, Any], state: Dict[str, Any]) -> None:
+def journal_entry_cqc(cmdr: str, is_beta: bool, entry: Dict[str, Any], state: Dict[str, Any]) -> Optional[str]:
     if entry['event'] == 'Location':
         # We loaded to CQC match, lets detect map!
         cqc_maps = {  # dict to map systems names to CQC maps, ref: https://forums.frontier.co.uk/threads/cqc-systems.234394/
