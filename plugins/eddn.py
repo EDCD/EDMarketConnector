@@ -88,6 +88,8 @@ class This:
         self.commodities: Optional[List[OrderedDictT[str, Any]]] = None
         self.outfitting: Optional[Tuple[bool, List[str]]] = None
         self.shipyard: Optional[Tuple[bool, List[Mapping[str, Any]]]] = None
+        self.fcmaterials_marketid: int = 0
+        self.fcmaterials: Optional[List[OrderedDictT[str, Any]]] = None
 
         # For the tkinter parent window, so we can call update_idletasks()
         self.parent: tk.Tk
@@ -1079,7 +1081,6 @@ class EDDN:
         Send a NavRoute to EDDN on the correct schema.
 
         :param cmdr: the commander under which this upload is made
-        :param system_starpos: Coordinates of current star system
         :param is_beta: whether or not we are in beta mode
         :param entry: the journal entry to send
         """
@@ -1140,6 +1141,87 @@ class EDDN:
 
         msg = {
             '$schemaRef': f'https://eddn.edcd.io/schemas/navroute/1{"/test" if is_beta else ""}',
+            'message': entry
+        }
+
+        this.eddn.export_journal_entry(cmdr, entry, msg)
+        return None
+
+    def export_journal_fcmaterials(
+        self, cmdr: str, is_beta: bool, entry: MutableMapping[str, Any]
+    ) -> Optional[str]:
+        """
+        Send an FCMaterials message to EDDN on the correct schema.
+
+        :param cmdr: the commander under which this upload is made
+        :param is_beta: whether or not we are in beta mode
+        :param entry: the journal entry to send
+        """
+        # {
+        #     "timestamp":"2022-06-08T12:44:19Z",
+        #     "event":"FCMaterials",
+        #     "MarketID":3700710912,
+        #     "CarrierName":"PSI RORSCHACH",
+        #     "CarrierID":"K4X-33F",
+        #     "Items":[
+        #         {
+        #             "id":128961533,
+        #             "Name":"$encryptedmemorychip_name;",
+        #             "Name_Localised":"Encrypted Memory Chip",
+        #             "Price":500,
+        #             "Stock":0,
+        #             "Demand":5
+        #         },
+        #
+        #         { "id":128961537,
+        #             "Name":"$memorychip_name;",
+        #             "Name_Localised":"Memory Chip",
+        #             "Price":600,
+        #             "Stock":0,
+        #             "Demand":5
+        #             },
+        #
+        #         { "id":128972290,
+        #             "Name":"$campaignplans_name;",
+        #             "Name_Localised":"Campaign Plans",
+        #             "Price":600,
+        #             "Stock":5,
+        #             "Demand":0
+        #         }
+        #     ]
+        # }
+
+        # Sanity check
+        if 'Items' not in entry:
+            logger.warning(f"FCMaterials didn't contain an Items array!\n{entry!r}")
+            # This can happen if first-load of the file failed, and we're simply
+            # passing through the bare Journal event, so no need to alert
+            # the user.
+            return None
+
+        if this.fcmaterials_marketid == entry['MarketID']:
+            if this.fcmaterials == entry['Items']:
+                # Same FC, no change in Stock/Demand/Prices, so don't send
+                return None
+
+        this.fcmaterials_marketid = entry['MarketID']
+        this.fcmaterials = entry['Items']
+
+        #######################################################################
+        # Elisions
+        #######################################################################
+        # There are Name_Localised key/values in the Items array members
+        entry = filter_localised(entry)
+        #######################################################################
+
+        #######################################################################
+        # Augmentations
+        #######################################################################
+        # None
+        #######################################################################
+
+        msg = {
+            '$schemaRef': f'https://eddn.edcd.io/schemas/fcmaterials/1{"/test" if is_beta else ""}',
             'message': entry
         }
 
@@ -1775,6 +1857,9 @@ def journal_entry(  # noqa: C901, CCR001
 
         elif event_name == 'navroute':
             return this.eddn.export_journal_navroute(cmdr, is_beta, entry)
+
+        elif event_name == 'fcmaterials':
+            return this.eddn.export_journal_fcmaterials(cmdr, is_beta, entry)
 
         elif event_name == 'approachsettlement':
             # An `ApproachSettlement` can appear *before* `Location` if you
