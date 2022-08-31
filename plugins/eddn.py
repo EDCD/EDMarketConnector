@@ -1278,6 +1278,8 @@ class EDDN:
             'timestamp':   data['timestamp'],
             'event':       'FCMaterials',
             'data-source': 'CAPI',  # Mandatory indication of data source
+            'horizons':    horizons,
+            'odyssey':     this.odyssey,
             'MarketID':    data['lastStarport']['id'],
             'CarrierID':   data['lastStarport']['name'],
             'Items':       items,
