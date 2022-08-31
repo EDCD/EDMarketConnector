@@ -90,6 +90,8 @@ class This:
         self.shipyard: Optional[Tuple[bool, List[Mapping[str, Any]]]] = None
         self.fcmaterials_marketid: int = 0
         self.fcmaterials: Optional[List[OrderedDictT[str, Any]]] = None
+        self.fcmaterials_capi_marketid: int = 0
+        self.fcmaterials_capi: Optional[List[OrderedDictT[str, Any]]] = None
 
         # For the tkinter parent window, so we can call update_idletasks()
         self.parent: tk.Tk
@@ -147,6 +149,7 @@ class EDDN:
         r"https://eddn.edcd.io/schemas/(?P<schema_name>.+)/(?P<schema_version>[0-9]+) is unknown, "
         r"unable to validate.',\)\]$"
     )
+    CAPI_LOCALISATION_RE = re.compile(r'^loc[A-Z].+')
 
     def __init__(self, parent: tk.Tk):
         self.parent: tk.Tk = parent
@@ -489,6 +492,9 @@ class EDDN:
             })
 
         this.commodities = commodities
+
+        # Send any FCMaterials.json-equivalent 'orders' as well
+        self.export_capi_fcmaterials(data, is_beta, horizons)
 
     def safe_modules_and_ships(self, data: Mapping[str, Any]) -> Tuple[Dict, Dict]:
         """
@@ -1229,6 +1235,63 @@ class EDDN:
         this.eddn.export_journal_entry(cmdr, entry, msg)
         return None
 
+    def export_capi_fcmaterials(
+        self, data: Mapping[str, Any], is_beta: bool, horizons: bool
+    ) -> Optional[str]:
+        """
+        Send CAPI-sourced 'onfootmicroresources' data on `fcmaterials/1` schema.
+
+        :param data: the CAPI `/market` data
+        :param is_beta: whether, or not we are in beta mode
+        :param horizons: whether player is in Horizons
+        """
+        # Sanity check
+        if 'lastStarport' not in data:
+            return None
+
+        if 'orders' not in data['lastStarport']:
+            return None
+
+        if 'onfootmicroresources' not in data['lastStarport']['orders']:
+            return None
+
+        items = data['lastStarport']['orders']['onfootmicroresources']
+        if this.fcmaterials_capi_marketid == data['lastStarport']['id']:
+            if this.fcmaterials_capi == items:
+                # Same FC, no change in orders, so don't send
+                return None
+
+        this.fcmaterials_capi_marketid = data['lastStarport']['id']
+        this.fcmaterials_capi = items
+
+        #######################################################################
+        # Elisions
+        #######################################################################
+        # There are localised key names for the resources
+        items = capi_filter_localised(items)
+        #######################################################################
+
+        #######################################################################
+        # EDDN `'message'` creation, and augmentations
+        #######################################################################
+        entry = {
+            'timestamp':   data['timestamp'],
+            'event':       'FCMaterials',
+            'data-source': 'CAPI',  # Mandatory indication of data source
+            'MarketID':    data['lastStarport']['id'],
+            'CarrierID':   data['lastStarport']['name'],
+            'Items':       items,
+        }
+        #######################################################################
+
+        msg = {
+            '$schemaRef': f'https://eddn.edcd.io/schemas/fcmaterials/1{"/test" if is_beta else ""}',
+            'message': entry
+        }
+
+        this.eddn.export_journal_entry(data['commander']['name'], entry, msg)
+        return None
+
     def export_journal_approachsettlement(
         self, cmdr: str, system_name: str, system_starpos: list, is_beta: bool, entry: MutableMapping[str, Any]
     ) -> Optional[str]:
@@ -1707,10 +1770,9 @@ def plugin_stop() -> None:
     logger.debug('Done.')
 
 
-# Recursively filter '*_Localised' keys from dict
 def filter_localised(d: Mapping[str, Any]) -> OrderedDictT[str, Any]:
     """
-    Remove any dict keys with names ending `_Localised` from a dict.
+    Recursively remove any dict keys with names ending `_Localised` from a dict.
 
     :param d: Dict to filter keys of.
     :return: The filtered dict.
@@ -1725,6 +1787,30 @@ def filter_localised(d: Mapping[str, Any]) -> OrderedDictT[str, Any]:
 
         elif isinstance(v, list):  # list of dicts -> recurse
             filtered[k] = [filter_localised(x) if hasattr(x, 'items') else x for x in v]
+
+        else:
+            filtered[k] = v
+
+    return filtered
+
+
+def capi_filter_localised(d: Mapping[str, Any]) -> OrderedDictT[str, Any]:
+    """
+    Recursively remove any dict keys for known CAPI 'localised' names.
+
+    :param d: Dict to filter keys of.
+    :return: The filtered dict.
+    """
+    filtered: OrderedDictT[str, Any] = OrderedDict()
+    for k, v in d.items():
+        if EDDN.CAPI_LOCALISATION_RE.search(k):
+            pass
+
+        elif hasattr(v, 'items'):  # dict -> recurse
+            filtered[k] = capi_filter_localised(v)
+
+        elif isinstance(v, list):  # list of dicts -> recurse
+            filtered[k] = [capi_filter_localised(x) if hasattr(x, 'items') else x for x in v]
 
         else:
             filtered[k] = v
