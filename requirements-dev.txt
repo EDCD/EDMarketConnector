@@ -40,7 +40,7 @@ lxml==4.9.1
 py2exe==0.11.1.1; sys_platform == 'win32'
 
 # Testing
-pytest==7.1.2
+pytest==7.1.3
 pytest-cov==3.0.0  # Pytest code coverage support
 coverage[toml]==6.4.4 # pytest-cov dep. This is here to ensure that it includes TOML support for pyproject.toml configs
 # For manipulating folder permissions and the like.
