@@ -1223,12 +1223,11 @@ class EDDN:
         #######################################################################
         # Augmentations
         #######################################################################
-        # Mandatory data-source
-        entry['data-source'] = 'Journal'
+        # None
         #######################################################################
 
         msg = {
-            '$schemaRef': f'https://eddn.edcd.io/schemas/fcmaterials/1{"/test" if is_beta else ""}',
+            '$schemaRef': f'https://eddn.edcd.io/schemas/fcmaterials_journal/1{"/test" if is_beta else ""}',
             'message': entry
         }
 
@@ -1277,7 +1276,6 @@ class EDDN:
         entry = {
             'timestamp':   data['timestamp'],
             'event':       'FCMaterials',
-            'data-source': 'CAPI',  # Mandatory indication of data source
             'horizons':    horizons,
             'odyssey':     this.odyssey,
             'MarketID':    data['lastStarport']['id'],
@@ -1287,7 +1285,7 @@ class EDDN:
         #######################################################################
 
         msg = {
-            '$schemaRef': f'https://eddn.edcd.io/schemas/fcmaterials/1{"/test" if is_beta else ""}',
+            '$schemaRef': f'https://eddn.edcd.io/schemas/fcmaterials_capi/1{"/test" if is_beta else ""}',
             'message': entry
         }
 
