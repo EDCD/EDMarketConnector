@@ -353,7 +353,7 @@ class TestJournalLock:
         """
         # First actually obtain the lock, and check it worked
         jlock = JournalLock()
-        jlock.obtain_lock()
+        assert jlock.obtain_lock() == JournalLockResult.LOCKED
         assert jlock.locked
 
         # Now store the 'current' journaldir for reference and attempt
