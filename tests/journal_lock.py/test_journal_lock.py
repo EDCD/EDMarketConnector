@@ -108,25 +108,28 @@ class TestJournalLock:
     """JournalLock test class."""
 
     @pytest.fixture
-    def mock_journaldir(self, monkeypatch: _pytest_monkeypatch, tmpdir: _pytest_tmpdir) -> py_path_local_LocalPath:
+    def mock_journaldir(
+        self, monkeypatch: _pytest_monkeypatch,
+        tmpdir_factory: _pytest_tmpdir.TempPathFactory
+    ) -> py_path_local_LocalPath:
         """Fixture for mocking config.get_str('journaldir')."""
         def get_str(key: str, *, default: str = None) -> str:
             """Mock config.*Config get_str to provide fake journaldir."""
             if key == 'journaldir':
-                return tmpdir
+                return tmpdir_factory
 
             print('Other key, calling up ...')
             return config.get_str(key)  # Call the non-mocked
 
         with monkeypatch.context() as m:
             m.setattr(config, "get_str", get_str)
-            yield tmpdir
+            yield tmpdir_factory
 
     @pytest.fixture
     def mock_journaldir_changing(
             self,
             monkeypatch: _pytest_monkeypatch,
-            tmpdir_factory: _pytest_tmpdir.TempdirFactory
+            tmpdir_factory: _pytest_tmpdir.TempPathFactory
     ) -> py_path_local_LocalPath:
         """Fixture for mocking config.get_str('journaldir')."""
         def get_str(key: str, *, default: str = None) -> str:
