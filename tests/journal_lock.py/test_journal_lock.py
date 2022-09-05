@@ -200,9 +200,9 @@ class TestJournalLock:
         locked = jlock.obtain_lock()
         assert locked == JournalLockResult.LOCKED
         assert jlock.locked
-        assert jlock.release_lock()
 
         # Cleanup, to avoid side-effect on other tests
+        assert jlock.release_lock()
         os.unlink(str(jlock.journal_dir_lockfile_name))
 
     def test_obtain_lock_with_tmpdir_ro(self, mock_journaldir: py_path_local_LocalPath):
@@ -314,6 +314,9 @@ class TestJournalLock:
         with open(mock_journaldir / 'edmc-journal-lock.txt', mode='w+') as lf:
             assert _obtain_lock('release-lock', lf)
 
+        # Cleanup, to avoid side-effect on other tests
+        os.unlink(str(jlock.journal_dir_lockfile_name))
+
     def test_release_lock_not_locked(self, mock_journaldir: py_path_local_LocalPath):
         """Test JournalLock.release_lock() when not locked."""
         jlock = JournalLock()
@@ -350,7 +353,9 @@ class TestJournalLock:
         assert jlock.journal_dir != old_journaldir
         assert jlock.locked
 
+        # Cleanup, to avoid side-effect on other tests
         assert jlock.release_lock()
+        os.unlink(str(jlock.journal_dir_lockfile_name))
 
     def test_update_lock_same(self, mock_journaldir: py_path_local_LocalPath):
         """
@@ -370,3 +375,7 @@ class TestJournalLock:
         jlock.update_lock(None)  # type: ignore
         assert jlock.journal_dir == old_journaldir
         assert jlock.locked
+
+        # Cleanup, to avoid side-effect on other tests
+        assert jlock.release_lock()
+        os.unlink(str(jlock.journal_dir_lockfile_name))
