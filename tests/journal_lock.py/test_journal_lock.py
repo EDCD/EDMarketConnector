@@ -277,7 +277,7 @@ class TestJournalLock:
         continue_q: mp.Queue = mp.Queue()
         exit_q: mp.Queue = mp.Queue()
         locker = mp.Process(target=other_process_lock,
-                            args=(continue_q, exit_q, mock_journaldir)
+                            args=(continue_q, exit_q, mock_journaldir.getbasetemp())
                             )
         print('Starting sub-process other_process_lock()...')
         locker.start()
