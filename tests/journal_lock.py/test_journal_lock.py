@@ -200,10 +200,15 @@ class TestJournalLock:
         locked = jlock.obtain_lock()
         assert locked == JournalLockResult.LOCKED
         assert jlock.locked
+        assert jlock.release_lock()
+
+        # Cleanup, to avoid side-effect on other tests
+        os.unlink(str(jlock.journal_dir_lockfile_name))
 
     def test_obtain_lock_with_tmpdir_ro(self, mock_journaldir: py_path_local_LocalPath):
         """Test JournalLock.obtain_lock() with read-only tmpdir."""
-        tmpdir = mock_journaldir
+        tmpdir = str(mock_journaldir.getbasetemp())
+        print(f'{tmpdir=}')
 
         # Make tmpdir read-only ?
         if sys.platform == 'win32':
@@ -214,7 +219,7 @@ class TestJournalLock:
             # Fetch user details
             winuser, domain, type = win32security.LookupAccountName("", os.environ.get('USERNAME'))
             # Fetch the current security of tmpdir for that user.
-            sd = win32security.GetFileSecurity(str(tmpdir), win32security.DACL_SECURITY_INFORMATION)
+            sd = win32security.GetFileSecurity(tmpdir, win32security.DACL_SECURITY_INFORMATION)
             dacl = sd.GetSecurityDescriptorDacl()  # instead of dacl = win32security.ACL()
 
             # Add Write to Denied list
@@ -225,7 +230,7 @@ class TestJournalLock:
             dacl.AddAccessDeniedAce(win32security.ACL_REVISION, con.FILE_WRITE_DATA, winuser)
             # Apply that change.
             sd.SetSecurityDescriptorDacl(1, dacl, 0)  # may not be necessary
-            win32security.SetFileSecurity(str(tmpdir), win32security.DACL_SECURITY_INFORMATION, sd)
+            win32security.SetFileSecurity(tmpdir, win32security.DACL_SECURITY_INFORMATION, sd)
 
         else:
             import stat
@@ -251,7 +256,7 @@ class TestJournalLock:
                     dacl.DeleteAce(i)
                     # Apply that change.
                     sd.SetSecurityDescriptorDacl(1, dacl, 0)  # may not be necessary
-                    win32security.SetFileSecurity(str(tmpdir), win32security.DACL_SECURITY_INFORMATION, sd)
+                    win32security.SetFileSecurity(tmpdir, win32security.DACL_SECURITY_INFORMATION, sd)
                     break
 
                 i += 1
