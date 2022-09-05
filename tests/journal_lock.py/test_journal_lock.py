@@ -116,7 +116,7 @@ class TestJournalLock:
         def get_str(key: str, *, default: str = None) -> str:
             """Mock config.*Config get_str to provide fake journaldir."""
             if key == 'journaldir':
-                return str(tmp_path_factory)
+                return str(tmp_path_factory.getbasetemp())
 
             print('Other key, calling up ...')
             return config.get_str(key)  # Call the non-mocked
@@ -148,7 +148,8 @@ class TestJournalLock:
     # Tests against JournalLock.__init__()
     def test_journal_lock_init(self, mock_journaldir: py_path_local_LocalPath):
         """Test JournalLock instantiation."""
-        tmpdir = str(mock_journaldir)
+        print(f'{type(mock_journaldir)=}')
+        tmpdir = str(mock_journaldir.getbasetemp())
 
         jlock = JournalLock()
         # Check members are properly initialised.
@@ -343,6 +344,8 @@ class TestJournalLock:
         jlock.update_lock(None)  # type: ignore
         assert jlock.journal_dir != old_journaldir
         assert jlock.locked
+
+        assert jlock.release_lock()
 
     def test_update_lock_same(self, mock_journaldir: py_path_local_LocalPath):
         """
