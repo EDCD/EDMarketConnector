@@ -12,8 +12,8 @@ on:
     branches: [ develop ]
 
 jobs:
-  flake8:
-    runs-on: ubuntu-18.04
+  code-checks:
+    runs-on: ubuntu-22.04
 
     steps:
 
@@ -90,4 +90,12 @@ jobs:
         # this doesn't fail the build.
         # explicitly ignore docstring errors (start with D)
         git diff "refs/remotes/${BASE_REPO_OWNER}/${BASE_REF}" -- | flake8 . --count --statistics --diff --extend-ignore D
+    ####################################################################
+
+    ####################################################################
+    # Ensure all tests pass
+    ####################################################################
+    - name: PyTest tests
+      run: |
+        pytest
     ####################################################################

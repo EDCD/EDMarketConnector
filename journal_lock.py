@@ -182,7 +182,9 @@ class JournalLock:
         if hasattr(self, 'journal_dir_lockfile'):
             self.journal_dir_lockfile.close()
 
-        self.journal_dir_lockfile_name = None
+        # Doing this makes it impossible for tests to ensure the file
+        # is removed as a part of cleanup.  So don't.
+        # self.journal_dir_lockfile_name = None
         # Avoids type hint issues, see 'declaration' in JournalLock.__init__()
         # self.journal_dir_lockfile = None
 
