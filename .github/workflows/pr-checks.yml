@@ -91,3 +91,11 @@ jobs:
         # explicitly ignore docstring errors (start with D)
         git diff "refs/remotes/${BASE_REPO_OWNER}/${BASE_REF}" -- | flake8 . --count --statistics --diff --extend-ignore D
     ####################################################################
+
+    ####################################################################
+    # Ensure all tests pass
+    ####################################################################
+    - name: PyTest tests
+      run: |
+        pytest
+    ####################################################################
