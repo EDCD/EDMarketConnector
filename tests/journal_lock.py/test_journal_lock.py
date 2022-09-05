@@ -110,45 +110,45 @@ class TestJournalLock:
     @pytest.fixture
     def mock_journaldir(
         self, monkeypatch: _pytest_monkeypatch,
-        tmpdir_factory: _pytest_tmpdir.TempPathFactory
+        tmp_path_factory: _pytest_tmpdir.TempPathFactory
     ) -> py_path_local_LocalPath:
         """Fixture for mocking config.get_str('journaldir')."""
         def get_str(key: str, *, default: str = None) -> str:
             """Mock config.*Config get_str to provide fake journaldir."""
             if key == 'journaldir':
-                return tmpdir_factory
+                return str(tmp_path_factory)
 
             print('Other key, calling up ...')
             return config.get_str(key)  # Call the non-mocked
 
         with monkeypatch.context() as m:
             m.setattr(config, "get_str", get_str)
-            yield tmpdir_factory
+            yield tmp_path_factory
 
     @pytest.fixture
     def mock_journaldir_changing(
             self,
             monkeypatch: _pytest_monkeypatch,
-            tmpdir_factory: _pytest_tmpdir.TempPathFactory
+            tmp_path_factory: _pytest_tmpdir.TempPathFactory
     ) -> py_path_local_LocalPath:
         """Fixture for mocking config.get_str('journaldir')."""
         def get_str(key: str, *, default: str = None) -> str:
             """Mock config.*Config get_str to provide fake journaldir."""
             if key == 'journaldir':
-                return tmpdir_factory.mktemp("changing")
+                return tmp_path_factory.mktemp("changing")
 
             print('Other key, calling up ...')
             return config.get_str(key)  # Call the non-mocked
 
         with monkeypatch.context() as m:
             m.setattr(config, "get_str", get_str)
-            yield tmpdir_factory
+            yield tmp_path_factory
 
     ###########################################################################
     # Tests against JournalLock.__init__()
     def test_journal_lock_init(self, mock_journaldir: py_path_local_LocalPath):
         """Test JournalLock instantiation."""
-        tmpdir = mock_journaldir
+        tmpdir = str(mock_journaldir)
 
         jlock = JournalLock()
         # Check members are properly initialised.
