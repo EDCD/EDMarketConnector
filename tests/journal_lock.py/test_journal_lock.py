@@ -352,6 +352,7 @@ class TestJournalLock:
         # Now store the 'current' journaldir for reference and attempt
         # to update to a new one.
         old_journaldir = jlock.journal_dir
+        old_journaldir_lockfile_name = jlock.journal_dir_lockfile_name
         jlock.update_lock(None)  # type: ignore
         assert jlock.journal_dir != old_journaldir
         assert jlock.locked
@@ -359,6 +360,8 @@ class TestJournalLock:
         # Cleanup, to avoid side-effect on other tests
         assert jlock.release_lock()
         os.unlink(str(jlock.journal_dir_lockfile_name))
+        # And the old_journaldir's lockfile too
+        os.unlink(str(old_journaldir_lockfile_name))
 
     def test_update_lock_same(self, mock_journaldir: py_path_local_LocalPath):
         """
