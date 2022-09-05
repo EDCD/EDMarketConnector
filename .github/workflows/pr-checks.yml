@@ -12,7 +12,7 @@ on:
     branches: [ develop ]
 
 jobs:
-  flake8:
+  code-checks:
     runs-on: ubuntu-22.04
 
     steps:
