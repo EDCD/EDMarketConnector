@@ -69,6 +69,9 @@ def other_process_lock(continue_q: mp.Queue, exit_q: mp.Queue, lockfile: pathlib
         print('sub-process: Waiting for exit signal...')
         exit_q.get(block=True, timeout=None)
 
+        # And clean up
+        os.unlink(lockfile / 'edmc-journal-lock.txt')
+
 
 def _obtain_lock(prefix: str, filehandle) -> bool:
     """
@@ -311,7 +314,7 @@ class TestJournalLock:
         assert jlock.release_lock()
 
         # And finally check it actually IS unlocked.
-        with open(mock_journaldir / 'edmc-journal-lock.txt', mode='w+') as lf:
+        with open(mock_journaldir.getbasetemp() / 'edmc-journal-lock.txt', mode='w+') as lf:
             assert _obtain_lock('release-lock', lf)
 
         # Cleanup, to avoid side-effect on other tests
