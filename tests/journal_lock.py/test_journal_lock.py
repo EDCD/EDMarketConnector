@@ -70,6 +70,7 @@ def other_process_lock(continue_q: mp.Queue, exit_q: mp.Queue, lockfile: pathlib
         exit_q.get(block=True, timeout=None)
 
         # And clean up
+        _release_lock('sub-process', lf)
         os.unlink(lockfile / 'edmc-journal-lock.txt')
 
 
@@ -329,6 +330,8 @@ class TestJournalLock:
         # Fails on Linux, because flock(2) is per process, so we'd need to
         # use multiprocessing to test this.
         assert second_attempt == JournalLockResult.ALREADY_LOCKED
+        # And need to release any handles on the lockfile
+        jlock.journal_dir_lockfile.close()
         print('Telling sub-process to quit...')
         exit_q.put('quit')
         print('Waiting for sub-process...')
