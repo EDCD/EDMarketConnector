@@ -104,6 +104,40 @@ def _obtain_lock(prefix: str, filehandle) -> bool:
             return False
 
     return True
+
+
+def _release_lock(prefix: str, filehandle) -> bool:
+    """
+    Release the JournalLock.
+
+    :param prefix: str - what to prefix output with.
+    :param filehandle: File handle already open on the lockfile.
+    :return: bool - True if we released the lock.
+    """
+    if sys.platform == 'win32':
+        print(f'{prefix}: On win32')
+        import msvcrt
+        try:
+            print(f'{prefix}: Trying msvcrt.locking() ...')
+            filehandle.seek(0)
+            msvcrt.locking(filehandle.fileno(), msvcrt.LK_UNLCK, 4096)
+
+        except Exception as e:
+            print(f'{prefix}: Unable to unlock file: {e!r}')
+            return False
+
+    else:
+        import fcntl
+
+        print(f'{prefix}: Not win32, using fcntl')
+        try:
+            fcntl.flock(filehandle, fcntl.LOCK_UN)
+
+        except Exception as e:
+            print(f'{prefix}: Unable to unlock file: {e!r}')
+            return False
+
+    return True
 ###########################################################################
 
 
@@ -316,6 +350,7 @@ class TestJournalLock:
         # And finally check it actually IS unlocked.
         with open(mock_journaldir.getbasetemp() / 'edmc-journal-lock.txt', mode='w+') as lf:
             assert _obtain_lock('release-lock', lf)
+            assert _release_lock('release-lock', lf)
 
         # Cleanup, to avoid side-effect on other tests
         os.unlink(str(jlock.journal_dir_lockfile_name))
