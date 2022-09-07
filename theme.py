@@ -115,6 +115,7 @@ elif sys.platform == 'linux':
 class _Theme(object):
 
     def __init__(self):
+        self.ttk_style = None
         self.active = None  # Starts out with no theme
         self.minwidth = None
         self.widgets = {}
@@ -183,6 +184,10 @@ class _Theme(object):
         if isinstance(widget, tk.Frame) or isinstance(widget, ttk.Frame):
             for child in widget.winfo_children():
                 self.register(child)
+
+        # This class is an import-time singleton, so can't do this in __init__
+        # as tkinter won't have been at all set up by then.
+        self.ttk_style = ttk.Style()
 
     def register_alternate(self, pair, gridopts):
         self.widgets_pair.append((pair, gridopts))
@@ -430,6 +435,16 @@ class _Theme(object):
         if not self.minwidth:
             self.minwidth = root.winfo_width()  # Minimum width = width on first creation
             root.minsize(self.minwidth, -1)
+
+        #######################################################################
+        # Update our ttk.Style
+        #
+        # Ref: <https://stackoverflow.com/a/54476816>
+        # Ref: <https://tkdocs.com/shipman/ttk-style-layer.html>
+        ######################################################################
+        self.ttk_style.configure('TSizegrip', background=self.current['background'])
+        self.ttk_style.configure('TSizegrip', foreground=self.current['foreground'])
+        #######################################################################
 
 
 # singleton
