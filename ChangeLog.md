@@ -9,7 +9,7 @@ produce the Windows executables and installer.
 
 ---
 
-* We now test against, and package with, Python 3.10.6.
+* We now test against, and package with, Python 3.10.7.
 
   **As a consequence of this we no longer support Windows 7.  
   This is due to
@@ -30,7 +30,7 @@ produce the Windows executables and installer.
 Pre-Release 5.4.2-rc1
 ===
 
-* We now test against, and package with, Python 3.10.6.
+* We now test against, and package with, Python 3.10.7.
 
 Release 5.4.1
 ===
