@@ -298,17 +298,17 @@ class _Theme(object):
 
             elif 'cursor' in widget.keys() and str(widget['cursor']) not in ['', 'arrow']:
                 # Hack - highlight widgets like HyperlinkLabel with a non-default cursor
-                if 'fg' not in attribs:
+                if 'fg' not in attribs and 'foreground' in widget.keys():
                     widget.configure(foreground=self.current['highlight']),
                     if 'insertbackground' in widget.keys():  # tk.Entry
                         widget.configure(insertbackground=self.current['foreground']),
 
-                if 'bg' not in attribs:
+                if 'bg' not in attribs and 'background' in widget.keys():
                     widget.configure(background=self.current['background'])
                     if 'highlightbackground' in widget.keys():  # tk.Entry
                         widget.configure(highlightbackground=self.current['background'])
 
-                if 'font' not in attribs:
+                if 'font' not in attribs and 'font' in widget.keys():
                     widget.configure(font=self.current['font'])
 
             elif 'activeforeground' in widget.keys():
