@@ -37,7 +37,7 @@ lxml==4.9.1
 # We only need py2exe on windows.
 # Pre-release version addressing semantic_version 2.9.0+ issues:
 # <https://github.com/py2exe/py2exe/issues/126>
-py2exe==0.11.1.1; sys_platform == 'win32'
+py2exe==0.12.0.1; sys_platform == 'win32'
 
 # Testing
 pytest==7.1.3
