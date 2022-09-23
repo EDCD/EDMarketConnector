@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 """Build to executables and MSI installer using py2exe and other tools."""
-import codecs
 import os
 import pathlib
 import platform
@@ -9,22 +8,31 @@ import shutil
 import sys
 from os.path import exists, isdir, join
 from tempfile import gettempdir
-from typing import Any, Generator, Set
 
 from lxml import etree
 from py2exe import freeze
 
-from config import (
-    appcmdname, applongname, appname, appversion, appversion_nobuild, copyright, git_shorthash_from_head, update_feed,
-    update_interval
-)
+from config import appcmdname, appname, appversion, appversion_nobuild, copyright, git_shorthash_from_head
 from constants import GITVERSION_FILE
 
+###########################################################################
+# Check we're on a supported platform
+###########################################################################
 if sys.version_info[0:2] != (3, 10):
     raise AssertionError(f'Unexpected python version {sys.version}')
 
+if sys.platform == 'win32':
+    assert platform.architecture()[0] == '32bit', 'Assumes a Python built for 32bit'
+    import py2exe  # noqa: F401 # Yes, this *is* used
+    dist_dir = 'dist.win32'
+
+else:
+    assert False, f'Unsupported platform {sys.platform}'
+###########################################################################
+
 ###########################################################################
 # Retrieve current git short hash and store in file GITVERSION_FILE
+###########################################################################
 git_shorthash = git_shorthash_from_head()
 if git_shorthash is None:
     exit(-1)
@@ -35,54 +43,28 @@ with open(GITVERSION_FILE, 'w+', encoding='utf-8') as gvf:
 print(f'Git short hash: {git_shorthash}')
 ###########################################################################
 
-if sys.platform == 'win32':
-    assert platform.architecture()[0] == '32bit', 'Assumes a Python built for 32bit'
-    import py2exe  # noqa: F401 # Yes, this *is* used
-    dist_dir = 'dist.win32'
-
-elif sys.platform == 'darwin':
-    dist_dir = 'dist.macosx'
-
-else:
-    assert False, f'Unsupported platform {sys.platform}'
-
+###########################################################################
+# Misc. Configuration
+###########################################################################
 # Split version, as py2exe wants the 'base' for version
 semver = appversion()
 appversion_str = str(semver)
 base_appversion = str(semver.truncate('patch'))
 
+# Ensure a clean `dist_dir` by first removing it.
 if dist_dir and len(dist_dir) > 1 and isdir(dist_dir):
     shutil.rmtree(dist_dir)
-
-# "Developer ID Application" name for signing
-macdeveloperid = None
 
 # Windows paths
 WIXPATH = r'C:\Program Files (x86)\WiX Toolset v3.11\bin'
 SDKPATH = r'C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x86'
+###########################################################################
 
-# OSX paths
-SPARKLE = '/Library/Frameworks/Sparkle.framework'
+###########################################################################
 
-if sys.platform == 'darwin':
-    # Patch py2app recipe enumerator to skip the sip recipe since it's too
-    # enthusiastic - we'll list additional Qt modules explicitly
-    import py2app.build_app
-    from py2app import recipes
-
-    # NB: 'Any' is because I don't have MacOS docs
-    def iter_recipes(module=recipes) -> Generator[str, Any]:
-        """Enumerate recipes via alternate method."""
-        for name in dir(module):
-            if name.startswith('_') or name == 'sip':
-                continue
-            check = getattr(getattr(module, name), 'check', None)
-            if check is not None:
-                yield (name, check)
-
-    py2app.build_app.iterRecipes = iter_recipes
-
-
+###########################################################################
+# Set up all the options, extra files etc. for py2exe build.
+###########################################################################
 APP = 'EDMarketConnector.py'
 APPCMD = 'EDMC.py'
 PLUGINS = [
@@ -94,91 +76,8 @@ PLUGINS = [
     'plugins/inara.py',
 ]
 
-if sys.platform == 'darwin':
-    def get_cfbundle_localizations() -> Set:
-        """
-        Build a set of the localisation files.
-
-        See https://github.com/sparkle-project/Sparkle/issues/238
-        """
-        return sorted(
-            (
-                [x[:-len('.lproj')] for x in os.listdir(join(SPARKLE, 'Resources')) if x.endswith('.lproj')]
-            ) | (
-                [x[:-len('.strings')] for x in os.listdir('L10n') if x.endswith('.strings')]
-            )
-        )
-
-    OPTIONS = {
-        'py2app': {
-            'dist_dir': dist_dir,
-            'optimize': 2,
-            'packages': [
-                'requests',
-                'sqlite3',  # Included for plugins
-            ],
-            'includes': [
-                'shutil',  # Included for plugins
-                'zipfile',  # Included for plugins
-            ],
-            'frameworks': [
-                'Sparkle.framework'
-            ],
-            'excludes': [
-                'distutils',
-                '_markerlib',
-                'PIL',
-                'pkg_resources',
-                'simplejson',
-                'unittest'
-            ],
-            'iconfile': f'{appname}.icns',
-            'include_plugins': [
-                ('plugins', x) for x in PLUGINS
-            ],
-            'resources': [
-                '.gitversion',  # Contains git short hash
-                'ChangeLog.md',
-                'snd_good.wav',
-                'snd_bad.wav',
-                'modules.p',
-                'ships.p',
-                ('FDevIDs', [
-                    join('FDevIDs', 'commodity.csv'),
-                    join('FDevIDs', 'rare_commodity.csv'),
-                ]),
-            ],
-            'site_packages': False,
-            'plist': {
-                'CFBundleName': applongname,
-                'CFBundleIdentifier': f'uk.org.marginal.{appname.lower()}',
-                'CFBundleLocalizations': get_cfbundle_localizations(),
-                'CFBundleShortVersionString': appversion_str,
-                'CFBundleVersion':  appversion_str,
-                'CFBundleURLTypes': [
-                    {
-                        'CFBundleTypeRole': 'Viewer',
-                        'CFBundleURLName': f'uk.org.marginal.{appname.lower()}.URLScheme',
-                        'CFBundleURLSchemes': [
-                            'edmc'
-                        ],
-                    }
-                ],
-                'LSMinimumSystemVersion': '10.10',
-                'NSAppleScriptEnabled': True,
-                'NSHumanReadableCopyright': copyright,
-                'SUEnableAutomaticChecks': True,
-                'SUShowReleaseNotes': True,
-                'SUAllowsAutomaticUpdates': False,
-                'SUFeedURL': update_feed,
-                'SUScheduledCheckInterval': update_interval,
-            },
-            'graph': True,  # output dependency graph in dist
-        }
-    }
-    DATA_FILES = []
-
-elif sys.platform == 'win32':
+# Ensure this fails on non-win32
+if sys.platform == 'win32':
     OPTIONS = {
         'py2exe': {
             'dist_dir': dist_dir,
@@ -231,6 +130,13 @@ elif sys.platform == 'win32':
         ('plugins', PLUGINS),
     ]
 
+else:
+    raise AssertionError('Unsupported platform')
+###########################################################################
+
+###########################################################################
+# Use py2exe's `freeze()` to produce the executables.
+###########################################################################
 freeze(
     version_info={
         'description': 'Downloads commodity market and other station data from the game Elite Dangerous for use with'
@@ -260,32 +166,14 @@ freeze(
     data_files=DATA_FILES,
     options=OPTIONS,
 )
+###########################################################################
 
+###########################################################################
+# Build installer(s)
+###########################################################################
 package_filename = None
-if sys.platform == 'darwin':
-    if isdir(f'{dist_dir}/{applongname}.app'):  # from CFBundleName
-        os.rename(f'{dist_dir}/{applongname}.app', f'{dist_dir}/{appname}.app')
-
-        # Generate OSX-style localization files
-        for x in os.listdir('L10n'):
-            if x.endswith('.strings'):
-                lang = x[:-len('.strings')]
-                path = f'{dist_dir}/{appname}.app/Contents/Resources/{lang}.lproj'
-                os.mkdir(path)
-                codecs.open(
-                    f'{path}/Localizable.strings',
-                    'w',
-                    'utf-16'
-                ).write(codecs.open(f'L10n/{x}', 'r', 'utf-8').read())
-
-        if macdeveloperid:
-            os.system(f'codesign --deep -v -s "Developer ID Application: {macdeveloperid}" {dist_dir}/{appname}.app')
-
-        # Make zip for distribution, preserving signature
-        package_filename = f'{appname}_mac_{appversion_nobuild()}.zip'
-        os.system(f'cd {dist_dir}; ditto -ck --keepParent --sequesterRsrc {appname}.app ../{package_filename}; cd ..')
-
-elif sys.platform == 'win32':
+# Ensure this fails on non-win32
+if sys.platform == 'win32':
     template_file = pathlib.Path('wix/template.wxs')
     components_file = pathlib.Path('wix/components.wxs')
     final_wxs_file = pathlib.Path('EDMarketConnector.wxs')
@@ -416,3 +304,4 @@ elif sys.platform == 'win32':
 
 else:
     raise AssertionError('Unsupported platform')
+###########################################################################
