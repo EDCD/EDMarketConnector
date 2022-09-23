@@ -38,7 +38,7 @@ jobs:
 
       - name: Build EDMC
         run: |
-          python setup.py py2exe
+          python Build-exe-and-msi.py
 
       - name: Upload build files
         uses: actions/upload-artifact@v3
