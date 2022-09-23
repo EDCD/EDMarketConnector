@@ -232,16 +232,21 @@ elif sys.platform == 'win32':
     ]
 
 freeze(
+    version_info={
+        'description': 'Downloads commodity market and other station data from the game Elite Dangerous for use with'
+                       ' all popular online and offline trading tools.',
+        'company_name': 'EDCD',  # Used by WinSparkle
+        'product_name': appname,  # Used by WinSparkle
+        'version': base_appversion,
+        'product_version': appversion_str,
+        'copyright': copyright,
+        'language': 'English (United States)',
+    },
     windows=[
         {
             'dest_base': appname,
             'script': APP,
             'icon_resources': [(0, f'{appname}.ico')],
-            'company_name': 'EDCD',  # Used by WinSparkle
-            'product_name': appname,  # Used by WinSparkle
-            'version': base_appversion,
-            'product_version': appversion_str,
-            'copyright': copyright,
             'other_resources': [(24, 1, open(f'{appname}.manifest').read())],
         }
     ],
@@ -249,11 +254,6 @@ freeze(
         {
             'dest_base': appcmdname,
             'script': APPCMD,
-            'company_name': 'EDCD',
-            'product_name': appname,
-            'version': base_appversion,
-            'product_version': appversion_str,
-            'copyright': copyright,
             'other_resources': [(24, 1, open(f'{appcmdname}.manifest').read())],
         }
     ],
