@@ -36,13 +36,62 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 5.4.1</title>
+			<title>Release 5.5.0</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
 
-<p>We now test against, and package with, Python 3.10.5.</p>
+<p>We now test against, and package with, Python 3.10.7.</p>
 <p><strong>As a consequence of this we no longer support Windows 7.</strong><br>
+
+<h2>Release 5.5.0</h2>
+<ul>
+<li><a href="https://www.virustotal.com/gui/file/fadbbc742530863396dabc4813fe80103dd149b9e05e7df9fcbf13ed62f64b9b?nocache=1">Virus Total scan results</a> for this release.</li>
+<li>We now test against, and package with, Python 3.10.7.</li>
+<li>EDDN: Support added for the <code>FCMaterials</code> schemas to aid third-party sites in
+offering searches for where to buy and sell Odyssey Micro Resources,
+including on Fleet Carriers with the bar tender facility.</li>
+</ul>
+<h2><a id="user-content-bug-fixes" class="anchor" aria-hidden="true" href="#bug-fixes"><span aria-hidden="true" class="octicon octicon-link"></span></a>Bug Fixes</h2>
+<ul>
+<li>EDDN: Abort <code>fsssignaldiscovered</code> sending of message if no signals passed
+the checks.</li>
+<li>EDDN: Add Horizons check for location on <code>fsssignaldiscovered</code> messages.</li>
+<li>Don't alert the user if the first attempted load of <code>NavRoute.json</code> contains
+no route.</li>
+<li>Inara: Don't set <code>marketID</code> for <code>ApproachSettlement</code> unless it's actually
+present in the event.</li>
+</ul>
+<h2><a id="user-content-plugin-developers" class="anchor" aria-hidden="true" href="#plugin-developers"><span aria-hidden="true" class="octicon octicon-link"></span></a>Plugin Developers</h2>
+<ul>
+<li>
+<p>We now build using the new, <code>setuptools</code> mediated py2exe <code>freeze()</code> method,
+so we're in the clear for when <code>distutils</code> is removed in Python 3.12.</p>
+<p>This shouldn't have any adverse effects on plugins, i.e. all of the same
+Python modules are still packaged as before.</p>
+</li>
+<li>
+<p>Support has been added for the <code>NavRouteClear</code> event.  We <em>do</em> send this
+through to plugins, so that they know the player has cleared the route,
+<strong>but we keep the previously plotted route details in <code>state['NavRoute']</code>.</strong></p>
+</li>
+<li>
+<p>The documentation of the return type of <code>journal_entry()</code> has been corrected
+to <code>Optional[str]</code>.</p>
+</li>
+<li>
+<p>FDevIDs files (<code>commodity.csv</code> <code>rare_commodity.csv</code>) updated to latest
+versions.</p>
+</li>
+</ul>
+<h2><a id="user-content-developers" class="anchor" aria-hidden="true" href="#developers"><span aria-hidden="true" class="octicon octicon-link"></span></a>Developers</h2>
+<ul>
+<li>We now build using the new, <code>setuptools</code> mediated py2exe <code>freeze()</code> method,
+so we're in the clear for when <code>distutils</code> is removed in Python 3.12.</li>
+<li>The old <code>setup.py</code> file, along with associated <code>py2exe.cmd</code> have been removed
+in favour of the new <code>Build-exe-and-msi.py</code> file.  Documentation updated.</li>
+</ul>
+<hr>
 
 <h2>Release 5.4.1</h2>
 <ul>
@@ -1395,11 +1444,11 @@ about this:
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.4.1/EDMarketConnector_win_5.4.1.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.5.0/EDMarketConnector_win_5.5.0.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="5.4.1"
-				length="16879616"
+				sparkle:version="5.5.0"
+				length="17154048"
 				type="application/octet-stream"
 			/>
 		</item>
