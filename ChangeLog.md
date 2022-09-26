@@ -27,10 +27,47 @@ produce the Windows executables and installer.
 
 ---
 
-Pre-Release 5.4.2-rc1
+Release 5.5.0
 ===
 
 * We now test against, and package with, Python 3.10.7.
+* EDDN: Support added for the `FCMaterials` schemas to aid third-party sites in
+   offering searches for where to buy and sell Odyssey Micro Resources,
+   including on Fleet Carriers with the bar tender facility.
+
+Bug Fixes
+---
+* EDDN: Abort `fsssignaldiscovered` sending of message if no signals passed
+   the checks.
+* EDDN: Add Horizons check for location on `fsssignaldiscovered` messages.
+* Don't alert the user if the first attempted load of `NavRoute.json` contains
+   no route.
+* Inara: Don't set `marketID` for `ApproachSettlement` unless it's actually
+   present in the event.
+
+Plugin Developers
+---
+* We now build using the new, `setuptools` mediated py2exe `freeze()` method,
+  so we're in the clear for when `distutils` is removed in Python 3.12.
+
+   This shouldn't have any adverse effects on plugins, i.e. all of the same
+   Python modules are still packaged as before.
+* Support has been added for the `NavRouteClear` event.  We *do* send this
+   through to plugins, so that they know the player has cleared the route,
+   **but we keep the previously plotted route details in `state['NavRoute']`.**
+* The documentation of the return type of `journal_entry()` has been corrected
+   to `Optional[str]`.
+* FDevIDs files (`commodity.csv` `rare_commodity.csv`) updated to latest
+   versions.
+
+Developers
+---
+* We now build using the new, `setuptools` mediated py2exe `freeze()` method,
+  so we're in the clear for when `distutils` is removed in Python 3.12.
+* The old `setup.py` file, along with associated `py2exe.cmd` have been removed
+   in favour of the new `Build-exe-and-msi.py` file.  Documentation updated.
+
+---
 
 Release 5.4.1
 ===
