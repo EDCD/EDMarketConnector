@@ -61,8 +61,9 @@ You will need several pieces of software installed, or the files from their
 
 If you are using different versions of any of these tools then please ensure
 that the paths where they're installed match the associated lines in
-`setup.py`.  i.e. if you're using later WiX you might need to edit the WIXPATH
-line, and likewise the SDKPATH line if you're using a later Windows SDK kit.
+`Build-exe-and-msi.py`.  i.e. if you're using later WiX you might need to edit
+the WIXPATH line, and likewise the SDKPATH line if you're using a later
+Windows SDK kit.
 
 # Version Strings
 
@@ -99,13 +100,13 @@ resulting .exe and/or .msi files. **But** realise that the resulting program
 will still try to check for new versions at the main URL unless you change
 that.
 
-1. Company is set in  `setup.py`. Search for `company_name`.  This is what
- appears in the EXE properties, and is also used as the location of WinSparkle
- registry entries on Windows.
+1. Company is set in  `Build-exe-and-msi.py`. Search for `company_name`.  This
+ is what appears in the EXE properties, and is also used as the location of
+ WinSparkle registry entries on Windows.
 
 1. Application names, version and URL of the file with latest release
  information. These are all in the `config/__init__.py` file.  See the
- `from config import ...` lines in setup.py.
+ `from config import ...` lines in `Build-exe-and-msi.py`:
     1. `appname`: The short appname, e.g. 'EDMarketConnector'
     2. `applongname`: The long appname, e.g. 'E:D Market Connector'
     3. `appcmdname`: The CLI appname, e.g. 'EDMC'
@@ -143,10 +144,10 @@ that.
 If you add a new file to the program that needs to be distributed to users as
 well then you will need to properly add it to the build process.
 
-### setup.py
+### Build-exe-and-msi.py
 
-You'll need to add it in setup.py so that py2exe includes it in the build.
-Add the file to the DATA_FILES statement.
+You'll need to add it in `Build-exe-and-msi.py` so that py2exe includes it in
+the build.  Add the file to the DATA_FILES statement.
 
 ### WiX
 
@@ -257,38 +258,46 @@ a 'Git bash' window.  The 'Terminal' tab of PyCharm works fine.
 Assuming the correct python.exe is associated with .py files then simply run:
 
 ```batch
-setup.py py2exe
+Build-exe-and-msi.py
 ```
 
 else you might need this, which assumes correct python.exe is in your PATH:
 
 ```batch
-python.exe setup.py py2exe
+python.exe Build-exe-and-msi.py
 ```
 
 else you'll have to specify the path to python.exe, e.g.:
 
 ```batch
-"C:\Program Files \(x86)\Python38-32\python.exe" setup.py py2exe
+"C:\Program Files \(x86)\Python38-32\python.exe" Build-exe-and-msi.py
 ```
 
 Output will be something like (`...` denoting parts elided for brevity):
 
 ```plaintext
-running py2exe
+Git short hash: 993f946b.DIRTY
+INFO:runtime:Analyzing the code
+INFO:runtime:Found 695 modules, 60 are missing, 0 may be missing
 ...
 Building 'dist.win32\EDMC.exe'.
 Building 'dist.win32\EDMarketConnector.exe'.
-Building shared code archive 'dist.win32\library.zip'.
 ...
-Windows Installer XML Toolset Compiler version 3.11.1.2318
+Windows Installer XML Toolset Toolset Harvester version 3.11.2.4516
+Copyright (c) .NET Foundation and contributors. All rights reserved.
+
+Windows Installer XML Toolset Compiler version 3.11.2.4516
+Copyright (c) .NET Foundation and contributors. All rights reserved.
+
+EDMarketConnector.wxs
+Windows Installer XML Toolset Linker version 3.11.2.4516
 Copyright (c) .NET Foundation and contributors. All rights reserved.
 ...
-Package language = 1033,1029,1031,1034,1035,1036,1038,1040,1041,1043,1045,1046,1049,1058,1062,2052,2070,2074,0, ProductLanguage = 1029, Database codepage = 0
+Package language = 1033,1029,1031,1034,1035,1036,1038,1040,1041,1043,1045,1046,1049,1058,1062,2052,2070,2074,6170,1060,1053,18,0, ProductLanguage = 1029, Database codepage = 0
 MsiTran V 5.0
 Copyright (c) Microsoft Corporation. All Rights Reserved
 ...
-DonePackage language = 1033,1029,1031,1034,1035,1036,1038,1040,1041,1043,1045,1046,1049,1058,1062,2052,2070,2074,0, ProductLanguage = 0, Database codepage = 0
+DonePackage language = 1033,1029,1031,1034,1035,1036,1038,1040,1041,1043,1045,1046,1049,1058,1062,2052,2070,2074,6170,1060,1053,18,0, ProductLanguage = 0, Database codepage = 0
 MsiTran V 5.0
 Copyright (c) Microsoft Corporation. All Rights Reserved
 
@@ -297,7 +306,8 @@ Done
 
 **Do check the output** for things like not properly specifying extra files
 to be included in the install.  If they're not picked up by current rules in
-`setup.py` then you will need to add them to the `win32` `DATA_FILES` array.
+`Build-exe-and-msi.py` then you will need to add them to the `win32`
+`DATA_FILES` array.
 
 You should now have one new/updated folder `dist.win32` and two new files
 (version string dependent): `EDMarketConnector_win_4.0.2.msi` and
@@ -444,7 +454,7 @@ When changing the Python version (Major.Minor.Patch) used:
 
 1. Major or Minor level changes:
 
-    1. `setup.py` will need its version check updating.
+    1. `Build-exe-and-msi.py` will need its version check updating.
     2. `EDMarketConnector.wxs` will need updating to reference the correct
        pythonXX.dll file.
     3. `.pre-commit-config.yaml` will need the `default_language_version`

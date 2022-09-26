@@ -1,33 +1,4 @@
-"""
-Tests for journal_lock.py code.
-
-Tests:
- - Is file actually locked after obtain_lock().  Problem: We opened the
-    file in a manner which means nothing else can open it.  Also I assume
-    that the same process will either be allowed to lock it 'again' or
-    overwrite the lock.
-
-    Expected failures if:
-
-     1. Lock already held (elsewhere).
-     2. Can't open lock file 'w+'.
-     3. Path to lock file doesn't exist.
-     4. journaldir is None (default on Linux).
-
- - Does release_lock() work?  Easier to test, if it's worked....
-     1. return True if not locked.
-     2. return True if locked, but successful unlock.
-     3. return False otherwise.
-
- - JournalLock.set_path_from_journaldir
-     1. When journaldir is None.
-     2. Succeeds otherwise?
-
- - Can any string to pathlib.Path result in an invalid path for other
-   operations?
-
- - Not sure about testing JournalAlreadyLocked class.
-"""
+"""Tests for journal_lock.py code."""
 import multiprocessing as mp
 import os
 import pathlib
@@ -69,6 +40,10 @@ def other_process_lock(continue_q: mp.Queue, exit_q: mp.Queue, lockfile: pathlib
         print('sub-process: Waiting for exit signal...')
         exit_q.get(block=True, timeout=None)
 
+        # And clean up
+        _release_lock('sub-process', lf)
+        os.unlink(lockfile / 'edmc-journal-lock.txt')
+
 
 def _obtain_lock(prefix: str, filehandle) -> bool:
     """
@@ -101,6 +76,40 @@ def _obtain_lock(prefix: str, filehandle) -> bool:
             return False
 
     return True
+
+
+def _release_lock(prefix: str, filehandle) -> bool:
+    """
+    Release the JournalLock.
+
+    :param prefix: str - what to prefix output with.
+    :param filehandle: File handle already open on the lockfile.
+    :return: bool - True if we released the lock.
+    """
+    if sys.platform == 'win32':
+        print(f'{prefix}: On win32')
+        import msvcrt
+        try:
+            print(f'{prefix}: Trying msvcrt.locking() ...')
+            filehandle.seek(0)
+            msvcrt.locking(filehandle.fileno(), msvcrt.LK_UNLCK, 4096)
+
+        except Exception as e:
+            print(f'{prefix}: Unable to unlock file: {e!r}')
+            return False
+
+    else:
+        import fcntl
+
+        print(f'{prefix}: Not win32, using fcntl')
+        try:
+            fcntl.flock(filehandle, fcntl.LOCK_UN)
+
+        except Exception as e:
+            print(f'{prefix}: Unable to unlock file: {e!r}')
+            return False
+
+    return True
 ###########################################################################
 
 
@@ -108,44 +117,48 @@ class TestJournalLock:
     """JournalLock test class."""
 
     @pytest.fixture
-    def mock_journaldir(self, monkeypatch: _pytest_monkeypatch, tmpdir: _pytest_tmpdir) -> py_path_local_LocalPath:
-        """Fixture for mocking config.get_str('journaldir')."""
-        def get_str(key: str, *, default: str = None) -> str:
-            """Mock config.*Config get_str to provide fake journaldir."""
-            if key == 'journaldir':
-                return tmpdir
-
-            print('Other key, calling up ...')
-            return config.get_str(key)  # Call the non-mocked
-
-        with monkeypatch.context() as m:
-            m.setattr(config, "get_str", get_str)
-            yield tmpdir
-
-    @pytest.fixture
-    def mock_journaldir_changing(
-            self,
-            monkeypatch: _pytest_monkeypatch,
-            tmpdir_factory: _pytest_tmpdir.TempdirFactory
+    def mock_journaldir(
+        self, monkeypatch: _pytest_monkeypatch,
+        tmp_path_factory: _pytest_tmpdir.TempPathFactory
     ) -> py_path_local_LocalPath:
         """Fixture for mocking config.get_str('journaldir')."""
         def get_str(key: str, *, default: str = None) -> str:
             """Mock config.*Config get_str to provide fake journaldir."""
             if key == 'journaldir':
-                return tmpdir_factory.mktemp("changing")
+                return str(tmp_path_factory.getbasetemp())
 
             print('Other key, calling up ...')
             return config.get_str(key)  # Call the non-mocked
 
         with monkeypatch.context() as m:
             m.setattr(config, "get_str", get_str)
-            yield tmpdir_factory
+            yield tmp_path_factory
+
+    @pytest.fixture
+    def mock_journaldir_changing(
+            self,
+            monkeypatch: _pytest_monkeypatch,
+            tmp_path_factory: _pytest_tmpdir.TempPathFactory
+    ) -> py_path_local_LocalPath:
+        """Fixture for mocking config.get_str('journaldir')."""
+        def get_str(key: str, *, default: str = None) -> str:
+            """Mock config.*Config get_str to provide fake journaldir."""
+            if key == 'journaldir':
+                return tmp_path_factory.mktemp("changing")
+
+            print('Other key, calling up ...')
+            return config.get_str(key)  # Call the non-mocked
+
+        with monkeypatch.context() as m:
+            m.setattr(config, "get_str", get_str)
+            yield tmp_path_factory
 
     ###########################################################################
     # Tests against JournalLock.__init__()
     def test_journal_lock_init(self, mock_journaldir: py_path_local_LocalPath):
         """Test JournalLock instantiation."""
-        tmpdir = mock_journaldir
+        print(f'{type(mock_journaldir)=}')
+        tmpdir = str(mock_journaldir.getbasetemp())
 
         jlock = JournalLock()
         # Check members are properly initialised.
@@ -197,9 +210,14 @@ class TestJournalLock:
         assert locked == JournalLockResult.LOCKED
         assert jlock.locked
 
+        # Cleanup, to avoid side-effect on other tests
+        assert jlock.release_lock()
+        os.unlink(str(jlock.journal_dir_lockfile_name))
+
     def test_obtain_lock_with_tmpdir_ro(self, mock_journaldir: py_path_local_LocalPath):
         """Test JournalLock.obtain_lock() with read-only tmpdir."""
-        tmpdir = mock_journaldir
+        tmpdir = str(mock_journaldir.getbasetemp())
+        print(f'{tmpdir=}')
 
         # Make tmpdir read-only ?
         if sys.platform == 'win32':
@@ -210,7 +228,7 @@ class TestJournalLock:
             # Fetch user details
             winuser, domain, type = win32security.LookupAccountName("", os.environ.get('USERNAME'))
             # Fetch the current security of tmpdir for that user.
-            sd = win32security.GetFileSecurity(str(tmpdir), win32security.DACL_SECURITY_INFORMATION)
+            sd = win32security.GetFileSecurity(tmpdir, win32security.DACL_SECURITY_INFORMATION)
             dacl = sd.GetSecurityDescriptorDacl()  # instead of dacl = win32security.ACL()
 
             # Add Write to Denied list
@@ -221,7 +239,7 @@ class TestJournalLock:
             dacl.AddAccessDeniedAce(win32security.ACL_REVISION, con.FILE_WRITE_DATA, winuser)
             # Apply that change.
             sd.SetSecurityDescriptorDacl(1, dacl, 0)  # may not be necessary
-            win32security.SetFileSecurity(str(tmpdir), win32security.DACL_SECURITY_INFORMATION, sd)
+            win32security.SetFileSecurity(tmpdir, win32security.DACL_SECURITY_INFORMATION, sd)
 
         else:
             import stat
@@ -247,7 +265,7 @@ class TestJournalLock:
                     dacl.DeleteAce(i)
                     # Apply that change.
                     sd.SetSecurityDescriptorDacl(1, dacl, 0)  # may not be necessary
-                    win32security.SetFileSecurity(str(tmpdir), win32security.DACL_SECURITY_INFORMATION, sd)
+                    win32security.SetFileSecurity(tmpdir, win32security.DACL_SECURITY_INFORMATION, sd)
                     break
 
                 i += 1
@@ -268,7 +286,7 @@ class TestJournalLock:
         continue_q: mp.Queue = mp.Queue()
         exit_q: mp.Queue = mp.Queue()
         locker = mp.Process(target=other_process_lock,
-                            args=(continue_q, exit_q, mock_journaldir)
+                            args=(continue_q, exit_q, mock_journaldir.getbasetemp())
                             )
         print('Starting sub-process other_process_lock()...')
         locker.start()
@@ -280,9 +298,13 @@ class TestJournalLock:
         # Now attempt to lock with to-test code
         jlock = JournalLock()
         second_attempt = jlock.obtain_lock()
-        # Fails on Linux, because flock(2) is per process, so we'd need to
-        # use multiprocessing to test this.
         assert second_attempt == JournalLockResult.ALREADY_LOCKED
+
+        # Need to release any handles on the lockfile else the sub-process
+        # might not be able to clean up properly, and that will impact
+        # on later tests.
+        jlock.journal_dir_lockfile.close()
+
         print('Telling sub-process to quit...')
         exit_q.put('quit')
         print('Waiting for sub-process...')
@@ -302,8 +324,12 @@ class TestJournalLock:
         assert jlock.release_lock()
 
         # And finally check it actually IS unlocked.
-        with open(mock_journaldir / 'edmc-journal-lock.txt', mode='w+') as lf:
+        with open(mock_journaldir.getbasetemp() / 'edmc-journal-lock.txt', mode='w+') as lf:
             assert _obtain_lock('release-lock', lf)
+            assert _release_lock('release-lock', lf)
+
+        # Cleanup, to avoid side-effect on other tests
+        os.unlink(str(jlock.journal_dir_lockfile_name))
 
     def test_release_lock_not_locked(self, mock_journaldir: py_path_local_LocalPath):
         """Test JournalLock.release_lock() when not locked."""
@@ -337,9 +363,16 @@ class TestJournalLock:
         # Now store the 'current' journaldir for reference and attempt
         # to update to a new one.
         old_journaldir = jlock.journal_dir
+        old_journaldir_lockfile_name = jlock.journal_dir_lockfile_name
         jlock.update_lock(None)  # type: ignore
         assert jlock.journal_dir != old_journaldir
         assert jlock.locked
+
+        # Cleanup, to avoid side-effect on other tests
+        assert jlock.release_lock()
+        os.unlink(str(jlock.journal_dir_lockfile_name))
+        # And the old_journaldir's lockfile too
+        os.unlink(str(old_journaldir_lockfile_name))
 
     def test_update_lock_same(self, mock_journaldir: py_path_local_LocalPath):
         """
@@ -350,7 +383,7 @@ class TestJournalLock:
         """
         # First actually obtain the lock, and check it worked
         jlock = JournalLock()
-        jlock.obtain_lock()
+        assert jlock.obtain_lock() == JournalLockResult.LOCKED
         assert jlock.locked
 
         # Now store the 'current' journaldir for reference and attempt
@@ -359,3 +392,7 @@ class TestJournalLock:
         jlock.update_lock(None)  # type: ignore
         assert jlock.journal_dir == old_journaldir
         assert jlock.locked
+
+        # Cleanup, to avoid side-effect on other tests
+        assert jlock.release_lock()
+        os.unlink(str(jlock.journal_dir_lockfile_name))

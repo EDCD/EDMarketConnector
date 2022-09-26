@@ -88,6 +88,10 @@ class This:
         self.commodities: Optional[List[OrderedDictT[str, Any]]] = None
         self.outfitting: Optional[Tuple[bool, List[str]]] = None
         self.shipyard: Optional[Tuple[bool, List[Mapping[str, Any]]]] = None
+        self.fcmaterials_marketid: int = 0
+        self.fcmaterials: Optional[List[OrderedDictT[str, Any]]] = None
+        self.fcmaterials_capi_marketid: int = 0
+        self.fcmaterials_capi: Optional[List[OrderedDictT[str, Any]]] = None
 
         # For the tkinter parent window, so we can call update_idletasks()
         self.parent: tk.Tk
@@ -145,6 +149,7 @@ class EDDN:
         r"https://eddn.edcd.io/schemas/(?P<schema_name>.+)/(?P<schema_version>[0-9]+) is unknown, "
         r"unable to validate.',\)\]$"
     )
+    CAPI_LOCALISATION_RE = re.compile(r'^loc[A-Z].+')
 
     def __init__(self, parent: tk.Tk):
         self.parent: tk.Tk = parent
@@ -487,6 +492,9 @@ class EDDN:
             })
 
         this.commodities = commodities
+
+        # Send any FCMaterials.json-equivalent 'orders' as well
+        self.export_capi_fcmaterials(data, is_beta, horizons)
 
     def safe_modules_and_ships(self, data: Mapping[str, Any]) -> Tuple[Dict, Dict]:
         """
@@ -1079,7 +1087,6 @@ class EDDN:
         Send a NavRoute to EDDN on the correct schema.
 
         :param cmdr: the commander under which this upload is made
-        :param system_starpos: Coordinates of current star system
         :param is_beta: whether or not we are in beta mode
         :param entry: the journal entry to send
         """
@@ -1111,8 +1118,10 @@ class EDDN:
         # Sanity check - Ref Issue 1342
         if 'Route' not in entry:
             logger.warning(f"NavRoute didn't contain a Route array!\n{entry!r}")
-            # LANG: No 'Route' found in NavRoute.json file
-            return _("No 'Route' array in NavRoute.json contents")
+            # This can happen if first-load of the file failed, and we're simply
+            # passing through the bare Journal event, so no need to alert
+            # the user.
+            return None
 
         #######################################################################
         # Elisions
@@ -1142,6 +1151,145 @@ class EDDN:
         }
 
         this.eddn.export_journal_entry(cmdr, entry, msg)
+        return None
+
+    def export_journal_fcmaterials(
+        self, cmdr: str, is_beta: bool, entry: MutableMapping[str, Any]
+    ) -> Optional[str]:
+        """
+        Send an FCMaterials message to EDDN on the correct schema.
+
+        :param cmdr: the commander under which this upload is made
+        :param is_beta: whether or not we are in beta mode
+        :param entry: the journal entry to send
+        """
+        # {
+        #     "timestamp":"2022-06-08T12:44:19Z",
+        #     "event":"FCMaterials",
+        #     "MarketID":3700710912,
+        #     "CarrierName":"PSI RORSCHACH",
+        #     "CarrierID":"K4X-33F",
+        #     "Items":[
+        #         {
+        #             "id":128961533,
+        #             "Name":"$encryptedmemorychip_name;",
+        #             "Name_Localised":"Encrypted Memory Chip",
+        #             "Price":500,
+        #             "Stock":0,
+        #             "Demand":5
+        #         },
+        #
+        #         { "id":128961537,
+        #             "Name":"$memorychip_name;",
+        #             "Name_Localised":"Memory Chip",
+        #             "Price":600,
+        #             "Stock":0,
+        #             "Demand":5
+        #             },
+        #
+        #         { "id":128972290,
+        #             "Name":"$campaignplans_name;",
+        #             "Name_Localised":"Campaign Plans",
+        #             "Price":600,
+        #             "Stock":5,
+        #             "Demand":0
+        #         }
+        #     ]
+        # }
+
+        # Sanity check
+        if 'Items' not in entry:
+            logger.warning(f"FCMaterials didn't contain an Items array!\n{entry!r}")
+            # This can happen if first-load of the file failed, and we're simply
+            # passing through the bare Journal event, so no need to alert
+            # the user.
+            return None
+
+        if this.fcmaterials_marketid == entry['MarketID']:
+            if this.fcmaterials == entry['Items']:
+                # Same FC, no change in Stock/Demand/Prices, so don't send
+                return None
+
+        this.fcmaterials_marketid = entry['MarketID']
+        this.fcmaterials = entry['Items']
+
+        #######################################################################
+        # Elisions
+        #######################################################################
+        # There are Name_Localised key/values in the Items array members
+        entry = filter_localised(entry)
+        #######################################################################
+
+        #######################################################################
+        # Augmentations
+        #######################################################################
+        # None
+        #######################################################################
+
+        msg = {
+            '$schemaRef': f'https://eddn.edcd.io/schemas/fcmaterials_journal/1{"/test" if is_beta else ""}',
+            'message': entry
+        }
+
+        this.eddn.export_journal_entry(cmdr, entry, msg)
+        return None
+
+    def export_capi_fcmaterials(
+        self, data: Mapping[str, Any], is_beta: bool, horizons: bool
+    ) -> Optional[str]:
+        """
+        Send CAPI-sourced 'onfootmicroresources' data on `fcmaterials/1` schema.
+
+        :param data: the CAPI `/market` data
+        :param is_beta: whether, or not we are in beta mode
+        :param horizons: whether player is in Horizons
+        """
+        # Sanity check
+        if 'lastStarport' not in data:
+            return None
+
+        if 'orders' not in data['lastStarport']:
+            return None
+
+        if 'onfootmicroresources' not in data['lastStarport']['orders']:
+            return None
+
+        items = data['lastStarport']['orders']['onfootmicroresources']
+        if this.fcmaterials_capi_marketid == data['lastStarport']['id']:
+            if this.fcmaterials_capi == items:
+                # Same FC, no change in orders, so don't send
+                return None
+
+        this.fcmaterials_capi_marketid = data['lastStarport']['id']
+        this.fcmaterials_capi = items
+
+        #######################################################################
+        # Elisions
+        #######################################################################
+        # There are localised key names for the resources
+        items = capi_filter_localised(items)
+        #######################################################################
+
+        #######################################################################
+        # EDDN `'message'` creation, and augmentations
+        #######################################################################
+        entry = {
+            'timestamp':   data['timestamp'],
+            'event':       'FCMaterials',
+            'horizons':    horizons,
+            'odyssey':     this.odyssey,
+            'MarketID':    data['lastStarport']['id'],
+            'CarrierID':   data['lastStarport']['name'],
+            'Items':       items,
+        }
+        #######################################################################
+
+        msg = {
+            '$schemaRef': f'https://eddn.edcd.io/schemas/fcmaterials_capi/1{"/test" if is_beta else ""}',
+            'message': entry
+        }
+
+        this.eddn.export_journal_entry(data['commander']['name'], entry, msg)
         return None
 
     def export_journal_approachsettlement(
@@ -1364,6 +1512,10 @@ class EDDN:
 
         else:
             # Horizons order, so use tracked data for cross-check
+            if this.systemaddress is None or system_name is None or system_starpos is None:
+                logger.error(f'Location tracking failure: {this.systemaddress=}, {system_name=}, {system_starpos=}')
+                return 'Current location not tracked properly, started after game?'
+
             aug_systemaddress = this.systemaddress
             aug_starsystem = system_name
             aug_starpos = system_starpos
@@ -1396,13 +1548,13 @@ class EDDN:
                                f"{s['SystemAddress']} != {aug_systemaddress}")
                 continue
 
-            # Remove any _Localised keys (would only be in a USS signal)
-            s = filter_localised(s)
-
             # Drop Mission USS signals.
             if "USSType" in s and s["USSType"] == "$USS_Type_MissionTarget;":
                 logger.trace_if("plugin.eddn.fsssignaldiscovered", "USSType is $USS_Type_MissionTarget;, dropping")
                 continue
+
+            # Remove any _Localised keys (would only be in a USS signal)
+            s = filter_localised(s)
 
             # Remove any key/values that shouldn't be there per signal
             s.pop('event', None)
@@ -1412,6 +1564,12 @@ class EDDN:
             s.pop('SystemAddress', None)
 
             msg['message']['signals'].append(s)
+
+        if not msg['message']['signals']:
+            # No signals passed checks, so drop them all and return
+            logger.debug('No signals after checks, so sending no message')
+            self.fss_signals = []
+            return None
 
         # `horizons` and `odyssey` augmentations
         msg['message']['horizons'] = entry['horizons']
@@ -1612,10 +1770,9 @@ def plugin_stop() -> None:
     logger.debug('Done.')
 
 
-# Recursively filter '*_Localised' keys from dict
 def filter_localised(d: Mapping[str, Any]) -> OrderedDictT[str, Any]:
     """
-    Remove any dict keys with names ending `_Localised` from a dict.
+    Recursively remove any dict keys with names ending `_Localised` from a dict.
 
     :param d: Dict to filter keys of.
     :return: The filtered dict.
@@ -1630,6 +1787,30 @@ def filter_localised(d: Mapping[str, Any]) -> OrderedDictT[str, Any]:
 
         elif isinstance(v, list):  # list of dicts -> recurse
             filtered[k] = [filter_localised(x) if hasattr(x, 'items') else x for x in v]
+
+        else:
+            filtered[k] = v
+
+    return filtered
+
+
+def capi_filter_localised(d: Mapping[str, Any]) -> OrderedDictT[str, Any]:
+    """
+    Recursively remove any dict keys for known CAPI 'localised' names.
+
+    :param d: Dict to filter keys of.
+    :return: The filtered dict.
+    """
+    filtered: OrderedDictT[str, Any] = OrderedDict()
+    for k, v in d.items():
+        if EDDN.CAPI_LOCALISATION_RE.search(k):
+            pass
+
+        elif hasattr(v, 'items'):  # dict -> recurse
+            filtered[k] = capi_filter_localised(v)
+
+        elif isinstance(v, list):  # list of dicts -> recurse
+            filtered[k] = [capi_filter_localised(x) if hasattr(x, 'items') else x for x in v]
 
         else:
             filtered[k] = v
@@ -1763,6 +1944,9 @@ def journal_entry(  # noqa: C901, CCR001
 
         elif event_name == 'navroute':
             return this.eddn.export_journal_navroute(cmdr, is_beta, entry)
+
+        elif event_name == 'fcmaterials':
+            return this.eddn.export_journal_fcmaterials(cmdr, is_beta, entry)
 
         elif event_name == 'approachsettlement':
             # An `ApproachSettlement` can appear *before* `Location` if you
