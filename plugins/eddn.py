@@ -191,13 +191,31 @@ class EDDN:
                 """
                 CREATE TABLE messages
                 (
-                    id INT PRIMARY KEY NOT NULL,
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
                     created TEXT NOT NULL,
                     cmdr TEXT NOT NULL,
                     edmc_version TEXT,
                     game_version TEXT,
                     game_build TEXT,
                     message TEXT NOT NULL
+                )
+                """
+            )
+
+            replaydb.execute(
+                """
+                CREATE INDEX messages_created ON messages
+                (
+                    created
+                )
+                """
+            )
+
+            replaydb.execute(
+                """
+                CREATE INDEX messages_cmdr ON messages
+                (
+                    cmdr
                 )
                 """
             )
