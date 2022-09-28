@@ -114,7 +114,6 @@ class This:
 
 this = This()
 
-
 # This SKU is tagged on any module or ship that you must have Horizons for.
 HORIZONS_SKU = 'ELITE_HORIZONS_V_PLANETARY_LANDINGS'
 # ELITE_HORIZONS_V_COBRA_MK_IV_1000` is for the Cobra Mk IV, but
@@ -126,8 +125,84 @@ HORIZONS_SKU = 'ELITE_HORIZONS_V_PLANETARY_LANDINGS'
 # one.
 
 
-# TODO: a good few of these methods are static or could be classmethods. they should be created as such.
+class EDDNReplay:
+    """Store and retry sending of EDDN messages."""
 
+    SQLITE_DB_FILENAME = 'eddn_replay.db'
+
+    def __init__(self) -> None:
+        """
+        Prepare the system for processing messages.
+
+        - Ensure the sqlite3 database for EDDN replays exists and has schema.
+        - Convert any legacy file into the database.
+        """
+        self.db_conn = sqlite3.connect(config.app_dir_path / self.SQLITE_DB_FILENAME)
+        self.db = self.db_conn.cursor()
+
+        try:
+            self.db.execute(
+                """
+                CREATE TABLE messages
+                (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    created TEXT NOT NULL,
+                    cmdr TEXT NOT NULL,
+                    edmc_version TEXT,
+                    game_version TEXT,
+                    game_build TEXT,
+                    message TEXT NOT NULL
+                )
+                """
+            )
+
+            self.db.execute(
+                """
+                CREATE INDEX messages_created ON messages
+                (
+                    created
+                )
+                """
+            )
+
+            self.db.execute(
+                """
+                CREATE INDEX messages_cmdr ON messages
+                (
+                    cmdr
+                )
+                """
+            )
+
+        except sqlite3.OperationalError as e:
+            if str(e) != "table messages already exists":
+                raise e
+
+        self.convert_legacy_file()
+
+    def convert_legacy_file(self):
+        """Convert a legacy file's contents into the sqlite3 db."""
+        try:
+            for m in self.load_legacy_file():
+                ...
+
+        except FileNotFoundError:
+            pass
+
+    def load_legacy_file(self) -> list[str]:
+        """
+        Load cached journal entries from disk.
+
+        :return: Contents of the file as a list.
+        """
+        # Try to obtain exclusive access to the journal cache
+        filename = config.app_dir_path / 'replay.jsonl'
+        # Try to open existing file
+        with open(filename, 'r+', buffering=1) as replay_file:
+            return [line.strip() for line in replay_file]
+
+
+# TODO: a good few of these methods are static or could be classmethods. they should be created as such.
 class EDDN:
     """EDDN Data export."""
 
@@ -155,19 +230,7 @@ class EDDN:
         #######################################################################
         # EDDN delayed sending/retry
         #######################################################################
-        self.replaydb = self.journal_replay_sqlite_init()
-        # Kept only for converting legacy file to sqlite3
-        try:
-            replaylog = self.load_journal_replay_file()
-
-        except FileNotFoundError:
-            pass
-
-        finally:
-            # TODO: Convert `replaylog` into the database.
-            #       Remove the file.
-            ...
-
+        self.replay = EDDNReplay()
         #######################################################################
 
         self.fss_signals: List[Mapping[str, Any]] = []
@@ -177,68 +240,6 @@ class EDDN:
 
         else:
             self.eddn_url = self.DEFAULT_URL
-
-    def journal_replay_sqlite_init(self) -> sqlite3.Cursor:
-        """
-        Ensure the sqlite3 database for EDDN replays exists and has schema.
-
-        :return: sqlite3 cursor for the database.
-        """
-        self.replaydb_conn = sqlite3.connect(config.app_dir_path / 'eddn_replay.db')
-        replaydb = self.replaydb_conn.cursor()
-        try:
-            replaydb.execute(
-                """
-                CREATE TABLE messages
-                (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    created TEXT NOT NULL,
-                    cmdr TEXT NOT NULL,
-                    edmc_version TEXT,
-                    game_version TEXT,
-                    game_build TEXT,
-                    message TEXT NOT NULL
-                )
-                """
-            )
-
-            replaydb.execute(
-                """
-                CREATE INDEX messages_created ON messages
-                (
-                    created
-                )
-                """
-            )
-
-            replaydb.execute(
-                """
-                CREATE INDEX messages_cmdr ON messages
-                (
-                    cmdr
-                )
-                """
-            )
-
-        except sqlite3.OperationalError as e:
-            if str(e) != "table messages already exists":
-                raise e
-
-        return replaydb
-
-    def load_journal_replay_file(self) -> list[str]:
-        """
-        Load cached journal entries from disk.
-
-        Simply let any exceptions propagate up if there's an error.
-
-        :return: Contents of the file as a list.
-        """
-        # Try to obtain exclusive access to the journal cache
-        filename = config.app_dir_path / 'replay.jsonl'
-        # Try to open existing file
-        with open(filename, 'r+', buffering=1) as replay_file:
-            return [line.strip() for line in replay_file]
 
     def flush(self):
         """Flush the replay file, clearing any data currently there that is not in the replaylog list."""
@@ -361,6 +362,10 @@ class EDDN:
 
     def sendreplay(self) -> None:  # noqa: CCR001
         """Send cached Journal lines to EDDN."""
+        # TODO: Convert to using the sqlite3 db
+        #       **IF** this is moved to a thread worker then we need to ensure
+        #         that we're operating sqlite3 in a thread-safe manner,
+        #         Ref: <https://ricardoanderegg.com/posts/python-sqlite-thread-safety/>
         if not self.replayfile:
             return  # Probably closing app
 
@@ -806,7 +811,7 @@ class EDDN:
         :param entry: The full journal event dictionary (due to checks in this function).
         :param msg: The EDDN message body to be sent.
         """
-        if self.replayfile or self.load_journal_replay_file():
+        if self.replayfile or self.journal_replay_load_file():
             # Store the entry
             self.replaylog.append(json.dumps([cmdr, msg]))
             self.replayfile.write(f'{self.replaylog[-1]}\n')  # type: ignore
