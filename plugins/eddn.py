@@ -26,16 +26,16 @@ import itertools
 import json
 import pathlib
 import re
+import sqlite3
 import sys
 import tkinter as tk
 from collections import OrderedDict
 from os import SEEK_SET
-from os.path import join
 from platform import system
 from textwrap import dedent
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Mapping, MutableMapping, Optional
 from typing import OrderedDict as OrderedDictT
-from typing import TextIO, Tuple, Union
+from typing import Tuple, Union
 
 import requests
 
@@ -51,10 +51,6 @@ from myNotebook import Frame
 from prefs import prefsVersion
 from ttkHyperlinkLabel import HyperlinkLabel
 from util import text
-
-if sys.platform != 'win32':
-    from fcntl import LOCK_EX, LOCK_NB, lockf
-
 
 if TYPE_CHECKING:
     def _(x: str) -> str:
@@ -155,8 +151,25 @@ class EDDN:
         self.parent: tk.Tk = parent
         self.session = requests.Session()
         self.session.headers['User-Agent'] = user_agent
-        self.replayfile: Optional[TextIO] = None  # For delayed messages
-        self.replaylog: List[str] = []
+
+        #######################################################################
+        # EDDN delayed sending/retry
+        #######################################################################
+        self.replaydb = self.journal_replay_sqlite_init()
+        # Kept only for converting legacy file to sqlite3
+        try:
+            replaylog = self.load_journal_replay_file()
+
+        except FileNotFoundError:
+            pass
+
+        finally:
+            # TODO: Convert `replaylog` into the database.
+            #       Remove the file.
+            ...
+
+        #######################################################################
+
         self.fss_signals: List[Mapping[str, Any]] = []
 
         if config.eddn_url is not None:
@@ -165,36 +178,49 @@ class EDDN:
         else:
             self.eddn_url = self.DEFAULT_URL
 
-    def load_journal_replay(self) -> bool:
+    def journal_replay_sqlite_init(self) -> sqlite3.Cursor:
+        """
+        Ensure the sqlite3 database for EDDN replays exists and has schema.
+
+        :return: sqlite3 cursor for the database.
+        """
+        self.replaydb_conn = sqlite3.connect(config.app_dir_path / 'eddn_replay.db')
+        replaydb = self.replaydb_conn.cursor()
+        try:
+            replaydb.execute(
+                """
+                CREATE TABLE messages
+                (
+                    id INT PRIMARY KEY NOT NULL,
+                    created TEXT NOT NULL,
+                    cmdr TEXT NOT NULL,
+                    edmc_version TEXT,
+                    game_version TEXT,
+                    game_build TEXT,
+                    message TEXT NOT NULL
+                )
+                """
+            )
+
+        except sqlite3.OperationalError as e:
+            if str(e) != "table messages already exists":
+                raise e
+
+        return replaydb
+
+    def load_journal_replay_file(self) -> list[str]:
         """
         Load cached journal entries from disk.
 
-        :return: a bool indicating success
+        Simply let any exceptions propagate up if there's an error.
+
+        :return: Contents of the file as a list.
         """
         # Try to obtain exclusive access to the journal cache
-        filename = join(config.app_dir, 'replay.jsonl')
-        try:
-            try:
-                # Try to open existing file
-                self.replayfile = open(filename, 'r+', buffering=1)
-
-            except FileNotFoundError:
-                self.replayfile = open(filename, 'w+', buffering=1)  # Create file
-
-            if sys.platform != 'win32':  # open for writing is automatically exclusive on Windows
-                lockf(self.replayfile, LOCK_EX | LOCK_NB)
-
-        except OSError:
-            logger.exception('Failed opening "replay.jsonl"')
-            if self.replayfile:
-                self.replayfile.close()
-
-            self.replayfile = None
-            return False
-
-        else:
-            self.replaylog = [line.strip() for line in self.replayfile]
-            return True
+        filename = config.app_dir_path / 'replay.jsonl'
+        # Try to open existing file
+        with open(filename, 'r+', buffering=1) as replay_file:
+            return [line.strip() for line in replay_file]
 
     def flush(self):
         """Flush the replay file, clearing any data currently there that is not in the replaylog list."""
@@ -762,7 +788,7 @@ class EDDN:
         :param entry: The full journal event dictionary (due to checks in this function).
         :param msg: The EDDN message body to be sent.
         """
-        if self.replayfile or self.load_journal_replay():
+        if self.replayfile or self.load_journal_replay_file():
             # Store the entry
             self.replaylog.append(json.dumps([cmdr, msg]))
             self.replayfile.write(f'{self.replaylog[-1]}\n')  # type: ignore
@@ -1621,10 +1647,6 @@ def plugin_app(parent: tk.Tk) -> Optional[tk.Frame]:
     """
     this.parent = parent
     this.eddn = EDDN(parent)
-    # Try to obtain exclusive lock on journal cache, even if we don't need it yet
-    if not this.eddn.load_journal_replay():
-        # Shouldn't happen - don't bother localizing
-        this.parent.children['status']['text'] = 'Error: Is another copy of this app already running?'
 
     if config.eddn_tracking_ui:
         this.ui = tk.Frame(parent)
