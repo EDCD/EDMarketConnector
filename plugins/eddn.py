@@ -180,26 +180,66 @@ class EDDNReplay:
 
         self.convert_legacy_file()
 
+    def add_message(self, cmdr, msg):
+        """
+        Add an EDDN message to the database.
+
+        `msg` absolutely needs to be the **FULL** EDDN message, including all
+        of `header`, `$schemaRef` and `message`.  Code handling this not being
+        the case is only for loading the legacy `replay.json` file messages.
+
+        :param cmdr: Name of the Commander that created this message.
+        :param msg: The full, transmission-ready, EDDN message.
+        """
+        # Cater for legacy replay.json messages
+        if 'header' not in msg:
+            msg['header'] = {
+                # We have to lie and say it's *this* version, but denote that
+                # it might not actually be this version.
+                'softwareName': f'{applongname} [{system() if sys.platform != "darwin" else "Mac OS"}]'
+                                ' (legacy replay)',
+                'softwareVersion': str(appversion_nobuild()),
+                'uploaderID': cmdr,
+                'gameversion': '',  # Can't add what we don't know
+                'gamebuild': '',  # Can't add what we don't know
+            }
+
+        created = msg['message']['timestamp']
+        edmc_version = msg['header']['softwareVersion']
+        game_version = msg['header']['gameversion']
+        game_build = msg['header']['gamebuild']
+        uploader = msg['header']['uploaderID']
+
+        try:
+            self.db.execute(
+                """
+                INSERT INTO messages (
+                    created, cmdr, edmc_version, game_version, game_build, message
+                )
+                VALUES (
+                    ?, ?, ?, ?, ?, ?
+                )
+                """,
+                (created, uploader, edmc_version, game_version, game_build, json.dumps(msg))
+            )
+            self.db_conn.commit()
+
+        except Exception:
+            logger.exception('EDDNReplay INSERT error')
+
     def convert_legacy_file(self):
         """Convert a legacy file's contents into the sqlite3 db."""
         try:
-            for m in self.load_legacy_file():
-                ...
+            filename = config.app_dir_path / 'replay.jsonl'
+            with open(filename, 'r+', buffering=1) as replay_file:
+                for line in replay_file:
+                    j = json.loads(line)
+                    cmdr, msg = j
+                    self.add_message(cmdr, msg)
+                    break
 
         except FileNotFoundError:
             pass
-
-    def load_legacy_file(self) -> list[str]:
-        """
-        Load cached journal entries from disk.
-
-        :return: Contents of the file as a list.
-        """
-        # Try to obtain exclusive access to the journal cache
-        filename = config.app_dir_path / 'replay.jsonl'
-        # Try to open existing file
-        with open(filename, 'r+', buffering=1) as replay_file:
-            return [line.strip() for line in replay_file]
 
 
 # TODO: a good few of these methods are static or could be classmethods. they should be created as such.
