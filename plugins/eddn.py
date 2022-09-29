@@ -126,22 +126,37 @@ HORIZONS_SKU = 'ELITE_HORIZONS_V_PLANETARY_LANDINGS'
 
 
 class EDDNSender:
-    """Store and retry sending of EDDN messages."""
+    """Handle sending of EDDN messages to the Gateway."""
 
-    SQLITE_DB_FILENAME = 'eddn_queue-v1.db'
+    SQLITE_DB_FILENAME_V1 = 'eddn_queue-v1.db'
 
-    def __init__(self) -> None:
+    def __init__(self, eddn_endpoint) -> None:
         """
         Prepare the system for processing messages.
 
         - Ensure the sqlite3 database for EDDN replays exists and has schema.
         - Convert any legacy file into the database.
         """
-        self.db_conn = sqlite3.connect(config.app_dir_path / self.SQLITE_DB_FILENAME)
+        self.db_conn = self.sqlite_queue_v1()
         self.db = self.db_conn.cursor()
 
+        #######################################################################
+        # Queue database migration
+        #######################################################################
+        self.convert_legacy_file()
+        #######################################################################
+
+    def sqlite_queue_v1(self):
+        """
+        Initialise a v1 EDDN queue database.
+
+        :return: sqlite3 connection
+        """
+        db_conn = sqlite3.connect(config.app_dir_path / self.SQLITE_DB_FILENAME_V1)
+        db = db_conn.cursor()
+
         try:
-            self.db.execute(
+            db.execute(
                 """
                 CREATE TABLE messages
                 (
@@ -156,7 +171,7 @@ class EDDNSender:
                 """
             )
 
-            self.db.execute(
+            db.execute(
                 """
                 CREATE INDEX messages_created ON messages
                 (
@@ -165,7 +180,7 @@ class EDDNSender:
                 """
             )
 
-            self.db.execute(
+            db.execute(
                 """
                 CREATE INDEX messages_cmdr ON messages
                 (
@@ -176,9 +191,15 @@ class EDDNSender:
 
         except sqlite3.OperationalError as e:
             if str(e) != "table messages already exists":
+                # Cleanup, as schema creation failed
+                db.close()
+                db_conn.close()
                 raise e
 
-        self.convert_legacy_file()
+        # We return only the connection, so tidy up
+        db.close()
+
+        return db_conn
 
     def add_message(self, cmdr, msg):
         """
@@ -269,15 +290,15 @@ class EDDN:
         self.session = requests.Session()
         self.session.headers['User-Agent'] = user_agent
 
-        self.sender = EDDNSender()
-
-        self.fss_signals: List[Mapping[str, Any]] = []
-
         if config.eddn_url is not None:
             self.eddn_url = config.eddn_url
 
         else:
             self.eddn_url = self.DEFAULT_URL
+
+        self.sender = EDDNSender(self.eddn_url)
+
+        self.fss_signals: List[Mapping[str, Any]] = []
 
     def flush(self):
         """Flush the replay file, clearing any data currently there that is not in the replaylog list."""
