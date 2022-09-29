@@ -201,6 +201,14 @@ class EDDNSender:
 
         return db_conn
 
+    def close(self) -> None:
+        """Clean up any resources."""
+        if self.db:
+            self.db.close()
+
+        if self.db_conn:
+            self.db_conn.close()
+
     def add_message(self, cmdr, msg) -> int:
         """
         Add an EDDN message to the database.
@@ -318,11 +326,10 @@ class EDDN:
 
     def close(self):
         """Close down the EDDN class instance."""
-        logger.debug('Closing replayfile...')
-        if self.replayfile:
-            self.replayfile.close()
+        logger.debug('Closing Sender...')
+        if self.sender:
+            self.sender.close()
 
-        self.replayfile = None
         logger.debug('Done.')
 
         logger.debug('Closing EDDN requests.Session.')
