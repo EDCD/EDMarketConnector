@@ -30,7 +30,6 @@ import sqlite3
 import sys
 import tkinter as tk
 from collections import OrderedDict
-from os import SEEK_SET
 from platform import system
 from textwrap import dedent
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Mapping, MutableMapping, Optional
@@ -130,13 +129,17 @@ class EDDNSender:
 
     SQLITE_DB_FILENAME_V1 = 'eddn_queue-v1.db'
 
-    def __init__(self, eddn_endpoint) -> None:
+    def __init__(self, eddn_endpoint: str) -> None:
         """
         Prepare the system for processing messages.
 
         - Ensure the sqlite3 database for EDDN replays exists and has schema.
         - Convert any legacy file into the database.
+
+        :param eddn_endpoint: Where messages should be sent.
         """
+        self.eddn_endpoint = eddn_endpoint
+
         self.db_conn = self.sqlite_queue_v1()
         self.db = self.db_conn.cursor()
 
@@ -146,7 +149,7 @@ class EDDNSender:
         self.convert_legacy_file()
         #######################################################################
 
-    def sqlite_queue_v1(self):
+    def sqlite_queue_v1(self) -> sqlite3.Connection:
         """
         Initialise a v1 EDDN queue database.
 
@@ -209,7 +212,7 @@ class EDDNSender:
         if self.db_conn:
             self.db_conn.close()
 
-    def add_message(self, cmdr, msg) -> int:
+    def add_message(self, cmdr: str, msg: dict) -> int:
         """
         Add an EDDN message to the database.
 
@@ -266,7 +269,7 @@ class EDDNSender:
         """
         Delete a queued message by row id.
 
-        :param row_id:
+        :param row_id: id of message to be deleted.
         """
         self.db.execute(
             """
