@@ -125,10 +125,10 @@ HORIZONS_SKU = 'ELITE_HORIZONS_V_PLANETARY_LANDINGS'
 # one.
 
 
-class EDDNReplay:
+class EDDNSender:
     """Store and retry sending of EDDN messages."""
 
-    SQLITE_DB_FILENAME = 'eddn_replay.db'
+    SQLITE_DB_FILENAME = 'eddn_queue-v1.db'
 
     def __init__(self) -> None:
         """
@@ -187,6 +187,8 @@ class EDDNReplay:
         `msg` absolutely needs to be the **FULL** EDDN message, including all
         of `header`, `$schemaRef` and `message`.  Code handling this not being
         the case is only for loading the legacy `replay.json` file messages.
+
+        TODO: Return the unique row id of the added message.
 
         :param cmdr: Name of the Commander that created this message.
         :param msg: The full, transmission-ready, EDDN message.
@@ -267,11 +269,7 @@ class EDDN:
         self.session = requests.Session()
         self.session.headers['User-Agent'] = user_agent
 
-        #######################################################################
-        # EDDN delayed sending/retry
-        #######################################################################
-        self.replay = EDDNReplay()
-        #######################################################################
+        self.sender = EDDNSender()
 
         self.fss_signals: List[Mapping[str, Any]] = []
 
