@@ -24,6 +24,7 @@
 # ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $#
 import itertools
 import json
+import os
 import pathlib
 import re
 import sqlite3
@@ -281,8 +282,8 @@ class EDDNSender:
 
     def convert_legacy_file(self):
         """Convert a legacy file's contents into the sqlite3 db."""
+        filename = config.app_dir_path / 'replay.jsonl'
         try:
-            filename = config.app_dir_path / 'replay.jsonl'
             with open(filename, 'r+', buffering=1) as replay_file:
                 for line in replay_file:
                     cmdr, msg = json.loads(line)
@@ -290,6 +291,13 @@ class EDDNSender:
 
         except FileNotFoundError:
             pass
+
+        finally:
+            # Best effort at removing the file/contents
+            # NB: The legacy code assumed it could write to the file.
+            replay_file = open(filename, 'w')  # Will truncate
+            replay_file.close()
+            os.unlink(filename)
 
 
 # TODO: a good few of these methods are static or could be classmethods. they should be created as such.
