@@ -260,10 +260,8 @@ class EDDNSender:
             filename = config.app_dir_path / 'replay.jsonl'
             with open(filename, 'r+', buffering=1) as replay_file:
                 for line in replay_file:
-                    j = json.loads(line)
-                    cmdr, msg = j
+                    cmdr, msg = json.loads(line)
                     self.add_message(cmdr, msg)
-                    break
 
         except FileNotFoundError:
             pass
