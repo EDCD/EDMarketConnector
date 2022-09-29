@@ -316,19 +316,6 @@ class EDDN:
 
         self.fss_signals: List[Mapping[str, Any]] = []
 
-    def flush(self):
-        """Flush the replay file, clearing any data currently there that is not in the replaylog list."""
-        if self.replayfile is None:
-            logger.error('replayfile is None!')
-            return
-
-        self.replayfile.seek(0, SEEK_SET)
-        self.replayfile.truncate()
-        for line in self.replaylog:
-            self.replayfile.write(f'{line}\n')
-
-        self.replayfile.flush()
-
     def close(self):
         """Close down the EDDN class instance."""
         logger.debug('Closing replayfile...')
