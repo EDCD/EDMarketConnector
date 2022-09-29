@@ -254,6 +254,20 @@ class EDDNSender:
 
         return self.db.lastrowid
 
+    def delete_message(self, row_id: int) -> None:
+        """
+        Delete a queued message by row id.
+
+        :param row_id:
+        """
+        self.db.execute(
+            """
+            DELETE FROM messages WHERE id = :row_id
+            """,
+            {'row_id': row_id}
+        )
+        self.db_conn.commit()
+
     def convert_legacy_file(self):
         """Convert a legacy file's contents into the sqlite3 db."""
         try:
