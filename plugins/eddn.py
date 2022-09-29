@@ -201,7 +201,7 @@ class EDDNSender:
 
         return db_conn
 
-    def add_message(self, cmdr, msg):
+    def add_message(self, cmdr, msg) -> int:
         """
         Add an EDDN message to the database.
 
@@ -209,10 +209,12 @@ class EDDNSender:
         of `header`, `$schemaRef` and `message`.  Code handling this not being
         the case is only for loading the legacy `replay.json` file messages.
 
-        TODO: Return the unique row id of the added message.
+        NB: Although `cmdr` *should* be the same as `msg->header->uploaderID`
+            we choose not to assume that.
 
         :param cmdr: Name of the Commander that created this message.
         :param msg: The full, transmission-ready, EDDN message.
+        :return: ID of the successfully inserted row.
         """
         # Cater for legacy replay.json messages
         if 'header' not in msg:
@@ -249,6 +251,8 @@ class EDDNSender:
 
         except Exception:
             logger.exception('EDDNReplay INSERT error')
+
+        return self.db.lastrowid
 
     def convert_legacy_file(self):
         """Convert a legacy file's contents into the sqlite3 db."""
