@@ -293,9 +293,11 @@ class EDDNSender:
             self.db_conn.commit()
 
         except Exception:
-            logger.exception('EDDNReplay INSERT error')
+            logger.exception('INSERT error')
+            # Can't possibly be a valid row id
+            return -1
 
-        return self.db.lastrowid
+        return self.db.lastrowid or -1
 
     def delete_message(self, row_id: int) -> None:
         """
@@ -327,17 +329,16 @@ class EDDNSender:
         row = dict(zip([c[0] for c in self.db.description], self.db.fetchone()))
 
         try:
-            self.send_message(row['message'])
+            if self.send_message(row['message']):
+                self.delete_message(id)
+                return True
 
         except requests.exceptions.HTTPError as e:
             logger.warning(f"HTTPError: {str(e)}")
 
-        finally:
-            # Remove from queue
-            ...
+        return False
 
-
-    def send_message(self, msg: str) -> bool:
+    def send_message(self, msg: str) -> bool:  # noqa: CCR001
         """
         Transmit a fully-formed EDDN message to the Gateway.
 
@@ -351,13 +352,11 @@ class EDDNSender:
         should_return, new_data = killswitch.check_killswitch('plugins.eddn.send', json.loads(msg))
         if should_return:
             logger.warning('eddn.send has been disabled via killswitch. Returning.')
-            return
-
-        msg = json.dumps(new_data)
+            return False
 
         status: tk.Widget = self.eddn.parent.children['status']
         # Even the smallest possible message compresses somewhat, so always compress
-        encoded, compressed = text.gzip(json.dumps(msg, separators=(',', ':')), max_size=0)
+        encoded, compressed = text.gzip(json.dumps(new_data, separators=(',', ':')), max_size=0)
         headers: None | dict[str, str] = None
         if compressed:
             headers = {'Content-Encoding': 'gzip'}
@@ -514,13 +513,12 @@ class EDDN:
         ])
 
         # Ensure it's en-queued
-        msg_id = self.sender.add_message(cmdr, to_send)
-        # Now try to transmit it immediately
-        if self.sender.send_message_by_id(msg_id):
-            # De-queue
-            self.sender.delete_message(msg_id)
+        if (msg_id := self.sender.add_message(cmdr, to_send)) == -1:
+            return
 
-    def sendreplay(self) -> None:  # noqa: CCR001
+        self.sender.send_message_by_id(msg_id)
+
+    def sendreplay(self) -> None:
         """Send cached Journal lines to EDDN."""
         # TODO: Convert to using the sqlite3 db
         #       **IF** this is moved to a thread worker then we need to ensure
@@ -578,7 +576,6 @@ class EDDN:
                 self.flush()
 
         self.parent.after(self.REPLAYPERIOD, self.sendreplay)
-
 
     def export_commodities(self, data: Mapping[str, Any], is_beta: bool) -> None:  # noqa: CCR001
         """
