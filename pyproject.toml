@@ -7,9 +7,16 @@ line_length       = 119
 
 [tool.pytest.ini_options]
 testpaths = ["tests"] # Search for tests in tests/
+addopts = "--cov . --cov plugins --cov-report=term-missing --no-cov-on-fail"
+# --cov-fail-under 80"
 
 [tool.coverage.run]
-omit = ["venv/*"] # when running pytest --cov, dont report coverage in venv directories
+omit = [ "tests/*", "venv/*", "dist.win32/*" ]
+plugins = [ "coverage_conditional_plugin" ]
+
+[tool.coverage.coverage_conditional_plugin.rules]
+sys-platform-win32 = "sys_platform == 'win32'"
+sys-platform-not-win32 = "sys_platform != 'win32'"
 
 [tool.pyright]
 # pythonPlatform = 'Darwin'
