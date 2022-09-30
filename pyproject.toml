@@ -17,6 +17,11 @@ plugins = [ "coverage_conditional_plugin" ]
 [tool.coverage.coverage_conditional_plugin.rules]
 sys-platform-win32 = "sys_platform == 'win32'"
 sys-platform-not-win32 = "sys_platform != 'win32'"
+sys-platform-darwin = "sys_platform == 'darwin'"
+sys-platform-not-darwin = "sys_platform != 'darwin'"
+sys-platform-linux = "sys_platform == 'linux'"
+sys-platform-not-linux = "sys_platform != 'linux'"
+sys-platform-known = "sys_platform in ('darwin', 'linux', 'win32')"
 
 [tool.pyright]
 # pythonPlatform = 'Darwin'
