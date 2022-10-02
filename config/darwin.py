@@ -1,7 +1,4 @@
 """Darwin/macOS implementation of AbstractConfig."""
-# This doesn't actually work:
-# <https://github.com/wemake-services/coverage-conditional-plugin/issues/2#issuecomment-1263899795>
-# pragma: sys-platform-not-darwin
 import pathlib
 import sys
 from typing import Any, Dict, List, Union
