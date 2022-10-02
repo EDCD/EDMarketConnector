@@ -263,8 +263,6 @@ e.g.
 
 ```toml
 [tool.coverage.coverage_conditional_plugin.rules]
-# Yes, the sense of all of these is inverted, because else it ends up
-# inverted at *every* use.
 sys-platform-win32 = "sys_platform != 'win32'"
 ...
 ```
@@ -279,6 +277,12 @@ else:  # pragma: sys-platform-not-win32
 ```
 Note the inverted sense of the pragma definitions, as the comments cause
 `coverage` to *not* consider that code block on this platform.
+
+As of 2022-10-02 and `coverage-conditional-plugin==0.7.0` there is no way to
+signal that an entire file should be excluded from coverage reporting on the
+current platform.  See
+[this GitHub issue comment](https://github.com/wemake-services/coverage-conditional-plugin/issues/2#issuecomment-1263918296)
+.
 
 ---
 
