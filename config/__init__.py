@@ -454,19 +454,19 @@ def get_config(*args, **kwargs) -> AbstractConfig:
     :param kwargs: Args to be passed through to implementation.
     :return: Instance of the implementation.
     """
-    if sys.platform == "darwin":  # pragma: sys-platform-not-darwin
+    if sys.platform == "darwin":  # pragma: sys-platform-darwin
         from .darwin import MacConfig
         return MacConfig(*args, **kwargs)
 
-    elif sys.platform == "win32":  # pragma: sys-platform-not-win32
+    elif sys.platform == "win32":  # pragma: sys-platform-win32
         from .windows import WinConfig
         return WinConfig(*args, **kwargs)
 
-    elif sys.platform == "linux":  # pragma: sys-platform-not-linux
+    elif sys.platform == "linux":  # pragma: sys-platform-linux
         from .linux import LinuxConfig
         return LinuxConfig(*args, **kwargs)
 
-    else:  # pragma: sys-platform-known
+    else:  # pragma: sys-platform-not-known
         raise ValueError(f'Unknown platform: {sys.platform=}')
 
 
