@@ -244,6 +244,46 @@ handy if you want to step through the testing code to be sure of anything.
 
 Otherwise, see the [pytest documentation](https://docs.pytest.org/en/stable/contents.html). 
 
+### Test Coverage
+As we work towards actually having tests for as much of the code as possible
+it is useful to monitor the current test coverage.
+
+Running `pytest` will also produce the overall coverage report, see the
+configured options in `pyproject.toml`.
+
+One issue you might run into is where there is code that only runs on one
+platform.  By default `pytest-cov`/`coverage` will count this code as not
+tested when run on a different platform.  We utilise the
+`coverage-conditional-plugin` module so that `#pragma` comments can be used
+to give hints to coverage about this.
+
+The pragmas are defined in the
+`tool.coverage.coverage_conditional_plugin.rules` section of `pyproject.toml`,
+e.g.
+
+```toml
+[tool.coverage.coverage_conditional_plugin.rules]
+sys-platform-win32 = "sys_platform != 'win32'"
+...
+```
+And are used as in:
+```python
+import sys
+
+if sys.platform == 'win32':  # pragma: sys-platform-win32
+    ...
+else:  # pragma: sys-platform-not-win32
+    ...
+```
+Note the inverted sense of the pragma definitions, as the comments cause
+`coverage` to *not* consider that code block on this platform.
+
+As of 2022-10-02 and `coverage-conditional-plugin==0.7.0` there is no way to
+signal that an entire file should be excluded from coverage reporting on the
+current platform.  See
+[this GitHub issue comment](https://github.com/wemake-services/coverage-conditional-plugin/issues/2#issuecomment-1263918296)
+.
+
 ---
 
 ## Imports used only in core plugins
