@@ -18,7 +18,7 @@ plugins = [ "coverage_conditional_plugin" ]
 # NB: The name versus content of all of these are inverted because of the way
 #     they're used.  When a pragma cites one it causes that code block to
 #     **NOT** be considered for code coverage.
-#     See Contributin.md#test-coverage for more details.
+#     See Contributing.md#test-coverage for more details.
 sys-platform-win32 = "sys_platform != 'win32'"
 sys-platform-not-win32 = "sys_platform == 'win32'"
 sys-platform-darwin = "sys_platform != 'darwin'"
