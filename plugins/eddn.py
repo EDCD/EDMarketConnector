@@ -349,6 +349,9 @@ class EDDNSender:
         :param msg: Fully formed, string, message.
         :return: `True` for "now remove this message from the queue"
         """
+
+        # TODO: Check if user options require us to send at this time.
+
         should_return, new_data = killswitch.check_killswitch('plugins.eddn.send', json.loads(msg))
         if should_return:
             logger.warning('eddn.send has been disabled via killswitch. Returning.')
@@ -500,6 +503,9 @@ class EDDN:
         :param cmdr: the CMDR to use as the uploader ID.
         :param msg: the payload to send.
         """
+
+        # TODO: Check if the global 'Send to EDDN' option is off
+
         to_send: OrderedDictT[str, OrderedDict[str, Any]] = OrderedDict([
             ('$schemaRef', msg['$schemaRef']),
             ('header', OrderedDict([
@@ -1854,7 +1860,7 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:
     )
 
     this.eddn_system_button.grid(padx=BUTTONX, pady=(5, 0), sticky=tk.W)
-    this.eddn_delay = tk.IntVar(value=(output & config.OUT_SYS_DELAY) and 1)
+    this.eddn_delay = tk.IntVar(value=(output & config.OUT_EDDN_DO_NOT_DELAY) and 1)
     # Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2
     this.eddn_delay_button = nb.Checkbutton(
         eddnframe,
@@ -1891,7 +1897,7 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
          & (config.OUT_MKT_TD | config.OUT_MKT_CSV | config.OUT_SHIP | config.OUT_MKT_MANUAL)) +
         (this.eddn_station.get() and config.OUT_MKT_EDDN) +
         (this.eddn_system.get() and config.OUT_SYS_EDDN) +
-        (this.eddn_delay.get() and config.OUT_SYS_DELAY)
+        (this.eddn_delay.get() and config.OUT_EDDN_DO_NOT_DELAY)
     )
 
 

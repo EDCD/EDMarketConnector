@@ -1221,7 +1221,7 @@ class PreferencesDialog(tk.Toplevel):
             (self.out_csv.get() and config.OUT_MKT_CSV) +
             (config.OUT_MKT_MANUAL if not self.out_auto.get() else 0) +
             (self.out_ship.get() and config.OUT_SHIP) +
-            (config.get_int('output') & (config.OUT_MKT_EDDN | config.OUT_SYS_EDDN | config.OUT_SYS_DELAY))
+            (config.get_int('output') & (config.OUT_MKT_EDDN | config.OUT_SYS_EDDN | config.OUT_EDDN_DO_NOT_DELAY))
         )
 
         config.set(
