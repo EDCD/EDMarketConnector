@@ -499,43 +499,6 @@ class EDDN:
         logger.debug('Closing EDDN requests.Session.')
         self.session.close()
 
-    def send(self, cmdr: str, msg: Mapping[str, Any]) -> None:
-        """
-        Enqueue a message for transmission.
-
-        :param cmdr: the CMDR to use as the uploader ID.
-        :param msg: the payload to send.
-        """
-        # TODO: Check if we should actually send this message:
-        #       1. Is sending of this 'class' of message configured on ?
-        #       2. Are we *not* docked and delayed sending is configured on ?
-        # NB: This is a placeholder whilst all the "start of processing data"
-        #     code points are confirmed to have their own check.
-        if (
-            any(f'/{s}/' in msg['$schemaRef'] for s in EDDNSender.STATION_SCHEMAS)
-            and not config.get_int('output') & config.OUT_EDDN_SEND_STATION_DATA
-        ):
-            # Sending of station data configured off
-            return
-
-        to_send: OrderedDictT[str, OrderedDict[str, Any]] = OrderedDict([
-            ('$schemaRef', msg['$schemaRef']),
-            ('header', OrderedDict([
-                ('softwareName',    f'{applongname} [{system() if sys.platform != "darwin" else "Mac OS"}]'),
-                ('softwareVersion', str(appversion_nobuild())),
-                ('uploaderID',      cmdr),
-                # TODO: Add `gameversion` and `gamebuild` if that change is live
-                #       on EDDN.
-            ])),
-            ('message', msg['message']),
-        ])
-
-        # Ensure it's en-queued
-        if (msg_id := self.sender.add_message(cmdr, to_send)) == -1:
-            return
-
-            self.sender.send_message_by_id(msg_id)
-
     def export_commodities(self, data: Mapping[str, Any], is_beta: bool) -> None:  # noqa: CCR001
         """
         Update EDDN with the commodities on the current (lastStarport) station.
@@ -601,7 +564,7 @@ class EDDN:
             if 'prohibited' in data['lastStarport']:
                 message['prohibited'] = sorted(x for x in (data['lastStarport']['prohibited'] or {}).values())
 
-            self.send(data['commander']['name'], {
+            self.send_message(data['commander']['name'], {
                 '$schemaRef': f'https://eddn.edcd.io/schemas/commodity/3{"/test" if is_beta else ""}',
                 'message':    message,
             })
@@ -686,7 +649,7 @@ class EDDN:
 
         # Don't send empty modules list - schema won't allow it
         if outfitting and this.outfitting != (horizons, outfitting):
-            self.send(data['commander']['name'], {
+            self.send_message(data['commander']['name'], {
                 '$schemaRef': f'https://eddn.edcd.io/schemas/outfitting/2{"/test" if is_beta else ""}',
                 'message': OrderedDict([
                     ('timestamp',   data['timestamp']),
@@ -730,7 +693,7 @@ class EDDN:
         )
         # Don't send empty ships list - shipyard data is only guaranteed present if user has visited the shipyard.
         if shipyard and this.shipyard != (horizons, shipyard):
-            self.send(data['commander']['name'], {
+            self.send_message(data['commander']['name'], {
                 '$schemaRef': f'https://eddn.edcd.io/schemas/shipyard/2{"/test" if is_beta else ""}',
                 'message': OrderedDict([
                     ('timestamp',   data['timestamp']),
@@ -778,7 +741,7 @@ class EDDN:
         # none and that really does need to be recorded over EDDN so that, e.g.
         # EDDB can update in a timely manner.
         if this.commodities != commodities:
-            self.send(cmdr, {
+            self.send_message(cmdr, {
                 '$schemaRef': f'https://eddn.edcd.io/schemas/commodity/3{"/test" if is_beta else ""}',
                 'message': OrderedDict([
                     ('timestamp',   entry['timestamp']),
@@ -817,7 +780,7 @@ class EDDN:
         )
         # Don't send empty modules list - schema won't allow it
         if outfitting and this.outfitting != (horizons, outfitting):
-            self.send(cmdr, {
+            self.send_message(cmdr, {
                 '$schemaRef': f'https://eddn.edcd.io/schemas/outfitting/2{"/test" if is_beta else ""}',
                 'message': OrderedDict([
                     ('timestamp',   entry['timestamp']),
@@ -851,7 +814,7 @@ class EDDN:
         shipyard = sorted(ship['ShipType'] for ship in ships)
         # Don't send empty ships list - shipyard data is only guaranteed present if user has visited the shipyard.
         if shipyard and this.shipyard != (horizons, shipyard):
-            self.send(cmdr, {
+            self.send_message(cmdr, {
                 '$schemaRef': f'https://eddn.edcd.io/schemas/shipyard/2{"/test" if is_beta else ""}',
                 'message': OrderedDict([
                     ('timestamp',   entry['timestamp']),
@@ -866,12 +829,11 @@ class EDDN:
 
         # this.shipyard = (horizons, shipyard)
 
-    def export_journal_entry(self, cmdr: str, entry: Mapping[str, Any], msg: MutableMapping[str, Any]) -> None:
+    def send_message(self, cmdr: str, msg: MutableMapping[str, Any]) -> None:
         """
-        Send a Journal-sourced EDDN message.
+        Send an EDDN message.
 
         :param cmdr: Commander name as passed in through `journal_entry()`.
-        :param entry: The full journal event dictionary (due to checks in this function).
         :param msg: The EDDN message body to be sent.
         """
         # Check if the user configured messages to be sent.
@@ -905,7 +867,7 @@ class EDDN:
             '$schemaRef': f'https://eddn.edcd.io/schemas/journal/1{"/test" if is_beta else ""}',
             'message': entry
         }
-        this.eddn.export_journal_entry(cmdr, entry, msg)
+        this.eddn.send_message(cmdr, msg)
 
     def entry_augment_system_data(
             self,
@@ -993,7 +955,7 @@ class EDDN:
             'message': entry
         }
 
-        this.eddn.export_journal_entry(cmdr, entry, msg)
+        this.eddn.send_message(cmdr, msg)
         return None
 
     def export_journal_navbeaconscan(
@@ -1035,7 +997,7 @@ class EDDN:
             'message': entry
         }
 
-        this.eddn.export_journal_entry(cmdr, entry, msg)
+        this.eddn.send_message(cmdr, msg)
         return None
 
     def export_journal_codexentry(  # noqa: CCR001
@@ -1135,7 +1097,7 @@ class EDDN:
             'message': entry
         }
 
-        this.eddn.export_journal_entry(cmdr, entry, msg)
+        this.eddn.send_message(cmdr, msg)
         return None
 
     def export_journal_scanbarycentre(
@@ -1189,7 +1151,7 @@ class EDDN:
             'message': entry
         }
 
-        this.eddn.export_journal_entry(cmdr, entry, msg)
+        this.eddn.send_message(cmdr, msg)
         return None
 
     def export_journal_navroute(
@@ -1262,7 +1224,7 @@ class EDDN:
             'message': entry
         }
 
-        this.eddn.export_journal_entry(cmdr, entry, msg)
+        this.eddn.send_message(cmdr, msg)
         return None
 
     def export_journal_fcmaterials(
@@ -1346,7 +1308,7 @@ class EDDN:
             'message': entry
         }
 
-        this.eddn.export_journal_entry(cmdr, entry, msg)
+        this.eddn.send_message(cmdr, msg)
         return None
 
     def export_capi_fcmaterials(
@@ -1404,7 +1366,7 @@ class EDDN:
             'message': entry
         }
 
-        this.eddn.export_journal_entry(data['commander']['name'], entry, msg)
+        this.eddn.send_message(data['commander']['name'], msg)
         return None
 
     def export_journal_approachsettlement(
@@ -1479,7 +1441,7 @@ class EDDN:
             'message': entry
         }
 
-        this.eddn.export_journal_entry(cmdr, entry, msg)
+        this.eddn.send_message(cmdr, msg)
         return None
 
     def export_journal_fssallbodiesfound(
@@ -1529,7 +1491,7 @@ class EDDN:
             'message': entry
         }
 
-        this.eddn.export_journal_entry(cmdr, entry, msg)
+        this.eddn.send_message(cmdr, msg)
         return None
 
     def export_journal_fssbodysignals(
@@ -1585,7 +1547,7 @@ class EDDN:
             'message': entry
         }
 
-        this.eddn.export_journal_entry(cmdr, entry, msg)
+        this.eddn.send_message(cmdr, msg)
         return None
 
     def enqueue_journal_fsssignaldiscovered(self, entry: MutableMapping[str, Any]) -> None:
@@ -1692,8 +1654,7 @@ class EDDN:
 
         logger.trace_if("plugin.eddn.fsssignaldiscovered", f"FSSSignalDiscovered batch is {json.dumps(msg)}")
 
-        # Fake an 'entry' as it's only there for some "should we send replay?" checks in the called function.
-        this.eddn.export_journal_entry(cmdr, {'event': 'send_fsssignaldiscovered'}, msg)
+        this.eddn.send_message(cmdr, msg)
         self.fss_signals = []
 
         return None
@@ -2180,11 +2141,11 @@ def journal_entry(  # noqa: C901, CCR001
             this.eddn.export_journal_generic(cmdr, is_beta, filter_localised(entry))
 
         except requests.exceptions.RequestException as e:
-            logger.debug('Failed in export_journal_entry', exc_info=e)
+            logger.debug('Failed in send_message', exc_info=e)
             return _("Error: Can't connect to EDDN")  # LANG: Error while trying to send data to EDDN
 
         except Exception as e:
-            logger.debug('Failed in export_journal_entry', exc_info=e)
+            logger.debug('Failed in export_journal_generic', exc_info=e)
             return str(e)
 
     elif (config.get_int('output') & config.OUT_EDDN_SEND_STATION_DATA and not state['Captain'] and
