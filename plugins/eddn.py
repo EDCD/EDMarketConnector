@@ -1350,8 +1350,7 @@ class EDDN:
         #         }
         #     ]
         # }
-
-        # TODO: Check we're configured to send station data
+        # Abort if we're not configured to send 'station' data.
         if not config.get_int('output') & config.OUT_EDDN_SEND_STATION_DATA:
             return None
 
