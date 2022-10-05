@@ -342,6 +342,10 @@ class EDDNSender:
         """
         Transmit a fully-formed EDDN message to the Gateway.
 
+        If this is called then the attempt *will* be made.  This is not where
+        options to not send to EDDN, or to delay the sending until docked,
+        are checked.
+
         Should catch and handle all failure conditions.  A `True` return might
         mean that the message was successfully sent, *or* that this message
         should not be retried after a failure, i.e. too large.
@@ -349,9 +353,6 @@ class EDDNSender:
         :param msg: Fully formed, string, message.
         :return: `True` for "now remove this message from the queue"
         """
-
-        # TODO: Check if user options require us to send at this time.
-
         should_return, new_data = killswitch.check_killswitch('plugins.eddn.send', json.loads(msg))
         if should_return:
             logger.warning('eddn.send has been disabled via killswitch. Returning.')
