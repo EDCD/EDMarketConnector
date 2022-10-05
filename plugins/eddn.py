@@ -1824,7 +1824,7 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:
     BUTTONX = 12  # noqa: N806 # indent Checkbuttons and Radiobuttons
 
     if prefsVersion.shouldSetDefaults('0.0.0.0', not bool(config.get_int('output'))):
-        output: int = (config.OUT_MKT_EDDN | config.OUT_EDDN_SEND_NON_STATION)  # default settings
+        output: int = (config.OUT_EDDN_SEND_STATION_DATA | config.OUT_EDDN_SEND_NON_STATION)  # default settings
 
     else:
         output = config.get_int('output')
@@ -1839,7 +1839,7 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:
         underline=True
     ).grid(padx=PADX, sticky=tk.W)  # Don't translate
 
-    this.eddn_station = tk.IntVar(value=(output & config.OUT_MKT_EDDN) and 1)
+    this.eddn_station = tk.IntVar(value=(output & config.OUT_EDDN_SEND_STATION_DATA) and 1)
     this.eddn_station_button = nb.Checkbutton(
         eddnframe,
         # LANG: Enable EDDN support for station data checkbox label
@@ -1895,7 +1895,7 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
         'output',
         (config.get_int('output')
          & (config.OUT_MKT_TD | config.OUT_MKT_CSV | config.OUT_SHIP | config.OUT_MKT_MANUAL)) +
-        (this.eddn_station.get() and config.OUT_MKT_EDDN) +
+        (this.eddn_station.get() and config.OUT_EDDN_SEND_STATION_DATA) +
         (this.eddn_system.get() and config.OUT_EDDN_SEND_NON_STATION) +
         (this.eddn_delay.get() and config.OUT_EDDN_DO_NOT_DELAY)
     )
@@ -2208,11 +2208,12 @@ def journal_entry(  # noqa: C901, CCR001
             return _("Error: Can't connect to EDDN")  # LANG: Error while trying to send data to EDDN
 
         except Exception as e:
+            return
             logger.debug('Failed in export_journal_entry', exc_info=e)
             return str(e)
 
-    elif (config.get_int('output') & config.OUT_MKT_EDDN and not state['Captain'] and
-            event_name in ('market', 'outfitting', 'shipyard')):
+    elif (config.get_int('output') & config.OUT_EDDN_SEND_STATION_DATA and not state['Captain'] and
+          event_name in ('market', 'outfitting', 'shipyard')):
         # Market.json, Outfitting.json or Shipyard.json to process
 
         try:
@@ -2263,7 +2264,7 @@ def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:  # noqa: CCR001
     :return: str - Error message, or `None` if no errors.
     """
     if (data['commander'].get('docked') or (this.on_foot and monitor.station)
-            and config.get_int('output') & config.OUT_MKT_EDDN):
+            and config.get_int('output') & config.OUT_EDDN_SEND_STATION_DATA):
         try:
             if this.marketId != data['lastStarport']['id']:
                 this.commodities = this.outfitting = this.shipyard = None
