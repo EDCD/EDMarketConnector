@@ -246,7 +246,7 @@ class EDDNSender:
         if self.db_conn:
             self.db_conn.close()
 
-    def add_message(self, cmdr: str, msg: dict) -> int:
+    def add_message(self, cmdr: str, msg: MutableMapping[str, Any]) -> int:
         """
         Add an EDDN message to the database.
 
@@ -925,7 +925,7 @@ class EDDN:
 
         # this.shipyard = (horizons, shipyard)
 
-    def export_journal_entry(self, cmdr: str, entry: Mapping[str, Any], msg: Mapping[str, Any]) -> None:
+    def export_journal_entry(self, cmdr: str, entry: Mapping[str, Any], msg: MutableMapping[str, Any]) -> None:
         """
         Send a Journal-sourced EDDN message.
 
@@ -933,7 +933,24 @@ class EDDN:
         :param entry: The full journal event dictionary (due to checks in this function).
         :param msg: The EDDN message body to be sent.
         """
-        self.send(cmdr, msg)
+        # Check if the user configured messages to be sent.
+        #
+        #   1. If this is a 'station' data message then check config.EDDN_SEND_STATION_DATA
+        #   2. Else check against config.EDDN_SEND_NON_STATION *and* config.OUT_EDDN_DO_NOT_DELAY
+        if any(f'{s}' in msg['$schemaRef'] for s in EDDNSender.STATION_SCHEMAS):
+            # 'Station data'
+            if config.get_int('output') & config.OUT_EDDN_SEND_STATION_DATA:
+                # And user has 'station data' configured to be sent
+                msg_id = self.sender.add_message(cmdr, msg)
+                # 'Station data' is never delayed on construction of message
+                self.sender.send_message_by_id(msg_id)
+
+        elif config.get_int('output') & config.OUT_EDDN_SEND_NON_STATION:
+            # Any data that isn't 'station' is configured to be sent
+            msg_id = self.sender.add_message(cmdr, msg)
+            if not config.get_int('output') & config.OUT_SYS_DELAY:
+                # No delay in sending configured, so attempt immediately
+                self.sender.send_message_by_id(msg_id)
 
     def export_journal_generic(self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]) -> None:
         """
