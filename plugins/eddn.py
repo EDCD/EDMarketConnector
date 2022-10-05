@@ -536,65 +536,6 @@ class EDDN:
 
             self.sender.send_message_by_id(msg_id)
 
-    def sendreplay(self) -> None:
-        """Send cached Journal lines to EDDN."""
-        # TODO: Convert to using the sqlite3 db
-        #       **IF** this is moved to a thread worker then we need to ensure
-        #         that we're operating sqlite3 in a thread-safe manner,
-        #         Ref: <https://ricardoanderegg.com/posts/python-sqlite-thread-safety/>
-        if not self.replayfile:
-            return  # Probably closing app
-
-        status: tk.Widget = self.parent.children['status']
-
-        if not self.replaylog:
-            status['text'] = ''
-            return
-
-        localized: str = _('Sending data to EDDN...')  # LANG: Status text shown while attempting to send data
-        if len(self.replaylog) == 1:
-            status['text'] = localized
-
-        else:
-            status['text'] = f'{localized.replace("...", "")} [{len(self.replaylog)}]'
-
-        self.parent.update_idletasks()
-
-        # Paranoia check in case this function gets chain-called.
-        if not self.replaylog:
-            # import traceback
-            # logger.error(
-            #     f'self.replaylog (type: {type(self.replaylog)}) is falsey after update_idletasks().  Traceback:\n'
-            #     f'{"".join(traceback.format_list(traceback.extract_stack()))}')
-            return
-
-        try:
-            cmdr, msg = json.loads(self.replaylog[0], object_pairs_hook=OrderedDict)
-
-        except json.JSONDecodeError as e:
-            # Couldn't decode - shouldn't happen!
-            logger.debug(f'\n{self.replaylog[0]}\n', exc_info=e)
-            # Discard and continue
-            self.replaylog.pop(0)
-
-        else:
-            # TODO: Check message against *current* relevant schema so we don't try
-            #       to send an old message that's now invalid.
-
-            # Rewrite old schema name
-            if msg['$schemaRef'].startswith('http://schemas.elite-markets.net/eddn/'):
-                msg['$schemaRef'] = str(msg['$schemaRef']).replace(
-                    'http://schemas.elite-markets.net/eddn/',
-                    'https://eddn.edcd.io/schemas/'
-                )
-
-            self.send(cmdr, msg)
-            self.replaylog.pop(0)
-            if not len(self.replaylog) % self.REPLAYFLUSH:
-                self.flush()
-
-        self.parent.after(self.REPLAYPERIOD, self.sendreplay)
-
     def export_commodities(self, data: Mapping[str, Any], is_beta: bool) -> None:  # noqa: CCR001
         """
         Update EDDN with the commodities on the current (lastStarport) station.
@@ -1911,9 +1852,12 @@ def prefsvarchanged(event=None) -> None:
 
     :param event: tkinter event ?
     """
+    # These two lines are legacy and probably not even needed
     this.eddn_station_button['state'] = tk.NORMAL
     this.eddn_system_button['state'] = tk.NORMAL
-    this.eddn_delay_button['state'] = this.eddn.replayfile and this.eddn_system.get() and tk.NORMAL or tk.DISABLED
+    # This line will grey out the 'Delay sending ...' option if the 'Send
+    #  system and scan data' option is off.
+    this.eddn_delay_button['state'] = this.eddn_system.get() and tk.NORMAL or tk.DISABLED
 
 
 def prefs_changed(cmdr: str, is_beta: bool) -> None:
