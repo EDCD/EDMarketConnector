@@ -130,6 +130,8 @@ class EDDNSender:
     """Handle sending of EDDN messages to the Gateway."""
 
     SQLITE_DB_FILENAME_V1 = 'eddn_queue-v1.db'
+    # EDDN schema types that pertain to station data
+    STATION_SCHEMAS = ('commodity', 'fcmaterials_capi', 'fcmaterials_journal', 'outfitting', 'shipyard')
     TIMEOUT = 10  # requests timeout
     UNKNOWN_SCHEMA_RE = re.compile(
         r"^FAIL: \[JsonValidationException\('Schema "
@@ -504,8 +506,17 @@ class EDDN:
         :param cmdr: the CMDR to use as the uploader ID.
         :param msg: the payload to send.
         """
-
-        # TODO: Check if the global 'Send to EDDN' option is off
+        # TODO: Check if we should actually send this message:
+        #       1. Is sending of this 'class' of message configured on ?
+        #       2. Are we *not* docked and delayed sending is configured on ?
+        # NB: This is a placeholder whilst all the "start of processing data"
+        #     code points are confirmed to have their own check.
+        if (
+            any(f'/{s}/' in msg['$schemaRef'] for s in EDDNSender.STATION_SCHEMAS)
+            and not config.get_int('output') & config.OUT_EDDN_SEND_STATION_DATA
+        ):
+            # Sending of station data configured off
+            return
 
         to_send: OrderedDictT[str, OrderedDict[str, Any]] = OrderedDict([
             ('$schemaRef', msg['$schemaRef']),
@@ -523,7 +534,7 @@ class EDDN:
         if (msg_id := self.sender.add_message(cmdr, to_send)) == -1:
             return
 
-        self.sender.send_message_by_id(msg_id)
+            self.sender.send_message_by_id(msg_id)
 
     def sendreplay(self) -> None:
         """Send cached Journal lines to EDDN."""
@@ -1339,6 +1350,10 @@ class EDDN:
         #         }
         #     ]
         # }
+
+        # TODO: Check we're configured to send station data
+        if not config.get_int('output') & config.OUT_EDDN_SEND_STATION_DATA:
+            return None
 
         # Sanity check
         if 'Items' not in entry:
@@ -2209,7 +2224,6 @@ def journal_entry(  # noqa: C901, CCR001
             return _("Error: Can't connect to EDDN")  # LANG: Error while trying to send data to EDDN
 
         except Exception as e:
-            return
             logger.debug('Failed in export_journal_entry', exc_info=e)
             return str(e)
 
