@@ -1824,7 +1824,7 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:
     BUTTONX = 12  # noqa: N806 # indent Checkbuttons and Radiobuttons
 
     if prefsVersion.shouldSetDefaults('0.0.0.0', not bool(config.get_int('output'))):
-        output: int = (config.OUT_MKT_EDDN | config.OUT_SYS_EDDN)  # default settings
+        output: int = (config.OUT_MKT_EDDN | config.OUT_EDDN_SEND_NON_STATION)  # default settings
 
     else:
         output = config.get_int('output')
@@ -1849,7 +1849,7 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:
     )  # Output setting
 
     this.eddn_station_button.grid(padx=BUTTONX, pady=(5, 0), sticky=tk.W)
-    this.eddn_system = tk.IntVar(value=(output & config.OUT_SYS_EDDN) and 1)
+    this.eddn_system = tk.IntVar(value=(output & config.OUT_EDDN_SEND_NON_STATION) and 1)
     # Output setting new in E:D 2.2
     this.eddn_system_button = nb.Checkbutton(
         eddnframe,
@@ -1896,7 +1896,7 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
         (config.get_int('output')
          & (config.OUT_MKT_TD | config.OUT_MKT_CSV | config.OUT_SHIP | config.OUT_MKT_MANUAL)) +
         (this.eddn_station.get() and config.OUT_MKT_EDDN) +
-        (this.eddn_system.get() and config.OUT_SYS_EDDN) +
+        (this.eddn_system.get() and config.OUT_EDDN_SEND_NON_STATION) +
         (this.eddn_delay.get() and config.OUT_EDDN_DO_NOT_DELAY)
     )
 
@@ -2066,7 +2066,7 @@ def journal_entry(  # noqa: C901, CCR001
             this.status_body_name = None
 
     # Events with their own EDDN schema
-    if config.get_int('output') & config.OUT_SYS_EDDN and not state['Captain']:
+    if config.get_int('output') & config.OUT_EDDN_SEND_NON_STATION and not state['Captain']:
 
         if event_name == 'fssdiscoveryscan':
             return this.eddn.export_journal_fssdiscoveryscan(cmdr, system, state['StarPos'], is_beta, entry)
@@ -2123,7 +2123,7 @@ def journal_entry(  # noqa: C901, CCR001
             )
 
     # Send journal schema events to EDDN, but not when on a crew
-    if (config.get_int('output') & config.OUT_SYS_EDDN and not state['Captain'] and
+    if (config.get_int('output') & config.OUT_EDDN_SEND_NON_STATION and not state['Captain'] and
         (event_name in ('location', 'fsdjump', 'docked', 'scan', 'saasignalsfound', 'carrierjump')) and
             ('StarPos' in entry or this.coordinates)):
 

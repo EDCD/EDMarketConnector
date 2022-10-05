@@ -175,7 +175,7 @@ class AbstractConfig(abc.ABC):
     # OUT_SYS_EDSM = 256  # Now a plugin
     # OUT_SYS_AUTO = 512  # Now always automatic
     OUT_MKT_MANUAL = 1024
-    OUT_SYS_EDDN = 2048
+    OUT_EDDN_SEND_NON_STATION = 2048
     OUT_EDDN_DO_NOT_DELAY = 4096
 
     app_dir_path: pathlib.Path
