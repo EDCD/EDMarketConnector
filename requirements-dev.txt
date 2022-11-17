@@ -5,7 +5,7 @@ wheel
 # We can't rely on just picking this up from either the base (not venv),
 # or venv-init-time version.  Specify here so that dependabot will prod us
 # about new versions.
-setuptools==65.5.0
+setuptools==65.5.1
 
 # Static analysis tools
 flake8==5.0.4
