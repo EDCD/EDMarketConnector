@@ -23,7 +23,7 @@ flake8-use-fstring==1.4
 mypy==0.991
 pep8-naming==0.13.2
 safety==2.3.1
-types-requests==2.28.11.2
+types-requests==2.28.11.5
 
 # Code formatting tools
 autopep8==2.0.0
