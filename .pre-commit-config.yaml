@@ -82,7 +82,7 @@ repos:
     - id: LANG_comments
       name: 'LANG comments'
       language: system
-      entry: python scripts/find_localised_strings.py --compare-lang L10n/en.template --directory . --ignore coriolis-data --ignore dist.win32
+      entry: python scripts/find_localised_strings.py --compare-lang L10n/en.template --directory . --ignore coriolis-data --ignore dist.win32 --ignore venv-3.11_64
       pass_filenames: false
       always_run: true
 
