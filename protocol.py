@@ -107,11 +107,12 @@ if sys.platform == 'darwin' and getattr(sys, 'frozen', False):  # noqa: C901 # i
 
         def handleEvent_withReplyEvent_(self, event, replyEvent) -> None:  # noqa: N802 N803 # Required to override
             """Actual event handling from NSAppleEventManager."""
-            protocolhandler.lasturl = urllib.parse.unquote(  # type: ignore # Its going to be a DPH in this code
+            protocolhandler.lasturl = urllib.parse.unquote(  # noqa: F821 # type: ignore # Its going to be a DPH in
+                # this code
                 event.paramDescriptorForKeyword_(keyDirectObject).stringValue()
             ).strip()
 
-            protocolhandler.master.after(DarwinProtocolHandler.POLL, protocolhandler.poll)  # type: ignore
+            protocolhandler.master.after(DarwinProtocolHandler.POLL, protocolhandler.poll)  # noqa: F821 # type: ignore
 
 
 elif (config.auth_force_edmc_protocol
@@ -157,7 +158,13 @@ elif (config.auth_force_edmc_protocol
     CreateWindowExW.restype = HWND
     RegisterClassW = windll.user32.RegisterClassW
     RegisterClassW.argtypes = [POINTER(WNDCLASS)]
-    DefWindowProcW = windll.user32.DefWindowProcW
+    # DefWindowProcW
+    # Ref: <https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-defwindowprocw>
+    # LRESULT DefWindowProcW([in] HWND   hWnd,[in] UINT   Msg,[in] WPARAM wParam,[in] LPARAM lParam);
+    # As per example at <https://docs.python.org/3/library/ctypes.html#ctypes.WINFUNCTYPE>
+    prototype = WINFUNCTYPE(c_long, HWND, UINT, WPARAM, LPARAM)
+    paramflags = (1, "hWnd"), (1, "Msg"), (1, "wParam"), (1, "lParam")
+    DefWindowProcW = prototype(("DefWindowProcW", windll.user32), paramflags)
     GetParent = windll.user32.GetParent
     SetForegroundWindow = windll.user32.SetForegroundWindow
 
@@ -389,7 +396,7 @@ else:  # Linux / Run from source
             url = urllib.parse.unquote(self.path)
             if url.startswith('/auth'):
                 logger.debug('Request starts with /auth, sending to protocolhandler.event()')
-                protocolhandler.event(url)
+                protocolhandler.event(url)  # noqa: F821
                 self.send_response(200)
                 return True
             else:
