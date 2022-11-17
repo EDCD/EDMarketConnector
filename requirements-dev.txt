@@ -33,7 +33,8 @@ grip==4.6.1
 
 # Packaging
 # Used to put together a WiX configuration from template/auto-gen
-lxml==4.9.1
+## FIXME: Disabled because as of 2022-11-17 PyPi has no 3.11 wheels
+# lxml==4.9.1
 # We only need py2exe on windows.
 # Pre-release version addressing semantic_version 2.9.0+ issues:
 # <https://github.com/py2exe/py2exe/issues/126>
