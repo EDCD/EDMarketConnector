@@ -182,10 +182,7 @@ if sys.platform == 'darwin':
 elif sys.platform == 'win32':
     import ctypes
     import winreg
-    from ctypes import POINTER, WINFUNCTYPE, Structure
-    from ctypes.wintypes import (
-        BOOL, BYTE, HINSTANCE, HWND, LPARAM, LPCWSTR, LPWSTR, MAX_PATH, POINT, RECT, SIZE, UINT, USHORT
-    )
+    from ctypes.wintypes import HINSTANCE, HWND, LPCWSTR, LPWSTR, MAX_PATH, POINT, RECT, SIZE, UINT
     is_wine = False
     try:
         WINE_REGISTRY_KEY = r'HKEY_LOCAL_MACHINE\Software\Wine'
@@ -195,69 +192,6 @@ elif sys.platform == 'win32':
 
     except OSError:
         pass
-
-    ###########################################################################
-    # From <https://github.com/hakril/PythonForWindows/blob/master/windows/generated_def/winstructs.py>
-    class _SHITEMID(ctypes.Structure):
-        _fields_ = [
-            ("cb", USHORT),
-            ("abID", BYTE * (1)),
-        ]
-
-    SHITEMID = _SHITEMID
-
-    class _ITEMIDLIST(Structure):
-        _fields_ = [
-            ("mkid", SHITEMID),
-        ]
-
-    ITEMIDLIST = _ITEMIDLIST
-    PCIDLIST_ABSOLUTE = ctypes.POINTER(_ITEMIDLIST)
-    PIDLIST_ABSOLUTE = ctypes.POINTER(_ITEMIDLIST)
-    ###########################################################################
-
-    ###########################################################################
-    # From: <https://stackoverflow.com/questions/32979525/creating-choose-folder-dialog-from-python-using-windows-api>
-    BrowseCallbackProc = WINFUNCTYPE(ctypes.c_int, HWND, ctypes.c_uint, LPARAM, LPARAM)
-
-    class BROWSEINFOW(ctypes.Structure):
-        """
-        Windows file browser fields.
-
-        Ref: <https://learn.microsoft.com/en-us/windows/win32/api/shlobj_core/ns-shlobj_core-browseinfow>
-        """
-
-        _fields_ = [
-            ("hwndOwner", HWND),
-            ("pidlRoot", PCIDLIST_ABSOLUTE),
-            ("pszDisplayName", LPWSTR),
-            ("lpszTitle", LPCWSTR),
-            ("ulFlags", UINT),
-            ("lpfn", BrowseCallbackProc),
-            ("lParam", LPARAM),
-            ("iImage", ctypes.c_int)
-        ]
-    LPBROWSEINFOW = POINTER(BROWSEINFOW)
-    ###########################################################################
-
-    # https://msdn.microsoft.com/en-us/library/windows/desktop/bb762115
-    BIF_RETURNONLYFSDIRS = 0x00000001
-    BIF_USENEWUI = 0x00000050
-    BFFM_INITIALIZED = 1
-    BFFM_SETSELECTION = 0x00000467
-    # SHGetPathFromIDListW
-    # Ref: <https://learn.microsoft.com/en-us/windows/win32/api/shlobj_core/nf-shlobj_core-shgetpathfromidlistw>
-    # BOOL SHGetPathFromIDListW([in]  PCIDLIST_ABSOLUTE pidl,[out] LPWSTR pszPath);
-    prototype = WINFUNCTYPE(BOOL, PCIDLIST_ABSOLUTE, LPCWSTR)
-    paramflags = (1, "pidl"), (2, "pszPath", "")
-    SHGetPathFromIDListW = prototype(("SHGetPathFromIDListW", ctypes.windll.shell32), paramflags)
-
-    # SHBrowseForFolderW
-    # Ref: <https://learn.microsoft.com/en-us/windows/win32/api/shlobj_core/nf-shlobj_core-shbrowseforfolderw>
-    # PIDLIST_ABSOLUTE SHBrowseForFolderW([in] LPBROWSEINFOWW lpbi);
-    prototype = WINFUNCTYPE(PIDLIST_ABSOLUTE, LPBROWSEINFOW)
-    paramflags2 = (1, "lpbi"),
-    SHBrowseForFolderW = prototype(("SHGetPathFromIDListW", ctypes.windll.shell32), paramflags2)
 
     CalculatePopupWindowPosition = None
     if not is_wine:
