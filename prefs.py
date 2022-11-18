@@ -189,7 +189,7 @@ elif sys.platform == 'win32':
         winreg.OpenKey(reg, WINE_REGISTRY_KEY)
         is_wine = True
 
-    except OSError:
+    except OSError:  # Assumed to be 'path not found', i.e. not-wine
         pass
 
     CalculatePopupWindowPosition = None
