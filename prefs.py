@@ -1077,48 +1077,13 @@ class PreferencesDialog(tk.Toplevel):
         :param title: Title of the window
         :param pathvar: the path to start the dialog on
         """
-        import locale
-
-        # If encoding isn't UTF-8 we can't use the tkinter dialog
-        current_locale = locale.getlocale(locale.LC_CTYPE)
-        directory = None
-        if sys.platform == 'win32' and current_locale[1] not in ('utf8', 'UTF8', 'utf-8', 'UTF-8'):
-            def browsecallback(hwnd, uMsg, lParam, lpData):  # noqa: N803 # Windows API convention
-                # set initial folder
-                if uMsg == BFFM_INITIALIZED and lpData:
-                    ctypes.windll.user32.SendMessageW(hwnd, BFFM_SETSELECTION, 1, lpData)
-                return 0
-
-            browseInfo = BROWSEINFOW()  # noqa: N806 # Windows convention
-            # browseInfo.pidlRoot = None
-            browseInfo.pszDisplayName = ctypes.c_wchar_p("x" * MAX_PATH)
-            browseInfo.lpszTitle = title
-            browseInfo.ulFlags = BIF_RETURNONLYFSDIRS | BIF_USENEWUI
-            browseInfo.lpfn = BrowseCallbackProc(browsecallback)
-            # browseInfo.lParam = pathvar.get().startswith('~') and join(config.home_path,
-            #                                                            pathvar.get()[2:]) or pathvar.get()
-            ctypes.windll.ole32.CoInitialize(None)
-            pidl = ctypes.windll.shell32.SHBrowseForFolderW(ctypes.byref(browseInfo))
-            # ctypes.ArgumentError: argument 1: <class 'TypeError'>: expected LP__ITEMIDLIST instance instead of int
-            # pidl = SHBrowseForFolderW(ctypes.byref(browseInfo))
-            # OSError: exception: access violation writing 0x00007FFB582DC9BF
-            if pidl:
-                pidl = ctypes.cast(pidl, PIDLIST_ABSOLUTE)
-                path = ctypes.create_unicode_buffer(MAX_PATH)
-                path = SHGetPathFromIDListW(pidl)
-                ctypes.windll.ole32.CoTaskMemFree(pidl)
-                directory = path.value
-            else:
-                directory = None
-
-        else:
-            import tkinter.filedialog
-            directory = tkinter.filedialog.askdirectory(
-                parent=self,
-                initialdir=expanduser(pathvar.get()),
-                title=title,
-                mustexist=tk.TRUE
-            )
+        import tkinter.filedialog
+        directory = tkinter.filedialog.askdirectory(
+            parent=self,
+            initialdir=expanduser(pathvar.get()),
+            title=title,
+            mustexist=tk.TRUE
+        )
 
         if directory:
             pathvar.set(directory)
