@@ -9,7 +9,7 @@ produce the Windows executables and installer.
 
 ---
 
-* We now test against, and package with, Python 3.10.8.
+* We now test against, and package with, Python 3.10.8 64-bit.
 
   **As a consequence of this we no longer support Windows 7.  
   This is due to
@@ -29,7 +29,70 @@ produce the Windows executables and installer.
 
 Pre-Release 5.5.1-alpha0
 ===
-* We now test against, and package with, Python 3.10.8.
+* We now test against, and package with, Python 3.10.8 **64-bit**.  In part
+  this change to 64-bit is because `py2exe`, the program we employ to create
+  windows executables, is no longer warranting that their 32-bit versions will
+  continue to work (they no longer run 32-bit tests).
+
+  Another advantage to switching to 64-bit is in case any data-hungry plugins
+  attempt to use around/more than 2GiB of RAM at once.  With 64-bit Python as
+  the basis the only limit will be your system RAM and 'page file' space.
+* `ctypes` code (for Windows API calls) has been updated where necessary to
+  work with 64-bit Python.
+* The `ctypes` code to invoke a "choose a folder" dialog for `Settings` >
+  `Output` tab > `File location` > `Browser` has been removed in favour of
+  always using `tkinter.filedialog()`.
+ 
+  - This was tested as still working under Windows 10 21H2 (Build 19044.2311),
+  even when forcing a UTF-8 locale to **not** be selected *and* selecting a
+  folder containing Unicode characters.
+
+  - The Windows UTF-8 code page has been available since Windows 10 Build 1903,
+  and even that version is no longer supported, so **any supported version of
+  Windows 10** shouldn't have a problem with this.
+
+  - The last Windows 8.1 build is still supported until 'Jan 10, 2023' and might
+  have an issue with this.  But as that 'end of life' date is very much in
+  sight we don't plan to hold back the change just for that OS.
+
+Those statements about (un)supported OS versions not withstanding, please do
+test this version and that specific functionality on any and all Windows
+systems which ran EDMarketConnector 5.5.0 without issues.
+
+*NB: If you make use of any third-party plugins that utilise extra modules
+which themselves use native libraries then you might find that plugin no
+longer works.*  The plugin author will likely need to make a new release which
+contains the 64-bit versions of any libraries, rather than the 32-bit version
+they would have been supplying up until now.  Please report the issue to them,
+not us.
+
+Plugin Developers
+---
+As noted above, if any third-party plugin is shipped with extra python modules
+that include native libraries then you will need to switch to shipping the
+64-bit versions of those libraries.
+
+There shouldn't be any other impact on plugins, as no API interfaces have
+changed.  Although if your own code utilises any `ctypes` calls you might also
+find that it needs updating or replacing.
+
+The key thing to look out for there is where the naive way to call a
+`ctypes`-mediated Windows API function defaults the return type to `int`.  On 
+32-bit Python this is OK if the actual return type is meant to be a pointer,
+as the two types are of the same size and that pointer will continue to work
+if passed through to another `ctypes` function.  However on 64-bit python the
+size of `int` is still 32 bits, but the pointers are 64 bits.  Thus any
+returned pointer gets erroneously cast *and truncated* to 32 bits unless you
+properly declare the function prototype first.
+
+See https://docs.python.org/3/library/ctypes.html#ctypes.WINFUNCTYPE for how
+to properly declare a function prototype, including return value.
+
+Due to this move to 64-bit Python being a potentially breaking change for
+some plugins we *will* be bumping our major version in the final release, i.e.
+to 6.0.0.  We're holding off on that for these alpha releases in case we need
+to backout/delay this change, not wanting to have testers on an alpha version
+that is considered newer than a release 5.6.0 or later 5.x.y version.
 
 ---
 
