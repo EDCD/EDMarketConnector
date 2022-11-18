@@ -335,8 +335,6 @@ class StatsDialog():
         elif (
             not capi_data.get('lastSystem')
             or not capi_data['lastSystem'].get('name', '').strip()
-            or not capi_data.get('lastStarport')
-            or not capi_data['lastStarport'].get('name', '').strip()
         ):
             # Shouldn't happen
             # LANG: Unknown location
