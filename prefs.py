@@ -893,7 +893,7 @@ class PreferencesDialog(tk.Toplevel):
         current_locale = locale.getlocale(locale.LC_CTYPE)
         from sys import platform as sys_platform
         directory = None
-        if sys_platform == 'win32' and current_locale[1] not in ('utf8', 'UTF8', 'utf-8', 'UTF-8'):
+        if False and sys_platform == 'win32' and current_locale[1] not in ('utf8', 'UTF8', 'utf-8', 'UTF-8'):
             def browsecallback(hwnd, uMsg, lParam, lpData):
                 # set initial folder
                 if uMsg == BFFM_INITIALIZED and lpData:
@@ -918,6 +918,7 @@ class PreferencesDialog(tk.Toplevel):
 
         else:
             import tkinter.filedialog
+            logger.info(f"locale: {locale.getlocale(locale.LC_CTYPE)}")
             directory = tkinter.filedialog.askdirectory(
                 parent=self,
                 initialdir=expanduser(pathvar.get()),

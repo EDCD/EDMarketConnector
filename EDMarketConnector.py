@@ -1295,7 +1295,8 @@ sys.path: {sys.path}'''
             # UTF-8, not utf8: <https://en.wikipedia.org/wiki/UTF-8#Naming>
             try:
                 # locale_startup[0] is the 'language' portion
-                locale.setlocale(locale.LC_ALL, (locale_startup[0], 'UTF-8'))
+                # locale.setlocale(locale.LC_ALL, (locale_startup[0], 'UTF-8'))
+                ...
 
             except locale.Error:
                 logger.exception(f"Could not set LC_ALL to ('{locale_startup[0]}', 'UTF_8')")
