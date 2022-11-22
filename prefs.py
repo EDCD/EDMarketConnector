@@ -1222,7 +1222,7 @@ class PreferencesDialog(tk.Toplevel):
             (config.OUT_MKT_MANUAL if not self.out_auto.get() else 0) +
             (self.out_ship.get() and config.OUT_SHIP) +
             (config.get_int('output') & (
-                config.OUT_EDDN_SEND_STATION_DATA | config.OUT_EDDN_SEND_NON_STATION | config.OUT_EDDN_DO_NOT_DELAY
+                config.OUT_EDDN_SEND_STATION_DATA | config.OUT_EDDN_SEND_NON_STATION | config.OUT_EDDN_DELAY
             ))
         )
 
