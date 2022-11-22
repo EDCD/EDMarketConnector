@@ -912,42 +912,37 @@ class EDDN:
             # 'Station data'
             if config.get_int('output') & config.OUT_EDDN_SEND_STATION_DATA:
                 # And user has 'station data' configured to be sent
-                msg = self.add_header(msg)
+                msg['header'] = self.standard_header()
                 msg_id = self.sender.add_message(cmdr, msg)
                 # 'Station data' is never delayed on construction of message
                 self.sender.send_message_by_id(msg_id)
 
         elif config.get_int('output') & config.OUT_EDDN_SEND_NON_STATION:
             # Any data that isn't 'station' is configured to be sent
-            msg = self.add_header(msg)
+            msg['header'] = self.standard_header()
             msg_id = self.sender.add_message(cmdr, msg)
             if not (config.get_int('output') & config.OUT_EDDN_DELAY):
                 # No delay in sending configured, so attempt immediately
                 self.sender.send_message_by_id(msg_id)
 
-    def add_header(self, msg: MutableMapping[str, Any]) -> MutableMapping[str, Any]:
+    def standard_header(
+        self, game_version: Optional[str] = None, game_build: Optional[str] = None
+    ) -> MutableMapping[str, Any]:
         """
-        Augment the given EDDN message with our header defaults.
+        Return the standard header for an EDDN message, given tracked state.
 
         NB: This should *only* be called for newly constructed messages, not
         for either a legacy message or an already queued one!
 
-        :param msg: Message to be augmented
-        :return: The augmented version
+        :return: The standard header
         """
-        if 'header' in msg:
-            logger.error("Passed `msg` which already has a header")
-            return msg
-
-        msg['header'] = {
+        return {
             'softwareName':    f'{applongname} [{system() if sys.platform != "darwin" else "Mac OS"}]',
             'softwareVersion': str(appversion_nobuild()),
             'uploaderID':      this.cmdr_name,
-            'gameversion':     this.game_version,
-            'gamebuild':       this.game_build,
+            'gameversion':     game_version or this.game_version,
+            'gamebuild':       game_build or this.game_build,
         }
-
-        return msg
 
     def export_journal_generic(self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]) -> None:
         """
@@ -1457,7 +1452,8 @@ class EDDN:
 
         msg = {
             '$schemaRef': f'https://eddn.edcd.io/schemas/fcmaterials_capi/1{"/test" if is_beta else ""}',
-            'message': entry
+            'message': entry,
+            'header': self.standard_header(game_version='CAPI-commodity', game_build='CAPI-commodity'),
         }
 
         this.eddn.send_message(data['commander']['name'], msg)
