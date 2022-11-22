@@ -166,6 +166,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             'Modules':            None,
             'CargoJSON':          None,  # The raw data from the last time cargo.json was read
             'Route':              None,  # Last plotted route from Route.json file
+            'IsDocked':           False,  # Whether we think cmdr is docked
             'OnFoot':             False,  # Whether we think you're on-foot
             'Component':          defaultdict(int),      # Odyssey Components in Ship Locker
             'Item':               defaultdict(int),      # Odyssey Items in Ship Locker
@@ -306,6 +307,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self.systemaddress = None
         self.is_beta = False
         self.state['OnFoot'] = False
+        self.state['IsDocked'] = False
         self.state['Body'] = None
         self.state['BodyType'] = None
 
@@ -725,6 +727,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.station_marketid = None
                 self.stationtype = None
                 self.stationservices = None
+                self.state['IsDocked'] = False
 
             elif event_type == 'embark':
                 # This event is logged when a player (on foot) gets into a ship or SRV
@@ -791,6 +794,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['Dropship'] = False
 
             elif event_type == 'docked':
+                self.state['IsDocked'] = True
                 self.station = entry.get('StationName')  # May be None
                 self.station_marketid = entry.get('MarketID')  # May be None
                 self.stationtype = entry.get('StationType')  # May be None
@@ -813,6 +817,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
                     if event_type == 'location':
                         logger.trace_if('journal.locations', '"Location" event')
+                        if entry.get('Docked'):
+                            self.state['IsDocked'] = True
 
                 elif event_type == 'fsdjump':
                     self.planet = None
