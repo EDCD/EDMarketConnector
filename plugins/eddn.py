@@ -340,7 +340,7 @@ class EDDNSender:
 
         return False
 
-    def send_message(self, msg: str) -> bool:  # noqa: CCR001
+    def send_message(self, msg: str) -> bool:
         """
         Transmit a fully-formed EDDN message to the Gateway.
 
@@ -2191,7 +2191,7 @@ def journal_entry(  # noqa: C901, CCR001
     return None
 
 
-def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:  # noqa: CCR001
+def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:
     """
     Process new CAPI data.
 
