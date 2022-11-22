@@ -34,6 +34,7 @@ import tkinter as tk
 from collections import OrderedDict
 from platform import system
 from textwrap import dedent
+from threading import Lock
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Mapping, MutableMapping, Optional
 from typing import OrderedDict as OrderedDictT
 from typing import Tuple, Union
@@ -66,6 +67,8 @@ class This:
     def __init__(self):
         # Track if we're on foot
         self.on_foot = False
+        # Track if we're docked
+        self.docked = False
 
         # Horizons ?
         self.horizons = False
@@ -163,6 +166,10 @@ class EDDNSender:
         #######################################################################
         self.convert_legacy_file()
         #######################################################################
+
+        self.queue_processing = Lock()
+        # Initiate retry/send-now timer
+        self.eddn.parent.after(self.eddn.REPLAYPERIOD, self.queue_check_and_send)
 
     def sqlite_queue_v1(self) -> sqlite3.Connection:
         """
@@ -413,6 +420,48 @@ class EDDNSender:
             status['text'] = str(e)
 
         return False
+
+    def queue_check_and_send(self) -> None:
+        """Check if we should be sending queued messages, and send if we should."""
+        # Mutex in case we're already processing
+        if not self.queue_processing.acquire(blocking=False):
+            return
+
+        # We send either if docked or 'Delay sending until docked' not set
+        if this.docked or config.get_int('output') & config.OUT_EDDN_DO_NOT_DELAY:
+            # We need our own cursor here, in case the semantics of
+            # tk `after()` could allow this to run in the middle of other
+            # database usage.
+            db_cursor = self.db_conn.cursor()
+
+            # Options:
+            #  1. Process every queued message, regardless.
+            #  2. Bail if we get any sort of connection error from EDDN.
+
+            # Every queued message that is for *this* commander.  We do **NOT**
+            # check if it's station/not-station, as the control of if a message
+            # was even created, versus the Settings > EDDN options, is applied
+            # *then*, not at time of sending.
+            try:
+                db_cursor.execute(
+                    """
+                    SELECT message_id FROM messages
+                    ORDER BY created ASC
+                    """
+                )
+
+            except Exception:
+                logger.exception("DB error querying queued messages")
+
+            else:
+                row = dict(zip([c[0] for c in db_cursor.description], db_cursor.fetchone()))
+                self.send_message_by_id(row['message_id'])
+
+            db_cursor.close()
+
+        # Set us up to run again after a delay
+        self.queue_processing.release()
+        self.eddn.parent.after(self.eddn.REPLAYPERIOD, self.queue_check_and_send)
 
     def _log_response(
         self,
@@ -851,7 +900,7 @@ class EDDN:
         elif config.get_int('output') & config.OUT_EDDN_SEND_NON_STATION:
             # Any data that isn't 'station' is configured to be sent
             msg_id = self.sender.add_message(cmdr, msg)
-            if not config.get_int('output') & config.OUT_SYS_DELAY:
+            if config.get_int('output') & config.OUT_EDDN_DO_NOT_DELAY:
                 # No delay in sending configured, so attempt immediately
                 self.sender.send_message_by_id(msg_id)
 
@@ -1925,6 +1974,7 @@ def journal_entry(  # noqa: C901, CCR001
     event_name = entry['event'].lower()
 
     this.on_foot = state['OnFoot']
+    this.docked = state['IsDocked']
 
     # Note if we're under Horizons and/or Odyssey
     # The only event these are already in is `LoadGame` which isn't sent to EDDN.
