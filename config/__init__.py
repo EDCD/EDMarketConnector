@@ -171,12 +171,12 @@ class AbstractConfig(abc.ABC):
     # OUT_SYS_FILE = 32	# No longer supported
     # OUT_STAT = 64	# No longer available
     # OUT_SHIP_CORIOLIS = 128	# Replaced by OUT_SHIP
-    OUT_STATION_ANY = OUT_EDDN_SEND_STATION_DATA | OUT_MKT_TD | OUT_MKT_CSV
     # OUT_SYS_EDSM = 256  # Now a plugin
     # OUT_SYS_AUTO = 512  # Now always automatic
     OUT_MKT_MANUAL = 1024
     OUT_EDDN_SEND_NON_STATION = 2048
     OUT_EDDN_DO_NOT_DELAY = 4096
+    OUT_STATION_ANY = OUT_EDDN_SEND_STATION_DATA | OUT_MKT_TD | OUT_MKT_CSV
 
     app_dir_path: pathlib.Path
     plugin_dir_path: pathlib.Path
