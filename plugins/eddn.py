@@ -30,6 +30,7 @@ import pathlib
 import re
 import sqlite3
 import sys
+import time
 import tkinter as tk
 from collections import OrderedDict
 from platform import system
@@ -169,7 +170,7 @@ class EDDNSender:
 
         self.queue_processing = Lock()
         # Initiate retry/send-now timer
-        self.eddn.parent.after(self.eddn.REPLAYPERIOD, self.queue_check_and_send)
+        self.eddn.parent.after(self.eddn.REPLAY_PERIOD, self.queue_check_and_send)
 
     def sqlite_queue_v1(self) -> sqlite3.Connection:
         """
@@ -252,6 +253,9 @@ class EDDNSender:
 
         if self.db_conn:
             self.db_conn.close()
+
+        logger.debug('Closing EDDN requests.Session.')
+        self.session.close()
 
     def add_message(self, cmdr: str, msg: MutableMapping[str, Any]) -> int:
         """
@@ -423,12 +427,16 @@ class EDDNSender:
 
     def queue_check_and_send(self) -> None:
         """Check if we should be sending queued messages, and send if we should."""
+        # logger.debug("Called")
         # Mutex in case we're already processing
         if not self.queue_processing.acquire(blocking=False):
+            logger.debug("Couldn't obtain mutex")
             return
 
+        # logger.debug("Obtained mutex")
         # We send either if docked or 'Delay sending until docked' not set
-        if this.docked or config.get_int('output') & config.OUT_EDDN_DO_NOT_DELAY:
+        if this.docked or not (config.get_int('output') & config.OUT_EDDN_DELAY):
+            # logger.debug("Should send")
             # We need our own cursor here, in case the semantics of
             # tk `after()` could allow this to run in the middle of other
             # database usage.
@@ -445,7 +453,7 @@ class EDDNSender:
             try:
                 db_cursor.execute(
                     """
-                    SELECT message_id FROM messages
+                    SELECT id FROM messages
                     ORDER BY created ASC
                     """
                 )
@@ -454,14 +462,20 @@ class EDDNSender:
                 logger.exception("DB error querying queued messages")
 
             else:
-                row = dict(zip([c[0] for c in db_cursor.description], db_cursor.fetchone()))
-                self.send_message_by_id(row['message_id'])
+                while row := db_cursor.fetchone():
+                    row = dict(zip([c[0] for c in db_cursor.description], row))
+                    self.send_message_by_id(row['id'])
+                    time.sleep(self.eddn.REPLAY_DELAY)
 
             db_cursor.close()
 
+        # else:
+        #    logger.debug("Should NOT send")
+
         # Set us up to run again after a delay
         self.queue_processing.release()
-        self.eddn.parent.after(self.eddn.REPLAYPERIOD, self.queue_check_and_send)
+        # logger.debug("Mutex released")
+        self.eddn.parent.after(self.eddn.REPLAY_PERIOD, self.queue_check_and_send)
 
     def _log_response(
         self,
@@ -518,7 +532,9 @@ class EDDN:
     if 'eddn' in debug_senders:
         DEFAULT_URL = f'http://{edmc_data.DEBUG_WEBSERVER_HOST}:{edmc_data.DEBUG_WEBSERVER_PORT}/eddn'
 
-    REPLAYPERIOD = 400  # Roughly two messages per second, accounting for send delays [ms]
+    # FIXME: Change back to `300_000`
+    REPLAY_PERIOD = 1_000  # How often to try (re-)sending the queue, [milliseconds]
+    REPLAY_DELAY = 0.400  # Roughly two messages per second, accounting for send delays [seconds]
     REPLAYFLUSH = 20  # Update log on disk roughly every 10 seconds
     MODULE_RE = re.compile(r'^Hpt_|^Int_|Armour_', re.IGNORECASE)
     CANONICALISE_RE = re.compile(r'\$(.+)_name;')
@@ -544,9 +560,6 @@ class EDDN:
             self.sender.close()
 
         logger.debug('Done.')
-
-        logger.debug('Closing EDDN requests.Session.')
-        self.session.close()
 
     def export_commodities(self, data: Mapping[str, Any], is_beta: bool) -> None:  # noqa: CCR001
         """
@@ -888,7 +901,7 @@ class EDDN:
         # Check if the user configured messages to be sent.
         #
         #   1. If this is a 'station' data message then check config.EDDN_SEND_STATION_DATA
-        #   2. Else check against config.EDDN_SEND_NON_STATION *and* config.OUT_EDDN_DO_NOT_DELAY
+        #   2. Else check against config.EDDN_SEND_NON_STATION *and* config.OUT_EDDN_DELAY
         if any(f'{s}' in msg['$schemaRef'] for s in EDDNSender.STATION_SCHEMAS):
             # 'Station data'
             if config.get_int('output') & config.OUT_EDDN_SEND_STATION_DATA:
@@ -900,7 +913,7 @@ class EDDN:
         elif config.get_int('output') & config.OUT_EDDN_SEND_NON_STATION:
             # Any data that isn't 'station' is configured to be sent
             msg_id = self.sender.add_message(cmdr, msg)
-            if config.get_int('output') & config.OUT_EDDN_DO_NOT_DELAY:
+            if not (config.get_int('output') & config.OUT_EDDN_DELAY):
                 # No delay in sending configured, so attempt immediately
                 self.sender.send_message_by_id(msg_id)
 
@@ -1843,7 +1856,7 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:
     )
 
     this.eddn_system_button.grid(padx=BUTTONX, pady=(5, 0), sticky=tk.W)
-    this.eddn_delay = tk.IntVar(value=(output & config.OUT_EDDN_DO_NOT_DELAY) and 1)
+    this.eddn_delay = tk.IntVar(value=(output & config.OUT_EDDN_DELAY) and 1)
     # Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2
     this.eddn_delay_button = nb.Checkbutton(
         eddnframe,
@@ -1883,7 +1896,7 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
          & (config.OUT_MKT_TD | config.OUT_MKT_CSV | config.OUT_SHIP | config.OUT_MKT_MANUAL)) +
         (this.eddn_station.get() and config.OUT_EDDN_SEND_STATION_DATA) +
         (this.eddn_system.get() and config.OUT_EDDN_SEND_NON_STATION) +
-        (this.eddn_delay.get() and config.OUT_EDDN_DO_NOT_DELAY)
+        (this.eddn_delay.get() and config.OUT_EDDN_DELAY)
     )
 
 
