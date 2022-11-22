@@ -635,6 +635,7 @@ class EDDN:
             self.send_message(data['commander']['name'], {
                 '$schemaRef': f'https://eddn.edcd.io/schemas/commodity/3{"/test" if is_beta else ""}',
                 'message':    message,
+                'header':     self.standard_header(game_version='CAPI-market', game_build='CAPI-market')
             })
 
         this.commodities = commodities
@@ -1453,7 +1454,7 @@ class EDDN:
         msg = {
             '$schemaRef': f'https://eddn.edcd.io/schemas/fcmaterials_capi/1{"/test" if is_beta else ""}',
             'message': entry,
-            'header': self.standard_header(game_version='CAPI-commodity', game_build='CAPI-commodity'),
+            'header': self.standard_header(game_version='CAPI-market', game_build='CAPI-market'),
         }
 
         this.eddn.send_message(data['commander']['name'], msg)
