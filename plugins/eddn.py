@@ -66,6 +66,12 @@ class This:
     """Holds module globals."""
 
     def __init__(self):
+        # Game version and build
+        self.game_version = ""
+        self.game_build = ""
+        # Commander Name
+        self.cmdr_name = ""
+
         # Track if we're on foot
         self.on_foot = False
         # Track if we're docked
@@ -906,16 +912,42 @@ class EDDN:
             # 'Station data'
             if config.get_int('output') & config.OUT_EDDN_SEND_STATION_DATA:
                 # And user has 'station data' configured to be sent
+                msg = self.add_header(msg)
                 msg_id = self.sender.add_message(cmdr, msg)
                 # 'Station data' is never delayed on construction of message
                 self.sender.send_message_by_id(msg_id)
 
         elif config.get_int('output') & config.OUT_EDDN_SEND_NON_STATION:
             # Any data that isn't 'station' is configured to be sent
+            msg = self.add_header(msg)
             msg_id = self.sender.add_message(cmdr, msg)
             if not (config.get_int('output') & config.OUT_EDDN_DELAY):
                 # No delay in sending configured, so attempt immediately
                 self.sender.send_message_by_id(msg_id)
+
+    def add_header(self, msg: MutableMapping[str, Any]) -> MutableMapping[str, Any]:
+        """
+        Augment the given EDDN message with our header defaults.
+
+        NB: This should *only* be called for newly constructed messages, not
+        for either a legacy message or an already queued one!
+
+        :param msg: Message to be augmented
+        :return: The augmented version
+        """
+        if 'header' in msg:
+            logger.error("Passed `msg` which already has a header")
+            return msg
+
+        msg['header'] = {
+            'softwareName':    f'{applongname} [{system() if sys.platform != "darwin" else "Mac OS"}]',
+            'softwareVersion': str(appversion_nobuild()),
+            'uploaderID':      this.cmdr_name,
+            'gameversion':     this.game_version,
+            'gamebuild':       this.game_build,
+        }
+
+        return msg
 
     def export_journal_generic(self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]) -> None:
         """
@@ -1966,7 +1998,7 @@ def journal_entry(  # noqa: C901, CCR001
     """
     Process a new Journal entry.
 
-    :param cmdr: `str` - Name of currennt Cmdr.
+    :param cmdr: `str` - Name of current Cmdr.
     :param is_beta: `bool` - True if this is a beta version of the Game.
     :param system: `str` - Name of system Cmdr is in.
     :param station: `str` - Name of station Cmdr is docked at, if applicable.
@@ -1986,6 +2018,9 @@ def journal_entry(  # noqa: C901, CCR001
     entry = new_data
     event_name = entry['event'].lower()
 
+    this.cmdr_name = cmdr
+    this.game_version = state['GameVersion']
+    this.game_build = state['GameBuild']
     this.on_foot = state['OnFoot']
     this.docked = state['IsDocked']
 
