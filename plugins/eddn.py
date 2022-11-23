@@ -364,6 +364,8 @@ class EDDNSender:
         options to not send to EDDN, or to delay the sending until docked,
         are checked.
 
+        It *is* however the one 'sending' place that the EDDN killswitches are checked.
+
         Should catch and handle all failure conditions.  A `True` return might
         mean that the message was successfully sent, *or* that this message
         should not be retried after a failure, i.e. too large.
@@ -480,10 +482,14 @@ class EDDNSender:
                 row = db_cursor.fetchone()
                 if row:
                     row = dict(zip([c[0] for c in db_cursor.description], row))
-                    self.send_message_by_id(row['id'])
-                    # Always re-schedule as this is only a "Don't hammer EDDN" delay
-                    self.eddn.parent.after(self.eddn.REPLAY_DELAY, self.queue_check_and_send, reschedule)
-                    have_rescheduled = True
+                    if self.send_message_by_id(row['id']):
+                        # If `True` was returned then we're done with this message.
+                        #  `False` means "failed to send, but not because the message
+                        #   is bad", i.e. an EDDN Gateway problem.  Thus, in that case
+                        #   we do *NOT* schedule attempting the next message.
+                        # Always re-schedule as this is only a "Don't hammer EDDN" delay
+                        self.eddn.parent.after(self.eddn.REPLAY_DELAY, self.queue_check_and_send, reschedule)
+                        have_rescheduled = True
 
                 db_cursor.close()
 
