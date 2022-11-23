@@ -30,7 +30,6 @@ import pathlib
 import re
 import sqlite3
 import sys
-import time
 import tkinter as tk
 from collections import OrderedDict
 from platform import system
@@ -929,14 +928,18 @@ class EDDN:
             # 'Station data'
             if config.get_int('output') & config.OUT_EDDN_SEND_STATION_DATA:
                 # And user has 'station data' configured to be sent
-                msg['header'] = self.standard_header()
+                if 'header' not in msg:
+                    msg['header'] = self.standard_header()
+
                 msg_id = self.sender.add_message(cmdr, msg)
                 # 'Station data' is never delayed on construction of message
                 self.sender.send_message_by_id(msg_id)
 
         elif config.get_int('output') & config.OUT_EDDN_SEND_NON_STATION:
             # Any data that isn't 'station' is configured to be sent
-            msg['header'] = self.standard_header()
+            if 'header' not in msg:
+                msg['header'] = self.standard_header()
+
             msg_id = self.sender.add_message(cmdr, msg)
             if not (config.get_int('output') & config.OUT_EDDN_DELAY):
                 # No delay in sending configured, so attempt immediately
