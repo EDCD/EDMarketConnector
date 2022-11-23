@@ -941,7 +941,7 @@ class EDDN:
                 msg['header'] = self.standard_header()
 
             msg_id = self.sender.add_message(cmdr, msg)
-            if not (config.get_int('output') & config.OUT_EDDN_DELAY):
+            if this.docked or not (config.get_int('output') & config.OUT_EDDN_DELAY):
                 # No delay in sending configured, so attempt immediately
                 self.sender.send_message_by_id(msg_id)
 
