@@ -176,7 +176,7 @@ class EDDNSender:
 
         self.queue_processing = Lock()
         # Initiate retry/send-now timer
-        self.eddn.parent.after(self.eddn.REPLAY_PERIOD, self.queue_check_and_send)
+        self.eddn.parent.after(self.eddn.REPLAY_PERIOD, self.queue_check_and_send, True)
 
     def sqlite_queue_v1(self) -> sqlite3.Connection:
         """
@@ -431,15 +431,24 @@ class EDDNSender:
 
         return False
 
-    def queue_check_and_send(self) -> None:
-        """Check if we should be sending queued messages, and send if we should."""
-        # logger.debug("Called")
+    def queue_check_and_send(self, reschedule: bool = False) -> None:
+        """
+        Check if we should be sending queued messages, and send if we should.
+
+        :param reschedule: Boolean indicating if we should call `after()` again.
+        """
+        logger.debug("Called")
         # Mutex in case we're already processing
         if not self.queue_processing.acquire(blocking=False):
             logger.debug("Couldn't obtain mutex")
+            if reschedule:
+                self.eddn.parent.after(self.eddn.REPLAY_PERIOD, self.queue_check_and_send, reschedule)
+
             return
 
         # logger.debug("Obtained mutex")
+        # Used to indicate if we've rescheduled at the faster rate already.
+        have_rescheduled = False
         # We send either if docked or 'Delay sending until docked' not set
         if this.docked or not (config.get_int('output') & config.OUT_EDDN_DELAY):
             # logger.debug("Should send")
@@ -461,6 +470,7 @@ class EDDNSender:
                     """
                     SELECT id FROM messages
                     ORDER BY created ASC
+                    LIMIT 1
                     """
                 )
 
@@ -468,20 +478,24 @@ class EDDNSender:
                 logger.exception("DB error querying queued messages")
 
             else:
-                while row := db_cursor.fetchone():
+                row = db_cursor.fetchone()
+                if row:
                     row = dict(zip([c[0] for c in db_cursor.description], row))
                     self.send_message_by_id(row['id'])
-                    time.sleep(self.eddn.REPLAY_DELAY)
+                    # Always re-schedule as this is only a "Don't hammer EDDN" delay
+                    self.eddn.parent.after(self.eddn.REPLAY_DELAY, self.queue_check_and_send, reschedule)
+                    have_rescheduled = True
 
-            db_cursor.close()
+                db_cursor.close()
 
         # else:
         #    logger.debug("Should NOT send")
 
-        # Set us up to run again after a delay
         self.queue_processing.release()
         # logger.debug("Mutex released")
-        self.eddn.parent.after(self.eddn.REPLAY_PERIOD, self.queue_check_and_send)
+        if reschedule and not have_rescheduled:
+            # Set us up to run again per the configured period
+            self.eddn.parent.after(self.eddn.REPLAY_PERIOD, self.queue_check_and_send, reschedule)
 
     def _log_response(
         self,
@@ -539,8 +553,8 @@ class EDDN:
         DEFAULT_URL = f'http://{edmc_data.DEBUG_WEBSERVER_HOST}:{edmc_data.DEBUG_WEBSERVER_PORT}/eddn'
 
     # FIXME: Change back to `300_000`
-    REPLAY_PERIOD = 1_000  # How often to try (re-)sending the queue, [milliseconds]
-    REPLAY_DELAY = 0.400  # Roughly two messages per second, accounting for send delays [seconds]
+    REPLAY_PERIOD = 300_000  # How often to try (re-)sending the queue, [milliseconds]
+    REPLAY_DELAY = 400  # Roughly two messages per second, accounting for send delays [milliseconds]
     REPLAYFLUSH = 20  # Update log on disk roughly every 10 seconds
     MODULE_RE = re.compile(r'^Hpt_|^Int_|Armour_', re.IGNORECASE)
     CANONICALISE_RE = re.compile(r'\$(.+)_name;')
@@ -2080,6 +2094,9 @@ def journal_entry(  # noqa: C901, CCR001
         # continue to use any old value.
         # Yes, explicitly state `None` here, so it's crystal clear.
         this.systemaddress = entry.get('SystemAddress', None)  # type: ignore
+
+        if event_name == 'docked':
+            this.eddn.parent.after(this.eddn.REPLAY_DELAY, this.eddn.sender.queue_check_and_send, False)
 
     elif event_name == 'approachbody':
         this.body_name = entry['Body']
