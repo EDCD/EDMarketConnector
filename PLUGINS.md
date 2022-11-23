@@ -617,6 +617,7 @@ Content of `state` (updated to the current journal entry):
 | `Modules`            |           `dict`            | Currently fitted modules                                                                                        |
 | `NavRoute`           |           `dict`            | Last plotted multi-hop route                                                                                    |
 | `ModuleInfo`         |           `dict`            | Last loaded ModulesInfo.json data                                                                               |
+| `IsDocked`           |           `bool`            | Whether the Cmdr is currently docked *in their own ship*.                                                       |
 | `OnFoot`             |           `bool`            | Whether the Cmdr is on foot                                                                                     |
 | `Component`          |           `dict`            | 'Component' MicroResources in Odyssey, `int` count each.                                                        |
 | `Item`               |           `dict`            | 'Item' MicroResources in Odyssey, `int` count each.                                                             |
@@ -709,6 +710,17 @@ access to the prior plotted route.
 NB: It *is* possible, if a player is quick enough, to plot and clear a route
 before we load it, in which case we'd be retaining the *previous* plotted
 route.
+
+New in version 5.6.0:
+
+`IsDocked` boolean added to `state`.  This is set True for a `Location` event
+having `"Docked":true"`, or the `Docked` event.  It is set back to False (its
+default value) for an `Undocked` event.  Being on-foot in a station at login
+time does *not* count as docked for this.
+
+In general on-foot, including being in a taxi, might not set this 100%
+correctly.  Its main use in core code is to detect being docked so as to send
+any stored EDDN messages due to "Delay sending until docked" option.
 
 ___
 
