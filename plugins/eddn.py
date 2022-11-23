@@ -175,7 +175,7 @@ class EDDNSender:
 
         self.queue_processing = Lock()
         # Initiate retry/send-now timer
-        self.eddn.parent.after(self.eddn.REPLAY_PERIOD, self.queue_check_and_send, True)
+        self.eddn.parent.after(self.eddn.REPLAY_STARTUP_DELAY, self.queue_check_and_send, True)
 
     def sqlite_queue_v1(self) -> sqlite3.Connection:
         """
@@ -552,6 +552,7 @@ class EDDN:
         DEFAULT_URL = f'http://{edmc_data.DEBUG_WEBSERVER_HOST}:{edmc_data.DEBUG_WEBSERVER_PORT}/eddn'
 
     # FIXME: Change back to `300_000`
+    REPLAY_STARTUP_DELAY = 10_000  # Delay during startup before checking queue [milliseconds]
     REPLAY_PERIOD = 300_000  # How often to try (re-)sending the queue, [milliseconds]
     REPLAY_DELAY = 400  # Roughly two messages per second, accounting for send delays [milliseconds]
     REPLAYFLUSH = 20  # Update log on disk roughly every 10 seconds
