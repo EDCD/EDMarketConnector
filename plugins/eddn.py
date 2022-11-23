@@ -1797,10 +1797,7 @@ def plugin_app(parent: tk.Tk) -> Optional[tk.Frame]:
     Set up any plugin-specific UI.
 
     In this case we need the tkinter parent in order to later call
-    `update_idletasks()` on it.
-
-    TODO: Re-work the whole replaylog and general sending to EDDN so this isn't
-          necessary.
+    `update_idletasks()` on it, or schedule things with `after()`.
 
     :param parent: tkinter parent frame.
     :return: Optional tk.Frame, if the tracking UI is active.
