@@ -1697,7 +1697,7 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:
         eddnframe,
         text='Elite Dangerous Data Network',
         background=nb.Label().cget('background'),
-        url='https://github.com/EDSM-NET/EDDN/wiki',
+        url='https://github.com/EDCD/EDDN#eddn---elite-dangerous-data-network',
         underline=True
     ).grid(padx=PADX, sticky=tk.W)  # Don't translate
 
