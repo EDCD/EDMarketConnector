@@ -175,6 +175,10 @@ class EDDNSender:
 
         self.queue_processing = Lock()
         # Initiate retry/send-now timer
+        logger.trace_if(
+            "plugin.eddn.send",
+            f"First queue run scheduled for {self.eddn.REPLAY_STARTUP_DELAY}ms from now"
+        )
         self.eddn.parent.after(self.eddn.REPLAY_STARTUP_DELAY, self.queue_check_and_send, True)
 
     def sqlite_queue_v1(self) -> sqlite3.Connection:
@@ -227,6 +231,9 @@ class EDDNSender:
                 db_conn.close()
                 raise e
 
+        else:
+            logger.info("New `eddn_queue-v1.db` created")
+
         # We return only the connection, so tidy up
         db.close()
 
@@ -237,6 +244,7 @@ class EDDNSender:
         filename = config.app_dir_path / 'replay.jsonl'
         try:
             with open(filename, 'r+', buffering=1) as replay_file:
+                logger.info("Converting legacy `replay.jsonl` to `eddn_queue-v1.db`")
                 for line in replay_file:
                     cmdr, msg = json.loads(line)
                     self.add_message(cmdr, msg)
@@ -247,15 +255,18 @@ class EDDNSender:
         finally:
             # Best effort at removing the file/contents
             # NB: The legacy code assumed it could write to the file.
+            logger.info("Converson` to `eddn_queue-v1.db` complete, removing `replay.jsonl`")
             replay_file = open(filename, 'w')  # Will truncate
             replay_file.close()
             os.unlink(filename)
 
     def close(self) -> None:
         """Clean up any resources."""
+        logger.debug('Closing db cursor.')
         if self.db:
             self.db.close()
 
+        logger.debug('Closing db connection.')
         if self.db_conn:
             self.db_conn.close()
 
@@ -277,6 +288,7 @@ class EDDNSender:
         :param msg: The full, transmission-ready, EDDN message.
         :return: ID of the successfully inserted row.
         """
+        logger.trace_if("plugin.eddn.send", f"Message for {msg['$schemaRef']=}")
         # Cater for legacy replay.json messages
         if 'header' not in msg:
             msg['header'] = {
@@ -315,6 +327,7 @@ class EDDNSender:
             # Can't possibly be a valid row id
             return -1
 
+        logger.trace_if("plugin.eddn.send", f"Message for {msg['$schemaRef']=} recorded, id={self.db.lastrowid}")
         return self.db.lastrowid or -1
 
     def delete_message(self, row_id: int) -> None:
@@ -323,6 +336,7 @@ class EDDNSender:
 
         :param row_id: id of message to be deleted.
         """
+        logger.trace_if("plugin.eddn.send", f"Deleting message with {row_id=}")
         self.db.execute(
             """
             DELETE FROM messages WHERE id = :row_id
@@ -338,6 +352,7 @@ class EDDNSender:
         :param id:
         :return:
         """
+        logger.trace_if("plugin.eddn.send", f"Sending message with {id=}")
         self.db.execute(
             """
             SELECT * FROM messages WHERE id = :row_id
@@ -373,6 +388,7 @@ class EDDNSender:
         :param msg: Fully formed, string, message.
         :return: `True` for "now remove this message from the queue"
         """
+        logger.trace_if("plugin.eddn.send", "Sending message")
         should_return, new_data = killswitch.check_killswitch('plugins.eddn.send', json.loads(msg))
         if should_return:
             logger.warning('eddn.send has been disabled via killswitch. Returning.')
@@ -432,27 +448,31 @@ class EDDNSender:
 
         return False
 
-    def queue_check_and_send(self, reschedule: bool = False) -> None:
+    def queue_check_and_send(self, reschedule: bool = False) -> None:  # noqa: CCR001
         """
         Check if we should be sending queued messages, and send if we should.
 
         :param reschedule: Boolean indicating if we should call `after()` again.
         """
-        logger.debug("Called")
+        logger.trace_if("plugin.eddn.send", "Called")
         # Mutex in case we're already processing
         if not self.queue_processing.acquire(blocking=False):
-            logger.debug("Couldn't obtain mutex")
+            logger.trace_if("plugin.eddn.send", "Couldn't obtain mutex")
             if reschedule:
+                logger.trace_if("plugin.eddn.send", f"Next run scheduled for {self.eddn.REPLAY_PERIOD}ms from now")
                 self.eddn.parent.after(self.eddn.REPLAY_PERIOD, self.queue_check_and_send, reschedule)
+
+            else:
+                logger.trace_if("plugin.eddn.send", "NO next run scheduled (there should be another one already set)")
 
             return
 
-        # logger.debug("Obtained mutex")
+        logger.trace_if("plugin.eddn.send", "Obtained mutex")
         # Used to indicate if we've rescheduled at the faster rate already.
         have_rescheduled = False
         # We send either if docked or 'Delay sending until docked' not set
         if this.docked or not (config.get_int('output') & config.OUT_EDDN_DELAY):
-            # logger.debug("Should send")
+            logger.trace_if("plugin.eddn.send", "Should send")
             # We need our own cursor here, in case the semantics of
             # tk `after()` could allow this to run in the middle of other
             # database usage.
@@ -488,18 +508,21 @@ class EDDNSender:
                         #   is bad", i.e. an EDDN Gateway problem.  Thus, in that case
                         #   we do *NOT* schedule attempting the next message.
                         # Always re-schedule as this is only a "Don't hammer EDDN" delay
+                        logger.trace_if("plugin.eddn.send", f"Next run scheduled for {self.eddn.REPLAY_DELAY}ms from "
+                                                            "now")
                         self.eddn.parent.after(self.eddn.REPLAY_DELAY, self.queue_check_and_send, reschedule)
                         have_rescheduled = True
 
                 db_cursor.close()
 
-        # else:
-        #    logger.debug("Should NOT send")
+        else:
+            logger.trace_if("plugin.eddn.send", "Should NOT send")
 
         self.queue_processing.release()
-        # logger.debug("Mutex released")
+        logger.trace_if("plugin.eddn.send", "Mutex released")
         if reschedule and not have_rescheduled:
             # Set us up to run again per the configured period
+            logger.trace_if("plugin.eddn.send", f"Next run scheduled for {self.eddn.REPLAY_PERIOD}ms from now")
             self.eddn.parent.after(self.eddn.REPLAY_PERIOD, self.queue_check_and_send, reschedule)
 
     def _log_response(
@@ -935,6 +958,7 @@ class EDDN:
             # 'Station data'
             if config.get_int('output') & config.OUT_EDDN_SEND_STATION_DATA:
                 # And user has 'station data' configured to be sent
+                logger.trace_if("plugin.eddn.send", "Recording/sending 'station' message")
                 if 'header' not in msg:
                     msg['header'] = self.standard_header()
 
@@ -944,12 +968,14 @@ class EDDN:
 
         elif config.get_int('output') & config.OUT_EDDN_SEND_NON_STATION:
             # Any data that isn't 'station' is configured to be sent
+            logger.trace_if("plugin.eddn.send", "Recording 'non-station' message")
             if 'header' not in msg:
                 msg['header'] = self.standard_header()
 
             msg_id = self.sender.add_message(cmdr, msg)
             if this.docked or not (config.get_int('output') & config.OUT_EDDN_DELAY):
                 # No delay in sending configured, so attempt immediately
+                logger.trace_if("plugin.eddn.send", "Sending 'non-station' message")
                 self.sender.send_message_by_id(msg_id)
 
     def standard_header(
