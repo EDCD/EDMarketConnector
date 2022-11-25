@@ -678,7 +678,7 @@ class EDDN:
             self.send_message(data['commander']['name'], {
                 '$schemaRef': f'https://eddn.edcd.io/schemas/commodity/3{"/test" if is_beta else ""}',
                 'message':    message,
-                'header':     self.standard_header(game_version='CAPI-market', game_build='CAPI-market'),
+                'header':     self.standard_header(game_version='CAPI-market', game_build=''),
             })
 
         this.commodities = commodities
@@ -772,7 +772,7 @@ class EDDN:
                     ('modules',     outfitting),
                     ('odyssey',     this.odyssey),
                 ]),
-                'header':     self.standard_header(game_version='CAPI-shipyard', game_build='CAPI-shipyard'),
+                'header':     self.standard_header(game_version='CAPI-shipyard', game_build=''),
             })
 
         this.outfitting = (horizons, outfitting)
@@ -817,7 +817,7 @@ class EDDN:
                     ('ships',       shipyard),
                     ('odyssey',     this.odyssey),
                 ]),
-                'header':     self.standard_header(game_version='CAPI-shipyard', game_build='CAPI-shipyard'),
+                'header':     self.standard_header(game_version='CAPI-shipyard', game_build=''),
             })
 
         this.shipyard = (horizons, shipyard)
@@ -1506,7 +1506,7 @@ class EDDN:
         msg = {
             '$schemaRef': f'https://eddn.edcd.io/schemas/fcmaterials_capi/1{"/test" if is_beta else ""}',
             'message': entry,
-            'header': self.standard_header(game_version='CAPI-market', game_build='CAPI-market'),
+            'header': self.standard_header(game_version='CAPI-market', game_build=''),
         }
 
         this.eddn.send_message(data['commander']['name'], msg)
