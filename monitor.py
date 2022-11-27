@@ -21,6 +21,8 @@ from typing import Tuple
 if TYPE_CHECKING:
     import tkinter
 
+import semantic_version
+
 import util_ships
 from config import config
 from edmc_data import edmc_suit_shortnames, edmc_suit_symbol_localised
@@ -111,6 +113,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         # Context for journal handling
         self.version: Optional[str] = None
+        self.version_semantic: Optional[semantic_version.Version] = None
         self.is_beta = False
         self.mode: Optional[str] = None
         self.group: Optional[str] = None
@@ -130,6 +133,11 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         self._fcmaterials_retries_remaining = 0
         self._last_fcmaterials_journal_timestamp: Optional[float] = None
+
+        # For determining Live versus Legacy galaxy.
+        # The assumption is gameversion will parse via `coerce()` and always
+        # be >= for Live, and < for Legacy.
+        self.live_galaxy_base_version = semantic_version.Version('4.0.0')
 
         self.__init_state()
 
@@ -293,6 +301,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         self.currentdir = None
         self.version = None
+        self.version_semantic = None
         self.mode = None
         self.group = None
         self.cmdr = None
@@ -1677,6 +1686,20 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             self.state['GameVersion'] = entry['gameversion']
             self.state['GameBuild'] = entry['build']
             self.version = self.state['GameVersion']
+
+            try:
+                self.version_semantic = semantic_version.Version.coerce(self.state['GameVersion'])
+
+            except Exception:
+                # Catching all Exceptions as this is *one* call, and we won't
+                # get caught out by any semantic_version changes.
+                self.version_semantic = None
+                logger.error(f"Couldn't coerce {self.state['GameVersion']=}")
+                pass
+
+            else:
+                logger.info(f"Parsed {self.state['GameVersion']=} into {self.version_semantic=}")
+
             self.is_beta = any(v in self.version.lower() for v in ('alpha', 'beta'))  # type: ignore
         except KeyError:
             if not suppress:
@@ -2347,6 +2370,25 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self._fcmaterials_retries_remaining = 0
         self._last_fcmaterials_journal_timestamp = None
         return file
+
+    def is_live_galaxy(self) -> bool:
+        """
+        Indicate if current tracking indicates Live galaxy.
+
+        We assume:
+         1) `gameversion` remains something that semantic_verison.Version.coerce() can parse.
+         2) Any Live galaxy client reports a version >= the defined base version.
+         3) Any Legacy client will always report a version < that base version.
+        :return: True for Live, False for Legacy or unknown.
+        """
+        # If we don't yet know the version we can't tell, so assume the worst
+        if self.version_semantic is None:
+            return False
+
+        if self.version_semantic >= self.live_galaxy_base_version:
+            return True
+
+        return False
 
 
 # singleton

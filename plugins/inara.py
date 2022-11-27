@@ -28,6 +28,7 @@ import time
 import tkinter as tk
 from collections import OrderedDict, defaultdict, deque
 from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
 from operator import itemgetter
 from threading import Lock, Thread
 from typing import TYPE_CHECKING, Any, Callable, Deque, Dict, List, Mapping, NamedTuple, Optional
@@ -44,6 +45,7 @@ import timeout_session
 from companion import CAPIData
 from config import applongname, appversion, config, debug_senders
 from EDMCLogging import get_main_logger
+from monitor import monitor
 from ttkHyperlinkLabel import HyperlinkLabel
 
 logger = get_main_logger()
@@ -88,6 +90,11 @@ class This:
     def __init__(self):
         self.session = timeout_session.new_session()
         self.thread: Thread
+        self.parent: tk.Tk
+
+        # Handle only sending Live galaxy data
+        self.legacy_galaxy_last_notified: Optional[datetime] = None
+
         self.lastlocation = None  # eventData from the last Commander's Flight Log event
         self.lastship = None  # eventData from the last addCommanderShip or setCommanderShip event
 
@@ -210,6 +217,7 @@ def plugin_start3(plugin_dir: str) -> str:
 
 def plugin_app(parent: tk.Tk) -> None:
     """Plugin UI setup Hook."""
+    this.parent = parent
     this.system_link = parent.children['system']  # system label in main window
     this.station_link = parent.children['station']  # station label in main window
     this.system_link.bind_all('<<InaraLocation>>', update_location)
@@ -361,6 +369,24 @@ def journal_entry(  # noqa: C901, CCR001
 
     :return: str - empty if no error, else error string.
     """
+    if not monitor.is_live_galaxy():
+        # This only applies after Update 14, which as of 2022-11-27 is scheduled
+        # for 2022-11-29, with the game servers presumably being down around
+        # 09:00
+        if datetime.now(timezone.utc) >= datetime.fromisoformat("2022-11-27T09:00:00+00:00"):
+            # Update 14 ETA has passed, so perform the check
+            if (
+                this.legacy_galaxy_last_notified is None
+                or (datetime.now(timezone.utc) - this.legacy_galaxy_last_notified) > timedelta(seconds=300)
+            ):
+                # LANG: The Inara API only accepts Live galaxy data, not Legacy galaxy data
+                logger.info(_("Inara only accepts Live galaxy data"))
+                # this.parent.children['status']['text'] =
+                this.legacy_galaxy_last_notified = datetime.now(timezone.utc)
+                return _("Inara only accepts Live galaxy data")
+
+            return ''
+
     should_return, new_entry = killswitch.check_killswitch('plugins.inara.journal', entry, logger)
     if should_return:
         plug.show_error(_('Inara disabled. See Log.'))  # LANG: INARA support disabled via killswitch
