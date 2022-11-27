@@ -46,6 +46,9 @@
 /* inara.py: Text for INARA API keys link ( goes to https://inara.cz/settings-api ); In files: inara.py:225; load.py:225; inara.py:234; */
 "Inara credentials" = "Inara credentials";
 
+/* inara.py: The Inara API only accepts Live galaxy data, not Legacy galaxy data; In files: inara.py:383; inara.py:386; */
+"Inara only accepts Live galaxy data" = "Inara only accepts Live galaxy data";
+
 /* inara.py: INARA API returned some kind of error (error message will be contained in {MSG}); In files: inara.py:1316; inara.py:1328; load.py:1319; load.py:1331; inara.py:1587; inara.py:1600; */
 "Error: Inara {MSG}" = "Error: Inara {MSG}";
 
@@ -744,4 +747,3 @@
 
 /* stats.py: Status dialog title; In files: stats.py:422; */
 "Ships" = "Ships";
-
