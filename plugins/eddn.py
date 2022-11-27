@@ -989,12 +989,25 @@ class EDDN:
 
         :return: The standard header
         """
+        # We want to pass `''` sometimes, so can't just use a Truthiness test
+        if game_version is not None:
+            gv = game_version
+
+        else:
+            gv = this.game_version
+
+        if game_build is not None:
+            gb = game_build
+
+        else:
+            gb = this.game_build
+
         return {
             'softwareName':    f'{applongname} [{system() if sys.platform != "darwin" else "Mac OS"}]',
             'softwareVersion': str(appversion_nobuild()),
             'uploaderID':      this.cmdr_name,
-            'gameversion':     game_version or this.game_version,
-            'gamebuild':       game_build or this.game_build,
+            'gameversion':     gv,
+            'gamebuild':       gb,
         }
 
     def export_journal_generic(self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]) -> None:
