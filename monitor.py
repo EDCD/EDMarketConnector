@@ -1686,7 +1686,20 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             self.state['GameVersion'] = entry['gameversion']
             self.state['GameBuild'] = entry['build']
             self.version = self.state['GameVersion']
-            self.version_semantic = semantic_version.Version.coerce(self.state['GameVersion'])
+
+            try:
+                self.version_semantic = semantic_version.Version.coerce(self.state['GameVersion'])
+
+            except Exception:
+                # Catching all Exceptions as this is *one* call, and we won't
+                # get caught out by any semantic_version changes.
+                self.version_semantic = None
+                logger.error(f"Couldn't coerce {self.state['GameVersion']=}")
+                pass
+
+            else:
+                logger.info(f"Parsed {self.state['GameVersion']=} into {self.version_semantic=}")
+
             self.is_beta = any(v in self.version.lower() for v in ('alpha', 'beta'))  # type: ignore
         except KeyError:
             if not suppress:
