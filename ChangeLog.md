@@ -58,6 +58,11 @@ Pre-Release 5.6.0-beta1
 
   Currently, the feedback of "Sending data to EDDN..." in the UI status line
   has been removed.
+
+  **If you do not have "Delay sending until docked" active, then the only
+  messages that will be at all delayed will be where there was a communication
+  problem with the EDDN Gateway, or it otherwise indicated a problem other
+  than 'your message is bad'.**
 * As a result of this EDDN rework this application now sends appropriate
   `gameversion` and `gamebuild` strings in EDDN message headers.
   The rework was necessary in order to enable this, in case of any queued
@@ -96,7 +101,7 @@ there are some changes to the major third-party websites and tools.
   Look for announcements by individual sites/tools as to what they have chosen
   to do.
 
-Developers
+Plugin Developers
 ---
 * There is a new flag in `state` passed to plugins, `IsDocked`.  See PLUGINS.md
   for details.
