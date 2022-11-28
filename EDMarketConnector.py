@@ -922,7 +922,7 @@ class AppWindow(object):
                     return False
 
             # Ignore possibly missing shipyard info
-            elif (config.get_int('output') & config.OUT_MKT_EDDN) \
+            elif (config.get_int('output') & config.OUT_EDDN_SEND_STATION_DATA) \
                     and not (data['lastStarport'].get('commodities') or data['lastStarport'].get('modules')):
                 if not self.status['text']:
                     # LANG: Status - Either no market or no modules data for station from Frontier CAPI

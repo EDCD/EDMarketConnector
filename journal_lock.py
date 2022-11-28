@@ -94,7 +94,7 @@ class JournalLock:
 
         :return: LockResult - See the class Enum definition
         """
-        if sys.platform == 'win32':
+        if sys.platform == 'win32':  # pragma: sys-platform-win32
             logger.trace_if('journal-lock', 'win32, using msvcrt')
             # win32 doesn't have fcntl, so we have to use msvcrt
             import msvcrt
@@ -107,7 +107,7 @@ class JournalLock:
                             f", assuming another process running: {e!r}")
                 return JournalLockResult.ALREADY_LOCKED
 
-        else:  # pytest coverage only sees this on !win32
+        else:  # pragma: sys-platform-not-win32
             logger.trace_if('journal-lock', 'NOT win32, using fcntl')
             try:
                 import fcntl
@@ -143,7 +143,7 @@ class JournalLock:
             return True  # We weren't locked, and still aren't
 
         unlocked = False
-        if sys.platform == 'win32':
+        if sys.platform == 'win32':  # pragma: sys-platform-win32
             logger.trace_if('journal-lock', 'win32, using msvcrt')
             # win32 doesn't have fcntl, so we have to use msvcrt
             import msvcrt
@@ -160,7 +160,7 @@ class JournalLock:
             else:
                 unlocked = True
 
-        else:  # pytest coverage only sees this on !win32
+        else:  # pragma: sys-platform-not-win32
             logger.trace_if('journal-lock', 'NOT win32, using fcntl')
             try:
                 import fcntl

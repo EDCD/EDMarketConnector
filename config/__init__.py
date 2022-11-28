@@ -52,7 +52,7 @@ appcmdname = 'EDMC'
 # <https://semver.org/#semantic-versioning-specification-semver>
 # Major.Minor.Patch(-prerelease)(+buildmetadata)
 # NB: Do *not* import this, use the functions appversion() and appversion_nobuild()
-_static_appversion = '5.5.0'
+_static_appversion = '5.6.0'
 _cached_version: Optional[semantic_version.Version] = None
 copyright = '© 2015-2019 Jonathan Harris, 2020-2022 EDCD'
 
@@ -162,7 +162,7 @@ def appversion_nobuild() -> semantic_version.Version:
 class AbstractConfig(abc.ABC):
     """Abstract root class of all platform specific Config implementations."""
 
-    OUT_MKT_EDDN = 1
+    OUT_EDDN_SEND_STATION_DATA = 1
     # OUT_MKT_BPC = 2	# No longer supported
     OUT_MKT_TD = 4
     OUT_MKT_CSV = 8
@@ -171,12 +171,12 @@ class AbstractConfig(abc.ABC):
     # OUT_SYS_FILE = 32	# No longer supported
     # OUT_STAT = 64	# No longer available
     # OUT_SHIP_CORIOLIS = 128	# Replaced by OUT_SHIP
-    OUT_STATION_ANY = OUT_MKT_EDDN | OUT_MKT_TD | OUT_MKT_CSV
     # OUT_SYS_EDSM = 256  # Now a plugin
     # OUT_SYS_AUTO = 512  # Now always automatic
     OUT_MKT_MANUAL = 1024
-    OUT_SYS_EDDN = 2048
-    OUT_SYS_DELAY = 4096
+    OUT_EDDN_SEND_NON_STATION = 2048
+    OUT_EDDN_DELAY = 4096
+    OUT_STATION_ANY = OUT_EDDN_SEND_STATION_DATA | OUT_MKT_TD | OUT_MKT_CSV
 
     app_dir_path: pathlib.Path
     plugin_dir_path: pathlib.Path
@@ -454,19 +454,19 @@ def get_config(*args, **kwargs) -> AbstractConfig:
     :param kwargs: Args to be passed through to implementation.
     :return: Instance of the implementation.
     """
-    if sys.platform == "darwin":
+    if sys.platform == "darwin":  # pragma: sys-platform-darwin
         from .darwin import MacConfig
         return MacConfig(*args, **kwargs)
 
-    elif sys.platform == "win32":
+    elif sys.platform == "win32":  # pragma: sys-platform-win32
         from .windows import WinConfig
         return WinConfig(*args, **kwargs)
 
-    elif sys.platform == "linux":
+    elif sys.platform == "linux":  # pragma: sys-platform-linux
         from .linux import LinuxConfig
         return LinuxConfig(*args, **kwargs)
 
-    else:
+    else:  # pragma: sys-platform-not-known
         raise ValueError(f'Unknown platform: {sys.platform=}')
 
 

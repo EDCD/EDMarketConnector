@@ -9,7 +9,7 @@ produce the Windows executables and installer.
 
 ---
 
-* We now test against, and package with, Python 3.10.7.
+* We now test against, and package with, Python 3.10.8.
 
   **As a consequence of this we no longer support Windows 7.  
   This is due to
@@ -24,6 +24,136 @@ produce the Windows executables and installer.
   Developers can check the contents of the `.python-version` file
   in the source (it's not distributed with the Windows installer) for the
   currently used version in a given branch.
+
+---
+
+Release 5.6.0
+===
+
+Tha major reason for this release is to address the Live versus Legacy galaxy
+split [coming in Update 14 of the game](https://www.elitedangerous.com/news/elite-dangerous-update-14-and-beyond-live-and-legacy-modes).
+See the section "Update 14 and the Galaxy Split" below for how this might
+impact you.
+
+Changes
+---
+
+* We now test against, and package with, Python 3.10.8.
+* The code for sending data to EDDN has been reworked.  This changes the
+  'replay log' from utilising an internal array, backed by a flat file
+  (`replay.jsonl`), to an sqlite3 database.
+
+  As a result:
+  1. Any messages stored in the old `replay.jsonl` are converted at startup,
+    if that file is present, and then the file removed.
+  2. All new messages are stored in this new sqlite3 queue before any attempt
+    is made to send them.  An immediate attempt is then made to send any
+    message not affected by "Delay sending until docked".
+  3. Sending of queued messages will be attempted every 5 minutes, unless
+    "Delay sending until docked" is active and the Cmdr is not docked in
+    their own ship.  This is in case a message failed to send due to an issue
+    communicating with the EDDN Gateway.
+  4. When you dock in your own ship an immediate attempt to send all queued
+    messages will be initiated.
+  5. When processing queued messages the same 0.4-second inter-message delay
+    as with the old code has been implemented.  This serves to not suddenly
+    flood the EDDN Gateway.  If any message fails to send for Gateway reasons,
+    i.e. not a bad message, then this processing is abandoned to wait for
+    the next invocation.
+
+  The 5-minute timer in point 3 differs from the old code, where almost any
+  new message sending attempt could initiate processing of the queue.  At
+  application startup this delay is only 10 seconds.
+
+  Currently, the feedback of "Sending data to EDDN..." in the UI status line
+  has been removed.
+
+  **If you do not have "Delay sending until docked" active, then the only
+  messages that will be at all delayed will be where there was a communication
+  problem with the EDDN Gateway, or it otherwise indicated a problem other
+  than 'your message is bad'.**
+* As a result of this EDDN rework this application now sends appropriate
+  `gameversion` and `gamebuild` strings in EDDN message headers.
+  The rework was necessary in order to enable this, in case of any queued
+  or delayed messages which did not contain this information in the legacy
+  `replay.jsonl` format.
+* For EDSM there is a very unlikely set of circumstances that could, in theory
+  lead to some events not being sent.  This is so as to safeguard against
+  sending a batch with a gameversion/build claimed that does not match for
+  *all* of the events in that batch.
+  
+  It would take a combination of "communications with EDSM are slow", more
+  events (the ones that would be lost), a game client crash, *and* starting
+  a new game client before the 'more events' are sent.
+
+Update 14 and the Galaxy Split
+---
+Due to the galaxy split [announced by Frontier](https://www.elitedangerous.com/news/elite-dangerous-update-14-and-beyond-live-and-legacy-modes)
+there are some changes to the major third-party websites and tools.
+
+* Inara [has chosen](https://inara.cz/elite/board-thread/7049/463292/#463292)
+  to only accept Live galaxy data on its API.
+
+  This application will not even process Journal data for Inara after
+  2022-11-29T09:00:00+00:00 *unless the `gameversion` indicates a Live client*.
+  This explicitly checks that the game's version is semantically equal to or
+  greater than '4.0.0'.
+
+  If a Live client is *not* detected, then there is an INFO level logging
+  message "Inara only accepts Live galaxy data", which is also set as the main
+  UI status line.  This message will repeat, at most, every 5 minutes.
+
+  If you continue to play in the Legacy galaxy only then you probably want to
+  just disable the Inara plugin with the checkbox on Settings > Inara.
+* All batches of events sent to EDSM will be tagged with a `gameversion`, in
+  a similar manner to the EDDN header.
+
+  Ref: [EDSM api-journal-v1](https://www.edsm.net/en/api-journal-v1)
+* All EDDN messages will now have appropriate `gameversion` and `gamebuild`
+  fields in the `header` as per
+  [EDDN/docs/Developers.md](https://github.com/EDCD/EDDN/blob/live/docs/Developers.md#gameversions-and-gamebuild).
+
+  As a result of this you can expect third-party sites to choose to filter data
+  based on that.
+
+  Look for announcements by individual sites/tools as to what they have chosen
+  to do.
+
+Known Bugs
+---
+In testing if it had been broken at all due to 5.5.0 -> 5.6.0 changes it has
+come to light that `EDMC.EXE -n`, to send data to EDDN, was already broken in
+5.5.0.
+
+In addition, there is now some extra 'INFO' logging output which will be
+produced by any invocation of `EDMC.EXE`.  This might break third-party use of
+it, e.g. [Trade Computer Extension Mk.II](https://forums.frontier.co.uk/threads/trade-computer-extension-mk-ii.223056/).
+This will be fixed as soon as the dust settles from Update 14, with emphasis
+being on ensuring the GUI `EDMarketConnector.exe` functions properly.
+
+Notes for EDDN Listeners
+---
+* Where EDMC sourced data from the Journal files it will set `gameversion`
+  and `gamebuild` as per their values in `Fileheader` or `LoadGame`, whichever
+  was more recent (there are some events that occur between these).
+* *If any message was already delayed such that it did not
+  have the EDDN header recorded, then the `gameversion` and `gamebuild` will
+  be empty strings*.  In order to indicate this the `softwareName` will have
+  ` (legacy replay)` appended to it, e.g. `E:D Market Connector Connector
+  [Windows] (legacy replay)`.  In general this indicates that the message was
+  queued up using a version of EDMC prior to this one.  If you're only
+  interested in Live galaxy data then you might want to ignore such messages.
+* Where EDMC sourced data from a CAPI endpoint, the resulting EDDN message
+  will have a `gameversion` of `CAPI-<endpoint>` set, e.g. `CAPI-market`.
+  **At this time it is not 100% certain which galaxy this data will be for, so
+  all listeners are advised to ignore/queue such data until this is clarified**.
+
+  `gamebuild` will be an empty string for all CAPI-sourced data.
+
+Plugin Developers
+---
+* There is a new flag in `state` passed to plugins, `IsDocked`.  See PLUGINS.md
+  for details.
 
 ---
 

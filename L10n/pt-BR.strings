@@ -1,3 +1,6 @@
+/* inara.py: The Inara API only accepts Live galaxy data, not Legacy galaxy data; In files: inara.py:383; inara.py:386; */
+"Inara only accepts Live galaxy data" = "Inara apenas aceita dados da versão Live.";
+
 /* Language name */
 "!Language" = "Português (Brasil)";
 

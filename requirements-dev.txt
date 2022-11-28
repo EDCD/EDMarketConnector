@@ -5,28 +5,28 @@ wheel
 # We can't rely on just picking this up from either the base (not venv),
 # or venv-init-time version.  Specify here so that dependabot will prod us
 # about new versions.
-setuptools==65.3.0
+setuptools==65.6.0
 
 # Static analysis tools
 flake8==5.0.4
 flake8-annotations-coverage==0.0.6
 flake8-cognitive-complexity==0.1.0
-flake8-comprehensions==3.10.0
+flake8-comprehensions==3.10.1
 flake8-docstrings==1.6.0
 isort==5.10.1
-flake8-isort==4.2.0
+flake8-isort==5.0.3
 flake8-json==21.7.0
 flake8-noqa==1.2.9
 flake8-polyfill==1.0.2
 flake8-use-fstring==1.4
 
-mypy==0.971
+mypy==0.991
 pep8-naming==0.13.2
-safety==2.2.0
-types-requests==2.28.11
+safety==2.3.1
+types-requests==2.28.11.5
 
 # Code formatting tools
-autopep8==1.7.0
+autopep8==2.0.0
 
 # HTML changelogs
 grip==4.6.1
@@ -37,14 +37,15 @@ lxml==4.9.1
 # We only need py2exe on windows.
 # Pre-release version addressing semantic_version 2.9.0+ issues:
 # <https://github.com/py2exe/py2exe/issues/126>
-py2exe==0.12.0.1; sys_platform == 'win32'
+py2exe==0.13.0.0; sys_platform == 'win32'
 
 # Testing
-pytest==7.1.3
-pytest-cov==3.0.0  # Pytest code coverage support
-coverage[toml]==6.4.4 # pytest-cov dep. This is here to ensure that it includes TOML support for pyproject.toml configs
+pytest==7.2.0
+pytest-cov==4.0.0  # Pytest code coverage support
+coverage[toml]==6.5.0 # pytest-cov dep. This is here to ensure that it includes TOML support for pyproject.toml configs
+coverage-conditional-plugin==0.7.0
 # For manipulating folder permissions and the like.
-pywin32==304; sys_platform == 'win32'
+pywin32==305; sys_platform == 'win32'
 
 
 # All of the normal requirements

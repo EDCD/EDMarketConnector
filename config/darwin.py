@@ -1,3 +1,4 @@
+"""Darwin/macOS implementation of AbstractConfig."""
 import pathlib
 import sys
 from typing import Any, Dict, List, Union
