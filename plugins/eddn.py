@@ -255,7 +255,7 @@ class EDDNSender:
         finally:
             # Best effort at removing the file/contents
             # NB: The legacy code assumed it could write to the file.
-            logger.info("Converson` to `eddn_queue-v1.db` complete, removing `replay.jsonl`")
+            logger.info("Conversion` to `eddn_queue-v1.db` complete, removing `replay.jsonl`")
             replay_file = open(filename, 'w')  # Will truncate
             replay_file.close()
             os.unlink(filename)
