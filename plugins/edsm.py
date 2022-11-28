@@ -644,6 +644,8 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
     pending: List[Mapping[str, Any]] = []  # Unsent events
     closing = False
     cmdr: str = ""
+    last_game_version = ""
+    last_game_build = ""
     entry: Mapping[str, Any] = {}
 
     while not this.discarded_events:
@@ -691,6 +693,20 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
                 if item and entry['event'] not in this.discarded_events:
                     logger.trace_if(
                         CMDR_EVENTS, f'({cmdr=}, {entry["event"]=}): not in discarded_events, appending to pending')
+
+                    # Discard the pending list if it's a new Journal file OR
+                    # if the gameversion has changed.   We claim a single
+                    # gameversion for an entire batch of events so can't mix
+                    # them.
+                    # The specific gameversion check caters for scenarios where
+                    # we took some time in the last POST, had new events queued
+                    # in the meantime *and* the game client crashed *and* was
+                    # changed to a different gameversion.
+                    if (
+                        entry['event'].lower() == 'fileheader'
+                        or last_game_version != game_version or last_game_build != game_build
+                    ):
+                        pending = []
 
                     pending.append(entry)
 
@@ -822,6 +838,9 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
         if closing:
             logger.debug('closing, so returning.')
             return
+
+        last_game_version = game_version
+        last_game_build = game_build
 
     logger.debug('Done.')
 
