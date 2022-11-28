@@ -36,13 +36,144 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 5.5.0</title>
+			<title>Release 5.6.0</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
 
-<p>We now test against, and package with, Python 3.10.7.</p>
+<p>We now test against, and package with, Python 3.10.8.</p>
 <p><strong>As a consequence of this we no longer support Windows 7.</strong><br>
+
+<h2>Release 5.6.0</h2>
+<p>Tha major reason for this release is to address the Live versus Legacy galaxy
+split <a href="https://www.elitedangerous.com/news/elite-dangerous-update-14-and-beyond-live-and-legacy-modes" rel="nofollow">coming in Update 14 of the game</a>.
+See the section "Update 14 and the Galaxy Split" below for how this might
+impact you.</p>
+<h2><a id="user-content-changes" class="anchor" aria-hidden="true" href="#changes"><span aria-hidden="true" class="octicon octicon-link"></span></a>Changes</h2>
+<ul>
+<li>
+<p>We now test against, and package with, Python 3.10.8.</p>
+</li>
+<li>
+<p>The code for sending data to EDDN has been reworked.  This changes the
+'replay log' from utilising an internal array, backed by a flat file
+(<code>replay.jsonl</code>), to an sqlite3 database.</p>
+<p>As a result:</p>
+<ol>
+<li>Any messages stored in the old <code>replay.jsonl</code> are converted at startup,
+if that file is present, and then the file removed.</li>
+<li>All new messages are stored in this new sqlite3 queue before any attempt
+is made to send them.  An immediate attempt is then made to send any
+message not affected by "Delay sending until docked".</li>
+<li>Sending of queued messages will be attempted every 5 minutes, unless
+"Delay sending until docked" is active and the Cmdr is not docked in
+their own ship.  This is in case a message failed to send due to an issue
+communicating with the EDDN Gateway.</li>
+<li>When you dock in your own ship an immediate attempt to send all queued
+messages will be initiated.</li>
+<li>When processing queued messages the same 0.4-second inter-message delay
+as with the old code has been implemented.  This serves to not suddenly
+flood the EDDN Gateway.  If any message fails to send for Gateway reasons,
+i.e. not a bad message, then this processing is abandoned to wait for
+the next invocation.</li>
+</ol>
+<p>The 5-minute timer in point 3 differs from the old code, where almost any
+new message sending attempt could initiate processing of the queue.  At
+application startup this delay is only 10 seconds.</p>
+<p>Currently, the feedback of "Sending data to EDDN..." in the UI status line
+has been removed.</p>
+<p><strong>If you do not have "Delay sending until docked" active, then the only
+messages that will be at all delayed will be where there was a communication
+problem with the EDDN Gateway, or it otherwise indicated a problem other
+than 'your message is bad'.</strong></p>
+</li>
+<li>
+<p>As a result of this EDDN rework this application now sends appropriate
+<code>gameversion</code> and <code>gamebuild</code> strings in EDDN message headers.
+The rework was necessary in order to enable this, in case of any queued
+or delayed messages which did not contain this information in the legacy
+<code>replay.jsonl</code> format.</p>
+</li>
+<li>
+<p>For EDSM there is a very unlikely set of circumstances that could, in theory
+lead to some events not being sent.  This is so as to safeguard against
+sending a batch with a gameversion/build claimed that does not match for
+<em>all</em> of the events in that batch.</p>
+<p>It would take a combination of "communications with EDSM are slow", more
+events (the ones that would be lost), a game client crash, <em>and</em> starting
+a new game client before the 'more events' are sent.</p>
+</li>
+</ul>
+<h2><a id="user-content-update-14-and-the-galaxy-split" class="anchor" aria-hidden="true" href="#update-14-and-the-galaxy-split"><span aria-hidden="true" class="octicon octicon-link"></span></a>Update 14 and the Galaxy Split</h2>
+<p>Due to the galaxy split <a href="https://www.elitedangerous.com/news/elite-dangerous-update-14-and-beyond-live-and-legacy-modes" rel="nofollow">announced by Frontier</a>
+there are some changes to the major third-party websites and tools.</p>
+<ul>
+<li>
+<p>Inara <a href="https://inara.cz/elite/board-thread/7049/463292/#463292" rel="nofollow">has chosen</a>
+to only accept Live galaxy data on its API.</p>
+<p>This application will not even process Journal data for Inara after
+2022-11-29T09:00:00+00:00 <em>unless the <code>gameversion</code> indicates a Live client</em>.
+This explicitly checks that the game's version is semantically equal to or
+greater than '4.0.0'.</p>
+<p>If a Live client is <em>not</em> detected, then there is an INFO level logging
+message "Inara only accepts Live galaxy data", which is also set as the main
+UI status line.  This message will repeat, at most, every 5 minutes.</p>
+<p>If you continue to play in the Legacy galaxy only then you probably want to
+just disable the Inara plugin with the checkbox on Settings &gt; Inara.</p>
+</li>
+<li>
+<p>All batches of events sent to EDSM will be tagged with a <code>gameversion</code>, in
+a similar manner to the EDDN header.</p>
+<p>Ref: <a href="https://www.edsm.net/en/api-journal-v1" rel="nofollow">EDSM api-journal-v1</a></p>
+</li>
+<li>
+<p>All EDDN messages will now have appropriate <code>gameversion</code> and <code>gamebuild</code>
+fields in the <code>header</code> as per
+<a href="https://github.com/EDCD/EDDN/blob/live/docs/Developers.md#gameversions-and-gamebuild">EDDN/docs/Developers.md</a>.</p>
+<p>As a result of this you can expect third-party sites to choose to filter data
+based on that.</p>
+<p>Look for announcements by individual sites/tools as to what they have chosen
+to do.</p>
+</li>
+</ul>
+<h2><a id="user-content-known-bugs" class="anchor" aria-hidden="true" href="#known-bugs"><span aria-hidden="true" class="octicon octicon-link"></span></a>Known Bugs</h2>
+<p>In testing if it had been broken at all due to 5.5.0 -&gt; 5.6.0 changes it has
+come to light that <code>EDMC.EXE -n</code>, to send data to EDDN, was already broken in
+5.5.0.</p>
+<p>In addition, there is now some extra 'INFO' logging output which will be
+produced by any invocation of <code>EDMC.EXE</code>.  This might break third-party use of
+it, e.g. <a href="https://forums.frontier.co.uk/threads/trade-computer-extension-mk-ii.223056/" rel="nofollow">Trade Computer Extension Mk.II</a>.
+This will be fixed as soon as the dust settles from Update 14, with emphasis
+being on ensuring the GUI <code>EDMarketConnector.exe</code> functions properly.</p>
+<h2><a id="user-content-notes-for-eddn-listeners" class="anchor" aria-hidden="true" href="#notes-for-eddn-listeners"><span aria-hidden="true" class="octicon octicon-link"></span></a>Notes for EDDN Listeners</h2>
+<ul>
+<li>
+<p>Where EDMC sourced data from the Journal files it will set <code>gameversion</code>
+and <code>gamebuild</code> as per their values in <code>Fileheader</code> or <code>LoadGame</code>, whichever
+was more recent (there are some events that occur between these).</p>
+</li>
+<li>
+<p><em>If any message was already delayed such that it did not
+have the EDDN header recorded, then the <code>gameversion</code> and <code>gamebuild</code> will
+be empty strings</em>.  In order to indicate this the <code>softwareName</code> will have
+<code> (legacy replay)</code> appended to it, e.g. <code>E:D Market Connector Connector [Windows] (legacy replay)</code>.  In general this indicates that the message was
+queued up using a version of EDMC prior to this one.  If you're only
+interested in Live galaxy data then you might want to ignore such messages.</p>
+</li>
+<li>
+<p>Where EDMC sourced data from a CAPI endpoint, the resulting EDDN message
+will have a <code>gameversion</code> of <code>CAPI-&lt;endpoint&gt;</code> set, e.g. <code>CAPI-market</code>.
+<strong>At this time it is not 100% certain which galaxy this data will be for, so
+all listeners are advised to ignore/queue such data until this is clarified</strong>.</p>
+<p><code>gamebuild</code> will be an empty string for all CAPI-sourced data.</p>
+</li>
+</ul>
+<h2><a id="user-content-plugin-developers" class="anchor" aria-hidden="true" href="#plugin-developers"><span aria-hidden="true" class="octicon octicon-link"></span></a>Plugin Developers</h2>
+<ul>
+<li>There is a new flag in <code>state</code> passed to plugins, <code>IsDocked</code>.  See PLUGINS.md
+for details.</li>
+</ul>
+<hr>
 
 <h2>Release 5.5.0</h2>
 <ul>
@@ -1444,11 +1575,11 @@ about this:
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.5.0/EDMarketConnector_win_5.5.0.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.6.0/EDMarketConnector_win_5.6.0.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="5.5.0"
-				length="17154048"
+				sparkle:version="5.6.0"
+				length="17162240"
 				type="application/octet-stream"
 			/>
 		</item>
