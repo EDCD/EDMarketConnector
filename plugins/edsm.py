@@ -552,7 +552,7 @@ entry: {entry!r}'''
             materials.update(transient)
             logger.trace_if(CMDR_EVENTS, f'"LoadGame" event, queueing Materials: {cmdr=}')
 
-            this.queue.put((cmdr, materials))
+            this.queue.put((cmdr, this.game_version, this.game_build, materials))
 
         if entry['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked'):
             logger.trace_if(
@@ -561,7 +561,7 @@ Queueing: {entry!r}'''
             )
         logger.trace_if(CMDR_EVENTS, f'"{entry["event"]=}" event, queueing: {cmdr=}')
 
-        this.queue.put((cmdr, entry))
+        this.queue.put((cmdr, this.game_version, this.game_build, entry))
 
 
 # Update system data
@@ -663,10 +663,10 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
             logger.debug(f'{this.shutting_down=}, so setting closing = True')
             closing = True
 
-        item: Optional[Tuple[str, Mapping[str, Any]]] = this.queue.get()
+        item: Optional[Tuple[str, str, str, Mapping[str, Any]]] = this.queue.get()
         if item:
-            (cmdr, entry) = item
-            logger.trace_if(CMDR_EVENTS, f'De-queued ({cmdr=}, {entry["event"]=})')
+            (cmdr, game_version, game_build, entry) = item
+            logger.trace_if(CMDR_EVENTS, f'De-queued ({cmdr=}, {game_version=}, {game_build=}, {entry["event"]=})')
 
         else:
             logger.debug('Empty queue message, setting closing = True')
@@ -732,8 +732,8 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
                         'apiKey': apikey,
                         'fromSoftware': applongname,
                         'fromSoftwareVersion': str(appversion()),
-                        'fromGameVersion': this.game_version,
-                        'fromGameBuild': this.game_build,
+                        'fromGameVersion': game_version,
+                        'fromGameBuild': game_build,
                         'message': json.dumps(pending, ensure_ascii=False).encode('utf-8'),
                     }
 
@@ -815,7 +815,7 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
             plug.show_error(_("Error: Can't connect to EDSM"))
 
         if entry['event'].lower() in ('shutdown', 'commander', 'fileheader'):
-            # Game shutdown or new login so we MUST not hang on to pending
+            # Game shutdown or new login, so we MUST not hang on to pending
             pending = []
             logger.trace_if(CMDR_EVENTS, f'Blanked pending because of event: {entry["event"]}')
 
