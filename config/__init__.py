@@ -52,7 +52,7 @@ appcmdname = 'EDMC'
 # <https://semver.org/#semantic-versioning-specification-semver>
 # Major.Minor.Patch(-prerelease)(+buildmetadata)
 # NB: Do *not* import this, use the functions appversion() and appversion_nobuild()
-_static_appversion = '5.6.0-beta1'
+_static_appversion = '5.6.0-beta2'
 _cached_version: Optional[semantic_version.Version] = None
 copyright = '© 2015-2019 Jonathan Harris, 2020-2022 EDCD'
 

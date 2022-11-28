@@ -71,6 +71,9 @@ class This:
     def __init__(self):
         self.shutting_down = False  # Plugin is shutting down.
 
+        self.game_version = ""
+        self.game_build = ""
+
         self.session: requests.Session = requests.Session()
         self.session.headers['User-Agent'] = user_agent
         self.queue: Queue = Queue()		# Items to be sent to EDSM by worker thread
@@ -432,6 +435,9 @@ def journal_entry(  # noqa: C901, CCR001
     if should_return:
         return
 
+    this.game_version = state['GameVersion']
+    this.game_build = state['GameBuild']
+
     entry = new_entry
 
     this.on_foot = state['OnFoot']
@@ -546,7 +552,7 @@ entry: {entry!r}'''
             materials.update(transient)
             logger.trace_if(CMDR_EVENTS, f'"LoadGame" event, queueing Materials: {cmdr=}')
 
-            this.queue.put((cmdr, materials))
+            this.queue.put((cmdr, this.game_version, this.game_build, materials))
 
         if entry['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked'):
             logger.trace_if(
@@ -555,7 +561,7 @@ Queueing: {entry!r}'''
             )
         logger.trace_if(CMDR_EVENTS, f'"{entry["event"]=}" event, queueing: {cmdr=}')
 
-        this.queue.put((cmdr, entry))
+        this.queue.put((cmdr, this.game_version, this.game_build, entry))
 
 
 # Update system data
@@ -638,6 +644,8 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
     pending: List[Mapping[str, Any]] = []  # Unsent events
     closing = False
     cmdr: str = ""
+    last_game_version = ""
+    last_game_build = ""
     entry: Mapping[str, Any] = {}
 
     while not this.discarded_events:
@@ -657,10 +665,10 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
             logger.debug(f'{this.shutting_down=}, so setting closing = True')
             closing = True
 
-        item: Optional[Tuple[str, Mapping[str, Any]]] = this.queue.get()
+        item: Optional[Tuple[str, str, str, Mapping[str, Any]]] = this.queue.get()
         if item:
-            (cmdr, entry) = item
-            logger.trace_if(CMDR_EVENTS, f'De-queued ({cmdr=}, {entry["event"]=})')
+            (cmdr, game_version, game_build, entry) = item
+            logger.trace_if(CMDR_EVENTS, f'De-queued ({cmdr=}, {game_version=}, {game_build=}, {entry["event"]=})')
 
         else:
             logger.debug('Empty queue message, setting closing = True')
@@ -685,6 +693,20 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
                 if item and entry['event'] not in this.discarded_events:
                     logger.trace_if(
                         CMDR_EVENTS, f'({cmdr=}, {entry["event"]=}): not in discarded_events, appending to pending')
+
+                    # Discard the pending list if it's a new Journal file OR
+                    # if the gameversion has changed.   We claim a single
+                    # gameversion for an entire batch of events so can't mix
+                    # them.
+                    # The specific gameversion check caters for scenarios where
+                    # we took some time in the last POST, had new events queued
+                    # in the meantime *and* the game client crashed *and* was
+                    # changed to a different gameversion.
+                    if (
+                        entry['event'].lower() == 'fileheader'
+                        or last_game_version != game_version or last_game_build != game_build
+                    ):
+                        pending = []
 
                     pending.append(entry)
 
@@ -726,6 +748,8 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
                         'apiKey': apikey,
                         'fromSoftware': applongname,
                         'fromSoftwareVersion': str(appversion()),
+                        'fromGameVersion': game_version,
+                        'fromGameBuild': game_build,
                         'message': json.dumps(pending, ensure_ascii=False).encode('utf-8'),
                     }
 
@@ -807,13 +831,16 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
             plug.show_error(_("Error: Can't connect to EDSM"))
 
         if entry['event'].lower() in ('shutdown', 'commander', 'fileheader'):
-            # Game shutdown or new login so we MUST not hang on to pending
+            # Game shutdown or new login, so we MUST not hang on to pending
             pending = []
             logger.trace_if(CMDR_EVENTS, f'Blanked pending because of event: {entry["event"]}')
 
         if closing:
             logger.debug('closing, so returning.')
             return
+
+        last_game_version = game_version
+        last_game_build = game_build
 
     logger.debug('Done.')
 
