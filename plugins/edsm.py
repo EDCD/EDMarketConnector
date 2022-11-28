@@ -71,6 +71,9 @@ class This:
     def __init__(self):
         self.shutting_down = False  # Plugin is shutting down.
 
+        self.game_version = ""
+        self.game_build = ""
+
         self.session: requests.Session = requests.Session()
         self.session.headers['User-Agent'] = user_agent
         self.queue: Queue = Queue()		# Items to be sent to EDSM by worker thread
@@ -432,6 +435,9 @@ def journal_entry(  # noqa: C901, CCR001
     if should_return:
         return
 
+    this.game_version = state['GameVersion']
+    this.game_build = state['GameBuild']
+
     entry = new_entry
 
     this.on_foot = state['OnFoot']
@@ -726,6 +732,8 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
                         'apiKey': apikey,
                         'fromSoftware': applongname,
                         'fromSoftwareVersion': str(appversion()),
+                        'fromGameVersion': this.game_version,
+                        'fromGameBuild': this.game_build,
                         'message': json.dumps(pending, ensure_ascii=False).encode('utf-8'),
                     }
 
