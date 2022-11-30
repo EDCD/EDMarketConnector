@@ -376,8 +376,11 @@ def journal_entry(  # noqa: C901, CCR001
         if datetime.now(timezone.utc) >= datetime.fromisoformat("2022-11-27T09:00:00+00:00"):
             # Update 14 ETA has passed, so perform the check
             if (
-                this.legacy_galaxy_last_notified is None
-                or (datetime.now(timezone.utc) - this.legacy_galaxy_last_notified) > timedelta(seconds=300)
+                (
+                    this.legacy_galaxy_last_notified is None
+                    or (datetime.now(timezone.utc) - this.legacy_galaxy_last_notified) > timedelta(seconds=300)
+                )
+                and config.get_int('inara_out') and not is_beta and not this.multicrew and credentials(cmdr)
             ):
                 # LANG: The Inara API only accepts Live galaxy data, not Legacy galaxy data
                 logger.info(_("Inara only accepts Live galaxy data"))
