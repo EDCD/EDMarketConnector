@@ -676,19 +676,15 @@ class EDDN:
             if 'prohibited' in data['lastStarport']:
                 message['prohibited'] = sorted(x for x in (data['lastStarport']['prohibited'] or {}).values())
 
-            if data.source_host == companion.SERVER_LIVE:
-                gv = 'CAPI-Live-market'
-
-            elif data.source_host == companion.SERVER_LEGACY:
-                gv = 'CAPI-Legacy-market'
-
-            else:
-                gv = 'CAPI-market'
-
             self.send_message(data['commander']['name'], {
                 '$schemaRef': f'https://eddn.edcd.io/schemas/commodity/3{"/test" if is_beta else ""}',
                 'message':    message,
-                'header':     self.standard_header(game_version=gv, game_build=''),
+                'header':     self.standard_header(
+                    game_version=self.capi_gameversion_from_host_endpoint(
+                        data.source_host, companion.Session.FRONTIER_CAPI_PATH_MARKET
+                    ),
+                    game_build=''
+                ),
             })
 
         this.commodities = commodities
@@ -771,15 +767,6 @@ class EDDN:
 
         # Don't send empty modules list - schema won't allow it
         if outfitting and this.outfitting != (horizons, outfitting):
-            if data.source_host == companion.SERVER_LIVE:
-                gv = 'CAPI-Live-shipyard'
-
-            elif data.source_host == companion.SERVER_LEGACY:
-                gv = 'CAPI-Legacy-shipyard'
-
-            else:
-                gv = 'CAPI-shipyard'
-
             self.send_message(data['commander']['name'], {
                 '$schemaRef': f'https://eddn.edcd.io/schemas/outfitting/2{"/test" if is_beta else ""}',
                 'message': OrderedDict([
@@ -791,7 +778,12 @@ class EDDN:
                     ('modules',     outfitting),
                     ('odyssey',     this.odyssey),
                 ]),
-                'header':     self.standard_header(game_version=gv, game_build=''),
+                'header':     self.standard_header(
+                    game_version=self.capi_gameversion_from_host_endpoint(
+                        data.source_host, companion.Session.FRONTIER_CAPI_PATH_SHIPYARD
+                    ),
+                    game_build=''
+                ),
             })
 
         this.outfitting = (horizons, outfitting)
@@ -825,15 +817,6 @@ class EDDN:
         )
         # Don't send empty ships list - shipyard data is only guaranteed present if user has visited the shipyard.
         if shipyard and this.shipyard != (horizons, shipyard):
-            if data.source_host == companion.SERVER_LIVE:
-                gv = 'CAPI-Live-shipyard'
-
-            elif data.source_host == companion.SERVER_LEGACY:
-                gv = 'CAPI-Legacy-shipyard'
-
-            else:
-                gv = 'CAPI-shipyard'
-
             self.send_message(data['commander']['name'], {
                 '$schemaRef': f'https://eddn.edcd.io/schemas/shipyard/2{"/test" if is_beta else ""}',
                 'message': OrderedDict([
@@ -845,7 +828,12 @@ class EDDN:
                     ('ships',       shipyard),
                     ('odyssey',     this.odyssey),
                 ]),
-                'header':     self.standard_header(game_version=gv, game_build=''),
+                'header': self.standard_header(
+                    game_version=self.capi_gameversion_from_host_endpoint(
+                        data.source_host, companion.Session.FRONTIER_CAPI_PATH_SHIPYARD
+                    ),
+                    game_build=''
+                ),
             })
 
         this.shipyard = (horizons, shipyard)
@@ -1495,7 +1483,7 @@ class EDDN:
         return None
 
     def export_capi_fcmaterials(
-        self, data: Mapping[str, Any], is_beta: bool, horizons: bool
+        self, data: CAPIData, is_beta: bool, horizons: bool
     ) -> Optional[str]:
         """
         Send CAPI-sourced 'onfootmicroresources' data on `fcmaterials/1` schema.
@@ -1547,7 +1535,11 @@ class EDDN:
         msg = {
             '$schemaRef': f'https://eddn.edcd.io/schemas/fcmaterials_capi/1{"/test" if is_beta else ""}',
             'message': entry,
-            'header': self.standard_header(game_version='CAPI-market', game_build=''),
+            'header': self.standard_header(
+                game_version=self.capi_gameversion_from_host_endpoint(
+                    data.source_host, companion.Session.FRONTIER_CAPI_PATH_MARKET
+                ), game_build=''
+            ),
         }
 
         this.eddn.send_message(data['commander']['name'], msg)
@@ -1853,9 +1845,47 @@ class EDDN:
         match = self.CANONICALISE_RE.match(item)
         return match and match.group(1) or item
 
+    def capi_gameversion_from_host_endpoint(self, capi_host: str, capi_endpoint: str) -> str:
+        """
+        Return the correct CAPI gameversion string for the given host/endpoint.
+
+        :param capi_host: CAPI host used.
+        :param capi_endpoint: CAPI endpoint queried.
+        :return: CAPI gameversion string.
+        """
+        gv = ''
+        #######################################################################
+        # Base string
+        if capi_host == companion.SERVER_LIVE or capi_host == companion.SERVER_BETA:
+            gv = 'CAPI-Live-'
+
+        elif capi_host == companion.SERVER_LEGACY:
+            gv = 'CAPI-Legacy-'
+
+        else:
+            # Technically incorrect, but it will inform Listeners
+            logger.error(f"{capi_host=} lead to bad gameversion")
+            gv = 'CAPI-UNKNOWN-'
+        #######################################################################
+
+        #######################################################################
+        # endpoint
+        if capi_endpoint == companion.Session.FRONTIER_CAPI_PATH_MARKET:
+            gv += 'market'
+
+        elif capi_endpoint == companion.Session.FRONTIER_CAPI_PATH_SHIPYARD:
+            gv += 'shipyard'
+
+        else:
+            # Technically incorrect, but it will inform Listeners
+            logger.error(f"{capi_endpoint=} lead to bad gameversion")
+            gv += 'UNKNOWN'
+        #######################################################################
+
+        return gv
+
 
 # Plugin callbacks
-
 def plugin_start3(plugin_dir: str) -> str:
     """
     Start this plugin.

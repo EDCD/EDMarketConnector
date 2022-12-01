@@ -896,6 +896,9 @@ data from Frontier's servers.
 | :-------- | :--------------: | :------------------------------------------------------------------------------------------------------- |
 | `data`    | `Dict[str, Any]` | `/profile` API response, with `/market` and `/shipyard` added under the keys `marketdata` and `shipdata` |
 | `is_beta` |      `bool`      | If the game is currently in beta                                                                         |
+NB: Actually `data` is a custom type, based on `UserDict`, called `CAPIData`,
+and has some extra properties.  However, these are for **internal use only**
+at this time, especially as there are some caveats about at least one of them.
 
 ---
 
