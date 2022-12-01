@@ -83,7 +83,18 @@ breaking with future code changes.**
  match the main UI.
 
 `from config import appname, applongname, appcmdname, appversion
-, copyright, config` - to access config.
+, copyright, config` - to access config.  *Intended use of config classes
+and functions is **only** for managing a plugin's own configuration*.
+Explicitly you can expect to use:
+- `config.set()` - to store a plugin configuration value.
+- `config.get_list()`, `config.get_str()`, `config.get_bool()`,
+  `config.get_int()` - To retrieve a plugin configuration value.
+- `config.delete()` - To remove a plugin configuration value.
+- `config.shutting_down` (NB: a property, not a function!) to detect if the application
+  is currently shutting down.
+
+Anything else from `import config` is not part of the stable plugin API and
+liable to change without notice.
 
 `from prefs import prefsVersion` - to allow for versioned preferences.
 
