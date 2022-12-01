@@ -1069,7 +1069,11 @@ def journal_entry(  # noqa: C901, CCR001
             elif 'Power' in entry:
                 data['opponentName'] = entry['Power']
 
-            new_add_event('addCommanderCombatInterdicted', entry['timestamp'], data)
+            if data['opponentName'] == "":
+                logger.warning('Dropping addCommanderCombatInterdicted message because opponentName came out as ""')
+
+            else:
+                new_add_event('addCommanderCombatInterdicted', entry['timestamp'], data)
 
         elif event_name == 'Interdiction':
             data = OrderedDict([
