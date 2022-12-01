@@ -214,6 +214,9 @@
 /* EDMarketConnector.py: CAPI queries aborted because game mode unknown; In files: EDMarketConnector.py:967; */
 "CAPI query aborted: Game mode unknown" = "CAPI query aborted: Game mode unknown";
 
+/* EDMarketConnector.py: CAPI queries aborted because GameVersion unknown; In files: EDMarketConnector.py:974; */
+"CAPI query aborted: GameVersion unknown" = "CAPI query aborted: GameVersion unknown";
+
 /* EDMarketConnector.py: CAPI queries aborted because current star system name unknown; In files: EDMarketConnector.py:973; */
 "CAPI query aborted: Current system unknown" = "CAPI query aborted: Current system unknown";
 
