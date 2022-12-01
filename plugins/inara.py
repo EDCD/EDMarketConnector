@@ -1072,7 +1072,12 @@ def journal_entry(  # noqa: C901, CCR001
             elif 'Power' in entry:
                 data['opponentName'] = entry['Power']
 
-            new_add_event('addCommanderCombatInterdicted', entry['timestamp'], data)
+            # Paranoia in case of e.g. Thargoid activity not having complete data
+            if data['opponentName'] == "":
+                logger.warning('Dropping addCommanderCombatInterdicted message because opponentName came out as ""')
+
+            else:
+                new_add_event('addCommanderCombatInterdicted', entry['timestamp'], data)
 
         elif event_name == 'Interdiction':
             data = OrderedDict([
@@ -1090,18 +1095,31 @@ def journal_entry(  # noqa: C901, CCR001
             elif 'Power' in entry:
                 data['opponentName'] = entry['Power']
 
-            new_add_event('addCommanderCombatInterdiction', entry['timestamp'], data)
+            # Paranoia in case of e.g. Thargoid activity not having complete data
+            if data['opponentName'] == "":
+                logger.warning('Dropping addCommanderCombatInterdiction message because opponentName came out as ""')
+
+            else:
+                new_add_event('addCommanderCombatInterdiction', entry['timestamp'], data)
 
         elif event_name == 'EscapeInterdiction':
-            new_add_event(
-                'addCommanderCombatInterdictionEscape',
-                entry['timestamp'],
-                {
-                    'starsystemName': system,
-                    'opponentName': entry['Interdictor'],
-                    'isPlayer': entry['IsPlayer'],
-                }
-            )
+            # Paranoia in case of e.g. Thargoid activity not having complete data
+            if entry.get('Interdictor') is None or entry['Interdictor'] == "":
+                logger.warning(
+                    'Dropping addCommanderCombatInterdictionEscape message'
+                    'because opponentName came out as ""'
+                )
+
+            else:
+                new_add_event(
+                    'addCommanderCombatInterdictionEscape',
+                    entry['timestamp'],
+                    {
+                        'starsystemName': system,
+                        'opponentName': entry['Interdictor'],
+                        'isPlayer': entry['IsPlayer'],
+                    }
+                )
 
         elif event_name == 'PVPKill':
             new_add_event(
