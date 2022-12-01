@@ -1091,7 +1091,11 @@ def journal_entry(  # noqa: C901, CCR001
             elif 'Power' in entry:
                 data['opponentName'] = entry['Power']
 
-            new_add_event('addCommanderCombatInterdiction', entry['timestamp'], data)
+            if data['opponentName'] == "":
+                logger.warning('Dropping addCommanderCombatInterdiction message because opponentName came out as ""')
+
+            else:
+                new_add_event('addCommanderCombatInterdiction', entry['timestamp'], data)
 
         elif event_name == 'EscapeInterdiction':
             new_add_event(
