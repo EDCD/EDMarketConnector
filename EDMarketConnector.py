@@ -944,7 +944,7 @@ class AppWindow(object):
 
         return True
 
-    def capi_request_data(self, event=None) -> None:
+    def capi_request_data(self, event=None) -> None:  # noqa: CCR001
         """
         Perform CAPI data retrieval and associated actions.
 
@@ -967,6 +967,17 @@ class AppWindow(object):
             logger.trace_if('capi.worker', 'Aborting Query: Game Mode unknown')
             # LANG: CAPI queries aborted because game mode unknown
             self.status['text'] = _('CAPI query aborted: Game mode unknown')
+            return
+
+        if monitor.state['GameVersion'] is None:
+            logger.trace_if('capi.worker', 'Aborting Query: GameVersion unknown')
+            # LANG: CAPI queries aborted because GameVersion unknown
+            self.status['text'] = _('CAPI query aborted: GameVersion unknown')
+            return
+
+        if not monitor.is_live_galaxy():
+            logger.warning("Dropping CAPI request because this is the Legacy galaxy, which is not yet supported")
+            self.status['text'] = 'CAPI for Legacy not yet supported'
             return
 
         if not monitor.system:

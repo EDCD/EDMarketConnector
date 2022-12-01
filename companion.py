@@ -55,6 +55,7 @@ auth_timeout = 30  # timeout for initial auth
 FRONTIER_AUTH_SERVER = 'https://auth.frontierstore.net'
 
 SERVER_LIVE = 'https://companion.orerve.net'
+SERVER_LEGACY = 'https://legacy-companion.orerve.net'
 SERVER_BETA = 'https://pts-companion.orerve.net'
 
 commodity_map: Dict = {}
@@ -679,7 +680,6 @@ class Session(object):
                 self.close()
                 self.credentials = credentials
 
-        self.server = self.credentials['beta'] and SERVER_BETA or SERVER_LIVE
         self.state = Session.STATE_INIT
         self.auth = Auth(self.credentials['cmdr'])
 
@@ -743,7 +743,7 @@ class Session(object):
         """Worker thread that performs actual CAPI queries."""
         logger.debug('CAPI worker thread starting')
 
-        def capi_single_query(  # noqa: CCR001
+        def capi_single_query(
             capi_endpoint: str, timeout: int = capi_default_requests_timeout
         ) -> CAPIData:
             """
@@ -754,6 +754,10 @@ class Session(object):
             :return: The resulting CAPI data, of type CAPIData.
             """
             capi_data: CAPIData
+            if not monitor.is_live_galaxy():
+                logger.warning("Dropping CAPI request because this is the Legacy galaxy")
+                return capi_data
+
             try:
                 logger.trace_if('capi.worker', 'Sending HTTP request...')
                 if conf_module.capi_pretend_down:
@@ -936,7 +940,7 @@ class Session(object):
                 )
 
             # If the query came from EDMC.(py|exe) there's no tk to send an
-            # event too, so assume it will be polling there response queue.
+            # event too, so assume it will be polling the response queue.
             if query.tk_response_event is not None:
                 logger.trace_if('capi.worker', 'Sending <<CAPIResponse>>')
                 self.tk_master.event_generate('<<CAPIResponse>>')
@@ -964,6 +968,18 @@ class Session(object):
         :param play_sound: Whether the app should play a sound on error.
         :param auto_update: Whether this request was triggered automatically.
         """
+        if self.credentials is not None and self.credentials['beta']:
+            self.server = SERVER_BETA
+
+        elif monitor.is_live_galaxy():
+            self.server = SERVER_LIVE
+
+        else:
+            logger.warning("Dropping CAPI request because this is the Legacy galaxy, which is not yet supported")
+            # self.server = SERVER_LEGACY
+            self.server = None
+            return
+
         # Ask the thread worker to perform all three queries
         logger.trace_if('capi.worker', 'Enqueueing request')
         self.capi_request_queue.put(
