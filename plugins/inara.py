@@ -370,22 +370,21 @@ def journal_entry(  # noqa: C901, CCR001
     :return: str - empty if no error, else error string.
     """
     if not monitor.is_live_galaxy():
-        # This only applies after Update 14, which as of 2022-11-27 is scheduled
-        # for 2022-11-29, with the game servers presumably being down around
-        # 09:00
-        if datetime.now(timezone.utc) >= datetime.fromisoformat("2022-11-27T09:00:00+00:00"):
-            # Update 14 ETA has passed, so perform the check
-            if (
+        # Since Update 14 on 2022-11-29 Inara only accepts Live data.
+        if (
+            (
                 this.legacy_galaxy_last_notified is None
                 or (datetime.now(timezone.utc) - this.legacy_galaxy_last_notified) > timedelta(seconds=300)
-            ):
-                # LANG: The Inara API only accepts Live galaxy data, not Legacy galaxy data
-                logger.info(_("Inara only accepts Live galaxy data"))
-                # this.parent.children['status']['text'] =
-                this.legacy_galaxy_last_notified = datetime.now(timezone.utc)
-                return _("Inara only accepts Live galaxy data")
+            )
+            and config.get_int('inara_out') and not is_beta and not this.multicrew and credentials(cmdr)
+        ):
+            # LANG: The Inara API only accepts Live galaxy data, not Legacy galaxy data
+            logger.info(_("Inara only accepts Live galaxy data"))
+            # this.parent.children['status']['text'] =
+            this.legacy_galaxy_last_notified = datetime.now(timezone.utc)
+            return _("Inara only accepts Live galaxy data")
 
-            return ''
+        return ''
 
     should_return, new_entry = killswitch.check_killswitch('plugins.inara.journal', entry, logger)
     if should_return:
@@ -1069,7 +1068,12 @@ def journal_entry(  # noqa: C901, CCR001
             elif 'Power' in entry:
                 data['opponentName'] = entry['Power']
 
-            new_add_event('addCommanderCombatInterdicted', entry['timestamp'], data)
+            # Paranoia in case of e.g. Thargoid activity not having complete data
+            if data['opponentName'] == "":
+                logger.warning('Dropping addCommanderCombatInterdicted message because opponentName came out as ""')
+
+            else:
+                new_add_event('addCommanderCombatInterdicted', entry['timestamp'], data)
 
         elif event_name == 'Interdiction':
             data = OrderedDict([
@@ -1087,18 +1091,31 @@ def journal_entry(  # noqa: C901, CCR001
             elif 'Power' in entry:
                 data['opponentName'] = entry['Power']
 
-            new_add_event('addCommanderCombatInterdiction', entry['timestamp'], data)
+            # Paranoia in case of e.g. Thargoid activity not having complete data
+            if data['opponentName'] == "":
+                logger.warning('Dropping addCommanderCombatInterdiction message because opponentName came out as ""')
+
+            else:
+                new_add_event('addCommanderCombatInterdiction', entry['timestamp'], data)
 
         elif event_name == 'EscapeInterdiction':
-            new_add_event(
-                'addCommanderCombatInterdictionEscape',
-                entry['timestamp'],
-                {
-                    'starsystemName': system,
-                    'opponentName': entry['Interdictor'],
-                    'isPlayer': entry['IsPlayer'],
-                }
-            )
+            # Paranoia in case of e.g. Thargoid activity not having complete data
+            if entry.get('Interdictor') is None or entry['Interdictor'] == "":
+                logger.warning(
+                    'Dropping addCommanderCombatInterdictionEscape message'
+                    'because opponentName came out as ""'
+                )
+
+            else:
+                new_add_event(
+                    'addCommanderCombatInterdictionEscape',
+                    entry['timestamp'],
+                    {
+                        'starsystemName': system,
+                        'opponentName': entry['Interdictor'],
+                        'isPlayer': entry['IsPlayer'],
+                    }
+                )
 
         elif event_name == 'PVPKill':
             new_add_event(

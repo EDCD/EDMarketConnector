@@ -97,7 +97,7 @@ elif sys.platform == 'linux':
 class OldConfig():
     """Object that holds all configuration data."""
 
-    OUT_MKT_EDDN = 1
+    OUT_EDDN_SEND_STATION_DATA = 1
     # OUT_MKT_BPC = 2	# No longer supported
     OUT_MKT_TD = 4
     OUT_MKT_CSV = 8
@@ -106,12 +106,12 @@ class OldConfig():
     # OUT_SYS_FILE = 32	# No longer supported
     # OUT_STAT = 64	# No longer available
     # OUT_SHIP_CORIOLIS = 128	# Replaced by OUT_SHIP
-    OUT_STATION_ANY = OUT_MKT_EDDN | OUT_MKT_TD | OUT_MKT_CSV
     # OUT_SYS_EDSM = 256  # Now a plugin
     # OUT_SYS_AUTO = 512  # Now always automatic
     OUT_MKT_MANUAL = 1024
-    OUT_SYS_EDDN = 2048
-    OUT_SYS_DELAY = 4096
+    OUT_EDDN_SEND_NON_STATION = 2048
+    OUT_EDDN_DELAY = 4096
+    OUT_STATION_ANY = OUT_EDDN_SEND_STATION_DATA | OUT_MKT_TD | OUT_MKT_CSV
 
     if sys.platform == 'darwin':  # noqa: C901 # It's gating *all* the functions
 

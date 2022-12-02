@@ -34,6 +34,7 @@
 import json
 import threading
 import tkinter as tk
+from datetime import datetime, timedelta, timezone
 from queue import Queue
 from threading import Thread
 from time import sleep
@@ -42,6 +43,7 @@ from typing import TYPE_CHECKING, Any, List, Literal, Mapping, MutableMapping, O
 import requests
 
 import killswitch
+import monitor
 import myNotebook as nb  # noqa: N813
 import plug
 from companion import CAPIData
@@ -73,6 +75,9 @@ class This:
 
         self.game_version = ""
         self.game_build = ""
+
+        # Handle only sending Live galaxy data
+        self.legacy_galaxy_last_notified: Optional[datetime] = None
 
         self.session: requests.Session = requests.Session()
         self.session.headers['User-Agent'] = user_agent
@@ -420,20 +425,30 @@ def credentials(cmdr: str) -> Optional[Tuple[str, str]]:
 
 def journal_entry(  # noqa: C901, CCR001
     cmdr: str, is_beta: bool, system: str, station: str, entry: MutableMapping[str, Any], state: Mapping[str, Any]
-) -> None:
-    """Journal Entry hook."""
+) -> str:
+    """
+    Process a Journal event.
+
+    :param cmdr:
+    :param is_beta:
+    :param system:
+    :param station:
+    :param entry:
+    :param state:
+    :return: str - empty if no error, else error string.
+    """
     should_return, new_entry = killswitch.check_killswitch('plugins.edsm.journal', entry, logger)
     if should_return:
         # LANG: EDSM plugin - Journal handling disabled by killswitch
         plug.show_error(_('EDSM Handler disabled. See Log.'))
-        return
+        return ''
 
     should_return, new_entry = killswitch.check_killswitch(
         f'plugins.edsm.journal.event.{entry["event"]}', data=new_entry, log=logger
     )
 
     if should_return:
-        return
+        return ''
 
     this.game_version = state['GameVersion']
     this.game_build = state['GameBuild']
@@ -530,6 +545,21 @@ entry: {entry!r}'''
 
     # Queue all events to send to EDSM.  worker() will take care of dropping EDSM discarded events
     if config.get_int('edsm_out') and not is_beta and not this.multicrew and credentials(cmdr):
+        if not monitor.monitor.is_live_galaxy():
+            logger.info("EDSM only accepts Live galaxy data")
+            # Since Update 14 on 2022-11-29 Inara only accepts Live data.
+            if (
+                this.legacy_galaxy_last_notified is None
+                or (datetime.now(timezone.utc) - this.legacy_galaxy_last_notified) > timedelta(seconds=300)
+            ):
+                # LANG: The Inara API only accepts Live galaxy data, not Legacy galaxy data
+                logger.info("EDSM only accepts Live galaxy data")
+                # this.parent.children['status']['text'] =
+                this.legacy_galaxy_last_notified = datetime.now(timezone.utc)
+                return _("EDSM only accepts Live galaxy data")
+
+            return ''
+
         # Introduce transient states into the event
         transient = {
             '_systemName': system,
@@ -562,6 +592,8 @@ Queueing: {entry!r}'''
         logger.trace_if(CMDR_EVENTS, f'"{entry["event"]=}" event, queueing: {cmdr=}')
 
         this.queue.put((cmdr, this.game_version, this.game_build, entry))
+
+    return ''
 
 
 # Update system data

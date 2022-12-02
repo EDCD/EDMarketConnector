@@ -27,10 +27,84 @@ produce the Windows executables and installer.
 
 ---
 
+Release 5.6.1
+===
+This release addresses some minor bugs and annoyances with v5.6.0, especially
+for Legacy galaxy players.
+
+In general, at this early stage of the galaxy split, we prefer to continue to
+warn Legacy users who have 'send data' options active for sites that only
+accept Live data.  In the future this might be reviewed and such warnings
+removed such that the functionality *fails silently*.  This might be of use
+to users who actively play in both galaxies.
+
+* CAPI queries will now **only be attempted for Live galaxy players**  This is
+  a stop-gap whilst the functionality is implemented for Legacy galaxy players.
+  Doing so prevents using Live galaxy data whilst playing Legacy galaxy, which
+  would be increasingly wrong and misleading.
+  1. 'Automatic update on docking' will do nothing for Legacy players.
+  2. Pressing the 'Update' button whilst playing Legacy will result in a status
+    line message "CAPI for Legacy not yet supported", and otherwise achieve
+    nothing.  **The only function of this button is to query CAPI data and
+    pass it to plugins, which does *not* include Inara and EDSM**.
+  3. A Legacy player trying to use "File" > "Status" will get the message
+    "Status: No CAPI data yet" due to depending on CAPI data.
+  
+  It is hoped to implement CAPI data retrieval and use for Legacy players soon,
+  although this will likely entail extending the plugins API to include a new
+  function specifically for this.  Thus only updated plugins would support
+  this.
+* EDDN: Where data has been sourced from the CAPI this application now sends
+  a header->gameversion in the format `"CAPI-(Live|Legacy)-<endpoint"` as per
+  [the updated documentation](https://github.com/EDCD/EDDN/blob/live/docs/Developers.md#gameversions-and-gamebuild).
+  1. As *this* version only queries CAPI for Live players that will only be
+  `"CAPI-Live-<endpoint>"` for the time being.
+
+  2. If, somehow, the CAPI host queried matches neither the
+  current Live host, the Legacy host, nor the past beta host, you will see
+  `"CAPI-UNKNOWN-<endpoint>"`.
+
+  3. As that statement implies, this application will also signal 'Live' if
+  `pts-companion.orerve.net` has been used, due to detecting an alpha or beta
+  version of the game.  However, in that case the `/test` schemas will be used.
+  
+  Closes [#1734](https://github.com/EDCD/EDMarketConnector/issues/1734).
+* Inara: Only warn about Legacy data if sending is enabled in Settings > Inara.
+
+  Closes [#1730](https://github.com/EDCD/EDMarketConnector/issues/1730).
+* Inara: Handling of some events has had a sanity check added so that the
+  Inara API doesn't complain about empty strings being sent.  In these cases
+  the event will simply not be sent.
+
+  Closes [#1732](https://github.com/EDCD/EDMarketConnector/issues/1732).
+
+* EDSM: EDSM has decided to accept only Live data on its API.  Thus, this
+  application will only attempt to send data for Live galaxy players.
+
+  If a Legacy galaxy player has the Settings > EDSM > "Send flight log and
+  Cmdr status to EDSM" option active then they will receive an error about
+  this at most once every 5 minutes.  Disabling that option will prevent the
+  warning.
+
+Plugin Developers
+---
+* PLUGINS.md has been updated to make it clear that the only use of imports
+  from the `config` module are for setting/getting/removing a plugin's own
+  configuration, or detecting application shutdown in progress.
+* PLUGINS.md has also been updated to add a note about how the `data` passed
+  to a plugin `cmdr_data()` is, strictly speaking, an instance of `CAPIData`,
+  which is an extension of `UserDict`.  It has some extra properties on it,
+  **but these are for internal use only and no plugin should rely on them**.
+* As noted above, implementing CAPI data for Legacy players will likely entail
+  an additional function in the API provided to plugins.  See
+  [#1728](https://github.com/EDCD/EDMarketConnector/issues/1728) for discussion
+  about this.
+
+---
+
 Release 5.6.0
 ===
-
-Tha major reason for this release is to address the Live versus Legacy galaxy
+The major reason for this release is to address the Live versus Legacy galaxy
 split [coming in Update 14 of the game](https://www.elitedangerous.com/news/elite-dangerous-update-14-and-beyond-live-and-legacy-modes).
 See the section "Update 14 and the Galaxy Split" below for how this might
 impact you.
