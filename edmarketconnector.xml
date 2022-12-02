@@ -36,13 +36,99 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 5.6.0</title>
+			<title>Release 5.6.1</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
 
 <p>We now test against, and package with, Python 3.10.8.</p>
 <p><strong>As a consequence of this we no longer support Windows 7.</strong><br>
+
+<h2>Release 5.6.1</h2>
+<p>This release addresses some minor bugs and annoyances with v5.6.0, especially
+for Legacy galaxy players.</p>
+<p>In general, at this early stage of the galaxy split, we prefer to continue to
+warn Legacy users who have 'send data' options active for sites that only
+accept Live data.  In the future this might be reviewed and such warnings
+removed such that the functionality <em>fails silently</em>.  This might be of use
+to users who actively play in both galaxies.</p>
+<ul>
+<li>
+<p>CAPI queries will now <strong>only be attempted for Live galaxy players</strong>  This is
+a stop-gap whilst the functionality is implemented for Legacy galaxy players.
+Doing so prevents using Live galaxy data whilst playing Legacy galaxy, which
+would be increasingly wrong and misleading.</p>
+<ol>
+<li>'Automatic update on docking' will do nothing for Legacy players.</li>
+<li>Pressing the 'Update' button whilst playing Legacy will result in a status
+line message "CAPI for Legacy not yet supported", and otherwise achieve
+nothing.  <strong>The only function of this button is to query CAPI data and
+pass it to plugins, which does <em>not</em> include Inara and EDSM</strong>.</li>
+<li>A Legacy player trying to use "File" &gt; "Status" will get the message
+"Status: No CAPI data yet" due to depending on CAPI data.</li>
+</ol>
+<p>It is hoped to implement CAPI data retrieval and use for Legacy players soon,
+although this will likely entail extending the plugins API to include a new
+function specifically for this.  Thus only updated plugins would support
+this.</p>
+</li>
+<li>
+<p>EDDN: Where data has been sourced from the CAPI this application now sends
+a header-&gt;gameversion in the format <code>"CAPI-(Live|Legacy)-&lt;endpoint"</code> as per
+<a href="https://github.com/EDCD/EDDN/blob/live/docs/Developers.md#gameversions-and-gamebuild">the updated documentation</a>.</p>
+<ol>
+<li>
+<p>As <em>this</em> version only queries CAPI for Live players that will only be
+<code>"CAPI-Live-&lt;endpoint&gt;"</code> for the time being.</p>
+</li>
+<li>
+<p>If, somehow, the CAPI host queried matches neither the
+current Live host, the Legacy host, nor the past beta host, you will see
+<code>"CAPI-UNKNOWN-&lt;endpoint&gt;"</code>.</p>
+</li>
+<li>
+<p>As that statement implies, this application will also signal 'Live' if
+<code>pts-companion.orerve.net</code> has been used, due to detecting an alpha or beta
+version of the game.  However, in that case the <code>/test</code> schemas will be used.</p>
+</li>
+</ol>
+<p>Closes <a href="https://github.com/EDCD/EDMarketConnector/issues/1734">#1734</a>.</p>
+</li>
+<li>
+<p>Inara: Only warn about Legacy data if sending is enabled in Settings &gt; Inara.</p>
+<p>Closes <a href="https://github.com/EDCD/EDMarketConnector/issues/1730">#1730</a>.</p>
+</li>
+<li>
+<p>Inara: Handling of some events has had a sanity check added so that the
+Inara API doesn't complain about empty strings being sent.  In these cases
+the event will simply not be sent.</p>
+<p>Closes <a href="https://github.com/EDCD/EDMarketConnector/issues/1732">#1732</a>.</p>
+</li>
+<li>
+<p>EDSM: EDSM has decided to accept only Live data on its API.  Thus, this
+application will only attempt to send data for Live galaxy players.</p>
+<p>If a Legacy galaxy player has the Settings &gt; EDSM &gt; "Send flight log and
+Cmdr status to EDSM" option active then they will receive an error about
+this at most once every 5 minutes.  Disabling that option will prevent the
+warning.</p>
+</li>
+</ul>
+<h2><a id="user-content-plugin-developers" class="anchor" aria-hidden="true" href="#plugin-developers"><span aria-hidden="true" class="octicon octicon-link"></span></a>Plugin Developers</h2>
+<ul>
+<li>PLUGINS.md has been updated to make it clear that the only use of imports
+from the <code>config</code> module are for setting/getting/removing a plugin's own
+configuration, or detecting application shutdown in progress.</li>
+<li>PLUGINS.md has also been updated to add a note about how the <code>data</code> passed
+to a plugin <code>cmdr_data()</code> is, strictly speaking, an instance of <code>CAPIData</code>,
+which is an extension of <code>UserDict</code>.  It has some extra properties on it,
+<strong>but these are for internal use only and no plugin should rely on them</strong>.</li>
+<li>As noted above, implementing CAPI data for Legacy players will likely entail
+an additional function in the API provided to plugins.  See
+<a href="https://github.com/EDCD/EDMarketConnector/issues/1728">#1728</a> for discussion
+about this.</li>
+</ul>
+<hr>
+
 
 <h2>Release 5.6.0</h2>
 <p>Tha major reason for this release is to address the Live versus Legacy galaxy
@@ -1575,10 +1661,10 @@ about this:
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.6.0/EDMarketConnector_win_5.6.0.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.6.1/EDMarketConnector_win_5.6.1.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="5.6.0"
+				sparkle:version="5.6.1"
 				length="17162240"
 				type="application/octet-stream"
 			/>
