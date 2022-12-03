@@ -7,8 +7,9 @@ import os
 import sys
 import tkinter as tk
 from builtins import object, str
-from typing import Optional
+from typing import Any, Callable, List, Mapping, MutableMapping, Optional, Tuple
 
+import companion
 import myNotebook as nb  # noqa: N813
 from config import config
 from EDMCLogging import get_main_logger
@@ -19,17 +20,25 @@ logger = get_main_logger()
 PLUGINS = []
 PLUGINS_not_py3 = []
 
+
 # For asynchronous error display
-last_error = {
-    'msg':  None,
-    'root': None,
-}
+class LastError:
+    """Holds the last plugin error."""
+
+    msg: Optional[str]
+    root: tk.Frame
+
+    def __init__(self) -> None:
+        self.msg = None
+
+
+last_error = LastError()
 
 
 class Plugin(object):
     """An EDMC plugin."""
 
-    def __init__(self, name: str, loadfile: str, plugin_logger: Optional[logging.Logger]):
+    def __init__(self, name: str, loadfile: Optional[str], plugin_logger: Optional[logging.Logger]):
         """
         Load a single plugin.
 
@@ -38,10 +47,10 @@ class Plugin(object):
         :param plugin_logger: The logging instance for this plugin to use.
         :raises Exception: Typically ImportError or OSError
         """
-        self.name = name  # Display name.
-        self.folder = name  # basename of plugin folder. None for internal plugins.
+        self.name: str = name  # Display name.
+        self.folder: Optional[str] = name  # basename of plugin folder. None for internal plugins.
         self.module = None  # None for disabled plugins.
-        self.logger = plugin_logger
+        self.logger: Optional[logging.Logger] = plugin_logger
 
         if loadfile:
             logger.info(f'loading plugin "{name.replace(".", "_")}" from "{loadfile}"')
@@ -68,7 +77,7 @@ class Plugin(object):
         else:
             logger.info(f'plugin {name} disabled')
 
-    def _get_func(self, funcname):
+    def _get_func(self, funcname: str) -> Optional[Callable]:
         """
         Get a function from a plugin.
 
@@ -77,7 +86,7 @@ class Plugin(object):
         """
         return getattr(self.module, funcname, None)
 
-    def get_app(self, parent):
+    def get_app(self, parent: tk.Frame) -> Optional[tk.Frame]:
         """
         If the plugin provides mainwindow content create and return it.
 
@@ -109,7 +118,7 @@ class Plugin(object):
 
         return None
 
-    def get_prefs(self, parent, cmdr, is_beta):
+    def get_prefs(self, parent: tk.Frame, cmdr: str, is_beta: bool) -> Optional[tk.Frame]:
         """
         If the plugin provides a prefs frame, create and return it.
 
@@ -131,9 +140,9 @@ class Plugin(object):
         return None
 
 
-def load_plugins(master):  # noqa: CCR001
+def load_plugins(master: tk.Frame) -> None:  # noqa: CCR001
     """Find and load all plugins."""
-    last_error['root'] = master
+    last_error.root = master
 
     internal = []
     for name in sorted(os.listdir(config.internal_plugin_dir_path)):
@@ -177,7 +186,7 @@ def load_plugins(master):  # noqa: CCR001
     PLUGINS.extend(sorted(found, key=lambda p: operator.attrgetter('name')(p).lower()))
 
 
-def provides(fn_name):
+def provides(fn_name: str) -> List[str]:
     """
     Find plugins that provide a function.
 
@@ -188,7 +197,9 @@ def provides(fn_name):
     return [p.name for p in PLUGINS if p._get_func(fn_name)]
 
 
-def invoke(plugin_name, fallback, fn_name, *args):
+def invoke(
+    plugin_name: str, fallback: str, fn_name: str, *args: Tuple
+) -> Optional[str]:
     """
     Invoke a function on a named plugin.
 
@@ -200,15 +211,21 @@ def invoke(plugin_name, fallback, fn_name, *args):
     .. versionadded:: 3.0.2
     """
     for plugin in PLUGINS:
-        if plugin.name == plugin_name and plugin._get_func(fn_name):
-            return plugin._get_func(fn_name)(*args)
+        if plugin.name == plugin_name:
+            plugin_func = plugin._get_func(fn_name)
+            if plugin_func is not None:
+                return plugin_func(*args)
+
     for plugin in PLUGINS:
         if plugin.name == fallback:
-            assert plugin._get_func(fn_name), plugin.name  # fallback plugin should provide the function
-            return plugin._get_func(fn_name)(*args)
+            plugin_func = plugin._get_func(fn_name)
+            assert plugin_func, plugin.name  # fallback plugin should provide the function
+            return plugin_func(*args)
+
+    return None
 
 
-def notify_stop():
+def notify_stop() -> Optional[str]:
     """
     Notify each plugin that the program is closing.
 
@@ -231,7 +248,7 @@ def notify_stop():
     return error
 
 
-def notify_prefs_cmdr_changed(cmdr, is_beta):
+def notify_prefs_cmdr_changed(cmdr: str, is_beta: bool) -> None:
     """
     Notify plugins that the Cmdr was changed while the settings dialog is open.
 
@@ -248,7 +265,7 @@ def notify_prefs_cmdr_changed(cmdr, is_beta):
                 logger.exception(f'Plugin "{plugin.name}" failed')
 
 
-def notify_prefs_changed(cmdr, is_beta):
+def notify_prefs_changed(cmdr: str, is_beta: bool) -> None:
     """
     Notify plugins that the settings dialog has been closed.
 
@@ -267,7 +284,11 @@ def notify_prefs_changed(cmdr, is_beta):
                 logger.exception(f'Plugin "{plugin.name}" failed')
 
 
-def notify_journal_entry(cmdr, is_beta, system, station, entry, state):
+def notify_journal_entry(
+    cmdr: str, is_beta: bool, system: str, station: str,
+    entry: MutableMapping[str, Any],
+    state: Mapping[str, Any]
+) -> Optional[str]:
     """
     Send a journal entry to each plugin.
 
@@ -295,7 +316,11 @@ def notify_journal_entry(cmdr, is_beta, system, station, entry, state):
     return error
 
 
-def notify_journal_entry_cqc(cmdr, is_beta, entry, state):
+def notify_journal_entry_cqc(
+    cmdr: str, is_beta: bool,
+    entry: MutableMapping[str, Any],
+    state: Mapping[str, Any]
+) -> Optional[str]:
     """
     Send an in-CQC journal entry to each plugin.
 
@@ -320,7 +345,10 @@ def notify_journal_entry_cqc(cmdr, is_beta, entry, state):
     return error
 
 
-def notify_dashboard_entry(cmdr, is_beta, entry):
+def notify_dashboard_entry(
+    cmdr: str, is_beta: bool,
+    entry: MutableMapping[str, Any],
+) -> Optional[str]:
     """
     Send a status entry to each plugin.
 
@@ -342,7 +370,10 @@ def notify_dashboard_entry(cmdr, is_beta, entry):
     return error
 
 
-def notify_newdata(data, is_beta):
+def notify_newdata(
+    data: companion.CAPIData,
+    is_beta: bool
+) -> Optional[str]:
     """
     Send the latest EDMC data from the FD servers to each plugin.
 
@@ -362,7 +393,7 @@ def notify_newdata(data, is_beta):
     return error
 
 
-def show_error(err):
+def show_error(err: str) -> None:
     """
     Display an error message in the status line of the main window.
 
@@ -374,6 +405,6 @@ def show_error(err):
         logger.info(f'Called during shutdown: "{str(err)}"')
         return
 
-    if err and last_error['root']:
-        last_error['msg'] = str(err)
-        last_error['root'].event_generate('<<PluginError>>', when="tail")
+    if err and last_error.root:
+        last_error.msg = str(err)
+        last_error.root.event_generate('<<PluginError>>', when="tail")
