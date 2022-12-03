@@ -1,24 +1,35 @@
-# Export list of ships as CSV
+"""Export list of ships as CSV."""
+import csv
 
-import time
-
-from config import config
+import companion
 from edmc_data import ship_name_map
 
 
-def export(data, filename):
+def export(data: companion.CAPIData, filename: str) -> None:
+    """
+    Write shipyard data in Companion API JSON format.
 
-    querytime = config.get_int('querytime', default=int(time.time()))
-
+    :param data: The CAPI data.
+    :param filename: Optional filename to write to.
+    :return:
+    """
     assert data['lastSystem'].get('name')
     assert data['lastStarport'].get('name')
     assert data['lastStarport'].get('ships')
 
-    header = 'System,Station,Ship,FDevID,Date\n'
-    rowheader = '%s,%s' % (data['lastSystem']['name'], data['lastStarport']['name'])
+    with open(filename, 'w', newline='') as f:
+        c = csv.writer(f)
+        c.writerow(('System', 'Station', 'Ship', 'FDevID', 'Date'))
 
-    h = open(filename, 'wt')
-    h.write(header)
-    for (name,fdevid) in [(ship_name_map.get(ship['name'].lower(), ship['name']), ship['id']) for ship in list((data['lastStarport']['ships'].get('shipyard_list') or {}).values()) + data['lastStarport']['ships'].get('unavailable_list')]:
-        h.write('%s,%s,%s,%s\n' % (rowheader, name, fdevid, data['timestamp']))
-    h.close()
+        for (name, fdevid) in [
+            (
+                ship_name_map.get(ship['name'].lower(), ship['name']),
+                ship['id']
+            ) for ship in list(
+                (data['lastStarport']['ships'].get('shipyard_list') or {}).values()
+            ) + data['lastStarport']['ships'].get('unavailable_list')
+        ]:
+            c.writerow((
+                data['lastSystem']['name'], data['lastStarport']['name'],
+                name, fdevid, data['timestamp']
+            ))
