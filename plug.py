@@ -62,7 +62,7 @@ class Plugin(object):
                     PLUGINS_not_py3.append(self)
                 else:
                     logger.error(f'plugin {name} has no plugin_start3() function')
-            except Exception as e:
+            except Exception:
                 logger.exception(f': Failed for Plugin "{name}"')
                 raise
         else:
@@ -70,7 +70,8 @@ class Plugin(object):
 
     def _get_func(self, funcname):
         """
-        Get a function from a plugin
+        Get a function from a plugin.
+
         :param funcname:
         :returns: The function, or None if it isn't implemented.
         """
@@ -79,6 +80,7 @@ class Plugin(object):
     def get_app(self, parent):
         """
         If the plugin provides mainwindow content create and return it.
+
         :param parent: the parent frame for this entry.
         :returns: None, a tk Widget, or a pair of tk.Widgets
         """
@@ -88,14 +90,23 @@ class Plugin(object):
                 appitem = plugin_app(parent)
                 if appitem is None:
                     return None
+                
                 elif isinstance(appitem, tuple):
-                    if len(appitem) != 2 or not isinstance(appitem[0], tk.Widget) or not isinstance(appitem[1], tk.Widget):
+                    if (
+                        len(appitem) != 2
+                        or not isinstance(appitem[0], tk.Widget)
+                        or not isinstance(appitem[1], tk.Widget)
+                    ):
                         raise AssertionError
+
                 elif not isinstance(appitem, tk.Widget):
                     raise AssertionError
+
                 return appitem
+
             except Exception as e:
                 logger.exception(f'Failed for Plugin "{self.name}"')
+
         return None
 
     def get_prefs(self, parent, cmdr, is_beta):
