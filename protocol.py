@@ -107,11 +107,12 @@ if sys.platform == 'darwin' and getattr(sys, 'frozen', False):  # noqa: C901 # i
 
         def handleEvent_withReplyEvent_(self, event, replyEvent) -> None:  # noqa: N802 N803 # Required to override
             """Actual event handling from NSAppleEventManager."""
-            protocolhandler.lasturl = urllib.parse.unquote(  # type: ignore # Its going to be a DPH in this code
+            protocolhandler.lasturl = urllib.parse.unquote(  # noqa: F821: type: ignore # Its going to be a DPH in
+                # this code
                 event.paramDescriptorForKeyword_(keyDirectObject).stringValue()
             ).strip()
 
-            protocolhandler.master.after(DarwinProtocolHandler.POLL, protocolhandler.poll)  # type: ignore
+            protocolhandler.master.after(DarwinProtocolHandler.POLL, protocolhandler.poll)  # noqa: F821: type: ignore
 
 
 elif (config.auth_force_edmc_protocol
@@ -389,7 +390,7 @@ else:  # Linux / Run from source
             url = urllib.parse.unquote(self.path)
             if url.startswith('/auth'):
                 logger.debug('Request starts with /auth, sending to protocolhandler.event()')
-                protocolhandler.event(url)
+                protocolhandler.event(url)  # noqa: F821
                 self.send_response(200)
                 return True
             else:
