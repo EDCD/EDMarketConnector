@@ -1,6 +1,4 @@
-"""
-Plugin hooks for EDMC - Ian Norton, Jonathan Harris
-"""
+"""Plugin API."""
 import copy
 import importlib
 import logging
@@ -29,15 +27,17 @@ last_error = {
 
 
 class Plugin(object):
+    """An EDMC plugin."""
 
     def __init__(self, name: str, loadfile: str, plugin_logger: Optional[logging.Logger]):
         """
-        Load a single plugin
-        :param name: module name
-        :param loadfile: the main .py file
+        Load a single plugin.
+
+        :param name: Base name of the file being loaded from.
+        :param loadfile: Full path/filename of the plugin.
+        :param plugin_logger: The logging instance for this plugin to use.
         :raises Exception: Typically ImportError or OSError
         """
-
         self.name = name  # Display name.
         self.folder = name  # basename of plugin folder. None for internal plugins.
         self.module = None  # None for disabled plugins.
@@ -46,9 +46,13 @@ class Plugin(object):
         if loadfile:
             logger.info(f'loading plugin "{name.replace(".", "_")}" from "{loadfile}"')
             try:
-                module = importlib.machinery.SourceFileLoader('plugin_{}'.format(
-                    name.encode(encoding='ascii', errors='replace').decode('utf-8').replace('.', '_')),
-                    loadfile).load_module()
+                filename = 'plugin_'
+                filename += name.encode(encoding='ascii', errors='replace').decode('utf-8').replace('.', '_')
+                module = importlib.machinery.SourceFileLoader(
+                    filename,
+                    loadfile
+                ).load_module()
+
                 if getattr(module, 'plugin_start3', None):
                     newname = module.plugin_start3(os.path.dirname(loadfile))
                     self.name = newname and str(newname) or name
