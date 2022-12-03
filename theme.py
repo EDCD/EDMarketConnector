@@ -1,20 +1,20 @@
-#
-# Theme support
-#
-# Because of various ttk limitations this app is an unholy mix of Tk and ttk widgets.
-# So can't use ttk's theme support. So have to change colors manually.
-#
+"""
+Theme support.
+
+Because of various ttk limitations this app is an unholy mix of Tk and ttk widgets.
+So can't use ttk's theme support. So have to change colors manually.
+"""
 
 import os
 import sys
 import tkinter as tk
 from os.path import join
-from tkinter import font as tkFont
+from tkinter import font as tk_font
 from tkinter import ttk
 
 from config import config
-from ttkHyperlinkLabel import HyperlinkLabel
 from EDMCLogging import get_main_logger
+from ttkHyperlinkLabel import HyperlinkLabel
 
 logger = get_main_logger()
 
@@ -65,6 +65,8 @@ elif sys.platform == 'linux':
     MWM_DECOR_MAXIMIZE = 1 << 6
 
     class MotifWmHints(Structure):
+        """MotifWmHints structure."""
+
         _fields_ = [
             ('flags', c_ulong),
             ('functions', c_ulong),
@@ -99,16 +101,19 @@ elif sys.platform == 'linux':
                 raise Exception("Can't find your display, can't continue")
 
             motif_wm_hints_property = XInternAtom(dpy, b'_MOTIF_WM_HINTS', False)
-            motif_wm_hints_normal = MotifWmHints(MWM_HINTS_FUNCTIONS | MWM_HINTS_DECORATIONS,
-                                                 MWM_FUNC_RESIZE | MWM_FUNC_MOVE | MWM_FUNC_MINIMIZE | MWM_FUNC_CLOSE,
-                                                 MWM_DECOR_BORDER | MWM_DECOR_RESIZEH | MWM_DECOR_TITLE | MWM_DECOR_MENU | MWM_DECOR_MINIMIZE,
-                                                 0, 0)
+            motif_wm_hints_normal = MotifWmHints(
+                MWM_HINTS_FUNCTIONS | MWM_HINTS_DECORATIONS,
+                MWM_FUNC_RESIZE | MWM_FUNC_MOVE | MWM_FUNC_MINIMIZE | MWM_FUNC_CLOSE,
+                MWM_DECOR_BORDER | MWM_DECOR_RESIZEH | MWM_DECOR_TITLE | MWM_DECOR_MENU | MWM_DECOR_MINIMIZE,
+                0, 0
+            )
             motif_wm_hints_dark = MotifWmHints(MWM_HINTS_FUNCTIONS | MWM_HINTS_DECORATIONS,
                                                MWM_FUNC_RESIZE | MWM_FUNC_MOVE | MWM_FUNC_MINIMIZE | MWM_FUNC_CLOSE,
                                                0, 0, 0)
-        except:
+        except Exception:
             if __debug__:
                 print_exc()
+
             dpy = None
 
 
@@ -124,8 +129,9 @@ class _Theme(object):
         self.default_ui_scale = None  # None == not yet known
         self.startup_ui_scale = None
 
-    def register(self, widget):
-        # Note widget and children for later application of a theme. Note if the widget has explicit fg or bg attributes.
+    def register(self, widget):  # noqa: CCR001, C901
+        # Note widget and children for later application of a theme. Note if
+        # the widget has explicit fg or bg attributes.
         assert isinstance(widget, tk.Widget) or isinstance(widget, tk.BitmapImage), widget
         if not self.defaults:
             # Can't initialise this til window is created       # Windows, MacOS
@@ -160,7 +166,10 @@ class _Theme(object):
                 if 'font' in widget.keys() and str(widget['font']) not in ['', self.defaults['entryfont']]:
                     attribs.add('font')
             elif isinstance(widget, tk.Frame) or isinstance(widget, ttk.Frame) or isinstance(widget, tk.Canvas):
-                if ('background' in widget.keys() or isinstance(widget, tk.Canvas)) and widget['background'] not in ['', self.defaults['frame']]:
+                if (
+                    ('background' in widget.keys() or isinstance(widget, tk.Canvas))
+                    and widget['background'] not in ['', self.defaults['frame']]
+                ):
                     attribs.add('bg')
             elif isinstance(widget, HyperlinkLabel):
                 pass    # Hack - HyperlinkLabel changes based on state, so skip
@@ -245,12 +254,13 @@ class _Theme(object):
                 'foreground': config.get_str('dark_text'),
                 'activebackground': config.get_str('dark_text'),
                 'activeforeground': 'grey4',
-                'disabledforeground': '#%02x%02x%02x' % (int(r/384), int(g/384), int(b/384)),
+                'disabledforeground': f'#{int(r/384):02x}{int(g/384):02x}{int(b/384):02x}',
                 'highlight': config.get_str('dark_highlight'),
-                # Font only supports Latin 1 / Supplement / Extended, and a few General Punctuation and Mathematical Operators
+                # Font only supports Latin 1 / Supplement / Extended, and a
+                # few General Punctuation and Mathematical Operators
                 # LANG: Label for commander name in main window
                 'font': (theme > 1 and not 0x250 < ord(_('Cmdr')[0]) < 0x3000 and
-                         tkFont.Font(family='Euro Caps', size=10, weight=tkFont.NORMAL) or
+                         tk_font.Font(family='Euro Caps', size=10, weight=tk_font.NORMAL) or
                          'TkDefaultFont'),
             }
         else:
@@ -282,9 +292,11 @@ class _Theme(object):
                 self._update_widget(child)
 
     # Apply current theme to a single widget
-    def _update_widget(self, widget):
-        assert widget in self.widgets, '%s %s "%s"' % (
-            widget.winfo_class(), widget, 'text' in widget.keys() and widget['text'])
+    def _update_widget(self, widget):  # noqa: CCR001, C901
+        if widget not in self.widgets:
+            assert_str = f'{widget.winfo_class()} {widget} "{"text" in widget.keys() and widget["text"]}"'
+            raise AssertionError(assert_str)
+
         attribs = self.widgets.get(widget, [])
 
         try:
@@ -348,7 +360,7 @@ class _Theme(object):
 
     # Apply configured theme
 
-    def apply(self, root):
+    def apply(self, root):  # noqa: CCR001
 
         theme = config.get_int('theme')
         self._colors(root, theme)
@@ -390,14 +402,14 @@ class _Theme(object):
                 window.setAppearance_(appearance)
 
         elif sys.platform == 'win32':
-            GWL_STYLE = -16
-            WS_MAXIMIZEBOX = 0x00010000
+            GWL_STYLE = -16  # noqa: N806 # ctypes
+            WS_MAXIMIZEBOX = 0x00010000  # noqa: N806 # ctypes
             # tk8.5.9/win/tkWinWm.c:342
-            GWL_EXSTYLE = -20
-            WS_EX_APPWINDOW = 0x00040000
-            WS_EX_LAYERED = 0x00080000
-            GetWindowLongW = ctypes.windll.user32.GetWindowLongW
-            SetWindowLongW = ctypes.windll.user32.SetWindowLongW
+            GWL_EXSTYLE = -20  # noqa: N806 # ctypes
+            WS_EX_APPWINDOW = 0x00040000  # noqa: N806 # ctypes
+            WS_EX_LAYERED = 0x00080000  # noqa: N806 # ctypes
+            GetWindowLongW = ctypes.windll.user32.GetWindowLongW  # noqa: N806 # ctypes
+            SetWindowLongW = ctypes.windll.user32.SetWindowLongW  # noqa: N806 # ctypes
 
             root.overrideredirect(theme and 1 or 0)
             root.attributes("-transparentcolor", theme > 1 and 'grey4' or '')
