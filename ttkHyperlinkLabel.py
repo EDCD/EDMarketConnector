@@ -19,19 +19,22 @@ import tkinter as tk
 import webbrowser
 from tkinter import font as tk_font
 from tkinter import ttk
+from typing import TYPE_CHECKING, Any, Optional
 
 if sys.platform == 'win32':
     import subprocess
     from winreg import HKEY_CLASSES_ROOT, HKEY_CURRENT_USER, CloseKey, OpenKeyEx, QueryValueEx
 
-# A clickable ttk Label
-#
+if TYPE_CHECKING:
+    def _(x: str) -> str: ...
 
 
-class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label, object):
+# FIXME: Split this into multi-file module to separate the platforms
+class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label, object):  # type: ignore
     """Clickable label for HTTP links."""
 
-    def __init__(self, master=None, **kw):
+    # NB: do **NOT** try `**kw: Dict`, it causes more trouble than it's worth.
+    def __init__(self, master: Optional[tk.Tk] = None, **kw) -> None:
         self.url = 'url' in kw and kw.pop('url') or None
         self.popup_copy = kw.pop('popup_copy', False)
         self.underline = kw.pop('underline', None)  # override ttk.Label's underline
@@ -44,8 +47,9 @@ class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label, object)
             kw['background'] = kw.pop('background', 'systemDialogBackgroundActive')
             kw['anchor'] = kw.pop('anchor', tk.W)  # like ttk.Label
             tk.Label.__init__(self, master, **kw)
+
         else:
-            ttk.Label.__init__(self, master, **kw)
+            ttk.Label.__init__(self, master, **kw)  # type: ignore
 
         self.bind('<Button-1>', self._click)
 
@@ -62,7 +66,10 @@ class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label, object)
                        text=kw.get('text'),
                        font=kw.get('font', ttk.Style().lookup('TLabel', 'font')))
 
-    def configure(self, cnf=None, **kw):  # noqa: CCR001
+    # NB: do **NOT** try `**kw: Dict`, it causes more trouble than it's worth.
+    def configure(  # noqa: CCR001
+        self, cnf: dict[str, Any] | None = None, **kw
+    ) -> dict[str, tuple[str, str, str, Any, Any]] | None:
         """Change cursor and appearance depending on state and text."""
         # This class' state
         for thing in ['url', 'popup_copy', 'underline']:
@@ -95,9 +102,9 @@ class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label, object)
                 kw['cursor'] = (sys.platform == 'darwin' and 'notallowed') or (
                     sys.platform == 'win32' and 'no') or 'circle'
 
-        super(HyperlinkLabel, self).configure(cnf, **kw)
+        return super(HyperlinkLabel, self).configure(cnf, **kw)
 
-    def __setitem__(self, key, value) -> None:
+    def __setitem__(self, key: str, value) -> None:
         """
         Allow for dict member style setting of options.
 
@@ -106,22 +113,22 @@ class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label, object)
         """
         self.configure(None, **{key: value})
 
-    def _enter(self, event):
+    def _enter(self, event: tk.Event) -> None:
         if self.url and self.underline is not False and str(self['state']) != tk.DISABLED:
             super(HyperlinkLabel, self).configure(font=self.font_u)
 
-    def _leave(self, event):
+    def _leave(self, event: tk.Event) -> None:
         if not self.underline:
             super(HyperlinkLabel, self).configure(font=self.font_n)
 
-    def _click(self, event):
+    def _click(self, event: tk.Event) -> None:
         if self.url and self['text'] and str(self['state']) != tk.DISABLED:
             url = self.url(self['text']) if callable(self.url) else self.url
             if url:
                 self._leave(event)  # Remove underline before we change window to browser
                 openurl(url)
 
-    def _contextmenu(self, event):
+    def _contextmenu(self, event: tk.Event) -> None:
         if self['text'] and (self.popup_copy(self['text']) if callable(self.popup_copy) else self.popup_copy):
             self.menu.post(sys.platform == 'darwin' and event.x_root + 1 or event.x_root, event.y_root)
 
@@ -131,7 +138,7 @@ class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label, object)
         self.clipboard_append(self['text'])
 
 
-def openurl(url) -> None:  # noqa: CCR001
+def openurl(url: str) -> None:  # noqa: CCR001
     """
     Open the given URL in appropriate browser.
 
@@ -161,7 +168,7 @@ def openurl(url) -> None:  # noqa: CCR001
         if cls:
             try:
                 hkey = OpenKeyEx(HKEY_CLASSES_ROOT, rf'{cls}\shell\open\command')
-                (value, typ) = QueryValueEx(hkey, None)
+                (value, typ) = QueryValueEx(hkey, '')
                 CloseKey(hkey)
                 if 'iexplore' not in value.lower():
                     if '%1' in value:
