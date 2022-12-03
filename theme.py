@@ -11,12 +11,16 @@ import tkinter as tk
 from os.path import join
 from tkinter import font as tk_font
 from tkinter import ttk
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Set, Tuple
 
 from config import config
 from EDMCLogging import get_main_logger
 from ttkHyperlinkLabel import HyperlinkLabel
 
 logger = get_main_logger()
+
+if TYPE_CHECKING:
+    def _(x: str) -> str: ...
 
 if __debug__:
     from traceback import print_exc
@@ -29,7 +33,7 @@ if sys.platform == 'win32':
     import ctypes
     from ctypes.wintypes import DWORD, LPCVOID, LPCWSTR
     AddFontResourceEx = ctypes.windll.gdi32.AddFontResourceExW
-    AddFontResourceEx.restypes = [LPCWSTR, DWORD, LPCVOID]
+    AddFontResourceEx.restypes = [LPCWSTR, DWORD, LPCVOID]  # type: ignore
     FR_PRIVATE = 0x10
     FR_NOT_ENUM = 0x20
     AddFontResourceEx(join(config.respath, u'EUROCAPS.TTF'), FR_PRIVATE, 0)
@@ -119,17 +123,17 @@ elif sys.platform == 'linux':
 
 class _Theme(object):
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.active = None  # Starts out with no theme
-        self.minwidth = None
-        self.widgets = {}
-        self.widgets_pair = []
-        self.defaults = {}
-        self.current = {}
+        self.minwidth: Optional[int] = None
+        self.widgets: Dict[tk.Widget, Set] = {}
+        self.widgets_pair: List = []
+        self.defaults: Dict = {}
+        self.current: Dict = {}
         self.default_ui_scale = None  # None == not yet known
         self.startup_ui_scale = None
 
-    def register(self, widget):  # noqa: CCR001, C901
+    def register(self, widget: tk.Widget) -> None:  # noqa: CCR001, C901
         # Note widget and children for later application of a theme. Note if
         # the widget has explicit fg or bg attributes.
         assert isinstance(widget, tk.Widget) or isinstance(widget, tk.BitmapImage), widget
@@ -193,15 +197,17 @@ class _Theme(object):
             for child in widget.winfo_children():
                 self.register(child)
 
-    def register_alternate(self, pair, gridopts):
+    def register_alternate(self, pair: Tuple, gridopts: Dict) -> None:
         self.widgets_pair.append((pair, gridopts))
 
-    def button_bind(self, widget, command, image=None):
+    def button_bind(
+        self, widget: tk.Widget, command: Callable, image: Optional[tk.BitmapImage] = None
+    ) -> None:
         widget.bind('<Button-1>', command)
         widget.bind('<Enter>', lambda e: self._enter(e, image))
         widget.bind('<Leave>', lambda e: self._leave(e, image))
 
-    def _enter(self, event, image):
+    def _enter(self, event: tk.Event, image: Optional[tk.BitmapImage]) -> None:
         widget = event.widget
         if widget and widget['state'] != tk.DISABLED:
             try:
@@ -218,7 +224,7 @@ class _Theme(object):
                 except Exception:
                     logger.exception(f'Failure configuring image: {image=}')
 
-    def _leave(self, event, image):
+    def _leave(self, event: tk.Event, image: Optional[tk.BitmapImage]) -> None:
         widget = event.widget
         if widget and widget['state'] != tk.DISABLED:
             try:
@@ -235,7 +241,7 @@ class _Theme(object):
                     logger.exception(f'Failure configuring image: {image=}')
 
     # Set up colors
-    def _colors(self, root, theme):
+    def _colors(self, root: tk.Tk, theme: int) -> None:
         style = ttk.Style()
         if sys.platform == 'linux':
             style.theme_use('clam')
@@ -281,10 +287,11 @@ class _Theme(object):
 
     # Apply current theme to a widget and its children, and register it for future updates
 
-    def update(self, widget):
+    def update(self, widget: tk.Widget) -> None:
         assert isinstance(widget, tk.Widget) or isinstance(widget, tk.BitmapImage), widget
         if not self.current:
             return  # No need to call this for widgets created in plugin_app()
+
         self.register(widget)
         self._update_widget(widget)
         if isinstance(widget, tk.Frame) or isinstance(widget, ttk.Frame):
@@ -292,67 +299,67 @@ class _Theme(object):
                 self._update_widget(child)
 
     # Apply current theme to a single widget
-    def _update_widget(self, widget):  # noqa: CCR001, C901
+    def _update_widget(self, widget: tk.Widget) -> None:  # noqa: CCR001, C901
         if widget not in self.widgets:
             assert_str = f'{widget.winfo_class()} {widget} "{"text" in widget.keys() and widget["text"]}"'
             raise AssertionError(assert_str)
 
-        attribs = self.widgets.get(widget, [])
+        attribs: Set = self.widgets.get(widget, set())
 
         try:
             if isinstance(widget, tk.BitmapImage):
                 # not a widget
                 if 'fg' not in attribs:
-                    widget.configure(foreground=self.current['foreground']),
+                    widget.configure(foreground=self.current['foreground']),  # type: ignore
 
                 if 'bg' not in attribs:
-                    widget.configure(background=self.current['background'])
+                    widget.configure(background=self.current['background'])  # type: ignore
 
             elif 'cursor' in widget.keys() and str(widget['cursor']) not in ['', 'arrow']:
                 # Hack - highlight widgets like HyperlinkLabel with a non-default cursor
                 if 'fg' not in attribs:
-                    widget.configure(foreground=self.current['highlight']),
+                    widget.configure(foreground=self.current['highlight']),  # type: ignore
                     if 'insertbackground' in widget.keys():  # tk.Entry
-                        widget.configure(insertbackground=self.current['foreground']),
+                        widget.configure(insertbackground=self.current['foreground']),  # type: ignore
 
                 if 'bg' not in attribs:
-                    widget.configure(background=self.current['background'])
+                    widget.configure(background=self.current['background'])  # type: ignore
                     if 'highlightbackground' in widget.keys():  # tk.Entry
-                        widget.configure(highlightbackground=self.current['background'])
+                        widget.configure(highlightbackground=self.current['background'])  # type: ignore
 
                 if 'font' not in attribs:
-                    widget.configure(font=self.current['font'])
+                    widget.configure(font=self.current['font'])  # type: ignore
 
             elif 'activeforeground' in widget.keys():
                 # e.g. tk.Button, tk.Label, tk.Menu
                 if 'fg' not in attribs:
-                    widget.configure(foreground=self.current['foreground'],
+                    widget.configure(foreground=self.current['foreground'],  # type: ignore
                                      activeforeground=self.current['activeforeground'],
                                      disabledforeground=self.current['disabledforeground'])
 
                 if 'bg' not in attribs:
-                    widget.configure(background=self.current['background'],
+                    widget.configure(background=self.current['background'],  # type: ignore
                                      activebackground=self.current['activebackground'])
                     if sys.platform == 'darwin' and isinstance(widget, tk.Button):
-                        widget.configure(highlightbackground=self.current['background'])
+                        widget.configure(highlightbackground=self.current['background'])  # type: ignore
 
                 if 'font' not in attribs:
-                    widget.configure(font=self.current['font'])
+                    widget.configure(font=self.current['font'])  # type: ignore
             elif 'foreground' in widget.keys():
                 # e.g. ttk.Label
                 if 'fg' not in attribs:
-                    widget.configure(foreground=self.current['foreground']),
+                    widget.configure(foreground=self.current['foreground']),  # type: ignore
 
                 if 'bg' not in attribs:
-                    widget.configure(background=self.current['background'])
+                    widget.configure(background=self.current['background'])  # type: ignore
 
                 if 'font' not in attribs:
-                    widget.configure(font=self.current['font'])
+                    widget.configure(font=self.current['font'])  # type: ignore
 
             elif 'background' in widget.keys() or isinstance(widget, tk.Canvas):
                 # e.g. Frame, Canvas
                 if 'bg' not in attribs:
-                    widget.configure(background=self.current['background'],
+                    widget.configure(background=self.current['background'],  # type: ignore
                                      highlightbackground=self.current['disabledforeground'])
 
         except Exception:
@@ -360,7 +367,7 @@ class _Theme(object):
 
     # Apply configured theme
 
-    def apply(self, root):  # noqa: CCR001
+    def apply(self, root: tk.Tk) -> None:  # noqa: CCR001
 
         theme = config.get_int('theme')
         self._colors(root, theme)
@@ -411,7 +418,7 @@ class _Theme(object):
             GetWindowLongW = ctypes.windll.user32.GetWindowLongW  # noqa: N806 # ctypes
             SetWindowLongW = ctypes.windll.user32.SetWindowLongW  # noqa: N806 # ctypes
 
-            root.overrideredirect(theme and 1 or 0)
+            root.overrideredirect(theme and True or False)
             root.attributes("-transparentcolor", theme > 1 and 'grey4' or '')
             root.withdraw()
             root.update_idletasks()  # Size and windows styles get recalculated here
