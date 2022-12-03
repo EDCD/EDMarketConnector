@@ -310,57 +310,58 @@ class _Theme(object):
             if isinstance(widget, tk.BitmapImage):
                 # not a widget
                 if 'fg' not in attribs:
-                    widget.configure(foreground=self.current['foreground']),  # type: ignore
+                    widget['foreground'] = self.current['foreground']
 
                 if 'bg' not in attribs:
-                    widget.configure(background=self.current['background'])  # type: ignore
+                    widget['background'] = self.current['background']
 
             elif 'cursor' in widget.keys() and str(widget['cursor']) not in ['', 'arrow']:
                 # Hack - highlight widgets like HyperlinkLabel with a non-default cursor
                 if 'fg' not in attribs:
-                    widget.configure(foreground=self.current['highlight']),  # type: ignore
+                    widget['foreground'] = self.current['highlight']
                     if 'insertbackground' in widget.keys():  # tk.Entry
-                        widget.configure(insertbackground=self.current['foreground']),  # type: ignore
+                        widget['insertbackground'] = self.current['foreground']
 
                 if 'bg' not in attribs:
-                    widget.configure(background=self.current['background'])  # type: ignore
+                    widget['background'] = self.current['background']
                     if 'highlightbackground' in widget.keys():  # tk.Entry
-                        widget.configure(highlightbackground=self.current['background'])  # type: ignore
+                        widget['highlightbackground'] = self.current['background']
 
                 if 'font' not in attribs:
-                    widget.configure(font=self.current['font'])  # type: ignore
+                    widget['font'] = self.current['font']
 
             elif 'activeforeground' in widget.keys():
                 # e.g. tk.Button, tk.Label, tk.Menu
                 if 'fg' not in attribs:
-                    widget.configure(foreground=self.current['foreground'],  # type: ignore
-                                     activeforeground=self.current['activeforeground'],
-                                     disabledforeground=self.current['disabledforeground'])
+                    widget['foreground'] = self.current['foreground']
+                    widget['activeforeground'] = self.current['activeforeground'],
+                    widget['disabledforeground'] = self.current['disabledforeground']
 
                 if 'bg' not in attribs:
-                    widget.configure(background=self.current['background'],  # type: ignore
-                                     activebackground=self.current['activebackground'])
+                    widget['background'] = self.current['background']
+                    widget['activebackground'] = self.current['activebackground']
                     if sys.platform == 'darwin' and isinstance(widget, tk.Button):
-                        widget.configure(highlightbackground=self.current['background'])  # type: ignore
+                        widget['highlightbackground'] = self.current['background']
 
                 if 'font' not in attribs:
-                    widget.configure(font=self.current['font'])  # type: ignore
+                    widget['font'] = self.current['font']
+
             elif 'foreground' in widget.keys():
                 # e.g. ttk.Label
                 if 'fg' not in attribs:
-                    widget.configure(foreground=self.current['foreground']),  # type: ignore
+                    widget['foreground'] = self.current['foreground']
 
                 if 'bg' not in attribs:
-                    widget.configure(background=self.current['background'])  # type: ignore
+                    widget['background'] = self.current['background']
 
                 if 'font' not in attribs:
-                    widget.configure(font=self.current['font'])  # type: ignore
+                    widget['font'] = self.current['font']
 
             elif 'background' in widget.keys() or isinstance(widget, tk.Canvas):
                 # e.g. Frame, Canvas
                 if 'bg' not in attribs:
-                    widget.configure(background=self.current['background'],  # type: ignore
-                                     highlightbackground=self.current['disabledforeground'])
+                    widget['background'] = self.current['background']
+                    widget['highlightbackground'] = self.current['disabledforeground']
 
         except Exception:
             logger.exception(f'Plugin widget issue ? {widget=}')
