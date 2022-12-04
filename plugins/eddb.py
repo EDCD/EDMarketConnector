@@ -41,7 +41,7 @@
 #
 # ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $#
 # ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $#
-import sys
+import tkinter
 from typing import TYPE_CHECKING, Any, Mapping, MutableMapping, Optional
 
 import requests
@@ -55,23 +55,30 @@ from config import config
 if TYPE_CHECKING:
     from tkinter import Tk
 
+    def _(x: str) -> str:
+        return x
 
 logger = EDMCLogging.get_main_logger()
 
 
-STATION_UNDOCKED: str = '×'  # "Station" name to display when not docked = U+00D7
+class This:
+    """Holds module globals."""
 
-this: Any = sys.modules[__name__]  # For holding module globals
+    STATION_UNDOCKED: str = '×'  # "Station" name to display when not docked = U+00D7
 
-# Main window clicks
-this.system_link: Optional[str] = None
-this.system: Optional[str] = None
-this.system_address: Optional[str] = None
-this.system_population: Optional[int] = None
-this.station_link: 'Optional[Tk]' = None
-this.station: Optional[str] = None
-this.station_marketid: Optional[int] = None
-this.on_foot = False
+    def __init__(self) -> None:
+        # Main window clicks
+        self.system_link: tkinter.Widget
+        self.system: Optional[str] = None
+        self.system_address: Optional[str] = None
+        self.system_population: Optional[int] = None
+        self.station_link: tkinter.Widget
+        self.station: Optional[str] = None
+        self.station_marketid: Optional[int] = None
+        self.on_foot = False
+
+
+this = This()
 
 
 def system_url(system_name: str) -> str:
@@ -130,7 +137,7 @@ def plugin_app(parent: 'Tk'):
     this.station = None
     this.station_marketid = None  # Frontier MarketID
     this.station_link = parent.children['station']  # station label in main window
-    this.station_link.configure(popup_copy=lambda x: x != STATION_UNDOCKED)
+    this.station_link['popup_copy'] = lambda x: x != this.STATION_UNDOCKED
 
 
 def prefs_changed(cmdr: str, is_beta: bool) -> None:
@@ -213,7 +220,7 @@ def journal_entry(  # noqa: CCR001
         text = this.station
         if not text:
             if this.system_population is not None and this.system_population > 0:
-                text = STATION_UNDOCKED
+                text = this.STATION_UNDOCKED
 
             else:
                 text = ''
@@ -255,7 +262,7 @@ def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:
             this.station_link['text'] = this.station
 
         elif data['lastStarport']['name'] and data['lastStarport']['name'] != "":
-            this.station_link['text'] = STATION_UNDOCKED
+            this.station_link['text'] = this.STATION_UNDOCKED
 
         else:
             this.station_link['text'] = ''
@@ -263,3 +270,5 @@ def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:
         # Do *NOT* set 'url' here, as it's set to a function that will call
         # through correctly.  We don't want a static string.
         this.station_link.update_idletasks()
+
+    return ''
