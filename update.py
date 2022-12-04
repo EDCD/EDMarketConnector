@@ -13,7 +13,7 @@ import semantic_version
 if TYPE_CHECKING:
     import tkinter as tk
 
-from config import appversion_nobuild, config, update_feed
+from config import appname, appversion_nobuild, config, update_feed
 from EDMCLogging import get_main_logger
 
 logger = get_main_logger()
@@ -216,7 +216,8 @@ class Updater(object):
         newversion = self.check_appcast()
 
         if newversion:
-            self.root.children['status']['text'] = newversion.title + ' is available'
+            status = self.root.nametowidget(f'.{appname.lower()}.status')
+            status['text'] = newversion.title + ' is available'
             self.root.update_idletasks()
 
     def close(self) -> None:
