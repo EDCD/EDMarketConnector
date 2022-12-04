@@ -29,7 +29,7 @@ KNOWN_KILLSWITCH_NAMES: list[str] = [
     'plugins.eddb.journal.event.$event'
 ]
 
-SPLIT_KNOWN_NAMES = list(map(lambda x: x.split('.'), KNOWN_KILLSWITCH_NAMES))
+SPLIT_KNOWN_NAMES = [x.split('.') for x in KNOWN_KILLSWITCH_NAMES]
 
 
 def match_exists(match: str) -> tuple[bool, str]:
