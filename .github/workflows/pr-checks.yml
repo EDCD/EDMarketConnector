@@ -87,13 +87,13 @@ jobs:
         # F82 - undefined checking
         git diff --name-only --diff-filter=d -z "refs/remotes/${BASE_REPO_OWNER}/${BASE_REF}" -- | \
           grep -E -z -Z '\.py$' | \
-          xargs -0 flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          xargs -0 flake8 --count --select=E9,F63,F7,F82 --show-source --statistics
         # Can optionally add `--exit-zero` to the flake8 arguments so that
         # this doesn't fail the build.
         # explicitly ignore docstring errors (start with D)
         git diff --name-only --diff-filter=d -z "refs/remotes/${BASE_REPO_OWNER}/${BASE_REF}" -- | \
           grep -E -z -Z '\.py$' | \
-          xargs -0 flake8 . --count --statistics --extend-ignore D
+          xargs -0 flake8 --count --statistics --extend-ignore D
     ####################################################################
 
     ####################################################################
