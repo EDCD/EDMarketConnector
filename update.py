@@ -1,15 +1,22 @@
+"""Checking for updates to this application."""
 import os
-from os.path import dirname, join
 import sys
 import threading
+from os.path import dirname, join
 from traceback import print_exc
-import semantic_version
 from typing import TYPE_CHECKING, Optional
+from xml.etree import ElementTree
+
+import requests
+import semantic_version
+
 if TYPE_CHECKING:
     import tkinter as tk
 
-# ensure registry is set up on Windows before we start
-from config import appname, appversion_nobuild, config, update_feed
+from config import appversion_nobuild, config, update_feed
+from EDMCLogging import get_main_logger
+
+logger = get_main_logger()
 
 
 class EDMCVersion(object):
@@ -25,6 +32,7 @@ class EDMCVersion(object):
     sv: semantic_version.base.Version
         semantic_version object for this version
     """
+
     def __init__(self, version: str, title: str, sv: semantic_version.base.Version):
         self.version: str = version
         self.title: str = title
@@ -33,30 +41,32 @@ class EDMCVersion(object):
 
 class Updater(object):
     """
-    Updater class to handle checking for updates, whether using internal code
-    or an external library such as WinSparkle on win32.
+    Handle checking for updates.
+
+    This is used whether using internal code or an external library such as
+    WinSparkle on win32.
     """
 
     def shutdown_request(self) -> None:
-        """
-        Receive (Win)Sparkle shutdown request and send it to parent.
-        :rtype: None
-        """
+        """Receive (Win)Sparkle shutdown request and send it to parent."""
         if not config.shutting_down:
             self.root.event_generate('<<Quit>>', when="tail")
 
     def use_internal(self) -> bool:
         """
-        :return: if internal update checks should be used.
-        :rtype: bool
+        Signal if internal update checks should be used.
+
+        :return: bool
         """
         if self.provider == 'internal':
             return True
 
         return False
 
-    def __init__(self, tkroot: 'tk.Tk'=None, provider: str='internal'):
+    def __init__(self, tkroot: 'tk.Tk' = None, provider: str = 'internal'):
         """
+        Initialise an Updater instance.
+
         :param tkroot: reference to the root window of the GUI
         :param provider: 'internal' or other string if not
         """
@@ -65,7 +75,7 @@ class Updater(object):
         self.thread: threading.Thread = None
 
         if self.use_internal():
-                return
+            return
 
         if sys.platform == 'win32':
             import ctypes
@@ -93,7 +103,7 @@ class Updater(object):
                 # Get WinSparkle running
                 self.updater.win_sparkle_init()
 
-            except Exception as ex:
+            except Exception:
                 print_exc()
                 self.updater = None
 
@@ -101,19 +111,24 @@ class Updater(object):
 
         if sys.platform == 'darwin':
             import objc
+
             try:
-                objc.loadBundle('Sparkle', globals(), join(dirname(sys.executable), os.pardir, 'Frameworks', 'Sparkle.framework'))
-                self.updater = SUUpdater.sharedUpdater()
-            except:
+                objc.loadBundle(
+                    'Sparkle', globals(), join(dirname(sys.executable), os.pardir, 'Frameworks', 'Sparkle.framework')
+                )
+                # loadBundle presumably supplies `SUUpdater`
+                self.updater = SUUpdater.sharedUpdater()  # noqa: F821
+
+            except Exception:
                 # can't load framework - not frozen or not included in app bundle?
                 print_exc()
                 self.updater = None
 
-    def setAutomaticUpdatesCheck(self, onoroff: bool) -> None:
+    def set_automatic_updates_check(self, onoroff: bool) -> None:
         """
-        Helper to set (Win)Sparkle to perform automatic update checks, or not.
+        Set (Win)Sparkle to perform automatic update checks, or not.
+
         :param onoroff: bool for if we should have the library check or not.
-        :return: None
         """
         if self.use_internal():
             return
@@ -124,13 +139,10 @@ class Updater(object):
         if sys.platform == 'darwin' and self.updater:
             self.updater.SUEnableAutomaticChecks(onoroff)
 
-    def checkForUpdates(self) -> None:
-        """
-        Trigger the requisite method to check for an update.
-        :return: None
-        """
+    def check_for_updates(self) -> None:
+        """Trigger the requisite method to check for an update."""
         if self.use_internal():
-            self.thread = threading.Thread(target = self.worker, name = 'update worker')
+            self.thread = threading.Thread(target=self.worker, name='update worker')
             self.thread.daemon = True
             self.thread.start()
 
@@ -142,27 +154,27 @@ class Updater(object):
 
     def check_appcast(self) -> Optional[EDMCVersion]:
         """
-        Manually (no Sparkle or WinSparkle) check the update_feed appcast file
-        to see if any listed version is semantically greater than the current
+        Manually (no Sparkle or WinSparkle) check the update_feed appcast file.
+
+        Checks if any listed version is semantically greater than the current
         running version.
         :return: EDMCVersion or None if no newer version found
         """
-        import requests
-        from xml.etree import ElementTree
-
         newversion = None
         items = {}
         try:
             r = requests.get(update_feed, timeout=10)
+
         except requests.RequestException as ex:
-            print('Error retrieving update_feed file: {}'.format(str(ex)), file=sys.stderr)
+            logger.exception(f'Error retrieving update_feed file: {ex}')
 
             return None
 
         try:
             feed = ElementTree.fromstring(r.text)
+
         except SyntaxError as ex:
-            print('Syntax error in update_feed file: {}'.format(str(ex)), file=sys.stderr)
+            logger.exception(f'Syntax error in update_feed file: {ex}')
 
             return None
 
@@ -171,9 +183,10 @@ class Updater(object):
             # This will change A.B.C.D to A.B.C+D
             sv = semantic_version.Version.coerce(ver)
 
-            items[sv] = EDMCVersion(version=ver, # sv might have mangled version
-                                    title=item.find('title').text,
-                                    sv=sv
+            items[sv] = EDMCVersion(
+                version=ver,  # sv might have mangled version
+                title=item.find('title').text,
+                sv=sv
             )
 
         # Look for any remaining version greater than appversion
@@ -185,22 +198,16 @@ class Updater(object):
         return None
 
     def worker(self) -> None:
-        """
-        Thread worker to perform internal update checking and update GUI
-        status if a newer version is found.
-        :return: None
-        """
+        """Perform internal update checking & update GUI status if needs be."""
         newversion = self.check_appcast()
 
         if newversion:
-            # TODO: Surely we can do better than this
-            #       nametowidget('.{}.status'.format(appname.lower()))['text']
-            self.root.nametowidget('.{}.status'.format(appname.lower()))['text'] = newversion.title + ' is available'
+            self.root.children['status']['text'] = newversion.title + ' is available'
             self.root.update_idletasks()
 
     def close(self) -> None:
         """
-        Handles the EDMarketConnector.AppWindow.onexit() request.
+        Handle the EDMarketConnector.AppWindow.onexit() request.
 
         NB: We just 'pass' here because:
          1) We might have a worker() going, but no way to make that
@@ -208,7 +215,5 @@ class Updater(object):
          2) If we're running frozen then we're using (Win)Sparkle to check
             and *it* might have asked this whole application to quit, in
             which case we don't want to ask *it* to quit
-
-        :return: None
         """
         pass
