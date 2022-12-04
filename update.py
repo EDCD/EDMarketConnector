@@ -185,8 +185,11 @@ class Updater(object):
             sparkle_platform = 'windows'
 
         for item in feed.findall('channel/item'):
-            ver = item.find('enclosure').attrib.get('{http://www.andymatuschak.org/xml-namespaces/sparkle}version')
-            ver_platform = item.find('enclosure').attrib.get(
+            # xml is a pain with types, hence these ignores
+            ver = item.find('enclosure').attrib.get(  # type: ignore
+                '{http://www.andymatuschak.org/xml-namespaces/sparkle}version'
+            )
+            ver_platform = item.find('enclosure').attrib.get(  # type: ignore
                 '{http://www.andymatuschak.org/xml-namespaces/sparkle}os'
             )
             if ver_platform != sparkle_platform:
@@ -196,8 +199,8 @@ class Updater(object):
             sv = semantic_version.Version.coerce(ver)
 
             items[sv] = EDMCVersion(
-                version=ver,  # sv might have mangled version
-                title=item.find('title').text,
+                version=str(ver),  # sv might have mangled version
+                title=item.find('title').text,  # type: ignore
                 sv=sv
             )
 
