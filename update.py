@@ -72,7 +72,7 @@ class Updater(object):
         """
         self.root: Optional['tk.Tk'] = tkroot
         self.provider: str = provider
-        self.thread: threading.Thread = None
+        self.thread: Optional[threading.Thread] = None
 
         if self.use_internal():
             return
@@ -81,7 +81,7 @@ class Updater(object):
             import ctypes
 
             try:
-                self.updater = ctypes.cdll.WinSparkle
+                self.updater: Optional[ctypes.CDLL] = ctypes.cdll.WinSparkle
 
                 # Set the appcast URL
                 self.updater.win_sparkle_set_appcast_url(update_feed.encode())
@@ -94,8 +94,6 @@ class Updater(object):
                 self.updater.win_sparkle_set_app_build_version(str(appversion_nobuild()))
 
                 # set up shutdown callback
-                global root
-                root = tkroot
                 self.callback_t = ctypes.CFUNCTYPE(None)  # keep reference
                 self.callback_fn = self.callback_t(self.shutdown_request)
                 self.updater.win_sparkle_set_shutdown_request_callback(self.callback_fn)
