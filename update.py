@@ -49,7 +49,7 @@ class Updater(object):
 
     def shutdown_request(self) -> None:
         """Receive (Win)Sparkle shutdown request and send it to parent."""
-        if not config.shutting_down:
+        if not config.shutting_down and self.root:
             self.root.event_generate('<<Quit>>', when="tail")
 
     def use_internal(self) -> bool:
@@ -63,14 +63,14 @@ class Updater(object):
 
         return False
 
-    def __init__(self, tkroot: 'tk.Tk' = None, provider: str = 'internal'):
+    def __init__(self, tkroot: Optional['tk.Tk'] = None, provider: str = 'internal'):
         """
         Initialise an Updater instance.
 
         :param tkroot: reference to the root window of the GUI
         :param provider: 'internal' or other string if not
         """
-        self.root: 'tk.Tk' = tkroot
+        self.root: Optional['tk.Tk'] = tkroot
         self.provider: str = provider
         self.thread: threading.Thread = None
 
@@ -215,7 +215,7 @@ class Updater(object):
         """Perform internal update checking & update GUI status if needs be."""
         newversion = self.check_appcast()
 
-        if newversion:
+        if newversion and self.root:
             status = self.root.nametowidget(f'.{appname.lower()}.status')
             status['text'] = newversion.title + ' is available'
             self.root.update_idletasks()
