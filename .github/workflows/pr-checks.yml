@@ -85,7 +85,7 @@ jobs:
         # F63 - 'tests' checking
         # F7 - syntax errors
         # F82 - undefined checking
-        echo git diff --name-only --diff-filter=d -z "refs/remotes/${BASE_REPO_OWNER}/${BASE_REF}" -- | \
+        git diff --name-only --diff-filter=d -z "refs/remotes/${BASE_REPO_OWNER}/${BASE_REF}" -- | \
           grep -E -z -Z '\.py$' | \
           xargs -0 flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # Can optionally add `--exit-zero` to the flake8 arguments so that
