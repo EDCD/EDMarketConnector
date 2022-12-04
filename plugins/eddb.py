@@ -1,8 +1,4 @@
-# -*- coding: utf-8 -*-
-#
-# Station display and eddb.io lookup
-#
-
+"""Station display and eddb.io lookup."""
 # Tests:
 #
 # As there's a lot of state tracking in here, need to ensure (at least)
@@ -38,15 +34,15 @@
 # Thus you **MUST** check if any imports you add in this file are only
 # referenced in this file (or only in any other core plugin), and if so...
 #
-#     YOU MUST ENSURE THAT PERTINENT ADJUSTMENTS ARE MADE IN `setup.py`
-#     SO AS TO ENSURE THE FILES ARE ACTUALLY PRESENT IN AN END-USER
-#     INSTALLATION ON WINDOWS.
+#     YOU MUST ENSURE THAT PERTINENT ADJUSTMENTS ARE MADE IN
+#     `Build-exe-and-msi.py` SO AS TO ENSURE THE FILES ARE ACTUALLY PRESENT IN
+#     AN END-USER INSTALLATION ON WINDOWS.
 #
 #
 # ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $#
 # ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $#
 import sys
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, Mapping, MutableMapping, Optional
 
 import requests
 
@@ -79,6 +75,13 @@ this.on_foot = False
 
 
 def system_url(system_name: str) -> str:
+    """
+    Construct an appropriate EDDB.IO URL for the provided system.
+
+    :param system_name: Will be overridden with `this.system_address` if that
+      is set.
+    :return: The URL, empty if no data was available to construct it.
+    """
     if this.system_address:
         return requests.utils.requote_uri(f'https://eddb.io/system/ed-address/{this.system_address}')
 
@@ -89,17 +92,38 @@ def system_url(system_name: str) -> str:
 
 
 def station_url(system_name: str, station_name: str) -> str:
+    """
+    Construct an appropriate EDDB.IO URL for a station.
+
+    Ignores `station_name` in favour of `this.station_marketid`.
+
+    :param system_name: Name of the system the station is in.
+    :param station_name: **NOT USED**
+    :return: The URL, empty if no data was available to construct it.
+    """
     if this.station_marketid:
         return requests.utils.requote_uri(f'https://eddb.io/station/market-id/{this.station_marketid}')
 
     return system_url(system_name)
 
 
-def plugin_start3(plugin_dir):
+def plugin_start3(plugin_dir: str) -> str:
+    """
+    Start the plugin.
+
+    :param plugin_dir: NAme of directory this was loaded from.
+    :return: Identifier string for this plugin.
+    """
     return 'eddb'
 
 
 def plugin_app(parent: 'Tk'):
+    """
+    Construct this plugin's main UI, if any.
+
+    :param parent: The tk parent to place our widgets into.
+    :return: See PLUGINS.md#display
+    """
     this.system_link = parent.children['system']  # system label in main window
     this.system = None
     this.system_address = None
@@ -109,13 +133,34 @@ def plugin_app(parent: 'Tk'):
     this.station_link.configure(popup_copy=lambda x: x != STATION_UNDOCKED)
 
 
-def prefs_changed(cmdr, is_beta):
+def prefs_changed(cmdr: str, is_beta: bool) -> None:
+    """
+    Update any saved configuration after Settings is closed.
+
+    :param cmdr: Name of Commander.
+    :param is_beta: If game beta was detected.
+    """
     # Do *NOT* set 'url' here, as it's set to a function that will call
     # through correctly.  We don't want a static string.
     pass
 
 
-def journal_entry(cmdr, is_beta, system, station, entry, state):
+def journal_entry(  # noqa: CCR001
+    cmdr: str, is_beta: bool, system: str, station: str,
+    entry: MutableMapping[str, Any],
+    state: Mapping[str, Any]
+):
+    """
+    Handle a new Journal event.
+
+    :param cmdr: Name of Commander.
+    :param is_beta: Whether game beta was detected.
+    :param system: Name of current tracked system.
+    :param station: Name of current tracked station location.
+    :param entry: The journal event.
+    :param state: `monitor.state`
+    :return: None if no error, else an error string.
+    """
     should_return, new_entry = killswitch.check_killswitch('plugins.eddb.journal', entry)
     if should_return:
         # LANG: Journal Processing disabled due to an active killswitch
@@ -179,7 +224,14 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         this.station_link.update_idletasks()
 
 
-def cmdr_data(data: CAPIData, is_beta):
+def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:
+    """
+    Process new CAPI data.
+
+    :param data: The latest merged CAPI data.
+    :param is_beta: Whether game beta was detected.
+    :return: Optional error string.
+    """
     # Always store initially, even if we're not the *current* system provider.
     if not this.station_marketid and data['commander']['docked']:
         this.station_marketid = data['lastStarport']['id']
