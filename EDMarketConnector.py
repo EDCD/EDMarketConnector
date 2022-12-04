@@ -529,16 +529,18 @@ class AppWindow(object):
         # LANG: Update button in main window
         self.button = ttk.Button(frame, text=_('Update'), width=28, default=tk.ACTIVE, state=tk.DISABLED)
         self.theme_button = tk.Label(frame, width=32 if sys.platform == 'darwin' else 28, state=tk.DISABLED)
-        self.status = tk.Label(frame, name='status', anchor=tk.W)
 
         ui_row = frame.grid_size()[1]
         self.button.grid(row=ui_row, columnspan=2, sticky=tk.NSEW)
         self.theme_button.grid(row=ui_row, columnspan=2, sticky=tk.NSEW)
         theme.register_alternate((self.button, self.theme_button, self.theme_button),
                                  {'row': ui_row, 'columnspan': 2, 'sticky': tk.NSEW})
-        self.status.grid(columnspan=2, sticky=tk.EW)
         self.button.bind('<Button-1>', self.capi_request_data)
         theme.button_bind(self.theme_button, self.capi_request_data)
+
+        # Bottom 'status' line.
+        self.status = tk.Label(frame, name='status', anchor=tk.W)
+        self.status.grid(columnspan=2, sticky=tk.EW)
 
         for child in frame.winfo_children():
             child.grid_configure(padx=self.PADX, pady=(
