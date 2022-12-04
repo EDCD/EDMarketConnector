@@ -51,9 +51,11 @@ jobs:
         #######################################################################
           
         #######################################################################
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        # 'Full' run, but ignoring docstring errors
         #######################################################################
+        # explicitly ignore docstring errors (start with D)
+        # Can optionally add `--exit-zero` to the flake8 arguments so that
         git diff --name-only --diff-filter=d -z "$DATA" | \
           grep -E -z -Z '\.py$' | \
-          xargs -0 flake8 . --count --statistics
+          xargs -0 flake8 --count --statistics --extend-ignore D
         #######################################################################
