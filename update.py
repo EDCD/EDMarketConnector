@@ -178,8 +178,22 @@ class Updater(object):
 
             return None
 
+        if sys.platform == 'darwin':
+            sparkle_platform = 'macos'
+
+        else:
+            # For *these* purposes anything else is the same as 'windows', as
+            # non-win32 would be running from source.
+            sparkle_platform = 'windows'
+
         for item in feed.findall('channel/item'):
             ver = item.find('enclosure').attrib.get('{http://www.andymatuschak.org/xml-namespaces/sparkle}version')
+            ver_platform = item.find('enclosure').attrib.get(
+                '{http://www.andymatuschak.org/xml-namespaces/sparkle}os'
+            )
+            if ver_platform != sparkle_platform:
+                continue
+
             # This will change A.B.C.D to A.B.C+D
             sv = semantic_version.Version.coerce(ver)
 
