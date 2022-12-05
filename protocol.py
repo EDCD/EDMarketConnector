@@ -1,5 +1,4 @@
 """protocol handler for cAPI authorisation."""
-
 # spell-checker: words ntdll GURL alloc wfile instantiatable pyright
 import os
 import sys
@@ -35,7 +34,7 @@ class GenericProtocolHandler:
     def __init__(self) -> None:
         self.redirect = protocolhandler_redirect  # Base redirection URL
         self.master: 'tkinter.Tk' = None  # type: ignore
-        self.lastpayload = None
+        self.lastpayload: Optional[str] = None
 
     def start(self, master: 'tkinter.Tk') -> None:
         """Start Protocol Handler."""
@@ -45,7 +44,7 @@ class GenericProtocolHandler:
         """Stop / Close Protocol Handler."""
         pass
 
-    def event(self, url) -> None:
+    def event(self, url: str) -> None:
         """Generate an auth event."""
         self.lastpayload = url
 
@@ -107,11 +106,12 @@ if sys.platform == 'darwin' and getattr(sys, 'frozen', False):  # noqa: C901 # i
 
         def handleEvent_withReplyEvent_(self, event, replyEvent) -> None:  # noqa: N802 N803 # Required to override
             """Actual event handling from NSAppleEventManager."""
-            protocolhandler.lasturl = urllib.parse.unquote(  # type: ignore # Its going to be a DPH in this code
+            protocolhandler.lasturl = urllib.parse.unquote(  # noqa: F821: type: ignore # Its going to be a DPH in
+                # this code
                 event.paramDescriptorForKeyword_(keyDirectObject).stringValue()
             ).strip()
 
-            protocolhandler.master.after(DarwinProtocolHandler.POLL, protocolhandler.poll)  # type: ignore
+            protocolhandler.master.after(DarwinProtocolHandler.POLL, protocolhandler.poll)  # noqa: F821: type: ignore
 
 
 elif (config.auth_force_edmc_protocol
@@ -196,7 +196,7 @@ elif (config.auth_force_edmc_protocol
     # Windows Message handler stuff (IPC)
     # https://docs.microsoft.com/en-us/previous-versions/windows/desktop/legacy/ms633573(v=vs.85)
     @WINFUNCTYPE(c_long, HWND, UINT, WPARAM, LPARAM)
-    def WndProc(hwnd: HWND, message: UINT, wParam, lParam):  # noqa: N803 N802
+    def WndProc(hwnd: HWND, message: UINT, wParam: WPARAM, lParam: LPARAM) -> c_long:  # noqa: N803 N802
         """
         Deal with DDE requests.
 
@@ -215,8 +215,10 @@ elif (config.auth_force_edmc_protocol
         topic = create_unicode_buffer(256)
         # Note that lParam is 32 bits, and broken into two 16 bit words. This will break on 64bit as the math is
         # wrong
-        lparam_low = lParam & 0xFFFF  # if nonzero, the target application for which a conversation is requested
-        lparam_high = lParam >> 16  # if nonzero, the topic of said conversation
+        # if nonzero, the target application for which a conversation is requested
+        lparam_low = lParam & 0xFFFF  # type: ignore
+        # if nonzero, the topic of said conversation
+        lparam_high = lParam >> 16  # type: ignore
 
         # if either of the words are nonzero, they contain
         # atoms https://docs.microsoft.com/en-us/windows/win32/dataxchg/about-atom-tables
@@ -236,7 +238,10 @@ elif (config.auth_force_edmc_protocol
                 wParam, WM_DDE_ACK, hwnd, PackDDElParam(WM_DDE_ACK, GlobalAddAtomW(appname), GlobalAddAtomW('System'))
             )
 
-            return 0
+            # It works as a constructor as per <https://docs.python.org/3/library/ctypes.html#fundamental-data-types>
+            return c_long(0)
+
+        return c_long(1)  # This is an utter guess -Ath
 
     class WindowsProtocolHandler(GenericProtocolHandler):
         """
@@ -349,7 +354,7 @@ else:  # Linux / Run from source
 
             self.thread: Optional[threading.Thread] = None
 
-        def start(self, master) -> None:
+        def start(self, master: 'tkinter.Tk') -> None:
             """Start the HTTP server thread."""
             GenericProtocolHandler.start(self, master)
             self.thread = threading.Thread(target=self.worker, name='OAuth worker')
@@ -389,7 +394,7 @@ else:  # Linux / Run from source
             url = urllib.parse.unquote(self.path)
             if url.startswith('/auth'):
                 logger.debug('Request starts with /auth, sending to protocolhandler.event()')
-                protocolhandler.event(url)
+                protocolhandler.event(url)  # noqa: F821
                 self.send_response(200)
                 return True
             else:
@@ -411,7 +416,7 @@ else:  # Linux / Run from source
             else:
                 self.end_headers()
 
-        def log_request(self, code, size=None):
+        def log_request(self, code: int | str = '-', size: int | str = '-') -> None:
             """Override to prevent logging."""
             pass
 

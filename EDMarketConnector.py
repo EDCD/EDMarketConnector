@@ -529,16 +529,18 @@ class AppWindow(object):
         # LANG: Update button in main window
         self.button = ttk.Button(frame, text=_('Update'), width=28, default=tk.ACTIVE, state=tk.DISABLED)
         self.theme_button = tk.Label(frame, width=32 if sys.platform == 'darwin' else 28, state=tk.DISABLED)
-        self.status = tk.Label(frame, name='status', anchor=tk.W)
 
         ui_row = frame.grid_size()[1]
         self.button.grid(row=ui_row, columnspan=2, sticky=tk.NSEW)
         self.theme_button.grid(row=ui_row, columnspan=2, sticky=tk.NSEW)
         theme.register_alternate((self.button, self.theme_button, self.theme_button),
                                  {'row': ui_row, 'columnspan': 2, 'sticky': tk.NSEW})
-        self.status.grid(columnspan=2, sticky=tk.EW)
         self.button.bind('<Button-1>', self.capi_request_data)
         theme.button_bind(self.theme_button, self.capi_request_data)
+
+        # Bottom 'status' line.
+        self.status = tk.Label(frame, name='status', anchor=tk.W)
+        self.status.grid(columnspan=2, sticky=tk.EW)
 
         for child in frame.winfo_children():
             child.grid_configure(padx=self.PADX, pady=(
@@ -558,7 +560,7 @@ class AppWindow(object):
             # https://www.tcl.tk/man/tcl/TkCmd/menu.htm
             self.system_menu = tk.Menu(self.menubar, name='apple')
             self.system_menu.add_command(command=lambda: self.w.call('tk::mac::standardAboutPanel'))
-            self.system_menu.add_command(command=lambda: self.updater.checkForUpdates())
+            self.system_menu.add_command(command=lambda: self.updater.check_for_updates())
             self.menubar.add_cascade(menu=self.system_menu)
             self.file_menu = tk.Menu(self.menubar, name='file')
             self.file_menu.add_command(command=self.save_raw)
@@ -601,7 +603,7 @@ class AppWindow(object):
             self.help_menu.add_command(command=self.help_general)
             self.help_menu.add_command(command=self.help_privacy)
             self.help_menu.add_command(command=self.help_releases)
-            self.help_menu.add_command(command=lambda: self.updater.checkForUpdates())
+            self.help_menu.add_command(command=lambda: self.updater.check_for_updates())
             self.help_menu.add_command(command=lambda: not self.HelpAbout.showing and self.HelpAbout(self.w))
 
             self.menubar.add_cascade(menu=self.help_menu)
@@ -724,7 +726,7 @@ class AppWindow(object):
             self.updater = update.Updater(tkroot=self.w, provider='external')
         else:
             self.updater = update.Updater(tkroot=self.w, provider='internal')
-            self.updater.checkForUpdates()  # Sparkle / WinSparkle does this automatically for packaged apps
+            self.updater.check_for_updates()  # Sparkle / WinSparkle does this automatically for packaged apps
 
         # Migration from <= 3.30
         for username in config.get_list('fdev_usernames', default=[]):
@@ -733,7 +735,6 @@ class AppWindow(object):
         config.delete('username', suppress=True)
         config.delete('password', suppress=True)
         config.delete('logdir', suppress=True)
-
         self.postprefs(False)  # Companion login happens in callback from monitor
         self.toggle_suit_row(visible=False)
 
@@ -1382,7 +1383,7 @@ class AppWindow(object):
 
                 # Disable WinSparkle automatic update checks, IFF configured to do so when in-game
                 if config.get_int('disable_autoappupdatecheckingame') and 1:
-                    self.updater.setAutomaticUpdatesCheck(False)
+                    self.updater.set_automatic_updates_check(False)
                     logger.info('Monitor: Disable WinSparkle automatic update checks')
 
                 # Can't start dashboard monitoring
@@ -1433,7 +1434,7 @@ class AppWindow(object):
             if entry['event'] == 'ShutDown':
                 # Enable WinSparkle automatic update checks
                 # NB: Do this blindly, in case option got changed whilst in-game
-                self.updater.setAutomaticUpdatesCheck(True)
+                self.updater.set_automatic_updates_check(True)
                 logger.info('Monitor: Enable WinSparkle automatic update checks')
 
     def auth(self, event=None) -> None:

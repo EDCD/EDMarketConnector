@@ -1,14 +1,19 @@
-#
-# Hacks to fix various display issues with notebooks and their child widgets on OSX and Windows.
-# - Windows: page background should be White, not SystemButtonFace
-# - OSX:     page background should be a darker gray than systemWindowBody
-#            selected tab foreground should be White when the window is active
-#
+"""
+Custom `ttk.Notebook` to fix various display issues.
+
+Hacks to fix various display issues with notebooks and their child widgets on
+OSX and Windows.
+
+- Windows: page background should be White, not SystemButtonFace
+- OSX:     page background should be a darker gray than systemWindowBody
+           selected tab foreground should be White when the window is active
+
+Entire file may be imported by plugins.
+"""
 import sys
 import tkinter as tk
 from tkinter import ttk
-
-# Entire file may be imported by plugins
+from typing import Optional
 
 # Can't do this with styles on OSX - http://www.tkdocs.com/tutorial/styles.html#whydifficult
 if sys.platform == 'darwin':
@@ -22,8 +27,9 @@ elif sys.platform == 'win32':
 
 
 class Notebook(ttk.Notebook):
+    """Custom ttk.Notebook class to fix some display issues."""
 
-    def __init__(self, master=None, **kw):
+    def __init__(self, master: Optional[ttk.Frame] = None, **kw):
 
         ttk.Notebook.__init__(self, master, **kw)
         style = ttk.Style()
@@ -46,9 +52,13 @@ class Notebook(ttk.Notebook):
             self.grid(padx=10, pady=10, sticky=tk.NSEW)
 
 
-class Frame(sys.platform == 'darwin' and tk.Frame or ttk.Frame):
+# FIXME: The real fix for this 'dynamic type' would be to split this whole
+#  thing into being a module with per-platform files, as we've done with config
+#  That would also make the code cleaner.
+class Frame(sys.platform == 'darwin' and tk.Frame or ttk.Frame):  # type: ignore
+    """Custom t(t)k.Frame class to fix some display issues."""
 
-    def __init__(self, master=None, **kw):
+    def __init__(self, master: Optional[ttk.Frame] = None, **kw):
         if sys.platform == 'darwin':
             kw['background'] = kw.pop('background', PAGEBG)
             tk.Frame.__init__(self, master, **kw)
@@ -63,8 +73,9 @@ class Frame(sys.platform == 'darwin' and tk.Frame or ttk.Frame):
 
 
 class Label(tk.Label):
+    """Custom tk.Label class to fix some display issues."""
 
-    def __init__(self, master=None, **kw):
+    def __init__(self, master: Optional[ttk.Frame] = None, **kw):
         if sys.platform in ['darwin', 'win32']:
             kw['foreground'] = kw.pop('foreground', PAGEFG)
             kw['background'] = kw.pop('background', PAGEBG)
@@ -74,9 +85,10 @@ class Label(tk.Label):
         tk.Label.__init__(self, master, **kw)  # Just use tk.Label on all platforms
 
 
-class Entry(sys.platform == 'darwin' and tk.Entry or ttk.Entry):
+class Entry(sys.platform == 'darwin' and tk.Entry or ttk.Entry):  # type: ignore
+    """Custom t(t)k.Entry class to fix some display issues."""
 
-    def __init__(self, master=None, **kw):
+    def __init__(self, master: Optional[ttk.Frame] = None, **kw):
         if sys.platform == 'darwin':
             kw['highlightbackground'] = kw.pop('highlightbackground', PAGEBG)
             tk.Entry.__init__(self, master, **kw)
@@ -84,9 +96,10 @@ class Entry(sys.platform == 'darwin' and tk.Entry or ttk.Entry):
             ttk.Entry.__init__(self, master, **kw)
 
 
-class Button(sys.platform == 'darwin' and tk.Button or ttk.Button):
+class Button(sys.platform == 'darwin' and tk.Button or ttk.Button):  # type: ignore
+    """Custom t(t)k.Button class to fix some display issues."""
 
-    def __init__(self, master=None, **kw):
+    def __init__(self, master: Optional[ttk.Frame] = None, **kw):
         if sys.platform == 'darwin':
             kw['highlightbackground'] = kw.pop('highlightbackground', PAGEBG)
             tk.Button.__init__(self, master, **kw)
@@ -96,9 +109,10 @@ class Button(sys.platform == 'darwin' and tk.Button or ttk.Button):
             ttk.Button.__init__(self, master, **kw)
 
 
-class ColoredButton(sys.platform == 'darwin' and tk.Label or tk.Button):
+class ColoredButton(sys.platform == 'darwin' and tk.Label or tk.Button):  # type: ignore
+    """Custom t(t)k.ColoredButton class to fix some display issues."""
 
-    def __init__(self, master=None, **kw):
+    def __init__(self, master: Optional[ttk.Frame] = None, **kw):
         if sys.platform == 'darwin':
             # Can't set Button background on OSX, so use a Label instead
             kw['relief'] = kw.pop('relief', tk.RAISED)
@@ -113,9 +127,10 @@ class ColoredButton(sys.platform == 'darwin' and tk.Label or tk.Button):
             self._command()
 
 
-class Checkbutton(sys.platform == 'darwin' and tk.Checkbutton or ttk.Checkbutton):
+class Checkbutton(sys.platform == 'darwin' and tk.Checkbutton or ttk.Checkbutton):  # type: ignore
+    """Custom t(t)k.Checkbutton class to fix some display issues."""
 
-    def __init__(self, master=None, **kw):
+    def __init__(self, master: Optional[ttk.Frame] = None, **kw):
         if sys.platform == 'darwin':
             kw['foreground'] = kw.pop('foreground', PAGEFG)
             kw['background'] = kw.pop('background', PAGEBG)
@@ -126,9 +141,10 @@ class Checkbutton(sys.platform == 'darwin' and tk.Checkbutton or ttk.Checkbutton
             ttk.Checkbutton.__init__(self, master, **kw)
 
 
-class Radiobutton(sys.platform == 'darwin' and tk.Radiobutton or ttk.Radiobutton):
+class Radiobutton(sys.platform == 'darwin' and tk.Radiobutton or ttk.Radiobutton):  # type: ignore
+    """Custom t(t)k.Radiobutton class to fix some display issues."""
 
-    def __init__(self, master=None, **kw):
+    def __init__(self, master: Optional[ttk.Frame] = None, **kw):
         if sys.platform == 'darwin':
             kw['foreground'] = kw.pop('foreground', PAGEFG)
             kw['background'] = kw.pop('background', PAGEBG)
@@ -139,7 +155,8 @@ class Radiobutton(sys.platform == 'darwin' and tk.Radiobutton or ttk.Radiobutton
             ttk.Radiobutton.__init__(self, master, **kw)
 
 
-class OptionMenu(sys.platform == 'darwin' and tk.OptionMenu or ttk.OptionMenu):
+class OptionMenu(sys.platform == 'darwin' and tk.OptionMenu or ttk.OptionMenu):  # type: ignore
+    """Custom t(t)k.OptionMenu class to fix some display issues."""
 
     def __init__(self, master, variable, default=None, *values, **kw):
         if sys.platform == 'darwin':

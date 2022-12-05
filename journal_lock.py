@@ -133,7 +133,7 @@ class JournalLock:
 
         return JournalLockResult.LOCKED
 
-    def release_lock(self) -> bool:  # noqa: CCR001
+    def release_lock(self) -> bool:
         """
         Release lock on journal directory.
 
