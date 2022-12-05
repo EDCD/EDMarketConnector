@@ -2409,7 +2409,7 @@ def journal_entry(  # noqa: C901, CCR001
     return None
 
 
-def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:
+def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:  # noqa: CCR001
     """
     Process new CAPI data.
 
@@ -2417,6 +2417,14 @@ def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:
     :param is_beta: bool - True if this is a beta version of the Game.
     :return: str - Error message, or `None` if no errors.
     """
+    # 'Update' can trigger CAPI queries before plugins have been fed any
+    # Journal events.  So this.cmdr_name might not be set otherwise.
+    if (
+        not this.cmdr_name
+        and data.get('commander') and (cmdr_name := data['commander'].get('name'))
+    ):
+        this.cmdr_name = cmdr_name
+
     if (data['commander'].get('docked') or (this.on_foot and monitor.station)
             and config.get_int('output') & config.OUT_EDDN_SEND_STATION_DATA):
         try:
