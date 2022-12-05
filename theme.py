@@ -133,14 +133,14 @@ class _Theme(object):
     def __init__(self) -> None:
         self.active = None  # Starts out with no theme
         self.minwidth: Optional[int] = None
-        self.widgets: Dict[tk.Widget, Set] = {}
+        self.widgets: Dict[tk.Widget | tk.BitmapImage, Set] = {}
         self.widgets_pair: List = []
         self.defaults: Dict = {}
         self.current: Dict = {}
         self.default_ui_scale = None  # None == not yet known
         self.startup_ui_scale = None
 
-    def register(self, widget: tk.Widget) -> None:  # noqa: CCR001, C901
+    def register(self, widget: tk.Widget | tk.BitmapImage) -> None:  # noqa: CCR001, C901
         # Note widget and children for later application of a theme. Note if
         # the widget has explicit fg or bg attributes.
         assert isinstance(widget, tk.Widget) or isinstance(widget, tk.BitmapImage), widget
@@ -310,9 +310,19 @@ class _Theme(object):
                 self._update_widget(child)
 
     # Apply current theme to a single widget
-    def _update_widget(self, widget: tk.Widget) -> None:  # noqa: CCR001, C901
+    def _update_widget(self, widget: tk.Widget | tk.BitmapImage) -> None:  # noqa: CCR001, C901
         if widget not in self.widgets:
-            assert_str = f'{widget.winfo_class()} {widget} "{"text" in widget.keys() and widget["text"]}"'
+            if type(widget) == tk.Widget:
+                w_class = widget.winfo_class()
+                w_keys: List[str] = widget.keys()
+
+            else:
+                # There is no tk.BitmapImage.winfo_class()
+                w_class = ''
+                # There is no tk.BitmapImage.keys()
+                w_keys = []
+
+            assert_str = f'{w_class} {widget} "{"text" in w_keys and widget["text"]}"'
             raise AssertionError(assert_str)
 
         attribs: Set = self.widgets.get(widget, set())
