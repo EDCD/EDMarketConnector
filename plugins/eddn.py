@@ -251,15 +251,14 @@ class EDDNSender:
                     self.add_message(cmdr, msg)
 
         except FileNotFoundError:
-            pass
+            return
 
-        finally:
-            # Best effort at removing the file/contents
-            # NB: The legacy code assumed it could write to the file.
-            logger.info("Conversion` to `eddn_queue-v1.db` complete, removing `replay.jsonl`")
-            replay_file = open(filename, 'w')  # Will truncate
-            replay_file.close()
-            os.unlink(filename)
+        # Best effort at removing the file/contents
+        # NB: The legacy code assumed it could write to the file.
+        logger.info("Conversion` to `eddn_queue-v1.db` complete, removing `replay.jsonl`")
+        replay_file = open(filename, 'w')  # Will truncate
+        replay_file.close()
+        os.unlink(filename)
 
     def close(self) -> None:
         """Clean up any resources."""
