@@ -123,6 +123,13 @@ elif sys.platform == 'linux':
 
 class _Theme(object):
 
+    # Enum ?  Remember these are, probably, based on 'value' of a tk
+    # RadioButton set.  Looking in prefs.py, they *appear* to be hard-coded
+    # there as well.
+    THEME_DEFAULT = 0
+    THEME_DARK = 1
+    THEME_TRANSPARENT = 2
+
     def __init__(self) -> None:
         self.active = None  # Starts out with no theme
         self.minwidth: Optional[int] = None
