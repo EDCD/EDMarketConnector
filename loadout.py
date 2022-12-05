@@ -49,19 +49,11 @@ def export(data: companion.CAPIData, requested_filename: Optional[str] = None) -
     query_time = config.get_int('querytime', default=int(time.time()))
 
     # Write
-    #
-    #  When this is refactored into multi-line CHECK IT WORKS, avoiding the
-    #  brainfart we had with dangling commas in commodity.py:export() !!!
-    #
-    output_path = pathlib.Path(config.get_str('outdir'))
-    output_filename = pathlib.Path(
-        ship + '.' + time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(query_time)) + '.txt'
-    )
-    # Can't re-use `filename`, different type
-    file_name = output_path / output_filename
-    #
-    #  When this is refactored into multi-line CHECK IT WORKS, avoiding the
-    #  brainfart we had with dangling commas in commodity.py:export() !!!
-    #
-    with open(file_name, 'wt') as h:
+
+    with open(
+        pathlib.Path(config.get_str('outdir')) / pathlib.Path(
+            ship + '.' + time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(query_time)) + '.txt'
+        ),
+        'wt'
+    ) as h:
         h.write(string)
