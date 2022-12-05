@@ -312,7 +312,7 @@ class _Theme(object):
     # Apply current theme to a single widget
     def _update_widget(self, widget: tk.Widget | tk.BitmapImage) -> None:  # noqa: CCR001, C901
         if widget not in self.widgets:
-            if type(widget) == tk.Widget:
+            if isinstance(widget, tk.Widget):
                 w_class = widget.winfo_class()
                 w_keys: List[str] = widget.keys()
 
@@ -403,7 +403,9 @@ class _Theme(object):
         # Switch menus
         for pair, gridopts in self.widgets_pair:
             for widget in pair:
-                widget.grid_remove()
+                if isinstance(widget, tk.Widget):
+                    widget.grid_remove()
+
             if isinstance(pair[0], tk.Menu):
                 if theme == self.THEME_DEFAULT:
                     root['menu'] = pair[0]
