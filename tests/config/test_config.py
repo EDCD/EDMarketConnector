@@ -41,7 +41,7 @@ def _fuzz_list(length: int) -> List[str]:
 _fuzz_generators = {  # Type annotating this would be a nightmare.
     int: lambda i: random.randint(min(0, i), max(0, i)),
     # This doesn't cover unicode, or random bytes. Use them at your own peril
-    str: lambda l: "".join(random.choice(string.ascii_letters + string.digits + '\r\n') for _ in range(l)),
+    str: lambda s: "".join(random.choice(string.ascii_letters + string.digits + '\r\n') for _ in range(s)),
     bool: lambda _: bool(random.choice((True, False))),
     list: _fuzz_list,
 }
