@@ -33,8 +33,7 @@ if TYPE_CHECKING:
 class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label, object):  # type: ignore
     """Clickable label for HTTP links."""
 
-    # NB: do **NOT** try `**kw: Dict`, it causes more trouble than it's worth.
-    def __init__(self, master: Optional[tk.Tk] = None, **kw) -> None:
+    def __init__(self, master: Optional[tk.Tk] = None, **kw: Any) -> None:
         self.url = 'url' in kw and kw.pop('url') or None
         self.popup_copy = kw.pop('popup_copy', False)
         self.underline = kw.pop('underline', None)  # override ttk.Label's underline
@@ -66,9 +65,8 @@ class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label, object)
                        text=kw.get('text'),
                        font=kw.get('font', ttk.Style().lookup('TLabel', 'font')))
 
-    # NB: do **NOT** try `**kw: Dict`, it causes more trouble than it's worth.
     def configure(  # noqa: CCR001
-        self, cnf: dict[str, Any] | None = None, **kw
+        self, cnf: dict[str, Any] | None = None, **kw: Any
     ) -> dict[str, tuple[str, str, str, Any, Any]] | None:
         """Change cursor and appearance depending on state and text."""
         # This class' state
@@ -104,7 +102,7 @@ class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label, object)
 
         return super(HyperlinkLabel, self).configure(cnf, **kw)
 
-    def __setitem__(self, key: str, value) -> None:
+    def __setitem__(self, key: str, value: Any) -> None:
         """
         Allow for dict member style setting of options.
 
