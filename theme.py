@@ -133,14 +133,14 @@ class _Theme(object):
     def __init__(self) -> None:
         self.active = None  # Starts out with no theme
         self.minwidth: Optional[int] = None
-        self.widgets: Dict[tk.Widget, Set] = {}
+        self.widgets: Dict[tk.Widget | tk.BitmapImage, Set] = {}
         self.widgets_pair: List = []
         self.defaults: Dict = {}
         self.current: Dict = {}
         self.default_ui_scale = None  # None == not yet known
         self.startup_ui_scale = None
 
-    def register(self, widget: tk.Widget) -> None:  # noqa: CCR001, C901
+    def register(self, widget: tk.Widget | tk.BitmapImage) -> None:  # noqa: CCR001, C901
         # Note widget and children for later application of a theme. Note if
         # the widget has explicit fg or bg attributes.
         assert isinstance(widget, tk.Widget) or isinstance(widget, tk.BitmapImage), widget
@@ -259,24 +259,7 @@ class _Theme(object):
         if not config.get_str('dark_highlight'):
             config.set('dark_highlight', 'white')
 
-        if theme:
-            # Dark
-            (r, g, b) = root.winfo_rgb(config.get_str('dark_text'))
-            self.current = {
-                'background': 'grey4',  # OSX inactive dark titlebar color
-                'foreground': config.get_str('dark_text'),
-                'activebackground': config.get_str('dark_text'),
-                'activeforeground': 'grey4',
-                'disabledforeground': f'#{int(r/384):02x}{int(g/384):02x}{int(b/384):02x}',
-                'highlight': config.get_str('dark_highlight'),
-                # Font only supports Latin 1 / Supplement / Extended, and a
-                # few General Punctuation and Mathematical Operators
-                # LANG: Label for commander name in main window
-                'font': (theme > 1 and not 0x250 < ord(_('Cmdr')[0]) < 0x3000 and
-                         tk_font.Font(family='Euro Caps', size=10, weight=tk_font.NORMAL) or
-                         'TkDefaultFont'),
-            }
-        else:
+        if theme == self.THEME_DEFAULT:
             # (Mostly) system colors
             style = ttk.Style()
             self.current = {
@@ -292,9 +275,30 @@ class _Theme(object):
                 'font': 'TkDefaultFont',
             }
 
-    # Apply current theme to a widget and its children, and register it for future updates
+        else:  # Dark *or* Transparent
+            (r, g, b) = root.winfo_rgb(config.get_str('dark_text'))
+            self.current = {
+                'background': 'grey4',  # OSX inactive dark titlebar color
+                'foreground': config.get_str('dark_text'),
+                'activebackground': config.get_str('dark_text'),
+                'activeforeground': 'grey4',
+                'disabledforeground': f'#{int(r/384):02x}{int(g/384):02x}{int(b/384):02x}',
+                'highlight': config.get_str('dark_highlight'),
+                # Font only supports Latin 1 / Supplement / Extended, and a
+                # few General Punctuation and Mathematical Operators
+                # LANG: Label for commander name in main window
+                'font': (theme > 1 and not 0x250 < ord(_('Cmdr')[0]) < 0x3000 and
+                         tk_font.Font(family='Euro Caps', size=10, weight=tk_font.NORMAL) or
+                         'TkDefaultFont'),
+            }
 
     def update(self, widget: tk.Widget) -> None:
+        """
+        Apply current theme to a widget and its children.
+
+        Also, register it for future updates.
+        :param widget: Target widget.
+        """
         assert isinstance(widget, tk.Widget) or isinstance(widget, tk.BitmapImage), widget
         if not self.current:
             return  # No need to call this for widgets created in plugin_app()
@@ -306,9 +310,19 @@ class _Theme(object):
                 self._update_widget(child)
 
     # Apply current theme to a single widget
-    def _update_widget(self, widget: tk.Widget) -> None:  # noqa: CCR001, C901
+    def _update_widget(self, widget: tk.Widget | tk.BitmapImage) -> None:  # noqa: CCR001, C901
         if widget not in self.widgets:
-            assert_str = f'{widget.winfo_class()} {widget} "{"text" in widget.keys() and widget["text"]}"'
+            if isinstance(widget, tk.Widget):
+                w_class = widget.winfo_class()
+                w_keys: List[str] = widget.keys()
+
+            else:
+                # There is no tk.BitmapImage.winfo_class()
+                w_class = ''
+                # There is no tk.BitmapImage.keys()
+                w_keys = []
+
+            assert_str = f'{w_class} {widget} "{"text" in w_keys and widget["text"]}"'
             raise AssertionError(assert_str)
 
         attribs: Set = self.widgets.get(widget, set())
@@ -375,8 +389,7 @@ class _Theme(object):
 
     # Apply configured theme
 
-    def apply(self, root: tk.Tk) -> None:  # noqa: CCR001
-
+    def apply(self, root: tk.Tk) -> None:  # noqa: CCR001, C901
         theme = config.get_int('theme')
         self._colors(root, theme)
 
@@ -390,27 +403,35 @@ class _Theme(object):
         # Switch menus
         for pair, gridopts in self.widgets_pair:
             for widget in pair:
-                widget.grid_remove()
+                if isinstance(widget, tk.Widget):
+                    widget.grid_remove()
+
             if isinstance(pair[0], tk.Menu):
-                if theme:
+                if theme == self.THEME_DEFAULT:
+                    root['menu'] = pair[0]
+
+                else:  # Dark *or* Transparent
                     root['menu'] = ''
                     pair[theme].grid(**gridopts)
-                else:
-                    root['menu'] = pair[0]
+
             else:
                 pair[theme].grid(**gridopts)
 
         if self.active == theme:
             return  # Don't need to mess with the window manager
+
         else:
             self.active = theme
 
         if sys.platform == 'darwin':
             from AppKit import NSAppearance, NSApplication, NSMiniaturizableWindowMask, NSResizableWindowMask
             root.update_idletasks()  # need main window to be created
-            appearance = NSAppearance.appearanceNamed_(theme and
-                                                       'NSAppearanceNameDarkAqua' or
-                                                       'NSAppearanceNameAqua')
+            if theme == self.THEME_DEFAULT:
+                appearance = NSAppearance.appearanceNamed_('NSAppearanceNameAqua')
+
+            else:  # Dark (Transparent only on win32)
+                appearance = NSAppearance.appearanceNamed_('NSAppearanceNameDarkAqua')
+
             for window in NSApplication.sharedApplication().windows():
                 window.setStyleMask_(window.styleMask() & ~(
                     NSMiniaturizableWindowMask | NSResizableWindowMask))  # disable zoom
@@ -426,14 +447,30 @@ class _Theme(object):
             GetWindowLongW = ctypes.windll.user32.GetWindowLongW  # noqa: N806 # ctypes
             SetWindowLongW = ctypes.windll.user32.SetWindowLongW  # noqa: N806 # ctypes
 
-            root.overrideredirect(theme and True or False)
-            root.attributes("-transparentcolor", theme > 1 and 'grey4' or '')
+            # FIXME: Lose the "treat this like a boolean" bullshit
+            if theme == self.THEME_DEFAULT:
+                root.overrideredirect(False)
+
+            else:
+                root.overrideredirect(True)
+
+            if theme == self.THEME_TRANSPARENT:
+                root.attributes("-transparentcolor", 'grey4')
+
+            else:
+                root.attributes("-transparentcolor", '')
+
             root.withdraw()
             root.update_idletasks()  # Size and windows styles get recalculated here
             hwnd = ctypes.windll.user32.GetParent(root.winfo_id())
             SetWindowLongW(hwnd, GWL_STYLE, GetWindowLongW(hwnd, GWL_STYLE) & ~WS_MAXIMIZEBOX)  # disable maximize
-            SetWindowLongW(hwnd, GWL_EXSTYLE, theme > 1 and WS_EX_APPWINDOW |
-                           WS_EX_LAYERED or WS_EX_APPWINDOW)  # Add to taskbar
+
+            if theme == self.THEME_TRANSPARENT:
+                SetWindowLongW(hwnd, GWL_EXSTYLE, WS_EX_APPWINDOW | WS_EX_LAYERED)  # Add to taskbar
+
+            else:
+                SetWindowLongW(hwnd, GWL_EXSTYLE, WS_EX_APPWINDOW)  # Add to taskbar
+
             root.deiconify()
             root.wait_visibility()  # need main window to be displayed before returning
 
@@ -446,11 +483,25 @@ class _Theme(object):
                 children = Window()
                 nchildren = c_uint()
                 XQueryTree(dpy, root.winfo_id(), byref(xroot), byref(parent), byref(children), byref(nchildren))
-                XChangeProperty(dpy, parent, motif_wm_hints_property, motif_wm_hints_property, 32,
-                                PropModeReplace, theme and motif_wm_hints_dark or motif_wm_hints_normal, 5)
+                if theme == self.THEME_DEFAULT:
+                    wm_hints = motif_wm_hints_normal
+
+                else:  # Dark *or* Transparent
+                    wm_hints = motif_wm_hints_dark
+
+                XChangeProperty(
+                    dpy, parent, motif_wm_hints_property, motif_wm_hints_property, 32, PropModeReplace, wm_hints, 5
+                )
+
                 XFlush(dpy)
+
             else:
-                root.overrideredirect(theme and 1 or 0)
+                if theme == self.THEME_DEFAULT:
+                    root.overrideredirect(False)
+
+                else:  # Dark *or* Transparent
+                    root.overrideredirect(True)
+
             root.deiconify()
             root.wait_visibility()  # need main window to be displayed before returning
 

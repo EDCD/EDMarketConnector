@@ -1799,18 +1799,14 @@ class AppWindow(object):
 
     def onenter(self, event=None) -> None:
         """Handle when our window gains focus."""
-        # TODO: This assumes that 1) transparent is at least 2, 2) there are
-        #       no new themes added after that.
-        if config.get_int('theme') > 1:
+        if config.get_int('theme') == theme.THEME_TRANSPARENT:
             self.w.attributes("-transparentcolor", '')
             self.blank_menubar.grid_remove()
             self.theme_menubar.grid(row=0, columnspan=2, sticky=tk.NSEW)
 
     def onleave(self, event=None) -> None:
         """Handle when our window loses focus."""
-        # TODO: This assumes that 1) transparent is at least 2, 2) there are
-        #       no new themes added after that.
-        if config.get_int('theme') > 1 and event.widget == self.w:
+        if config.get_int('theme') == theme.THEME_TRANSPARENT and event.widget == self.w:
             self.w.attributes("-transparentcolor", 'grey4')
             self.theme_menubar.grid_remove()
             self.blank_menubar.grid(row=0, columnspan=2, sticky=tk.NSEW)
@@ -1887,7 +1883,7 @@ sys.path: {sys.path}'''
                  )
 
     if args.reset_ui:
-        config.set('theme', 0)  # 'Default' theme uses ID 0
+        config.set('theme', theme.THEME_DEFAULT)
         config.set('ui_transparency', 100)  # 100 is completely opaque
         config.delete('font', suppress=True)
         config.delete('font_size', suppress=True)
