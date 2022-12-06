@@ -21,10 +21,6 @@ from tkinter import font as tk_font
 from tkinter import ttk
 from typing import TYPE_CHECKING, Any, Optional
 
-if sys.platform == 'win32':
-    import subprocess
-    from winreg import HKEY_CLASSES_ROOT, HKEY_CURRENT_USER, CloseKey, OpenKeyEx, QueryValueEx
-
 if TYPE_CHECKING:
     def _(x: str) -> str: ...
 
@@ -136,48 +132,40 @@ class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label, object)
         self.clipboard_append(self['text'])
 
 
-def openurl(url: str) -> None:  # noqa: CCR001
-    """
+def openurl(url: str) -> None:
+    r"""
     Open the given URL in appropriate browser.
 
+    2022-12-06:
+    Firefox itself will gladly attempt to use very long URLs in its URL
+    input.  Up to 16384 was attempted, but the Apache instance this was
+    tested against only allowed up to 8207 total URL length to pass, that
+    being 8190 octets of REQUEST_URI (path + GET params).
+
+    Testing from Windows 10 Home 21H2 cmd.exe with:
+
+        "<path to>\firefox.exe" -osint -url "<test url>"
+
+    only allowed 8115 octest of REQUEST_URI to pass through.
+
+    Microsoft Edge yielded 8092 octets.  Google Chrome yielded 8093 octets.
+
+    However, this is actually the limit of how long a CMD.EXE command-line
+    can be.  The URL was being cut off *there*.
+
+    The 8207 octet URL makes it through `webbrowser.open(<url>)` to:
+
+        Firefox 107.0.1
+        Microsoft Edge 108.0.1462.42
+        Google Chrome 108.0.5359.95
+
+    This was also tested as working *with* the old winreg/subprocess code,
+    so it wasn't even suffering from the same limit as CMD.EXE.
+
+    Conclusion: No reason to not just use `webbrowser.open()`, as prior
+    to e280d6c2833c25867b8139490e68ddf056477917 there was a bug, introduced
+    in 5989acd0d3263e54429ff99769ff73a20476d863, which meant the code always
+    ended up using `webbrowser.open()` *anyway*.
     :param url: URL to open.
     """
-    if sys.platform == 'win32':
-        # FIXME: Is still still true with supported Windows 10 and 11 ?
-        # On Windows webbrowser.open calls os.startfile which calls ShellExecute which can't handle long arguments,
-        # so discover and launch the browser directly.
-        # https://blogs.msdn.microsoft.com/oldnewthing/20031210-00/?p=41553
-        try:
-            hkey = OpenKeyEx(HKEY_CURRENT_USER,
-                             r'Software\Microsoft\Windows\Shell\Associations\UrlAssociations\https\UserChoice')
-            (value, typ) = QueryValueEx(hkey, 'ProgId')
-            CloseKey(hkey)
-            if value in ['IE.HTTP', 'AppXq0fevzme2pys62n3e0fbqa7peapykr8v']:
-                # IE and Edge can't handle long arguments so just use webbrowser.open and hope
-                # https://blogs.msdn.microsoft.com/ieinternals/2014/08/13/url-length-limits/
-                cls = None
-
-            else:
-                cls = value
-
-        except Exception:
-            cls = 'https'
-
-        if cls:
-            try:
-                hkey = OpenKeyEx(HKEY_CLASSES_ROOT, rf'{cls}\shell\open\command')
-                (value, typ) = QueryValueEx(hkey, '')
-                CloseKey(hkey)
-                if 'iexplore' not in value.lower():
-                    if '%1' in value:
-                        subprocess.Popen(value.replace('%1', url))
-
-                    else:
-                        subprocess.Popen(f'{value} "{url}"')
-
-                    return
-
-            except Exception:
-                pass
-
     webbrowser.open(url)
