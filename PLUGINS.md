@@ -597,7 +597,7 @@ This gets called when EDMarketConnector sees a new entry in the game's journal.
 Content of `state` (updated to the current journal entry):
 
 | Field                |            Type             | Description                                                                                                     |
-| :------------------- | :-------------------------: | :-------------------------------------------------------------------------------------------------------------- |
+| :------------------- | :-------------------------: |:----------------------------------------------------------------------------------------------------------------|
 | `GameLanguage`       |       `Optional[str]`       | `language` value from `Fileheader` event.                                                                       |
 | `GameVersion`        |       `Optional[str]`       | `version` value from `Fileheader` event.                                                                        |
 | `GameBuild`          |       `Optional[str]`       | `build` value from `Fileheader` event.                                                                          |
@@ -626,7 +626,7 @@ Content of `state` (updated to the current journal entry):
 | `ModulesValue`       |            `int`            | Value of the current ship's modules                                                                             |
 | `Rebuy`              |            `int`            | Current ship's rebuy cost                                                                                       |
 | `Modules`            |           `dict`            | Currently fitted modules                                                                                        |
-| `NavRoute`           |           `dict`            | Last plotted multi-hop route                                                                                    |
+| `NavRoute`           |           `dict`            | Last plotted multi-hop route[1]                                                                                 |
 | `ModuleInfo`         |           `dict`            | Last loaded ModulesInfo.json data                                                                               |
 | `IsDocked`           |           `bool`            | Whether the Cmdr is currently docked *in their own ship*.                                                       |
 | `OnFoot`             |           `bool`            | Whether the Cmdr is on foot                                                                                     |
@@ -638,15 +638,29 @@ Content of `state` (updated to the current journal entry):
 | `BackpackJSON`       |           `dict`            | Content of Backpack.json as of last read.                                                                       |
 | `ShipLockerJSON`     |           `dict`            | Content of ShipLocker.json as of last read.                                                                     |
 | `SuitCurrent`        |           `dict`            | CAPI-returned data of currently worn suit.  NB: May be `None` if no data.                                       |
-| `Suits`              |          `dict`[1]          | CAPI-returned data of owned suits.  NB: May be `None` if no data.                                               |
+| `Suits`              |          `dict`[2]          | CAPI-returned data of owned suits.  NB: May be `None` if no data.                                               |
 | `SuitLoadoutCurrent` |           `dict`            | CAPI-returned data of current Suit Loadout.  NB: May be `None` if no data.                                      |
-| `SuitLoadouts`       |          `dict`[1]          | CAPI-returned data of all Suit Loadouts.  NB: May be `None` if no data.                                         |
+| `SuitLoadouts`       |          `dict`[2]          | CAPI-returned data of all Suit Loadouts.  NB: May be `None` if no data.                                         |
 | `Taxi`               |      `Optional[bool]`       | Whether or not we're currently in a taxi. NB: This is best effort with what the journals provide.               |
 | `Dropship`           |      `Optional[bool]`       | Whether or not the above taxi is a Dropship                                                                     |
 | `Body`               |       `Optional[str]`       | The body we're currently on / in the SOI of                                                                     |
 | `BodyType`           |       `Optional[str]`       | The type of body that `Body` refers to                                                                          |
 
-[1] - Some data from the CAPI is sometimes returned as a `list` (when all 
+[1] - Contents of `NavRoute` not changed if a `NavRouteClear` event is seen,
+but plugins will see the `NavRouteClear` event.
+
+If EDMarketConnector is restarted whilst the game is running then
+`NavRoute` will be populated with current 'NavRoute.json' contents (assuming
+that the file exists).  Thus `NavRoute` will have the data when the
+synthetic `StartUp` event is sent to plugins.  NB: If the contents of the file
+indicate a `NavRouteClear` then that's what will be passed.
+
+If the *game* is restarted then `Fileheader` in the new Journal file will
+cause `state['NavRoute'] = None`, but if you open the galaxy map in-game and
+cause an automatic re-plot of last route, then a new `NavRoute` event will
+also be generated and passed to plugins.
+
+[2] - Some data from the CAPI is sometimes returned as a `list` (when all 
 members are present) and other times as an integer-keyed `dict` (when at 
 least one member is missing, so the indices are not contiguous).  We choose to
 always convert to the integer-keyed `dict` form so that code utilising the data
@@ -732,6 +746,14 @@ time does *not* count as docked for this.
 In general on-foot, including being in a taxi, might not set this 100%
 correctly.  Its main use in core code is to detect being docked so as to send
 any stored EDDN messages due to "Delay sending until docked" option.
+
+
+New in version 5.7.0:
+
+`state['NavRoute']` will be populated from the file, if present, if you
+re-start EDMarketConnector.  That will be present when plugins are invoked
+with the synthetic `StartUp` event.  NB: Might just be a `NavRouteClear` event
+if that's what was in the file.
 
 ___
 
