@@ -49,6 +49,37 @@ if __name__ == '__main__':
         sys.stdout = sys.stderr = open(join(tempfile.gettempdir(), f'{appname}.log'), mode='wt', buffering=1)
     # TODO: Test: Make *sure* this redirect is working, else py2exe is going to cause an exit popup
 
+    try:
+        import subprocess
+        git_cmd = subprocess.Popen('git branch --show-current'.split(),
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.STDOUT
+                                   )
+        out, err = git_cmd.communicate()
+        git_branch = out.decode().rstrip('\n')
+
+        if (
+            git_branch == 'develop'
+            and (
+                (
+                    sys.platform == 'linux'
+                    and environ.get('USER') is not None
+                    and environ['USER'] not in ['ad', 'athan']
+                )
+                or (
+                    sys.platform == 'win32'
+                    and environ.get('USERNAME') is not None
+                    and environ['USERNAME'] not in ['XAthan']
+                )
+            )
+        ):
+            print("Why are you running the develop branch if you're not a developer?")
+            sys.exit(-1)
+
+    except Exception:
+        pass
+
+
 # These need to be after the stdout/err redirect because they will cause
 # logging to be set up.
 # isort: off
