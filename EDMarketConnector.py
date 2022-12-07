@@ -74,6 +74,9 @@ if __name__ == '__main__':
             )
         ):
             print("Why are you running the develop branch if you're not a developer?")
+            print("Please check https://github.com/EDCD/EDMarketConnector/wiki/Running-from-source#running-from-source")
+            print("You probably want the 'stable' branch.")
+            print("\n\rIf Athanasius or A_D asked you to run this, tell them about this message.")
             sys.exit(-1)
 
     except Exception:
