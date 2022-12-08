@@ -1080,17 +1080,22 @@ class Session(object):
         """
         if self.credentials is None:
             # Can't tell if beta or not
+            logger.warning("Dropping CAPI request because unclear if game beta or not")
             return ''
 
         if self.credentials['beta']:
+            logger.debug(f"Using {SERVER_BETA} because {self.credentials['beta']=}")
             return SERVER_BETA
 
         if monitor.is_live_galaxy():
+            logger.debug(f"Using {SERVER_LIVE} because monitor.is_live_galaxy() was True")
             return SERVER_LIVE
 
-        # return SERVER_LEGACY # Not Yet
-        logger.warning("Dropping CAPI request because this is the Legacy galaxy, which is not yet supported")
-        return ""
+        else:
+            logger.debug(f"Using {SERVER_LEGACY} because monitor.is_live_galaxy() was False")
+            return SERVER_LEGACY
+
+        return ''
     ######################################################################
 
 
