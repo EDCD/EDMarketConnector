@@ -1210,8 +1210,7 @@ class AppWindow(object):
                     monitor.state['Loan'] = capi_response.capi_data['commander'].get('debt', 0)
 
                 # stuff we can do when not docked
-                # TODO: Use plug.notify_capi_legacy if Legacy host
-                err = plug.notify_newdata(capi_response.capi_data, monitor.is_beta)
+                err = plug.notify_capidata(capi_response.capi_data, monitor.is_beta)
                 self.status['text'] = err and err or ''
                 if err:
                     play_bad = True
