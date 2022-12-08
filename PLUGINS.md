@@ -98,6 +98,12 @@ liable to change without notice.
 
 `from prefs import prefsVersion` - to allow for versioned preferences.
 
+`from companion import CAPIData, SERVER_LIVE, SERVER_LEGACY, SERVER_BETA` -
+`CAPIData` is the actual type of `data` as passed into `cmdr_data()` and
+`cmdr_data_legacy()`.
+See [Commander Data from Frontier CAPI](#commander-data-from-frontier-capi))
+for further information.
+
 `import edmc_data` (or specific 'from' imports) - This contains various static
 data that used to be in other files.  You should **not** now import anything
 from the original files unless specified as allowed in this section.
@@ -881,8 +887,14 @@ constants.
 ---
 
 ### Commander Data from Frontier CAPI
+If a plugin has a `cmdr_data()` function it gets called when the application
+has just fetched fresh Cmdr and station data from Frontier's servers, **but not
+for the Legacy galaxy**.  See `cmdr_data_legacy()` below for Legacy data
+handling.
 
 ```python
+from companion import CAPIData, SERVER_LIVE, SERVER_LEGACY, SERVER_BETA
+
 def cmdr_data(data, is_beta):
     """
     We have new data on our commander
@@ -891,18 +903,29 @@ def cmdr_data(data, is_beta):
         raise ValueError("this isn't possible")
 
     logger.info(data['commander']['name'])
-```
 
-This gets called when the application has just fetched fresh Cmdr and station 
-data from Frontier's servers, **but not for the Legacy galaxy**.
+    # Determining source galaxy for the data
+    if data.source_host == SERVER_LIVE:
+        ...
+
+    elif data.source_host == SERVER_BETA:
+        ...
+
+    elif data.source_host == SERVER_LEGACY:
+        ...
+```
 
 | Parameter |       Type       | Description                                                                                              |
 | :-------- | :--------------: | :------------------------------------------------------------------------------------------------------- |
-| `data`    | `Dict[str, Any]` | `/profile` API response, with `/market` and `/shipyard` added under the keys `marketdata` and `shipdata` |
+| `data`    |     `CAPIData`   | `/profile` API response, with `/market` and `/shipyard` added under the keys `marketdata` and `shipdata` |
 | `is_beta` |      `bool`      | If the game is currently in beta                                                                         |
-NB: Actually `data` is a custom type, based on `UserDict`, called `CAPIData`,
-and has some extra properties.  However, these are for **internal use only**
-at this time, especially as there are some caveats about at least one of them.
+`CAPIData` is a class, which you can `from companion import CAPIDATA`, and is
+based on `UserDict`.  The actual data from CAPI queries is thus accessible
+via python's normal `data['key']` syntax.  However, being a class, it can also
+have extra properties, such as `source_host`, as shown above.  Plugin authors
+are free to use *that* property, **but MUST NOT rely on any other extra
+properties present in `CAPIData`, they are for internal use only.**
+
 
 #### CAPI data for Legacy
 When CAPI data has been retrieved from the separate CAPI host for the Legacy
