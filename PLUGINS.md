@@ -890,7 +890,7 @@ def cmdr_data(data, is_beta):
 ```
 
 This gets called when the application has just fetched fresh Cmdr and station 
-data from Frontier's servers.
+data from Frontier's servers, **but not for the Legacy galaxy**.
 
 | Parameter |       Type       | Description                                                                                              |
 | :-------- | :--------------: | :------------------------------------------------------------------------------------------------------- |
@@ -899,6 +899,35 @@ data from Frontier's servers.
 NB: Actually `data` is a custom type, based on `UserDict`, called `CAPIData`,
 and has some extra properties.  However, these are for **internal use only**
 at this time, especially as there are some caveats about at least one of them.
+
+#### CAPI data for Legacy
+When CAPI data has been retrieved from the separate CAPI host for the Legacy
+galaxy, because the Journal gameversion indicated the player is playing/last
+played in that galaxy, a different function will be called,
+`cmdr_data_legacy()`.
+
+```python
+def cmdr_data_legacy(data, is_beta):
+    """
+    We have new data on our commander
+    """
+    if data.get('commander') is None or data['commander'].get('name') is None:
+        raise ValueError("this isn't possible")
+
+    logger.info(data['commander']['name'])
+```
+
+**IF AND ONLY IF** your code definitely handles the Live/Legacy split itself
+then you *may* simply:
+
+```python
+def cmdr_data_legacy(data, is_beta):
+    return cmdr_data(data, is_beta)
+```
+
+The core 'eddn' plugin might contain some useful hints about how to handle the
+split **but do not rely on any extra properties on `data` unless they are
+documented in [Available imports](#available-imports) in this document**.
 
 ---
 
