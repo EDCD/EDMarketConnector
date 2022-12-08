@@ -129,11 +129,15 @@ modules for plugin use:
 - sqlite3
 - zipfile
 
-And, of course, anything in the [Python Standard Library](https://docs.python.org/3/library/)
-will always be available, dependent on the version of Python we're using to 
-build Windows installed versions.   Check the 'Startup' line in an application
-[Debug Log File](https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting#debug-log-files)
-for the version of Python being used.
+Unfortunately we cannot promise to include every part of the
+[Python Standard Library](https://docs.python.org/3/library/) due to issues
+with correctly detecting all the modules, and if they're single file or a
+package, and perhaps have sub-modules.  For now, if you find something is
+missing that you need for your plugin, ask us to add it in, and we'll do so on
+a 'best efforts' basis.
+
+See [#1327 - ModuleNotFound when creating a new plugin.](https://github.com/EDCD/EDMarketConnector/issues/1327)
+for some discussion.
 
 
 ---
