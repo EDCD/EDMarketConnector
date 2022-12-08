@@ -16,7 +16,7 @@ from builtins import object, str
 from os import chdir, environ
 from os.path import dirname, join
 from time import localtime, strftime, time
-from typing import TYPE_CHECKING, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Literal, Optional, Tuple, Union
 
 # Have this as early as possible for people running EDMarketConnector.exe
 # from cmd.exe or a bat file or similar.  Else they might not be in the correct
@@ -1356,7 +1356,7 @@ class AppWindow(object):
 
                 # Ensure the ship type/name text is clickable, if it should be.
                 if monitor.state['Modules']:
-                    ship_state = True
+                    ship_state: Literal['normal', 'disabled'] = tk.NORMAL
 
                 else:
                     ship_state = tk.DISABLED
