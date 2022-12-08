@@ -760,10 +760,6 @@ class Session(object):
             :return: The resulting CAPI data, of type CAPIData.
             """
             capi_data: CAPIData
-            if capi_host == SERVER_LEGACY:
-                logger.warning("Dropping CAPI request because this is the Legacy galaxy")
-                return capi_data
-
             try:
                 logger.trace_if('capi.worker', 'Sending HTTP request...')
                 if conf_module.capi_pretend_down:

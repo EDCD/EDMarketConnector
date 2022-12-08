@@ -1013,11 +1013,6 @@ class AppWindow(object):
             self.status['text'] = _('CAPI query aborted: GameVersion unknown')
             return
 
-        if not monitor.is_live_galaxy():
-            logger.warning("Dropping CAPI request because this is the Legacy galaxy, which is not yet supported")
-            self.status['text'] = 'CAPI for Legacy not yet supported'
-            return
-
         if not monitor.system:
             logger.trace_if('capi.worker', 'Aborting Query: Current star system unknown')
             # LANG: CAPI queries aborted because current star system name unknown
