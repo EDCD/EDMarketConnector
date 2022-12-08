@@ -44,9 +44,6 @@ else:
     UserDict = collections.UserDict  # type: ignore # Otherwise simply use the actual class
 
 
-# Define custom type for the dicts that hold CAPI data
-# CAPIData = NewType('CAPIData', Dict)
-
 capi_query_cooldown = 60  # Minimum time between (sets of) CAPI queries
 capi_default_requests_timeout = 10
 auth_timeout = 30  # timeout for initial auth
@@ -67,8 +64,8 @@ class CAPIData(UserDict):
     def __init__(
             self,
             data: Union[str, Dict[str, Any], 'CAPIData', None] = None,
-            source_host: str = None,
-            source_endpoint: str = None
+            source_host: Optional[str] = None,
+            source_endpoint: Optional[str] = None
     ) -> None:
         if data is None:
             super().__init__()
@@ -652,7 +649,7 @@ class Session(object):
         self.requests_session.headers['User-Agent'] = user_agent
         self.state = Session.STATE_OK
 
-    def login(self, cmdr: str = None, is_beta: Optional[bool] = None) -> bool:
+    def login(self, cmdr: Optional[str] = None, is_beta: Optional[bool] = None) -> bool:
         """
         Attempt oAuth2 login.
 
@@ -921,7 +918,6 @@ class Session(object):
                 break
 
             logger.trace_if('capi.worker', f'Processing query: {query.endpoint}')
-            capi_data: CAPIData
             try:
                 if query.endpoint == self._CAPI_PATH_STATION:
                     capi_data = capi_station_queries(query.capi_host)
