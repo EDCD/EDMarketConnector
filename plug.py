@@ -370,7 +370,7 @@ def notify_dashboard_entry(
     return error
 
 
-def notify_newdata(
+def notify_capidata(
     data: companion.CAPIData,
     is_beta: bool
 ) -> Optional[str]:
@@ -383,13 +383,21 @@ def notify_newdata(
     """
     error = None
     for plugin in PLUGINS:
-        cmdr_data = plugin._get_func('cmdr_data')
+        # TODO: Handle it being Legacy data
+        if data.source_host == companion.SERVER_LEGACY:
+            cmdr_data = plugin._get_func('cmdr_data_legacy')
+
+        else:
+            cmdr_data = plugin._get_func('cmdr_data')
+
         if cmdr_data:
             try:
                 newerror = cmdr_data(data, is_beta)
                 error = error or newerror
+
             except Exception:
                 logger.exception(f'Plugin "{plugin.name}" failed')
+
     return error
 
 

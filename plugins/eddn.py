@@ -2408,9 +2408,28 @@ def journal_entry(  # noqa: C901, CCR001
     return None
 
 
+def cmdr_data_legacy(data: CAPIData, is_beta: bool) -> Optional[str]:
+    """
+    Process new CAPI data for Legacy galaxy.
+
+    Ensuring the correct EDDN `header->gameversion` is achieved by use of
+    `EDDN.capi_gameversion_from_host_endpoint()` in:
+
+        `EDDN.export_outfitting()`
+        `EDDN.export_shipyard()`
+        `EDDN.export_outfitting()`
+
+    Thus we can just call through to the 'not Legacy' version of this function.
+    :param data: CAPI data to process.
+    :param is_beta: bool - True if this is a beta version of the Game.
+    :return: str - Error message, or `None` if no errors.
+    """
+    return cmdr_data(data, is_beta)
+
+
 def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:  # noqa: CCR001
     """
-    Process new CAPI data.
+    Process new CAPI data for not-Legacy galaxy (might be beta).
 
     :param data: CAPI data to process.
     :param is_beta: bool - True if this is a beta version of the Game.

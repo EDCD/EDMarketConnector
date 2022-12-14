@@ -16,7 +16,7 @@ from builtins import object, str
 from os import chdir, environ
 from os.path import dirname, join
 from time import localtime, strftime, time
-from typing import TYPE_CHECKING, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Literal, Optional, Tuple, Union
 
 # Have this as early as possible for people running EDMarketConnector.exe
 # from cmd.exe or a bat file or similar.  Else they might not be in the correct
@@ -1013,11 +1013,6 @@ class AppWindow(object):
             self.status['text'] = _('CAPI query aborted: GameVersion unknown')
             return
 
-        if not monitor.is_live_galaxy():
-            logger.warning("Dropping CAPI request because this is the Legacy galaxy, which is not yet supported")
-            self.status['text'] = 'CAPI for Legacy not yet supported'
-            return
-
         if not monitor.system:
             logger.trace_if('capi.worker', 'Aborting Query: Current star system unknown')
             # LANG: CAPI queries aborted because current star system name unknown
@@ -1210,8 +1205,7 @@ class AppWindow(object):
                     monitor.state['Loan'] = capi_response.capi_data['commander'].get('debt', 0)
 
                 # stuff we can do when not docked
-                # TODO: Use plug.notify_capi_legacy if Legacy host
-                err = plug.notify_newdata(capi_response.capi_data, monitor.is_beta)
+                err = plug.notify_capidata(capi_response.capi_data, monitor.is_beta)
                 self.status['text'] = err and err or ''
                 if err:
                     play_bad = True
@@ -1357,7 +1351,7 @@ class AppWindow(object):
 
                 # Ensure the ship type/name text is clickable, if it should be.
                 if monitor.state['Modules']:
-                    ship_state = True
+                    ship_state: Literal['normal', 'disabled'] = tk.NORMAL
 
                 else:
                     ship_state = tk.DISABLED

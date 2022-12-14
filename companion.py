@@ -44,9 +44,6 @@ else:
     UserDict = collections.UserDict  # type: ignore # Otherwise simply use the actual class
 
 
-# Define custom type for the dicts that hold CAPI data
-# CAPIData = NewType('CAPIData', Dict)
-
 capi_query_cooldown = 60  # Minimum time between (sets of) CAPI queries
 capi_default_requests_timeout = 10
 auth_timeout = 30  # timeout for initial auth
@@ -67,8 +64,8 @@ class CAPIData(UserDict):
     def __init__(
             self,
             data: Union[str, Dict[str, Any], 'CAPIData', None] = None,
-            source_host: str = None,
-            source_endpoint: str = None
+            source_host: Optional[str] = None,
+            source_endpoint: Optional[str] = None
     ) -> None:
         if data is None:
             super().__init__()
@@ -652,7 +649,7 @@ class Session(object):
         self.requests_session.headers['User-Agent'] = user_agent
         self.state = Session.STATE_OK
 
-    def login(self, cmdr: str = None, is_beta: Optional[bool] = None) -> bool:
+    def login(self, cmdr: Optional[str] = None, is_beta: Optional[bool] = None) -> bool:
         """
         Attempt oAuth2 login.
 
@@ -763,10 +760,6 @@ class Session(object):
             :return: The resulting CAPI data, of type CAPIData.
             """
             capi_data: CAPIData
-            if capi_host == SERVER_LEGACY:
-                logger.warning("Dropping CAPI request because this is the Legacy galaxy")
-                return capi_data
-
             try:
                 logger.trace_if('capi.worker', 'Sending HTTP request...')
                 if conf_module.capi_pretend_down:
@@ -921,7 +914,6 @@ class Session(object):
                 break
 
             logger.trace_if('capi.worker', f'Processing query: {query.endpoint}')
-            capi_data: CAPIData
             try:
                 if query.endpoint == self._CAPI_PATH_STATION:
                     capi_data = capi_station_queries(query.capi_host)
@@ -1080,17 +1072,22 @@ class Session(object):
         """
         if self.credentials is None:
             # Can't tell if beta or not
+            logger.warning("Dropping CAPI request because unclear if game beta or not")
             return ''
 
         if self.credentials['beta']:
+            logger.debug(f"Using {SERVER_BETA} because {self.credentials['beta']=}")
             return SERVER_BETA
 
         if monitor.is_live_galaxy():
+            logger.debug(f"Using {SERVER_LIVE} because monitor.is_live_galaxy() was True")
             return SERVER_LIVE
 
-        # return SERVER_LEGACY # Not Yet
-        logger.warning("Dropping CAPI request because this is the Legacy galaxy, which is not yet supported")
-        return ""
+        else:
+            logger.debug(f"Using {SERVER_LEGACY} because monitor.is_live_galaxy() was False")
+            return SERVER_LEGACY
+
+        return ''
     ######################################################################
 
 
