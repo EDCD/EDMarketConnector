@@ -9,13 +9,11 @@ FDevIDs/ version of the file, copy it over the local one.
 """
 
 
-import csv
 import json
 import pickle
 import subprocess
 import sys
 from collections import OrderedDict
-from traceback import print_exc
 
 import outfitting
 from edmc_data import coriolis_ship_map, ship_name_map
@@ -80,20 +78,8 @@ if __name__ == "__main__":
     add(modules, 'int_stellarbodydiscoveryscanner_advanced',      {'mass': 2})
 
     # Missing
-    add(modules, 'hpt_dumbfiremissilerack_fixed_small_advanced',  {'mass': 2})
-    add(modules, 'hpt_dumbfiremissilerack_fixed_medium_advanced', {'mass': 4})
     add(modules, 'hpt_multicannon_fixed_small_advanced',          {'mass': 2})
     add(modules, 'hpt_multicannon_fixed_medium_advanced',         {'mass': 4})
 
     modules = OrderedDict([(k, modules[k]) for k in sorted(modules)])  # sort for easier diffing
     pickle.dump(modules, open('modules.p', 'wb'))
-
-    # Check data is present for all modules
-    with open('outfitting.csv') as csvfile:
-        reader = csv.DictReader(csvfile, restval='')
-        for row in reader:
-            try:
-                module = outfitting.lookup({'id': row['id'], 'name': row['symbol']}, ship_name_map)
-            except AssertionError:
-                print(row['symbol'])
-                print_exc()
