@@ -118,6 +118,7 @@ outfitting_missiletype_map = {
 }
 
 outfitting_weaponmount_map = {
+    'basic':    'Utility',
     'fixed':    'Fixed',
     'gimbal':   'Gimballed',
     'turret':   'Turreted',
@@ -264,6 +265,7 @@ outfitting_weaponrating_map = {
     'hpt_slugshot_turret_small':                 'E',
     'hpt_slugshot_turret_medium':                'D',
     'hpt_slugshot_turret_large':                 'C',
+    'hpt_xenoscannermk2_basic_tiny':             '?',
 }
 
 # Old standard weapon variants
@@ -282,6 +284,7 @@ outfitting_countermeasure_map = {
     'heatsinklauncher':           ('Heat Sink Launcher', 'I'),
     'plasmapointdefence':         ('Point Defence', 'I'),
     'xenoscanner':                ('Xeno Scanner', 'E'),
+    'xenoscannermk2':             ('Unknown Xeno Scanner Mk II', '?'),
 }
 
 outfitting_utility_map = {
