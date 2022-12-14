@@ -1710,7 +1710,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 pass
 
             else:
-                logger.info(f"Parsed {self.state['GameVersion']=} into {self.version_semantic=}")
+                logger.debug(f"Parsed {self.state['GameVersion']=} into {self.version_semantic=}")
 
             self.is_beta = any(v in self.version.lower() for v in ('alpha', 'beta'))  # type: ignore
         except KeyError:
