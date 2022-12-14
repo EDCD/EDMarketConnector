@@ -970,8 +970,22 @@ def cmdr_data_legacy(data, is_beta):
 then you *may* simply:
 
 ```python
+from companion import SERVER_BETA, SERVER_LEGACY, SERVER_LIVE
+
 def cmdr_data_legacy(data, is_beta):
     return cmdr_data(data, is_beta)
+
+def cmdr_data(data, is_beta):
+    if data.source_host == SERVER_LEGACY:
+        ...
+    elif data.source_host == SERVER_LIVE:
+        ...
+    elif data.source_host == SERVER_BETA:
+        # Would also be indicated by `is_beta == True`
+        ...
+    else:
+        # Unknown source galaxy !
+        ...
 ```
 
 The core 'eddn' plugin might contain some useful hints about how to handle the
