@@ -104,7 +104,7 @@ Plugin Developers
 * The contents of `NavRoute.json` will now be loaded during 'catch-up' when
   EDMarketConnector is (re-)started.  The synthetic `StartUp` (note the 
   capitalisation) event that is emitted after the catch-up ends will have
-  `state['NavRoute]` containing this data.
+  `state['NavRoute']` containing this data.
 
   However, the `Fileheader` event from detecting a subsequent new Journal file
   *will* blank this data again.  Thus, if you're interested in "last plotted
