@@ -27,13 +27,16 @@ produce the Windows executables and installer.
 
 ---
 
-Pre-Release 5.7.0-rc1
+Release 5.7.0
 ===
-This release allows CAPI queries for Legacy players.  This means that the
-'Update' button functionality is restored, along with "Automatically update on
-docking".
+This release re-enables CAPI queries for Legacy players.  As a result, the
+'Update' button functionality is now restored for Legacy players, along with
+"Automatically update on docking" functionality.
 
 * We now test against, and package with, Python 3.11.1, 32-bit.
+
+* This release is functionally identical to 5.7.0-rc1, as no problems were
+  reported with that.
 
 * As noted above, Legacy players now have CAPI functionality once more.
   Plugin developers check below for how you can determine the source galaxy
