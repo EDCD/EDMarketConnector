@@ -910,10 +910,9 @@ constants.
 
 ### Commander Data from Frontier CAPI
 If a plugin has a `cmdr_data()` function it gets called when the application
-has just fetched fresh Cmdr and station data from Frontier's servers, **but not
-for the Legacy galaxy**.  See `cmdr_data_legacy()` below for Legacy data
-handling.
-
+has just fetched fresh Cmdr and station data from Frontier's CAPI servers,
+**but not for the Legacy galaxy**.  See `cmdr_data_legacy()` below for Legacy
+data handling.
 ```python
 from companion import CAPIData, SERVER_LIVE, SERVER_LEGACY, SERVER_BETA
 
@@ -947,6 +946,16 @@ via python's normal `data['key']` syntax.  However, being a class, it can also
 have extra properties, such as `source_host`, as shown above.  Plugin authors
 are free to use *that* property, **but MUST NOT rely on any other extra
 properties present in `CAPIData`, they are for internal use only.**
+
+The contents of `data` will always have at least the data returned by a CAPI
+`/profile` query.  If the player is docked at a station, and the relevant
+services are available then the `lastStarport` key's value will have been
+augmented with `/market` and/or `/shipyard` data.  **But do not assume this
+will always be the case**.
+
+If there is a killswitch in effect for some of the CAPI endpoints, then the
+data passed to this function might not be as complete as you expect.  Code
+defensively.
 
 
 #### CAPI data for Legacy

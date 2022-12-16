@@ -119,10 +119,17 @@ JSON primitives and their python equivalents
 json compound types (`object -- {}` and `array -- []`) may be set.
 
 ### Testing
+You can supply a custom killswitches file for testing against
+EDMarketConnector:
+```bash
+python EDMarketConnector.py --killswitches-file <filename>
+```
+This will be relative to the CWD of the process.
 
-Killswitch files can be tested using the script in `scripts/killswitch_test.py`.
-Providing a file as an argument or `-` for stdin will output the behaviour of
-the provided file, including indicating typos, if applicable.
+Alternatively, killswitch files can be independently tested using the script in
+`scripts/killswitch_test.py`. Providing a file as an argument or `-` for stdin
+will output the behaviour of the provided file, including indicating typos, if
+applicable.
 
 ### Versions
 

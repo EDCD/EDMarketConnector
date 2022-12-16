@@ -168,6 +168,11 @@ if __name__ == '__main__':  # noqa: C901
         help='Have EDDN plugin show what it is tracking',
         action='store_true',
     )
+
+    parser.add_argument(
+        '--killswitches-file',
+        help='Specify a custom killswitches file',
+    )
     ###########################################################################
 
     args = parser.parse_args()
@@ -907,6 +912,12 @@ class AppWindow(object):
 
     def login(self):
         """Initiate CAPI/Frontier login and set other necessary state."""
+        should_return, new_data = killswitch.check_killswitch('capi.auth', {})
+        if should_return:
+            logger.warning('capi.auth has been disabled via killswitch. Returning.')
+            self.status['text'] = 'CAPI auth disabled by killswitch'
+            return
+
         if not self.status['text']:
             # LANG: Status - Attempting to get a Frontier Auth Access Token
             self.status['text'] = _('Logging in...')
@@ -992,6 +1003,13 @@ class AppWindow(object):
         :param event: Tk generated event details.
         """
         logger.trace_if('capi.worker', 'Begin')
+        should_return, new_data = killswitch.check_killswitch('capi.auth', {})
+        if should_return:
+            logger.warning('capi.auth has been disabled via killswitch. Returning.')
+            self.status['text'] = 'CAPI auth disabled by killswitch'
+            hotkeymgr.play_bad()
+            return
+
         auto_update = not event
         play_sound = (auto_update or int(event.type) == self.EVENT_VIRTUAL) and not config.get_int('hotkey_mute')
 
@@ -1210,10 +1228,15 @@ class AppWindow(object):
                 if err:
                     play_bad = True
 
-                # Export market data
-                if not self.export_market_data(capi_response.capi_data):
-                    err = 'Error: Exporting Market data'
-                    play_bad = True
+                should_return, new_data = killswitch.check_killswitch('capi.request./market', {})
+                if should_return:
+                    logger.warning("capi.request./market has been disabled by killswitch.  Returning.")
+
+                else:
+                    # Export market data
+                    if not self.export_market_data(capi_response.capi_data):
+                        err = 'Error: Exporting Market data'
+                        play_bad = True
 
                 self.capi_query_holdoff_time = capi_response.query_time + companion.capi_query_cooldown
 
@@ -1460,7 +1483,9 @@ class AppWindow(object):
                         auto_update = True
 
             if auto_update:
-                self.w.after(int(SERVER_RETRY * 1000), self.capi_request_data)
+                should_return, new_data = killswitch.check_killswitch('capi.auth', {})
+                if not should_return:
+                    self.w.after(int(SERVER_RETRY * 1000), self.capi_request_data)
 
             if entry['event'] == 'ShutDown':
                 # Enable WinSparkle automatic update checks
@@ -1859,10 +1884,13 @@ Locale LC_TIME: {locale.getlocale(locale.LC_TIME)}'''
                  )
 
 
-def setup_killswitches():
+def setup_killswitches(filename: Optional[str]):
     """Download and setup the main killswitch list."""
     logger.debug('fetching killswitches...')
-    killswitch.setup_main_list()
+    if filename is not None:
+        filename = "file:" + filename
+
+    killswitch.setup_main_list(filename)
 
 
 def show_killswitch_poppup(root=None):
@@ -1891,9 +1919,9 @@ def show_killswitch_poppup(root=None):
     for version in kills:
         tk.Label(frame, text=f'Version: {version.version}').grid(row=idx, sticky=tk.W)
         idx += 1
-        for id, reason in version.kills.items():
+        for id, kill in version.kills.items():
             tk.Label(frame, text=id).grid(column=0, row=idx, sticky=tk.W, padx=(10, 0))
-            tk.Label(frame, text=reason).grid(column=1, row=idx, sticky=tk.E, padx=(0, 10))
+            tk.Label(frame, text=kill.reason).grid(column=1, row=idx, sticky=tk.E, padx=(0, 10))
             idx += 1
         idx += 1
 
@@ -2026,7 +2054,8 @@ sys.path: {sys.path}'''
 
     Translations.install(config.get_str('language'))  # Can generate errors so wait til log set up
 
-    setup_killswitches()
+    setup_killswitches(args.killswitches_file)
+
     root = tk.Tk(className=appname.lower())
     if sys.platform != 'win32' and ((f := config.get_str('font')) is not None or f != ''):
         size = config.get_int('font_size', default=-1)

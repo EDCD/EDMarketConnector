@@ -28,6 +28,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, OrderedDic
 import requests
 
 import config as conf_module
+import killswitch
 import protocol
 from config import config, user_agent
 from edmc_data import companion_category_map as category_map
@@ -325,6 +326,11 @@ class Auth(object):
         """
         logger.debug(f'Trying for "{self.cmdr}"')
 
+        should_return, new_data = killswitch.check_killswitch('capi.auth', {})
+        if should_return:
+            logger.warning('capi.auth has been disabled via killswitch. Returning.')
+            return None
+
         self.verifier = None
         cmdrs = config.get_list('cmdrs', default=[])
         logger.debug(f'Cmdrs: {cmdrs}')
@@ -393,9 +399,11 @@ class Auth(object):
         return None
 
     def authorize(self, payload: str) -> str:  # noqa: CCR001
-        """Handle oAuth authorization callback.
+        """
+        Handle oAuth authorization callback.
 
-        :return: access token if successful, otherwise raises CredentialsError.
+        :return: access token if successful
+        :raises CredentialsError
         """
         logger.debug('Checking oAuth authorization callback')
         if '?' not in payload:
@@ -593,7 +601,7 @@ class EDMCCAPIFailedRequest(EDMCCAPIReturn):
     ):
         super().__init__(query_time=query_time, play_sound=play_sound, auto_update=auto_update)
         self.message: str = message  # User-friendly reason for failure.
-        self.exception: int = exception  # Exception that recipient should raise.
+        self.exception: Exception = exception  # Exception that recipient should raise.
 
 
 class Session(object):
@@ -611,7 +619,7 @@ class Session(object):
     def __init__(self) -> None:
         self.state = Session.STATE_INIT
         self.credentials: Optional[Dict[str, Any]] = None
-        self.requests_session: Optional[requests.Session] = None
+        self.requests_session: Optional[requests.Session] = requests.Session()
         self.auth: Optional[Auth] = None
         self.retrying = False  # Avoid infinite loop when successful auth / unsuccessful query
         self.tk_master: Optional[tk.Tk] = None
@@ -644,9 +652,10 @@ class Session(object):
     def start_frontier_auth(self, access_token: str) -> None:
         """Start an oAuth2 session."""
         logger.debug('Starting session')
-        self.requests_session = requests.Session()
-        self.requests_session.headers['Authorization'] = f'Bearer {access_token}'
-        self.requests_session.headers['User-Agent'] = user_agent
+        if self.requests_session is not None:
+            self.requests_session.headers['Authorization'] = f'Bearer {access_token}'
+            self.requests_session.headers['User-Agent'] = user_agent
+
         self.state = Session.STATE_OK
 
     def login(self, cmdr: Optional[str] = None, is_beta: Optional[bool] = None) -> bool:
@@ -655,6 +664,11 @@ class Session(object):
 
         :return: True if login succeeded, False if re-authorization initiated.
         """
+        should_return, new_data = killswitch.check_killswitch('capi.auth', {})
+        if should_return:
+            logger.warning('capi.auth has been disabled via killswitch. Returning.')
+            return False
+
         if not Auth.CLIENT_ID:
             logger.error('self.CLIENT_ID is None')
             raise CredentialsError('cannot login without a valid Client ID')
@@ -759,7 +773,12 @@ class Session(object):
             :param timeout: requests query timeout to use.
             :return: The resulting CAPI data, of type CAPIData.
             """
-            capi_data: CAPIData
+            capi_data: CAPIData = CAPIData()
+            should_return, new_data = killswitch.check_killswitch('capi.request.' + capi_endpoint, {})
+            if should_return:
+                logger.warning(f"capi.request.{capi_endpoint} has been disabled by killswitch.  Returning.")
+                return capi_data
+
             try:
                 logger.trace_if('capi.worker', 'Sending HTTP request...')
                 if conf_module.capi_pretend_down:
@@ -841,6 +860,10 @@ class Session(object):
             """
             station_data = capi_single_query(capi_host, self.FRONTIER_CAPI_PATH_PROFILE, timeout=timeout)
 
+            if not station_data.get('commander'):
+                # If even this doesn't exist, probably killswitched.
+                return station_data
+
             if not station_data['commander'].get('docked') and not monitor.state['OnFoot']:
                 return station_data
 
@@ -881,6 +904,10 @@ class Session(object):
 
             if services.get('commodities'):
                 market_data = capi_single_query(capi_host, self.FRONTIER_CAPI_PATH_MARKET, timeout=timeout)
+                if not market_data.get('id'):
+                    # Probably killswitched
+                    return station_data
+
                 if last_starport_id != int(market_data['id']):
                     logger.warning(f"{last_starport_id!r} != {int(market_data['id'])!r}")
                     raise ServerLagging()
@@ -891,6 +918,10 @@ class Session(object):
 
             if services.get('outfitting') or services.get('shipyard'):
                 shipyard_data = capi_single_query(capi_host, self.FRONTIER_CAPI_PATH_SHIPYARD, timeout=timeout)
+                if not shipyard_data.get('id'):
+                    # Probably killswitched
+                    return station_data
+
                 if last_starport_id != int(shipyard_data['id']):
                     logger.warning(f"{last_starport_id!r} != {int(shipyard_data['id'])!r}")
                     raise ServerLagging()
@@ -946,7 +977,8 @@ class Session(object):
             # event too, so assume it will be polling the response queue.
             if query.tk_response_event is not None:
                 logger.trace_if('capi.worker', 'Sending <<CAPIResponse>>')
-                self.tk_master.event_generate('<<CAPIResponse>>')
+                if self.tk_master is not None:
+                    self.tk_master.event_generate('<<CAPIResponse>>')
 
         logger.info('CAPI worker thread DONE')
 
