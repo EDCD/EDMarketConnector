@@ -912,6 +912,12 @@ class AppWindow(object):
 
     def login(self):
         """Initiate CAPI/Frontier login and set other necessary state."""
+        should_return, new_data = killswitch.check_killswitch('capi.auth', {})
+        if should_return:
+            logger.warning('capi.auth has been disabled via killswitch. Returning.')
+            self.status['text'] = 'CAPI auth disabled by killswitch'
+            return
+
         if not self.status['text']:
             # LANG: Status - Attempting to get a Frontier Auth Access Token
             self.status['text'] = _('Logging in...')
@@ -997,6 +1003,13 @@ class AppWindow(object):
         :param event: Tk generated event details.
         """
         logger.trace_if('capi.worker', 'Begin')
+        should_return, new_data = killswitch.check_killswitch('capi.auth', {})
+        if should_return:
+            logger.warning('capi.auth has been disabled via killswitch. Returning.')
+            self.status['text'] = 'CAPI auth disabled by killswitch'
+            hotkeymgr.play_bad()
+            return
+
         auto_update = not event
         play_sound = (auto_update or int(event.type) == self.EVENT_VIRTUAL) and not config.get_int('hotkey_mute')
 
@@ -1465,7 +1478,9 @@ class AppWindow(object):
                         auto_update = True
 
             if auto_update:
-                self.w.after(int(SERVER_RETRY * 1000), self.capi_request_data)
+                should_return, new_data = killswitch.check_killswitch('capi.auth', {})
+                if not should_return:
+                    self.w.after(int(SERVER_RETRY * 1000), self.capi_request_data)
 
             if entry['event'] == 'ShutDown':
                 # Enable WinSparkle automatic update checks
