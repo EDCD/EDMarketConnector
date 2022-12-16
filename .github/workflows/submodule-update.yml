@@ -33,12 +33,14 @@ jobs:
         continue-on-error: true
         run: |
           changes=$(git status --porcelain)
+          git status --porcelain
           if [ -n "${changes}" ];
           then
             echo '::set-output changes=true'
+          else
+            echo '::set-output changes=false'
+            exit 0
           fi
-          echo '::set-output changes=false'
-          exit 0
       
       - name: Create submodules changes branch
         if: steps.check_for_changes.outputs.changes == 'true'
