@@ -36,13 +36,132 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 5.6.1</title>
+			<title>Release 5.7.0</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
 
-<p>We now test against, and package with, Python 3.10.8.</p>
+<p>We now test against, and package with, Python 3.11.1.</p>
 <p><strong>As a consequence of this we no longer support Windows 7.</strong><br>
+
+<h2>Release 5.7.0</h2>
+<p>This release re-enables CAPI queries for Legacy players.  As a result, the
+'Update' button functionality is now restored for Legacy players, along with
+"Automatically update on docking" functionality.</p>
+<ul>
+<li>
+<p>We now test against, and package with, Python 3.11.1, 32-bit.</p>
+</li>
+<li>
+<p>This release is functionally identical to 5.7.0-rc1, as no problems were
+reported with that.</p>
+</li>
+<li>
+<p>As noted above, Legacy players now have CAPI functionality once more.
+Plugin developers check below for how you can determine the source galaxy
+of such data.</p>
+</li>
+<li>
+<p>Due to a bug it turned out that a workaround for "old browsers don't support
+very long URLs" had been inactive since late 2019.  As no-one has noticed
+or complained we've now removed the defunct code in favour of the simple
+<code>webbrowser.open(&lt;url&gt;)</code>.</p>
+<p>Testing showed that all of Firefox, Chrome and Chrome-based Edge worked with
+very long URLs without issues.</p>
+</li>
+<li>
+<p><code>EDMC.exe -n</code> had been broken for a while, it now functions once more.</p>
+</li>
+<li>
+<p>Some output related to detecting and parsing <code>gameversion</code> from Journals
+has been moved from INFO to DEBUG.  This returns the output of any <code>EDMC.exe</code>
+command to the former, quieter, version.</p>
+</li>
+</ul>
+<h2><a id="user-content-bugs" class="anchor" aria-hidden="true" href="#bugs"><span aria-hidden="true" class="octicon octicon-link"></span></a>Bugs</h2>
+<ul>
+<li>
+<p>A corner case of "game not running" and "user presses 'Update' button" would
+result in an empty <code>uploaderID</code> string being sent to EDDN.  Such messages are
+still accepted by the EDDN Gateway, and the Relay then obfuscates this field
+anyway.  So, at worse, this would make it look like the same uploader was in
+lots of different places.  This has been fixed.</p>
+</li>
+<li>
+<p>The message about converting legacy <code>replay.jsonl</code> was being emitted even
+when there was no file to convert.  This has been fixed.</p>
+</li>
+</ul>
+<h2><a id="user-content-plugin-developers" class="anchor" aria-hidden="true" href="#plugin-developers"><span aria-hidden="true" class="octicon octicon-link"></span></a>Plugin Developers</h2>
+<ul>
+<li>
+<p>An erroneous statement about "all of Python stdlib" in PLUGINS.md has been
+corrected.  We don't/can't easily include all of this.  Ask if any part of it
+you require is missing.</p>
+</li>
+<li>
+<p>In order to not pass Legacy data to plugins without them being aware of it
+there is now a new function <code>cmdr_data_legacy()</code>, which mirrors the
+functionality of <code>cmdr_data()</code>, but for Legacy data only.  See PLUGINS.md
+for more details.</p>
+</li>
+<li>
+<p>The <code>data</code> passed to <code>cmdr_data()</code> and <code>cmdr_data_legacy()</code> is now correctly
+typed as <code>CAPIData</code>.  This is a sub-class of <code>UserDict</code>, so you can continue
+to use it as such.  However, it also has one extra property, <code>source_host</code>,
+which can be used to determine if the data was from the Live or Legacy
+CAPI endpoint host.  See PLUGINS.md for more details.</p>
+</li>
+<li>
+<p>If any plugin had been attempting to make use of <code>config.get_int('theme')</code>,
+then be aware that we've finally moved from hard-coded values to actual
+defined constants.  Example use would be as in:</p>
+<div class="highlight highlight-source-python"><pre><span class="pl-k">from</span> <span class="pl-s1">config</span> <span class="pl-k">import</span> <span class="pl-s1">config</span>
+<span class="pl-k">from</span> <span class="pl-s1">theme</span> <span class="pl-k">import</span> <span class="pl-s1">theme</span>
+
+<span class="pl-s1">active_theme</span> <span class="pl-c1">=</span> <span class="pl-s1">config</span>.<span class="pl-en">get_int</span>(<span class="pl-s">'theme'</span>)
+<span class="pl-k">if</span> <span class="pl-s1">active_theme</span> <span class="pl-c1">==</span> <span class="pl-s1">theme</span>.<span class="pl-v">THEME_DARK</span>:
+    ...
+<span class="pl-k">elif</span> <span class="pl-s1">active_theme</span> <span class="pl-c1">==</span> <span class="pl-s1">theme</span>.<span class="pl-v">THEME_TRANSPARENT</span>:
+    ...
+<span class="pl-k">elif</span> <span class="pl-s1">active_theme</span> <span class="pl-c1">==</span> <span class="pl-s1">theme</span>.<span class="pl-v">THEME_DEFAULT</span>:
+    ...
+<span class="pl-k">else</span>:
+    ...</pre></div>
+<p>But remember that all tkinter widgets in plugins will inherit the main UI
+current theme colours anyway.</p>
+</li>
+<li>
+<p>The contents of <code>NavRoute.json</code> will now be loaded during 'catch-up' when
+EDMarketConnector is (re-)started.  The synthetic <code>StartUp</code> (note the
+capitalisation) event that is emitted after the catch-up ends will have
+<code>state['NavRoute']</code> containing this data.</p>
+<p>However, the <code>Fileheader</code> event from detecting a subsequent new Journal file
+<em>will</em> blank this data again.  Thus, if you're interested in "last plotted
+route" on startup you should react to the <code>StartUp</code> event.  Also, note that
+the contents <em>will</em> indicate a <code>NavRouteClear</code> if that was the last such
+event.</p>
+<p>PLUGINS.md has been updated to reflect this.</p>
+</li>
+<li>
+<p>If you've ever been in the habit of running our <code>develop</code> branch, please
+don't.  Whilst we try to ensure that any code merged into this branch doesn't
+contain bugs, it hasn't at that point undergone more thorough testing.
+Please use the <code>stable</code> branch unless otherwise directed.</p>
+</li>
+<li>
+<p>Some small updates have been made in <code>edmc_data</code> as a part of reviewing the
+latest update to <code>coriolis-data</code>.
+We make no guarantee about keeping these parts of <code>edmc_data</code> up to date.
+Any plugins attempting to use that data should look at alternatives, such
+as <a href="https://github.com/EDCD/FDevIDs/blob/master/outfitting.csv">FDevIDs/outfitting.csv</a>.</p>
+<p>A future update might remove those maps, or at least fully deprecate their
+use by plugins.  Please contact us <strong>now</strong> if you actually make use of this
+data.</p>
+</li>
+</ul>
+<hr>
+
 
 <h2>Release 5.6.1</h2>
 <p>This release addresses some minor bugs and annoyances with v5.6.0, especially
@@ -1661,11 +1780,11 @@ about this:
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.6.1/EDMarketConnector_win_5.6.1.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.7.0/EDMarketConnector_win_5.7.0.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="5.6.1"
-				length="17162240"
+				sparkle:version="5.7.0"
+				length="19374080"
 				type="application/octet-stream"
 			/>
 		</item>
