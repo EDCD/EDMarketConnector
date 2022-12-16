@@ -652,9 +652,10 @@ class Session(object):
     def start_frontier_auth(self, access_token: str) -> None:
         """Start an oAuth2 session."""
         logger.debug('Starting session')
-        self.requests_session = requests.Session()
-        self.requests_session.headers['Authorization'] = f'Bearer {access_token}'
-        self.requests_session.headers['User-Agent'] = user_agent
+        if self.requests_session is not None:
+            self.requests_session.headers['Authorization'] = f'Bearer {access_token}'
+            self.requests_session.headers['User-Agent'] = user_agent
+
         self.state = Session.STATE_OK
 
     def login(self, cmdr: Optional[str] = None, is_beta: Optional[bool] = None) -> bool:
