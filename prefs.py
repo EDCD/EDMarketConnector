@@ -308,6 +308,7 @@ class PreferencesDialog(tk.Toplevel):
             button.bind("<Return>", lambda event: self.apply())
             self.protocol("WM_DELETE_WINDOW", self._destroy)
 
+        # FIXME: Why are these being called when *creating* the Settings window?
         # Selectively disable buttons depending on output settings
         self.cmdrchanged()
         self.themevarchanged()
@@ -733,13 +734,14 @@ class PreferencesDialog(tk.Toplevel):
         # Appearance theme and language setting
         nb.Radiobutton(
             # LANG: Label for 'Default' theme radio button
-            appearance_frame, text=_('Default'), variable=self.theme, value=0, command=self.themevarchanged
+            appearance_frame, text=_('Default'), variable=self.theme,
+            value=theme.THEME_DEFAULT, command=self.themevarchanged
         ).grid(columnspan=3, padx=self.BUTTONX, sticky=tk.W, row=row.get())
 
         # Appearance theme setting
         nb.Radiobutton(
             # LANG: Label for 'Dark' theme radio button
-            appearance_frame, text=_('Dark'), variable=self.theme, value=1, command=self.themevarchanged
+            appearance_frame, text=_('Dark'), variable=self.theme, value=theme.THEME_DARK, command=self.themevarchanged
         ).grid(columnspan=3, padx=self.BUTTONX, sticky=tk.W, row=row.get())
 
         if sys.platform == 'win32':
@@ -748,7 +750,7 @@ class PreferencesDialog(tk.Toplevel):
                 # LANG: Label for 'Transparent' theme radio button
                 text=_('Transparent'),  # Appearance theme setting
                 variable=self.theme,
-                value=2,
+                value=theme.THEME_TRANSPARENT,
                 command=self.themevarchanged
             ).grid(columnspan=3, padx=self.BUTTONX, sticky=tk.W, row=row.get())
 
@@ -1149,7 +1151,12 @@ class PreferencesDialog(tk.Toplevel):
         """Update theme examples."""
         self.theme_button_0['foreground'], self.theme_button_1['foreground'] = self.theme_colors
 
-        state = tk.NORMAL if self.theme.get() else tk.DISABLED
+        if self.theme.get() == theme.THEME_DEFAULT:
+            state = tk.DISABLED  # type: ignore
+
+        else:
+            state = tk.NORMAL  # type: ignore
+
         self.theme_label_0['state'] = state
         self.theme_label_1['state'] = state
         self.theme_button_0['state'] = state

@@ -9,7 +9,7 @@ produce the Windows executables and installer.
 
 ---
 
-* We now test against, and package with, Python 3.10.8.
+* We now test against, and package with, Python 3.11.1, 32-bit.
 
   **As a consequence of this we no longer support Windows 7.  
   This is due to
@@ -24,6 +24,113 @@ produce the Windows executables and installer.
   Developers can check the contents of the `.python-version` file
   in the source (it's not distributed with the Windows installer) for the
   currently used version in a given branch.
+
+---
+
+Release 5.7.0
+===
+This release re-enables CAPI queries for Legacy players.  As a result, the
+'Update' button functionality is now restored for Legacy players, along with
+"Automatically update on docking" functionality.
+
+* We now test against, and package with, Python 3.11.1, 32-bit.
+
+* This release is functionally identical to 5.7.0-rc1, as no problems were
+  reported with that.
+
+* As noted above, Legacy players now have CAPI functionality once more.
+  Plugin developers check below for how you can determine the source galaxy
+  of such data.
+
+* Due to a bug it turned out that a workaround for "old browsers don't support
+  very long URLs" had been inactive since late 2019.  As no-one has noticed
+  or complained we've now removed the defunct code in favour of the simple
+  `webbrowser.open(<url>)`.
+
+  Testing showed that all of Firefox, Chrome and Chrome-based Edge worked with
+  very long URLs without issues.
+
+* `EDMC.exe -n` had been broken for a while, it now functions once more.
+
+* Some output related to detecting and parsing `gameversion` from Journals
+  has been moved from INFO to DEBUG.  This returns the output of any `EDMC.exe`
+  command to the former, quieter, version.
+
+Bugs
+---
+* A corner case of "game not running" and "user presses 'Update' button" would
+  result in an empty `uploaderID` string being sent to EDDN.  Such messages are
+  still accepted by the EDDN Gateway, and the Relay then obfuscates this field
+  anyway.  So, at worse, this would make it look like the same uploader was in
+  lots of different places.  This has been fixed.
+
+* The message about converting legacy `replay.jsonl` was being emitted even
+  when there was no file to convert.  This has been fixed.
+
+Plugin Developers
+---
+* An erroneous statement about "all of Python stdlib" in PLUGINS.md has been
+  corrected.  We don't/can't easily include all of this.  Ask if any part of it
+  you require is missing.
+
+* In order to not pass Legacy data to plugins without them being aware of it
+  there is now a new function `cmdr_data_legacy()`, which mirrors the
+  functionality of `cmdr_data()`, but for Legacy data only.  See PLUGINS.md
+  for more details.
+
+* The `data` passed to `cmdr_data()` and `cmdr_data_legacy()` is now correctly
+  typed as `CAPIData`.  This is a sub-class of `UserDict`, so you can continue
+  to use it as such.  However, it also has one extra property, `source_host`,
+  which can be used to determine if the data was from the Live or Legacy
+  CAPI endpoint host.  See PLUGINS.md for more details.
+
+* If any plugin had been attempting to make use of `config.get_int('theme')`,
+  then be aware that we've finally moved from hard-coded values to actual
+  defined constants.  Example use would be as in:
+  ```python
+  from config import config
+  from theme import theme
+  
+  active_theme = config.get_int('theme')
+  if active_theme == theme.THEME_DARK:
+      ...
+  elif active_theme == theme.THEME_TRANSPARENT:
+      ...
+  elif active_theme == theme.THEME_DEFAULT:
+      ...
+  else:
+      ...
+  ```
+  But remember that all tkinter widgets in plugins will inherit the main UI
+  current theme colours anyway.
+
+* The contents of `NavRoute.json` will now be loaded during 'catch-up' when
+  EDMarketConnector is (re-)started.  The synthetic `StartUp` (note the 
+  capitalisation) event that is emitted after the catch-up ends will have
+  `state['NavRoute']` containing this data.
+
+  However, the `Fileheader` event from detecting a subsequent new Journal file
+  *will* blank this data again.  Thus, if you're interested in "last plotted
+  route" on startup you should react to the `StartUp` event.  Also, note that
+  the contents *will* indicate a `NavRouteClear` if that was the last such
+  event.
+
+  PLUGINS.md has been updated to reflect this.
+
+* If you've ever been in the habit of running our `develop` branch, please
+  don't.  Whilst we try to ensure that any code merged into this branch doesn't
+  contain bugs, it hasn't at that point undergone more thorough testing.
+  Please use the `stable` branch unless otherwise directed.
+
+* Some small updates have been made in `edmc_data` as a part of reviewing the
+  latest update to `coriolis-data`.
+  We make no guarantee about keeping these parts of `edmc_data` up to date.
+  Any plugins attempting to use that data should look at alternatives, such
+  as [FDevIDs/outfitting.csv](https://github.com/EDCD/FDevIDs/blob/master/outfitting.csv).
+
+  A future update might remove those maps, or at least fully deprecate their
+  use by plugins.  Please contact us **now** if you actually make use of this
+  data.
 
 ---
 

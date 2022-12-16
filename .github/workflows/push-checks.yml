@@ -40,7 +40,22 @@ jobs:
         DATA=$(jq --raw-output .before $GITHUB_EVENT_PATH)
 
         echo "DATA: ${DATA}"
+        #######################################################################
         # stop the build if there are Python syntax errors or undefined names, ignore existing 
-        git diff "$DATA" | flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --diff
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        git diff "$DATA" | flake8 . --count --statistics --diff
+        #######################################################################
+        # We need to get just the *filenames* of only *python* files changed.
+        # Using various -z/-Z/-0 to utilise NUL-terminated strings.
+        git diff --name-only --diff-filter=d -z "$DATA" | \
+          grep -E -z -Z '\.py$' | \
+          xargs -0 flake8 --count --select=E9,F63,F7,F82 --show-source --statistics
+        #######################################################################
+          
+        #######################################################################
+        # 'Full' run, but ignoring docstring errors
+        #######################################################################
+        # explicitly ignore docstring errors (start with D)
+        # Can optionally add `--exit-zero` to the flake8 arguments so that
+        git diff --name-only --diff-filter=d -z "$DATA" | \
+          grep -E -z -Z '\.py$' | \
+          xargs -0 flake8 --count --statistics --extend-ignore D
+        #######################################################################

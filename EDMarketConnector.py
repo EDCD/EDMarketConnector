@@ -16,7 +16,7 @@ from builtins import object, str
 from os import chdir, environ
 from os.path import dirname, join
 from time import localtime, strftime, time
-from typing import TYPE_CHECKING, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Literal, Optional, Tuple, Union
 
 # Have this as early as possible for people running EDMarketConnector.exe
 # from cmd.exe or a bat file or similar.  Else they might not be in the correct
@@ -48,6 +48,7 @@ if __name__ == '__main__':
         # unbuffered not allowed for text in python3, so use `1 for line buffering
         sys.stdout = sys.stderr = open(join(tempfile.gettempdir(), f'{appname}.log'), mode='wt', buffering=1)
     # TODO: Test: Make *sure* this redirect is working, else py2exe is going to cause an exit popup
+
 
 # These need to be after the stdout/err redirect because they will cause
 # logging to be set up.
@@ -365,6 +366,42 @@ if __name__ == '__main__':  # noqa: C901
         sys.stdout.seek(0)
         sys.stdout.truncate()
 
+    git_branch = ""
+    try:
+        import subprocess
+        git_cmd = subprocess.Popen('git branch --show-current'.split(),
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.STDOUT
+                                   )
+        out, err = git_cmd.communicate()
+        git_branch = out.decode().rstrip('\n')
+
+    except Exception:
+        pass
+
+    if (
+        (
+            git_branch == 'develop'
+            or '-alpha0' in str(appversion())
+        ) and (
+            (
+                sys.platform == 'linux'
+                and environ.get('USER') is not None
+                and environ['USER'] not in ['ad', 'athan']
+            )
+            or (
+                sys.platform == 'win32'
+                and environ.get('USERNAME') is not None
+                and environ['USERNAME'] not in ['Athan']
+            )
+        )
+    ):
+        print("Why are you running the develop branch if you're not a developer?")
+        print("Please check https://github.com/EDCD/EDMarketConnector/wiki/Running-from-source#running-from-source")
+        print("You probably want the 'stable' branch.")
+        print("\n\rIf Athanasius or A_D asked you to run this, tell them about this message.")
+        sys.exit(-1)
+
 
 # See EDMCLogging.py docs.
 # isort: off
@@ -529,16 +566,18 @@ class AppWindow(object):
         # LANG: Update button in main window
         self.button = ttk.Button(frame, text=_('Update'), width=28, default=tk.ACTIVE, state=tk.DISABLED)
         self.theme_button = tk.Label(frame, width=32 if sys.platform == 'darwin' else 28, state=tk.DISABLED)
-        self.status = tk.Label(frame, name='status', anchor=tk.W)
 
         ui_row = frame.grid_size()[1]
         self.button.grid(row=ui_row, columnspan=2, sticky=tk.NSEW)
         self.theme_button.grid(row=ui_row, columnspan=2, sticky=tk.NSEW)
         theme.register_alternate((self.button, self.theme_button, self.theme_button),
                                  {'row': ui_row, 'columnspan': 2, 'sticky': tk.NSEW})
-        self.status.grid(columnspan=2, sticky=tk.EW)
         self.button.bind('<Button-1>', self.capi_request_data)
         theme.button_bind(self.theme_button, self.capi_request_data)
+
+        # Bottom 'status' line.
+        self.status = tk.Label(frame, name='status', anchor=tk.W)
+        self.status.grid(columnspan=2, sticky=tk.EW)
 
         for child in frame.winfo_children():
             child.grid_configure(padx=self.PADX, pady=(
@@ -558,7 +597,7 @@ class AppWindow(object):
             # https://www.tcl.tk/man/tcl/TkCmd/menu.htm
             self.system_menu = tk.Menu(self.menubar, name='apple')
             self.system_menu.add_command(command=lambda: self.w.call('tk::mac::standardAboutPanel'))
-            self.system_menu.add_command(command=lambda: self.updater.checkForUpdates())
+            self.system_menu.add_command(command=lambda: self.updater.check_for_updates())
             self.menubar.add_cascade(menu=self.system_menu)
             self.file_menu = tk.Menu(self.menubar, name='file')
             self.file_menu.add_command(command=self.save_raw)
@@ -601,7 +640,7 @@ class AppWindow(object):
             self.help_menu.add_command(command=self.help_general)
             self.help_menu.add_command(command=self.help_privacy)
             self.help_menu.add_command(command=self.help_releases)
-            self.help_menu.add_command(command=lambda: self.updater.checkForUpdates())
+            self.help_menu.add_command(command=lambda: self.updater.check_for_updates())
             self.help_menu.add_command(command=lambda: not self.HelpAbout.showing and self.HelpAbout(self.w))
 
             self.menubar.add_cascade(menu=self.help_menu)
@@ -724,7 +763,7 @@ class AppWindow(object):
             self.updater = update.Updater(tkroot=self.w, provider='external')
         else:
             self.updater = update.Updater(tkroot=self.w, provider='internal')
-            self.updater.checkForUpdates()  # Sparkle / WinSparkle does this automatically for packaged apps
+            self.updater.check_for_updates()  # Sparkle / WinSparkle does this automatically for packaged apps
 
         # Migration from <= 3.30
         for username in config.get_list('fdev_usernames', default=[]):
@@ -733,7 +772,6 @@ class AppWindow(object):
         config.delete('username', suppress=True)
         config.delete('password', suppress=True)
         config.delete('logdir', suppress=True)
-
         self.postprefs(False)  # Companion login happens in callback from monitor
         self.toggle_suit_row(visible=False)
 
@@ -975,11 +1013,6 @@ class AppWindow(object):
             self.status['text'] = _('CAPI query aborted: GameVersion unknown')
             return
 
-        if not monitor.is_live_galaxy():
-            logger.warning("Dropping CAPI request because this is the Legacy galaxy, which is not yet supported")
-            self.status['text'] = 'CAPI for Legacy not yet supported'
-            return
-
         if not monitor.system:
             logger.trace_if('capi.worker', 'Aborting Query: Current star system unknown')
             # LANG: CAPI queries aborted because current star system name unknown
@@ -1172,8 +1205,7 @@ class AppWindow(object):
                     monitor.state['Loan'] = capi_response.capi_data['commander'].get('debt', 0)
 
                 # stuff we can do when not docked
-                # TODO: Use plug.notify_capi_legacy if Legacy host
-                err = plug.notify_newdata(capi_response.capi_data, monitor.is_beta)
+                err = plug.notify_capidata(capi_response.capi_data, monitor.is_beta)
                 self.status['text'] = err and err or ''
                 if err:
                     play_bad = True
@@ -1319,7 +1351,7 @@ class AppWindow(object):
 
                 # Ensure the ship type/name text is clickable, if it should be.
                 if monitor.state['Modules']:
-                    ship_state = True
+                    ship_state: Literal['normal', 'disabled'] = tk.NORMAL
 
                 else:
                     ship_state = tk.DISABLED
@@ -1382,7 +1414,7 @@ class AppWindow(object):
 
                 # Disable WinSparkle automatic update checks, IFF configured to do so when in-game
                 if config.get_int('disable_autoappupdatecheckingame') and 1:
-                    self.updater.setAutomaticUpdatesCheck(False)
+                    self.updater.set_automatic_updates_check(False)
                     logger.info('Monitor: Disable WinSparkle automatic update checks')
 
                 # Can't start dashboard monitoring
@@ -1433,7 +1465,7 @@ class AppWindow(object):
             if entry['event'] == 'ShutDown':
                 # Enable WinSparkle automatic update checks
                 # NB: Do this blindly, in case option got changed whilst in-game
-                self.updater.setAutomaticUpdatesCheck(True)
+                self.updater.set_automatic_updates_check(True)
                 logger.info('Monitor: Enable WinSparkle automatic update checks')
 
     def auth(self, event=None) -> None:
@@ -1798,18 +1830,14 @@ class AppWindow(object):
 
     def onenter(self, event=None) -> None:
         """Handle when our window gains focus."""
-        # TODO: This assumes that 1) transparent is at least 2, 2) there are
-        #       no new themes added after that.
-        if config.get_int('theme') > 1:
+        if config.get_int('theme') == theme.THEME_TRANSPARENT:
             self.w.attributes("-transparentcolor", '')
             self.blank_menubar.grid_remove()
             self.theme_menubar.grid(row=0, columnspan=2, sticky=tk.NSEW)
 
     def onleave(self, event=None) -> None:
         """Handle when our window loses focus."""
-        # TODO: This assumes that 1) transparent is at least 2, 2) there are
-        #       no new themes added after that.
-        if config.get_int('theme') > 1 and event.widget == self.w:
+        if config.get_int('theme') == theme.THEME_TRANSPARENT and event.widget == self.w:
             self.w.attributes("-transparentcolor", 'grey4')
             self.theme_menubar.grid_remove()
             self.blank_menubar.grid(row=0, columnspan=2, sticky=tk.NSEW)
@@ -1886,7 +1914,7 @@ sys.path: {sys.path}'''
                  )
 
     if args.reset_ui:
-        config.set('theme', 0)  # 'Default' theme uses ID 0
+        config.set('theme', theme.THEME_DEFAULT)
         config.set('ui_transparency', 100)  # 100 is completely opaque
         config.delete('font', suppress=True)
         config.delete('font_size', suppress=True)

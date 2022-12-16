@@ -455,7 +455,5 @@ When changing the Python version (Major.Minor.Patch) used:
 1. Major or Minor level changes:
 
     1. `Build-exe-and-msi.py` will need its version check updating.
-    2. `EDMarketConnector.wxs` will need updating to reference the correct
-       pythonXX.dll file.
-    3. `.pre-commit-config.yaml` will need the `default_language_version`
+    2. `.pre-commit-config.yaml` will need the `default_language_version`
        section updated to the appropriate version.

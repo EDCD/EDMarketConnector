@@ -98,6 +98,12 @@ liable to change without notice.
 
 `from prefs import prefsVersion` - to allow for versioned preferences.
 
+`from companion import CAPIData, SERVER_LIVE, SERVER_LEGACY, SERVER_BETA` -
+`CAPIData` is the actual type of `data` as passed into `cmdr_data()` and
+`cmdr_data_legacy()`.
+See [Commander Data from Frontier CAPI](#commander-data-from-frontier-capi))
+for further information.
+
 `import edmc_data` (or specific 'from' imports) - This contains various static
 data that used to be in other files.  You should **not** now import anything
 from the original files unless specified as allowed in this section.
@@ -129,11 +135,15 @@ modules for plugin use:
 - sqlite3
 - zipfile
 
-And, of course, anything in the [Python Standard Library](https://docs.python.org/3/library/)
-will always be available, dependent on the version of Python we're using to 
-build Windows installed versions.   Check the 'Startup' line in an application
-[Debug Log File](https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting#debug-log-files)
-for the version of Python being used.
+Unfortunately we cannot promise to include every part of the
+[Python Standard Library](https://docs.python.org/3/library/) due to issues
+with correctly detecting all the modules, and if they're single file or a
+package, and perhaps have sub-modules.  For now, if you find something is
+missing that you need for your plugin, ask us to add it in, and we'll do so on
+a 'best efforts' basis.
+
+See [#1327 - ModuleNotFound when creating a new plugin.](https://github.com/EDCD/EDMarketConnector/issues/1327)
+for some discussion.
 
 
 ---
@@ -597,7 +607,7 @@ This gets called when EDMarketConnector sees a new entry in the game's journal.
 Content of `state` (updated to the current journal entry):
 
 | Field                |            Type             | Description                                                                                                     |
-| :------------------- | :-------------------------: | :-------------------------------------------------------------------------------------------------------------- |
+| :------------------- | :-------------------------: |:----------------------------------------------------------------------------------------------------------------|
 | `GameLanguage`       |       `Optional[str]`       | `language` value from `Fileheader` event.                                                                       |
 | `GameVersion`        |       `Optional[str]`       | `version` value from `Fileheader` event.                                                                        |
 | `GameBuild`          |       `Optional[str]`       | `build` value from `Fileheader` event.                                                                          |
@@ -626,7 +636,7 @@ Content of `state` (updated to the current journal entry):
 | `ModulesValue`       |            `int`            | Value of the current ship's modules                                                                             |
 | `Rebuy`              |            `int`            | Current ship's rebuy cost                                                                                       |
 | `Modules`            |           `dict`            | Currently fitted modules                                                                                        |
-| `NavRoute`           |           `dict`            | Last plotted multi-hop route                                                                                    |
+| `NavRoute`           |           `dict`            | Last plotted multi-hop route[1]                                                                                 |
 | `ModuleInfo`         |           `dict`            | Last loaded ModulesInfo.json data                                                                               |
 | `IsDocked`           |           `bool`            | Whether the Cmdr is currently docked *in their own ship*.                                                       |
 | `OnFoot`             |           `bool`            | Whether the Cmdr is on foot                                                                                     |
@@ -638,15 +648,29 @@ Content of `state` (updated to the current journal entry):
 | `BackpackJSON`       |           `dict`            | Content of Backpack.json as of last read.                                                                       |
 | `ShipLockerJSON`     |           `dict`            | Content of ShipLocker.json as of last read.                                                                     |
 | `SuitCurrent`        |           `dict`            | CAPI-returned data of currently worn suit.  NB: May be `None` if no data.                                       |
-| `Suits`              |          `dict`[1]          | CAPI-returned data of owned suits.  NB: May be `None` if no data.                                               |
+| `Suits`              |          `dict`[2]          | CAPI-returned data of owned suits.  NB: May be `None` if no data.                                               |
 | `SuitLoadoutCurrent` |           `dict`            | CAPI-returned data of current Suit Loadout.  NB: May be `None` if no data.                                      |
-| `SuitLoadouts`       |          `dict`[1]          | CAPI-returned data of all Suit Loadouts.  NB: May be `None` if no data.                                         |
+| `SuitLoadouts`       |          `dict`[2]          | CAPI-returned data of all Suit Loadouts.  NB: May be `None` if no data.                                         |
 | `Taxi`               |      `Optional[bool]`       | Whether or not we're currently in a taxi. NB: This is best effort with what the journals provide.               |
 | `Dropship`           |      `Optional[bool]`       | Whether or not the above taxi is a Dropship                                                                     |
 | `Body`               |       `Optional[str]`       | The body we're currently on / in the SOI of                                                                     |
 | `BodyType`           |       `Optional[str]`       | The type of body that `Body` refers to                                                                          |
 
-[1] - Some data from the CAPI is sometimes returned as a `list` (when all 
+[1] - Contents of `NavRoute` not changed if a `NavRouteClear` event is seen,
+but plugins will see the `NavRouteClear` event.
+
+If EDMarketConnector is restarted whilst the game is running then
+`NavRoute` will be populated with current 'NavRoute.json' contents (assuming
+that the file exists).  Thus `NavRoute` will have the data when the
+synthetic `StartUp` event is sent to plugins.  NB: If the contents of the file
+indicate a `NavRouteClear` then that's what will be passed.
+
+If the *game* is restarted then `Fileheader` in the new Journal file will
+cause `state['NavRoute'] = None`, but if you open the galaxy map in-game and
+cause an automatic re-plot of last route, then a new `NavRoute` event will
+also be generated and passed to plugins.
+
+[2] - Some data from the CAPI is sometimes returned as a `list` (when all 
 members are present) and other times as an integer-keyed `dict` (when at 
 least one member is missing, so the indices are not contiguous).  We choose to
 always convert to the integer-keyed `dict` form so that code utilising the data
@@ -732,6 +756,14 @@ time does *not* count as docked for this.
 In general on-foot, including being in a taxi, might not set this 100%
 correctly.  Its main use in core code is to detect being docked so as to send
 any stored EDDN messages due to "Delay sending until docked" option.
+
+
+New in version 5.7.0:
+
+`state['NavRoute']` will be populated from the file, if present, if you
+re-start EDMarketConnector.  That will be present when plugins are invoked
+with the synthetic `StartUp` event.  NB: Might just be a `NavRouteClear` event
+if that's what was in the file.
 
 ___
 
@@ -877,9 +909,54 @@ constants.
 ---
 
 ### Commander Data from Frontier CAPI
+If a plugin has a `cmdr_data()` function it gets called when the application
+has just fetched fresh Cmdr and station data from Frontier's servers, **but not
+for the Legacy galaxy**.  See `cmdr_data_legacy()` below for Legacy data
+handling.
 
 ```python
+from companion import CAPIData, SERVER_LIVE, SERVER_LEGACY, SERVER_BETA
+
 def cmdr_data(data, is_beta):
+    """
+    We have new data on our commander
+    """
+    if data.get('commander') is None or data['commander'].get('name') is None:
+        raise ValueError("this isn't possible")
+
+    logger.info(data['commander']['name'])
+
+    # Determining source galaxy for the data
+    if data.source_host == SERVER_LIVE:
+        ...
+
+    elif data.source_host == SERVER_BETA:
+        ...
+
+    elif data.source_host == SERVER_LEGACY:
+        ...
+```
+
+| Parameter |       Type       | Description                                                                                              |
+| :-------- | :--------------: | :------------------------------------------------------------------------------------------------------- |
+| `data`    |     `CAPIData`   | `/profile` API response, with `/market` and `/shipyard` added under the keys `marketdata` and `shipdata` |
+| `is_beta` |      `bool`      | If the game is currently in beta                                                                         |
+`CAPIData` is a class, which you can `from companion import CAPIDATA`, and is
+based on `UserDict`.  The actual data from CAPI queries is thus accessible
+via python's normal `data['key']` syntax.  However, being a class, it can also
+have extra properties, such as `source_host`, as shown above.  Plugin authors
+are free to use *that* property, **but MUST NOT rely on any other extra
+properties present in `CAPIData`, they are for internal use only.**
+
+
+#### CAPI data for Legacy
+When CAPI data has been retrieved from the separate CAPI host for the Legacy
+galaxy, because the Journal gameversion indicated the player is playing/last
+played in that galaxy, a different function will be called,
+`cmdr_data_legacy()`.
+
+```python
+def cmdr_data_legacy(data, is_beta):
     """
     We have new data on our commander
     """
@@ -889,16 +966,31 @@ def cmdr_data(data, is_beta):
     logger.info(data['commander']['name'])
 ```
 
-This gets called when the application has just fetched fresh Cmdr and station 
-data from Frontier's servers.
+**IF AND ONLY IF** your code definitely handles the Live/Legacy split itself
+then you *may* simply:
 
-| Parameter |       Type       | Description                                                                                              |
-| :-------- | :--------------: | :------------------------------------------------------------------------------------------------------- |
-| `data`    | `Dict[str, Any]` | `/profile` API response, with `/market` and `/shipyard` added under the keys `marketdata` and `shipdata` |
-| `is_beta` |      `bool`      | If the game is currently in beta                                                                         |
-NB: Actually `data` is a custom type, based on `UserDict`, called `CAPIData`,
-and has some extra properties.  However, these are for **internal use only**
-at this time, especially as there are some caveats about at least one of them.
+```python
+from companion import SERVER_BETA, SERVER_LEGACY, SERVER_LIVE
+
+def cmdr_data_legacy(data, is_beta):
+    return cmdr_data(data, is_beta)
+
+def cmdr_data(data, is_beta):
+    if data.source_host == SERVER_LEGACY:
+        ...
+    elif data.source_host == SERVER_LIVE:
+        ...
+    elif data.source_host == SERVER_BETA:
+        # Would also be indicated by `is_beta == True`
+        ...
+    else:
+        # Unknown source galaxy !
+        ...
+```
+
+The core 'eddn' plugin might contain some useful hints about how to handle the
+split **but do not rely on any extra properties on `data` unless they are
+documented in [Available imports](#available-imports) in this document**.
 
 ---
 

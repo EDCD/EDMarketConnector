@@ -397,6 +397,12 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 except Exception as ex:
                     logger.debug(f'Invalid journal entry:\n{line!r}\n', exc_info=ex)
 
+            # One-shot attempt to read in latest NavRoute, if present
+            navroute_data = self._parse_navroute_file()
+            if navroute_data is not None:
+                # If it's NavRouteClear contents, just keep those anyway.
+                self.state['NavRoute'] = navroute_data
+
             self.catching_up = False
             log_pos = loghandle.tell()
 
@@ -1704,7 +1710,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 pass
 
             else:
-                logger.info(f"Parsed {self.state['GameVersion']=} into {self.version_semantic=}")
+                logger.debug(f"Parsed {self.state['GameVersion']=} into {self.version_semantic=}")
 
             self.is_beta = any(v in self.version.lower() for v in ('alpha', 'beta'))  # type: ignore
         except KeyError:

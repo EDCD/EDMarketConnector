@@ -18,7 +18,7 @@ from constants import GITVERSION_FILE
 ###########################################################################
 # Check we're on a supported platform
 ###########################################################################
-if sys.version_info[0:2] != (3, 10):
+if sys.version_info[0:2] != (3, 11):
     raise AssertionError(f'Unexpected python version {sys.version}')
 
 if sys.platform == 'win32':

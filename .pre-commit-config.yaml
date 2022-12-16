@@ -87,7 +87,7 @@ repos:
       always_run: true
 
 default_language_version:
-    python: python3.10
+    python: python3.11
 
 default_stages: [ commit, push ]
 

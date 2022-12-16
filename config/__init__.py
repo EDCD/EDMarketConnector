@@ -52,7 +52,7 @@ appcmdname = 'EDMC'
 # <https://semver.org/#semantic-versioning-specification-semver>
 # Major.Minor.Patch(-prerelease)(+buildmetadata)
 # NB: Do *not* import this, use the functions appversion() and appversion_nobuild()
-_static_appversion = '5.6.1'
+_static_appversion = '5.7.0'
 _cached_version: Optional[semantic_version.Version] = None
 copyright = '© 2015-2019 Jonathan Harris, 2020-2022 EDCD'
 
@@ -319,17 +319,17 @@ class AbstractConfig(abc.ABC):
         warnings.warn(DeprecationWarning('get is Deprecated. use the specific getter for your type'))
         logger.debug('Attempt to use Deprecated get() method\n' + ''.join(traceback.format_stack()))
 
-        if (l := self._suppress_call(self.get_list, ValueError, key, default=None)) is not None:
-            return l
+        if (a_list := self._suppress_call(self.get_list, ValueError, key, default=None)) is not None:
+            return a_list
 
-        elif (s := self._suppress_call(self.get_str, ValueError, key, default=None)) is not None:
-            return s
+        elif (a_str := self._suppress_call(self.get_str, ValueError, key, default=None)) is not None:
+            return a_str
 
-        elif (b := self._suppress_call(self.get_bool, ValueError, key, default=None)) is not None:
-            return b
+        elif (a_bool := self._suppress_call(self.get_bool, ValueError, key, default=None)) is not None:
+            return a_bool
 
-        elif (i := self._suppress_call(self.get_int, ValueError, key, default=None)) is not None:
-            return i
+        elif (an_int := self._suppress_call(self.get_int, ValueError, key, default=None)) is not None:
+            return an_int
 
         return default  # type: ignore
 

@@ -1,6 +1,4 @@
-"""
-Plugin hooks for EDMC - Ian Norton, Jonathan Harris
-"""
+"""Plugin API."""
 import copy
 import importlib
 import logging
@@ -9,8 +7,9 @@ import os
 import sys
 import tkinter as tk
 from builtins import object, str
-from typing import Optional
+from typing import Any, Callable, List, Mapping, MutableMapping, Optional, Tuple
 
+import companion
 import myNotebook as nb  # noqa: N813
 from config import config
 from EDMCLogging import get_main_logger
@@ -21,34 +20,48 @@ logger = get_main_logger()
 PLUGINS = []
 PLUGINS_not_py3 = []
 
+
 # For asynchronous error display
-last_error = {
-    'msg':  None,
-    'root': None,
-}
+class LastError:
+    """Holds the last plugin error."""
+
+    msg: Optional[str]
+    root: tk.Frame
+
+    def __init__(self) -> None:
+        self.msg = None
+
+
+last_error = LastError()
 
 
 class Plugin(object):
+    """An EDMC plugin."""
 
-    def __init__(self, name: str, loadfile: str, plugin_logger: Optional[logging.Logger]):
+    def __init__(self, name: str, loadfile: Optional[str], plugin_logger: Optional[logging.Logger]):
         """
-        Load a single plugin
-        :param name: module name
-        :param loadfile: the main .py file
+        Load a single plugin.
+
+        :param name: Base name of the file being loaded from.
+        :param loadfile: Full path/filename of the plugin.
+        :param plugin_logger: The logging instance for this plugin to use.
         :raises Exception: Typically ImportError or OSError
         """
-
-        self.name = name  # Display name.
-        self.folder = name  # basename of plugin folder. None for internal plugins.
+        self.name: str = name  # Display name.
+        self.folder: Optional[str] = name  # basename of plugin folder. None for internal plugins.
         self.module = None  # None for disabled plugins.
-        self.logger = plugin_logger
+        self.logger: Optional[logging.Logger] = plugin_logger
 
         if loadfile:
             logger.info(f'loading plugin "{name.replace(".", "_")}" from "{loadfile}"')
             try:
-                module = importlib.machinery.SourceFileLoader('plugin_{}'.format(
-                    name.encode(encoding='ascii', errors='replace').decode('utf-8').replace('.', '_')),
-                    loadfile).load_module()
+                filename = 'plugin_'
+                filename += name.encode(encoding='ascii', errors='replace').decode('utf-8').replace('.', '_')
+                module = importlib.machinery.SourceFileLoader(
+                    filename,
+                    loadfile
+                ).load_module()
+
                 if getattr(module, 'plugin_start3', None):
                     newname = module.plugin_start3(os.path.dirname(loadfile))
                     self.name = newname and str(newname) or name
@@ -58,23 +71,25 @@ class Plugin(object):
                     PLUGINS_not_py3.append(self)
                 else:
                     logger.error(f'plugin {name} has no plugin_start3() function')
-            except Exception as e:
+            except Exception:
                 logger.exception(f': Failed for Plugin "{name}"')
                 raise
         else:
             logger.info(f'plugin {name} disabled')
 
-    def _get_func(self, funcname):
+    def _get_func(self, funcname: str) -> Optional[Callable]:
         """
-        Get a function from a plugin
+        Get a function from a plugin.
+
         :param funcname:
         :returns: The function, or None if it isn't implemented.
         """
         return getattr(self.module, funcname, None)
 
-    def get_app(self, parent):
+    def get_app(self, parent: tk.Frame) -> Optional[tk.Frame]:
         """
         If the plugin provides mainwindow content create and return it.
+
         :param parent: the parent frame for this entry.
         :returns: None, a tk Widget, or a pair of tk.Widgets
         """
@@ -84,19 +99,29 @@ class Plugin(object):
                 appitem = plugin_app(parent)
                 if appitem is None:
                     return None
+
                 elif isinstance(appitem, tuple):
-                    if len(appitem) != 2 or not isinstance(appitem[0], tk.Widget) or not isinstance(appitem[1], tk.Widget):
+                    if (
+                        len(appitem) != 2
+                        or not isinstance(appitem[0], tk.Widget)
+                        or not isinstance(appitem[1], tk.Widget)
+                    ):
                         raise AssertionError
+
                 elif not isinstance(appitem, tk.Widget):
                     raise AssertionError
+
                 return appitem
-            except Exception as e:
+
+            except Exception:
                 logger.exception(f'Failed for Plugin "{self.name}"')
+
         return None
 
-    def get_prefs(self, parent, cmdr, is_beta):
+    def get_prefs(self, parent: tk.Frame, cmdr: str, is_beta: bool) -> Optional[tk.Frame]:
         """
         If the plugin provides a prefs frame, create and return it.
+
         :param parent: the parent frame for this preference tab.
         :param cmdr: current Cmdr name (or None). Relevant if you want to have
            different settings for different user accounts.
@@ -110,16 +135,14 @@ class Plugin(object):
                 if not isinstance(frame, nb.Frame):
                     raise AssertionError
                 return frame
-            except Exception as e:
+            except Exception:
                 logger.exception(f'Failed for Plugin "{self.name}"')
         return None
 
 
-def load_plugins(master):
-    """
-    Find and load all plugins
-    """
-    last_error['root'] = master
+def load_plugins(master: tk.Frame) -> None:  # noqa: CCR001
+    """Find and load all plugins."""
+    last_error.root = master
 
     internal = []
     for name in sorted(os.listdir(config.internal_plugin_dir_path)):
@@ -128,7 +151,7 @@ def load_plugins(master):
                 plugin = Plugin(name[:-3], os.path.join(config.internal_plugin_dir_path, name), logger)
                 plugin.folder = None  # Suppress listing in Plugins prefs tab
                 internal.append(plugin)
-            except Exception as e:
+            except Exception:
                 logger.exception(f'Failure loading internal Plugin "{name}"')
     PLUGINS.extend(sorted(internal, key=lambda p: operator.attrgetter('name')(p).lower()))
 
@@ -137,8 +160,10 @@ def load_plugins(master):
 
     found = []
     # Load any plugins that are also packages first
-    for name in sorted(os.listdir(config.plugin_dir_path),
-                       key=lambda n: (not os.path.isfile(os.path.join(config.plugin_dir_path, n, '__init__.py')), n.lower())):
+    for name in sorted(
+        os.listdir(config.plugin_dir_path),
+        key=lambda n: (not os.path.isfile(os.path.join(config.plugin_dir_path, n, '__init__.py')), n.lower())
+    ):
         if not os.path.isdir(os.path.join(config.plugin_dir_path, name)) or name[0] in ['.', '_']:
             pass
         elif name.endswith('.disabled'):
@@ -155,15 +180,16 @@ def load_plugins(master):
 
                 plugin_logger = EDMCLogging.get_plugin_logger(name)
                 found.append(Plugin(name, os.path.join(config.plugin_dir_path, name, 'load.py'), plugin_logger))
-            except Exception as e:
+            except Exception:
                 logger.exception(f'Failure loading found Plugin "{name}"')
                 pass
     PLUGINS.extend(sorted(found, key=lambda p: operator.attrgetter('name')(p).lower()))
 
 
-def provides(fn_name):
+def provides(fn_name: str) -> List[str]:
     """
-    Find plugins that provide a function
+    Find plugins that provide a function.
+
     :param fn_name:
     :returns: list of names of plugins that provide this function
     .. versionadded:: 3.0.2
@@ -171,9 +197,12 @@ def provides(fn_name):
     return [p.name for p in PLUGINS if p._get_func(fn_name)]
 
 
-def invoke(plugin_name, fallback, fn_name, *args):
+def invoke(
+    plugin_name: str, fallback: str, fn_name: str, *args: Tuple
+) -> Optional[str]:
     """
-    Invoke a function on a named plugin
+    Invoke a function on a named plugin.
+
     :param plugin_name: preferred plugin on which to invoke the function
     :param fallback: fallback plugin on which to invoke the function, or None
     :param fn_name:
@@ -182,17 +211,24 @@ def invoke(plugin_name, fallback, fn_name, *args):
     .. versionadded:: 3.0.2
     """
     for plugin in PLUGINS:
-        if plugin.name == plugin_name and plugin._get_func(fn_name):
-            return plugin._get_func(fn_name)(*args)
+        if plugin.name == plugin_name:
+            plugin_func = plugin._get_func(fn_name)
+            if plugin_func is not None:
+                return plugin_func(*args)
+
     for plugin in PLUGINS:
         if plugin.name == fallback:
-            assert plugin._get_func(fn_name), plugin.name  # fallback plugin should provide the function
-            return plugin._get_func(fn_name)(*args)
+            plugin_func = plugin._get_func(fn_name)
+            assert plugin_func, plugin.name  # fallback plugin should provide the function
+            return plugin_func(*args)
+
+    return None
 
 
-def notify_stop():
+def notify_stop() -> Optional[str]:
     """
     Notify each plugin that the program is closing.
+
     If your plugin uses threads then stop and join() them before returning.
     .. versionadded:: 2.3.7
     """
@@ -204,7 +240,7 @@ def notify_stop():
                 logger.info(f'Asking plugin "{plugin.name}" to stop...')
                 newerror = plugin_stop()
                 error = error or newerror
-            except Exception as e:
+            except Exception:
                 logger.exception(f'Plugin "{plugin.name}" failed')
 
     logger.info('Done')
@@ -212,9 +248,10 @@ def notify_stop():
     return error
 
 
-def notify_prefs_cmdr_changed(cmdr, is_beta):
+def notify_prefs_cmdr_changed(cmdr: str, is_beta: bool) -> None:
     """
-    Notify each plugin that the Cmdr has been changed while the settings dialog is open.
+    Notify plugins that the Cmdr was changed while the settings dialog is open.
+
     Relevant if you want to have different settings for different user accounts.
     :param cmdr: current Cmdr name (or None).
     :param is_beta: whether the player is in a Beta universe.
@@ -224,13 +261,14 @@ def notify_prefs_cmdr_changed(cmdr, is_beta):
         if prefs_cmdr_changed:
             try:
                 prefs_cmdr_changed(cmdr, is_beta)
-            except Exception as e:
+            except Exception:
                 logger.exception(f'Plugin "{plugin.name}" failed')
 
 
-def notify_prefs_changed(cmdr, is_beta):
+def notify_prefs_changed(cmdr: str, is_beta: bool) -> None:
     """
-    Notify each plugin that the settings dialog has been closed.
+    Notify plugins that the settings dialog has been closed.
+
     The prefs frame and any widgets you created in your `get_prefs()` callback
     will be destroyed on return from this function, so take a copy of any
     values that you want to save.
@@ -242,13 +280,18 @@ def notify_prefs_changed(cmdr, is_beta):
         if prefs_changed:
             try:
                 prefs_changed(cmdr, is_beta)
-            except Exception as e:
+            except Exception:
                 logger.exception(f'Plugin "{plugin.name}" failed')
 
 
-def notify_journal_entry(cmdr, is_beta, system, station, entry, state):
+def notify_journal_entry(
+    cmdr: str, is_beta: bool, system: str, station: str,
+    entry: MutableMapping[str, Any],
+    state: Mapping[str, Any]
+) -> Optional[str]:
     """
     Send a journal entry to each plugin.
+
     :param cmdr: The Cmdr name, or None if not yet known
     :param system: The current system, or None if not yet known
     :param station: The current station, or None if not docked or not yet known
@@ -268,21 +311,25 @@ def notify_journal_entry(cmdr, is_beta, system, station, entry, state):
                 # Pass a copy of the journal entry in case the callee modifies it
                 newerror = journal_entry(cmdr, is_beta, system, station, dict(entry), dict(state))
                 error = error or newerror
-            except Exception as e:
+            except Exception:
                 logger.exception(f'Plugin "{plugin.name}" failed')
     return error
 
 
-def notify_journal_entry_cqc(cmdr, is_beta, entry, state):
+def notify_journal_entry_cqc(
+    cmdr: str, is_beta: bool,
+    entry: MutableMapping[str, Any],
+    state: Mapping[str, Any]
+) -> Optional[str]:
     """
-    Send a journal entry to each plugin.
+    Send an in-CQC journal entry to each plugin.
+
     :param cmdr: The Cmdr name, or None if not yet known
     :param entry: The journal entry as a dictionary
     :param state: A dictionary containing info about the Cmdr, current ship and cargo
     :param is_beta: whether the player is in a Beta universe.
     :returns: Error message from the first plugin that returns one (if any)
     """
-
     error = None
     for plugin in PLUGINS:
         cqc_callback = plugin._get_func('journal_entry_cqc')
@@ -298,9 +345,13 @@ def notify_journal_entry_cqc(cmdr, is_beta, entry, state):
     return error
 
 
-def notify_dashboard_entry(cmdr, is_beta, entry):
+def notify_dashboard_entry(
+    cmdr: str, is_beta: bool,
+    entry: MutableMapping[str, Any],
+) -> Optional[str]:
     """
     Send a status entry to each plugin.
+
     :param cmdr: The piloting Cmdr name
     :param is_beta: whether the player is in a Beta universe.
     :param entry: The status entry as a dictionary
@@ -314,31 +365,43 @@ def notify_dashboard_entry(cmdr, is_beta, entry):
                 # Pass a copy of the status entry in case the callee modifies it
                 newerror = status(cmdr, is_beta, dict(entry))
                 error = error or newerror
-            except Exception as e:
+            except Exception:
                 logger.exception(f'Plugin "{plugin.name}" failed')
     return error
 
 
-def notify_newdata(data, is_beta):
+def notify_capidata(
+    data: companion.CAPIData,
+    is_beta: bool
+) -> Optional[str]:
     """
-    Send the latest EDMC data from the FD servers to each plugin
+    Send the latest EDMC data from the FD servers to each plugin.
+
     :param data:
     :param is_beta: whether the player is in a Beta universe.
     :returns: Error message from the first plugin that returns one (if any)
     """
     error = None
     for plugin in PLUGINS:
-        cmdr_data = plugin._get_func('cmdr_data')
+        # TODO: Handle it being Legacy data
+        if data.source_host == companion.SERVER_LEGACY:
+            cmdr_data = plugin._get_func('cmdr_data_legacy')
+
+        else:
+            cmdr_data = plugin._get_func('cmdr_data')
+
         if cmdr_data:
             try:
                 newerror = cmdr_data(data, is_beta)
                 error = error or newerror
-            except Exception as e:
+
+            except Exception:
                 logger.exception(f'Plugin "{plugin.name}" failed')
+
     return error
 
 
-def show_error(err):
+def show_error(err: str) -> None:
     """
     Display an error message in the status line of the main window.
 
@@ -350,6 +413,6 @@ def show_error(err):
         logger.info(f'Called during shutdown: "{str(err)}"')
         return
 
-    if err and last_error['root']:
-        last_error['msg'] = str(err)
-        last_error['root'].event_generate('<<PluginError>>', when="tail")
+    if err and last_error.root:
+        last_error.msg = str(err)
+        last_error.root.event_generate('<<PluginError>>', when="tail")

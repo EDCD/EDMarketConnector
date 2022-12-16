@@ -1,70 +1,66 @@
-# Export to Trade Dangerous
+"""Export data for Trade Dangerous."""
 
+import pathlib
+import sys
 import time
 from collections import defaultdict
 from operator import itemgetter
-from os.path import join
 from platform import system
-from sys import platform
 
+from companion import CAPIData
 from config import applongname, appversion, config
 
 # These are specific to Trade Dangerous, so don't move to edmc_data.py
-demandbracketmap = { 0: '?',
-                     1: 'L',
-                     2: 'M',
-                     3: 'H', }
-stockbracketmap =  { 0: '-',
-                     1: 'L',
-                     2: 'M',
-                     3: 'H', }
+demandbracketmap = {0: '?',
+                    1: 'L',
+                    2: 'M',
+                    3: 'H', }
+stockbracketmap = {0: '-',
+                   1: 'L',
+                   2: 'M',
+                   3: 'H', }
 
-def export(data):
 
-    querytime = config.get_int('querytime', default=int(time.time()))
+def export(data: CAPIData) -> None:
+    """Export market data in TD format."""
+    data_path = pathlib.Path(config.get_str('outdir'))
+    timestamp = time.strftime('%Y-%m-%dT%H.%M.%S', time.strptime(data['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
+    data_filename = f"{data['lastSystem']['name'].strip()}.{data['lastStarport']['name'].strip()}.{timestamp}.prices"
 
-    #
-    #  When this is refactored into multi-line CHECK IT WORKS, avoiding the
-    #  brainfart we had with dangling commas in commodity.py:export() !!!
-    #
-    filename = join(config.get_str('outdir'), '%s.%s.%s.prices' % (data['lastSystem']['name'].strip(), data['lastStarport']['name'].strip(), time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(querytime))))
-    #
-    #  When this is refactored into multi-line CHECK IT WORKS, avoiding the
-    #  brainfart we had with dangling commas in commodity.py:export() !!!
-    #
+    # codecs can't automatically handle line endings, so encode manually where
+    # required
+    with open(data_path / data_filename, 'wb') as h:
+        # Format described here: https://github.com/eyeonus/Trade-Dangerous/wiki/Price-Data
+        h.write('#! trade.py import -\n'.encode('utf-8'))
+        this_platform = sys.platform == 'darwin' and "Mac OS" or system()
+        cmdr_name = data['commander']['name'].strip()
+        h.write(
+            f'# Created by {applongname} {appversion()} on {this_platform} for Cmdr {cmdr_name}.\n'.encode('utf-8')
+        )
+        h.write(
+            '#\n#    <item name>             <sellCR> <buyCR>   <demand>   <stock>  <timestamp>\n\n'.encode('utf-8')
+        )
+        system_name = data['lastSystem']['name'].strip()
+        starport_name = data['lastStarport']['name'].strip()
+        h.write(f'@ {system_name}/{starport_name}\n'.encode('utf-8'))
 
-    timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.strptime(data['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
+        # sort commodities by category
+        by_category = defaultdict(list)
+        for commodity in data['lastStarport']['commodities']:
+            by_category[commodity['categoryname']].append(commodity)
 
-    # Format described here: https://bitbucket.org/kfsone/tradedangerous/wiki/Price%20Data
-    h = open(filename, 'wb')	# codecs can't automatically handle line endings, so encode manually where required
-    h.write('#! trade.py import -\n# Created by {appname} {appversion} on {platform} for Cmdr {cmdr}.\n'
-            '#\n#    <item name>             <sellCR> <buyCR>   <demand>   <stock>  <timestamp>\n\n'
-            '@ {system}/{starport}\n'.format(
-                appname=applongname,
-                appversion=appversion(),
-                platform=platform == 'darwin' and "Mac OS" or system(),
-                cmdr=data['commander']['name'].strip(),
-                system=data['lastSystem']['name'].strip(),
-                starport=data['lastStarport']['name'].strip()
-    ).encode('utf-8'))
-
-    # sort commodities by category
-    bycategory = defaultdict(list)
-    for commodity in data['lastStarport']['commodities']:
-        bycategory[commodity['categoryname']].append(commodity)
-
-    for category in sorted(bycategory):
-        h.write('   + {}\n'.format(category).encode('utf-8'))
-        # corrections to commodity names can change the sort order
-        for commodity in sorted(bycategory[category], key=itemgetter('name')):
-            h.write('      {:<23} {:7d} {:7d} {:9}{:1} {:8}{:1}  {}\n'.format(
-                commodity['name'],
-                int(commodity['sellPrice']),
-                int(commodity['buyPrice']),
-                int(commodity['demand']) if commodity['demandBracket'] else '',
-                demandbracketmap[commodity['demandBracket']],
-                int(commodity['stock']) if commodity['stockBracket'] else '',
-                stockbracketmap[commodity['stockBracket']],
-                timestamp).encode('utf-8'))
-
-    h.close()
+        timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.strptime(data['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
+        for category in sorted(by_category):
+            h.write(f'   + {format(category)}\n'.encode('utf-8'))
+            # corrections to commodity names can change the sort order
+            for commodity in sorted(by_category[category], key=itemgetter('name')):
+                h.write(
+                    f"      {commodity['name']:<23}"
+                    f" {int(commodity['sellPrice']):7d}"
+                    f" {int(commodity['buyPrice']):7d}"
+                    f" {int(commodity['demand']) if commodity['demandBracket'] else '':9}"
+                    f"{demandbracketmap[commodity['demandBracket']]:1}"
+                    f" {int(commodity['stock']) if commodity['stockBracket'] else '':8}"
+                    f"{stockbracketmap[commodity['stockBracket']]:1}"
+                    f"  {timestamp}\n".encode('utf-8')
+                )

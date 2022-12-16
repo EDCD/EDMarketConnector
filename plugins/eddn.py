@@ -180,7 +180,8 @@ class EDDNSender:
             "plugin.eddn.send",
             f"First queue run scheduled for {self.eddn.REPLAY_STARTUP_DELAY}ms from now"
         )
-        self.eddn.parent.after(self.eddn.REPLAY_STARTUP_DELAY, self.queue_check_and_send, True)
+        if not os.getenv("EDMC_NO_UI"):
+            self.eddn.parent.after(self.eddn.REPLAY_STARTUP_DELAY, self.queue_check_and_send, True)
 
     def sqlite_queue_v1(self) -> sqlite3.Connection:
         """
@@ -251,15 +252,14 @@ class EDDNSender:
                     self.add_message(cmdr, msg)
 
         except FileNotFoundError:
-            pass
+            return
 
-        finally:
-            # Best effort at removing the file/contents
-            # NB: The legacy code assumed it could write to the file.
-            logger.info("Conversion` to `eddn_queue-v1.db` complete, removing `replay.jsonl`")
-            replay_file = open(filename, 'w')  # Will truncate
-            replay_file.close()
-            os.unlink(filename)
+        # Best effort at removing the file/contents
+        # NB: The legacy code assumed it could write to the file.
+        logger.info("Conversion` to `eddn_queue-v1.db` complete, removing `replay.jsonl`")
+        replay_file = open(filename, 'w')  # Will truncate
+        replay_file.close()
+        os.unlink(filename)
 
     def close(self) -> None:
         """Clean up any resources."""
@@ -372,6 +372,19 @@ class EDDNSender:
 
         return False
 
+    def set_ui_status(self, text: str) -> None:
+        """
+        Set the UI status text, if applicable.
+
+        When running as a CLI there is no such thing, so log to INFO instead.
+        :param text: The status text to be set/logged.
+        """
+        if os.getenv('EDMC_NO_UI'):
+            logger.INFO(text)
+            return
+
+        self.eddn.parent.children['status']['text'] = text
+
     def send_message(self, msg: str) -> bool:
         """
         Transmit a fully-formed EDDN message to the Gateway.
@@ -395,7 +408,6 @@ class EDDNSender:
             logger.warning('eddn.send has been disabled via killswitch. Returning.')
             return False
 
-        status: tk.Widget = self.eddn.parent.children['status']
         # Even the smallest possible message compresses somewhat, so always compress
         encoded, compressed = text.gzip(json.dumps(new_data, separators=(',', ':')), max_size=0)
         headers: None | dict[str, str] = None
@@ -436,16 +448,16 @@ class EDDNSender:
 
             else:
                 # This should catch anything else, e.g. timeouts, gateway errors
-                status['text'] = self.http_error_to_log(e)
+                self.set_ui_status(self.http_error_to_log(e))
 
         except requests.exceptions.RequestException as e:
             logger.debug('Failed sending', exc_info=e)
             # LANG: Error while trying to send data to EDDN
-            status['text'] = _("Error: Can't connect to EDDN")
+            self.set_ui_status(_("Error: Can't connect to EDDN"))
 
         except Exception as e:
             logger.debug('Failed sending', exc_info=e)
-            status['text'] = str(e)
+            self.set_ui_status(str(e))
 
         return False
 
@@ -2409,14 +2421,41 @@ def journal_entry(  # noqa: C901, CCR001
     return None
 
 
-def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:
+def cmdr_data_legacy(data: CAPIData, is_beta: bool) -> Optional[str]:
     """
-    Process new CAPI data.
+    Process new CAPI data for Legacy galaxy.
+
+    Ensuring the correct EDDN `header->gameversion` is achieved by use of
+    `EDDN.capi_gameversion_from_host_endpoint()` in:
+
+        `EDDN.export_outfitting()`
+        `EDDN.export_shipyard()`
+        `EDDN.export_outfitting()`
+
+    Thus we can just call through to the 'not Legacy' version of this function.
+    :param data: CAPI data to process.
+    :param is_beta: bool - True if this is a beta version of the Game.
+    :return: str - Error message, or `None` if no errors.
+    """
+    return cmdr_data(data, is_beta)
+
+
+def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:  # noqa: CCR001
+    """
+    Process new CAPI data for not-Legacy galaxy (might be beta).
 
     :param data: CAPI data to process.
     :param is_beta: bool - True if this is a beta version of the Game.
     :return: str - Error message, or `None` if no errors.
     """
+    # 'Update' can trigger CAPI queries before plugins have been fed any
+    # Journal events.  So this.cmdr_name might not be set otherwise.
+    if (
+        not this.cmdr_name
+        and data.get('commander') and (cmdr_name := data['commander'].get('name'))
+    ):
+        this.cmdr_name = cmdr_name
+
     if (data['commander'].get('docked') or (this.on_foot and monitor.station)
             and config.get_int('output') & config.OUT_EDDN_SEND_STATION_DATA):
         try:
