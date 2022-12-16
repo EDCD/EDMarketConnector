@@ -601,7 +601,7 @@ class EDMCCAPIFailedRequest(EDMCCAPIReturn):
     ):
         super().__init__(query_time=query_time, play_sound=play_sound, auto_update=auto_update)
         self.message: str = message  # User-friendly reason for failure.
-        self.exception: BaseException = exception  # Exception that recipient should raise.
+        self.exception: Exception = exception  # Exception that recipient should raise.
 
 
 class Session(object):
@@ -619,7 +619,7 @@ class Session(object):
     def __init__(self) -> None:
         self.state = Session.STATE_INIT
         self.credentials: Optional[Dict[str, Any]] = None
-        self.requests_session: Optional[requests.Session] = None
+        self.requests_session: Optional[requests.Session] = requests.Session()
         self.auth: Optional[Auth] = None
         self.retrying = False  # Avoid infinite loop when successful auth / unsuccessful query
         self.tk_master: Optional[tk.Tk] = None
