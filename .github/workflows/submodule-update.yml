@@ -39,8 +39,8 @@ jobs:
             echo '::set-output changes=true'
           else
             echo '::set-output changes=false'
-            exit 0
           fi
+          exit 0
       
       - name: Create submodules changes branch
         if: steps.check_for_changes.outputs.changes == 'true'
