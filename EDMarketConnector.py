@@ -1228,10 +1228,15 @@ class AppWindow(object):
                 if err:
                     play_bad = True
 
-                # Export market data
-                if not self.export_market_data(capi_response.capi_data):
-                    err = 'Error: Exporting Market data'
-                    play_bad = True
+                should_return, new_data = killswitch.check_killswitch('capi.request./market', {})
+                if should_return:
+                    logger.warning("capi.request./market has been disabled by killswitch.  Returning.")
+
+                else:
+                    # Export market data
+                    if not self.export_market_data(capi_response.capi_data):
+                        err = 'Error: Exporting Market data'
+                        play_bad = True
 
                 self.capi_query_holdoff_time = capi_response.query_time + companion.capi_query_cooldown
 

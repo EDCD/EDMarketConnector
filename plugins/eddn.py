@@ -636,6 +636,16 @@ class EDDN:
         :param data: a dict containing the starport data
         :param is_beta: whether or not we're currently in beta mode
         """
+        should_return, new_data = killswitch.check_killswitch('capi.request./market', {})
+        if should_return:
+            logger.warning("capi.request./market has been disabled by killswitch.  Returning.")
+            return
+
+        should_return, new_data = killswitch.check_killswitch('eddn.capi_export.commodities', {})
+        if should_return:
+            logger.warning("eddn.capi_export.commodities has been disabled by killswitch.  Returning.")
+            return
+
         modules, ships = self.safe_modules_and_ships(data)
         horizons: bool = capi_is_horizons(
             data['lastStarport'].get('economies', {}),
@@ -757,6 +767,16 @@ class EDDN:
         :param data: dict containing the outfitting data
         :param is_beta: whether or not we're currently in beta mode
         """
+        should_return, new_data = killswitch.check_killswitch('capi.request./shipyard', {})
+        if should_return:
+            logger.warning("capi.request./shipyard has been disabled by killswitch.  Returning.")
+            return
+
+        should_return, new_data = killswitch.check_killswitch('eddn.capi_export.outfitting', {})
+        if should_return:
+            logger.warning("eddn.capi_export.outfitting has been disabled by killswitch.  Returning.")
+            return
+
         modules, ships = self.safe_modules_and_ships(data)
 
         # Horizons flag - will hit at least Int_PlanetApproachSuite other than at engineer bases ("Colony"),
@@ -813,6 +833,16 @@ class EDDN:
         :param data: dict containing the shipyard data
         :param is_beta: whether or not we are in beta mode
         """
+        should_return, new_data = killswitch.check_killswitch('capi.request./shipyard', {})
+        if should_return:
+            logger.warning("capi.request./shipyard has been disabled by killswitch.  Returning.")
+            return
+
+        should_return, new_data = killswitch.check_killswitch('eddn.capi_export.shipyard', {})
+        if should_return:
+            logger.warning("eddn.capi_export.shipyard has been disabled by killswitch.  Returning.")
+            return
+
         modules, ships = self.safe_modules_and_ships(data)
 
         horizons: bool = capi_is_horizons(
@@ -1857,7 +1887,7 @@ class EDDN:
         match = self.CANONICALISE_RE.match(item)
         return match and match.group(1) or item
 
-    def capi_gameversion_from_host_endpoint(self, capi_host: str, capi_endpoint: str) -> str:
+    def capi_gameversion_from_host_endpoint(self, capi_host: Optional[str], capi_endpoint: str) -> str:
         """
         Return the correct CAPI gameversion string for the given host/endpoint.
 

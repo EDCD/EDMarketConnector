@@ -601,7 +601,7 @@ class EDMCCAPIFailedRequest(EDMCCAPIReturn):
     ):
         super().__init__(query_time=query_time, play_sound=play_sound, auto_update=auto_update)
         self.message: str = message  # User-friendly reason for failure.
-        self.exception: int = exception  # Exception that recipient should raise.
+        self.exception: BaseException = exception  # Exception that recipient should raise.
 
 
 class Session(object):
@@ -772,7 +772,12 @@ class Session(object):
             :param timeout: requests query timeout to use.
             :return: The resulting CAPI data, of type CAPIData.
             """
-            capi_data: CAPIData
+            capi_data: CAPIData = CAPIData()
+            should_return, new_data = killswitch.check_killswitch('capi.request.' + capi_endpoint, {})
+            if should_return:
+                logger.warning(f"capi.request.{capi_endpoint} has been disabled by killswitch.  Returning.")
+                return capi_data
+
             try:
                 logger.trace_if('capi.worker', 'Sending HTTP request...')
                 if conf_module.capi_pretend_down:
@@ -854,6 +859,10 @@ class Session(object):
             """
             station_data = capi_single_query(capi_host, self.FRONTIER_CAPI_PATH_PROFILE, timeout=timeout)
 
+            if not station_data.get('commander'):
+                # If even this doesn't exist, probably killswitched.
+                return station_data
+
             if not station_data['commander'].get('docked') and not monitor.state['OnFoot']:
                 return station_data
 
@@ -894,6 +903,10 @@ class Session(object):
 
             if services.get('commodities'):
                 market_data = capi_single_query(capi_host, self.FRONTIER_CAPI_PATH_MARKET, timeout=timeout)
+                if not market_data.get('id'):
+                    # Probably killswitched
+                    return station_data
+
                 if last_starport_id != int(market_data['id']):
                     logger.warning(f"{last_starport_id!r} != {int(market_data['id'])!r}")
                     raise ServerLagging()
@@ -904,6 +917,10 @@ class Session(object):
 
             if services.get('outfitting') or services.get('shipyard'):
                 shipyard_data = capi_single_query(capi_host, self.FRONTIER_CAPI_PATH_SHIPYARD, timeout=timeout)
+                if not shipyard_data.get('id'):
+                    # Probably killswitched
+                    return station_data
+
                 if last_starport_id != int(shipyard_data['id']):
                     logger.warning(f"{last_starport_id!r} != {int(shipyard_data['id'])!r}")
                     raise ServerLagging()
