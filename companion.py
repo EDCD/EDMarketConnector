@@ -28,6 +28,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, OrderedDic
 import requests
 
 import config as conf_module
+import killswitch
 import protocol
 from config import config, user_agent
 from edmc_data import companion_category_map as category_map
@@ -325,6 +326,11 @@ class Auth(object):
         """
         logger.debug(f'Trying for "{self.cmdr}"')
 
+        should_return, new_data = killswitch.check_killswitch('capi.auth', {})
+        if should_return:
+            logger.warning('capi.auth has been disabled via killswitch. Returning.')
+            return None
+
         self.verifier = None
         cmdrs = config.get_list('cmdrs', default=[])
         logger.debug(f'Cmdrs: {cmdrs}')
@@ -393,9 +399,11 @@ class Auth(object):
         return None
 
     def authorize(self, payload: str) -> str:  # noqa: CCR001
-        """Handle oAuth authorization callback.
+        """
+        Handle oAuth authorization callback.
 
-        :return: access token if successful, otherwise raises CredentialsError.
+        :return: access token if successful
+        :raises CredentialsError
         """
         logger.debug('Checking oAuth authorization callback')
         if '?' not in payload:
@@ -655,6 +663,11 @@ class Session(object):
 
         :return: True if login succeeded, False if re-authorization initiated.
         """
+        should_return, new_data = killswitch.check_killswitch('capi.auth', {})
+        if should_return:
+            logger.warning('capi.auth has been disabled via killswitch. Returning.')
+            return False
+
         if not Auth.CLIENT_ID:
             logger.error('self.CLIENT_ID is None')
             raise CredentialsError('cannot login without a valid Client ID')
@@ -946,7 +959,8 @@ class Session(object):
             # event too, so assume it will be polling the response queue.
             if query.tk_response_event is not None:
                 logger.trace_if('capi.worker', 'Sending <<CAPIResponse>>')
-                self.tk_master.event_generate('<<CAPIResponse>>')
+                if self.tk_master is not None:
+                    self.tk_master.event_generate('<<CAPIResponse>>')
 
         logger.info('CAPI worker thread DONE')
 
