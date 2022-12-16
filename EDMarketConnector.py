@@ -168,6 +168,11 @@ if __name__ == '__main__':  # noqa: C901
         help='Have EDDN plugin show what it is tracking',
         action='store_true',
     )
+
+    parser.add_argument(
+        '--killswitches-file',
+        help='Specify a custom killswitches file',
+    )
     ###########################################################################
 
     args = parser.parse_args()
@@ -1859,10 +1864,13 @@ Locale LC_TIME: {locale.getlocale(locale.LC_TIME)}'''
                  )
 
 
-def setup_killswitches():
+def setup_killswitches(filename: Optional[str]):
     """Download and setup the main killswitch list."""
     logger.debug('fetching killswitches...')
-    killswitch.setup_main_list()
+    if filename is not None:
+        filename = "file:" + filename
+
+    killswitch.setup_main_list(filename)
 
 
 def show_killswitch_poppup(root=None):
@@ -1891,9 +1899,9 @@ def show_killswitch_poppup(root=None):
     for version in kills:
         tk.Label(frame, text=f'Version: {version.version}').grid(row=idx, sticky=tk.W)
         idx += 1
-        for id, reason in version.kills.items():
+        for id, kill in version.kills.items():
             tk.Label(frame, text=id).grid(column=0, row=idx, sticky=tk.W, padx=(10, 0))
-            tk.Label(frame, text=reason).grid(column=1, row=idx, sticky=tk.E, padx=(0, 10))
+            tk.Label(frame, text=kill.reason).grid(column=1, row=idx, sticky=tk.E, padx=(0, 10))
             idx += 1
         idx += 1
 
@@ -2026,7 +2034,8 @@ sys.path: {sys.path}'''
 
     Translations.install(config.get_str('language'))  # Can generate errors so wait til log set up
 
-    setup_killswitches()
+    setup_killswitches(args.killswitches_file)
+
     root = tk.Tk(className=appname.lower())
     if sys.platform != 'win32' and ((f := config.get_str('font')) is not None or f != ''):
         size = config.get_int('font_size', default=-1)
