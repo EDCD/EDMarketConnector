@@ -43,14 +43,14 @@ jobs:
           exit 0
       
       - name: Create submodules changes branch
-        if: steps.check_for_changes.outputs.changes == 'true'
+        if: ${{ steps.check_for_changes.outputs.changes }} == 'true'
         run: |
           git checkout -b $GITHUB_RUN_ID
           git commit -am "updating submodules"
           git push --set-upstream origin $GITHUB_RUN_ID
 
       - name: Create pull request against target branch
-        if: steps.check_for_changes.outputs.changes == 'true'
+        if: ${{ steps.check_for_changes.outputs.changes }} == 'true'
         uses: actions/github-script@v6
         with:
           github-token: ${{ inputs.github_token }}
@@ -65,7 +65,7 @@ jobs:
             });
 
       - name: Add labels
-        if: steps.check_for_changes.outputs.changes == 'true'
+        if: ${{ steps.check_for_changes.outputs.changes }} == 'true'
         uses: actions/github-script@v6
         with:
           github-token: ${{ inputs.github_token }}
