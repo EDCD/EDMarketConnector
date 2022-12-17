@@ -37,6 +37,7 @@ jobs:
           if [ -n "${changes}" ];
           then
             echo 'changes=true' >> $GITHUB_OUTPUT
+            echo "changes_text=${changes}" >> $GITHUB_OUTPUT
           else
             echo 'changes=false' >> $GITHUB_OUTPUT
           fi
@@ -61,7 +62,7 @@ jobs:
               head: process.env.GITHUB_RUN_ID,
               base: '${{ github.ref }}',
               title: `[Auto-generated] Submodule Updates ${process.env.GITHUB_RUN_ID}`,
-              body: `[Auto-generated] Submodule Updates ${process.env.GITHUB_RUN_ID}`,
+              body: '${{ steps.check_for_changes.outputs.changes_text }}',
             });
 
 #      - name: Add labels
