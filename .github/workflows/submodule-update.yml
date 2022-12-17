@@ -53,7 +53,7 @@ jobs:
         if: steps.check_for_changes.outputs.changes == 'true'
         uses: actions/github-script@v6
         with:
-          github-token: ${{ inputs.github_token }}
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
           script: |
             await github.rest.pulls.create({
               owner: '${{ inputs.owner }}',
@@ -68,7 +68,7 @@ jobs:
         if: steps.check_for_changes.outputs.changes == 'true'
         uses: actions/github-script@v6
         with:
-          github-token: ${{ inputs.github_token }}
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
           script: |
             const res = await github.rest.issues.listForRepo({
               owner: '${{ inputs.owner }}',
