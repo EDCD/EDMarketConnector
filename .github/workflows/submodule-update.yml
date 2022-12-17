@@ -2,9 +2,8 @@
 name: Submodule Updates
 
 on:
-  # We might want this on a schedule once this is in `main`
-  push:
-    branches: [ develop ]
+  schedule:
+    - cron: '00 12 * * *'
 
 jobs:
   check_submodules:
