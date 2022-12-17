@@ -25,6 +25,7 @@ jobs:
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
+          git checkout $CHECKOUT_BRANCH
           git submodule update --remote
 
       - name: Check for changes
@@ -45,7 +46,7 @@ jobs:
       - name: Create submodules changes branch
         if: steps.check_for_changes.outputs.changes == 'true'
         run: |
-          git checkout -b "submodule-change/$GITHUB_RUN_ID"
+          git checkout -b "submodule-change/$GITHUB_RUN_ID" $CHECKOUT_BRANCH
           git commit -am "updating submodules"
           git push --set-upstream origin "submodule-change/$GITHUB_RUN_ID"
 
@@ -59,7 +60,7 @@ jobs:
               owner: '${{ github.repository_owner }}',
               repo: '${{ github.repository }}'.split('/')[1].trim(),
               head: 'submodule-change/${{ github.run_id }}',
-              base: '${{ github.ref }}',
+              base: '$PR_AGAINST_BRANCH',
               title: `[Auto-generated] Submodule Updates ${process.env.GITHUB_RUN_ID}`,
               body: '${{ steps.check_for_changes.outputs.changes_text }}',
             });
