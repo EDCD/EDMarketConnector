@@ -3,7 +3,7 @@ name: Submodule Updates
 
 on:
   schedule:
-    - cron: '10 * * * *'
+    - cron: '00 12 * * *'
 
 jobs:
   check_submodules:
