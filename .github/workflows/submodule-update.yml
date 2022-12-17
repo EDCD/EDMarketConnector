@@ -56,10 +56,10 @@ jobs:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
           script: |
             await github.rest.pulls.create({
-              owner: '${{ process.env.OWNER }}',
-              repo: '${{ process.env.PARENT_REPOSITORY }}'.split('/')[1].trim(),
+              owner: '${process.env.OWNER}',
+              repo: '${process.env.PARENT_REPOSITORY}'.split('/')[1].trim(),
               head: process.env.GITHUB_RUN_ID,
-              base: '${{ process.env.PR_AGAINST_BRANCH }}',
+              base: '${process.env.PR_AGAINST_BRANCH}',
               title: `[Auto-generated] Submodule Updates ${process.env.GITHUB_RUN_ID}`,
               body: `[Auto-generated] Submodule Updates ${process.env.GITHUB_RUN_ID}`,
             });
@@ -71,14 +71,14 @@ jobs:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
           script: |
             const res = await github.rest.issues.listForRepo({
-              owner: '${{ process.env.OWNER }}',
-              repo: '${{ process.env.PARENT_REPOSITORY }}'.split('/')[1].trim(),
+              owner: '${process.env.OWNER}',
+              repo: '${process.env.PARENT_REPOSITORY}'.split('/')[1].trim(),
             });
             const pr = res.data.filter(i => i.title.includes(process.env.GITHUB_RUN_ID));
             const prNumber = pr[0].number;  
             await github.rest.issues.addLabels({
               issue_number: prNumber,
-              owner: '${{ process.env.OWNER }}',
-              repo: '${{ process.env.PARENT_REPOSITORY }}'.split('/')[1].trim(),
+              owner: '${process.env.OWNER}',
+              repo: '${process.env.PARENT_REPOSITORY}'.split('/')[1].trim(),
               labels: ['${{ inputs.label }}']
             });
