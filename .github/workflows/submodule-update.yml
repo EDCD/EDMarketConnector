@@ -20,6 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
+          ref: '${{ env.CHECKOUT_BRANCH }}'
           submodules: true
 
       - name: Update submodules
@@ -27,7 +28,6 @@ jobs:
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git checkout $CHECKOUT_BRANCH
           git submodule update --remote
 
       - name: Check for changes
