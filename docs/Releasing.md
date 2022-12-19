@@ -191,14 +191,16 @@ that it's actually included in the installer.
 Before you create a new install each time you should:
 
 1. Ensure the data sourced from coriolis.io is up to date and works:
-    1. Update the `coriolis-data` repo. **NB: You will need 'npm' installed for
-     this.**
-        1. `cd coriolis-data`
-        1. `git pull`
-        1. `npm install` - to check it's worked.
-    1. Run `coriolis.py` to update `modules.p` and `ships.p`
-    1. XXX: Test ?
-    1. `git commit` the changes to the repo and the `.p` files.
+  1. Update the `coriolis-data` repo. **NB: You will need 'npm' installed for
+    this.**
+     1. `cd coriolis-data`
+     1. `git pull`
+     1. `npm install` - to check it's worked.
+  1. Run `coriolis.py` to update `modules.p` and `ships.p`. **NB: The
+      submodule might have been updated by a GitHub workflow/PR/merge, so
+      be sure to perform this step for every build.**
+  1. XXX: Test ?
+  1. `git commit` the changes to the repo and the `.p` files.
 1. Ensure translations are up to date, see [Translations.md](Translations.md).
 
 # Preparing to Package
