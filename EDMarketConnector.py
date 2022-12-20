@@ -387,7 +387,9 @@ if __name__ == '__main__':  # noqa: C901
     if (
         (
             git_branch == 'develop'
-            or '-alpha0' in str(appversion())
+            or (
+                git_branch == '' and '-alpha0' in str(appversion())
+            )
         ) and (
             (
                 sys.platform == 'linux'
@@ -397,7 +399,7 @@ if __name__ == '__main__':  # noqa: C901
             or (
                 sys.platform == 'win32'
                 and environ.get('USERNAME') is not None
-                and environ['USERNAME'] not in ['Athan']
+                and environ['USERNAME'] not in ['XAthan']
             )
         )
     ):
