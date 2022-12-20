@@ -13,7 +13,7 @@ flake8-annotations-coverage==0.0.6
 flake8-cognitive-complexity==0.1.0
 flake8-comprehensions==3.10.1
 flake8-docstrings==1.6.0
-isort==5.11.2
+isort==5.11.3
 flake8-isort==5.0.3
 flake8-json==21.7.0
 flake8-noqa==1.3.0
