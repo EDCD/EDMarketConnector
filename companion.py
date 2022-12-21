@@ -612,6 +612,8 @@ class Session(object):
     FRONTIER_CAPI_PATH_PROFILE = '/profile'
     FRONTIER_CAPI_PATH_MARKET = '/market'
     FRONTIER_CAPI_PATH_SHIPYARD = '/shipyard'
+    FRONTIER_CAPI_PATH_FLEETCARRIER = '/fleetcarrier'
+
     # This is a dummy value, to signal to Session.capi_query_worker that we
     # the 'station' triplet of queries.
     _CAPI_PATH_STATION = '_edmc_station'
@@ -949,6 +951,9 @@ class Session(object):
                 if query.endpoint == self._CAPI_PATH_STATION:
                     capi_data = capi_station_queries(query.capi_host)
 
+                elif query.endpoint == self.FRONTIER_CAPI_PATH_FLEETCARRIER:
+                    capi_data = capi_single_query(query.capi_host, self.FRONTIER_CAPI_PATH_FLEETCARRIER)
+
                 else:
                     capi_data = capi_single_query(query.capi_host, self.FRONTIER_CAPI_PATH_PROFILE)
 
@@ -1014,6 +1019,35 @@ class Session(object):
             EDMCCAPIRequest(
                 capi_host=capi_host,
                 endpoint=self._CAPI_PATH_STATION,
+                tk_response_event=tk_response_event,
+                query_time=query_time,
+                play_sound=play_sound,
+                auto_update=auto_update
+            )
+        )
+
+    def fleetcarrier(
+            self, query_time: int, tk_response_event: Optional[str] = None,
+            play_sound: bool = False, auto_update: bool = False
+    ) -> None:
+        """
+        Perform CAPI query for fleetcarrier data.
+
+        :param query_time: When this query was initiated.
+        :param tk_response_event: Name of tk event to generate when response queued.
+        :param play_sound: Whether the app should play a sound on error.
+        :param auto_update: Whether this request was triggered automatically.
+        """
+        capi_host = self.capi_host_for_galaxy()
+        if not capi_host:
+            return
+
+        # Ask the thread worker to perform a fleetcarrier query
+        logger.trace_if('capi.worker', 'Enqueueing fleetcarrier request')
+        self.capi_request_queue.put(
+            EDMCCAPIRequest(
+                capi_host=capi_host,
+                endpoint=self.FRONTIER_CAPI_PATH_FLEETCARRIER,
                 tk_response_event=tk_response_event,
                 query_time=query_time,
                 play_sound=play_sound,
