@@ -619,7 +619,7 @@ class Session(object):
     def __init__(self) -> None:
         self.state = Session.STATE_INIT
         self.credentials: Optional[Dict[str, Any]] = None
-        self.requests_session: Optional[requests.Session] = requests.Session()
+        self.requests_session = requests.Session()
         self.auth: Optional[Auth] = None
         self.retrying = False  # Avoid infinite loop when successful auth / unsuccessful query
         self.tk_master: Optional[tk.Tk] = None
@@ -652,9 +652,8 @@ class Session(object):
     def start_frontier_auth(self, access_token: str) -> None:
         """Start an oAuth2 session."""
         logger.debug('Starting session')
-        if self.requests_session is not None:
-            self.requests_session.headers['Authorization'] = f'Bearer {access_token}'
-            self.requests_session.headers['User-Agent'] = user_agent
+        self.requests_session.headers['Authorization'] = f'Bearer {access_token}'
+        self.requests_session.headers['User-Agent'] = user_agent
 
         self.state = Session.STATE_OK
 
@@ -694,7 +693,7 @@ class Session(object):
 
             else:
                 logger.debug('changed account or retrying login during auth')
-                self.close()
+                self.reinit_session()
                 self.credentials = credentials
 
         self.state = Session.STATE_INIT
@@ -733,26 +732,27 @@ class Session(object):
             self.auth = None
             raise  # Bad thing happened
 
-    def close(self, reopen: bool = True) -> None:
-        """Close Frontier authorization session."""
+    def reinit_session(self, reopen: bool = True) -> None:
+        """
+        Re-initialise the session's `request.Session()`.
+
+        :param reopen: Whether to open a new session.
+        """
         self.state = Session.STATE_INIT
-        if self.requests_session:
-            try:
-                self.requests_session.close()
+        try:
+            self.requests_session.close()
 
-            except Exception as e:
-                logger.debug('Frontier Auth: closing', exc_info=e)
-                self.requests_session = None
+        except Exception as e:
+            logger.debug('Frontier Auth: closing', exc_info=e)
 
-            # 2022-12-21: Current callers all need a *new* session.
-            if reopen:
-                self.requests_session = requests.Session()
+        if reopen:
+            self.requests_session = requests.Session()
 
     def invalidate(self) -> None:
         """Invalidate Frontier authorization credentials."""
         logger.debug('Forcing a full re-authentication')
         # Force a full re-authentication
-        self.close()
+        self.reinit_session()
         Auth.invalidate(self.credentials['cmdr'])  # type: ignore
     ######################################################################
 
