@@ -783,7 +783,7 @@ class Session(object):
                 return capi_data
 
             try:
-                logger.trace_if('capi.worker', 'Sending HTTP request...')
+                logger.trace_if('capi.worker', f'Sending HTTP request for {capi_endpoint} ...')
                 if conf_module.capi_pretend_down:
                     raise ServerConnectionError(f'Pretending CAPI down: {capi_endpoint}')
 
