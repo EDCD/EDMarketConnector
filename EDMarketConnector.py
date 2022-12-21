@@ -1081,6 +1081,11 @@ class AppWindow(object):
             query_time=query_time, tk_response_event=self._CAPI_RESPONSE_TK_EVENT_NAME,
             play_sound=play_sound
         )
+        logger.trace_if('capi.worker', 'Calling companion.session.fleetcarrier')
+        companion.session.fleetcarrier(
+            query_time=query_time, tk_response_event=self._CAPI_RESPONSE_TK_EVENT_NAME,
+            play_sound=play_sound
+        )
 
     def capi_handle_response(self, event=None):  # noqa: C901, CCR001
         """Handle the resulting data from a CAPI query."""
