@@ -1112,7 +1112,28 @@ class AppWindow(object):
                 raise ValueError(msg)
 
             # Validation
-            if 'commander' not in capi_response.capi_data:
+            if capi_response.capi_data.source_endpoint == companion.session.FRONTIER_CAPI_PATH_FLEETCARRIER:
+                if 'name' not in capi_response.capi_data:
+                    # LANG: No data was returned for the fleetcarrier from the Frontier CAPI
+                    err = self.status['text'] = _('CAPI: No fleetcarrier data returned')
+
+                elif not capi_response.capi_data.get('name', {}).get('callsign'):
+                    # LANG: We didn't have the fleetcarrier callsign when we should have
+                    err = self.status['text'] = _("CAPI: Fleetcarrier data incomplete")  # Shouldn't happen
+
+                else:
+                    if __debug__:  # Recording
+                        companion.session.dump_capi_data(capi_response.capi_data)
+
+                    err = plug.notify_capi_fleetcarrierdata(capi_response.capi_data, monitor.is_beta)
+                    self.status['text'] = err and err or ''
+                    if err:
+                        play_bad = True
+
+                    # TODO: Need to set a different holdoff time for the FC CAPI request
+                    self.capi_query_holdoff_time = capi_response.query_time + companion.capi_query_cooldown
+
+            elif 'commander' not in capi_response.capi_data:
                 # This can happen with EGS Auth if no commander created yet
                 # LANG: No data was returned for the commander from the Frontier CAPI
                 err = self.status['text'] = _('CAPI: No commander data returned')
