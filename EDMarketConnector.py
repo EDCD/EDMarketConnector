@@ -399,7 +399,7 @@ if __name__ == '__main__':  # noqa: C901
             or (
                 sys.platform == 'win32'
                 and environ.get('USERNAME') is not None
-                and environ['USERNAME'] not in ['XAthan']
+                and environ['USERNAME'] not in ['Athan']
             )
         )
     ):
