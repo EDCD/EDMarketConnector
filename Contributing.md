@@ -245,6 +245,10 @@ code is compliant with our requirements.  If you have a *temporary* need to
 bypass this (e.g. wanting to commit one change and fix a non-compliant file
 later) you can add `-n` to the `git commit` arguments.
 
+**NB: There is [a problem](https://github.com/microsoft/vscode-python/issues/10165)
+with pre-commit if using VSCode.**  There's a workaround in
+[one of the comments](https://github.com/microsoft/vscode-python/issues/10165#issuecomment-1277237676).
+
 ### Consider running `pytest` before any `git push`
 The GitHub workflows for PRs and pushes will run `pytest` and flag an error
 if the tests don't pass, so it's in your interests to ensure you've not broken
