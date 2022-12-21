@@ -18,7 +18,8 @@ EDMarketConnector.VisualElementsManifest.xml
 
 .idea
 .vscode
-venv
+.venv/
+venv/
 *.code-workspace
 htmlcov/
 .ignored

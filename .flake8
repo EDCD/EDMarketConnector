@@ -6,7 +6,7 @@ exclude =
     dist.win32/
     FDevIDs/
     venv/
-    venv-py39/
+    .venv/
     wix/
 
 # Show exactly where in a line the error happened
