@@ -733,7 +733,7 @@ class Session(object):
             self.auth = None
             raise  # Bad thing happened
 
-    def close(self) -> None:
+    def close(self, reopen: bool = True) -> None:
         """Close Frontier authorization session."""
         self.state = Session.STATE_INIT
         if self.requests_session:
@@ -742,8 +742,11 @@ class Session(object):
 
             except Exception as e:
                 logger.debug('Frontier Auth: closing', exc_info=e)
+                self.requests_session = None
 
-        self.requests_session = None
+            # 2022-12-21: Current callers all need a *new* session.
+            if reopen:
+                self.requests_session = requests.Session()
 
     def invalidate(self) -> None:
         """Invalidate Frontier authorization credentials."""
