@@ -476,6 +476,8 @@ class AppWindow(object):
     def __init__(self, master: tk.Tk):  # noqa: C901, CCR001 # TODO - can possibly factor something out
 
         self.capi_query_holdoff_time = config.get_int('querytime', default=0) + companion.capi_query_cooldown
+        self.capi_fleetcarrier_query_holdoff_time = config.get_int('fleetcarrierquerytime', default=0) \
+            + companion.capi_fleetcarrier_query_cooldown
 
         self.w = master
         self.w.title(applongname)
@@ -1081,10 +1083,55 @@ class AppWindow(object):
             query_time=query_time, tk_response_event=self._CAPI_RESPONSE_TK_EVENT_NAME,
             play_sound=play_sound
         )
+
+    def capi_request_fleetcarrier_data(self, event=None) -> None:
+        """
+        Perform CAPI fleetcarrier data retrieval and associated actions.
+
+        This is triggered by certain FleetCarrier journal events
+
+        :param event: Tk generated event details.
+        """
+        logger.trace_if('capi.worker', 'Begin')
+        should_return, new_data = killswitch.check_killswitch('capi.fleetcarrier', {})
+        if should_return:
+            logger.warning('capi.fleetcarrier has been disabled via killswitch. Returning.')
+            self.status['text'] = 'CAPI fleetcarrier disabled by killswitch'
+            hotkeymgr.play_bad()
+            return
+
+        if not monitor.cmdr:
+            logger.trace_if('capi.worker', 'Aborting Query: Cmdr unknown')
+            # LANG: CAPI queries aborted because Cmdr name is unknown
+            self.status['text'] = _('CAPI query aborted: Cmdr name unknown')
+            return
+
+        if not monitor.mode:
+            logger.trace_if('capi.worker', 'Aborting Query: Game Mode unknown')
+            # LANG: CAPI queries aborted because game mode unknown
+            self.status['text'] = _('CAPI query aborted: Game mode unknown')
+            return
+
+        if monitor.state['GameVersion'] is None:
+            logger.trace_if('capi.worker', 'Aborting Query: GameVersion unknown')
+            # LANG: CAPI queries aborted because GameVersion unknown
+            self.status['text'] = _('CAPI query aborted: GameVersion unknown')
+            return
+
+        if not companion.session.retrying:
+            if time() < self.capi_fleetcarrier_query_holdoff_time:  # Was invoked while in cooldown
+                return
+
+            # LANG: Status - Attempting to retrieve data from Frontier CAPI
+            self.status['text'] = _('Fetching data...')
+            self.w.update_idletasks()
+
+        query_time = int(time())
+        logger.trace_if('capi.worker', 'Requesting fleetcarrier data')
+        config.set('fleetcarrierquerytime', query_time)
         logger.trace_if('capi.worker', 'Calling companion.session.fleetcarrier')
         companion.session.fleetcarrier(
-            query_time=query_time, tk_response_event=self._CAPI_RESPONSE_TK_EVENT_NAME,
-            play_sound=play_sound
+            query_time=query_time, tk_response_event=self._CAPI_RESPONSE_TK_EVENT_NAME
         )
 
     def capi_handle_response(self, event=None):  # noqa: C901, CCR001
@@ -1111,8 +1158,9 @@ class AppWindow(object):
                 logger.error(msg)
                 raise ValueError(msg)
 
-            # Validation
             if capi_response.capi_data.source_endpoint == companion.session.FRONTIER_CAPI_PATH_FLEETCARRIER:
+                # Fleetcarrier CAPI response
+                # Validation
                 if 'name' not in capi_response.capi_data:
                     # LANG: No data was returned for the fleetcarrier from the Frontier CAPI
                     err = self.status['text'] = _('CAPI: No fleetcarrier data returned')
@@ -1130,9 +1178,11 @@ class AppWindow(object):
                     if err:
                         play_bad = True
 
-                    # TODO: Need to set a different holdoff time for the FC CAPI request
-                    self.capi_query_holdoff_time = capi_response.query_time + companion.capi_query_cooldown
+                    self.capi_fleetcarrier_query_holdoff_time = capi_response.query_time \
+                        + companion.capi_fleetcarrier_query_cooldown
 
+            # Other CAPI response
+            # Validation
             elif 'commander' not in capi_response.capi_data:
                 # This can happen with EGS Auth if no commander created yet
                 # LANG: No data was returned for the commander from the Frontier CAPI
@@ -1514,6 +1564,11 @@ class AppWindow(object):
                 should_return, new_data = killswitch.check_killswitch('capi.auth', {})
                 if not should_return:
                     self.w.after(int(SERVER_RETRY * 1000), self.capi_request_data)
+
+            if entry['event'] in ['CarrierBuy', 'CarrierStats', 'CarrierTradeOrder']:  # 'CargoTransfer' too?
+                should_return, new_data = killswitch.check_killswitch('capi.fleetcarrier', {})
+                if not should_return:
+                    self.w.after(int(SERVER_RETRY * 1000), self.capi_request_fleetcarrier_data)
 
             if entry['event'] == 'ShutDown':
                 # Enable WinSparkle automatic update checks

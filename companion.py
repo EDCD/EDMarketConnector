@@ -46,6 +46,7 @@ else:
 
 
 capi_query_cooldown = 60  # Minimum time between (sets of) CAPI queries
+capi_fleetcarrier_query_cooldown = 60 * 15  # Minimum time between CAPI fleetcarrier queries
 capi_default_requests_timeout = 10
 auth_timeout = 30  # timeout for initial auth
 
