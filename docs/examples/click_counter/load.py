@@ -6,7 +6,6 @@ It adds a single button to the EDMC interface that displays the number of times 
 
 import logging
 import tkinter as tk
-import tkinter.ttk as ttk
 from typing import Optional
 
 import myNotebook as nb  # noqa: N813
@@ -49,7 +48,7 @@ class ClickCounter:
         """
         self.on_preferences_closed("", False)  # Save our prefs
 
-    def setup_preferences(self, parent: ttk.Frame, cmdr: str, is_beta: bool) -> Optional[tk.Frame]:
+    def setup_preferences(self, parent: nb.Notebook, cmdr: str, is_beta: bool) -> Optional[tk.Frame]:
         """
         setup_preferences is called by plugin_prefs below.
 
@@ -128,7 +127,7 @@ def plugin_stop() -> None:
     return cc.on_unload()
 
 
-def plugin_prefs(parent: ttk.Frame, cmdr: str, is_beta: bool) -> Optional[tk.Frame]:
+def plugin_prefs(parent: nb.Notebook, cmdr: str, is_beta: bool) -> Optional[tk.Frame]:
     """
     Handle preferences tab for the plugin.
 
