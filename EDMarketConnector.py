@@ -16,7 +16,7 @@ from builtins import object, str
 from os import chdir, environ
 from os.path import dirname, join
 from time import localtime, strftime, time
-from typing import TYPE_CHECKING, Literal, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Literal, Optional, Tuple, Union
 
 # Have this as early as possible for people running EDMarketConnector.exe
 # from cmd.exe or a bat file or similar.  Else they might not be in the correct
@@ -592,7 +592,7 @@ class AppWindow(object):
 
         # The type needs defining for adding the menu entry, but won't be
         # properly set until later
-        self.updater: update.Updater = None
+        self.updater: update.Updater | None = None
 
         self.menubar = tk.Menu()
         if sys.platform == 'darwin':
@@ -647,7 +647,9 @@ class AppWindow(object):
             self.help_menu.add_command(command=self.help_general)
             self.help_menu.add_command(command=self.help_privacy)
             self.help_menu.add_command(command=self.help_releases)
-            self.help_menu.add_command(command=lambda: self.updater.check_for_updates())
+            if self.updater is not None:
+                self.help_menu.add_command(command=lambda: self.updater.check_for_updates())
+
             self.help_menu.add_command(command=lambda: not self.HelpAbout.showing and self.HelpAbout(self.w))
 
             self.menubar.add_cascade(menu=self.help_menu)
@@ -1005,6 +1007,8 @@ class AppWindow(object):
         :param event: Tk generated event details.
         """
         logger.trace_if('capi.worker', 'Begin')
+        should_return: bool
+        new_data: Dict[str, Any]
         should_return, new_data = killswitch.check_killswitch('capi.auth', {})
         if should_return:
             logger.warning('capi.auth has been disabled via killswitch. Returning.')
