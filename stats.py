@@ -442,7 +442,9 @@ class StatsResults(tk.Toplevel):
             ):
                 self.geometry(f"+{position.left}+{position.top}")
 
-    def addpage(self, parent, header: List[str] = None, align: Optional[str] = None) -> tk.Frame:
+    def addpage(
+        self, parent, header: List[str] | None = None, align: str | None = None
+    ) -> ttk.Frame:
         """
         Add a page to the StatsResults screen.
 
@@ -462,7 +464,7 @@ class StatsResults(tk.Toplevel):
 
         return page
 
-    def addpageheader(self, parent: tk.Frame, header: Sequence[str], align: Optional[str] = None) -> None:
+    def addpageheader(self, parent: ttk.Frame, header: Sequence[str], align: Optional[str] = None) -> None:
         """
         Add the column headers to the page, followed by a separator.
 
@@ -478,7 +480,7 @@ class StatsResults(tk.Toplevel):
         self.addpagerow(parent, [''])
 
     def addpagerow(
-        self, parent: tk.Frame, content: Sequence[str], align: Optional[str] = None, with_copy: bool = False
+        self, parent: ttk.Frame, content: Sequence[str], align: Optional[str] = None, with_copy: bool = False
     ):
         """
         Add a single row to parent.
