@@ -307,7 +307,10 @@ class AbstractConfig(abc.ABC):
 
         return None
 
-    def get(self, key: str, default: Union[list, str, bool, int] = None) -> Union[list, str, bool, int]:
+    def get(
+        self, key: str,
+        default: Union[list, str, bool, int, None] = None
+    ) -> Union[list, str, bool, int, None]:
         """
         Return the data for the requested key, or a default.
 
@@ -334,7 +337,7 @@ class AbstractConfig(abc.ABC):
         return default  # type: ignore
 
     @abstractmethod
-    def get_list(self, key: str, *, default: list = None) -> list:
+    def get_list(self, key: str, *, default: list | None = None) -> list:
         """
         Return the list referred to by the given key if it exists, or the default.
 
@@ -343,7 +346,7 @@ class AbstractConfig(abc.ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_str(self, key: str, *, default: str = None) -> str:
+    def get_str(self, key: str, *, default: str | None = None) -> str:
         """
         Return the string referred to by the given key if it exists, or the default.
 
@@ -356,7 +359,7 @@ class AbstractConfig(abc.ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_bool(self, key: str, *, default: bool = None) -> bool:
+    def get_bool(self, key: str, *, default: bool | None = None) -> bool:
         """
         Return the bool referred to by the given key if it exists, or the default.
 
