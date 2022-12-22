@@ -121,7 +121,7 @@ class TestJournalLock:
         tmp_path_factory: _pytest_tmpdir.TempPathFactory
     ) -> _pytest_tmpdir.TempPathFactory:
         """Fixture for mocking config.get_str('journaldir')."""
-        def get_str(key: str, *, default: str = None) -> str:
+        def get_str(key: str, *, default: str | None = None) -> str:
             """Mock config.*Config get_str to provide fake journaldir."""
             if key == 'journaldir':
                 return str(tmp_path_factory.getbasetemp())
@@ -140,7 +140,7 @@ class TestJournalLock:
             tmp_path_factory: _pytest_tmpdir.TempPathFactory
     ) -> _pytest_tmpdir.TempPathFactory:
         """Fixture for mocking config.get_str('journaldir')."""
-        def get_str(key: str, *, default: str = None) -> str:
+        def get_str(key: str, *, default: str | None = None) -> str:
             """Mock config.*Config get_str to provide fake journaldir."""
             if key == 'journaldir':
                 return tmp_path_factory.mktemp("changing")
