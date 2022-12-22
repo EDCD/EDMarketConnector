@@ -216,7 +216,7 @@ class Logger:
         """
         return self.logger_channel
 
-    def set_channels_loglevel(self, level: int) -> None:
+    def set_channels_loglevel(self, level: int | str) -> None:
         """
         Set the specified log level on the channels.
 
@@ -226,7 +226,7 @@ class Logger:
         self.logger_channel.setLevel(level)
         self.logger_channel_rotating.setLevel(level)
 
-    def set_console_loglevel(self, level: int) -> None:
+    def set_console_loglevel(self, level: int | str) -> None:
         """
         Set the specified log level on the console channel.
 
