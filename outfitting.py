@@ -93,13 +93,13 @@ def lookup(module, ship_map, entitled=False) -> Optional[dict]:  # noqa: C901, C
     # Countermeasures - e.g. Hpt_PlasmaPointDefence_Turret_Tiny
     elif name[0] == 'hpt' and name[1] in countermeasure_map:
         new['category'] = 'utility'
-        new['name'], new['rating'] = countermeasure_map[len(name) > 4 and (name[1], name[4]) or name[1]]
+        new['name'], new['rating'] = countermeasure_map[name[1]]
         new['class'] = weaponclass_map[name[-1]]
 
     # Utility - e.g. Hpt_CargoScanner_Size0_Class1
     elif name[0] == 'hpt' and name[1] in utility_map:
         new['category'] = 'utility'
-        new['name'] = utility_map[len(name) > 4 and (name[1], name[4]) or name[1]]
+        new['name'] = utility_map[name[1]]
         if not name[2].startswith('size') or not name[3].startswith('class'):
             raise AssertionError(f'{module["id"]}: Unknown class/rating "{name[2]}/{name[3]}"')
 
