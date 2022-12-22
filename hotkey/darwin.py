@@ -56,7 +56,7 @@ class MacHotkeyMgr(AbstractHotkeyMgr):
             pathlib.Path(config.respath_path) / 'snd_bad.wav', False
         )
 
-    def register(self, root: tk.Tk, keycode, modifiers) -> None:
+    def register(self, root: tk.Tk, keycode: int, modifiers: int) -> None:
         """
         Register current hotkey for monitoring.
 
