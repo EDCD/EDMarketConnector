@@ -137,8 +137,8 @@ class _Theme(object):
         self.widgets_pair: List = []
         self.defaults: Dict = {}
         self.current: Dict = {}
-        self.default_ui_scale = None  # None == not yet known
-        self.startup_ui_scale = None
+        self.default_ui_scale: float | None = None  # None == not yet known
+        self.startup_ui_scale: int | None = None
 
     def register(self, widget: tk.Widget | tk.BitmapImage) -> None:  # noqa: CCR001, C901
         # Note widget and children for later application of a theme. Note if

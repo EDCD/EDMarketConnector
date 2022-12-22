@@ -2089,10 +2089,13 @@ sys.path: {sys.path}'''
     if not ui_scale:
         ui_scale = 100
         config.set('ui_scale', ui_scale)
+
     theme.default_ui_scale = root.tk.call('tk', 'scaling')
     logger.trace_if('tk', f'Default tk scaling = {theme.default_ui_scale}')
     theme.startup_ui_scale = ui_scale
-    root.tk.call('tk', 'scaling', theme.default_ui_scale * float(ui_scale) / 100.0)
+    if theme.default_ui_scale is not None:
+        root.tk.call('tk', 'scaling', theme.default_ui_scale * float(ui_scale) / 100.0)
+
     app = AppWindow(root)
 
     def messagebox_not_py3():
