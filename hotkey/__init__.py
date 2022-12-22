@@ -4,6 +4,7 @@
 import abc
 import sys
 from abc import abstractmethod
+from typing import Optional, Tuple, Union
 
 
 class AbstractHotkeyMgr(abc.ABC):
@@ -17,6 +18,41 @@ class AbstractHotkeyMgr(abc.ABC):
     @abstractmethod
     def unregister(self) -> None:
         """Unregister the hotkey handling."""
+        pass
+
+    @abstractmethod
+    def acquire_start(self) -> None:
+        """Start acquiring hotkey state via polling."""
+        pass
+
+    @abstractmethod
+    def acquire_stop(self) -> None:
+        """Stop acquiring hotkey state."""
+        pass
+
+    @abstractmethod
+    def fromevent(self, event) -> Optional[Union[bool, Tuple]]:
+        """
+        Return configuration (keycode, modifiers) or None=clear or False=retain previous.
+
+        event.state is a pain - it shows the state of the modifiers *before* a modifier key was pressed.
+        event.state *does* differentiate between left and right Ctrl and Alt and between Return and Enter
+        by putting KF_EXTENDED in bit 18, but RegisterHotKey doesn't differentiate.
+
+        :param event: tk event ?
+        :return: False to retain previous, None to not use, else (keycode, modifiers)
+        """
+        pass
+
+    @abstractmethod
+    def display(self, keycode: int, modifiers: int) -> str:
+        """
+        Return displayable form of given hotkey + modifiers.
+
+        :param keycode:
+        :param modifiers:
+        :return: string form
+        """
         pass
 
     @abstractmethod
