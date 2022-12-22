@@ -6,6 +6,7 @@ It adds a single button to the EDMC interface that displays the number of times 
 
 import logging
 import tkinter as tk
+import tkinter.ttk as ttk
 from typing import Optional
 
 import myNotebook as nb  # noqa: N813
@@ -27,7 +28,7 @@ class ClickCounter:
 
     def __init__(self) -> None:
         # Be sure to use names that wont collide in our config variables
-        self.click_count: Optional[tk.StringVar] = tk.StringVar(value=str(config.get_int('click_counter_count')))
+        self.click_count = tk.StringVar(value=str(config.get_int('click_counter_count')))
         logger.info("ClickCounter instantiated")
 
     def on_load(self) -> str:
@@ -48,7 +49,7 @@ class ClickCounter:
         """
         self.on_preferences_closed("", False)  # Save our prefs
 
-    def setup_preferences(self, parent: nb.Notebook, cmdr: str, is_beta: bool) -> Optional[tk.Frame]:
+    def setup_preferences(self, parent: ttk.Frame, cmdr: str, is_beta: bool) -> Optional[tk.Frame]:
         """
         setup_preferences is called by plugin_prefs below.
 
@@ -99,8 +100,8 @@ class ClickCounter:
         )
         button.grid(row=current_row)
         current_row += 1
-        nb.Label(frame, text="Count:").grid(row=current_row, sticky=tk.W)
-        nb.Label(frame, textvariable=self.click_count).grid(row=current_row, column=1)
+        tk.Label(frame, text="Count:").grid(row=current_row, sticky=tk.W)
+        tk.Label(frame, textvariable=self.click_count).grid(row=current_row, column=1)
         return frame
 
 
@@ -127,7 +128,7 @@ def plugin_stop() -> None:
     return cc.on_unload()
 
 
-def plugin_prefs(parent: nb.Notebook, cmdr: str, is_beta: bool) -> Optional[tk.Frame]:
+def plugin_prefs(parent: ttk.Frame, cmdr: str, is_beta: bool) -> Optional[tk.Frame]:
     """
     Handle preferences tab for the plugin.
 
