@@ -99,8 +99,8 @@ liable to change without notice.
 `from prefs import prefsVersion` - to allow for versioned preferences.
 
 `from companion import CAPIData, SERVER_LIVE, SERVER_LEGACY, SERVER_BETA` -
-`CAPIData` is the actual type of `data` as passed into `cmdr_data()` and
-`cmdr_data_legacy()`.
+`CAPIData` is the actual type of `data` as passed into `cmdr_data()`,
+`cmdr_data_legacy()` and `capi_fleetcarrier()`.
 See [Commander Data from Frontier CAPI](#commander-data-from-frontier-capi))
 for further information.
 
@@ -561,9 +561,9 @@ See [Avoiding potential pitfalls](#avoiding-potential-pitfalls).
 ### Events
 
 Once you have created your plugin and EDMarketConnector has loaded it there
-are four other functions you can define to be notified by EDMarketConnector
+are five other functions you can define to be notified by EDMarketConnector
 when something happens: `journal_entry()`, `journal_entry_cqc()`,
-`dashboard_entry()` and `cmdr_data()`.
+`dashboard_entry()`, `cmdr_data()` and `capi_fleetcarrier()`.
 
 Your events all get called on the main Tkinter loop so be sure not to block for
 very long or the app will appear to freeze. If you have a long running
@@ -940,6 +940,37 @@ def cmdr_data(data, is_beta):
 | :-------- | :--------------: | :------------------------------------------------------------------------------------------------------- |
 | `data`    |     `CAPIData`   | `/profile` API response, with `/market` and `/shipyard` added under the keys `marketdata` and `shipdata` |
 | `is_beta` |      `bool`      | If the game is currently in beta                                                                         |
+
+If a plugin has a `capi_fleetcarrier()` function it gets called when the application has just fetched fresh Fleetcarrier data from Frontier's CAPI servers. This is done when `CarrierBuy`, `CarrierStats` or `CarrierTradeOrder` events are detected in the Player Journal. To avoid flooding Frontier's CAPI server, a throttle is applied to ensure a significant interval between requests (currently 15 mins).
+
+```python
+from companion import CAPIData, SERVER_LIVE, SERVER_LEGACY, SERVER_BETA
+
+def capi_fleetcarrier(data, is_beta):
+    """
+    We have new data on our Fleet Carrier
+    """
+    if data.get('name') is None or data['name'].get('callsign') is None:
+        raise ValueError("this isn't possible")
+
+    logger.info(data['name']['callsign'])
+
+    # Determining source galaxy for the data
+    if data.source_host == SERVER_LIVE:
+        ...
+
+    elif data.source_host == SERVER_BETA:
+        ...
+
+    elif data.source_host == SERVER_LEGACY:
+        ...
+```
+
+| Parameter |       Type       | Description                                                                                              |
+| :-------- | :--------------: | :------------------------------------------------------------------------------------------------------- |
+| `data`    |     `CAPIData`   | `/fleetcarrier` API response                                                                             |
+| `is_beta` |      `bool`      | If the game is currently in beta                                                                         |
+
 `CAPIData` is a class, which you can `from companion import CAPIDATA`, and is
 based on `UserDict`.  The actual data from CAPI queries is thus accessible
 via python's normal `data['key']` syntax.  However, being a class, it can also
@@ -947,11 +978,13 @@ have extra properties, such as `source_host`, as shown above.  Plugin authors
 are free to use *that* property, **but MUST NOT rely on any other extra
 properties present in `CAPIData`, they are for internal use only.**
 
-The contents of `data` will always have at least the data returned by a CAPI
+In the `cmdr_data()` callback, the contents of `data` will always have at least the data returned by a CAPI
 `/profile` query.  If the player is docked at a station, and the relevant
 services are available then the `lastStarport` key's value will have been
 augmented with `/market` and/or `/shipyard` data.  **But do not assume this
 will always be the case**.
+
+In the `capi_fleetcarrier()` callback, the contents of `data` will be the unmodified response from the CAPI `/fleetcarrier` query. See [this documentation](https://github.com/Athanasius/fd-api/blob/main/docs/FrontierDevelopments-CAPI-endpoints.md) for details of the expected content structure and data.
 
 If there is a killswitch in effect for some of the CAPI endpoints, then the
 data passed to this function might not be as complete as you expect.  Code
@@ -1082,7 +1115,7 @@ time after the corresponding `journal_entry()` event.
 ## Error messages
 
 You can display an error in EDMarketConnector's status area by returning a
-string from your `journal_entry()`, `dashboard_entry()` or `cmdr_data()`
+string from your `journal_entry()`, `dashboard_entry()`, `cmdr_data()` or `capi_fleetcarrier()`
 function, or asynchronously (e.g. from a "worker" thread that is performing a
 long-running operation) by calling `plug.show_error()`. Either method will
 cause the "bad" sound to be played (unless the user has muted sound).
@@ -1311,7 +1344,7 @@ versions of EDMarketConnector:
     `Settings` > `Plugins` tab.
 
 - Check that callback functions `plugin_prefs`, `prefs_changed`,
-    `journal_entry`, `dashboard_entry` and `cmdr_data`, if used, are declared
+    `journal_entry`, `dashboard_entry`, `cmdr_data` and `capi_fleetcarrier`, if used, are declared
     with the correct number of arguments.  Older versions of this app were
     tolerant of missing arguments in these function declarations.
 
