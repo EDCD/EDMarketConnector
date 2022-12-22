@@ -1425,7 +1425,7 @@ class AppWindow(object):
                     config.set('cmdrs', config.get_list('cmdrs', default=[]) + [monitor.cmdr])
                 self.login()
 
-            if monitor.mode == 'CQC' and entry['event']:
+            if monitor.cmdr and monitor.mode == 'CQC' and entry['event']:
                 err = plug.notify_journal_entry_cqc(monitor.cmdr, monitor.is_beta, entry, monitor.state)
                 if err:
                     self.status['text'] = err
@@ -1443,7 +1443,9 @@ class AppWindow(object):
 
                 # Disable WinSparkle automatic update checks, IFF configured to do so when in-game
                 if config.get_int('disable_autoappupdatecheckingame') and 1:
-                    self.updater.set_automatic_updates_check(False)
+                    if self.updater is not None:
+                        self.updater.set_automatic_updates_check(False)
+
                     logger.info('Monitor: Disable WinSparkle automatic update checks')
 
                 # Can't start dashboard monitoring
@@ -1455,12 +1457,16 @@ class AppWindow(object):
                     and config.get_int('output') & config.OUT_SHIP:
                 monitor.export_ship()
 
-            err = plug.notify_journal_entry(monitor.cmdr,
-                                            monitor.is_beta,
-                                            monitor.system,
-                                            monitor.station,
-                                            entry,
-                                            monitor.state)
+            if monitor.cmdr and monitor.system and monitor.station:
+                err = plug.notify_journal_entry(
+                    monitor.cmdr,
+                    monitor.is_beta,
+                    monitor.system,
+                    monitor.station,
+                    entry,
+                    monitor.state
+                )
+
             if err:
                 self.status['text'] = err
                 if not config.get_int('hotkey_mute'):
@@ -1496,7 +1502,9 @@ class AppWindow(object):
             if entry['event'] == 'ShutDown':
                 # Enable WinSparkle automatic update checks
                 # NB: Do this blindly, in case option got changed whilst in-game
-                self.updater.set_automatic_updates_check(True)
+                if self.updater is not None:
+                    self.updater.set_automatic_updates_check(True)
+
                 logger.info('Monitor: Enable WinSparkle automatic update checks')
 
     def auth(self, event=None) -> None:
@@ -1539,7 +1547,9 @@ class AppWindow(object):
 
         entry = dashboard.status
         # Currently we don't do anything with these events
-        err = plug.notify_dashboard_entry(monitor.cmdr, monitor.is_beta, entry)
+        if monitor.cmdr:
+            err = plug.notify_dashboard_entry(monitor.cmdr, monitor.is_beta, entry)
+
         if err:
             self.status['text'] = err
             if not config.get_int('hotkey_mute'):
