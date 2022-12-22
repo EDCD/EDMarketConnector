@@ -19,7 +19,7 @@ import tkinter as tk
 import webbrowser
 from tkinter import font as tk_font
 from tkinter import ttk
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     def _(x: str) -> str: ...
