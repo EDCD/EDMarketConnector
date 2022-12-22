@@ -7,9 +7,8 @@ import os
 import sys
 import tkinter as tk
 from builtins import object, str
-from typing import Any, Callable, List, Mapping, MutableMapping, Optional, Tuple
-
-import ttk
+from tkinter import ttk
+from typing import Any, Callable, List, Mapping, MutableMapping, Optional
 
 import companion
 import myNotebook as nb  # noqa: N813
@@ -200,7 +199,7 @@ def provides(fn_name: str) -> List[str]:
 
 
 def invoke(
-    plugin_name: str, fallback: str | None, fn_name: str, *args: Tuple
+    plugin_name: str, fallback: str | None, fn_name: str, *args: Any
 ) -> Optional[str]:
     """
     Invoke a function on a named plugin.
