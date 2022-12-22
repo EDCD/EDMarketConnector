@@ -1557,13 +1557,13 @@ class AppWindow(object):
 
     def plugin_error(self, event=None) -> None:
         """Display asynchronous error from plugin."""
-        if plug.last_error.get('msg'):
-            self.status['text'] = plug.last_error['msg']
+        if plug.last_error.msg:
+            self.status['text'] = plug.last_error.msg
             self.w.update_idletasks()
             if not config.get_int('hotkey_mute'):
                 hotkeymgr.play_bad()
 
-    def shipyard_url(self, shipname: str) -> str:
+    def shipyard_url(self, shipname: str) -> str | None:
         """Despatch a ship URL to the configured handler."""
         if not (loadout := monitor.ship()):
             logger.warning('No ship loadout, aborting.')
@@ -1590,11 +1590,11 @@ class AppWindow(object):
 
         return f'file://localhost/{file_name}'
 
-    def system_url(self, system: str) -> str:
+    def system_url(self, system: str) -> str | None:
         """Despatch a system URL to the configured handler."""
         return plug.invoke(config.get_str('system_provider'), 'EDSM', 'system_url', monitor.system)
 
-    def station_url(self, station: str) -> str:
+    def station_url(self, station: str) -> str | None:
         """Despatch a station URL to the configured handler."""
         return plug.invoke(config.get_str('station_provider'), 'eddb', 'station_url', monitor.system, monitor.station)
 
@@ -1671,7 +1671,7 @@ class AppWindow(object):
 
             self.resizable(tk.FALSE, tk.FALSE)
 
-            frame = ttk.Frame(self)
+            frame = tk.Frame(self)
             frame.grid(sticky=tk.NSEW)
 
             row = 1
@@ -1684,7 +1684,7 @@ class AppWindow(object):
 
             ############################################################
             # version <link to changelog>
-            ttk.Label(frame).grid(row=row, column=0)  # spacer
+            tk.Label(frame).grid(row=row, column=0)  # spacer
             row += 1
             self.appversion_label = tk.Label(frame, text=appversion())
             self.appversion_label.grid(row=row, column=0, sticky=tk.E)
@@ -1792,7 +1792,8 @@ class AppWindow(object):
 
         # First so it doesn't interrupt us
         logger.info('Closing update checker...')
-        self.updater.close()
+        if self.updater is not None:
+            self.updater.close()
 
         # Earlier than anything else so plugin code can't interfere *and* it
         # won't still be running in a manner that might rely on something
@@ -1941,10 +1942,8 @@ def show_killswitch_poppup(root=None):
             idx += 1
         idx += 1
 
-    ok_button = tk.Button(frame, text="ok", command=tl.destroy)
+    ok_button = tk.Button(frame, text="Ok", command=tl.destroy)
     ok_button.grid(columnspan=2, sticky=tk.EW)
-
-    theme.apply(tl)
 
 
 # Run the app
