@@ -326,7 +326,7 @@ class Auth(object):
         """
         logger.debug(f'Trying for "{self.cmdr}"')
 
-        should_return, new_data = killswitch.check_killswitch('capi.auth', {})
+        should_return, _ = killswitch.check_killswitch('capi.auth', {})
         if should_return:
             logger.warning('capi.auth has been disabled via killswitch. Returning.')
             return None
@@ -663,7 +663,7 @@ class Session(object):
 
         :return: True if login succeeded, False if re-authorization initiated.
         """
-        should_return, new_data = killswitch.check_killswitch('capi.auth', {})
+        should_return, _ = killswitch.check_killswitch('capi.auth', {})
         if should_return:
             logger.warning('capi.auth has been disabled via killswitch. Returning.')
             return False
@@ -781,7 +781,7 @@ class Session(object):
             :return: The resulting CAPI data, of type CAPIData.
             """
             capi_data: CAPIData = CAPIData()
-            should_return, new_data = killswitch.check_killswitch('capi.request.' + capi_endpoint, {})
+            should_return, _ = killswitch.check_killswitch('capi.request.' + capi_endpoint, {})
             if should_return:
                 logger.warning(f"capi.request.{capi_endpoint} has been disabled by killswitch.  Returning.")
                 return capi_data
