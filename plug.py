@@ -198,7 +198,7 @@ def provides(fn_name: str) -> List[str]:
 
 
 def invoke(
-    plugin_name: str, fallback: str, fn_name: str, *args: Tuple
+    plugin_name: str, fallback: str | None, fn_name: str, *args: Tuple
 ) -> Optional[str]:
     """
     Invoke a function on a named plugin.

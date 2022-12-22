@@ -35,6 +35,7 @@ from typing import OrderedDict as OrderedDictT
 from typing import Sequence, Union, cast
 
 import requests
+import ttk
 
 import edmc_data
 import killswitch
@@ -130,7 +131,7 @@ class This:
         self.log_button: nb.Checkbutton
         self.label: HyperlinkLabel
         self.apikey: nb.Entry
-        self.apikey_label: HyperlinkLabel
+        self.apikey_label: tk.Label
 
         self.events: Dict[Credentials, Deque[Event]] = defaultdict(deque)
         self.event_lock: Lock = threading.Lock()  # protects events, for use when rewriting events
@@ -235,7 +236,7 @@ def plugin_stop() -> None:
     logger.debug('Done.')
 
 
-def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool) -> tk.Frame:
+def plugin_prefs(parent: ttk.Frame, cmdr: str, is_beta: bool) -> tk.Frame:
     """Plugin Preferences UI hook."""
     x_padding = 10
     x_button_padding = 12  # indent Checkbuttons and Radiobuttons
