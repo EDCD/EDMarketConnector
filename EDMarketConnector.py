@@ -16,7 +16,7 @@ from builtins import object, str
 from os import chdir, environ
 from os.path import dirname, join
 from time import localtime, strftime, time
-from typing import TYPE_CHECKING, Literal, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Literal, Optional, Tuple, Union
 
 # Have this as early as possible for people running EDMarketConnector.exe
 # from cmd.exe or a bat file or similar.  Else they might not be in the correct
@@ -916,7 +916,10 @@ class AppWindow(object):
 
     def login(self):
         """Initiate CAPI/Frontier login and set other necessary state."""
-        should_return, __ = killswitch.check_killswitch('capi.auth', {})
+        should_return: bool
+        new_data: Dict[str, Any] = {}
+
+        should_return, new_data = killswitch.check_killswitch('capi.auth', {})
         if should_return:
             logger.warning('capi.auth has been disabled via killswitch. Returning.')
             self.status['text'] = 'CAPI auth disabled by killswitch'
@@ -1007,7 +1010,10 @@ class AppWindow(object):
         :param event: Tk generated event details.
         """
         logger.trace_if('capi.worker', 'Begin')
-        should_return, __ = killswitch.check_killswitch('capi.auth', {})
+        should_return: bool
+        new_data: Dict[str, Any] = {}
+
+        should_return, new_data = killswitch.check_killswitch('capi.auth', {})
         if should_return:
             logger.warning('capi.auth has been disabled via killswitch. Returning.')
             self.status['text'] = 'CAPI auth disabled by killswitch'
@@ -1093,7 +1099,10 @@ class AppWindow(object):
         :param event: Tk generated event details.
         """
         logger.trace_if('capi.worker', 'Begin')
-        should_return, __ = killswitch.check_killswitch('capi.request.fleetcarrier', {})
+        should_return: bool
+        new_data: Dict[str, Any] = {}
+
+        should_return, new_data = killswitch.check_killswitch('capi.request.fleetcarrier', {})
         if should_return:
             logger.warning('capi.fleetcarrier has been disabled via killswitch. Returning.')
             self.status['text'] = 'CAPI fleetcarrier disabled by killswitch'
@@ -1301,7 +1310,10 @@ class AppWindow(object):
                 if err:
                     play_bad = True
 
-                should_return, __ = killswitch.check_killswitch('capi.request./market', {})
+                should_return: bool
+                new_data: Dict[str, Any] = {}
+
+                should_return, new_data = killswitch.check_killswitch('capi.request./market', {})
                 if should_return:
                     logger.warning("capi.request./market has been disabled by killswitch.  Returning.")
 
@@ -1555,13 +1567,16 @@ class AppWindow(object):
                     elif entry['event'] == 'Disembark' and entry.get('Taxi') and entry.get('OnStation'):
                         auto_update = True
 
+            should_return: bool
+            new_data: Dict[str, Any] = {}
+
             if auto_update:
-                should_return, __ = killswitch.check_killswitch('capi.auth', {})
+                should_return, new_data = killswitch.check_killswitch('capi.auth', {})
                 if not should_return:
                     self.w.after(int(SERVER_RETRY * 1000), self.capi_request_data)
 
             if entry['event'] in ('CarrierBuy', 'CarrierStats'):
-                should_return, __ = killswitch.check_killswitch('capi.request.fleetcarrier', {})
+                should_return, new_data = killswitch.check_killswitch('capi.request.fleetcarrier', {})
                 if not should_return:
                     self.w.after(int(SERVER_RETRY * 1000), self.capi_request_fleetcarrier_data)
 

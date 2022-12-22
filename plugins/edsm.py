@@ -38,7 +38,7 @@ from datetime import datetime, timedelta, timezone
 from queue import Queue
 from threading import Thread
 from time import sleep
-from typing import TYPE_CHECKING, Any, List, Literal, Mapping, MutableMapping, Optional, Set, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Mapping, MutableMapping, Optional, Set, Tuple, Union, cast
 
 import requests
 
@@ -479,6 +479,9 @@ def journal_entry(  # noqa: C901, CCR001
     :param state: `monitor.state`
     :return: None if no error, else an error string.
     """
+    should_return: bool
+    new_entry: Dict[str, Any] = {}
+
     should_return, new_entry = killswitch.check_killswitch('plugins.edsm.journal', entry, logger)
     if should_return:
         # LANG: EDSM plugin - Journal handling disabled by killswitch
@@ -759,6 +762,9 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
 
         retrying = 0
         while retrying < 3:
+            should_skip: bool
+            new_item: Dict[str, Any] = {}
+
             should_skip, new_item = killswitch.check_killswitch(
                 'plugins.edsm.worker',
                 item if item is not None else cast(Tuple[str, Mapping[str, Any]], ("", {})),
@@ -795,6 +801,9 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
                 # drop events if required by killswitch
                 new_pending = []
                 for e in pending:
+                    skip: bool
+                    new: Dict[str, Any] = {}
+
                     skip, new = killswitch.check_killswitch(f'plugin.edsm.worker.{e["event"]}', e, logger)
                     if skip:
                         continue

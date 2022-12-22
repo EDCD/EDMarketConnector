@@ -328,6 +328,9 @@ class Auth(object):
         """
         logger.debug(f'Trying for "{self.cmdr}"')
 
+        should_return: bool
+        new_data: Dict[str, Any] = {}
+
         should_return, new_data = killswitch.check_killswitch('capi.auth', {})
         if should_return:
             logger.warning('capi.auth has been disabled via killswitch. Returning.')
@@ -667,6 +670,9 @@ class Session(object):
 
         :return: True if login succeeded, False if re-authorization initiated.
         """
+        should_return: bool
+        new_data: Dict[str, Any] = {}
+
         should_return, new_data = killswitch.check_killswitch('capi.auth', {})
         if should_return:
             logger.warning('capi.auth has been disabled via killswitch. Returning.')
@@ -785,6 +791,9 @@ class Session(object):
             :return: The resulting CAPI data, of type CAPIData.
             """
             capi_data: CAPIData = CAPIData()
+            should_return: bool
+            new_data: Dict[str, Any] = {}
+
             should_return, new_data = killswitch.check_killswitch('capi.request.' + capi_endpoint, {})
             if should_return:
                 logger.warning(f"capi.request.{capi_endpoint} has been disabled by killswitch.  Returning.")
@@ -962,7 +971,7 @@ class Session(object):
 
                 elif query.endpoint == self.FRONTIER_CAPI_PATH_FLEETCARRIER:
                     capi_data = capi_single_query(query.capi_host, self.FRONTIER_CAPI_PATH_FLEETCARRIER,
-                                    timeout=capi_fleetcarrier_requests_timeout)
+                                                  timeout=capi_fleetcarrier_requests_timeout)
 
                 else:
                     capi_data = capi_single_query(query.capi_host, self.FRONTIER_CAPI_PATH_PROFILE)

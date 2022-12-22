@@ -402,6 +402,9 @@ class EDDNSender:
         :return: `True` for "now remove this message from the queue"
         """
         logger.trace_if("plugin.eddn.send", "Sending message")
+        should_return: bool
+        new_data: Dict[str, Any] = {}
+
         should_return, new_data = killswitch.check_killswitch('plugins.eddn.send', json.loads(msg))
         if should_return:
             logger.warning('eddn.send has been disabled via killswitch. Returning.')
@@ -635,6 +638,9 @@ class EDDN:
         :param data: a dict containing the starport data
         :param is_beta: whether or not we're currently in beta mode
         """
+        should_return: bool
+        new_data: Dict[str, Any] = {}
+
         should_return, new_data = killswitch.check_killswitch('capi.request./market', {})
         if should_return:
             logger.warning("capi.request./market has been disabled by killswitch.  Returning.")
@@ -766,6 +772,9 @@ class EDDN:
         :param data: dict containing the outfitting data
         :param is_beta: whether or not we're currently in beta mode
         """
+        should_return: bool
+        new_data: Dict[str, Any] = {}
+
         should_return, new_data = killswitch.check_killswitch('capi.request./shipyard', {})
         if should_return:
             logger.warning("capi.request./shipyard has been disabled by killswitch.  Returning.")
@@ -832,6 +841,9 @@ class EDDN:
         :param data: dict containing the shipyard data
         :param is_beta: whether or not we are in beta mode
         """
+        should_return: bool
+        new_data: Dict[str, Any] = {}
+
         should_return, new_data = killswitch.check_killswitch('capi.request./shipyard', {})
         if should_return:
             logger.warning("capi.request./shipyard has been disabled by killswitch.  Returning.")
@@ -2164,6 +2176,9 @@ def journal_entry(  # noqa: C901, CCR001
     :param state: `dict` - Current `monitor.state` data.
     :return: `str` - Error message, or `None` if no errors.
     """
+    should_return: bool
+    new_data: Dict[str, Any] = {}
+
     should_return, new_data = killswitch.check_killswitch('plugins.eddn.journal', entry)
     if should_return:
         plug.show_error(_('EDDN journal handler disabled. See Log.'))  # LANG: Killswitch disabled EDDN
