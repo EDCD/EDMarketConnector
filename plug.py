@@ -27,7 +27,7 @@ class LastError:
     """Holds the last plugin error."""
 
     msg: Optional[str]
-    root: tk.Frame
+    root: tk.Tk
 
     def __init__(self) -> None:
         self.msg = None
@@ -141,7 +141,7 @@ class Plugin(object):
         return None
 
 
-def load_plugins(master: tk.Frame) -> None:  # noqa: CCR001
+def load_plugins(master: tk.Tk) -> None:  # noqa: CCR001
     """Find and load all plugins."""
     last_error.root = master
 
