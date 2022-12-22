@@ -131,7 +131,7 @@ class _Theme(object):
     THEME_TRANSPARENT = 2
 
     def __init__(self) -> None:
-        self.active = None  # Starts out with no theme
+        self.active: int | None = None  # Starts out with no theme
         self.minwidth: Optional[int] = None
         self.widgets: Dict[tk.Widget | tk.BitmapImage, Set] = {}
         self.widgets_pair: List = []
