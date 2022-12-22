@@ -145,7 +145,7 @@ class Logger:
     logging.Logger instance.
     """
 
-    def __init__(self, logger_name: str, loglevel: int = _default_loglevel):
+    def __init__(self, logger_name: str, loglevel: int | str = _default_loglevel):
         """
         Set up a `logging.Logger` with our preferred configuration.
 
@@ -541,7 +541,7 @@ def get_main_logger(sublogger_name: str = '') -> 'LoggerMixin':
 
 
 # Singleton
-loglevel = config.get_str('loglevel')
+loglevel: str | int = config.get_str('loglevel')
 if not loglevel:
     loglevel = logging.INFO
 
