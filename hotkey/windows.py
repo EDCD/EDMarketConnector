@@ -62,6 +62,7 @@ GetWindowText = ctypes.windll.user32.GetWindowTextW
 GetWindowText.argtypes = [HWND, LPWSTR, ctypes.c_int]
 GetWindowTextLength = ctypes.windll.user32.GetWindowTextLengthW
 
+
 def window_title(h) -> str:
     """
     Determine the title for a window.
@@ -77,6 +78,7 @@ def window_title(h) -> str:
 
     return ''
 
+
 class MOUSEINPUT(ctypes.Structure):
     """Mouse Input structure."""
 
@@ -89,6 +91,7 @@ class MOUSEINPUT(ctypes.Structure):
         ('dwExtraInfo', ctypes.POINTER(ULONG))
     ]
 
+
 class KEYBDINPUT(ctypes.Structure):
     """Keyboard Input structure."""
 
@@ -100,6 +103,7 @@ class KEYBDINPUT(ctypes.Structure):
         ('dwExtraInfo', ctypes.POINTER(ULONG))
     ]
 
+
 class HARDWAREINPUT(ctypes.Structure):
     """Hardware Input structure."""
 
@@ -108,6 +112,7 @@ class HARDWAREINPUT(ctypes.Structure):
         ('wParamL', WORD),
         ('wParamH', WORD)
     ]
+
 
 class INPUTUNION(ctypes.Union):
     """Input union."""
@@ -118,6 +123,7 @@ class INPUTUNION(ctypes.Union):
         ('hi', HARDWAREINPUT)
     ]
 
+
 class INPUT(ctypes.Structure):
     """Input structure."""
 
@@ -125,6 +131,7 @@ class INPUT(ctypes.Structure):
         ('type', DWORD),
         ('union', INPUTUNION)
     ]
+
 
 SendInput = ctypes.windll.user32.SendInput
 SendInput.argtypes = [ctypes.c_uint, ctypes.POINTER(INPUT), ctypes.c_int]
@@ -268,10 +275,10 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
         :return: False to retain previous, None to not use, else (keycode, modifiers)
         """
         modifiers = ((GetKeyState(VK_MENU) & 0x8000) and MOD_ALT) \
-                    | ((GetKeyState(VK_CONTROL) & 0x8000) and MOD_CONTROL) \
-                    | ((GetKeyState(VK_SHIFT) & 0x8000) and MOD_SHIFT) \
-                    | ((GetKeyState(VK_LWIN) & 0x8000) and MOD_WIN) \
-                    | ((GetKeyState(VK_RWIN) & 0x8000) and MOD_WIN)
+            | ((GetKeyState(VK_CONTROL) & 0x8000) and MOD_CONTROL) \
+            | ((GetKeyState(VK_SHIFT) & 0x8000) and MOD_SHIFT) \
+            | ((GetKeyState(VK_LWIN) & 0x8000) and MOD_WIN) \
+            | ((GetKeyState(VK_RWIN) & 0x8000) and MOD_WIN)
         keycode = event.keycode
 
         if keycode in [VK_SHIFT, VK_CONTROL, VK_MENU, VK_LWIN, VK_RWIN]:
@@ -284,8 +291,9 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
             elif keycode in [VK_BACK, VK_DELETE, VK_CLEAR, VK_OEM_CLEAR]:  # BkSp, Del, Clear = clear hotkey
                 return None
 
-            elif keycode in [VK_RETURN, VK_SPACE, VK_OEM_MINUS] or ord('A') <= keycode <= ord(
-                'Z'):  # don't allow keys needed for typing in System Map
+            elif (
+                keycode in [VK_RETURN, VK_SPACE, VK_OEM_MINUS] or ord('A') <= keycode <= ord('Z')
+            ):  # don't allow keys needed for typing in System Map
                 winsound.MessageBeep()
                 return None
 
