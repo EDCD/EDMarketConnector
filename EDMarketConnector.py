@@ -1329,7 +1329,7 @@ class AppWindow(object):
 
         except companion.CredentialsRequireRefresh:
             # We need to 'close' the auth else it'll see STATE_OK and think login() isn't needed
-            companion.session.close()
+            companion.session.reinit_session()
             # LANG: Frontier CAPI Access Token expired, trying to get a new one
             self.status['text'] = _('CAPI: Refreshing access token...')
             if companion.session.login():

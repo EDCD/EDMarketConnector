@@ -735,6 +735,14 @@ class Session(object):
             self.auth = None
             raise  # Bad thing happened
 
+    def close(self) -> None:
+        """Close the `request.Session()."""
+        try:
+            self.requests_session.close()
+
+        except Exception as e:
+            logger.debug('Frontier Auth: closing', exc_info=e)
+
     def reinit_session(self, reopen: bool = True) -> None:
         """
         Re-initialise the session's `request.Session()`.
@@ -742,11 +750,7 @@ class Session(object):
         :param reopen: Whether to open a new session.
         """
         self.state = Session.STATE_INIT
-        try:
-            self.requests_session.close()
-
-        except Exception as e:
-            logger.debug('Frontier Auth: closing', exc_info=e)
+        self.close()
 
         if reopen:
             self.requests_session = requests.Session()
