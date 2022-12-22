@@ -916,7 +916,7 @@ class AppWindow(object):
 
     def login(self):
         """Initiate CAPI/Frontier login and set other necessary state."""
-        should_return, new_data = killswitch.check_killswitch('capi.auth', {})
+        should_return, __ = killswitch.check_killswitch('capi.auth', {})
         if should_return:
             logger.warning('capi.auth has been disabled via killswitch. Returning.')
             self.status['text'] = 'CAPI auth disabled by killswitch'
@@ -1007,7 +1007,7 @@ class AppWindow(object):
         :param event: Tk generated event details.
         """
         logger.trace_if('capi.worker', 'Begin')
-        should_return, new_data = killswitch.check_killswitch('capi.auth', {})
+        should_return, __ = killswitch.check_killswitch('capi.auth', {})
         if should_return:
             logger.warning('capi.auth has been disabled via killswitch. Returning.')
             self.status['text'] = 'CAPI auth disabled by killswitch'
@@ -1093,7 +1093,7 @@ class AppWindow(object):
         :param event: Tk generated event details.
         """
         logger.trace_if('capi.worker', 'Begin')
-        should_return, new_data = killswitch.check_killswitch('capi.fleetcarrier', {})
+        should_return, __ = killswitch.check_killswitch('capi.request.fleetcarrier', {})
         if should_return:
             logger.warning('capi.fleetcarrier has been disabled via killswitch. Returning.')
             self.status['text'] = 'CAPI fleetcarrier disabled by killswitch'
@@ -1106,12 +1106,6 @@ class AppWindow(object):
             self.status['text'] = _('CAPI query aborted: Cmdr name unknown')
             return
 
-        if not monitor.mode:
-            logger.trace_if('capi.worker', 'Aborting Query: Game Mode unknown')
-            # LANG: CAPI queries aborted because game mode unknown
-            self.status['text'] = _('CAPI query aborted: Game mode unknown')
-            return
-
         if monitor.state['GameVersion'] is None:
             logger.trace_if('capi.worker', 'Aborting Query: GameVersion unknown')
             # LANG: CAPI queries aborted because GameVersion unknown
@@ -1120,6 +1114,7 @@ class AppWindow(object):
 
         if not companion.session.retrying:
             if time() < self.capi_fleetcarrier_query_holdoff_time:  # Was invoked while in cooldown
+                logger.debug('CAPI fleetcarrier query aborted, too soon since last request')
                 return
 
             # LANG: Status - Attempting to retrieve data from Frontier CAPI
@@ -1173,7 +1168,7 @@ class AppWindow(object):
                     if __debug__:  # Recording
                         companion.session.dump_capi_data(capi_response.capi_data)
 
-                    err = plug.notify_capi_fleetcarrierdata(capi_response.capi_data, monitor.is_beta)
+                    err = plug.notify_capi_fleetcarrierdata(capi_response.capi_data)
                     self.status['text'] = err and err or ''
                     if err:
                         play_bad = True
@@ -1306,7 +1301,7 @@ class AppWindow(object):
                 if err:
                     play_bad = True
 
-                should_return, new_data = killswitch.check_killswitch('capi.request./market', {})
+                should_return, __ = killswitch.check_killswitch('capi.request./market', {})
                 if should_return:
                     logger.warning("capi.request./market has been disabled by killswitch.  Returning.")
 
@@ -1561,12 +1556,12 @@ class AppWindow(object):
                         auto_update = True
 
             if auto_update:
-                should_return, new_data = killswitch.check_killswitch('capi.auth', {})
+                should_return, __ = killswitch.check_killswitch('capi.auth', {})
                 if not should_return:
                     self.w.after(int(SERVER_RETRY * 1000), self.capi_request_data)
 
-            if entry['event'] in ['CarrierBuy', 'CarrierStats', 'CarrierTradeOrder']:  # 'CargoTransfer' too?
-                should_return, new_data = killswitch.check_killswitch('capi.fleetcarrier', {})
+            if entry['event'] in ('CarrierBuy', 'CarrierStats'):
+                should_return, __ = killswitch.check_killswitch('capi.request.fleetcarrier', {})
                 if not should_return:
                     self.w.after(int(SERVER_RETRY * 1000), self.capi_request_fleetcarrier_data)
 

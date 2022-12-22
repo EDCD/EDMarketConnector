@@ -402,23 +402,21 @@ def notify_capidata(
 
 
 def notify_capi_fleetcarrierdata(
-    data: companion.CAPIData,
-    is_beta: bool
+    data: companion.CAPIData
 ) -> Optional[str]:
     """
     Send the latest CAPI Fleetcarrier data from the FD servers to each plugin.
 
-    :param data:
-    :param is_beta: whether the player is in a Beta universe.
+    :param data: The CAPIData returned in the CAPI response
     :returns: Error message from the first plugin that returns one (if any)
     """
     error = None
     for plugin in PLUGINS:
-        fc_data = plugin._get_func('capi_fleetcarrier')
-
-        if fc_data:
+        fc_callback = plugin._get_func('capi_fleetcarrier')
+        if fc_callback is not None and callable(fc_callback):
             try:
-                newerror = fc_data(data, is_beta)
+                # Pass a copy of the CAPIData in case the callee modifies it
+                newerror = fc_callback(copy.deepcopy(data))
                 error = error or newerror
 
             except Exception:

@@ -48,6 +48,7 @@ else:
 capi_query_cooldown = 60  # Minimum time between (sets of) CAPI queries
 capi_fleetcarrier_query_cooldown = 60 * 15  # Minimum time between CAPI fleetcarrier queries
 capi_default_requests_timeout = 10
+capi_fleetcarrier_requests_timeout = 60
 auth_timeout = 30  # timeout for initial auth
 
 # Used by both class Auth and Session
@@ -960,7 +961,8 @@ class Session(object):
                     capi_data = capi_station_queries(query.capi_host)
 
                 elif query.endpoint == self.FRONTIER_CAPI_PATH_FLEETCARRIER:
-                    capi_data = capi_single_query(query.capi_host, self.FRONTIER_CAPI_PATH_FLEETCARRIER)
+                    capi_data = capi_single_query(query.capi_host, self.FRONTIER_CAPI_PATH_FLEETCARRIER,
+                                    timeout=capi_fleetcarrier_requests_timeout)
 
                 else:
                     capi_data = capi_single_query(query.capi_host, self.FRONTIER_CAPI_PATH_PROFILE)

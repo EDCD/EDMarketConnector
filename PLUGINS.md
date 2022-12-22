@@ -941,12 +941,12 @@ def cmdr_data(data, is_beta):
 | `data`    |     `CAPIData`   | `/profile` API response, with `/market` and `/shipyard` added under the keys `marketdata` and `shipdata` |
 | `is_beta` |      `bool`      | If the game is currently in beta                                                                         |
 
-If a plugin has a `capi_fleetcarrier()` function it gets called when the application has just fetched fresh Fleetcarrier data from Frontier's CAPI servers. This is done when `CarrierBuy`, `CarrierStats` or `CarrierTradeOrder` events are detected in the Player Journal. To avoid flooding Frontier's CAPI server, a throttle is applied to ensure a significant interval between requests (currently 15 mins).
+If a plugin has a `capi_fleetcarrier()` function it gets called when the application has just fetched fresh Fleetcarrier data from Frontier's CAPI servers. This is done when `CarrierBuy`or `CarrierStats` events are detected in the Player Journal. To avoid flooding Frontier's CAPI server, a throttle is applied to ensure a significant interval between requests (currently 15 mins). Also be aware that calls to the `/fleetcarrier` CAPI endpoint have been reported to take a very long time to return, potentially up to 20 minutes. Delays in responses from this endpoint could delay other CAPI queries.
 
 ```python
 from companion import CAPIData, SERVER_LIVE, SERVER_LEGACY, SERVER_BETA
 
-def capi_fleetcarrier(data, is_beta):
+def capi_fleetcarrier(data):
     """
     We have new data on our Fleet Carrier
     """
@@ -969,7 +969,6 @@ def capi_fleetcarrier(data, is_beta):
 | Parameter |       Type       | Description                                                                                              |
 | :-------- | :--------------: | :------------------------------------------------------------------------------------------------------- |
 | `data`    |     `CAPIData`   | `/fleetcarrier` API response                                                                             |
-| `is_beta` |      `bool`      | If the game is currently in beta                                                                         |
 
 `CAPIData` is a class, which you can `from companion import CAPIDATA`, and is
 based on `UserDict`.  The actual data from CAPI queries is thus accessible
