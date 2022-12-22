@@ -379,7 +379,7 @@ class EDDNSender:
         :param text: The status text to be set/logged.
         """
         if os.getenv('EDMC_NO_UI'):
-            logger.INFO(text)
+            logger.info(text)
             return
 
         self.eddn.parent.children['status']['text'] = text
@@ -635,6 +635,8 @@ class EDDN:
         :param data: a dict containing the starport data
         :param is_beta: whether or not we're currently in beta mode
         """
+        should_return: bool = False
+        new_data: Dict[str, Any] = {}
         should_return, new_data = killswitch.check_killswitch('capi.request./market', {})
         if should_return:
             logger.warning("capi.request./market has been disabled by killswitch.  Returning.")
@@ -766,6 +768,8 @@ class EDDN:
         :param data: dict containing the outfitting data
         :param is_beta: whether or not we're currently in beta mode
         """
+        should_return: bool = False
+        new_data: Dict[str, Any] = {}
         should_return, new_data = killswitch.check_killswitch('capi.request./shipyard', {})
         if should_return:
             logger.warning("capi.request./shipyard has been disabled by killswitch.  Returning.")
@@ -832,6 +836,8 @@ class EDDN:
         :param data: dict containing the shipyard data
         :param is_beta: whether or not we are in beta mode
         """
+        should_return: bool = False
+        new_data: Dict[str, Any] = {}
         should_return, new_data = killswitch.check_killswitch('capi.request./shipyard', {})
         if should_return:
             logger.warning("capi.request./shipyard has been disabled by killswitch.  Returning.")
