@@ -40,7 +40,7 @@ import sys
 import traceback
 import warnings
 from abc import abstractmethod
-from typing import Any, Callable, List, Optional, Type, TypeVar
+from typing import Any, Callable, Optional, Type, TypeVar
 
 import semantic_version
 
@@ -59,10 +59,10 @@ copyright = '© 2015-2019 Jonathan Harris, 2020-2022 EDCD'
 update_feed = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml'
 update_interval = 8*60*60
 # Providers marked to be in debug mode. Generally this is expected to switch to sending data to a log file
-debug_senders: List[str] = []
+debug_senders: list[str] = []
 # TRACE logging code that should actually be used.  Means not spamming it
 # *all* if only interested in some things.
-trace_on: List[str] = []
+trace_on: list[str] = []
 
 capi_pretend_down: bool = False
 capi_debug_access_token: Optional[str] = None
@@ -293,7 +293,7 @@ class AbstractConfig(abc.ABC):
 
     @staticmethod
     def _suppress_call(
-        func: Callable[..., _T], exceptions: Type[BaseException] | List[Type[BaseException]] = Exception,
+        func: Callable[..., _T], exceptions: Type[BaseException] | list[Type[BaseException]] = Exception,
         *args: Any, **kwargs: Any
     ) -> Optional[_T]:
         if exceptions is None:
@@ -399,7 +399,7 @@ class AbstractConfig(abc.ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def set(self, key: str, val: int | str | List[str] | bool) -> None:
+    def set(self, key: str, val: int | str | list[str] | bool) -> None:
         """
         Set the given key's data to the given value.
 
