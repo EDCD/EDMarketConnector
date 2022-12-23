@@ -3,11 +3,10 @@ import multiprocessing as mp
 import os
 import pathlib
 import sys
+from typing import Generator
 
 import pytest
-# Import as other names else they get picked up when used as fixtures
-from _pytest import monkeypatch as _pytest_monkeypatch
-from _pytest import tmpdir as _pytest_tmpdir
+from pytest import MonkeyPatch, TempdirFactory, TempPathFactory
 
 from config import config
 from journal_lock import JournalLock, JournalLockResult
@@ -117,9 +116,9 @@ class TestJournalLock:
 
     @pytest.fixture
     def mock_journaldir(
-        self, monkeypatch: _pytest_monkeypatch,
-        tmp_path_factory: _pytest_tmpdir.TempPathFactory
-    ) -> _pytest_tmpdir.TempPathFactory:
+        self, monkeypatch: MonkeyPatch,
+        tmp_path_factory: TempdirFactory
+    ) -> Generator:
         """Fixture for mocking config.get_str('journaldir')."""
         def get_str(key: str, *, default: str | None = None) -> str:
             """Mock config.*Config get_str to provide fake journaldir."""
@@ -136,9 +135,9 @@ class TestJournalLock:
     @pytest.fixture
     def mock_journaldir_changing(
             self,
-            monkeypatch: _pytest_monkeypatch,
-            tmp_path_factory: _pytest_tmpdir.TempPathFactory
-    ) -> _pytest_tmpdir.TempPathFactory:
+            monkeypatch: MonkeyPatch,
+            tmp_path_factory: TempdirFactory
+    ) -> Generator:
         """Fixture for mocking config.get_str('journaldir')."""
         def get_str(key: str, *, default: str | None = None) -> str:
             """Mock config.*Config get_str to provide fake journaldir."""
@@ -154,7 +153,7 @@ class TestJournalLock:
 
     ###########################################################################
     # Tests against JournalLock.__init__()
-    def test_journal_lock_init(self, mock_journaldir: _pytest_tmpdir.TempPathFactory):
+    def test_journal_lock_init(self, mock_journaldir: TempPathFactory):
         """Test JournalLock instantiation."""
         print(f'{type(mock_journaldir)=}')
         tmpdir = str(mock_journaldir.getbasetemp())
@@ -176,14 +175,14 @@ class TestJournalLock:
         jlock.set_path_from_journaldir()
         assert jlock.journal_dir_path is None
 
-    def test_path_from_journaldir_with_tmpdir(self, mock_journaldir: _pytest_tmpdir.TempPathFactory):
+    def test_path_from_journaldir_with_tmpdir(self, mock_journaldir: TempPathFactory):
         """Test JournalLock.set_path_from_journaldir() with tmpdir."""
         tmpdir = mock_journaldir
 
         jlock = JournalLock()
 
         # Check that an actual journaldir is handled correctly.
-        jlock.journal_dir = tmpdir
+        jlock.journal_dir = str(tmpdir)
         jlock.set_path_from_journaldir()
         assert isinstance(jlock.journal_dir_path, pathlib.Path)
 
@@ -200,7 +199,7 @@ class TestJournalLock:
         locked = jlock.obtain_lock()
         assert locked == JournalLockResult.JOURNALDIR_IS_NONE
 
-    def test_obtain_lock_with_tmpdir(self, mock_journaldir: _pytest_tmpdir.TempPathFactory):
+    def test_obtain_lock_with_tmpdir(self, mock_journaldir: TempPathFactory):
         """Test JournalLock.obtain_lock() with tmpdir."""
         jlock = JournalLock()
 
@@ -213,7 +212,7 @@ class TestJournalLock:
         assert jlock.release_lock()
         os.unlink(str(jlock.journal_dir_lockfile_name))
 
-    def test_obtain_lock_with_tmpdir_ro(self, mock_journaldir: _pytest_tmpdir.TempPathFactory):
+    def test_obtain_lock_with_tmpdir_ro(self, mock_journaldir: TempPathFactory):
         """Test JournalLock.obtain_lock() with read-only tmpdir."""
         tmpdir = str(mock_journaldir.getbasetemp())
         print(f'{tmpdir=}')
@@ -280,7 +279,7 @@ class TestJournalLock:
 
         assert locked == JournalLockResult.JOURNALDIR_READONLY
 
-    def test_obtain_lock_already_locked(self, mock_journaldir: _pytest_tmpdir.TempPathFactory):
+    def test_obtain_lock_already_locked(self, mock_journaldir: TempPathFactory):
         """Test JournalLock.obtain_lock() with tmpdir."""
         continue_q: mp.Queue = mp.Queue()
         exit_q: mp.Queue = mp.Queue()
@@ -312,7 +311,7 @@ class TestJournalLock:
 
     ###########################################################################
     # Tests against JournalLock.release_lock()
-    def test_release_lock(self, mock_journaldir: _pytest_tmpdir.TempPathFactory):
+    def test_release_lock(self, mock_journaldir: TempPathFactory):
         """Test JournalLock.release_lock()."""
         # First actually obtain the lock, and check it worked
         jlock = JournalLock()
@@ -330,12 +329,12 @@ class TestJournalLock:
         # Cleanup, to avoid side-effect on other tests
         os.unlink(str(jlock.journal_dir_lockfile_name))
 
-    def test_release_lock_not_locked(self, mock_journaldir: _pytest_tmpdir.TempPathFactory):
+    def test_release_lock_not_locked(self, mock_journaldir: TempPathFactory):
         """Test JournalLock.release_lock() when not locked."""
         jlock = JournalLock()
         assert jlock.release_lock()
 
-    def test_release_lock_lie_locked(self, mock_journaldir: _pytest_tmpdir.TempPathFactory):
+    def test_release_lock_lie_locked(self, mock_journaldir: TempPathFactory):
         """Test JournalLock.release_lock() when not locked, but lie we are."""
         jlock = JournalLock()
         jlock.locked = True
@@ -345,7 +344,7 @@ class TestJournalLock:
     # Tests against JournalLock.update_lock()
     def test_update_lock(
             self,
-            mock_journaldir_changing: _pytest_tmpdir.TempPathFactory):
+            mock_journaldir_changing: TempPathFactory):
         """
         Test JournalLock.update_lock().
 
@@ -373,7 +372,7 @@ class TestJournalLock:
         # And the old_journaldir's lockfile too
         os.unlink(str(old_journaldir_lockfile_name))
 
-    def test_update_lock_same(self, mock_journaldir: _pytest_tmpdir.TempPathFactory):
+    def test_update_lock_same(self, mock_journaldir: TempPathFactory):
         """
         Test JournalLock.update_lock().
 
