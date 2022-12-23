@@ -17,7 +17,7 @@ on:
         - 'beta'
 
 jobs:
-  build:
+  push_checks:
 
     runs-on: ubuntu-22.04
 
