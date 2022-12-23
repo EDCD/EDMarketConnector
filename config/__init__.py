@@ -40,7 +40,7 @@ import sys
 import traceback
 import warnings
 from abc import abstractmethod
-from typing import Any, Callable, List, Optional, Type, TypeVar, Union
+from typing import Any, Callable, List, Optional, Type, TypeVar
 
 import semantic_version
 
@@ -293,7 +293,7 @@ class AbstractConfig(abc.ABC):
 
     @staticmethod
     def _suppress_call(
-        func: Callable[..., _T], exceptions: Union[Type[BaseException], List[Type[BaseException]]] = Exception,
+        func: Callable[..., _T], exceptions: Type[BaseException] | List[Type[BaseException]] = Exception,
         *args: Any, **kwargs: Any
     ) -> Optional[_T]:
         if exceptions is None:
@@ -309,8 +309,8 @@ class AbstractConfig(abc.ABC):
 
     def get(
         self, key: str,
-        default: Union[list, str, bool, int, None] = None
-    ) -> Union[list, str, bool, int, None]:
+        default: list | str | bool | int | None = None
+    ) -> list | str | bool | int | None:
         """
         Return the data for the requested key, or a default.
 
@@ -399,7 +399,7 @@ class AbstractConfig(abc.ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def set(self, key: str, val: Union[int, str, List[str], bool]) -> None:
+    def set(self, key: str, val: int | str | List[str] | bool) -> None:
         """
         Set the given key's data to the given value.
 
