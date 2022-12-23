@@ -59,3 +59,7 @@ jobs:
           grep -E -z -Z '\.py$' | \
           xargs -0 flake8 --count --statistics --extend-ignore D
         #######################################################################
+
+    - name: mypy type checks
+      run: |
+          ./scripts/mypy-all.sh
