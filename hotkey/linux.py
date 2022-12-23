@@ -1,6 +1,10 @@
 """Linux implementation of hotkey.AbstractHotkeyMgr."""
+import sys
+
 from EDMCLogging import get_main_logger
 from hotkey import AbstractHotkeyMgr
+
+assert sys.platform == 'linux'
 
 logger = get_main_logger()
 
