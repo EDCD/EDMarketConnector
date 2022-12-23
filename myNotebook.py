@@ -76,7 +76,8 @@ class Label(tk.Label):
     """Custom tk.Label class to fix some display issues."""
 
     def __init__(self, master: Optional[ttk.Frame] = None, **kw):
-        if sys.platform in ['darwin', 'win32']:
+        # This format chosen over `sys.platform in (...)` as mypy and friends dont understand that
+        if sys.platform == 'darwin' or sys.platform == 'win32':
             kw['foreground'] = kw.pop('foreground', PAGEFG)
             kw['background'] = kw.pop('background', PAGEBG)
         else:
