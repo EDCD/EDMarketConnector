@@ -9,7 +9,12 @@ name: Push-Checks
 
 on:
   push:
-    branches: [ develop ]
+      # We'll catch issues on `develop` or any PR branch.
+    branches-ignore:
+        - 'main'
+        - 'stable'
+        - 'releases'
+        - 'beta'
 
 jobs:
   build:
