@@ -147,14 +147,14 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
     # https://msdn.microsoft.com/en-us/library/windows/desktop/dd375731%28v=vs.85%29.aspx
     # Limit ourselves to symbols in Windows 7 Segoe UI
     DISPLAY = {
-        0x03: 'Break', 0x08: 'Bksp', 0x09: u'↹', 0x0c: 'Clear', 0x0d: u'↵', 0x13: 'Pause',
-        0x14: u'Ⓐ', 0x1b: 'Esc',
-        0x20: u'⏘', 0x21: 'PgUp', 0x22: 'PgDn', 0x23: 'End', 0x24: 'Home',
-        0x25: u'←', 0x26: u'↑', 0x27: u'→', 0x28: u'↓',
+        0x03: 'Break', 0x08: 'Bksp', 0x09: '↹', 0x0c: 'Clear', 0x0d: '↵', 0x13: 'Pause',
+        0x14: 'Ⓐ', 0x1b: 'Esc',
+        0x20: '⏘', 0x21: 'PgUp', 0x22: 'PgDn', 0x23: 'End', 0x24: 'Home',
+        0x25: '←', 0x26: '↑', 0x27: '→', 0x28: '↓',
         0x2c: 'PrtScn', 0x2d: 'Ins', 0x2e: 'Del', 0x2f: 'Help',
-        0x5d: u'▤', 0x5f: u'☾',
-        0x90: u'➀', 0x91: 'ScrLk',
-        0xa6: u'⇦', 0xa7: u'⇨', 0xa9: u'⊗', 0xab: u'☆', 0xac: u'⌂', 0xb4: u'✉',
+        0x5d: '▤', 0x5f: '☾',
+        0x90: '➀', 0x91: 'ScrLk',
+        0xa6: '⇦', 0xa7: '⇨', 0xa9: '⊗', 0xab: '☆', 0xac: '⌂', 0xb4: '✉',
     }
 
     def __init__(self) -> None:
@@ -320,19 +320,19 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
         """
         text = ''
         if modifiers & MOD_WIN:
-            text += u'❖+'
+            text += '❖+'
 
         if modifiers & MOD_CONTROL:
-            text += u'Ctrl+'
+            text += 'Ctrl+'
 
         if modifiers & MOD_ALT:
-            text += u'Alt+'
+            text += 'Alt+'
 
         if modifiers & MOD_SHIFT:
-            text += u'⇧+'
+            text += '⇧+'
 
         if VK_NUMPAD0 <= keycode <= VK_DIVIDE:
-            text += u'№'
+            text += '№'
 
         if not keycode:
             pass
@@ -346,7 +346,7 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
         else:
             c = MapVirtualKey(keycode, 2)  # printable ?
             if not c:  # oops not printable
-                text += u'⁈'
+                text += '⁈'
 
             elif c < 0x20:  # control keys
                 text += chr(c + 0x40)
