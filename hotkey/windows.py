@@ -2,6 +2,7 @@
 import atexit
 import ctypes
 import pathlib
+import sys
 import threading
 import tkinter as tk
 import winsound
@@ -11,6 +12,8 @@ from typing import Optional, Tuple, Union
 from config import config
 from EDMCLogging import get_main_logger
 from hotkey import AbstractHotkeyMgr
+
+assert sys.platform == 'win32'
 
 logger = get_main_logger()
 
