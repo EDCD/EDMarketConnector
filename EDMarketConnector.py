@@ -16,7 +16,7 @@ from builtins import object, str
 from os import chdir, environ
 from os.path import dirname, join
 from time import localtime, strftime, time
-from typing import TYPE_CHECKING, Any, Dict, Literal, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Literal, Optional, Tuple, Union
 
 # Have this as early as possible for people running EDMarketConnector.exe
 # from cmd.exe or a bat file or similar.  Else they might not be in the correct
@@ -1008,7 +1008,7 @@ class AppWindow(object):
         """
         logger.trace_if('capi.worker', 'Begin')
         should_return: bool
-        new_data: Dict[str, Any]
+        new_data: dict[str, Any]
         should_return, new_data = killswitch.check_killswitch('capi.auth', {})
         if should_return:
             logger.warning('capi.auth has been disabled via killswitch. Returning.')
