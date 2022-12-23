@@ -3,7 +3,7 @@ import os
 import pathlib
 import sys
 from configparser import ConfigParser
-from typing import List, Optional, Union
+from typing import Any, List, Optional, Union
 
 from config import AbstractConfig, appname, logger
 
@@ -119,7 +119,7 @@ class LinuxConfig(AbstractConfig):
 
         return self.config[self.SECTION].get(key)
 
-    def get_str(self, key: str, *, default: str = None) -> str:
+    def get_str(self, key: str, *, default: str | None = None) -> str:
         """
         Return the string referred to by the given key if it exists, or the default.
 
@@ -134,7 +134,7 @@ class LinuxConfig(AbstractConfig):
 
         return self.__unescape(data)
 
-    def get_list(self, key: str, *, default: list = None) -> list:
+    def get_list(self, key: str, *, default: list | None = None) -> list:
         """
         Return the list referred to by the given key if it exists, or the default.
 
@@ -168,7 +168,7 @@ class LinuxConfig(AbstractConfig):
         except ValueError as e:
             raise ValueError(f'requested {key=} as int cannot be converted to int') from e
 
-    def get_bool(self, key: str, *, default: bool = None) -> bool:
+    def get_bool(self, key: str, *, default: bool | None = None) -> bool:
         """
         Return the bool referred to by the given key if it exists, or the default.
 
