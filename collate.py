@@ -100,7 +100,7 @@ def addmodules(data):  # noqa: C901, CCR001
     if not data['lastStarport'].get('modules'):
         return
 
-    outfile = 'outfitting.csv'
+    outfile = pathlib.Path('outfitting.csv')
     modules = {}
     fields = ('id', 'symbol', 'category', 'name', 'mount', 'guidance', 'ship', 'class', 'rating', 'entitlement')
 

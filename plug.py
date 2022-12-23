@@ -7,7 +7,8 @@ import os
 import sys
 import tkinter as tk
 from builtins import object, str
-from typing import Any, Callable, List, Mapping, MutableMapping, Optional, Tuple
+from tkinter import ttk
+from typing import Any, Callable, List, Mapping, MutableMapping, Optional
 
 import companion
 import myNotebook as nb  # noqa: N813
@@ -26,7 +27,7 @@ class LastError:
     """Holds the last plugin error."""
 
     msg: Optional[str]
-    root: tk.Frame
+    root: tk.Tk
 
     def __init__(self) -> None:
         self.msg = None
@@ -118,7 +119,7 @@ class Plugin(object):
 
         return None
 
-    def get_prefs(self, parent: tk.Frame, cmdr: str, is_beta: bool) -> Optional[tk.Frame]:
+    def get_prefs(self, parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> Optional[tk.Frame]:
         """
         If the plugin provides a prefs frame, create and return it.
 
@@ -140,7 +141,7 @@ class Plugin(object):
         return None
 
 
-def load_plugins(master: tk.Frame) -> None:  # noqa: CCR001
+def load_plugins(master: tk.Tk) -> None:  # noqa: CCR001
     """Find and load all plugins."""
     last_error.root = master
 
@@ -198,7 +199,7 @@ def provides(fn_name: str) -> List[str]:
 
 
 def invoke(
-    plugin_name: str, fallback: str, fn_name: str, *args: Tuple
+    plugin_name: str, fallback: str | None, fn_name: str, *args: Any
 ) -> Optional[str]:
     """
     Invoke a function on a named plugin.
@@ -248,7 +249,7 @@ def notify_stop() -> Optional[str]:
     return error
 
 
-def notify_prefs_cmdr_changed(cmdr: str, is_beta: bool) -> None:
+def notify_prefs_cmdr_changed(cmdr: str | None, is_beta: bool) -> None:
     """
     Notify plugins that the Cmdr was changed while the settings dialog is open.
 
@@ -265,7 +266,7 @@ def notify_prefs_cmdr_changed(cmdr: str, is_beta: bool) -> None:
                 logger.exception(f'Plugin "{plugin.name}" failed')
 
 
-def notify_prefs_changed(cmdr: str, is_beta: bool) -> None:
+def notify_prefs_changed(cmdr: str | None, is_beta: bool) -> None:
     """
     Notify plugins that the settings dialog has been closed.
 

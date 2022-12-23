@@ -16,7 +16,7 @@ from builtins import object, str
 from os import chdir, environ
 from os.path import dirname, join
 from time import localtime, strftime, time
-from typing import TYPE_CHECKING, Literal, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Literal, Optional, Tuple, Union
 
 # Have this as early as possible for people running EDMarketConnector.exe
 # from cmd.exe or a bat file or similar.  Else they might not be in the correct
@@ -592,7 +592,7 @@ class AppWindow(object):
 
         # The type needs defining for adding the menu entry, but won't be
         # properly set until later
-        self.updater: update.Updater = None
+        self.updater: update.Updater | None = None
 
         self.menubar = tk.Menu()
         if sys.platform == 'darwin':
@@ -647,7 +647,9 @@ class AppWindow(object):
             self.help_menu.add_command(command=self.help_general)
             self.help_menu.add_command(command=self.help_privacy)
             self.help_menu.add_command(command=self.help_releases)
-            self.help_menu.add_command(command=lambda: self.updater.check_for_updates())
+            if self.updater is not None:
+                self.help_menu.add_command(command=lambda: self.updater.check_for_updates())
+
             self.help_menu.add_command(command=lambda: not self.HelpAbout.showing and self.HelpAbout(self.w))
 
             self.menubar.add_cascade(menu=self.help_menu)
@@ -1005,6 +1007,8 @@ class AppWindow(object):
         :param event: Tk generated event details.
         """
         logger.trace_if('capi.worker', 'Begin')
+        should_return: bool
+        new_data: dict[str, Any]
         should_return, new_data = killswitch.check_killswitch('capi.auth', {})
         if should_return:
             logger.warning('capi.auth has been disabled via killswitch. Returning.')
@@ -1421,7 +1425,7 @@ class AppWindow(object):
                     config.set('cmdrs', config.get_list('cmdrs', default=[]) + [monitor.cmdr])
                 self.login()
 
-            if monitor.mode == 'CQC' and entry['event']:
+            if monitor.cmdr and monitor.mode == 'CQC' and entry['event']:
                 err = plug.notify_journal_entry_cqc(monitor.cmdr, monitor.is_beta, entry, monitor.state)
                 if err:
                     self.status['text'] = err
@@ -1439,7 +1443,9 @@ class AppWindow(object):
 
                 # Disable WinSparkle automatic update checks, IFF configured to do so when in-game
                 if config.get_int('disable_autoappupdatecheckingame') and 1:
-                    self.updater.set_automatic_updates_check(False)
+                    if self.updater is not None:
+                        self.updater.set_automatic_updates_check(False)
+
                     logger.info('Monitor: Disable WinSparkle automatic update checks')
 
                 # Can't start dashboard monitoring
@@ -1451,12 +1457,16 @@ class AppWindow(object):
                     and config.get_int('output') & config.OUT_SHIP:
                 monitor.export_ship()
 
-            err = plug.notify_journal_entry(monitor.cmdr,
-                                            monitor.is_beta,
-                                            monitor.system,
-                                            monitor.station,
-                                            entry,
-                                            monitor.state)
+            if monitor.cmdr and monitor.system and monitor.station:
+                err = plug.notify_journal_entry(
+                    monitor.cmdr,
+                    monitor.is_beta,
+                    monitor.system,
+                    monitor.station,
+                    entry,
+                    monitor.state
+                )
+
             if err:
                 self.status['text'] = err
                 if not config.get_int('hotkey_mute'):
@@ -1492,7 +1502,9 @@ class AppWindow(object):
             if entry['event'] == 'ShutDown':
                 # Enable WinSparkle automatic update checks
                 # NB: Do this blindly, in case option got changed whilst in-game
-                self.updater.set_automatic_updates_check(True)
+                if self.updater is not None:
+                    self.updater.set_automatic_updates_check(True)
+
                 logger.info('Monitor: Enable WinSparkle automatic update checks')
 
     def auth(self, event=None) -> None:
@@ -1535,7 +1547,9 @@ class AppWindow(object):
 
         entry = dashboard.status
         # Currently we don't do anything with these events
-        err = plug.notify_dashboard_entry(monitor.cmdr, monitor.is_beta, entry)
+        if monitor.cmdr:
+            err = plug.notify_dashboard_entry(monitor.cmdr, monitor.is_beta, entry)
+
         if err:
             self.status['text'] = err
             if not config.get_int('hotkey_mute'):
@@ -1543,13 +1557,13 @@ class AppWindow(object):
 
     def plugin_error(self, event=None) -> None:
         """Display asynchronous error from plugin."""
-        if plug.last_error.get('msg'):
-            self.status['text'] = plug.last_error['msg']
+        if plug.last_error.msg:
+            self.status['text'] = plug.last_error.msg
             self.w.update_idletasks()
             if not config.get_int('hotkey_mute'):
                 hotkeymgr.play_bad()
 
-    def shipyard_url(self, shipname: str) -> str:
+    def shipyard_url(self, shipname: str) -> str | None:
         """Despatch a ship URL to the configured handler."""
         if not (loadout := monitor.ship()):
             logger.warning('No ship loadout, aborting.')
@@ -1576,11 +1590,11 @@ class AppWindow(object):
 
         return f'file://localhost/{file_name}'
 
-    def system_url(self, system: str) -> str:
+    def system_url(self, system: str) -> str | None:
         """Despatch a system URL to the configured handler."""
         return plug.invoke(config.get_str('system_provider'), 'EDSM', 'system_url', monitor.system)
 
-    def station_url(self, station: str) -> str:
+    def station_url(self, station: str) -> str | None:
         """Despatch a station URL to the configured handler."""
         return plug.invoke(config.get_str('station_provider'), 'eddb', 'station_url', monitor.system, monitor.station)
 
@@ -1657,7 +1671,7 @@ class AppWindow(object):
 
             self.resizable(tk.FALSE, tk.FALSE)
 
-            frame = ttk.Frame(self)
+            frame = tk.Frame(self)
             frame.grid(sticky=tk.NSEW)
 
             row = 1
@@ -1670,7 +1684,7 @@ class AppWindow(object):
 
             ############################################################
             # version <link to changelog>
-            ttk.Label(frame).grid(row=row, column=0)  # spacer
+            tk.Label(frame).grid(row=row, column=0)  # spacer
             row += 1
             self.appversion_label = tk.Label(frame, text=appversion())
             self.appversion_label.grid(row=row, column=0, sticky=tk.E)
@@ -1778,7 +1792,8 @@ class AppWindow(object):
 
         # First so it doesn't interrupt us
         logger.info('Closing update checker...')
-        self.updater.close()
+        if self.updater is not None:
+            self.updater.close()
 
         # Earlier than anything else so plugin code can't interfere *and* it
         # won't still be running in a manner that might rely on something
@@ -1927,10 +1942,8 @@ def show_killswitch_poppup(root=None):
             idx += 1
         idx += 1
 
-    ok_button = tk.Button(frame, text="ok", command=tl.destroy)
+    ok_button = tk.Button(frame, text="Ok", command=tl.destroy)
     ok_button.grid(columnspan=2, sticky=tk.EW)
-
-    theme.apply(tl)
 
 
 # Run the app
@@ -2076,10 +2089,13 @@ sys.path: {sys.path}'''
     if not ui_scale:
         ui_scale = 100
         config.set('ui_scale', ui_scale)
+
     theme.default_ui_scale = root.tk.call('tk', 'scaling')
     logger.trace_if('tk', f'Default tk scaling = {theme.default_ui_scale}')
     theme.startup_ui_scale = ui_scale
-    root.tk.call('tk', 'scaling', theme.default_ui_scale * float(ui_scale) / 100.0)
+    if theme.default_ui_scale is not None:
+        root.tk.call('tk', 'scaling', theme.default_ui_scale * float(ui_scale) / 100.0)
+
     app = AppWindow(root)
 
     def messagebox_not_py3():

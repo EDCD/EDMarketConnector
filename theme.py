@@ -131,14 +131,14 @@ class _Theme(object):
     THEME_TRANSPARENT = 2
 
     def __init__(self) -> None:
-        self.active = None  # Starts out with no theme
+        self.active: int | None = None  # Starts out with no theme
         self.minwidth: Optional[int] = None
         self.widgets: Dict[tk.Widget | tk.BitmapImage, Set] = {}
         self.widgets_pair: List = []
         self.defaults: Dict = {}
         self.current: Dict = {}
-        self.default_ui_scale = None  # None == not yet known
-        self.startup_ui_scale = None
+        self.default_ui_scale: float | None = None  # None == not yet known
+        self.startup_ui_scale: int | None = None
 
     def register(self, widget: tk.Widget | tk.BitmapImage) -> None:  # noqa: CCR001, C901
         # Note widget and children for later application of a theme. Note if
