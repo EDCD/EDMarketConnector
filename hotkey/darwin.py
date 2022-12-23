@@ -3,6 +3,7 @@ import pathlib
 import sys
 import tkinter as tk
 from typing import Callable, Optional, Tuple, Union
+assert sys.platform == 'darwin'
 
 import objc
 from AppKit import (
@@ -36,7 +37,7 @@ class MacHotkeyMgr(AbstractHotkeyMgr):
 
     def __init__(self):
         self.MODIFIERMASK = NSShiftKeyMask | NSControlKeyMask | NSAlternateKeyMask | NSCommandKeyMask \
-                            | NSNumericPadKeyMask
+            | NSNumericPadKeyMask
         self.root: tk.Tk
 
         self.keycode = 0

@@ -1617,10 +1617,11 @@ class AppWindow(object):
                                                                  monitor.system and
                                                                  tk.NORMAL or tk.DISABLED)
 
-    def ontop_changed(self, event=None) -> None:
-        """Set main window 'on top' state as appropriate."""
-        config.set('always_ontop', self.always_ontop.get())
-        self.w.wm_attributes('-topmost', self.always_ontop.get())
+    if sys.platform == 'win32':
+        def ontop_changed(self, event=None) -> None:
+            """Set main window 'on top' state as appropriate."""
+            config.set('always_ontop', self.always_ontop.get())
+            self.w.wm_attributes('-topmost', self.always_ontop.get())
 
     def copy(self, event=None) -> None:
         """Copy system, and possible station, name to clipboard."""
@@ -1760,13 +1761,14 @@ class AppWindow(object):
         with open(f, 'wb') as h:
             h.write(str(companion.session.capi_raw_data).encode(encoding='utf-8'))
 
-    def exit_tray(self, systray: 'SysTrayIcon') -> None:
-        """Tray icon is shutting down."""
-        exit_thread = threading.Thread(
-            target=self.onexit,
-            daemon=True,
-        )
-        exit_thread.start()
+    if sys.platform == 'win32':
+        def exit_tray(self, systray: 'SysTrayIcon') -> None:
+            """Tray icon is shutting down."""
+            exit_thread = threading.Thread(
+                target=self.onexit,
+                daemon=True,
+            )
+            exit_thread.start()
 
     def onexit(self, event=None) -> None:
         """Application shutdown procedure."""

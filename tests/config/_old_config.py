@@ -1,3 +1,4 @@
+# type: ignore
 import numbers
 import sys
 import warnings
