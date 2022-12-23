@@ -166,7 +166,7 @@ that it's actually included in the installer.
         <File KeyPath="yes" Source="SourceDir\\<file name>" />
    </Component>
    ```
- | None
+
    Note that you only need `Id="<valid_component_id>"` if the filename itself
    is not a valid Id, e.g. because it contains spaces.
 
