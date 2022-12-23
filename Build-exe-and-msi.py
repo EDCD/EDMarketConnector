@@ -28,6 +28,9 @@ if sys.platform == 'win32':
 
 else:
     raise AssertionError(f'Unsupported platform {sys.platform}')
+
+# This added to make mypy happy
+assert sys.platform == 'win32'
 ###########################################################################
 
 ###########################################################################
