@@ -575,7 +575,8 @@ class EDMCCAPIRequest(EDMCCAPIReturn):
         self, capi_host: str, endpoint: str,
         query_time: int,
         tk_response_event: Optional[str] = None,
-        play_sound: bool = False, auto_update: bool = False
+        play_sound: bool = False, auto_update: bool = False,
+        cmdr: Optional[str] = None
     ):
         super().__init__(
             query_time=query_time, tk_response_event=tk_response_event,
@@ -583,6 +584,7 @@ class EDMCCAPIRequest(EDMCCAPIReturn):
         )
         self.capi_host: str = capi_host  # The CAPI host to use.
         self.endpoint: str = endpoint  # The CAPI query to perform.
+        self.cmdr: Optional[str] = cmdr  # The CMDR name used for the request.
 
 
 class EDMCCAPIResponse(EDMCCAPIReturn):
@@ -590,10 +592,12 @@ class EDMCCAPIResponse(EDMCCAPIReturn):
 
     def __init__(
             self, capi_data: CAPIData,
-            query_time: int, play_sound: bool = False, auto_update: bool = False
+            query_time: int, play_sound: bool = False, auto_update: bool = False,
+            cmdr: Optional[str] = None
     ):
         super().__init__(query_time=query_time, play_sound=play_sound, auto_update=auto_update)
         self.capi_data: CAPIData = capi_data  # Frontier CAPI response, possibly augmented (station query)
+        self.capi_data['request_cmdr'] = cmdr  # Inject the CMDR name used for the original request into the data
 
 
 class EDMCCAPIFailedRequest(EDMCCAPIReturn):
@@ -993,7 +997,8 @@ class Session(object):
                         capi_data=capi_data,
                         query_time=query.query_time,
                         play_sound=query.play_sound,
-                        auto_update=query.auto_update
+                        auto_update=query.auto_update,
+                        cmdr=query.cmdr
                     )
                 )
 
@@ -1041,7 +1046,8 @@ class Session(object):
                 tk_response_event=tk_response_event,
                 query_time=query_time,
                 play_sound=play_sound,
-                auto_update=auto_update
+                auto_update=auto_update,
+                cmdr=monitor.cmdr
             )
         )
 
@@ -1070,7 +1076,8 @@ class Session(object):
                 tk_response_event=tk_response_event,
                 query_time=query_time,
                 play_sound=play_sound,
-                auto_update=auto_update
+                auto_update=auto_update,
+                cmdr=monitor.cmdr
             )
         )
     ######################################################################
