@@ -68,7 +68,8 @@ class CAPIData(UserDict):
             self,
             data: Union[str, Dict[str, Any], 'CAPIData', None] = None,
             source_host: Optional[str] = None,
-            source_endpoint: Optional[str] = None
+            source_endpoint: Optional[str] = None,
+            request_cmdr: Optional[str] = None
     ) -> None:
         if data is None:
             super().__init__()
@@ -83,6 +84,7 @@ class CAPIData(UserDict):
 
         self.source_host = source_host
         self.source_endpoint = source_endpoint
+        self.request_cmdr = request_cmdr
 
         if source_endpoint is None:
             return
@@ -575,8 +577,7 @@ class EDMCCAPIRequest(EDMCCAPIReturn):
         self, capi_host: str, endpoint: str,
         query_time: int,
         tk_response_event: Optional[str] = None,
-        play_sound: bool = False, auto_update: bool = False,
-        cmdr: Optional[str] = None
+        play_sound: bool = False, auto_update: bool = False
     ):
         super().__init__(
             query_time=query_time, tk_response_event=tk_response_event,
@@ -584,7 +585,6 @@ class EDMCCAPIRequest(EDMCCAPIReturn):
         )
         self.capi_host: str = capi_host  # The CAPI host to use.
         self.endpoint: str = endpoint  # The CAPI query to perform.
-        self.cmdr: Optional[str] = cmdr  # The CMDR name used for the request.
 
 
 class EDMCCAPIResponse(EDMCCAPIReturn):
@@ -592,12 +592,10 @@ class EDMCCAPIResponse(EDMCCAPIReturn):
 
     def __init__(
             self, capi_data: CAPIData,
-            query_time: int, play_sound: bool = False, auto_update: bool = False,
-            cmdr: Optional[str] = None
+            query_time: int, play_sound: bool = False, auto_update: bool = False
     ):
         super().__init__(query_time=query_time, play_sound=play_sound, auto_update=auto_update)
         self.capi_data: CAPIData = capi_data  # Frontier CAPI response, possibly augmented (station query)
-        self.capi_data['request_cmdr'] = cmdr  # Inject the CMDR name used for the original request into the data
 
 
 class EDMCCAPIFailedRequest(EDMCCAPIReturn):
@@ -821,7 +819,7 @@ class Session(object):
                 # r.status_code = 401
                 # raise requests.HTTPError
                 capi_json = r.json()
-                capi_data = CAPIData(capi_json, capi_host, capi_endpoint)
+                capi_data = CAPIData(capi_json, capi_host, capi_endpoint, monitor.cmdr)
                 self.capi_raw_data.record_endpoint(
                     capi_endpoint, r.content.decode(encoding='utf-8'),
                     datetime.datetime.utcnow()
@@ -997,8 +995,7 @@ class Session(object):
                         capi_data=capi_data,
                         query_time=query.query_time,
                         play_sound=query.play_sound,
-                        auto_update=query.auto_update,
-                        cmdr=query.cmdr
+                        auto_update=query.auto_update
                     )
                 )
 
@@ -1046,8 +1043,7 @@ class Session(object):
                 tk_response_event=tk_response_event,
                 query_time=query_time,
                 play_sound=play_sound,
-                auto_update=auto_update,
-                cmdr=monitor.cmdr
+                auto_update=auto_update
             )
         )
 
@@ -1076,8 +1072,7 @@ class Session(object):
                 tk_response_event=tk_response_event,
                 query_time=query_time,
                 play_sound=play_sound,
-                auto_update=auto_update,
-                cmdr=monitor.cmdr
+                auto_update=auto_update
             )
         )
     ######################################################################

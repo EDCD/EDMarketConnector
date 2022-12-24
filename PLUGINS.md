@@ -970,22 +970,20 @@ def capi_fleetcarrier(data):
 | :-------- | :--------------: | :------------------------------------------------------------------------------------------------------- |
 | `data`    |     `CAPIData`   | `/fleetcarrier` API response                                                                             |
 
-`CAPIData` is a class, which you can `from companion import CAPIDATA`, and is
-based on `UserDict`.  The actual data from CAPI queries is thus accessible
-via python's normal `data['key']` syntax.  However, being a class, it can also
-have extra properties, such as `source_host`, as shown above.  Plugin authors
-are free to use *that* property, **but MUST NOT rely on any other extra
-properties present in `CAPIData`, they are for internal use only.**
 
-In the `cmdr_data()` callback, the contents of `data` will always have at least the data returned by a CAPI
-`/profile` query.  If the player is docked at a station, and the relevant
-services are available then the `lastStarport` key's value will have been
-augmented with `/market` and/or `/shipyard` data.  **But do not assume this
-will always be the case**.
+`CAPIData` is a class, which you can `from companion import CAPIDATA`, and is based on `UserDict`.  The actual data from CAPI queries is thus accessible via python's normal `data['key']` syntax.  However, being a class, it can also have extra properties, such as `source_host`, as shown above.
 
-In the `capi_fleetcarrier()` callback, the contents of `data` will be the response from the CAPI `/fleetcarrier` query. See [this documentation](https://github.com/Athanasius/fd-api/blob/main/docs/FrontierDevelopments-CAPI-endpoints.md) for details of the expected content structure and data.
+#### Properties of CAPIData permitted for use by plugins
 
-In all cases, `data` will include a `request_cmdr` entry, which will be the name of the active CMDR _at the point the request was made_. In the case of a CAPI request taking a long time to return, the user may have switched CMDR during the request, so this may be different to the current CMDR.
+Plugin authors are free to use the following properties of `CAPIData`, **but MUST NOT rely on any other extra properties, they are for internal use only.**
+
+| Property       | Type             | Description                                                                                              |
+| :------------- | :--------------: | :------------------------------------------------------------------------------------------------------- |
+| `data`         | `Dict`            | The data returned by the CAPI query.  For the `cmdr_data()` callback, if the player is docked at a station, and the relevant services are available then the `lastStarport` key's value will have been augmented with `/market` and/or `/shipyard` data.  **But do not assume this will always be the case**. |
+| `source_host`  | `str`            | `SERVER_LIVE` \| `SERVER_BETA` \| `SERVER_LEGACY` the current calaxy mode. |
+| `request_cmdr` | `str`            | The name of the active CMDR _at the point the request was made_. In the case of a CAPI request taking a long time to return, the user may have switched CMDR during the request, so this may be different to the current CMDR. |
+
+See [this documentation](https://github.com/Athanasius/fd-api/blob/main/docs/FrontierDevelopments-CAPI-endpoints.md) for details of the expected content structure and data for CAPI queries.
 
 If there is a killswitch in effect for some of the CAPI endpoints, then the
 data passed to this function might not be as complete as you expect.  Code
