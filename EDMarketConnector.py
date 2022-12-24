@@ -1457,7 +1457,7 @@ class AppWindow(object):
                     and config.get_int('output') & config.OUT_SHIP:
                 monitor.export_ship()
 
-            if monitor.cmdr and monitor.system and monitor.station:
+            if monitor.cmdr:
                 err = plug.notify_journal_entry(
                     monitor.cmdr,
                     monitor.is_beta,
@@ -1467,10 +1467,10 @@ class AppWindow(object):
                     monitor.state
                 )
 
-            if err:
-                self.status['text'] = err
-                if not config.get_int('hotkey_mute'):
-                    hotkeymgr.play_bad()
+                if err:
+                    self.status['text'] = err
+                    if not config.get_int('hotkey_mute'):
+                        hotkeymgr.play_bad()
 
             auto_update = False
             # Only if auth callback is not pending
