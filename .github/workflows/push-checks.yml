@@ -9,10 +9,15 @@ name: Push-Checks
 
 on:
   push:
-    branches: [ develop ]
+      # We'll catch issues on `develop` or any PR branch.
+    branches-ignore:
+        - 'main'
+        - 'stable'
+        - 'releases'
+        - 'beta'
 
 jobs:
-  build:
+  push_checks:
 
     runs-on: ubuntu-22.04
 
@@ -59,3 +64,7 @@ jobs:
           grep -E -z -Z '\.py$' | \
           xargs -0 flake8 --count --statistics --extend-ignore D
         #######################################################################
+
+    - name: mypy type checks
+      run: |
+          ./scripts/mypy-all.sh --platform win32

@@ -71,7 +71,7 @@ def versioncmp(versionstring) -> List:
     return list(map(int, versionstring.split('.')))
 
 
-def deep_get(target: dict, *args: str, default=None) -> Any:
+def deep_get(target: dict | companion.CAPIData, *args: str, default=None) -> Any:
     """
     Walk into a dict and return the specified deep value.
 
@@ -224,12 +224,15 @@ sys.path: {sys.path}'''
 
                 logger.debug(f'logdir = "{monitor.currentdir}"')
                 logfile = monitor.journal_newest_filename(monitor.currentdir)
+                if logfile is None:
+                    raise ValueError("None from monitor.journal_newest_filename")
 
                 logger.debug(f'Using logfile "{logfile}"')
-                with open(logfile, 'r', encoding='utf-8') as loghandle:
+                with open(logfile, 'rb', 0) as loghandle:
                     for line in loghandle:
                         try:
                             monitor.parse_entry(line)
+
                         except Exception:
                             logger.debug(f'Invalid journal entry {line!r}')
 
@@ -410,7 +413,23 @@ sys.path: {sys.path}'''
 
             # Retry for shipyard
             sleep(SERVER_RETRY)
-            new_data = companion.session.station()
+            companion.session.station(int(time()))
+            # Wait for the response
+            _capi_request_timeout = 60
+            try:
+                capi_response = companion.session.capi_response_queue.get(
+                    block=True, timeout=_capi_request_timeout
+                )
+
+            except queue.Empty:
+                logger.error(f'CAPI requests timed out after {_capi_request_timeout} seconds')
+                sys.exit(EXIT_SERVER)
+
+            if isinstance(capi_response, companion.EDMCCAPIFailedRequest):
+                logger.error(f'Failed Request: {capi_response.message}')
+                sys.exit(EXIT_SERVER)
+
+            new_data = capi_response.capi_data
             # might have undocked while we were waiting for retry in which case station data is unreliable
             if new_data['commander'].get('docked') and \
                     deep_get(new_data, 'lastSystem', 'name') == monitor.system and \

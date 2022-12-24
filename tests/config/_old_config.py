@@ -1,3 +1,4 @@
+# type: ignore
 import numbers
 import sys
 import warnings
@@ -138,7 +139,7 @@ class OldConfig():
                 self.identifier = f'uk.org.marginal.{appname.lower()}'
                 NSBundle.mainBundle().infoDictionary()['CFBundleIdentifier'] = self.identifier
 
-            self.default_journal_dir = join(
+            self.default_journal_dir: str | None = join(
                 NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, True)[0],
                 'Frontier Developments',
                 'Elite Dangerous'
@@ -222,13 +223,13 @@ class OldConfig():
 
             journaldir = known_folder_path(FOLDERID_SavedGames)
             if journaldir:
-                self.default_journal_dir = join(journaldir, 'Frontier Developments', 'Elite Dangerous')
+                self.default_journal_dir: str | None = join(journaldir, 'Frontier Developments', 'Elite Dangerous')
 
             else:
                 self.default_journal_dir = None
 
             self.identifier = applongname
-            self.hkey = HKEY()
+            self.hkey: ctypes.c_void_p | None = HKEY()
             disposition = DWORD()
             if RegCreateKeyEx(
                     HKEY_CURRENT_USER,
@@ -376,7 +377,7 @@ class OldConfig():
                 mkdir(self.plugin_dir)
 
             self.internal_plugin_dir = join(dirname(__file__), 'plugins')
-            self.default_journal_dir = None
+            self.default_journal_dir: str | None = None
             self.home = expanduser('~')
             self.respath = dirname(__file__)
             self.identifier = f'uk.org.marginal.{appname.lower()}'

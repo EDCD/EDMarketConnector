@@ -30,6 +30,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from operator import itemgetter
 from threading import Lock, Thread
+from tkinter import ttk
 from typing import TYPE_CHECKING, Any, Callable, Deque, Dict, List, Mapping, NamedTuple, Optional
 from typing import OrderedDict as OrderedDictT
 from typing import Sequence, Union, cast
@@ -130,7 +131,7 @@ class This:
         self.log_button: nb.Checkbutton
         self.label: HyperlinkLabel
         self.apikey: nb.Entry
-        self.apikey_label: HyperlinkLabel
+        self.apikey_label: tk.Label
 
         self.events: Dict[Credentials, Deque[Event]] = defaultdict(deque)
         self.event_lock: Lock = threading.Lock()  # protects events, for use when rewriting events
@@ -235,7 +236,7 @@ def plugin_stop() -> None:
     logger.debug('Done.')
 
 
-def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool) -> tk.Frame:
+def plugin_prefs(parent: ttk.Notebook, cmdr: str, is_beta: bool) -> tk.Frame:
     """Plugin Preferences UI hook."""
     x_padding = 10
     x_button_padding = 12  # indent Checkbuttons and Radiobuttons
@@ -1539,9 +1540,6 @@ def new_add_event(
 def clean_event_list(event_list: List[Event]) -> List[Event]:
     """Check for killswitched events and remove or modify them as requested."""
     out = []
-    bad: bool
-    new_event: Dict[str, Any] = {}
-
     for e in event_list:
         bad, new_event = killswitch.check_killswitch(f'plugins.inara.worker.{e.name}', e.data, logger)
         if bad:

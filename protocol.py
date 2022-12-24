@@ -121,9 +121,13 @@ elif (config.auth_force_edmc_protocol
           and not is_wine
           and not config.auth_force_localserver
       )):
+    # This could be false if you use auth_force_edmc_protocol, but then you get to keep the pieces
+    assert sys.platform == 'win32'
     # spell-checker: words HBRUSH HICON WPARAM wstring WNDCLASS HMENU HGLOBAL
     from ctypes import windll  # type: ignore
-    from ctypes import POINTER, WINFUNCTYPE, Structure, byref, c_long, c_void_p, create_unicode_buffer, wstring_at
+    from ctypes import (  # type: ignore
+        POINTER, WINFUNCTYPE, Structure, byref, c_long, c_void_p, create_unicode_buffer, wstring_at
+    )
     from ctypes.wintypes import (
         ATOM, BOOL, DWORD, HBRUSH, HGLOBAL, HICON, HINSTANCE, HMENU, HWND, INT, LPARAM, LPCWSTR, LPVOID, LPWSTR, MSG,
         UINT, WPARAM

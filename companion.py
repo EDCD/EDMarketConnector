@@ -329,7 +329,7 @@ class Auth(object):
         logger.debug(f'Trying for "{self.cmdr}"')
 
         should_return: bool
-        new_data: Dict[str, Any] = {}
+        new_data: dict[str, Any]
 
         should_return, new_data = killswitch.check_killswitch('capi.auth', {})
         if should_return:
@@ -675,7 +675,7 @@ class Session(object):
         :return: True if login succeeded, False if re-authorization initiated.
         """
         should_return: bool
-        new_data: Dict[str, Any] = {}
+        new_data: dict[str, Any]
 
         should_return, new_data = killswitch.check_killswitch('capi.auth', {})
         if should_return:
@@ -796,7 +796,7 @@ class Session(object):
             """
             capi_data: CAPIData = CAPIData()
             should_return: bool
-            new_data: Dict[str, Any] = {}
+            new_data: dict[str, Any]
 
             should_return, new_data = killswitch.check_killswitch('capi.request.' + capi_endpoint, {})
             if should_return:
