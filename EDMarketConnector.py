@@ -1550,10 +1550,10 @@ class AppWindow(object):
         if monitor.cmdr:
             err = plug.notify_dashboard_entry(monitor.cmdr, monitor.is_beta, entry)
 
-        if err:
-            self.status['text'] = err
-            if not config.get_int('hotkey_mute'):
-                hotkeymgr.play_bad()
+            if err:
+                self.status['text'] = err
+                if not config.get_int('hotkey_mute'):
+                    hotkeymgr.play_bad()
 
     def plugin_error(self, event=None) -> None:
         """Display asynchronous error from plugin."""
