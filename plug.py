@@ -286,7 +286,7 @@ def notify_prefs_changed(cmdr: str | None, is_beta: bool) -> None:
 
 
 def notify_journal_entry(
-    cmdr: str, is_beta: bool, system: str, station: str,
+    cmdr: str, is_beta: bool, system: str | None, station: str | None,
     entry: MutableMapping[str, Any],
     state: Mapping[str, Any]
 ) -> Optional[str]:
