@@ -1547,10 +1547,10 @@ class AppWindow(object):
                     monitor.state
                 )
 
-                if err:
-                    self.status['text'] = err
-                    if not config.get_int('hotkey_mute'):
-                        hotkeymgr.play_bad()
+            if err:
+                self.status['text'] = err
+                if not config.get_int('hotkey_mute'):
+                    hotkeymgr.play_bad()
 
             auto_update = False
             # Only if auth callback is not pending
