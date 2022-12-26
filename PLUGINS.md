@@ -908,11 +908,11 @@ constants.
 
 ---
 
-### Commander Data from Frontier CAPI
-If a plugin has a `cmdr_data()` function it gets called when the application
-has just fetched fresh Cmdr and station data from Frontier's CAPI servers,
-**but not for the Legacy galaxy**.  See `cmdr_data_legacy()` below for Legacy
-data handling.
+### Data from Frontier CAPI
+
+#### Commander, Market and Shipyard Data
+
+If a plugin has a `cmdr_data()` function it gets called when the application has just fetched fresh CMDR, station and shipyard data from Frontier's CAPI servers, **but not for the Legacy galaxy**.  See `cmdr_data_legacy()` below for Legacy data handling.
 ```python
 from companion import CAPIData, SERVER_LIVE, SERVER_LEGACY, SERVER_BETA
 
@@ -940,6 +940,8 @@ def cmdr_data(data, is_beta):
 | :-------- | :--------------: | :------------------------------------------------------------------------------------------------------- |
 | `data`    |     `CAPIData`   | `/profile` API response, with `/market` and `/shipyard` added under the keys `marketdata` and `shipdata` |
 | `is_beta` |      `bool`      | If the game is currently in beta                                                                         |
+
+#### Fleet Carrier Data
 
 If a plugin has a `capi_fleetcarrier()` function it gets called when the application has just fetched fresh Fleetcarrier data from Frontier's CAPI servers. This is done when `CarrierBuy`or `CarrierStats` events are detected in the Player Journal. To avoid flooding Frontier's CAPI server, a throttle is applied to ensure a significant interval between requests (currently 15 mins). Also be aware that calls to the `/fleetcarrier` CAPI endpoint have been reported to take a very long time to return, potentially up to 20 minutes. Delays in responses from this endpoint could delay other CAPI queries.
 
@@ -970,17 +972,16 @@ def capi_fleetcarrier(data):
 | :-------- | :--------------: | :------------------------------------------------------------------------------------------------------- |
 | `data`    |     `CAPIData`   | `/fleetcarrier` API response                                                                             |
 
+#### CAPIData and Available Properties
 
-`CAPIData` is a class, which you can `from companion import CAPIDATA`, and is based on `UserDict`.  The actual data from CAPI queries is thus accessible via python's normal `data['key']` syntax.  However, being a class, it can also have extra properties, such as `source_host`, as shown above.
-
-#### Properties of CAPIData permitted for use by plugins
+`CAPIData` is a class, which you can `from companion import CAPIDATA`, and is based on `UserDict`.  The actual data from CAPI queries is thus accessible via python's normal `data['key']` syntax.  However, being a class, it can also have extra properties, such as `source_host`, as shown in the code example above.
 
 Plugin authors are free to use the following properties of `CAPIData`, **but MUST NOT rely on any other extra properties, they are for internal use only.**
 
 | Property       | Type             | Description                                                                                              |
 | :------------- | :--------------: | :------------------------------------------------------------------------------------------------------- |
-| `data`         | `Dict`            | The data returned by the CAPI query.  For the `cmdr_data()` callback, if the player is docked at a station, and the relevant services are available then the `lastStarport` key's value will have been augmented with `/market` and/or `/shipyard` data.  **But do not assume this will always be the case**. |
-| `source_host`  | `str`            | `SERVER_LIVE` \| `SERVER_BETA` \| `SERVER_LEGACY` the current calaxy mode. |
+| `data`         | `Dict`            | The data returned by the CAPI query.  For the `cmdr_data()` callback, if the player is docked at a station, and the relevant services are available then the `lastStarport` key's value will have been augmented with `/market` and/or `/shipyard` data.  **Do not assume this will always be the case**. |
+| `source_host`  | `str`            | `SERVER_LIVE` \| `SERVER_BETA` \| `SERVER_LEGACY` the current galaxy mode. |
 | `request_cmdr` | `str`            | The name of the active CMDR _at the point the request was made_. In the case of a CAPI request taking a long time to return, the user may have switched CMDR during the request, so this may be different to the current CMDR. |
 
 See [this documentation](https://github.com/Athanasius/fd-api/blob/main/docs/FrontierDevelopments-CAPI-endpoints.md) for details of the expected content structure and data for CAPI queries.
@@ -989,12 +990,9 @@ If there is a killswitch in effect for some of the CAPI endpoints, then the
 data passed to this function might not be as complete as you expect.  Code
 defensively.
 
-
 #### CAPI data for Legacy
-When CAPI data has been retrieved from the separate CAPI host for the Legacy
-galaxy, because the Journal gameversion indicated the player is playing/last
-played in that galaxy, a different function will be called,
-`cmdr_data_legacy()`.
+
+When CAPI data has been retrieved from the separate CAPI host for the Legacy galaxy, because the Journal gameversion indicated the player is playing last played in that galaxy, a different function will be called, `cmdr_data_legacy()`.  Note that there is no legacy equivalent to `capi_fleetcarrier()`, so always use the `source_host` property to determine the user's galaxy.
 
 ```python
 def cmdr_data_legacy(data, is_beta):
