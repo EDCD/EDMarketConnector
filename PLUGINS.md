@@ -992,7 +992,7 @@ defensively.
 
 #### CAPI data for Legacy
 
-When CAPI data has been retrieved from the separate CAPI host for the Legacy galaxy, because the Journal gameversion indicated the player is playing last played in that galaxy, a different function will be called, `cmdr_data_legacy()`.  Note that there is no legacy equivalent to `capi_fleetcarrier()`, so always use the `source_host` property to determine the user's galaxy.
+When CAPI data has been retrieved from the separate CAPI host for the Legacy galaxy, because the Journal gameversion indicated the player is playing / last played in that galaxy, a different function will be called, `cmdr_data_legacy()`.  Note that there is no legacy equivalent to `capi_fleetcarrier()`, so always use the `source_host` property to determine the user's galaxy.
 
 ```python
 def cmdr_data_legacy(data, is_beta):
