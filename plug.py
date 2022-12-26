@@ -160,7 +160,10 @@ def load_plugins(master: tk.Tk) -> None:  # noqa: CCR001
     sys.path.append(config.plugin_dir)
 
     found = []
-    # Load any plugins that are also packages first
+    # Load any plugins that are also packages first, but note it's *still*
+    # 100% relying on there being a `load.py`, as only that will be loaded.
+    # The intent here is to e.g. have EDMC-Overlay load before any plugins
+    # that depend on it.
     for name in sorted(
         os.listdir(config.plugin_dir_path),
         key=lambda n: (not os.path.isfile(os.path.join(config.plugin_dir_path, n, '__init__.py')), n.lower())
