@@ -42,7 +42,7 @@
 # ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $#
 # ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $#
 import tkinter
-from typing import TYPE_CHECKING, Any, Mapping, MutableMapping, Optional
+from typing import TYPE_CHECKING, Any, Dict, Mapping, MutableMapping, Optional
 
 import requests
 
@@ -168,6 +168,9 @@ def journal_entry(  # noqa: CCR001
     :param state: `monitor.state`
     :return: None if no error, else an error string.
     """
+    should_return: bool
+    new_entry: Dict[str, Any] = {}
+
     should_return, new_entry = killswitch.check_killswitch('plugins.eddb.journal', entry)
     if should_return:
         # LANG: Journal Processing disabled due to an active killswitch

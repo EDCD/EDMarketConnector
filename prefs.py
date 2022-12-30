@@ -470,6 +470,25 @@ class PreferencesDialog(tk.Toplevel):
                 state=tk.NORMAL if config.get_str('journaldir') else tk.DISABLED
             ).grid(column=2, pady=self.PADY, sticky=tk.EW, row=row.get())
 
+        # CAPI settings
+        self.capi_fleetcarrier = tk.BooleanVar(value=config.get_bool('capi_fleetcarrier'))
+
+        ttk.Separator(config_frame, orient=tk.HORIZONTAL).grid(
+                columnspan=4, padx=self.PADX, pady=self.PADY*4, sticky=tk.EW, row=row.get()
+            )
+
+        nb.Label(
+                config_frame,
+                text=_('CAPI Settings')  # LANG: Settings > Configuration - Label for CAPI section
+            ).grid(padx=self.PADX, sticky=tk.W, row=row.get())
+
+        nb.Checkbutton(
+                config_frame,
+                # LANG: Configuration - Enable or disable the Fleet Carrier CAPI calls
+                text=_('Enable Fleetcarrier CAPI Queries'),
+                variable=self.capi_fleetcarrier
+            ).grid(columnspan=4, padx=self.PADX, pady=(5, 0), sticky=tk.W, row=row.get())
+
         if sys.platform in ('darwin', 'win32'):
             ttk.Separator(config_frame, orient=tk.HORIZONTAL).grid(
                 columnspan=4, padx=self.PADX, pady=self.PADY*4, sticky=tk.EW, row=row.get()
@@ -1243,6 +1262,8 @@ class PreferencesDialog(tk.Toplevel):
 
         else:
             config.set('journaldir', logdir)
+
+        config.set('capi_fleetcarrier', self.capi_fleetcarrier.get())
 
         if sys.platform in ('darwin', 'win32'):
             config.set('hotkey_code', self.hotkey_code)

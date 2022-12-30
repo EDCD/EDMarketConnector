@@ -402,6 +402,9 @@ class EDDNSender:
         :return: `True` for "now remove this message from the queue"
         """
         logger.trace_if("plugin.eddn.send", "Sending message")
+        should_return: bool
+        new_data: dict[str, Any]
+
         should_return, new_data = killswitch.check_killswitch('plugins.eddn.send', json.loads(msg))
         if should_return:
             logger.warning('eddn.send has been disabled via killswitch. Returning.')

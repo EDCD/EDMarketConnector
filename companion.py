@@ -46,7 +46,9 @@ else:
 
 
 capi_query_cooldown = 60  # Minimum time between (sets of) CAPI queries
+capi_fleetcarrier_query_cooldown = 60 * 15  # Minimum time between CAPI fleetcarrier queries
 capi_default_requests_timeout = 10
+capi_fleetcarrier_requests_timeout = 60
 auth_timeout = 30  # timeout for initial auth
 
 # Used by both class Auth and Session
@@ -66,7 +68,8 @@ class CAPIData(UserDict):
             self,
             data: Union[str, Dict[str, Any], 'CAPIData', None] = None,
             source_host: Optional[str] = None,
-            source_endpoint: Optional[str] = None
+            source_endpoint: Optional[str] = None,
+            request_cmdr: Optional[str] = None
     ) -> None:
         if data is None:
             super().__init__()
@@ -81,6 +84,7 @@ class CAPIData(UserDict):
 
         self.source_host = source_host
         self.source_endpoint = source_endpoint
+        self.request_cmdr = request_cmdr
 
         if source_endpoint is None:
             return
@@ -326,7 +330,10 @@ class Auth(object):
         """
         logger.debug(f'Trying for "{self.cmdr}"')
 
-        should_return, _ = killswitch.check_killswitch('capi.auth', {})
+        should_return: bool
+        new_data: dict[str, Any]
+
+        should_return, new_data = killswitch.check_killswitch('capi.auth', {})
         if should_return:
             logger.warning('capi.auth has been disabled via killswitch. Returning.')
             return None
@@ -612,6 +619,8 @@ class Session(object):
     FRONTIER_CAPI_PATH_PROFILE = '/profile'
     FRONTIER_CAPI_PATH_MARKET = '/market'
     FRONTIER_CAPI_PATH_SHIPYARD = '/shipyard'
+    FRONTIER_CAPI_PATH_FLEETCARRIER = '/fleetcarrier'
+
     # This is a dummy value, to signal to Session.capi_query_worker that we
     # the 'station' triplet of queries.
     _CAPI_PATH_STATION = '_edmc_station'
@@ -663,7 +672,10 @@ class Session(object):
 
         :return: True if login succeeded, False if re-authorization initiated.
         """
-        should_return, _ = killswitch.check_killswitch('capi.auth', {})
+        should_return: bool
+        new_data: dict[str, Any]
+
+        should_return, new_data = killswitch.check_killswitch('capi.auth', {})
         if should_return:
             logger.warning('capi.auth has been disabled via killswitch. Returning.')
             return False
@@ -781,7 +793,10 @@ class Session(object):
             :return: The resulting CAPI data, of type CAPIData.
             """
             capi_data: CAPIData = CAPIData()
-            should_return, _ = killswitch.check_killswitch('capi.request.' + capi_endpoint, {})
+            should_return: bool
+            new_data: dict[str, Any]
+
+            should_return, new_data = killswitch.check_killswitch('capi.request.' + capi_endpoint, {})
             if should_return:
                 logger.warning(f"capi.request.{capi_endpoint} has been disabled by killswitch.  Returning.")
                 return capi_data
@@ -804,7 +819,7 @@ class Session(object):
                 # r.status_code = 401
                 # raise requests.HTTPError
                 capi_json = r.json()
-                capi_data = CAPIData(capi_json, capi_host, capi_endpoint)
+                capi_data = CAPIData(capi_json, capi_host, capi_endpoint, monitor.cmdr)
                 self.capi_raw_data.record_endpoint(
                     capi_endpoint, r.content.decode(encoding='utf-8'),
                     datetime.datetime.utcnow()
@@ -956,6 +971,10 @@ class Session(object):
                 if query.endpoint == self._CAPI_PATH_STATION:
                     capi_data = capi_station_queries(query.capi_host)
 
+                elif query.endpoint == self.FRONTIER_CAPI_PATH_FLEETCARRIER:
+                    capi_data = capi_single_query(query.capi_host, self.FRONTIER_CAPI_PATH_FLEETCARRIER,
+                                                  timeout=capi_fleetcarrier_requests_timeout)
+
                 else:
                     capi_data = capi_single_query(query.capi_host, self.FRONTIER_CAPI_PATH_PROFILE)
 
@@ -1021,6 +1040,35 @@ class Session(object):
             EDMCCAPIRequest(
                 capi_host=capi_host,
                 endpoint=self._CAPI_PATH_STATION,
+                tk_response_event=tk_response_event,
+                query_time=query_time,
+                play_sound=play_sound,
+                auto_update=auto_update
+            )
+        )
+
+    def fleetcarrier(
+            self, query_time: int, tk_response_event: Optional[str] = None,
+            play_sound: bool = False, auto_update: bool = False
+    ) -> None:
+        """
+        Perform CAPI query for fleetcarrier data.
+
+        :param query_time: When this query was initiated.
+        :param tk_response_event: Name of tk event to generate when response queued.
+        :param play_sound: Whether the app should play a sound on error.
+        :param auto_update: Whether this request was triggered automatically.
+        """
+        capi_host = self.capi_host_for_galaxy()
+        if not capi_host:
+            return
+
+        # Ask the thread worker to perform a fleetcarrier query
+        logger.trace_if('capi.worker', 'Enqueueing fleetcarrier request')
+        self.capi_request_queue.put(
+            EDMCCAPIRequest(
+                capi_host=capi_host,
+                endpoint=self.FRONTIER_CAPI_PATH_FLEETCARRIER,
                 tk_response_event=tk_response_event,
                 query_time=query_time,
                 play_sound=play_sound,

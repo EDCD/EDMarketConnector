@@ -476,6 +476,8 @@ class AppWindow(object):
     def __init__(self, master: tk.Tk):  # noqa: C901, CCR001 # TODO - can possibly factor something out
 
         self.capi_query_holdoff_time = config.get_int('querytime', default=0) + companion.capi_query_cooldown
+        self.capi_fleetcarrier_query_holdoff_time = config.get_int('fleetcarrierquerytime', default=0) \
+            + companion.capi_fleetcarrier_query_cooldown
 
         self.w = master
         self.w.title(applongname)
@@ -916,6 +918,9 @@ class AppWindow(object):
 
     def login(self):
         """Initiate CAPI/Frontier login and set other necessary state."""
+        should_return: bool
+        new_data: dict[str, Any]
+
         should_return, new_data = killswitch.check_killswitch('capi.auth', {})
         if should_return:
             logger.warning('capi.auth has been disabled via killswitch. Returning.')
@@ -1086,6 +1091,54 @@ class AppWindow(object):
             play_sound=play_sound
         )
 
+    def capi_request_fleetcarrier_data(self, event=None) -> None:
+        """
+        Perform CAPI fleetcarrier data retrieval and associated actions.
+
+        This is triggered by certain FleetCarrier journal events
+
+        :param event: Tk generated event details.
+        """
+        logger.trace_if('capi.worker', 'Begin')
+        should_return: bool
+        new_data: dict[str, Any]
+
+        should_return, new_data = killswitch.check_killswitch('capi.request.fleetcarrier', {})
+        if should_return:
+            logger.warning('capi.fleetcarrier has been disabled via killswitch. Returning.')
+            self.status['text'] = 'CAPI fleetcarrier disabled by killswitch'
+            hotkeymgr.play_bad()
+            return
+
+        if not monitor.cmdr:
+            logger.trace_if('capi.worker', 'Aborting Query: Cmdr unknown')
+            # LANG: CAPI queries aborted because Cmdr name is unknown
+            self.status['text'] = _('CAPI query aborted: Cmdr name unknown')
+            return
+
+        if monitor.state['GameVersion'] is None:
+            logger.trace_if('capi.worker', 'Aborting Query: GameVersion unknown')
+            # LANG: CAPI queries aborted because GameVersion unknown
+            self.status['text'] = _('CAPI query aborted: GameVersion unknown')
+            return
+
+        if not companion.session.retrying:
+            if time() < self.capi_fleetcarrier_query_holdoff_time:  # Was invoked while in cooldown
+                logger.debug('CAPI fleetcarrier query aborted, too soon since last request')
+                return
+
+            # LANG: Status - Attempting to retrieve data from Frontier CAPI
+            self.status['text'] = _('Fetching data...')
+            self.w.update_idletasks()
+
+        query_time = int(time())
+        logger.trace_if('capi.worker', 'Requesting fleetcarrier data')
+        config.set('fleetcarrierquerytime', query_time)
+        logger.trace_if('capi.worker', 'Calling companion.session.fleetcarrier')
+        companion.session.fleetcarrier(
+            query_time=query_time, tk_response_event=self._CAPI_RESPONSE_TK_EVENT_NAME
+        )
+
     def capi_handle_response(self, event=None):  # noqa: C901, CCR001
         """Handle the resulting data from a CAPI query."""
         logger.trace_if('capi.worker', 'Handling response')
@@ -1110,8 +1163,32 @@ class AppWindow(object):
                 logger.error(msg)
                 raise ValueError(msg)
 
+            if capi_response.capi_data.source_endpoint == companion.session.FRONTIER_CAPI_PATH_FLEETCARRIER:
+                # Fleetcarrier CAPI response
+                # Validation
+                if 'name' not in capi_response.capi_data:
+                    # LANG: No data was returned for the fleetcarrier from the Frontier CAPI
+                    err = self.status['text'] = _('CAPI: No fleetcarrier data returned')
+
+                elif not capi_response.capi_data.get('name', {}).get('callsign'):
+                    # LANG: We didn't have the fleetcarrier callsign when we should have
+                    err = self.status['text'] = _("CAPI: Fleetcarrier data incomplete")  # Shouldn't happen
+
+                else:
+                    if __debug__:  # Recording
+                        companion.session.dump_capi_data(capi_response.capi_data)
+
+                    err = plug.notify_capi_fleetcarrierdata(capi_response.capi_data)
+                    self.status['text'] = err and err or ''
+                    if err:
+                        play_bad = True
+
+                    self.capi_fleetcarrier_query_holdoff_time = capi_response.query_time \
+                        + companion.capi_fleetcarrier_query_cooldown
+
+            # Other CAPI response
             # Validation
-            if 'commander' not in capi_response.capi_data:
+            elif 'commander' not in capi_response.capi_data:
                 # This can happen with EGS Auth if no commander created yet
                 # LANG: No data was returned for the commander from the Frontier CAPI
                 err = self.status['text'] = _('CAPI: No commander data returned')
@@ -1233,6 +1310,9 @@ class AppWindow(object):
                 self.status['text'] = err and err or ''
                 if err:
                     play_bad = True
+
+                should_return: bool
+                new_data: dict[str, Any]
 
                 should_return, new_data = killswitch.check_killswitch('capi.request./market', {})
                 if should_return:
@@ -1494,10 +1574,18 @@ class AppWindow(object):
                     elif entry['event'] == 'Disembark' and entry.get('Taxi') and entry.get('OnStation'):
                         auto_update = True
 
+            should_return: bool
+            new_data: dict[str, Any]
+
             if auto_update:
                 should_return, new_data = killswitch.check_killswitch('capi.auth', {})
                 if not should_return:
                     self.w.after(int(SERVER_RETRY * 1000), self.capi_request_data)
+
+            if entry['event'] in ('CarrierBuy', 'CarrierStats') and config.get_bool('capi_fleetcarrier'):
+                should_return, new_data = killswitch.check_killswitch('capi.request.fleetcarrier', {})
+                if not should_return:
+                    self.w.after(int(SERVER_RETRY * 1000), self.capi_request_fleetcarrier_data)
 
             if entry['event'] == 'ShutDown':
                 # Enable WinSparkle automatic update checks

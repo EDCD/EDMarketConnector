@@ -386,6 +386,9 @@ def journal_entry(  # noqa: C901, CCR001
 
         return ''
 
+    should_return: bool
+    new_entry: Dict[str, Any] = {}
+
     should_return, new_entry = killswitch.check_killswitch('plugins.inara.journal', entry, logger)
     if should_return:
         plug.show_error(_('Inara disabled. See Log.'))  # LANG: INARA support disabled via killswitch
@@ -1537,7 +1540,6 @@ def new_add_event(
 def clean_event_list(event_list: List[Event]) -> List[Event]:
     """Check for killswitched events and remove or modify them as requested."""
     out = []
-
     for e in event_list:
         bad, new_event = killswitch.check_killswitch(f'plugins.inara.worker.{e.name}', e.data, logger)
         if bad:

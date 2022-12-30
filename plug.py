@@ -405,6 +405,30 @@ def notify_capidata(
     return error
 
 
+def notify_capi_fleetcarrierdata(
+    data: companion.CAPIData
+) -> Optional[str]:
+    """
+    Send the latest CAPI Fleetcarrier data from the FD servers to each plugin.
+
+    :param data: The CAPIData returned in the CAPI response
+    :returns: Error message from the first plugin that returns one (if any)
+    """
+    error = None
+    for plugin in PLUGINS:
+        fc_callback = plugin._get_func('capi_fleetcarrier')
+        if fc_callback is not None and callable(fc_callback):
+            try:
+                # Pass a copy of the CAPIData in case the callee modifies it
+                newerror = fc_callback(copy.deepcopy(data))
+                error = error or newerror
+
+            except Exception:
+                logger.exception(f'Plugin "{plugin.name}" failed on receiving Fleetcarrier data')
+
+    return error
+
+
 def show_error(err: str) -> None:
     """
     Display an error message in the status line of the main window.
