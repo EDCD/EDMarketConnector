@@ -34,7 +34,7 @@ jobs:
         run: |
           Invoke-Webrequest -UseBasicParsing https://github.com/vslavik/winsparkle/releases/download/v0.7.0/WinSparkle-0.7.0.zip -OutFile out.zip
           Expand-Archive out.zip
-          Move-Item 'out\WinSparkle-0.7.0\Release\*' '.\'
+          Move-Item 'out\WinSparkle-0.7.0\x64\Release\*' '.\'
 
       - name: Build EDMC
         run: |

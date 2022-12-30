@@ -2,7 +2,6 @@
 """Build to executables and MSI installer using py2exe and other tools."""
 import os
 import pathlib
-import platform
 import re
 import shutil
 import sys
@@ -22,7 +21,6 @@ if sys.version_info[0:2] != (3, 11):
     raise AssertionError(f'Unexpected python version {sys.version}')
 
 if sys.platform == 'win32':
-    assert platform.architecture()[0] == '32bit', 'A Python 32bit build is required'
     import py2exe  # noqa: F401 # Yes, this *is* used
     dist_dir = 'dist.win32'
 
