@@ -26,6 +26,59 @@ produce the Windows executables and installer.
   currently used version in a given branch.
 
 ---
+Pre-Release 5.7.1-alpha1
+===
+As well as some other changes, as below, **this is a 64-bit release for plugin
+developers to test against**.  Moving forwards we're looking into producing
+both 32-bit and 64-bit build/installers.
+
+* **New Feature** - Perform a CAPI `/fleetcarrier` query when you open the
+  Carrier Management UI in-game.  It will also trigger when you buy an
+  FC (Fleet Carrier).
+  1. You will need to enable this using the new option on the `Configuration`
+    tab of Settings.
+  2. There will be a slight delay before the query is even initiated.
+  3. These queries *can take a long time*, depending on the number of separate
+    'lots' of cargo, and orders, you have in your FC.  In the meantime the
+    normal 'station' CAPI queries will be blocked.  **Thus, it is advised to
+    only enable this feature if you know you have an active plugin that
+    utilises the data.**
+    However, currently the timeout for such queries is set at *one minute*, so
+    any query taking longer than that will fail.  This timeout will be tweaked
+    based on user feedback.  Ultimately we will look into making these queries
+    independent of the 'station' CAPI queries.
+  4. Due to the last point, there is an enforced 15 minute delay between the
+    last such query completing and a new one being initiated.
+
+* If we ever activate any functionality killswitches, the popup denoting which
+  are active has been made more readable.
+
+* There's a new section in `Contributing.md` - "Python Environment".  This
+  should aid any new developers in getting things set up.
+
+* The code for choosing the 'Output' folder is now simply the `tkinter`
+  function for such a dialogue, rather than a special case on Windows.  In
+  the past the former had issues with Unicode characters, but in testing no
+  such issue was observed (on a supported OS).
+
+Bug Fixes
+---
+* Use of CAPI data in `EDMC.exe` when invoked with either `-s` or `-n`
+  arguments hadn't been updated for prior changes, causing such invocations to
+  fail.  This has been fixed.
+
+Plugin Developers
+---
+* In order to make use of the data from a `/fleetcarrier` query you will need
+  to implement the new function `capi_fleetcarrier()`.  See PLUGINS.md for
+  details.
+
+* `FDevIDs` files are their latest versions at time of this version's build.
+
+* `examples\plugintest` - dropped the "pre-5.0.0 config" code, as it's long
+  since irrelevant.
+
+---
 
 Release 5.7.0
 ===
