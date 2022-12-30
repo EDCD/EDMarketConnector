@@ -1048,7 +1048,7 @@ class Session(object):
         )
 
     def fleetcarrier(
-            self, query_time: int, tk_response_event: Optional[str] = None,
+            self, query_time: int, tk_response_event: str | None = None,
             play_sound: bool = False, auto_update: bool = False
     ) -> None:
         """
