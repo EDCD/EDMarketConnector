@@ -407,7 +407,7 @@ def notify_capidata(
 
 def notify_capi_fleetcarrierdata(
     data: companion.CAPIData
-) -> Optional[str]:
+) -> str | None:
     """
     Send the latest CAPI Fleetcarrier data from the FD servers to each plugin.
 
@@ -421,7 +421,7 @@ def notify_capi_fleetcarrierdata(
             try:
                 # Pass a copy of the CAPIData in case the callee modifies it
                 newerror = fc_callback(copy.deepcopy(data))
-                error = error or newerror
+                error = error if error else newerror
 
             except Exception:
                 logger.exception(f'Plugin "{plugin.name}" failed on receiving Fleetcarrier data')
