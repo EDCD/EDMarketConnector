@@ -1125,24 +1125,27 @@ class Session(object):
     def dump_capi_data(self, data: CAPIData) -> None:
         """Dump CAPI data to file for examination."""
         if os.path.isdir('dump'):
-            try:
-                system = data['lastSystem']['name']
+            file_name: str = ""
+            if data.source_endpoint == self.FRONTIER_CAPI_PATH_FLEETCARRIER:
+                file_name += f"FleetCarrier.{data['name']['callsign']}"
 
-            except (KeyError, ValueError):
-                system = '<unknown system>'
+            else:
+                try:
+                    file_name += data['lastSystem']['name']
 
-            try:
-                if data['commander'].get('docked'):
-                    station = f'.{data["lastStarport"]["name"]}'
+                except (KeyError, ValueError):
+                    file_name += 'unknown system'
 
-                else:
-                    station = ''
+                try:
+                    if data['commander'].get('docked'):
+                        file_name += f'.{data["lastStarport"]["name"]}'
 
-            except (KeyError, ValueError):
-                station = '<unknown station>'
+                except (KeyError, ValueError):
+                    file_name += '.unknown station'
 
-            timestamp = time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime())
-            with open(f'dump/{system}{station}.{timestamp}.json', 'wb') as h:
+            file_name += time.strftime('.%Y-%m-%dT%H.%M.%S', time.localtime())
+            file_name += '.json'
+            with open(f'dump/{file_name}', 'wb') as h:
                 h.write(json.dumps(data, cls=CAPIDataEncoder,
                                    ensure_ascii=False,
                                    indent=2,
