@@ -471,7 +471,7 @@ class PreferencesDialog(tk.Toplevel):
             ).grid(column=2, pady=self.PADY, sticky=tk.EW, row=row.get())
 
         # CAPI settings
-        self.capi_fleetcarrier = tk.IntVar(value=config.get_int('capi_fleetcarrier'))
+        self.capi_fleetcarrier = tk.BooleanVar(value=config.get_bool('capi_fleetcarrier'))
 
         ttk.Separator(config_frame, orient=tk.HORIZONTAL).grid(
                 columnspan=4, padx=self.PADX, pady=self.PADY*4, sticky=tk.EW, row=row.get()
@@ -1263,7 +1263,7 @@ class PreferencesDialog(tk.Toplevel):
         else:
             config.set('journaldir', logdir)
 
-        config.set('capi_fleetcarrier', int(self.capi_fleetcarrier.get()))
+        config.set('capi_fleetcarrier', self.capi_fleetcarrier.get())
 
         if sys.platform in ('darwin', 'win32'):
             config.set('hotkey_code', self.hotkey_code)
