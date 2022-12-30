@@ -593,7 +593,9 @@ class AppWindow(object):
                 sys.platform != 'win32' or isinstance(child, tk.Frame)) and 2 or 0)
 
         self.menubar = tk.Menu()
-        # Load updater after UI creation (for WinSparkle)
+
+        # This used to be *after* the menu setup for some reason, but is testing
+        # as working (both internal and external) like this. -Ath
         import update
 
         if getattr(sys, 'frozen', False):
