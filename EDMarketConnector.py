@@ -592,11 +592,18 @@ class AppWindow(object):
             child.grid_configure(padx=self.PADX, pady=(
                 sys.platform != 'win32' or isinstance(child, tk.Frame)) and 2 or 0)
 
-        # The type needs defining for adding the menu entry, but won't be
-        # properly set until later
-        self.updater: update.Updater | None = None
-
         self.menubar = tk.Menu()
+        # Load updater after UI creation (for WinSparkle)
+        import update
+
+        if getattr(sys, 'frozen', False):
+            # Running in frozen .exe, so use (Win)Sparkle
+            self.updater = update.Updater(tkroot=self.w, provider='external')
+
+        else:
+            self.updater = update.Updater(tkroot=self.w, provider='internal')
+            self.updater.check_for_updates()  # Sparkle / WinSparkle does this automatically for packaged apps
+
         if sys.platform == 'darwin':
             # Can't handle (de)iconify if topmost is set, so suppress iconify button
             # http://wiki.tcl.tk/13428 and p15 of
@@ -649,8 +656,7 @@ class AppWindow(object):
             self.help_menu.add_command(command=self.help_general)
             self.help_menu.add_command(command=self.help_privacy)
             self.help_menu.add_command(command=self.help_releases)
-            if self.updater is not None:
-                self.help_menu.add_command(command=lambda: self.updater.check_for_updates())
+            self.help_menu.add_command(command=lambda: self.updater.check_for_updates())
 
             self.help_menu.add_command(command=lambda: not self.HelpAbout.showing and self.HelpAbout(self.w))
 
@@ -765,16 +771,6 @@ class AppWindow(object):
 
         # Start a protocol handler to handle cAPI registration. Requires main loop to be running.
         self.w.after_idle(lambda: protocol.protocolhandler.start(self.w))
-
-        # Load updater after UI creation (for WinSparkle)
-        import update
-
-        if getattr(sys, 'frozen', False):
-            # Running in frozen .exe, so use (Win)Sparkle
-            self.updater = update.Updater(tkroot=self.w, provider='external')
-        else:
-            self.updater = update.Updater(tkroot=self.w, provider='internal')
-            self.updater.check_for_updates()  # Sparkle / WinSparkle does this automatically for packaged apps
 
         # Migration from <= 3.30
         for username in config.get_list('fdev_usernames', default=[]):
