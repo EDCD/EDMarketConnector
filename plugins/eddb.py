@@ -42,7 +42,7 @@
 # ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $#
 # ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $#
 import tkinter
-from typing import TYPE_CHECKING, Any, Dict, Mapping, MutableMapping, Optional
+from typing import TYPE_CHECKING, Any, Mapping, Optional
 
 import requests
 
@@ -154,7 +154,7 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
 
 def journal_entry(  # noqa: CCR001
     cmdr: str, is_beta: bool, system: str, station: str,
-    entry: MutableMapping[str, Any],
+    entry: dict[str, Any],
     state: Mapping[str, Any]
 ):
     """
@@ -169,7 +169,7 @@ def journal_entry(  # noqa: CCR001
     :return: None if no error, else an error string.
     """
     should_return: bool
-    new_entry: Dict[str, Any] = {}
+    new_entry: dict[str, Any] = {}
 
     should_return, new_entry = killswitch.check_killswitch('plugins.eddb.journal', entry)
     if should_return:
