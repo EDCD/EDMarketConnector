@@ -718,11 +718,15 @@ class AppWindow(object):
             theme.register(self.help_menu)
 
             # Alternate title bar and menu for dark theme
-            self.theme_menubar = tk.Frame(frame)
+            self.theme_menubar = tk.Frame(frame, name="alternate_menubar")
             self.theme_menubar.columnconfigure(2, weight=1)
-            theme_titlebar = tk.Label(self.theme_menubar, text=applongname,
-                                      image=self.theme_icon, cursor='fleur',
-                                      anchor=tk.W, compound=tk.LEFT)
+            theme_titlebar = tk.Label(
+                self.theme_menubar,
+                name="alternate_titlebar",
+                text=applongname,
+                image=self.theme_icon, cursor='fleur',
+                anchor=tk.W, compound=tk.LEFT
+            )
             theme_titlebar.grid(columnspan=3, padx=2, sticky=tk.NSEW)
             self.drag_offset: Tuple[Optional[int], Optional[int]] = (None, None)
             theme_titlebar.bind('<Button-1>', self.drag_start)
@@ -755,7 +759,7 @@ class AppWindow(object):
             tk.Frame(self.theme_menubar, highlightthickness=1).grid(columnspan=5, padx=self.PADX, sticky=tk.EW)
             theme.register(self.theme_minimize)  # images aren't automatically registered
             theme.register(self.theme_close)
-            self.blank_menubar = tk.Frame(frame)
+            self.blank_menubar = tk.Frame(frame, name="blank_menubar")
             tk.Label(self.blank_menubar).grid()
             tk.Label(self.blank_menubar).grid()
             tk.Frame(self.blank_menubar, height=2).grid()
