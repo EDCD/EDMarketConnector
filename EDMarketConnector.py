@@ -536,7 +536,8 @@ class AppWindow(object):
         # system and station text is set/updated by the 'provider' plugins
         # eddb, edsm and inara.  Look for:
         #
-        # parent.children['system'] / parent.children['station']
+        # parent.nametowidget(f".{appname.lower()}.system")
+        # parent.nametowidget(f".{appname.lower()}.station")
 
         ui_row = 1
 
@@ -562,7 +563,11 @@ class AppWindow(object):
 
         plugin_no = 0
         for plugin in plug.PLUGINS:
-            # Per plugin frame
+            # Per plugin separator
+            plugin_sep = tk.Frame(
+                frame, highlightthickness=1, name=f"plugin_hr_{plugin_no + 1}"
+            )
+            # Per plugin frame, for it to use as its parent for own widgets
             plugin_frame = tk.Frame(
                 frame,
                 name=f"plugin_{plugin_no + 1}"
@@ -570,9 +575,11 @@ class AppWindow(object):
             appitem = plugin.get_app(plugin_frame)
             if appitem:
                 plugin_no += 1
-                tk.Frame(
-                    frame, highlightthickness=1, name=f"plugin_hr_{plugin_no}"
-                ).grid(columnspan=2, sticky=tk.EW)  # separator
+                plugin_sep.grid(columnspan=2, sticky=tk.EW)
+                ui_row = frame.grid_size()[1]
+                plugin_frame.grid(
+                    row=ui_row, columnspan=2, sticky=tk.EW
+                )
                 if isinstance(appitem, tuple) and len(appitem) == 2:
                     ui_row = frame.grid_size()[1]
                     appitem[0].grid(row=ui_row, column=0, sticky=tk.W)
@@ -582,7 +589,9 @@ class AppWindow(object):
                     appitem.grid(columnspan=2, sticky=tk.EW)
 
             else:
+                # This plugin didn't provide any UI, so drop the frames
                 plugin_frame.destroy()
+                plugin_sep.destroy()
 
         # LANG: Update button in main window
         self.button = ttk.Button(
