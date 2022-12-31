@@ -562,7 +562,12 @@ class AppWindow(object):
 
         plugin_no = 0
         for plugin in plug.PLUGINS:
-            appitem = plugin.get_app(frame)
+            # Per plugin frame
+            plugin_frame = tk.Frame(
+                frame,
+                name=f"plugin_{plugin_no + 1}"
+            )
+            appitem = plugin.get_app(plugin_frame)
             if appitem:
                 plugin_no += 1
                 tk.Frame(
@@ -575,6 +580,9 @@ class AppWindow(object):
 
                 else:
                     appitem.grid(columnspan=2, sticky=tk.EW)
+
+            else:
+                plugin_frame.destroy()
 
         # LANG: Update button in main window
         self.button = ttk.Button(
