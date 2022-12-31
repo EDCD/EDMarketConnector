@@ -523,15 +523,15 @@ class AppWindow(object):
         frame.grid(sticky=tk.NSEW)
         frame.columnconfigure(1, weight=1)
 
-        self.cmdr_label = tk.Label(frame)
+        self.cmdr_label = tk.Label(frame, name='cmdr_label')
         self.cmdr = tk.Label(frame, compound=tk.RIGHT, anchor=tk.W, name='cmdr')
-        self.ship_label = tk.Label(frame)
+        self.ship_label = tk.Label(frame, name='ship_label')
         self.ship = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.shipyard_url, name='ship')
-        self.suit_label = tk.Label(frame)
+        self.suit_label = tk.Label(frame, name='suit_label')
         self.suit = tk.Label(frame, compound=tk.RIGHT, anchor=tk.W, name='suit')
-        self.system_label = tk.Label(frame)
+        self.system_label = tk.Label(frame, name='system_label')
         self.system = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.system_url, popup_copy=True, name='system')
-        self.station_label = tk.Label(frame)
+        self.station_label = tk.Label(frame, name='station_label')
         self.station = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.station_url, name='station')
         # system and station text is set/updated by the 'provider' plugins
         # eddb, edsm and inara.  Look for:
@@ -560,10 +560,14 @@ class AppWindow(object):
         self.station.grid(row=ui_row, column=1, sticky=tk.EW)
         ui_row += 1
 
+        plugin_no = 0
         for plugin in plug.PLUGINS:
             appitem = plugin.get_app(frame)
             if appitem:
-                tk.Frame(frame, highlightthickness=1).grid(columnspan=2, sticky=tk.EW)  # separator
+                plugin_no += 1
+                tk.Frame(
+                    frame, highlightthickness=1, name=f"plugin_hr_{plugin_no}"
+                ).grid(columnspan=2, sticky=tk.EW)  # separator
                 if isinstance(appitem, tuple) and len(appitem) == 2:
                     ui_row = frame.grid_size()[1]
                     appitem[0].grid(row=ui_row, column=0, sticky=tk.W)
@@ -573,8 +577,20 @@ class AppWindow(object):
                     appitem.grid(columnspan=2, sticky=tk.EW)
 
         # LANG: Update button in main window
-        self.button = ttk.Button(frame, text=_('Update'), width=28, default=tk.ACTIVE, state=tk.DISABLED)
-        self.theme_button = tk.Label(frame, width=32 if sys.platform == 'darwin' else 28, state=tk.DISABLED)
+        self.button = ttk.Button(
+            frame,
+            name='update_button',
+            text=_('Update'),
+            width=28,
+            default=tk.ACTIVE,
+            state=tk.DISABLED
+        )
+        self.theme_button = tk.Label(
+            frame,
+            name='themed_update_button',
+            width=32 if sys.platform == 'darwin' else 28,
+            state=tk.DISABLED
+        )
 
         ui_row = frame.grid_size()[1]
         self.button.grid(row=ui_row, columnspan=2, sticky=tk.NSEW)
