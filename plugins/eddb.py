@@ -50,7 +50,7 @@ import EDMCLogging
 import killswitch
 import plug
 from companion import CAPIData
-from config import config
+from config import appname, config
 
 if TYPE_CHECKING:
     from tkinter import Tk
@@ -131,12 +131,14 @@ def plugin_app(parent: 'Tk'):
     :param parent: The tk parent to place our widgets into.
     :return: See PLUGINS.md#display
     """
-    this.system_link = parent.children['system']  # system label in main window
+    # system label in main window
+    this.system_link = parent.nametowidget(f".{appname.lower()}.system")
     this.system = None
     this.system_address = None
     this.station = None
     this.station_marketid = None  # Frontier MarketID
-    this.station_link = parent.children['station']  # station label in main window
+    # station label in main window
+    this.station_link = parent.nametowidget(f".{appname.lower()}.station")
     this.station_link['popup_copy'] = lambda x: x != this.STATION_UNDOCKED
 
 

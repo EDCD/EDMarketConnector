@@ -49,7 +49,7 @@ import myNotebook
 import myNotebook as nb  # noqa: N813
 import plug
 from companion import CAPIData
-from config import applongname, appversion, config, debug_senders, user_agent
+from config import applongname, appname, appversion, config, debug_senders, user_agent
 from edmc_data import DEBUG_WEBSERVER_HOST, DEBUG_WEBSERVER_PORT
 from EDMCLogging import get_main_logger
 from ttkHyperlinkLabel import HyperlinkLabel
@@ -250,9 +250,15 @@ def plugin_app(parent: tk.Tk) -> None:
     :param parent: The tk parent to place our widgets into.
     :return: See PLUGINS.md#display
     """
-    this.system_link = parent.children['system']  # system label in main window
+    # system label in main window
+    this.system_link = parent.nametowidget(f".{appname.lower()}.system")
+    if this.system_link is None:
+        logger.error("Couldn't look up system widget!!!")
+        return
+
     this.system_link.bind_all('<<EDSMStatus>>', update_status)
-    this.station_link = parent.children['station']  # station label in main window
+    # station label in main window
+    this.station_link = parent.nametowidget(f".{appname.lower()}.station")
 
 
 def plugin_stop() -> None:
