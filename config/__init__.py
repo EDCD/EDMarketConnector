@@ -54,7 +54,7 @@ appcmdname = 'EDMC'
 # NB: Do *not* import this, use the functions appversion() and appversion_nobuild()
 _static_appversion = '5.7.1-alpha0'
 _cached_version: Optional[semantic_version.Version] = None
-copyright = '© 2015-2019 Jonathan Harris, 2020-2022 EDCD'
+copyright = '© 2015-2019 Jonathan Harris, 2020-2023 EDCD'
 
 update_feed = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml'
 update_interval = 8*60*60
