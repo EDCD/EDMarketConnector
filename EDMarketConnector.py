@@ -578,8 +578,9 @@ class AppWindow(object):
                 plugin_sep.grid(columnspan=2, sticky=tk.EW)
                 ui_row = frame.grid_size()[1]
                 plugin_frame.grid(
-                    row=ui_row, columnspan=2, sticky=tk.EW
+                    row=ui_row, columnspan=2, sticky=tk.NSEW
                 )
+                # plugin_frame.columnconfigure(1, weight=1)
                 if isinstance(appitem, tuple) and len(appitem) == 2:
                     ui_row = frame.grid_size()[1]
                     appitem[0].grid(row=ui_row, column=0, sticky=tk.W)
