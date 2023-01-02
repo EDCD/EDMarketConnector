@@ -43,7 +43,7 @@ import myNotebook as nb  # noqa: N813
 import plug
 import timeout_session
 from companion import CAPIData
-from config import applongname, appversion, config, debug_senders
+from config import applongname, appname, appversion, config, debug_senders
 from EDMCLogging import get_main_logger
 from monitor import monitor
 from ttkHyperlinkLabel import HyperlinkLabel
@@ -218,8 +218,10 @@ def plugin_start3(plugin_dir: str) -> str:
 def plugin_app(parent: tk.Tk) -> None:
     """Plugin UI setup Hook."""
     this.parent = parent
-    this.system_link = parent.children['system']  # system label in main window
-    this.station_link = parent.children['station']  # station label in main window
+    # system label in main window
+    this.system_link = parent.nametowidget(f".{appname.lower()}.system")
+    # station label in main window
+    this.station_link = parent.nametowidget(f".{appname.lower()}.station")
     this.system_link.bind_all('<<InaraLocation>>', update_location)
     this.system_link.bind_all('<<InaraShip>>', update_ship)
 
@@ -380,7 +382,6 @@ def journal_entry(  # noqa: C901, CCR001
         ):
             # LANG: The Inara API only accepts Live galaxy data, not Legacy galaxy data
             logger.info(_("Inara only accepts Live galaxy data"))
-            # this.parent.children['status']['text'] =
             this.legacy_galaxy_last_notified = datetime.now(timezone.utc)
             return _("Inara only accepts Live galaxy data")
 

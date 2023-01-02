@@ -1138,7 +1138,7 @@ _ = functools.partial(l10n.Translations.translate, context=__file__)
 Wrap each string that needs translating with the `_()` function, e.g.:
 
 ```python
-    status["text"] = _('Happy!')  # Main window status
+    somewidget["text"] = _("Happy!")
 ```
 
 If you display localized strings in EDMarketConnector's main window you should
