@@ -144,7 +144,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
     def __init_state(self) -> None:
         # Cmdr state shared with EDSM and plugins
         # If you change anything here update PLUGINS.md documentation!
-        self.state: Dict = {
+        self.state: dict = {
             'GameLanguage':       None,  # From `Fileheader
             'GameVersion':        None,  # From `Fileheader
             'GameBuild':          None,  # From `Fileheader
@@ -1955,7 +1955,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         return item.capitalize()
 
-    def get_entry(self) -> MutableMapping[str, Any | None]:
+    def get_entry(self) -> MutableMapping[str, Any] | None:
         """
         Pull the next Journal event from the event_queue.
 
@@ -2051,7 +2051,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         return False
 
-    def ship(self, timestamped=True) -> MutableMapping[str, Any | None]:
+    def ship(self, timestamped=True) -> MutableMapping[str, Any] | None:
         """
         Produce a subset of data for the current ship.
 
@@ -2188,7 +2188,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         except OSError:
             logger.exception("OSError writing ship loadout to new filename with utf-8 encoding, aborting.")
 
-    def coalesce_cargo(self, raw_cargo: List[MutableMapping[str, Any]]) -> List[MutableMapping[str, Any]]:
+    def coalesce_cargo(self, raw_cargo: list[MutableMapping[str, Any]]) -> list[MutableMapping[str, Any]]:
         """
         Coalesce multiple entries of the same cargo into one.
 
@@ -2209,7 +2209,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         :return: Coalesced data
         """
         # self.state['Cargo'].update({self.canonicalise(x['Name']): x['Count'] for x in entry['Inventory']})
-        out: List[MutableMapping[str, Any]] = []
+        out: list[MutableMapping[str, Any]] = []
         for inventory_item in raw_cargo:
             if not any(self.canonicalise(x['Name']) == self.canonicalise(inventory_item['Name']) for x in out):
                 out.append(dict(inventory_item))
@@ -2250,7 +2250,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         return slots
 
-    def _parse_navroute_file(self) -> dict[str, Any | None]:
+    def _parse_navroute_file(self) -> dict[str, Any] | None:
         """Read and parse NavRoute.json."""
         if self.currentdir is None:
             raise ValueError('currentdir unset')
@@ -2276,7 +2276,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         return data
 
-    def _parse_fcmaterials_file(self) -> dict[str, Any | None]:
+    def _parse_fcmaterials_file(self) -> dict[str, Any] | None:
         """Read and parse FCMaterials.json."""
         if self.currentdir is None:
             raise ValueError('currentdir unset')
@@ -2348,7 +2348,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self._last_navroute_journal_timestamp = None
         return True
 
-    def __fcmaterials_retry(self) -> Dict[str, Any | None]:
+    def __fcmaterials_retry(self) -> dict[str, Any] | None:
         """Retry reading FCMaterials files."""
         if self._fcmaterials_retries_remaining == 0:
             return None
