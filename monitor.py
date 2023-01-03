@@ -119,7 +119,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self.system: str | None = None
         self.coordinates: Tuple[float, float, float] | None = None
         self.systempopulation: int | None = None
-        self.planet: str | None = None
         self.station: str | None = None
         self.station_marketid: int | None = None
         self.stationtype: str | None = None
@@ -308,7 +307,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self.system = None
         self.state['SystemAddress'] = None
         self.coordinates = None
-        self.planet = self.state['Body'] = None
+        self.state['Body'] = None
         self.state['BodyID'] = None
         self.state['BodyType'] = None
         self.station = None
@@ -535,8 +534,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             'Population':       self.systempopulation,
         }
 
-        if self.planet:
-            entry['Body'] = self.planet
+        if self.state['Body']:
+            entry['Body'] = self.state['Body']
             entry['BodyID'] = self.state['BodyID']
             entry['BodyType'] = self.state['BodyType']
 
@@ -583,7 +582,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.system = None
                 self.state['SystemAddress'] = None
                 self.state['StarPos'] = self.coordinates = None
-                self.state['Body'] = self.planet = None
+                self.state['Body'] = None
                 self.state['BodyID'] = None
                 self.station = None
                 self.station_marketid = None
@@ -620,7 +619,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.system = None
                 self.state['SystemAddress'] = None
                 self.state['StarPos'] = self.coordinates = None
-                self.status['Body'] = self.planet = None
+                self.status['Body'] = None
                 self.status['BodyID'] = None
                 self.status['BodyType'] = None
                 self.station = None
@@ -856,7 +855,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #     • InSRV: bool
                 #     • OnFoot: bool
                 if event_type in ('location', 'carrierjump'):
-                    self.planet = entry.get('Body') if entry.get('BodyType') == 'Planet' else None
+                    # We're not guaranteeing this is a planet, rather than a
+                    # station.
                     self.state['Body'] = entry.get('Body')
                     self.state['BodyID'] = entry.get('BodyID')
                     self.state['BodyType'] = entry.get('BodyType')
@@ -867,7 +867,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                             self.state['IsDocked'] = True
 
                 elif event_type == 'fsdjump':
-                    self.planet = None
                     self.state['Body'] = None
                     self.state['BodyID'] = None
                     self.state['BodyType'] = None
@@ -902,7 +901,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     self.state['Dropship'] = None
 
             elif event_type == 'approachbody':
-                self.planet = entry['Body']
                 self.state['Body'] = entry['Body']
                 self.state['BodyID'] = entry.get('BodyID')
                 self.state['BodyType'] = 'Planet'  # Best guess. Journal says always planet.
@@ -911,7 +909,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # FIXME: In the plugins/eddn.py version of this tracking we
                 #  explicitly do NOT clear this information for `supercruiseentry',
                 #  but it is also doing some Status.jon checking.
-                self.planet = None
                 self.state['Body'] = None
                 self.state['BodyID'] = None
                 self.state['BodyType'] = None
@@ -1599,7 +1596,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             elif event_type == 'joinacrew':
                 self.state['Captain'] = entry['Captain']
                 self.state['Role'] = 'Idle'
-                self.state['Body'] = self.planet = None
+                self.state['Body'] = None
                 self.state['BodyID'] = None
                 self.system = None
                 self.station = None
@@ -1619,7 +1616,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             elif event_type == 'quitacrew':
                 self.state['Captain'] = None
                 self.state['Role'] = None
-                self.state['Body'] = self.planet = None
+                self.state['Body'] = None
                 self.state['BodyID'] = None
                 self.state['BodyType'] = None
                 self.system = None
@@ -1713,11 +1710,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
                 # There should be a `Backpack` event as you 'come to' in the
                 # new location, so no need to zero out BackPack here.
-
-            # HACK (not game related / 2021-06-2): self.planet is moved into a more general self.state['Body'].
-            # This exists to help plugins doing what they SHOULDN'T BE cope. It will be removed at some point.
-            if self.state['Body'] is None or self.state['BodyType'] == 'Planet':
-                self.planet = self.state['Body']
 
             return entry
 
