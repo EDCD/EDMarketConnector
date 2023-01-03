@@ -1123,11 +1123,10 @@ class EDDN:
             entry['SystemAddress'] = this.systemaddress
 
         if 'StarPos' not in entry:
-            # Prefer the passed-in, probably monitor.state version
+            # Prefer the passed-in version
             if system_coordinates is not None:
                 entry['StarPos'] = system_coordinates
 
-            # TODO: Deprecate in-plugin tracking
             elif this.coordinates is not None:
                 entry['StarPos'] = list(this.coordinates)
 
