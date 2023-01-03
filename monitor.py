@@ -117,7 +117,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self.group: str | None = None
         self.cmdr: str | None = None
         self.system: str | None = None
-        self.coordinates: Tuple[float, float, float] | None = None
         self.systempopulation: int | None = None
         self.station: str | None = None
         self.station_marketid: int | None = None
@@ -306,7 +305,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self.cmdr = None
         self.system = None
         self.state['SystemAddress'] = None
-        self.coordinates = None
+        self.state['StarPos'] = None
         self.state['Body'] = None
         self.state['BodyID'] = None
         self.state['BodyType'] = None
@@ -529,7 +528,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             'timestamp':        strftime('%Y-%m-%dT%H:%M:%SZ', gmtime()),
             'event':            'StartUp',
             'StarSystem':       self.system,
-            'StarPos':          self.coordinates,
+            'StarPos':          self.state['StarPos'],
             'SystemAddress':    self.state['SystemAddress'],
             'Population':       self.systempopulation,
         }
@@ -581,7 +580,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.group = None
                 self.system = None
                 self.state['SystemAddress'] = None
-                self.state['StarPos'] = self.coordinates = None
+                self.state['StarPos'] = None
                 self.state['Body'] = None
                 self.state['BodyID'] = None
                 self.station = None
@@ -618,7 +617,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.group = entry.get('Group')
                 self.system = None
                 self.state['SystemAddress'] = None
-                self.state['StarPos'] = self.coordinates = None
+                self.state['StarPos'] = None
                 self.state['Body'] = None
                 self.state['BodyID'] = None
                 self.state['BodyType'] = None
@@ -839,21 +838,18 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             elif event_type == 'docked':
                 self.state['IsDocked'] = True
-                self.station = entry.get('StationName')  # May be None
-                self.station_marketid = entry.get('MarketID')  # May be None
-                self.stationtype = entry.get('StationType')  # May be None
+                self.station = entry.get('StationName')  # It may be None
+                self.station_marketid = entry.get('MarketID')  # It may be None
+                self.stationtype = entry.get('StationType')  # It may be None
                 self.stationservices = entry.get('StationServices')  # None under E:D < 2.4
 
-                # No need to set self.state['Taxi'] or Dropship here, if its those, the next event is a Disembark anyway
+                # No need to set self.state['Taxi'] or Dropship here, if it's
+                # those, the next event is a Disembark anyway
 
             elif event_type in ('location', 'fsdjump', 'carrierjump'):
-                # alpha4 - any changes ?
-                # Location:
-                # New in Odyssey:
-                #     • Taxi: bool
-                #     • Multicrew: bool
-                #     • InSRV: bool
-                #     • OnFoot: bool
+                ###############################################################
+                # Track: Body
+                ###############################################################
                 if event_type in ('location', 'carrierjump'):
                     # We're not guaranteeing this is a planet, rather than a
                     # station.
@@ -861,21 +857,32 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     self.state['BodyID'] = entry.get('BodyID')
                     self.state['BodyType'] = entry.get('BodyType')
 
-                    if event_type == 'location':
-                        logger.trace_if('journal.locations', '"Location" event')
-                        self.state['IsDocked'] = entry.get('Docked', False)
-
                 elif event_type == 'fsdjump':
                     self.state['Body'] = None
                     self.state['BodyID'] = None
                     self.state['BodyType'] = None
+                ###############################################################
 
+                ###############################################################
+                # Track: IsDocked
+                ###############################################################
+                if event_type == 'location':
+                    logger.trace_if('journal.locations', '"Location" event')
+                    self.state['IsDocked'] = entry.get('Docked', False)
+                ###############################################################
+
+                ###############################################################
+                # Track: Current System
+                ###############################################################
                 if 'StarPos' in entry:
                     # Plugins need this as well, so copy in state
-                    self.state['StarPos'] = self.coordinates = tuple(entry['StarPos'])  # type: ignore
+                    self.state['StarPos'] = tuple(entry['StarPos'])  # type: ignore
+
+                else:
+                    logger.warning(f"'{event_type}' event without 'StarPos' !!!:\n{entry}\n")
 
                 if 'SystemAddress' not in entry:
-                    logger.warning(f'"location" event without SystemAddress !!!:\n{entry}\n')
+                    logger.warning(f"{event_type} event without SystemAddress !!!:\n{entry}\n")
 
                 # But we'll still *use* the value, because if a 'location' event doesn't
                 # have this we've still moved and now don't know where and MUST NOT
@@ -890,8 +897,12 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
                 else:
                     self.system = entry['StarSystem']
+                ###############################################################
 
-                self.station = entry.get('StationName')  # May be None
+                ###############################################################
+                # Track: Current station, if applicable
+                ###############################################################
+                self.station = entry.get('StationName')  # It may be None
                 # If on foot in-station 'Docked' is false, but we have a
                 # 'BodyType' of 'Station', and the 'Body' is the station name
                 # NB: No MarketID
@@ -901,10 +912,15 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.station_marketid = entry.get('MarketID')  # May be None
                 self.stationtype = entry.get('StationType')  # May be None
                 self.stationservices = entry.get('StationServices')  # None in Odyssey for on-foot 'Location'
+                ###############################################################
 
+                ###############################################################
+                # Track: Whether in a Taxi/Dropship
+                ###############################################################
                 self.state['Taxi'] = entry.get('Taxi', None)
                 if not self.state['Taxi']:
                     self.state['Dropship'] = None
+                ###############################################################
 
             elif event_type == 'approachbody':
                 self.state['Body'] = entry['Body']
@@ -1618,19 +1634,18 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             elif event_type == 'joinacrew':
                 self.state['Captain'] = entry['Captain']
                 self.state['Role'] = 'Idle'
+                self.state['StarPos'] = None
+                self.system = None
+                self.state['SystemAddress'] = None
+                self.state['StarPos'] = None
                 self.state['Body'] = None
                 self.state['BodyID'] = None
-                self.system = None
+                self.state['BodyType'] = None
                 self.station = None
                 self.station_marketid = None
                 self.stationtype = None
                 self.stationservices = None
-                self.coordinates = None
-                self.state['SystemAddress'] = None
                 self.state['OnFoot'] = False
-
-                self.state['Body'] = None
-                self.state['BodyType'] = None
 
             elif event_type == 'changecrewrole':
                 self.state['Role'] = entry['Role']
@@ -1638,16 +1653,16 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             elif event_type == 'quitacrew':
                 self.state['Captain'] = None
                 self.state['Role'] = None
+                self.system = None
+                self.state['SystemAddress'] = None
+                self.state['StarPos'] = None
                 self.state['Body'] = None
                 self.state['BodyID'] = None
                 self.state['BodyType'] = None
-                self.system = None
                 self.station = None
                 self.station_marketid = None
                 self.stationtype = None
                 self.stationservices = None
-                self.coordinates = None
-                self.state['SystemAddress'] = None
 
                 # TODO: on_foot: Will we get an event after this to know ?
 

@@ -2217,16 +2217,6 @@ def journal_entry(  # noqa: C901, CCR001
     this.coordinates = state['StarPos']
     this.systemaddress = state['SystemAddress']
 
-    if event_name in ('location', 'fsdjump', 'docked', 'carrierjump'):
-        if 'StarPos' in entry:
-            this.coordinates = tuple(entry['StarPos'])
-
-        elif this.systemaddress != entry.get('SystemAddress'):
-            this.coordinates = None  # Docked event doesn't include coordinates
-
-        if 'SystemAddress' not in entry:
-            logger.warning(f'"location" event without SystemAddress !!!:\n{entry}\n')
-
     if event_name == 'docked':
         # Trigger a send/retry of pending EDDN messages
         this.eddn.parent.after(this.eddn.REPLAY_DELAY, this.eddn.sender.queue_check_and_send, False)
