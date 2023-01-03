@@ -14,7 +14,7 @@ from collections import OrderedDict, defaultdict
 from os import SEEK_END, SEEK_SET, listdir
 from os.path import basename, expanduser, getctime, isdir, join
 from time import gmtime, localtime, mktime, sleep, strftime, strptime, time
-from typing import TYPE_CHECKING, Any, BinaryIO, Dict, List, MutableMapping, Optional
+from typing import TYPE_CHECKING, Any, BinaryIO, MutableMapping
 from typing import OrderedDict as OrderedDictT
 from typing import Tuple
 
@@ -91,11 +91,11 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         # TODO(A_D): A bunch of these should be switched to default values (eg '' for strings) and no longer be Optional
         FileSystemEventHandler.__init__(self)  # futureproofing - not need for current version of watchdog
         self.root: 'tkinter.Tk' = None  # type: ignore # Don't use Optional[] - mypy thinks no methods
-        self.currentdir: Optional[str] = None  # The actual logdir that we're monitoring
-        self.logfile: Optional[str] = None
-        self.observer: Optional['Observer'] = None
+        self.currentdir: str | None = None  # The actual logdir that we're monitoring
+        self.logfile: str | None = None
+        self.observer: 'Observer' | None = None
         self.observed = None  # a watchdog ObservedWatch, or None if polling
-        self.thread: Optional[threading.Thread] = None
+        self.thread: threading.Thread | None = None
         # For communicating journal entries back to main thread
         self.event_queue: queue.Queue = queue.Queue(maxsize=0)
 
@@ -112,27 +112,27 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self.game_was_running = False  # For generation of the "ShutDown" event
 
         # Context for journal handling
-        self.version: Optional[str] = None
-        self.version_semantic: Optional[semantic_version.Version] = None
+        self.version: str | None = None
+        self.version_semantic: semantic_version.Version | None = None
         self.is_beta = False
-        self.mode: Optional[str] = None
-        self.group: Optional[str] = None
-        self.cmdr: Optional[str] = None
-        self.planet: Optional[str] = None
-        self.system: Optional[str] = None
-        self.station: Optional[str] = None
-        self.station_marketid: Optional[int] = None
-        self.stationtype: Optional[str] = None
-        self.coordinates: Optional[Tuple[float, float, float]] = None
-        self.systemaddress: Optional[int] = None
-        self.systempopulation: Optional[int] = None
-        self.started: Optional[int] = None  # Timestamp of the LoadGame event
+        self.mode: str | None = None
+        self.group: str | None = None
+        self.cmdr: str | None = None
+        self.planet: str | None = None
+        self.system: str | None = None
+        self.station: str | None = None
+        self.station_marketid: int | None = None
+        self.stationtype: str | None = None
+        self.coordinates: Tuple[float, float, float] | None = None
+        self.systemaddress: int | None = None
+        self.systempopulation: int | None = None
+        self.started: int | None = None  # Timestamp of the LoadGame event
 
         self._navroute_retries_remaining = 0
-        self._last_navroute_journal_timestamp: Optional[float] = None
+        self._last_navroute_journal_timestamp: float | None = None
 
         self._fcmaterials_retries_remaining = 0
-        self._last_fcmaterials_journal_timestamp: Optional[float] = None
+        self._last_fcmaterials_journal_timestamp: float | None = None
 
         # For determining Live versus Legacy galaxy.
         # The assumption is gameversion will parse via `coerce()` and always
@@ -274,7 +274,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         logger.debug('Done.')
         return True
 
-    def journal_newest_filename(self, journals_dir) -> Optional[str]:
+    def journal_newest_filename(self, journals_dir) -> str | None:
         """
         Determine the newest Journal file name.
 
@@ -455,7 +455,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             # Check whether new log file started, e.g. client (re)started.
             if emitter and emitter.is_alive():
-                new_journal_file: Optional[str] = self.logfile  # updated by on_created watchdog callback
+                new_journal_file: str | None = self.logfile  # updated by on_created watchdog callback
 
             else:
                 # Poll
@@ -1918,7 +1918,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         slotid = journal_loadoutid - 4293000000
         return slotid
 
-    def canonicalise(self, item: Optional[str]) -> str:
+    def canonicalise(self, item: str | None) -> str:
         """
         Produce canonical name for a ship module.
 
@@ -1955,7 +1955,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         return item.capitalize()
 
-    def get_entry(self) -> Optional[MutableMapping[str, Any]]:
+    def get_entry(self) -> MutableMapping[str, Any | None]:
         """
         Pull the next Journal event from the event_queue.
 
@@ -2051,7 +2051,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         return False
 
-    def ship(self, timestamped=True) -> Optional[MutableMapping[str, Any]]:
+    def ship(self, timestamped=True) -> MutableMapping[str, Any | None]:
         """
         Produce a subset of data for the current ship.
 
@@ -2250,7 +2250,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         return slots
 
-    def _parse_navroute_file(self) -> Optional[dict[str, Any]]:
+    def _parse_navroute_file(self) -> dict[str, Any | None]:
         """Read and parse NavRoute.json."""
         if self.currentdir is None:
             raise ValueError('currentdir unset')
@@ -2276,7 +2276,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         return data
 
-    def _parse_fcmaterials_file(self) -> Optional[dict[str, Any]]:
+    def _parse_fcmaterials_file(self) -> dict[str, Any | None]:
         """Read and parse FCMaterials.json."""
         if self.currentdir is None:
             raise ValueError('currentdir unset')
@@ -2348,7 +2348,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self._last_navroute_journal_timestamp = None
         return True
 
-    def __fcmaterials_retry(self) -> Optional[Dict[str, Any]]:
+    def __fcmaterials_retry(self) -> Dict[str, Any | None]:
         """Retry reading FCMaterials files."""
         if self._fcmaterials_retries_remaining == 0:
             return None
