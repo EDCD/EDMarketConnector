@@ -2208,6 +2208,14 @@ def journal_entry(  # noqa: C901, CCR001
             entry
         )
 
+    # TODO - uncomment this, i.e. use monitor.py tracking, not also here
+    # Copy some state into module-held variables because we might need it
+    # outside of this function.
+    # this.body_name = state['Body']
+    # this.body_id = state['BodyID']
+    # this.coordinates = state['StarPos']
+    # this.systemaddress = state['SystemAddress']
+
     # Track location
     if event_name == 'supercruiseexit':
         # For any orbital station we have no way of determining the body
@@ -2360,6 +2368,7 @@ def journal_entry(  # noqa: C901, CCR001
 
         # add planet to Docked event for planetary stations if known
         if event_name == 'docked' and this.body_name:
+            # FIXME - Is this correct if using monitor.py tracking ?
             entry['Body'] = this.body_name
             entry['BodyType'] = 'Planet'
 

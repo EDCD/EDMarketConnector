@@ -771,7 +771,7 @@ ___
 
 A special "StartUp" entry is sent if EDMarketConnector is started while the
 game is already running. In this case you won't receive initial events such as
-"LoadGame", "Rank", "Location", etc. However the `state` dictionary will
+"LoadGame", "Rank", "Location", etc. However, the `state` dictionary will
 reflect the cumulative effect of these missed events.
 
 **NB: Any of the values in this might be `None` if the Cmdr has loaded into

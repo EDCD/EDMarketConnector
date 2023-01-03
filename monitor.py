@@ -14,9 +14,7 @@ from collections import OrderedDict, defaultdict
 from os import SEEK_END, SEEK_SET, listdir
 from os.path import basename, expanduser, getctime, isdir, join
 from time import gmtime, localtime, mktime, sleep, strftime, strptime, time
-from typing import TYPE_CHECKING, Any, BinaryIO, MutableMapping
-from typing import OrderedDict as OrderedDictT
-from typing import Tuple
+from typing import TYPE_CHECKING, Any, BinaryIO, MutableMapping, Tuple
 
 if TYPE_CHECKING:
     import tkinter
@@ -118,14 +116,14 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self.mode: str | None = None
         self.group: str | None = None
         self.cmdr: str | None = None
-        self.planet: str | None = None
         self.system: str | None = None
+        self.systemaddress: int | None = None
+        self.coordinates: Tuple[float, float, float] | None = None
+        self.systempopulation: int | None = None
+        self.planet: str | None = None
         self.station: str | None = None
         self.station_marketid: int | None = None
         self.stationtype: str | None = None
-        self.coordinates: Tuple[float, float, float] | None = None
-        self.systemaddress: int | None = None
-        self.systempopulation: int | None = None
         self.started: int | None = None  # Timestamp of the LoadGame event
 
         self._navroute_retries_remaining = 0
@@ -195,7 +193,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             'Taxi':               None,  # True whenever we are _in_ a taxi. ie, this is reset on Disembark etc.
             'Dropship':           None,  # Best effort as to whether or not the above taxi is a dropship.
             'StarPos':            None,  # Best effort current system's galaxy position.
+            'SystemAddress':      None,
             'Body':               None,
+            'BodyID':             None,
             'BodyType':           None,
 
             'NavRoute':           None,
@@ -306,19 +306,19 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self.mode = None
         self.group = None
         self.cmdr = None
-        self.planet = None
         self.system = None
+        self.state['SystemAddress'] = self.systemaddress = None
+        self.coordinates = None
+        self.planet = self.state['Body'] = None
+        self.state['BodyID'] = None
+        self.state['BodyType'] = None
         self.station = None
         self.station_marketid = None
         self.stationtype = None
         self.stationservices = None
-        self.coordinates = None
-        self.systemaddress = None
         self.is_beta = False
         self.state['OnFoot'] = False
         self.state['IsDocked'] = False
-        self.state['Body'] = None
-        self.state['BodyType'] = None
 
         if self.observed:
             logger.debug('self.observed: Calling unschedule_all()')
@@ -416,24 +416,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         if self.live:
             if self.game_was_running:
                 # Game is running locally
-                entry: OrderedDictT[str, Any] = OrderedDict([
-                    ('timestamp', strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())),
-                    ('event', 'StartUp'),
-                    ('StarSystem', self.system),
-                    ('StarPos', self.coordinates),
-                    ('SystemAddress', self.systemaddress),
-                    ('Population', self.systempopulation),
-                ])
-
-                if self.planet:
-                    entry['Body'] = self.planet
-
-                entry['Docked'] = bool(self.station)
-
-                if self.station:
-                    entry['StationName'] = self.station
-                    entry['StationType'] = self.stationtype
-                    entry['MarketID'] = self.station_marketid
+                entry = self.synthesize_startup_event()
 
                 self.event_queue.put(json.dumps(entry, separators=(', ', ':')))
 
@@ -534,6 +517,41 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         logger.debug('Done.')
 
+    def synthesize_startup_event(self) -> dict[str, Any]:
+        """
+        Synthesize a 'StartUp' event to notify plugins of initial state.
+
+        May be called, e.g. after 'catch up' loading of current latest
+        journal file on startup, or when a new journal file is detected without
+        the game running locally.
+
+        :return: Synthesized event as a dict
+        """
+        entry: dict[str, Any] = {
+            'timestamp':        strftime('%Y-%m-%dT%H:%M:%SZ', gmtime()),
+            'event':            'StartUp',
+            'StarSystem':       self.system,
+            'StarPos':          self.coordinates,
+            'SystemAddress':    self.systemaddress,
+            'Population':       self.systempopulation,
+        }
+
+        if self.planet:
+            entry['Body'] = self.planet
+            entry['BodyID'] = self.state['BodyID']
+            entry['BodyType'] = self.state['BodyType']
+
+        if self.station:
+            entry['Docked'] = True
+            entry['MarketID'] = self.station_marketid
+            entry['StationName'] = self.station
+            entry['StationType'] = self.stationtype
+
+        else:
+            entry['Docked'] = False
+
+        return entry
+
     def parse_entry(self, line: bytes) -> MutableMapping[str, Any]:  # noqa: C901, CCR001
         """
         Parse a Journal JSON line.
@@ -563,14 +581,15 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.cmdr = None
                 self.mode = None
                 self.group = None
-                self.planet = None
                 self.system = None
+                self.state['SystemAddress'] = self.systemaddress = None
+                self.state['StarPos'] = self.coordinates = None
+                self.state['Body'] = self.planet = None
+                self.state['BodyID'] = None
                 self.station = None
                 self.station_marketid = None
                 self.stationtype = None
                 self.stationservices = None
-                self.coordinates = None
-                self.systemaddress = None
                 self.started = None
                 self.__init_state()
 
@@ -599,34 +618,34 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     self.mode = entry.get('GameMode')
 
                 self.group = entry.get('Group')
-                self.planet = None
                 self.system = None
+                self.state['SystemAddress'] = self.systemaddress = None
+                self.state['StarPos'] = self.coordinates = None
+                self.status['Body'] = self.planet = None
+                self.status['BodyID'] = None
+                self.status['BodyType'] = None
                 self.station = None
                 self.station_marketid = None
                 self.stationtype = None
                 self.stationservices = None
-                self.coordinates = None
-                self.systemaddress = None
                 self.started = timegm(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
                 # Don't set Ship, ShipID etc since this will reflect Fighter or SRV if starting in those
                 self.state.update({
-                    'Captain':    None,
-                    'Credits':    entry['Credits'],
-                    'FID':        entry.get('FID'),   # From 3.3
-                    'Horizons':   entry['Horizons'],  # From 3.0
-                    'Odyssey':    entry.get('Odyssey', False),  # From 4.0 Odyssey
-                    'Loan':       entry['Loan'],
+                    'Captain':              None,
+                    'Credits':              entry['Credits'],
+                    'FID':                  entry.get('FID'),   # From 3.3
+                    'Horizons':             entry['Horizons'],  # From 3.0
+                    'Odyssey':              entry.get('Odyssey', False),  # From 4.0 Odyssey
+                    'Loan':                 entry['Loan'],
                     # For Odyssey, by 4.0.0.100, and at least from Horizons 3.8.0.201 the order of events changed
                     # to LoadGame being after some 'status' events.
-                    # 'Engineers':  {},  # 'EngineerProgress' event now before 'LoadGame'
-                    # 'Rank':       {},  # 'Rank'/'Progress' events now before 'LoadGame'
-                    # 'Reputation': {},  # 'Reputation' event now before 'LoadGame'
-                    'Statistics': {},  # Still after 'LoadGame' in 4.0.0.903
-                    'Role':       None,
-                    'Taxi':       None,
-                    'Dropship':   None,
-                    'Body':       None,
-                    'BodyType':   None,
+                    # 'Engineers':          {},  # 'EngineerProgress' event now before 'LoadGame'
+                    # 'Rank':               {},  # 'Rank'/'Progress' events now before 'LoadGame'
+                    # 'Reputation':         {},  # 'Reputation' event now before 'LoadGame'
+                    'Statistics':           {},  # Still after 'LoadGame' in 4.0.0.903
+                    'Role':                 None,
+                    'Taxi':                 None,
+                    'Dropship':             None,
                 })
                 if entry.get('Ship') is not None and self._RE_SHIP_ONFOOT.search(entry['Ship']):
                     self.state['OnFoot'] = True
@@ -808,6 +827,18 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['Taxi'] = False
                 self.state['Dropship'] = False
 
+            elif event_type == 'supercruiseexit':
+                # For any orbital station we have no way of determining the body
+                # it orbits:
+                #
+                #   In-ship Status.json doesn't specify this.
+                #   On-foot Status.json lists the station itself as Body.
+                #   Location for stations (on-foot or in-ship) has station as Body.
+                #   SupercruiseExit (own ship or taxi) lists the station as the Body.
+                if entry['BodyType'] == 'Station':
+                    self.state['Body'] = None
+                    self.state['BodyID'] = None
+
             elif event_type == 'docked':
                 self.state['IsDocked'] = True
                 self.station = entry.get('StationName')  # May be None
@@ -828,6 +859,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 if event_type in ('location', 'carrierjump'):
                     self.planet = entry.get('Body') if entry.get('BodyType') == 'Planet' else None
                     self.state['Body'] = entry.get('Body')
+                    self.state['BodyID'] = entry.get('BodyID')
                     self.state['BodyType'] = entry.get('BodyType')
 
                     if event_type == 'location':
@@ -838,13 +870,14 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 elif event_type == 'fsdjump':
                     self.planet = None
                     self.state['Body'] = None
+                    self.state['BodyID'] = None
                     self.state['BodyType'] = None
 
                 if 'StarPos' in entry:
                     # Plugins need this as well, so copy in state
                     self.state['StarPos'] = self.coordinates = tuple(entry['StarPos'])  # type: ignore
 
-                self.systemaddress = entry.get('SystemAddress')
+                self.state['SystemAddress'] = self.systemaddress = entry.get('SystemAddress')
 
                 self.systempopulation = entry.get('Population')
 
@@ -872,11 +905,16 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             elif event_type == 'approachbody':
                 self.planet = entry['Body']
                 self.state['Body'] = entry['Body']
+                self.state['BodyID'] = entry.get('BodyID')
                 self.state['BodyType'] = 'Planet'  # Best guess. Journal says always planet.
 
             elif event_type in ('leavebody', 'supercruiseentry'):
+                # FIXME: In the plugins/eddn.py version of this tracking we
+                #  explicitly do NOT clear this information for `supercruiseentry',
+                #  but it is also doing some Status.jon checking.
                 self.planet = None
                 self.state['Body'] = None
+                self.state['BodyID'] = None
                 self.state['BodyType'] = None
 
             elif event_type in ('rank', 'promotion'):
@@ -1562,14 +1600,15 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             elif event_type == 'joinacrew':
                 self.state['Captain'] = entry['Captain']
                 self.state['Role'] = 'Idle'
-                self.planet = None
+                self.state['Body'] = self.planet = None
+                self.state['BodyID'] = None
                 self.system = None
                 self.station = None
                 self.station_marketid = None
                 self.stationtype = None
                 self.stationservices = None
                 self.coordinates = None
-                self.systemaddress = None
+                self.state['SystemAddress'] = self.systemaddress = None
                 self.state['OnFoot'] = False
 
                 self.state['Body'] = None
@@ -1581,17 +1620,17 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             elif event_type == 'quitacrew':
                 self.state['Captain'] = None
                 self.state['Role'] = None
-                self.planet = None
+                self.state['Body'] = self.planet = None
+                self.state['BodyID'] = None
+                self.state['BodyType'] = None
                 self.system = None
                 self.station = None
                 self.station_marketid = None
                 self.stationtype = None
                 self.stationservices = None
                 self.coordinates = None
-                self.systemaddress = None
+                self.state['SystemAddress'] = self.systemaddress = None
 
-                self.state['Body'] = None
-                self.state['BodyType'] = None
                 # TODO: on_foot: Will we get an event after this to know ?
 
             elif event_type == 'friends':
@@ -1979,31 +2018,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         if not self.live and entry['event'] not in (None, 'Fileheader'):
             # Game not running locally, but Journal has been updated
             self.live = True
-            if self.station:
-                entry = OrderedDict([
-                    ('timestamp', strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())),
-                    ('event', 'StartUp'),
-                    ('Docked', True),
-                    ('MarketID', self.station_marketid),
-                    ('StationName', self.station),
-                    ('StationType', self.stationtype),
-                    ('StarSystem', self.system),
-                    ('StarPos', self.coordinates),
-                    ('SystemAddress', self.systemaddress),
-                ])
-
-            else:
-                entry = OrderedDict([
-                    ('timestamp', strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())),
-                    ('event', 'StartUp'),
-                    ('Docked', False),
-                    ('StarSystem', self.system),
-                    ('StarPos', self.coordinates),
-                    ('SystemAddress', self.systemaddress),
-                ])
-
-            if entry['event'] == 'Location':
-                logger.trace_if('journal.locations', 'Appending "Location" event to event_queue')
+            entry = self.synthesize_startup_event()
 
             self.event_queue.put(json.dumps(entry, separators=(', ', ':')))
 
