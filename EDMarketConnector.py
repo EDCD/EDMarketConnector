@@ -665,6 +665,8 @@ class AppWindow(object):
             self.menubar.add_cascade(menu=window_menu)
             self.help_menu = tk.Menu(self.menubar, name='help')
             self.w.createcommand("::tk::mac::ShowHelp", self.help_general)
+            self.help_menu.add_command(command=self.help_troubleshooting)
+            self.help_menu.add_command(command=self.help_report_a_bug)
             self.help_menu.add_command(command=self.help_privacy)
             self.help_menu.add_command(command=self.help_releases)
             self.menubar.add_cascade(menu=self.help_menu)
@@ -689,11 +691,13 @@ class AppWindow(object):
             self.edit_menu.add_command(accelerator='Ctrl+C', state=tk.DISABLED, command=self.copy)
             self.menubar.add_cascade(menu=self.edit_menu)
             self.help_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)  # type: ignore
-            self.help_menu.add_command(command=self.help_general)
-            self.help_menu.add_command(command=self.help_privacy)
-            self.help_menu.add_command(command=self.help_releases)
-            self.help_menu.add_command(command=lambda: self.updater.check_for_updates())
-
+            self.help_menu.add_command(command=self.help_general)  # Documentation
+            self.help_menu.add_command(command=self.help_troubleshooting)  # Troubleshooting
+            self.help_menu.add_command(command=self.help_report_a_bug)  # Report A Bug
+            self.help_menu.add_command(command=self.help_privacy)  # Privacy Policy
+            self.help_menu.add_command(command=self.help_releases)  # Release Notes
+            self.help_menu.add_command(command=lambda: self.updater.check_for_updates())  # Check for Updates...
+            # About E:D Market Connector
             self.help_menu.add_command(command=lambda: not self.HelpAbout.showing and self.HelpAbout(self.w))
 
             self.menubar.add_cascade(menu=self.help_menu)
@@ -926,8 +930,11 @@ class AppWindow(object):
             self.system_menu.entryconfigure(1, label=_("Check for Updates..."))  # LANG: Help > Check for Updates...
             self.file_menu.entryconfigure(0, label=_('Save Raw Data...'))  # LANG: File > Save Raw Data...
             self.view_menu.entryconfigure(0, label=_('Status'))  # LANG: File > Status
-            self.help_menu.entryconfigure(1, label=_('Privacy Policy'))  # LANG: Help > Privacy Policy
-            self.help_menu.entryconfigure(2, label=_('Release Notes'))  # LANG: Help > Release Notes
+            self.help_menu.entryconfigure(1, label=_('Documentation'))  # LANG: Help > Documentation
+            self.help_menu.entryconfigure(2, label=_('Troubleshooting'))  # LANG: Help > Troubleshooting
+            self.help_menu.entryconfigure(3, label=_('Report A Bug'))  # LANG: Help > Report A Bug
+            self.help_menu.entryconfigure(4, label=_('Privacy Policy'))  # LANG: Help > Privacy Policy
+            self.help_menu.entryconfigure(5, label=_('Release Notes'))  # LANG: Help > Release Notes
         else:
             self.menubar.entryconfigure(1, label=_('File'))  # LANG: 'File' menu title
             self.menubar.entryconfigure(2, label=_('Edit'))  # LANG: 'Edit' menu title
@@ -944,10 +951,12 @@ class AppWindow(object):
 
             # Help menu
             self.help_menu.entryconfigure(0, label=_('Documentation'))  # LANG: Help > Documentation
-            self.help_menu.entryconfigure(1, label=_('Privacy Policy'))  # LANG: Help > Privacy Policy
-            self.help_menu.entryconfigure(2, label=_('Release Notes'))  # LANG: Help > Release Notes
-            self.help_menu.entryconfigure(3, label=_('Check for Updates...'))  # LANG: Help > Check for Updates...
-            self.help_menu.entryconfigure(4, label=_("About {APP}").format(APP=applongname))  # LANG: Help > About App
+            self.help_menu.entryconfigure(1, label=_('Troubleshooting'))  # LANG: Help > Troubleshooting
+            self.help_menu.entryconfigure(2, label=_('Report A Bug'))  # LANG: Help > Report A Bug
+            self.help_menu.entryconfigure(3, label=_('Privacy Policy'))  # LANG: Help > Privacy Policy
+            self.help_menu.entryconfigure(4, label=_('Release Notes'))  # LANG: Help > Release Notes
+            self.help_menu.entryconfigure(5, label=_('Check for Updates...'))  # LANG: Help > Check for Updates...
+            self.help_menu.entryconfigure(6, label=_("About {APP}").format(APP=applongname))  # LANG: Help > About App
 
         # Edit menu
         self.edit_menu.entryconfigure(0, label=_('Copy'))  # LANG: Label for 'Copy' as in 'Copy and Paste'
@@ -1756,6 +1765,15 @@ class AppWindow(object):
     def help_general(self, event=None) -> None:
         """Open Wiki Help page in browser."""
         webbrowser.open('https://github.com/EDCD/EDMarketConnector/wiki')
+
+    def help_troubleshooting(self, event=None) -> None:
+        """Open Wiki Privacy page in browser."""
+        webbrowser.open("https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting")
+
+    def help_report_a_bug(self, event=None) -> None:
+        """Open Wiki Privacy page in browser."""
+        webbrowser.open("https://github.com/EDCD/EDMarketConnector/issues/new?assignees=&labels=bug%2C+unconfirmed"
+                        "&template=bug_report.md&title=")
 
     def help_privacy(self, event=None) -> None:
         """Open Wiki Privacy page in browser."""
