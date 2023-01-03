@@ -863,8 +863,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
                     if event_type == 'location':
                         logger.trace_if('journal.locations', '"Location" event')
-                        if entry.get('Docked'):
-                            self.state['IsDocked'] = True
+                        self.state['IsDocked'] = entry.get('Docked', False)
 
                 elif event_type == 'fsdjump':
                     self.state['Body'] = None
