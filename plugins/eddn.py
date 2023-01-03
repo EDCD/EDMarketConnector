@@ -1279,6 +1279,8 @@ class EDDN:
             logger.warning(f'this.status_body_name was not set properly:'
                            f' "{this.status_body_name}" ({type(this.status_body_name)})')
 
+        # this.status_body_name is available for cross-checks, so try to set
+        # BodyName and ID.
         else:
             # In case Frontier add it in
             if 'BodyName' not in entry:
@@ -2208,40 +2210,14 @@ def journal_entry(  # noqa: C901, CCR001
             entry
         )
 
-    # TODO - uncomment this, i.e. use monitor.py tracking, not also here
     # Copy some state into module-held variables because we might need it
     # outside of this function.
-    # this.body_name = state['Body']
-    # this.body_id = state['BodyID']
-    # this.coordinates = state['StarPos']
-    # this.systemaddress = state['SystemAddress']
+    this.body_name = state['Body']
+    this.body_id = state['BodyID']
+    this.coordinates = state['StarPos']
+    this.systemaddress = state['SystemAddress']
 
-    # Track location
-    if event_name == 'supercruiseexit':
-        # For any orbital station we have no way of determining the body
-        # it orbits:
-        #
-        #   In-ship Status.json doesn't specify this.
-        #   On-foot Status.json lists the station itself as Body.
-        #   Location for stations (on-foot or in-ship) has station as Body.
-        #   SupercruiseExit (own ship or taxi) lists the station as the Body.
-        if entry['BodyType'] == 'Station':
-            this.body_name = None
-            this.body_id = None
-
-    elif event_name in ('location', 'fsdjump', 'docked', 'carrierjump'):
-        if event_name in ('location', 'carrierjump'):
-            if entry.get('BodyType') == 'Planet':
-                this.body_name = entry.get('Body')
-                this.body_id = entry.get('BodyID')
-
-            else:
-                this.body_name = None
-
-        elif event_name == 'fsdjump':
-            this.body_name = None
-            this.body_id = None
-
+    if event_name in ('location', 'fsdjump', 'docked', 'carrierjump'):
         if 'StarPos' in entry:
             this.coordinates = tuple(entry['StarPos'])
 
@@ -2251,18 +2227,9 @@ def journal_entry(  # noqa: C901, CCR001
         if 'SystemAddress' not in entry:
             logger.warning(f'"location" event without SystemAddress !!!:\n{entry}\n')
 
-        # But we'll still *use* the value, because if a 'location' event doesn't
-        # have this we've still moved and now don't know where and MUST NOT
-        # continue to use any old value.
-        # Yes, explicitly state `None` here, so it's crystal clear.
-        this.systemaddress = entry.get('SystemAddress', None)  # type: ignore
-
-        if event_name == 'docked':
-            this.eddn.parent.after(this.eddn.REPLAY_DELAY, this.eddn.sender.queue_check_and_send, False)
-
-    elif event_name == 'approachbody':
-        this.body_name = entry['Body']
-        this.body_id = entry.get('BodyID')
+    if event_name == 'docked':
+        # Trigger a send/retry of pending EDDN messages
+        this.eddn.parent.after(this.eddn.REPLAY_DELAY, this.eddn.sender.queue_check_and_send, False)
 
     elif event_name == 'leavebody':
         # NB: **NOT** SupercruiseEntry, because we won't get a fresh

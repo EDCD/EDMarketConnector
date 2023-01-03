@@ -619,9 +619,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.system = None
                 self.state['SystemAddress'] = None
                 self.state['StarPos'] = self.coordinates = None
-                self.status['Body'] = None
-                self.status['BodyID'] = None
-                self.status['BodyType'] = None
+                self.state['Body'] = None
+                self.state['BodyID'] = None
+                self.state['BodyType'] = None
                 self.station = None
                 self.station_marketid = None
                 self.stationtype = None
@@ -874,7 +874,14 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     # Plugins need this as well, so copy in state
                     self.state['StarPos'] = self.coordinates = tuple(entry['StarPos'])  # type: ignore
 
-                self.state['SystemAddress'] = entry.get('SystemAddress')
+                if 'SystemAddress' not in entry:
+                    logger.warning(f'"location" event without SystemAddress !!!:\n{entry}\n')
+
+                # But we'll still *use* the value, because if a 'location' event doesn't
+                # have this we've still moved and now don't know where and MUST NOT
+                # continue to use any old value.
+                # Yes, explicitly state `None` here, so it's crystal clear.
+                self.state['SystemAddress'] = entry.get('SystemAddress', None)
 
                 self.systempopulation = entry.get('Population')
 
@@ -902,15 +909,31 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             elif event_type == 'approachbody':
                 self.state['Body'] = entry['Body']
                 self.state['BodyID'] = entry.get('BodyID')
-                self.state['BodyType'] = 'Planet'  # Best guess. Journal says always planet.
+                # This isn't in the event, but Journal doc for ApproachBody says:
+                #   when in Supercruise, and distance from planet drops to within the 'Orbital Cruise' zone
+                self.state['BodyType'] = 'Planet'
 
-            elif event_type in ('leavebody', 'supercruiseentry'):
-                # FIXME: In the plugins/eddn.py version of this tracking we
-                #  explicitly do NOT clear this information for `supercruiseentry',
-                #  but it is also doing some Status.jon checking.
+            elif event_type == 'leavebody':
+                # Triggered when ship goes above Orbital Cruise altitude, such
+                # that a new 'ApproachBody' would get triggered if the ship
+                # went back down.
                 self.state['Body'] = None
                 self.state['BodyID'] = None
                 self.state['BodyType'] = None
+
+            elif event_type == 'supercruiseentry':
+                # NB: Do **NOT** clear Body state, because we won't get a fresh
+                #     ApproachBody if we don't leave Orbital Cruise but land
+                #     again.
+                pass
+
+            elif event_type == 'music':
+                if entry['MusicTrack'] == 'MainMenu':
+                    # We'll get new Body state when the player logs back into
+                    # the game.
+                    self.state['Body'] = None
+                    self.state['BodyID'] = None
+                    self.state['BodyType'] = None
 
             elif event_type in ('rank', 'promotion'):
                 payload = dict(entry)
