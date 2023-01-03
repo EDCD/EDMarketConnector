@@ -598,7 +598,7 @@ class AppWindow(object):
         self.button = ttk.Button(
             frame,
             name='update_button',
-            text=_('Update'),
+            text=_('Update'),  # LANG: Main UI Update button
             width=28,
             default=tk.ACTIVE,
             state=tk.DISABLED

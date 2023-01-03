@@ -629,7 +629,7 @@ entry: {entry!r}'''
                 # LANG: The Inara API only accepts Live galaxy data, not Legacy galaxy data
                 logger.info("EDSM only accepts Live galaxy data")
                 this.legacy_galaxy_last_notified = datetime.now(timezone.utc)
-                return _("EDSM only accepts Live galaxy data")
+                return _("EDSM only accepts Live galaxy data")  # LANG: EDSM - Only Live data
 
             return ''
 

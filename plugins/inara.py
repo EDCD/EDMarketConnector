@@ -383,7 +383,7 @@ def journal_entry(  # noqa: C901, CCR001
             # LANG: The Inara API only accepts Live galaxy data, not Legacy galaxy data
             logger.info(_("Inara only accepts Live galaxy data"))
             this.legacy_galaxy_last_notified = datetime.now(timezone.utc)
-            return _("Inara only accepts Live galaxy data")
+            return _("Inara only accepts Live galaxy data")  # LANG: Inara - Only Live data
 
         return ''
 
