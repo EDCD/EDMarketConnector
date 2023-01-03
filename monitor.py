@@ -117,7 +117,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self.group: str | None = None
         self.cmdr: str | None = None
         self.system: str | None = None
-        self.systemaddress: int | None = None
         self.coordinates: Tuple[float, float, float] | None = None
         self.systempopulation: int | None = None
         self.planet: str | None = None
@@ -307,7 +306,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self.group = None
         self.cmdr = None
         self.system = None
-        self.state['SystemAddress'] = self.systemaddress = None
+        self.state['SystemAddress'] = None
         self.coordinates = None
         self.planet = self.state['Body'] = None
         self.state['BodyID'] = None
@@ -532,7 +531,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             'event':            'StartUp',
             'StarSystem':       self.system,
             'StarPos':          self.coordinates,
-            'SystemAddress':    self.systemaddress,
+            'SystemAddress':    self.state['SystemAddress'],
             'Population':       self.systempopulation,
         }
 
@@ -582,7 +581,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.mode = None
                 self.group = None
                 self.system = None
-                self.state['SystemAddress'] = self.systemaddress = None
+                self.state['SystemAddress'] = None
                 self.state['StarPos'] = self.coordinates = None
                 self.state['Body'] = self.planet = None
                 self.state['BodyID'] = None
@@ -619,7 +618,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
                 self.group = entry.get('Group')
                 self.system = None
-                self.state['SystemAddress'] = self.systemaddress = None
+                self.state['SystemAddress'] = None
                 self.state['StarPos'] = self.coordinates = None
                 self.status['Body'] = self.planet = None
                 self.status['BodyID'] = None
@@ -877,7 +876,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     # Plugins need this as well, so copy in state
                     self.state['StarPos'] = self.coordinates = tuple(entry['StarPos'])  # type: ignore
 
-                self.state['SystemAddress'] = self.systemaddress = entry.get('SystemAddress')
+                self.state['SystemAddress'] = entry.get('SystemAddress')
 
                 self.systempopulation = entry.get('Population')
 
@@ -1608,7 +1607,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.stationtype = None
                 self.stationservices = None
                 self.coordinates = None
-                self.state['SystemAddress'] = self.systemaddress = None
+                self.state['SystemAddress'] = None
                 self.state['OnFoot'] = False
 
                 self.state['Body'] = None
@@ -1629,7 +1628,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.stationtype = None
                 self.stationservices = None
                 self.coordinates = None
-                self.state['SystemAddress'] = self.systemaddress = None
+                self.state['SystemAddress'] = None
 
                 # TODO: on_foot: Will we get an event after this to know ?
 
