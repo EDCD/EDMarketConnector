@@ -969,7 +969,8 @@ class AppWindow(object):
         should_return, new_data = killswitch.check_killswitch('capi.auth', {})
         if should_return:
             logger.warning('capi.auth has been disabled via killswitch. Returning.')
-            self.status['text'] = 'CAPI auth disabled by killswitch'
+            # LANG: CAPI auth aborted because of killswitch
+            self.status['text'] = _('CAPI auth disabled by killswitch')
             return
 
         if not self.status['text']:
@@ -1062,7 +1063,8 @@ class AppWindow(object):
         should_return, new_data = killswitch.check_killswitch('capi.auth', {})
         if should_return:
             logger.warning('capi.auth has been disabled via killswitch. Returning.')
-            self.status['text'] = 'CAPI auth disabled by killswitch'
+            # LANG: CAPI auth query aborted because of killswitch
+            self.status['text'] = _('CAPI auth disabled by killswitch')
             hotkeymgr.play_bad()
             return
 
@@ -1151,19 +1153,20 @@ class AppWindow(object):
         should_return, new_data = killswitch.check_killswitch('capi.request.fleetcarrier', {})
         if should_return:
             logger.warning('capi.fleetcarrier has been disabled via killswitch. Returning.')
-            self.status['text'] = 'CAPI fleetcarrier disabled by killswitch'
+            # LANG: CAPI fleetcarrier query aborted because of killswitch
+            self.status['text'] = _('CAPI fleetcarrier disabled by killswitch')
             hotkeymgr.play_bad()
             return
 
         if not monitor.cmdr:
             logger.trace_if('capi.worker', 'Aborting Query: Cmdr unknown')
-            # LANG: CAPI queries aborted because Cmdr name is unknown
+            # LANG: CAPI fleetcarrier query aborted because Cmdr name is unknown
             self.status['text'] = _('CAPI query aborted: Cmdr name unknown')
             return
 
         if monitor.state['GameVersion'] is None:
             logger.trace_if('capi.worker', 'Aborting Query: GameVersion unknown')
-            # LANG: CAPI queries aborted because GameVersion unknown
+            # LANG: CAPI fleetcarrier query aborted because GameVersion unknown
             self.status['text'] = _('CAPI query aborted: GameVersion unknown')
             return
 
