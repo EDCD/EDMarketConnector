@@ -34,7 +34,7 @@
 /* companion.py: Frontier CAPI data retrieval failed; In files: companion.py:856; */
 "Frontier CAPI query failure" = "Frontier CAPI query failure";
 
-/* EDMarketConnector.py: Main UI Update button; EDMarketConnector.py: Update button in main window; In files: EDMarketConnector.py:601; EDMarketConnector.py:919; EDMarketConnector.py:1745; */
+/* EDMarketConnector.py: Main UI Update button; EDMarketConnector.py: Update button in main window; In files: EDMarketConnector.py:601; EDMarketConnector.py:919; EDMarketConnector.py:1748; */
 "Update" = "Update";
 
 /* EDMarketConnector.py: Appearance - Label for checkbox to select if application always on top; prefs.py: Appearance - Label for checkbox to select if application always on top; In files: EDMarketConnector.py:710; prefs.py:875; */
@@ -49,10 +49,10 @@
 /* EDMarketConnector.py: Label for commander name in main window; edsm.py: Game Commander name label in EDSM settings; stats.py: Cmdr stats; theme.py: Label for commander name in main window; In files: EDMarketConnector.py:913; edsm.py:332; stats.py:57; theme.py:290; */
 "Cmdr" = "Cmdr";
 
-/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: Multicrew role label in main window; In files: EDMarketConnector.py:915; EDMarketConnector.py:1484; */
+/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: Multicrew role label in main window; In files: EDMarketConnector.py:915; EDMarketConnector.py:1487; */
 "Role" = "Role";
 
-/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: 'Ship' label in main UI; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:915; EDMarketConnector.py:1494; EDMarketConnector.py:1517; stats.py:405; */
+/* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: 'Ship' label in main UI; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:915; EDMarketConnector.py:1497; EDMarketConnector.py:1520; stats.py:405; */
 "Ship" = "Ship";
 
 /* EDMarketConnector.py: Label for 'Suit' line in main UI; In files: EDMarketConnector.py:916; */
@@ -64,7 +64,7 @@
 /* EDMarketConnector.py: Label for 'Station' line in main UI; prefs.py: Configuration - Label for selection of 'Station' provider website; prefs.py: Appearance - Example 'Normal' text; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:918; prefs.py:632; prefs.py:770; stats.py:408; */
 "Station" = "Station";
 
-/* EDMarketConnector.py: 'File' menu title on OSX; EDMarketConnector.py: 'File' menu title; EDMarketConnector.py: 'File' menu; In files: EDMarketConnector.py:921; EDMarketConnector.py:939; EDMarketConnector.py:942; EDMarketConnector.py:2261; */
+/* EDMarketConnector.py: 'File' menu title on OSX; EDMarketConnector.py: 'File' menu title; EDMarketConnector.py: 'File' menu; In files: EDMarketConnector.py:921; EDMarketConnector.py:939; EDMarketConnector.py:942; EDMarketConnector.py:2264; */
 "File" = "File";
 
 /* EDMarketConnector.py: 'Edit' menu title on OSX; EDMarketConnector.py: 'Edit' menu title; In files: EDMarketConnector.py:922; EDMarketConnector.py:940; EDMarketConnector.py:943; */
@@ -79,7 +79,7 @@
 /* EDMarketConnector.py: Help' menu title on OSX; EDMarketConnector.py: 'Help' menu title; In files: EDMarketConnector.py:925; EDMarketConnector.py:941; EDMarketConnector.py:944; */
 "Help" = "Help";
 
-/* EDMarketConnector.py: App menu entry on OSX; EDMarketConnector.py: Help > About App; In files: EDMarketConnector.py:928; EDMarketConnector.py:959; EDMarketConnector.py:1801; */
+/* EDMarketConnector.py: App menu entry on OSX; EDMarketConnector.py: Help > About App; In files: EDMarketConnector.py:928; EDMarketConnector.py:959; EDMarketConnector.py:1804; */
 "About {APP}" = "About {APP}";
 
 /* EDMarketConnector.py: Help > Check for Updates...; In files: EDMarketConnector.py:930; EDMarketConnector.py:958; */
@@ -103,10 +103,10 @@
 /* EDMarketConnector.py: Help > Privacy Policy; In files: EDMarketConnector.py:936; EDMarketConnector.py:956; */
 "Privacy Policy" = "Privacy Policy";
 
-/* EDMarketConnector.py: Help > Release Notes; In files: EDMarketConnector.py:937; EDMarketConnector.py:957; EDMarketConnector.py:1835; */
+/* EDMarketConnector.py: Help > Release Notes; In files: EDMarketConnector.py:937; EDMarketConnector.py:957; EDMarketConnector.py:1838; */
 "Release Notes" = "Release Notes";
 
-/* EDMarketConnector.py: File > Settings; prefs.py: File > Settings (macOS); In files: EDMarketConnector.py:949; EDMarketConnector.py:2262; prefs.py:241; */
+/* EDMarketConnector.py: File > Settings; prefs.py: File > Settings (macOS); In files: EDMarketConnector.py:949; EDMarketConnector.py:2265; prefs.py:241; */
 "Settings" = "Settings";
 
 /* EDMarketConnector.py: File > Exit; In files: EDMarketConnector.py:950; */
@@ -115,94 +115,100 @@
 /* EDMarketConnector.py: Label for 'Copy' as in 'Copy and Paste'; ttkHyperlinkLabel.py: Label for 'Copy' as in 'Copy and Paste'; In files: EDMarketConnector.py:962; ttkHyperlinkLabel.py:53; */
 "Copy" = "Copy";
 
-/* EDMarketConnector.py: Status - Attempting to get a Frontier Auth Access Token; In files: EDMarketConnector.py:977; */
+/* EDMarketConnector.py: CAPI auth aborted because of killswitch; EDMarketConnector.py: CAPI auth query aborted because of killswitch; In files: EDMarketConnector.py:973; EDMarketConnector.py:1067; */
+"CAPI auth disabled by killswitch" = "CAPI auth disabled by killswitch";
+
+/* EDMarketConnector.py: Status - Attempting to get a Frontier Auth Access Token; In files: EDMarketConnector.py:978; */
 "Logging in..." = "Logging in...";
 
-/* EDMarketConnector.py: Successfully authenticated with the Frontier website; In files: EDMarketConnector.py:993; EDMarketConnector.py:1654; */
+/* EDMarketConnector.py: Successfully authenticated with the Frontier website; In files: EDMarketConnector.py:994; EDMarketConnector.py:1657; */
 "Authentication successful" = "Authentication successful";
 
-/* EDMarketConnector.py: Player is not docked at a station, when we expect them to be; In files: EDMarketConnector.py:1024; */
+/* EDMarketConnector.py: Player is not docked at a station, when we expect them to be; In files: EDMarketConnector.py:1025; */
 "You're not docked at a station!" = "You're not docked at a station!";
 
-/* EDMarketConnector.py: Status - Either no market or no modules data for station from Frontier CAPI; In files: EDMarketConnector.py:1032; */
+/* EDMarketConnector.py: Status - Either no market or no modules data for station from Frontier CAPI; In files: EDMarketConnector.py:1033; */
 "Station doesn't have anything!" = "Station doesn't have anything!";
 
-/* EDMarketConnector.py: Status - No station market data from Frontier CAPI; In files: EDMarketConnector.py:1037; */
+/* EDMarketConnector.py: Status - No station market data from Frontier CAPI; In files: EDMarketConnector.py:1038; */
 "Station doesn't have a market!" = "Station doesn't have a market!";
 
-/* EDMarketConnector.py: CAPI queries aborted because Cmdr name is unknown; In files: EDMarketConnector.py:1075; EDMarketConnector.py:1161; */
+/* EDMarketConnector.py: CAPI queries aborted because Cmdr name is unknown; EDMarketConnector.py: CAPI fleetcarrier query aborted because Cmdr name is unknown; In files: EDMarketConnector.py:1077; EDMarketConnector.py:1164; */
 "CAPI query aborted: Cmdr name unknown" = "CAPI query aborted: Cmdr name unknown";
 
-/* EDMarketConnector.py: CAPI queries aborted because game mode unknown; In files: EDMarketConnector.py:1081; */
+/* EDMarketConnector.py: CAPI queries aborted because game mode unknown; In files: EDMarketConnector.py:1083; */
 "CAPI query aborted: Game mode unknown" = "CAPI query aborted: Game mode unknown";
 
-/* EDMarketConnector.py: CAPI queries aborted because GameVersion unknown; In files: EDMarketConnector.py:1087; EDMarketConnector.py:1167; */
+/* EDMarketConnector.py: CAPI queries aborted because GameVersion unknown; EDMarketConnector.py: CAPI fleetcarrier query aborted because GameVersion unknown; In files: EDMarketConnector.py:1089; EDMarketConnector.py:1170; */
 "CAPI query aborted: GameVersion unknown" = "CAPI query aborted: GameVersion unknown";
 
-/* EDMarketConnector.py: CAPI queries aborted because current star system name unknown; In files: EDMarketConnector.py:1093; */
+/* EDMarketConnector.py: CAPI queries aborted because current star system name unknown; In files: EDMarketConnector.py:1095; */
 "CAPI query aborted: Current system unknown" = "CAPI query aborted: Current system unknown";
 
-/* EDMarketConnector.py: CAPI queries aborted because player is in multi-crew on other Cmdr's ship; In files: EDMarketConnector.py:1099; */
+/* EDMarketConnector.py: CAPI queries aborted because player is in multi-crew on other Cmdr's ship; In files: EDMarketConnector.py:1101; */
 "CAPI query aborted: In other-ship multi-crew" = "CAPI query aborted: In other-ship multi-crew";
 
-/* EDMarketConnector.py: CAPI queries aborted because player is in CQC (Arena); In files: EDMarketConnector.py:1105; */
+/* EDMarketConnector.py: CAPI queries aborted because player is in CQC (Arena); In files: EDMarketConnector.py:1107; */
 "CAPI query aborted: CQC (Arena) detected" = "CAPI query aborted: CQC (Arena) detected";
 
-/* EDMarketConnector.py: Status - Attempting to retrieve data from Frontier CAPI; In files: EDMarketConnector.py:1126; EDMarketConnector.py:1176; */
+/* EDMarketConnector.py: Status - Attempting to retrieve data from Frontier CAPI; In files: EDMarketConnector.py:1128; EDMarketConnector.py:1179; */
 "Fetching data..." = "Fetching data...";
 
-/* EDMarketConnector.py: No data was returned for the fleetcarrier from the Frontier CAPI; In files: EDMarketConnector.py:1216; */
+/* EDMarketConnector.py: CAPI fleetcarrier query aborted because of killswitch; In files: EDMarketConnector.py:1157; */
+"CAPI fleetcarrier disabled by killswitch" = "CAPI fleetcarrier disabled by killswitch";
+
+/* EDMarketConnector.py: No data was returned for the fleetcarrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
 "CAPI: No fleetcarrier data returned" = "CAPI: No fleetcarrier data returned";
 
-/* EDMarketConnector.py: We didn't have the fleetcarrier callsign when we should have; In files: EDMarketConnector.py:1220; */
+/* EDMarketConnector.py: We didn't have the fleetcarrier callsign when we should have; In files: EDMarketConnector.py:1223; */
 "CAPI: Fleetcarrier data incomplete" = "CAPI: Fleetcarrier data incomplete";
 
-/* EDMarketConnector.py: No data was returned for the commander from the Frontier CAPI; In files: EDMarketConnector.py:1239; */
+/* EDMarketConnector.py: No data was returned for the commander from the Frontier CAPI; In files: EDMarketConnector.py:1242; */
 "CAPI: No commander data returned" = "CAPI: No commander data returned";
 
-/* EDMarketConnector.py: We didn't have the commander name when we should have; stats.py: Unknown commander; In files: EDMarketConnector.py:1243; stats.py:333; */
+/* EDMarketConnector.py: We didn't have the commander name when we should have; stats.py: Unknown commander; In files: EDMarketConnector.py:1246; stats.py:333; */
 "Who are you?!" = "Who are you?!";
 
-/* EDMarketConnector.py: We don't know where the commander is, when we should; stats.py: Unknown location; In files: EDMarketConnector.py:1249; stats.py:341; */
+/* EDMarketConnector.py: We don't know where the commander is, when we should; stats.py: Unknown location; In files: EDMarketConnector.py:1252; stats.py:341; */
 "Where are you?!" = "Where are you?!";
 
-/* EDMarketConnector.py: We don't know what ship the commander is in, when we should; stats.py: Unknown ship; In files: EDMarketConnector.py:1256; stats.py:349; */
+/* EDMarketConnector.py: We don't know what ship the commander is in, when we should; stats.py: Unknown ship; In files: EDMarketConnector.py:1259; stats.py:349; */
 "What are you flying?!" = "What are you flying?!";
 
-/* EDMarketConnector.py: Frontier CAPI server error when fetching data; In files: EDMarketConnector.py:1381; */
+/* EDMarketConnector.py: Frontier CAPI server error when fetching data; In files: EDMarketConnector.py:1384; */
 "Frontier CAPI server error" = "Frontier CAPI server error";
 
-/* EDMarketConnector.py: Frontier CAPI Access Token expired, trying to get a new one; In files: EDMarketConnector.py:1387; */
+/* EDMarketConnector.py: Frontier CAPI Access Token expired, trying to get a new one; In files: EDMarketConnector.py:1390; */
 "CAPI: Refreshing access token..." = "CAPI: Refreshing access token...";
 
-/* EDMarketConnector.py: Time when we last obtained Frontier CAPI data; In files: EDMarketConnector.py:1431; */
+/* EDMarketConnector.py: Time when we last obtained Frontier CAPI data; In files: EDMarketConnector.py:1434; */
 "Last updated at %H:%M:%S" = "Last updated at %H:%M:%S";
 
-/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1459; */
+/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1462; */
 "Fighter" = "Fighter";
 
-/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1460; */
+/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1463; */
 "Gunner" = "Gunner";
 
-/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1461; */
+/* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1464; */
 "Helm" = "Helm";
 
-/* EDMarketConnector.py: Cooldown on 'Update' button; In files: EDMarketConnector.py:1739; */
+/* EDMarketConnector.py: Cooldown on 'Update' button; In files: EDMarketConnector.py:1742; */
 "cooldown {SS}s" = "cooldown {SS}s";
 
-/* EDMarketConnector.py: Generic 'OK' button label; prefs.py: 'OK' button on Settings/Preferences window; In files: EDMarketConnector.py:1861; prefs.py:292; */
+/* EDMarketConnector.py: Generic 'OK' button label; prefs.py: 'OK' button on Settings/Preferences window; In files: EDMarketConnector.py:1864; prefs.py:292; */
 "OK" = "OK";
 
-/* EDMarketConnector.py: The application is shutting down; In files: EDMarketConnector.py:1933; */
+/* EDMarketConnector.py: The application is shutting down; In files: EDMarketConnector.py:1936; */
 "Shutting down..." = "Shutting down...";
 
-/* EDMarketConnector.py: Popup-text about 'active' plugins without Python 3.x support; In files: EDMarketConnector.py:2250:2256; */
+/* EDMarketConnector.py: Popup-text about 'active' plugins without Python 3.x support; In files: EDMarketConnector.py:2253:2259; */
 "One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name.";
 
-/* EDMarketConnector.py: Settings > Plugins tab; prefs.py: Label on Settings > Plugins tab; In files: EDMarketConnector.py:2260; prefs.py:986; */
+/* EDMarketConnector.py: Settings > Plugins tab; prefs.py: Label on Settings > Plugins tab; In files: EDMarketConnector.py:2263; prefs.py:986; */
 "Plugins" = "Plugins";
 
-/* EDMarketConnector.py: Popup window title for list of 'enabled' plugins that don't work with Python 3.x; In files: EDMarketConnector.py:2271; */
+/* EDMarketConnector.py: Popup window title for list of 'enabled' plugins that don't work with Python 3.x; In files: EDMarketConnector.py:2274; */
 "EDMC: Plugins Without Python 3.x Support" = "EDMC: Plugins Without Python 3.x Support";
 
 /* journal_lock.py: Title text on popup when Journal directory already locked; In files: journal_lock.py:208; */
