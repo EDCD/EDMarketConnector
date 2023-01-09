@@ -2222,8 +2222,6 @@ def journal_entry(  # noqa: C901, CCR001
 
     elif event_name == 'music':
         if entry['MusicTrack'] == 'MainMenu':
-            this.body_name = None
-            this.body_id = None
             this.status_body_name = None
 
     # Events with their own EDDN schema
