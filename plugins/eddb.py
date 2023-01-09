@@ -73,7 +73,7 @@ class This:
         self.system_address: str | None = None
         self.system_population: int | None = None
         self.station_link: tkinter.Widget
-        self.station: str | None = None
+        self.station_name: str | None = None
         self.station_marketid: int | None = None
         self.on_foot = False
 
@@ -135,7 +135,7 @@ def plugin_app(parent: 'Tk'):
     this.system_link = parent.nametowidget(f".{appname.lower()}.system")
     this.system_name = None
     this.system_address = None
-    this.station = None
+    this.station_name = None
     this.station_marketid = None  # Frontier MarketID
     # station label in main window
     this.station_link = parent.nametowidget(f".{appname.lower()}.station")
@@ -154,7 +154,7 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
     pass
 
 
-def journal_entry(  # noqa: CCR001
+def journal_entry(
     cmdr: str, is_beta: bool, system: str, station: str,
     entry: dict[str, Any],
     state: Mapping[str, Any]
@@ -187,22 +187,16 @@ def journal_entry(  # noqa: CCR001
     this.system_address = state['SystemAddress']
     this.system_name = state['SystemName']
     this.system_population = state['SystemPopulation']
-
-    this.station = entry.get('StationName') or this.station
-    # on_foot station detection
-    if entry['event'] == 'Location' and entry['BodyType'] == 'Station':
-        this.station = entry['Body']
+    this.station_name = state['StationName']
 
     this.station_marketid = entry.get('MarketID') or this.station_marketid
     # We might pick up StationName in DockingRequested, make sure we clear it if leaving
     if entry['event'] in ('Undocked', 'FSDJump', 'SupercruiseEntry'):
-        this.station = None
         this.station_marketid = None
 
     if entry['event'] == 'Embark' and not entry.get('OnStation'):
         # If we're embarking OnStation to a Taxi/Dropship we'll also get an
         # Undocked event.
-        this.station = None
         this.station_marketid = None
 
     # Only actually change URLs if we are current provider.
@@ -214,15 +208,13 @@ def journal_entry(  # noqa: CCR001
 
     # But only actually change the URL if we are current station provider.
     if config.get_str('station_provider') == 'eddb':
-        text = this.station
-        if not text:
+        if not this.station_name:
             if this.system_population is not None and this.system_population > 0:
-                text = this.STATION_UNDOCKED
+                this.station_link['text'] = this.STATION_UNDOCKED
 
             else:
-                text = ''
+                this.station_link['text'] = ''
 
-        this.station_link['text'] = text
         # Do *NOT* set 'url' here, as it's set to a function that will call
         # through correctly.  We don't want a static string.
         this.station_link.update_idletasks()
@@ -244,8 +236,8 @@ def cmdr_data(data: CAPIData, is_beta: bool) -> str | None:
     if not this.system_name:
         this.system_name = data['lastSystem']['name']
 
-    if not this.station and data['commander']['docked']:
-        this.station = data['lastStarport']['name']
+    if not this.station_name and data['commander']['docked']:
+        this.station_name = data['lastStarport']['name']
 
     # Override standard URL functions
     if config.get_str('system_provider') == 'eddb':
@@ -255,8 +247,8 @@ def cmdr_data(data: CAPIData, is_beta: bool) -> str | None:
         this.system_link.update_idletasks()
 
     if config.get_str('station_provider') == 'eddb':
-        if data['commander']['docked'] or this.on_foot and this.station:
-            this.station_link['text'] = this.station
+        if data['commander']['docked'] or this.on_foot and this.station_name:
+            this.station_link['text'] = this.station_name
 
         elif data['lastStarport']['name'] and data['lastStarport']['name'] != "":
             this.station_link['text'] = this.STATION_UNDOCKED

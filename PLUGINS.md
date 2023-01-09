@@ -660,6 +660,7 @@ Content of `state` (updated to the current journal entry):
 | `Body`[3][4]         |       `Optional[str]`       | Name of the body we're currently on / in the SOI of                                                             |
 | `BodyID`[3][4]       |       `Optional[int]`       | ID of the body we're currently on / in the SOI of                                                               |
 | `BodyType`[3][4]     |       `Optional[str]`       | The type of body that `Body` refers to                                                                          |
+| `StationName`        |       `Optional[str]`       | Name of the station we're docked at, if applicable                                                              |
 
 [1] - Contents of `NavRoute` not changed if a `NavRouteClear` event is seen,
 but plugins will see the `NavRouteClear` event.
@@ -805,6 +806,8 @@ system the player is in.
 now track in the same manner as prior core EDDN plugin code.  Check the
 documentation above for some caveats.  Do not just blindly use this data, or
 the 'Body' name value.
+
+`StationName` added to the `state` dictionary.
 
 ___
 

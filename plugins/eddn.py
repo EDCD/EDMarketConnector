@@ -2449,7 +2449,7 @@ def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:  # noqa: CCR001
     ):
         this.cmdr_name = cmdr_name
 
-    if (data['commander'].get('docked') or (this.on_foot and monitor.station)
+    if (data['commander'].get('docked') or (this.on_foot and monitor.state['StationName'])
             and config.get_int('output') & config.OUT_EDDN_SEND_STATION_DATA):
         try:
             if this.marketId != data['lastStarport']['id']:
