@@ -42,7 +42,7 @@
 # ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $#
 # ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $#
 import tkinter
-from typing import TYPE_CHECKING, Any, Mapping, Optional
+from typing import TYPE_CHECKING, Any, Mapping
 
 import requests
 
@@ -69,12 +69,12 @@ class This:
     def __init__(self) -> None:
         # Main window clicks
         self.system_link: tkinter.Widget
-        self.system: Optional[str] = None
-        self.system_address: Optional[str] = None
-        self.system_population: Optional[int] = None
+        self.system_name: str | None = None
+        self.system_address: str | None = None
+        self.system_population: int | None = None
         self.station_link: tkinter.Widget
-        self.station: Optional[str] = None
-        self.station_marketid: Optional[int] = None
+        self.station: str | None = None
+        self.station_marketid: int | None = None
         self.on_foot = False
 
 
@@ -133,7 +133,7 @@ def plugin_app(parent: 'Tk'):
     """
     # system label in main window
     this.system_link = parent.nametowidget(f".{appname.lower()}.system")
-    this.system = None
+    this.system_name = None
     this.system_address = None
     this.station = None
     this.station_marketid = None  # Frontier MarketID
@@ -185,12 +185,13 @@ def journal_entry(  # noqa: CCR001
 
     this.on_foot = state['OnFoot']
     this.system_address = state['SystemAddress']
+    this.system_name = state['SystemName']
 
     # Always update our system address even if we're not currently the provider for system or station, but dont update
     # on events that contain "future" data, such as FSDTarget
     if entry['event'] in ('Location', 'Docked', 'CarrierJump', 'FSDJump'):
         this.system_address = entry.get('SystemAddress') or this.system_address
-        this.system = entry.get('StarSystem') or this.system
+        this.system_name = entry.get('StarSystem') or this.system_name
 
     # We need pop == 0 to set the value so as to clear 'x' in systems with
     # no stations.
@@ -217,7 +218,7 @@ def journal_entry(  # noqa: CCR001
 
     # Only actually change URLs if we are current provider.
     if config.get_str('system_provider') == 'eddb':
-        this.system_link['text'] = this.system
+        this.system_link['text'] = this.system_name
         # Do *NOT* set 'url' here, as it's set to a function that will call
         # through correctly.  We don't want a static string.
         this.system_link.update_idletasks()
@@ -238,7 +239,7 @@ def journal_entry(  # noqa: CCR001
         this.station_link.update_idletasks()
 
 
-def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:
+def cmdr_data(data: CAPIData, is_beta: bool) -> str | None:
     """
     Process new CAPI data.
 
@@ -251,15 +252,15 @@ def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:
         this.station_marketid = data['lastStarport']['id']
 
     # Only trust CAPI if these aren't yet set
-    if not this.system:
-        this.system = data['lastSystem']['name']
+    if not this.system_name:
+        this.system_name = data['lastSystem']['name']
 
     if not this.station and data['commander']['docked']:
         this.station = data['lastStarport']['name']
 
     # Override standard URL functions
     if config.get_str('system_provider') == 'eddb':
-        this.system_link['text'] = this.system
+        this.system_link['text'] = this.system_name
         # Do *NOT* set 'url' here, as it's set to a function that will call
         # through correctly.  We don't want a static string.
         this.system_link.update_idletasks()
