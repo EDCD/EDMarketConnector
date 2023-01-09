@@ -2220,14 +2220,6 @@ def journal_entry(  # noqa: C901, CCR001
         # Trigger a send/retry of pending EDDN messages
         this.eddn.parent.after(this.eddn.REPLAY_DELAY, this.eddn.sender.queue_check_and_send, False)
 
-    elif event_name == 'leavebody':
-        # NB: **NOT** SupercruiseEntry, because we won't get a fresh
-        #     ApproachBody if we don't leave Orbital Cruise and land again.
-        # *This* is triggered when you go above Orbital Cruise altitude.
-        # Status.json BodyName clears when the OC/Glide HUD is deactivated.
-        this.body_name = None
-        this.body_id = None
-
     elif event_name == 'music':
         if entry['MusicTrack'] == 'MainMenu':
             this.body_name = None
