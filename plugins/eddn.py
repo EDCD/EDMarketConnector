@@ -2323,10 +2323,10 @@ def journal_entry(  # noqa: C901, CCR001
             ]
 
         # add planet to Docked event for planetary stations if known
-        if event_name == 'docked' and this.body_name:
-            # FIXME - Is this correct if using monitor.py tracking ?
-            entry['Body'] = this.body_name
-            entry['BodyType'] = 'Planet'
+        if event_name == 'docked' and state['Body'] is not None:
+            if state['BodyType'] == 'Planet':
+                entry['Body'] = state['Body']
+                entry['BodyType'] = state['BodyType']
 
         # The generic journal schema is for events:
         #   Docked, FSDJump, Scan, Location, SAASignalsFound, CarrierJump
