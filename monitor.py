@@ -116,7 +116,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self.mode: str | None = None
         self.group: str | None = None
         self.cmdr: str | None = None
-        self.system: str | None = None
         self.systempopulation: int | None = None
         self.station: str | None = None
         self.station_marketid: int | None = None
@@ -191,6 +190,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             'Dropship':           None,  # Best effort as to whether or not the above taxi is a dropship.
             'StarPos':            None,  # Best effort current system's galaxy position.
             'SystemAddress':      None,
+            'SystemName':         None,
             'Body':               None,
             'BodyID':             None,
             'BodyType':           None,
@@ -303,7 +303,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self.mode = None
         self.group = None
         self.cmdr = None
-        self.system = None
         self.state['SystemAddress'] = None
         self.state['StarPos'] = None
         self.state['Body'] = None
@@ -527,7 +526,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         entry: dict[str, Any] = {
             'timestamp':        strftime('%Y-%m-%dT%H:%M:%SZ', gmtime()),
             'event':            'StartUp',
-            'StarSystem':       self.system,
+            'StarSystem':       self.state['SystemName'],
             'StarPos':          self.state['StarPos'],
             'SystemAddress':    self.state['SystemAddress'],
             'Population':       self.systempopulation,
@@ -578,7 +577,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.cmdr = None
                 self.mode = None
                 self.group = None
-                self.system = None
+                self.state['SystemName'] = None
                 self.state['SystemAddress'] = None
                 self.state['StarPos'] = None
                 self.state['Body'] = None
@@ -615,7 +614,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     self.mode = entry.get('GameMode')
 
                 self.group = entry.get('Group')
-                self.system = None
+                self.state['SystemName'] = None
                 self.state['SystemAddress'] = None
                 self.state['StarPos'] = None
                 self.state['Body'] = None
@@ -943,10 +942,10 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.systempopulation = entry.get('Population')
 
                 if entry['StarSystem'] == 'ProvingGround':
-                    self.system = 'CQC'
+                    self.state['SystemName'] = 'CQC'
 
                 else:
-                    self.system = entry['StarSystem']
+                    self.state['SystemName'] = entry['StarSystem']
                 ###############################################################
 
                 ###############################################################
@@ -1687,7 +1686,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['Captain'] = entry['Captain']
                 self.state['Role'] = 'Idle'
                 self.state['StarPos'] = None
-                self.system = None
+                self.state['SystemName'] = None
                 self.state['SystemAddress'] = None
                 self.state['StarPos'] = None
                 self.state['Body'] = None
@@ -1705,7 +1704,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             elif event_type == 'quitacrew':
                 self.state['Captain'] = None
                 self.state['Role'] = None
-                self.system = None
+                self.state['SystemName'] = None
                 self.state['SystemAddress'] = None
                 self.state['StarPos'] = None
                 self.state['Body'] = None

@@ -1089,7 +1089,7 @@ class AppWindow(object):
             self.status['text'] = _('CAPI query aborted: GameVersion unknown')
             return
 
-        if not monitor.system:
+        if not monitor.state['SystemName']:
             logger.trace_if('capi.worker', 'Aborting Query: Current star system unknown')
             # LANG: CAPI queries aborted because current star system name unknown
             self.status['text'] = _('CAPI query aborted: Current system unknown')
@@ -1272,9 +1272,10 @@ class AppWindow(object):
                                f"not {capi_response.capi_data['commander'].get('docked')!r}")
                 raise companion.ServerLagging()
 
-            elif capi_response.capi_data['lastSystem']['name'] != monitor.system:
+            elif capi_response.capi_data['lastSystem']['name'] != monitor.state['SystemName']:
                 # CAPI system must match last journal one
-                logger.warning(f"{capi_response.capi_data['lastSystem']['name']!r} != {monitor.system!r}")
+                logger.warning(f"{capi_response.capi_data['lastSystem']['name']!r} != "
+                               f"{monitor.state['SystemName']!r}")
                 raise companion.ServerLagging()
 
             elif capi_response.capi_data['lastStarport']['name'] != monitor.station:
@@ -1526,7 +1527,7 @@ class AppWindow(object):
             self.update_suit_text()
             self.suit_show_if_set()
 
-            self.edit_menu.entryconfigure(0, state=monitor.system and tk.NORMAL or tk.DISABLED)  # Copy
+            self.edit_menu.entryconfigure(0, state=monitor.state['SystemName'] and tk.NORMAL or tk.DISABLED)  # Copy
 
             if entry['event'] in (
                     'Undocked',
@@ -1589,7 +1590,7 @@ class AppWindow(object):
                 err = plug.notify_journal_entry(
                     monitor.cmdr,
                     monitor.is_beta,
-                    monitor.system,
+                    monitor.state['SystemName'],
                     monitor.station,
                     entry,
                     monitor.state
@@ -1728,11 +1729,16 @@ class AppWindow(object):
 
     def system_url(self, system: str) -> str | None:
         """Despatch a system URL to the configured handler."""
-        return plug.invoke(config.get_str('system_provider'), 'EDSM', 'system_url', monitor.system)
+        return plug.invoke(
+            config.get_str('system_provider'), 'EDSM', 'system_url', monitor.state['SystemName']
+        )
 
     def station_url(self, station: str) -> str | None:
         """Despatch a station URL to the configured handler."""
-        return plug.invoke(config.get_str('station_provider'), 'eddb', 'station_url', monitor.system, monitor.station)
+        return plug.invoke(
+            config.get_str('station_provider'), 'eddb', 'station_url',
+            monitor.state['SystemName'], monitor.station
+        )
 
     def cooldown(self) -> None:
         """Display and update the cooldown timer for 'Update' button."""
@@ -1746,12 +1752,14 @@ class AppWindow(object):
 
         else:
             self.button['text'] = self.theme_button['text'] = _('Update')  # LANG: Update button in main window
-            self.button['state'] = self.theme_button['state'] = (monitor.cmdr and
-                                                                 monitor.mode and
-                                                                 monitor.mode != 'CQC' and
-                                                                 not monitor.state['Captain'] and
-                                                                 monitor.system and
-                                                                 tk.NORMAL or tk.DISABLED)
+            self.button['state'] = self.theme_button['state'] = (
+                monitor.cmdr and
+                monitor.mode and
+                monitor.mode != 'CQC' and
+                not monitor.state['Captain'] and
+                monitor.state['SystemName'] and
+                tk.NORMAL or tk.DISABLED
+            )
 
     if sys.platform == 'win32':
         def ontop_changed(self, event=None) -> None:
@@ -1761,9 +1769,12 @@ class AppWindow(object):
 
     def copy(self, event=None) -> None:
         """Copy system, and possible station, name to clipboard."""
-        if monitor.system:
+        if monitor.state['SystemName']:
             self.w.clipboard_clear()
-            self.w.clipboard_append(monitor.station and f'{monitor.system},{monitor.station}' or monitor.system)
+            self.w.clipboard_append(
+                f"{monitor.state['SystemName']},{monitor.station}" if monitor.station
+                else monitor.state['SystemName']
+            )
 
     def help_general(self, event=None) -> None:
         """Open Wiki Help page in browser."""
@@ -1898,7 +1909,7 @@ class AppWindow(object):
             defaultextension=default_extension,
             filetypes=[('JSON', '.json'), ('All Files', '*')],
             initialdir=config.get_str('outdir'),
-            initialfile=f'{monitor.system}.{monitor.station}.{timestamp}'
+            initialfile=f"{monitor.state['SystemName']}.{monitor.station}.{timestamp}"
         )
         if not f:
             return
