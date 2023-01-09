@@ -653,8 +653,9 @@ Content of `state` (updated to the current journal entry):
 | `SuitLoadouts`       |          `dict`[2]          | CAPI-returned data of all Suit Loadouts.  NB: May be `None` if no data.                                         |
 | `Taxi`               |      `Optional[bool]`       | Whether or not we're currently in a taxi. NB: This is best effort with what the journals provide.               |
 | `Dropship`           |      `Optional[bool]`       | Whether or not the above taxi is a Dropship                                                                     |
-| `Body`               |       `Optional[str]`       | The body we're currently on / in the SOI of                                                                     |
-| `BodyType`           |       `Optional[str]`       | The type of body that `Body` refers to                                                                          |
+| `Body`[3]            |       `Optional[str]`       | Name of the body we're currently on / in the SOI of                                                                     |
+| `BodyID`[3]            |       `Optional[int]`     | ID of the body we're currently on / in the SOI of                                                                     |
+| `BodyType`[3]        |       `Optional[str]`       | The type of body that `Body` refers to                                                                          |
 
 [1] - Contents of `NavRoute` not changed if a `NavRouteClear` event is seen,
 but plugins will see the `NavRouteClear` event.
@@ -675,6 +676,28 @@ members are present) and other times as an integer-keyed `dict` (when at
 least one member is missing, so the indices are not contiguous).  We choose to
 always convert to the integer-keyed `dict` form so that code utilising the data
 is simpler.
+
+[3] - There are some caveats with the Body data.  Firstly the name and ID
+can be for the orbital station or fleet carrier the player is docked at.
+Check 'BodyType' before using the values.
+
+Secondly there is an issue with close-orbiting binary bodies.  If the player:
+
+1. Enters Orbital Cruise around a Body an 'ApproachBody' event is emitted
+  and the tracking will update to reflect this.
+2. If the player then flies *in Orbital Cruise without entering Supercruise
+  proper* to the close-orbiting binary partner of the Body then *there is no
+  new 'ApproachBody' event to indicate the new Body's details*.  **Thus this
+  tracking will incorrectly indicate the first Body still**.
+
+So, before making use of any of this Body state a plugin should:
+
+1. Have a `dashboard_entry()` method and track the Body name present in its
+  data.
+2. Cross-check that Body name with `state['Body']` before making use of any
+ of `state'`s Body data.
+
+See `plugins/eddn.py` for an example of this in `export_journal_codexentry()`.
 
 New in version 4.1.6:
 
@@ -764,6 +787,12 @@ New in version 5.7.0:
 re-start EDMarketConnector.  That will be present when plugins are invoked
 with the synthetic `StartUp` event.  NB: Might just be a `NavRouteClear` event
 if that's what was in the file.
+
+New in version 5.8.0:
+`BodyID` and `BodyType` have been added to the `state` dictionary.  These
+now track in the same manner as prior core EDDN plugin code.  Check the
+documentation above for some caveats.  Do not just blindly use this data, or
+the 'Body' name value.
 
 ___
 
