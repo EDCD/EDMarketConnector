@@ -187,12 +187,6 @@ def journal_entry(  # noqa: CCR001
     this.system_address = state['SystemAddress']
     this.system_name = state['SystemName']
 
-    # Always update our system address even if we're not currently the provider for system or station, but dont update
-    # on events that contain "future" data, such as FSDTarget
-    if entry['event'] in ('Location', 'Docked', 'CarrierJump', 'FSDJump'):
-        this.system_address = entry.get('SystemAddress') or this.system_address
-        this.system_name = entry.get('StarSystem') or this.system_name
-
     # We need pop == 0 to set the value so as to clear 'x' in systems with
     # no stations.
     pop = entry.get('Population')
