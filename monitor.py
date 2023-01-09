@@ -892,6 +892,10 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                   player is no longer near the Body.  They can easily utilise
                   Orbital Cruise to rapidly travel around the Body and then
                   land on it again **without a fresh 'ApproachBody'** event.
+
+                  The only way to check for this is to utilise the Body (name)
+                  present in `Status.json` data, as this *will* correctly
+                  reflect the second Body.
                 """
                 ###############################################################
                 # Track: Body
