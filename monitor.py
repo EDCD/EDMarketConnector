@@ -837,6 +837,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     self.state['BodyID'] = None
 
             elif event_type == 'docked':
+                ###############################################################
+                # Track: Station
+                ###############################################################
                 self.state['IsDocked'] = True
                 self.station = entry.get('StationName')  # It may be None
                 self.station_marketid = entry.get('MarketID')  # It may be None
@@ -845,8 +848,51 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
                 # No need to set self.state['Taxi'] or Dropship here, if it's
                 # those, the next event is a Disembark anyway
+                ###############################################################
 
             elif event_type in ('location', 'fsdjump', 'carrierjump'):
+                """
+                Notes on tracking of a player's location.
+
+                Body
+                ---
+                There are some caveats about tracking Body name, ID and type,
+                mostly due to close-orbiting binary planets/moons.
+
+                Presence on or near a Body is indicated in several scenarios:
+
+                1. When the player logs in.
+                2. When the player's location changes due to being docked
+                  on a Fleet Carrier when it jumps.
+                3. When the player flies within Orbital Cruise range of a
+                  Body.
+
+                For the first case this will always be a 'Location' event.
+                If landed on a Body, or docked at a surface port then this
+                will be indicated.  However, if docked at an orbital station
+                the 'Body' is the name of that station, with 'BodyType' having
+                'Station' as its value.
+
+                In the second case although it *should* be a 'CarrierJump'
+                event, for a while now it's actually been a 'Location' event.
+                This should follow the same rules as being docked at an
+                orbital station.
+
+                For the last case there are some caveats to do with close
+                orbiting binary bodies:
+
+                1. 'ApproachBody' indicates presence near the Body in question.
+                2. 'LeaveBody' indicates the player is no longer considered
+                  to be near the Body.  This is specifically when no longer
+                  in Orbital Cruise around the Body such that the HUD for that
+                  has been switched out for the normal SuperCruise one.
+                3. 'SupercruiseExit' does not indicate any change of presence
+                  near a Body.
+                4. 'SupercruiseEntry' *also* **DOES NOT** indicate that the
+                  player is no longer near the Body.  They can easily utilise
+                  Orbital Cruise to rapidly travel around the Body and then
+                  land on it again **without a fresh 'ApproachBody'** event.
+                """
                 ###############################################################
                 # Track: Body
                 ###############################################################
