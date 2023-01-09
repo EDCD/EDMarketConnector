@@ -607,11 +607,11 @@ This gets called when EDMarketConnector sees a new entry in the game's journal.
 Content of `state` (updated to the current journal entry):
 
 | Field                |            Type             | Description                                                                                                     |
-| :------------------- | :-------------------------: |:----------------------------------------------------------------------------------------------------------------|
+|:---------------------|:---------------------------:|:----------------------------------------------------------------------------------------------------------------|
 | `GameLanguage`       |       `Optional[str]`       | `language` value from `Fileheader` event.                                                                       |
 | `GameVersion`        |       `Optional[str]`       | `version` value from `Fileheader` event.                                                                        |
 | `GameBuild`          |       `Optional[str]`       | `build` value from `Fileheader` event.                                                                          |
-| `Captain`            |       `Optional[str]`       | Name of the commander who's crew you're on, if any                                                              |
+| `Captain`[3]         |       `Optional[str]`       | Name of the commander who's crew you're on, if any                                                              |
 | `Cargo`              |           `dict`            | Current cargo. Note that this will be totals, and any mission specific duplicates will be counted together      |
 | `CargoJSON`          |           `dict`            | content of cargo.json as of last read.                                                                          |
 | `Credits`            |            `int`            | Current credits balance                                                                                         |
@@ -639,7 +639,7 @@ Content of `state` (updated to the current journal entry):
 | `NavRoute`           |           `dict`            | Last plotted multi-hop route[1]                                                                                 |
 | `ModuleInfo`         |           `dict`            | Last loaded ModulesInfo.json data                                                                               |
 | `IsDocked`           |           `bool`            | Whether the Cmdr is currently docked *in their own ship*.                                                       |
-| `OnFoot`             |           `bool`            | Whether the Cmdr is on foot                                                                                     |
+| `OnFoot`[3]          |           `bool`            | Whether the Cmdr is on foot                                                                                     |
 | `Component`          |           `dict`            | 'Component' MicroResources in Odyssey, `int` count each.                                                        |
 | `Item`               |           `dict`            | 'Item' MicroResources in Odyssey, `int` count each.                                                             |
 | `Consumable`         |           `dict`            | 'Consumable' MicroResources in Odyssey, `int` count each.                                                       |
@@ -653,9 +653,13 @@ Content of `state` (updated to the current journal entry):
 | `SuitLoadouts`       |          `dict`[2]          | CAPI-returned data of all Suit Loadouts.  NB: May be `None` if no data.                                         |
 | `Taxi`               |      `Optional[bool]`       | Whether or not we're currently in a taxi. NB: This is best effort with what the journals provide.               |
 | `Dropship`           |      `Optional[bool]`       | Whether or not the above taxi is a Dropship                                                                     |
-| `Body`[3]            |       `Optional[str]`       | Name of the body we're currently on / in the SOI of                                                                     |
-| `BodyID`[3]            |       `Optional[int]`     | ID of the body we're currently on / in the SOI of                                                                     |
-| `BodyType`[3]        |       `Optional[str]`       | The type of body that `Body` refers to                                                                          |
+| `SystemAddress`[3]   |       `Optional[int]`       | Unique [ID64](http://disc.thargoid.space/ID64) of the star system we're currently in                            |
+| `SystemName`[3]      |       `Optional[str]`       | Name of the star system we're currently in                                                                      |
+| `SystemPopulation`[3]|       `Optional[int]`       | Population of the star system we're currently in                                                                |
+| `StarPos`[3]         |  `Optional[tuple[float]]`   | Galaxy co-ordinates of the system we're currently in                                                            |
+| `Body`[3][4]         |       `Optional[str]`       | Name of the body we're currently on / in the SOI of                                                             |
+| `BodyID`[3][4]       |       `Optional[int]`       | ID of the body we're currently on / in the SOI of                                                               |
+| `BodyType`[3][4]     |       `Optional[str]`       | The type of body that `Body` refers to                                                                          |
 
 [1] - Contents of `NavRoute` not changed if a `NavRouteClear` event is seen,
 but plugins will see the `NavRouteClear` event.
@@ -677,7 +681,10 @@ least one member is missing, so the indices are not contiguous).  We choose to
 always convert to the integer-keyed `dict` form so that code utilising the data
 is simpler.
 
-[3] - There are some caveats with the Body data.  Firstly the name and ID
+[3] - Forced to `None` if the player joins another player's ship in remote
+multi-crew.
+
+[4] - There are some caveats with the Body data.  Firstly the name and ID
 can be for the orbital station or fleet carrier the player is docked at.
 Check 'BodyType' before using the values.
 
@@ -789,6 +796,11 @@ with the synthetic `StartUp` event.  NB: Might just be a `NavRouteClear` event
 if that's what was in the file.
 
 New in version 5.8.0:
+
+`StarPos`, `SystemAddress`, `SystemName` and `SystemPopulation` have been 
+added to the `state` dictionary.  Best efforts data pertaining to the star
+system the player is in.
+
 `BodyID` and `BodyType` have been added to the `state` dictionary.  These
 now track in the same manner as prior core EDDN plugin code.  Check the
 documentation above for some caveats.  Do not just blindly use this data, or

@@ -116,7 +116,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self.mode: str | None = None
         self.group: str | None = None
         self.cmdr: str | None = None
-        self.systempopulation: int | None = None
         self.station: str | None = None
         self.station_marketid: int | None = None
         self.stationtype: str | None = None
@@ -191,6 +190,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             'StarPos':            None,  # Best effort current system's galaxy position.
             'SystemAddress':      None,
             'SystemName':         None,
+            'SystemPopulation':   None,
             'Body':               None,
             'BodyID':             None,
             'BodyType':           None,
@@ -304,6 +304,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self.group = None
         self.cmdr = None
         self.state['SystemAddress'] = None
+        self.state['SystemName'] = None
+        self.state['SystemPopulation'] = None
         self.state['StarPos'] = None
         self.state['Body'] = None
         self.state['BodyID'] = None
@@ -529,7 +531,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             'StarSystem':       self.state['SystemName'],
             'StarPos':          self.state['StarPos'],
             'SystemAddress':    self.state['SystemAddress'],
-            'Population':       self.systempopulation,
+            'Population':       self.state['SystemPopulation'],
         }
 
         if self.state['Body']:
@@ -577,8 +579,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.cmdr = None
                 self.mode = None
                 self.group = None
-                self.state['SystemName'] = None
                 self.state['SystemAddress'] = None
+                self.state['SystemName'] = None
+                self.state['SystemPopulation'] = None
                 self.state['StarPos'] = None
                 self.state['Body'] = None
                 self.state['BodyID'] = None
@@ -614,8 +617,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     self.mode = entry.get('GameMode')
 
                 self.group = entry.get('Group')
-                self.state['SystemName'] = None
                 self.state['SystemAddress'] = None
+                self.state['SystemName'] = None
+                self.state['SystemPopulation'] = None
                 self.state['StarPos'] = None
                 self.state['Body'] = None
                 self.state['BodyID'] = None
@@ -939,7 +943,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # Yes, explicitly state `None` here, so it's crystal clear.
                 self.state['SystemAddress'] = entry.get('SystemAddress', None)
 
-                self.systempopulation = entry.get('Population')
+                self.state['SystemPopulation'] = entry.get('Population')
 
                 if entry['StarSystem'] == 'ProvingGround':
                     self.state['SystemName'] = 'CQC'
@@ -1688,6 +1692,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['StarPos'] = None
                 self.state['SystemName'] = None
                 self.state['SystemAddress'] = None
+                self.state['SystemPopulation'] = None
                 self.state['StarPos'] = None
                 self.state['Body'] = None
                 self.state['BodyID'] = None
@@ -1706,6 +1711,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['Role'] = None
                 self.state['SystemName'] = None
                 self.state['SystemAddress'] = None
+                self.state['SystemPopulation'] = None
                 self.state['StarPos'] = None
                 self.state['Body'] = None
                 self.state['BodyID'] = None

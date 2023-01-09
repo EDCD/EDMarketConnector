@@ -186,12 +186,7 @@ def journal_entry(  # noqa: CCR001
     this.on_foot = state['OnFoot']
     this.system_address = state['SystemAddress']
     this.system_name = state['SystemName']
-
-    # We need pop == 0 to set the value so as to clear 'x' in systems with
-    # no stations.
-    pop = entry.get('Population')
-    if pop is not None:
-        this.system_population = pop
+    this.system_population = state['SystemPopulation']
 
     this.station = entry.get('StationName') or this.station
     # on_foot station detection
