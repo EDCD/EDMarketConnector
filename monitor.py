@@ -116,7 +116,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self.mode: str | None = None
         self.group: str | None = None
         self.cmdr: str | None = None
-        self.station_marketid: int | None = None
         self.stationtype: str | None = None
         self.started: int | None = None  # Timestamp of the LoadGame event
 
@@ -311,7 +310,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self.state['BodyID'] = None
         self.state['BodyType'] = None
         self.state['StationName'] = None
-        self.station_marketid = None
+        self.state['MarketID'] = None
         self.stationtype = None
         self.stationservices = None
         self.is_beta = False
@@ -541,7 +540,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         if self.state['StationName']:
             entry['Docked'] = True
-            entry['MarketID'] = self.station_marketid
+            entry['MarketID'] = self.state['MarketID']
             entry['StationName'] = self.state['StationName']
             entry['StationType'] = self.stationtype
 
@@ -586,7 +585,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['Body'] = None
                 self.state['BodyID'] = None
                 self.state['StationName'] = None
-                self.station_marketid = None
+                self.state['MarketID'] = None
                 self.stationtype = None
                 self.stationservices = None
                 self.started = None
@@ -625,7 +624,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['BodyID'] = None
                 self.state['BodyType'] = None
                 self.state['StationName'] = None
-                self.station_marketid = None
+                self.state['MarketID'] = None
                 self.stationtype = None
                 self.stationservices = None
                 self.started = timegm(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
@@ -758,7 +757,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             elif event_type == 'undocked':
                 self.state['StationName'] = None
-                self.station_marketid = None
+                self.state['MarketID'] = None
                 self.stationtype = None
                 self.stationservices = None
                 self.state['IsDocked'] = False
@@ -780,8 +779,10 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #     • StationType
                 #     • MarketID
                 self.state['StationName'] = None
+                self.state['MarketID'] = None
                 if entry.get('OnStation'):
                     self.state['StationName'] = entry.get('StationName', '')
+                    self.state['MarketID'] = entry.get('MarketID', '')
 
                 self.state['OnFoot'] = False
                 self.state['Taxi'] = entry['Taxi']
@@ -845,7 +846,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 ###############################################################
                 self.state['IsDocked'] = True
                 self.state['StationName'] = entry.get('StationName')  # It may be None
-                self.station_marketid = entry.get('MarketID')  # It may be None
+                self.state['MarketID'] = entry.get('MarketID')  # It may be None
                 self.stationtype = entry.get('StationType')  # It may be None
                 self.stationservices = entry.get('StationServices')  # None under E:D < 2.4
 
@@ -957,7 +958,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 ###############################################################
                 if event_type == 'fsdjump':
                     self.state['StationName'] = None
-                    self.station_marketid = None
+                    self.state['MarketID'] = None
                     self.stationtype = None
                     self.stationservices = None
 
@@ -969,7 +970,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     if entry.get('BodyType') and entry['BodyType'] == 'Station':
                         self.state['StationName'] = entry.get('Body')
 
-                    self.station_marketid = entry.get('MarketID')  # May be None
+                    self.state['MarketID'] = entry.get('MarketID')  # May be None
                     self.stationtype = entry.get('StationType')  # May be None
                     self.stationservices = entry.get('StationServices')  # None in Odyssey for on-foot 'Location'
                 ###############################################################
@@ -1008,7 +1009,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # Track: Current station, if applicable
                 ###############################################################
                 self.state['StationName'] = None
-                self.station_marketid = None
+                self.state['MarketID'] = None
                 self.stationtype = None
                 self.stationservices = None
                 ###############################################################
@@ -1713,7 +1714,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['BodyID'] = None
                 self.state['BodyType'] = None
                 self.state['StationName'] = None
-                self.station_marketid = None
+                self.state['MarketID'] = None
                 self.stationtype = None
                 self.stationservices = None
                 self.state['OnFoot'] = False
@@ -1732,7 +1733,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['BodyID'] = None
                 self.state['BodyType'] = None
                 self.state['StationName'] = None
-                self.station_marketid = None
+                self.state['MarketID'] = None
                 self.stationtype = None
                 self.stationservices = None
 

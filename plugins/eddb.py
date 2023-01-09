@@ -188,16 +188,7 @@ def journal_entry(
     this.system_name = state['SystemName']
     this.system_population = state['SystemPopulation']
     this.station_name = state['StationName']
-
-    this.station_marketid = entry.get('MarketID') or this.station_marketid
-    # We might pick up StationName in DockingRequested, make sure we clear it if leaving
-    if entry['event'] in ('Undocked', 'FSDJump', 'SupercruiseEntry'):
-        this.station_marketid = None
-
-    if entry['event'] == 'Embark' and not entry.get('OnStation'):
-        # If we're embarking OnStation to a Taxi/Dropship we'll also get an
-        # Undocked event.
-        this.station_marketid = None
+    this.station_marketid = state['MarketID']
 
     # Only change URL text if we are current provider.
     if config.get_str('station_provider') == 'eddb':

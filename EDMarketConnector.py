@@ -1295,9 +1295,9 @@ class AppWindow(object):
 
                 self.capi_query_holdoff_time = capi_response.query_time + companion.capi_query_cooldown
 
-            elif capi_response.capi_data['lastStarport']['id'] != monitor.station_marketid:
+            elif capi_response.capi_data['lastStarport']['id'] != monitor.state['MarketID']:
                 logger.warning(f"MarketID mis-match: {capi_response.capi_data['lastStarport']['id']!r} !="
-                               f" {monitor.station_marketid!r}")
+                               f" {monitor.state['MarketID']!r}")
                 raise companion.ServerLagging()
 
             elif not monitor.state['OnFoot'] and capi_response.capi_data['ship']['id'] != monitor.state['ShipID']:
