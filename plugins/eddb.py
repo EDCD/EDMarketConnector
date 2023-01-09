@@ -199,16 +199,17 @@ def journal_entry(
         # Undocked event.
         this.station_marketid = None
 
-    # Only actually change URLs if we are current provider.
-    if config.get_str('system_provider') == 'eddb':
+    # Only change URL text if we are current provider.
+    if config.get_str('station_provider') == 'eddb':
         this.system_link['text'] = this.system_name
         # Do *NOT* set 'url' here, as it's set to a function that will call
         # through correctly.  We don't want a static string.
         this.system_link.update_idletasks()
 
-    # But only actually change the URL if we are current station provider.
-    if config.get_str('station_provider') == 'eddb':
-        if not this.station_name:
+        if this.station_name:
+            this.station_link['text'] = this.station_name
+
+        else:
             if this.system_population is not None and this.system_population > 0:
                 this.station_link['text'] = this.STATION_UNDOCKED
 

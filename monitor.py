@@ -539,10 +539,10 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             entry['BodyID'] = self.state['BodyID']
             entry['BodyType'] = self.state['BodyType']
 
-        if self.station:
+        if self.state['StationName']:
             entry['Docked'] = True
             entry['MarketID'] = self.station_marketid
-            entry['StationName'] = self.station
+            entry['StationName'] = self.state['StationName']
             entry['StationType'] = self.stationtype
 
         else:
