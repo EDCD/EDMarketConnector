@@ -927,6 +927,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['BodyID'] = entry.get('BodyID')
                 # This isn't in the event, but Journal doc for ApproachBody says:
                 #   when in Supercruise, and distance from planet drops to within the 'Orbital Cruise' zone
+                # Used in plugins/eddn.py for setting entry Body/BodyType
+                # on 'docked' events when Planetary.
                 self.state['BodyType'] = 'Planet'
 
             elif event_type == 'leavebody':
