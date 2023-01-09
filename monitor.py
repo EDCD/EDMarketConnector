@@ -116,7 +116,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self.mode: str | None = None
         self.group: str | None = None
         self.cmdr: str | None = None
-        self.stationtype: str | None = None
         self.started: int | None = None  # Timestamp of the LoadGame event
 
         self._navroute_retries_remaining = 0
@@ -311,7 +310,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self.state['BodyType'] = None
         self.state['StationName'] = None
         self.state['MarketID'] = None
-        self.stationtype = None
+        self.state['StationType'] = None
         self.stationservices = None
         self.is_beta = False
         self.state['OnFoot'] = False
@@ -542,7 +541,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             entry['Docked'] = True
             entry['MarketID'] = self.state['MarketID']
             entry['StationName'] = self.state['StationName']
-            entry['StationType'] = self.stationtype
+            entry['StationType'] = self.state['StationType']
 
         else:
             entry['Docked'] = False
@@ -586,7 +585,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['BodyID'] = None
                 self.state['StationName'] = None
                 self.state['MarketID'] = None
-                self.stationtype = None
+                self.state['StationType'] = None
                 self.stationservices = None
                 self.started = None
                 self.__init_state()
@@ -625,7 +624,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['BodyType'] = None
                 self.state['StationName'] = None
                 self.state['MarketID'] = None
-                self.stationtype = None
+                self.state['StationType'] = None
                 self.stationservices = None
                 self.started = timegm(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
                 # Don't set Ship, ShipID etc since this will reflect Fighter or SRV if starting in those
@@ -758,7 +757,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             elif event_type == 'undocked':
                 self.state['StationName'] = None
                 self.state['MarketID'] = None
-                self.stationtype = None
+                self.state['StationType'] = None
                 self.stationservices = None
                 self.state['IsDocked'] = False
 
@@ -847,7 +846,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['IsDocked'] = True
                 self.state['StationName'] = entry.get('StationName')  # It may be None
                 self.state['MarketID'] = entry.get('MarketID')  # It may be None
-                self.stationtype = entry.get('StationType')  # It may be None
+                self.state['StationType'] = entry.get('StationType')  # It may be None
                 self.stationservices = entry.get('StationServices')  # None under E:D < 2.4
 
                 # No need to set self.state['Taxi'] or Dropship here, if it's
@@ -959,7 +958,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 if event_type == 'fsdjump':
                     self.state['StationName'] = None
                     self.state['MarketID'] = None
-                    self.stationtype = None
+                    self.state['StationType'] = None
                     self.stationservices = None
 
                 else:
@@ -971,7 +970,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                         self.state['StationName'] = entry.get('Body')
 
                     self.state['MarketID'] = entry.get('MarketID')  # May be None
-                    self.stationtype = entry.get('StationType')  # May be None
+                    self.state['StationType'] = entry.get('StationType')  # May be None
                     self.stationservices = entry.get('StationServices')  # None in Odyssey for on-foot 'Location'
                 ###############################################################
 
@@ -1010,7 +1009,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 ###############################################################
                 self.state['StationName'] = None
                 self.state['MarketID'] = None
-                self.stationtype = None
+                self.state['StationType'] = None
                 self.stationservices = None
                 ###############################################################
 
@@ -1715,7 +1714,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['BodyType'] = None
                 self.state['StationName'] = None
                 self.state['MarketID'] = None
-                self.stationtype = None
+                self.state['StationType'] = None
                 self.stationservices = None
                 self.state['OnFoot'] = False
 
@@ -1734,7 +1733,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['BodyType'] = None
                 self.state['StationName'] = None
                 self.state['MarketID'] = None
-                self.stationtype = None
+                self.state['StationType'] = None
                 self.stationservices = None
 
                 # TODO: on_foot: Will we get an event after this to know ?

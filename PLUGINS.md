@@ -662,6 +662,7 @@ Content of `state` (updated to the current journal entry):
 | `BodyType`[3][4]      |       `Optional[str]`       | The type of body that `Body` refers to                                                                          |
 | `StationName`[3]      |       `Optional[str]`       | Name of the station we're docked at, if applicable                                                              |
 | `MarketID`[3]         |       `Optional[str]`       | MarketID of the station we're docked at, if applicable                                                          |
+| `StationType`[3]      |       `Optional[str]`       | Type of the station we're docked at, if applicable                                                              |
 
 [1] - Contents of `NavRoute` not changed if a `NavRouteClear` event is seen,
 but plugins will see the `NavRouteClear` event.
@@ -808,7 +809,7 @@ now track in the same manner as prior core EDDN plugin code.  Check the
 documentation above for some caveats.  Do not just blindly use this data, or
 the 'Body' name value.
 
-`StationName` and `MarketID` added to the `state` dictionary.
+`StationName`, `MarketID`, and `StationType` added to the `state` dictionary.
 
 ___
 
