@@ -1898,7 +1898,7 @@ class AppWindow(object):
             defaultextension=default_extension,
             filetypes=[('JSON', '.json'), ('All Files', '*')],
             initialdir=config.get_str('outdir'),
-            initialfile=f'{monitor.system}{monitor.station}.{timestamp}'
+            initialfile=f'{monitor.system}.{monitor.station}.{timestamp}'
         )
         if not f:
             return
