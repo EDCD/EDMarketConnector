@@ -509,7 +509,7 @@ class AppWindow(object):
 
             else:
                 self.w.tk.call('wm', 'iconphoto', self.w, '-default',
-                               tk.PhotoImage(file=join(config.respath_path, 'EDMarketConnector.png')))
+                               tk.PhotoImage(file=join(config.respath_path, 'io.edcd.EDMarketConnector.png')))
 
             # TODO: Export to files and merge from them in future ?
             self.theme_icon = tk.PhotoImage(
