@@ -59,7 +59,7 @@ jobs:
           type: 'zip'
           directory: '..'
           path: 'EDMarketConnector'
-          filename: 'EDMarketConnector-release-${{ needs.variables.outputs.sem_ver }}.zip'
+          filename: 'EDMarketConnector/EDMarketConnector-release-${{ needs.variables.outputs.sem_ver }}.zip'
           exclusions: 'EDMarketConnector-release-*.zip dist.win32/* dist.win32 __pycache__/* __pycache__ .editorconfig .flake8 .git* .mypy.ini .pre-commit-config.yaml Build-exe-and-msi.py *.manifest coriolis-data/* coriolis-data/.??* coriolis-data img/* img out/* out out.zip pyproject.toml scripts/* scripts tests/* tests wix/* wix WinSparkle.*'
 
       - name: Upload build files
