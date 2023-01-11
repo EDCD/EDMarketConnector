@@ -7,7 +7,20 @@ on:
   workflow_dispatch:
 
 jobs:
+  variables:
+    outputs:
+      sem_ver: ${{ steps.var.outputs.sem_ver }}
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: Setting global variables
+        uses: actions/github-script@v6
+        id: var
+        with:
+          script: |
+            core.setOutput('sem_ver', '${{ github.ref_name }}'.replaceAll('Release\/', ''))
+
   windows_build:
+    needs: [variables]
     name: Build EDMC
     runs-on: windows-2019
 
@@ -40,11 +53,20 @@ jobs:
         run: |
           python Build-exe-and-msi.py
 
+      - name: Make zip archive
+        uses: thedoctor0/zip-release@main
+        with:
+          type: 'zip'
+          filename: 'EDMarketConnector-release-${{ needs.variables.outputs.sem_ver }}.zip'
+          exclusions: 'EDMarketConnector-release-*.zip .editorconfig .flake8 .git* .mypy.ini .pre-commit-config.yaml Build-exe-and-msi.py *.manifest coriolis-data/* img/* pyproject.toml scripts/* tests/* wix/*'
+
       - name: Upload build files
         uses: actions/upload-artifact@v3
         with:
           name: Built files
-          path: EDMarketConnector_win*.msi
+          path: |
+              EDMarketConnector_win*.msi
+              EDMarketConnector-release-*.zip
 
   release:
     name: Release new version
@@ -60,7 +82,7 @@ jobs:
           path: ./
           
       - name: Hash files
-        run: sha256sum EDMarketConnector_win*.msi > ./hashes.sum
+        run: sha256sum EDMarketConnector_win*.msi EDMarketConnector-release*.zip > ./hashes.sum
 
       - name: Create Draft Release
         uses: "softprops/action-gh-release@v1"
@@ -71,4 +93,5 @@ jobs:
           discussion_category_name: "Announcement"
           files: |
             ./EDMarketConnector_win*.msi
+            ./EDMarketConnector-release-*.zip
             ./hashes.sum
