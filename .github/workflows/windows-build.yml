@@ -68,7 +68,7 @@ jobs:
           filename: 'EDMarketConnector/EDMarketConnector-release-${{ needs.variables.outputs.sem_ver }}.zip'
           # 4. And all the exclusions need to be prefixed with the 'root'
           #   directory.
-          exclusions: 'EDMarketConnector/EDMarketConnector-release-*.zip EDMarketConnector/dist.win32/* EDMarketConnector/dist.win32 EDMarketConnector/__pycache__/* EDMarketConnector/__pycache__ EDMarketConnector/.editorconfig EDMarketConnector/.flake8 EDMarketConnector/.git* EDMarketConnector/.mypy.ini EDMarketConnector/.pre-commit-config.yaml EDMarketConnector/Build-exe-and-msi.py EDMarketConnector/*.manifest EDMarketConnector/coriolis-data/* EDMarketConnector/coriolis-data/.??* EDMarketConnector/coriolis-data EDMarketConnector/img/* EDMarketConnector/img EDMarketConnector/out/* EDMarketConnector/out EDMarketConnector/out.zip EDMarketConnector/pyproject.toml EDMarketConnector/scripts/* EDMarketConnector/scripts EDMarketConnector/tests/* EDMarketConnector/tests EDMarketConnector/wix/* EDMarketConnector/wix EDMarketConnector/WinSparkle.*'
+          exclusions: 'EDMarketConnector/EDMarketConnector-release-*.zip EDMarketConnector/dist.win32 EDMarketConnector/__pycache__/ EDMarketConnector/.editorconfig EDMarketConnector/.flake8 EDMarketConnector/.git* EDMarketConnector/.mypy.ini EDMarketConnector/.pre-commit-config.yaml EDMarketConnector/Build-exe-and-msi.py EDMarketConnector/*.manifest EDMarketConnector/coriolis-data/ EDMarketConnector/img/ EDMarketConnector/out/ EDMarketConnector/out.zip EDMarketConnector/pyproject.toml EDMarketConnector/scripts/ EDMarketConnector/tests/ EDMarketConnector/wix/ EDMarketConnector/WinSparkle.*'
 
       - name: Upload build files
         uses: actions/upload-artifact@v3
