@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
+  windows_build:
     name: Build EDMC
     runs-on: windows-2019
 
