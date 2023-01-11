@@ -57,10 +57,18 @@ jobs:
         uses: thedoctor0/zip-release@main
         with:
           type: 'zip'
+          # We want an in-zip prefix of `EDMarketConnector/` for all files, so
+          # we specify that:
+          # 1. We work from the parent directory
           directory: '..'
+          # 2. The path we're using is the 'root' directory
           path: 'EDMarketConnector'
+          # 3. The .zip file has to be in the 'root' so that upload-artifact
+          #   will process it.  Can't use relative paths.
           filename: 'EDMarketConnector/EDMarketConnector-release-${{ needs.variables.outputs.sem_ver }}.zip'
-          exclusions: 'EDMarketConnector-release-*.zip dist.win32/* dist.win32 __pycache__/* __pycache__ .editorconfig .flake8 .git* .mypy.ini .pre-commit-config.yaml Build-exe-and-msi.py *.manifest coriolis-data/* coriolis-data/.??* coriolis-data img/* img out/* out out.zip pyproject.toml scripts/* scripts tests/* tests wix/* wix WinSparkle.*'
+          # 4. And all the exclusions need to be prefixed with the 'root'
+          #   directory.
+          exclusions: 'EDMarketConnector/EDMarketConnector-release-*.zip EDMarketConnector/dist.win32/* EDMarketConnector/dist.win32 EDMarketConnector/__pycache__/* EDMarketConnector/__pycache__ EDMarketConnector/.editorconfig EDMarketConnector/.flake8 EDMarketConnector/.git* EDMarketConnector/.mypy.ini EDMarketConnector/.pre-commit-config.yaml EDMarketConnector/Build-exe-and-msi.py EDMarketConnector/*.manifest EDMarketConnector/coriolis-data/* EDMarketConnector/coriolis-data/.??* EDMarketConnector/coriolis-data EDMarketConnector/img/* EDMarketConnector/img EDMarketConnector/out/* EDMarketConnector/out EDMarketConnector/out.zip EDMarketConnector/pyproject.toml EDMarketConnector/scripts/* EDMarketConnector/scripts EDMarketConnector/tests/* EDMarketConnector/tests EDMarketConnector/wix/* EDMarketConnector/wix EDMarketConnector/WinSparkle.*'
 
       - name: Upload build files
         uses: actions/upload-artifact@v3
