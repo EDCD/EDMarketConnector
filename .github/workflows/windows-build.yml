@@ -57,8 +57,10 @@ jobs:
         uses: thedoctor0/zip-release@main
         with:
           type: 'zip'
+          directory: '..'
+          path: 'EDMarketConnector'
           filename: 'EDMarketConnector-release-${{ needs.variables.outputs.sem_ver }}.zip'
-          exclusions: 'EDMarketConnector-release-*.zip .editorconfig .flake8 .git* .mypy.ini .pre-commit-config.yaml Build-exe-and-msi.py *.manifest coriolis-data/* img/* pyproject.toml scripts/* tests/* wix/*'
+          exclusions: 'dist.win32/* dist.win32 __pycache__/* __pycache__ .editorconfig .flake8 .git* .mypy.ini .pre-commit-config.yaml Build-exe-and-msi.py *.manifest coriolis-data/* coriolis-data/.??* coriolis-data img/* img out/* out out.zip pyproject.toml scripts/* scripts tests/* tests wix/* wix WinSparkle.*'
 
       - name: Upload build files
         uses: actions/upload-artifact@v3
@@ -66,7 +68,7 @@ jobs:
           name: Built files
           path: |
               EDMarketConnector_win*.msi
-              EDMarketConnector-release-*.zip
+              ../EDMarketConnector-release-*.zip
 
   release:
     name: Release new version
