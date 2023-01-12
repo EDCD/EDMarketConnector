@@ -21,16 +21,6 @@ jobs:
           script: |
             core.setOutput('sem_ver', '${{ github.ref_name }}'.replaceAll('Release\/', ''))
 
-  windows_build:
-    needs: [variables]
-    name: Build EDMC
-    runs-on: windows-2019
-
-    defaults:
-      run:
-        shell: powershell
-
-    steps:
       - uses: actions/checkout@v3
         with:
           submodules: true
@@ -44,8 +34,29 @@ jobs:
           path: 'EDMarketConnector'
           filename: 'EDMarketConnector/EDMarketConnector-release-${{ needs.variables.outputs.sem_ver }}.tar.gz'
           # For 'tar' we can only specify filenames, not any directory location
-          # exclusions: 'EDMarketConnector-release-*.* .editorconfig .flake8 .git* .mypy.ini .pre-commit-config.yaml Build-exe-and-msi.py *.manifest coriolis-data img pyproject.toml scripts tests wix'
-          exclusions: 'EDMarketConnector/EDMarketConnector-release-*.* EDMarketConnector/.editorconfig EDMarketConnector/.flake8 EDMarketConnector/.git* EDMarketConnector/.mypy.ini EDMarketConnector/.pre-commit-config.yaml EDMarketConnector/Build-exe-and-msi.py EDMarketConnector/*.manifest EDMarketConnector/coriolis-data/ EDMarketConnector/img/ EDMarketConnector/pyproject.toml EDMarketConnector/scripts/ EDMarketConnector/tests/ EDMarketConnector/wix/'
+          exclusions: 'EDMarketConnector-release-*.* .editorconfig .flake8 .git* .mypy.ini .pre-commit-config.yaml Build-exe-and-msi.py *.manifest coriolis-data img pyproject.toml scripts tests wix'
+          # exclusions: 'EDMarketConnector/EDMarketConnector-release-*.* EDMarketConnector/.editorconfig EDMarketConnector/.flake8 EDMarketConnector/.git* EDMarketConnector/.mypy.ini EDMarketConnector/.pre-commit-config.yaml EDMarketConnector/Build-exe-and-msi.py EDMarketConnector/*.manifest EDMarketConnector/coriolis-data/ EDMarketConnector/img/ EDMarketConnector/pyproject.toml EDMarketConnector/scripts/ EDMarketConnector/tests/ EDMarketConnector/wix/'
+
+      - name: Upload build files
+        uses: actions/upload-artifact@v3
+        with:
+          name: Built files
+          path: |
+              EDMarketConnector-release-*.tar.gz
+
+  windows_build:
+    needs: [variables]
+    name: Build EDMC
+    runs-on: windows-2019
+
+    defaults:
+      run:
+        shell: powershell
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
 
       - name: Make zip archive
         uses: thedoctor0/zip-release@main
@@ -93,7 +104,6 @@ jobs:
           path: |
               EDMarketConnector_win_*.msi
               EDMarketConnector-release-*.zip
-              EDMarketConnector-release-*.tar.gz
 
   release:
     name: Release new version
