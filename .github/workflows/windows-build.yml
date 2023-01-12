@@ -26,16 +26,27 @@ jobs:
           submodules: true
 
       - name: Make tar archive
-        uses: thedoctor0/zip-release@main
         with:
-          # See the 'zip' version for commentary on these values
-          type: 'tar'
-          directory: '..'
-          path: 'EDMarketConnector'
-          filename: 'EDMarketConnector/EDMarketConnector-release-${{ needs.variables.outputs.sem_ver }}.tar.gz'
-          # For 'tar' we can only specify filenames, not any directory location
-          exclusions: 'EDMarketConnector-release-*.* .editorconfig .flake8 .git* .mypy.ini .pre-commit-config.yaml Build-exe-and-msi.py *.manifest coriolis-data img pyproject.toml scripts tests wix'
-          # exclusions: 'EDMarketConnector/EDMarketConnector-release-*.* EDMarketConnector/.editorconfig EDMarketConnector/.flake8 EDMarketConnector/.git* EDMarketConnector/.mypy.ini EDMarketConnector/.pre-commit-config.yaml EDMarketConnector/Build-exe-and-msi.py EDMarketConnector/*.manifest EDMarketConnector/coriolis-data/ EDMarketConnector/img/ EDMarketConnector/pyproject.toml EDMarketConnector/scripts/ EDMarketConnector/tests/ EDMarketConnector/wix/'
+          script: |
+            # For 'tar' we can only specify filename/glob exclusions, not any
+            # directory location
+            tar -C .. -c -v -z \
+                -f EDMarketConnector/EDMarketConnector-release-${{ needs.variables.outputs.sem_ver }}.tar.gz \
+                --exclude=EDMarketConnector-release-*.* \
+                --exclude=.editorconfig \
+                --exclude=.flake8 \
+                --exclude=.git* \
+                --exclude=.mypy.ini \
+                --exclude=.pre-commit-config.yaml \
+                --exclude=Build-exe-and-msi.py \
+                --exclude=*.manifest \
+                --exclude=coriolis-data \
+                --exclude=img \
+                --exclude=pyproject.toml \
+                --exclude=scripts \
+                --exclude=tests \
+                --exclude=wix \
+                EDMarketConnector
 
       - name: Upload build files
         uses: actions/upload-artifact@v3
