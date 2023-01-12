@@ -10,6 +10,7 @@ jobs:
   variables:
     outputs:
       sem_ver: ${{ steps.var.outputs.sem_ver }}
+      archive_exclusions: ${{ steps.var.outputs.archive_exclusions }}
     runs-on: "ubuntu-latest"
     steps:
       - name: Setting global variables
@@ -18,6 +19,11 @@ jobs:
         with:
           script: |
             core.setOutput('sem_ver', '${{ github.ref_name }}'.replaceAll('Release\/', ''))
+            # If this value gets too long it can cause issues with Windows
+            # command-line length and zip/tar will fail
+            # And all the exclusions need to be prefixed with the 'root'
+            # directory.
+            core.setOutput('archive_exclusions', 'EDMarketConnector/EDMarketConnector-release-*.* EDMarketConnector/dist.win32 EDMarketConnector/__pycache__/ EDMarketConnector/.editorconfig EDMarketConnector/.flake8 EDMarketConnector/.git* EDMarketConnector/.mypy.ini EDMarketConnector/.pre-commit-config.yaml EDMarketConnector/Build-exe-and-msi.py EDMarketConnector/*.manifest EDMarketConnector/coriolis-data/ EDMarketConnector/img/ EDMarketConnector/out/ EDMarketConnector/out.zip EDMarketConnector/pyproject.toml EDMarketConnector/scripts/ EDMarketConnector/tests/ EDMarketConnector/wix/ EDMarketConnector/WinSparkle.*')
 
   windows_build:
     needs: [variables]
@@ -70,15 +76,25 @@ jobs:
           #   directory.
           # NB: If this gets too long it can cause zip 'Command Line Error',
           #   presumably due to a Windows CL length limit.
-          exclusions: 'EDMarketConnector/EDMarketConnector-release-*.zip EDMarketConnector/dist.win32 EDMarketConnector/__pycache__/ EDMarketConnector/.editorconfig EDMarketConnector/.flake8 EDMarketConnector/.git* EDMarketConnector/.mypy.ini EDMarketConnector/.pre-commit-config.yaml EDMarketConnector/Build-exe-and-msi.py EDMarketConnector/*.manifest EDMarketConnector/coriolis-data/ EDMarketConnector/img/ EDMarketConnector/out/ EDMarketConnector/out.zip EDMarketConnector/pyproject.toml EDMarketConnector/scripts/ EDMarketConnector/tests/ EDMarketConnector/wix/ EDMarketConnector/WinSparkle.*'
+          exclusions: ${{ needs.variables.outputs.archive_exclusions }}
+
+      - name: Make tar archive
+        uses: thedoctor0/zip-release@main
+        with:
+          # See the 'zip' version above for commentary on these values
+          type: 'tar'
+          path: 'EDMarketConnector'
+          filename: 'EDMarketConnector/EDMarketConnector-release-${{ needs.variables.outputs.sem_ver }}.tar.gz'
+          exclusions: ${{ needs.variables.outputs.archive_exclusions }}
 
       - name: Upload build files
         uses: actions/upload-artifact@v3
         with:
           name: Built files
           path: |
-              EDMarketConnector_win*.msi
+              EDMarketConnector_win_*.msi
               EDMarketConnector-release-*.zip
+              EDMarketConnector-release-*.tar.gz
 
   release:
     name: Release new version
@@ -94,7 +110,7 @@ jobs:
           path: ./
           
       - name: Hash files
-        run: sha256sum EDMarketConnector_win*.msi EDMarketConnector-release*.zip > ./hashes.sum
+        run: sha256sum EDMarketConnector_win_*.msi EDMarketConnector-release-*.{zip,tar.gz} > ./hashes.sum
 
       - name: Create Draft Release
         uses: "softprops/action-gh-release@v1"
@@ -104,6 +120,7 @@ jobs:
           prerelease: true
           discussion_category_name: "Announcement"
           files: |
-            ./EDMarketConnector_win*.msi
+            ./EDMarketConnector_win_*.msi
             ./EDMarketConnector-release-*.zip
+            ./EDMarketConnector-release-*.tar.gz
             ./hashes.sum
