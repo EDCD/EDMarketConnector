@@ -61,7 +61,7 @@ elif sys.platform == 'win32':
 
     GetWindowText = ctypes.windll.user32.GetWindowTextW
     GetWindowText.argtypes = [HWND, LPWSTR, ctypes.c_int]
-    GetWindowTextLength = ctypes.windll.user32.GetWindowTextLengthW
+    GetWindowTextLengthW = ctypes.windll.user32.GetWindowTextLengthW
 
     GetProcessHandleFromHwnd = ctypes.windll.oleacc.GetProcessHandleFromHwnd
 
@@ -2032,7 +2032,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         elif sys.platform == 'win32':
             def WindowTitle(h):  # noqa: N802 # type: ignore
                 if h:
-                    length = GetWindowTextLength(h) + 1
+                    length = GetWindowTextLengthW(h) + 1
                     buf = ctypes.create_unicode_buffer(length)
                     if GetWindowText(h, buf, length):
                         return buf.value
