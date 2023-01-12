@@ -48,23 +48,13 @@ if sys.platform == 'darwin':
     F_GLOBAL_NOCACHE = 55
 
 elif sys.platform == 'win32':
-    import ctypes
-    from ctypes import WINFUNCTYPE, windll
-    from ctypes.wintypes import BOOL, HANDLE
-
+    # pywin32 modules: <https://mhammond.github.io/pywin32/modules.html>
+    import win32api
+    import win32con
     import win32gui
+    import win32process
     from watchdog.events import FileCreatedEvent, FileSystemEventHandler
     from watchdog.observers import Observer
-
-    # <https://learn.microsoft.com/en-us/windows/win32/api/handleapi/nf-handleapi-closehandle>
-    # BOOL CloseHandle(
-    #   [in] HANDLE hObject
-    # );
-    prototype = WINFUNCTYPE(BOOL, HANDLE)
-    paramflags_closehandle = (1, "hObject"),
-    CloseHandle = prototype(("CloseHandle", windll.kernel32), paramflags_closehandle)
-
-    GetProcessHandleFromHwnd = ctypes.windll.oleacc.GetProcessHandleFromHwnd
 
 else:
     # Linux's inotify doesn't work over CIFS or NFS, so poll
@@ -2040,8 +2030,12 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             def callback(hwnd, hwnds):
                 name = WindowTitle(hwnd)
                 if name and name.startswith('Elite - Dangerous'):
-                    handle = GetProcessHandleFromHwnd(hwnd)
-                    if handle:  # If GetProcessHandleFromHwnd succeeds then the app is already running as this user
+                    # <https://mhammond.github.io/pywin32/win32process__GetWindowThreadProcessId_meth.html>
+                    thread_id, process_id = win32process.GetWindowThreadProcessId(hwnd)
+                    # <https://mhammond.github.io/pywin32/win32api__OpenProcess_meth.html>
+                    # The first arg can't simply be `0`, and `win32con.PROCESS_TERMINATE` works
+                    handle = win32api.OpenProcess(win32con.PROCESS_TERMINATE, False, process_id)
+                    if handle:  # If OpenProcess succeeds then the app is already running as this user
                         hwnds.append(hwnd)
 
                 return True
