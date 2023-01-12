@@ -50,7 +50,7 @@ if sys.platform == 'darwin':
 elif sys.platform == 'win32':
     import ctypes
     from ctypes import WINFUNCTYPE, windll
-    from ctypes.wintypes import BOOL, HWND, LPARAM, LPWSTR
+    from ctypes.wintypes import BOOL, HANDLE, HWND, LPARAM, LPWSTR
 
     from watchdog.events import FileCreatedEvent, FileSystemEventHandler
     from watchdog.observers import Observer
@@ -64,7 +64,9 @@ elif sys.platform == 'win32':
     paramflags = (1, "lpEnumFunc"), (1, "lParam")
     EnumWindows = prototype(("EnumWindows", windll.user32), paramflags)
 
-    CloseHandle = ctypes.windll.kernel32.CloseHandle
+    prototype = WINFUNCTYPE(BOOL, HANDLE)
+    paramflags_closehandle = (1, "hObject"),
+    CloseHandle = prototype(("CloseHandle", windll.kernel32), paramflags_closehandle)
 
     GetWindowText = ctypes.windll.user32.GetWindowTextW
     GetWindowText.argtypes = [HWND, LPWSTR, ctypes.c_int]
