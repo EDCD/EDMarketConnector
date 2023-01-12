@@ -26,27 +26,26 @@ jobs:
           submodules: true
 
       - name: Make tar archive
-        with:
-          script: |
-            # For 'tar' we can only specify filename/glob exclusions, not any
-            # directory location
-            tar -C .. -c -v -z \
-                -f EDMarketConnector/EDMarketConnector-release-${{ needs.variables.outputs.sem_ver }}.tar.gz \
-                --exclude=EDMarketConnector-release-*.* \
-                --exclude=.editorconfig \
-                --exclude=.flake8 \
-                --exclude=.git* \
-                --exclude=.mypy.ini \
-                --exclude=.pre-commit-config.yaml \
-                --exclude=Build-exe-and-msi.py \
-                --exclude=*.manifest \
-                --exclude=coriolis-data \
-                --exclude=img \
-                --exclude=pyproject.toml \
-                --exclude=scripts \
-                --exclude=tests \
-                --exclude=wix \
-                EDMarketConnector
+        run: |
+          # For 'tar' we can only specify filename/glob exclusions, not any
+          # directory location
+          tar -C .. -c -v -z \
+              -f EDMarketConnector/EDMarketConnector-release-${{ needs.variables.outputs.sem_ver }}.tar.gz \
+              --exclude=EDMarketConnector-release-*.* \
+              --exclude=.editorconfig \
+              --exclude=.flake8 \
+              --exclude=.git* \
+              --exclude=.mypy.ini \
+              --exclude=.pre-commit-config.yaml \
+              --exclude=Build-exe-and-msi.py \
+              --exclude=*.manifest \
+              --exclude=coriolis-data \
+              --exclude=img \
+              --exclude=pyproject.toml \
+              --exclude=scripts \
+              --exclude=tests \
+              --exclude=wix \
+              EDMarketConnector
 
       - name: Upload build files
         uses: actions/upload-artifact@v3
