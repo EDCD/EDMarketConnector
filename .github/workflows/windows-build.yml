@@ -35,7 +35,7 @@ jobs:
           # For 'tar' we can only specify filename/glob exclusions, not any
           # directory location
           tar -c -v -z \
-              -f EDMarketConnector-release-${{ needs.variables.outputs.sem_ver }}.tar.gz \
+              -f ../EDMarketConnector-release-${{ needs.variables.outputs.sem_ver }}.tar.gz \
               -C .. \
               --exclude=EDMarketConnector-release-*.* \
               --exclude=.editorconfig \
@@ -52,6 +52,7 @@ jobs:
               --exclude=tests \
               --exclude=wix \
               EDMarketConnector
+            mv ../EDMarketConnector-release-${{ needs.variables.outputs.sem_ver }}.tar.gz .
 
       - name: Upload build files
         uses: actions/upload-artifact@v3
@@ -124,7 +125,7 @@ jobs:
   release:
     name: Release new version
     runs-on: ubuntu-latest
-    needs: windows_build
+    needs: [ windows_build, linux_build ]
     if: "${{ github.event_name != 'workflow_dispatch' }}"
 
     steps:
