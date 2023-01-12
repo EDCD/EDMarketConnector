@@ -29,8 +29,9 @@ jobs:
         run: |
           # For 'tar' we can only specify filename/glob exclusions, not any
           # directory location
-          tar -C .. -c -v -z \
-              -f EDMarketConnector/EDMarketConnector-release-${{ needs.variables.outputs.sem_ver }}.tar.gz \
+          tar -c -v -z \
+              -f EDMarketConnector-release-${{ needs.variables.outputs.sem_ver }}.tar.gz \
+              -C .. \
               --exclude=EDMarketConnector-release-*.* \
               --exclude=.editorconfig \
               --exclude=.flake8 \
