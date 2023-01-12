@@ -415,6 +415,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         if self.live:
             if self.game_was_running:
+                logger.info("Game is/was running, so synthesizing StartUp event for plugins")
                 # Game is running locally
                 entry: OrderedDictT[str, Any] = OrderedDict([
                     ('timestamp', strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())),
