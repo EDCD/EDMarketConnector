@@ -50,8 +50,9 @@ if sys.platform == 'darwin':
 elif sys.platform == 'win32':
     import ctypes
     from ctypes import WINFUNCTYPE, windll
-    from ctypes.wintypes import BOOL, HANDLE, HWND, LPARAM, LPWSTR
+    from ctypes.wintypes import BOOL, HANDLE, HWND, LPARAM
 
+    import win32gui
     from watchdog.events import FileCreatedEvent, FileSystemEventHandler
     from watchdog.observers import Observer
 
@@ -72,24 +73,6 @@ elif sys.platform == 'win32':
     prototype = WINFUNCTYPE(BOOL, HANDLE)
     paramflags_closehandle = (1, "hObject"),
     CloseHandle = prototype(("CloseHandle", windll.kernel32), paramflags_closehandle)
-
-    # <https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getwindowtextw>
-    # int GetWindowTextW(
-    #   [in]  HWND   hWnd,
-    #   [out] LPWSTR lpString,
-    #   [in]  int    nMaxCount
-    # );
-    prototype = WINFUNCTYPE(ctypes.c_int, HWND, LPWSTR, ctypes.c_int)
-    paramflags_getwindowtextw = (1, "hWnd"), (2, "lpString"), (1, "nMaxCount")
-    GetWindowTextW = prototype(("GetWindowTextW", windll.user32), paramflags_getwindowtextw)
-
-    # <https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getwindowtextlengthw>
-    # int GetWindowTextLengthW(
-    #   [in] HWND hWnd
-    # );
-    prototype = WINFUNCTYPE(ctypes.c_int, HWND)
-    paramflags_getwindowtextlengthw = (1, "hWnd"),
-    GetWindowTextLengthW = prototype(("GetWindowTextLengthW", windll.user32), paramflags_getwindowtextw)
 
     GetProcessHandleFromHwnd = ctypes.windll.oleacc.GetProcessHandleFromHwnd
 
@@ -2060,10 +2043,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         elif sys.platform == 'win32':
             def WindowTitle(h):  # noqa: N802 # type: ignore
                 if h:
-                    length = GetWindowTextLengthW(h) + 1
-                    buf = ctypes.create_unicode_buffer(length)
-                    if GetWindowTextW(h, buf, length):
-                        return buf.value
+                    return win32gui.GetWindowText(h)
+
                 return None
 
             def callback(hWnd, lParam):  # noqa: N803
