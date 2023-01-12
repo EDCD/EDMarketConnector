@@ -50,21 +50,11 @@ if sys.platform == 'darwin':
 elif sys.platform == 'win32':
     import ctypes
     from ctypes import WINFUNCTYPE, windll
-    from ctypes.wintypes import BOOL, HANDLE, HWND, LPARAM
+    from ctypes.wintypes import BOOL, HANDLE
 
     import win32gui
     from watchdog.events import FileCreatedEvent, FileSystemEventHandler
     from watchdog.observers import Observer
-
-    # <https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-enumwindows>
-    # BOOL EnumWindows(
-    #   [in] WNDENUMPROC lpEnumFunc,
-    #   [in] LPARAM      lParam
-    # );
-    EnumWindowsProc = WINFUNCTYPE(BOOL, HWND, LPARAM)
-    prototype = WINFUNCTYPE(BOOL, EnumWindowsProc, LPARAM)
-    paramflags_enumwindows = (1, "lpEnumFunc"), (1, "lParam")
-    EnumWindows = prototype(("EnumWindows", windll.user32), paramflags_enumwindows)
 
     # <https://learn.microsoft.com/en-us/windows/win32/api/handleapi/nf-handleapi-closehandle>
     # BOOL CloseHandle(
@@ -2047,17 +2037,19 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
                 return None
 
-            def callback(hWnd, lParam):  # noqa: N803
-                name = WindowTitle(hWnd)
+            def callback(hwnd, hwnds):
+                name = WindowTitle(hwnd)
                 if name and name.startswith('Elite - Dangerous'):
-                    handle = GetProcessHandleFromHwnd(hWnd)
+                    handle = GetProcessHandleFromHwnd(hwnd)
                     if handle:  # If GetProcessHandleFromHwnd succeeds then the app is already running as this user
-                        CloseHandle(handle)
-                        return False  # stop enumeration
+                        hwnds.append(hwnd)
 
                 return True
 
-            return not EnumWindows(EnumWindowsProc(callback), 0)
+            # Ref: <http://timgolden.me.uk/python/win32_how_do_i/find-the-window-for-my-subprocess.html>
+            ed_windows: list[int] = []
+            win32gui.EnumWindows(callback, ed_windows)
+            return True if len(ed_windows) > 0 else False
 
         return False
 
