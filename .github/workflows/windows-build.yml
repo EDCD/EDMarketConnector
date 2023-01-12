@@ -35,6 +35,36 @@ jobs:
         with:
           submodules: true
 
+      - name: Make tar archive
+        uses: thedoctor0/zip-release@main
+        with:
+          # See the 'zip' version for commentary on these values
+          type: 'tar'
+          directory: '..'
+          path: 'EDMarketConnector'
+          filename: 'EDMarketConnector/EDMarketConnector-release-${{ needs.variables.outputs.sem_ver }}.tar.gz'
+          # For 'tar' we can only specify filenames, not any directory location
+          exclusions: 'EDMarketConnector-release-*.* .editorconfig .flake8 .git* .mypy.ini .pre-commit-config.yaml Build-exe-and-msi.py *.manifest coriolis-data img pyproject.toml scripts tests wix'
+
+      - name: Make zip archive
+        uses: thedoctor0/zip-release@main
+        with:
+          type: 'zip'
+          # We want an in-zip prefix of `EDMarketConnector/` for all files, so
+          # we specify that:
+          # 1. We work from the parent directory
+          directory: '..'
+          # 2. The path we're using is the 'root' directory
+          path: 'EDMarketConnector'
+          # 3. The .zip file has to be in the 'root' so that upload-artifact
+          #   will process it.  Can't use relative paths.
+          filename: 'EDMarketConnector/EDMarketConnector-release-${{ needs.variables.outputs.sem_ver }}.zip'
+          # 4. And all the exclusions need to be prefixed with the 'root'
+          #   directory.
+          # NB: If this gets too long it can cause zip 'Command Line Error',
+          #   presumably due to a Windows CL length limit.
+          exclusions: 'EDMarketConnector/EDMarketConnector-release-*.* EDMarketConnector/.editorconfig EDMarketConnector/.flake8 EDMarketConnector/.git* EDMarketConnector/.mypy.ini EDMarketConnector/.pre-commit-config.yaml EDMarketConnector/Build-exe-and-msi.py EDMarketConnector/*.manifest EDMarketConnector/coriolis-data/ EDMarketConnector/img/ EDMarketConnector/pyproject.toml EDMarketConnector/scripts/ EDMarketConnector/tests/ EDMarketConnector/wix/'
+
       - uses: actions/setup-python@v4
         with:
           python-version-file: '.python-version'
@@ -54,35 +84,6 @@ jobs:
       - name: Build EDMC
         run: |
           python Build-exe-and-msi.py
-
-      - name: Make zip archive
-        uses: thedoctor0/zip-release@main
-        with:
-          type: 'zip'
-          # We want an in-zip prefix of `EDMarketConnector/` for all files, so
-          # we specify that:
-          # 1. We work from the parent directory
-          directory: '..'
-          # 2. The path we're using is the 'root' directory
-          path: 'EDMarketConnector'
-          # 3. The .zip file has to be in the 'root' so that upload-artifact
-          #   will process it.  Can't use relative paths.
-          filename: 'EDMarketConnector/EDMarketConnector-release-${{ needs.variables.outputs.sem_ver }}.zip'
-          # 4. And all the exclusions need to be prefixed with the 'root'
-          #   directory.
-          # NB: If this gets too long it can cause zip 'Command Line Error',
-          #   presumably due to a Windows CL length limit.
-          exclusions: 'EDMarketConnector/EDMarketConnector-release-*.* EDMarketConnector/dist.win32 EDMarketConnector/__pycache__/ EDMarketConnector/.editorconfig EDMarketConnector/.flake8 EDMarketConnector/.git* EDMarketConnector/.mypy.ini EDMarketConnector/.pre-commit-config.yaml EDMarketConnector/Build-exe-and-msi.py EDMarketConnector/*.manifest EDMarketConnector/coriolis-data/ EDMarketConnector/img/ EDMarketConnector/out/ EDMarketConnector/out.zip EDMarketConnector/pyproject.toml EDMarketConnector/scripts/ EDMarketConnector/tests/ EDMarketConnector/wix/ EDMarketConnector/WinSparkle.*'
-
-      - name: Make tar archive
-        uses: thedoctor0/zip-release@main
-        with:
-          # See the 'zip' version above for commentary on these values
-          type: 'tar'
-          path: 'EDMarketConnector'
-          filename: 'EDMarketConnector/EDMarketConnector-release-${{ needs.variables.outputs.sem_ver }}.tar.gz'
-          # For 'tar' we can only specify filenames, not any directory location
-          exclusions: 'EDMarketConnector-release-*.* dist.win32 __pycache__ .editorconfig .flake8 .git* .mypy.ini .pre-commit-config.yaml Build-exe-and-msi.py *.manifest coriolis-data img out out.zip pyproject.toml scripts tests wix WinSparkle.*'
 
       - name: Upload build files
         uses: actions/upload-artifact@v3
