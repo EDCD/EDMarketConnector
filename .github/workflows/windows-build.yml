@@ -7,13 +7,6 @@ on:
       - "Release/*"
   workflow_dispatch:
 
-env:
-  # If this value gets too long it can cause issues with Windows
-  # command-line length and zip/tar will fail
-  # And all the exclusions need to be prefixed with the 'root'
-  # directory.
-  ARCHIVE_EXCLUSIONS: 'EDMarketConnector/EDMarketConnector-release-*.* EDMarketConnector/dist.win32 EDMarketConnector/__pycache__/ EDMarketConnector/.editorconfig EDMarketConnector/.flake8 EDMarketConnector/.git* EDMarketConnector/.mypy.ini EDMarketConnector/.pre-commit-config.yaml EDMarketConnector/Build-exe-and-msi.py EDMarketConnector/*.manifest EDMarketConnector/coriolis-data/ EDMarketConnector/img/ EDMarketConnector/out/ EDMarketConnector/out.zip EDMarketConnector/pyproject.toml EDMarketConnector/scripts/ EDMarketConnector/tests/ EDMarketConnector/wix/ EDMarketConnector/WinSparkle.*'
-
 jobs:
   variables:
     outputs:
@@ -79,7 +72,7 @@ jobs:
           #   directory.
           # NB: If this gets too long it can cause zip 'Command Line Error',
           #   presumably due to a Windows CL length limit.
-          exclusions: ${{ env.ARCHIVE_EXCLUSIONS }}
+          exclusions: 'EDMarketConnector/EDMarketConnector-release-*.* EDMarketConnector/dist.win32 EDMarketConnector/__pycache__/ EDMarketConnector/.editorconfig EDMarketConnector/.flake8 EDMarketConnector/.git* EDMarketConnector/.mypy.ini EDMarketConnector/.pre-commit-config.yaml EDMarketConnector/Build-exe-and-msi.py EDMarketConnector/*.manifest EDMarketConnector/coriolis-data/ EDMarketConnector/img/ EDMarketConnector/out/ EDMarketConnector/out.zip EDMarketConnector/pyproject.toml EDMarketConnector/scripts/ EDMarketConnector/tests/ EDMarketConnector/wix/ EDMarketConnector/WinSparkle.*'
 
       - name: Make tar archive
         uses: thedoctor0/zip-release@main
@@ -88,7 +81,8 @@ jobs:
           type: 'tar'
           path: 'EDMarketConnector'
           filename: 'EDMarketConnector/EDMarketConnector-release-${{ needs.variables.outputs.sem_ver }}.tar.gz'
-          exclusions: ${{ env.ARCHIVE_EXCLUSIONS }}
+          # For 'tar' we can only specify filenames, not any directory location
+          exclusions: 'EDMarketConnector-release-*.* dist.win32 __pycache__ .editorconfig .flake8 .git* .mypy.ini .pre-commit-config.yaml Build-exe-and-msi.py *.manifest coriolis-data img out out.zip pyproject.toml scripts tests wix WinSparkle.*'
 
       - name: Upload build files
         uses: actions/upload-artifact@v3
