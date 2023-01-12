@@ -21,6 +21,9 @@ jobs:
           script: |
             core.setOutput('sem_ver', '${{ github.ref_name }}'.replaceAll('Release\/', ''))
 
+  linux_build:
+    runs-on: "ubuntu-latest"
+    steps:
       - uses: actions/checkout@v3
         with:
           submodules: true
