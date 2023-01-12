@@ -22,6 +22,8 @@ jobs:
             core.setOutput('sem_ver', '${{ github.ref_name }}'.replaceAll('Release\/', ''))
 
   linux_build:
+    needs: [variables]
+    name: Linux environment build steps
     runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v3
