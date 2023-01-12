@@ -55,22 +55,41 @@ elif sys.platform == 'win32':
     from watchdog.events import FileCreatedEvent, FileSystemEventHandler
     from watchdog.observers import Observer
 
+    # <https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-enumwindows>
     # BOOL EnumWindows(
     #   [in] WNDENUMPROC lpEnumFunc,
     #   [in] LPARAM      lParam
     # );
     EnumWindowsProc = WINFUNCTYPE(BOOL, HWND, LPARAM)
     prototype = WINFUNCTYPE(BOOL, EnumWindowsProc, LPARAM)
-    paramflags = (1, "lpEnumFunc"), (1, "lParam")
-    EnumWindows = prototype(("EnumWindows", windll.user32), paramflags)
+    paramflags_enumwindows = (1, "lpEnumFunc"), (1, "lParam")
+    EnumWindows = prototype(("EnumWindows", windll.user32), paramflags_enumwindows)
 
+    # <https://learn.microsoft.com/en-us/windows/win32/api/handleapi/nf-handleapi-closehandle>
+    # BOOL CloseHandle(
+    #   [in] HANDLE hObject
+    # );
     prototype = WINFUNCTYPE(BOOL, HANDLE)
     paramflags_closehandle = (1, "hObject"),
     CloseHandle = prototype(("CloseHandle", windll.kernel32), paramflags_closehandle)
 
-    GetWindowText = ctypes.windll.user32.GetWindowTextW
-    GetWindowText.argtypes = [HWND, LPWSTR, ctypes.c_int]
-    GetWindowTextLengthW = ctypes.windll.user32.GetWindowTextLengthW
+    # <https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getwindowtextw>
+    # int GetWindowTextW(
+    #   [in]  HWND   hWnd,
+    #   [out] LPWSTR lpString,
+    #   [in]  int    nMaxCount
+    # );
+    prototype = WINFUNCTYPE(ctypes.c_int, HWND, LPWSTR, ctypes.c_int)
+    paramflags_getwindowtextw = (1, "hWnd"), (2, "lpString"), (1, "nMaxCount")
+    GetWindowTextW = prototype(("GetWindowTextW", windll.user32), paramflags_getwindowtextw)
+
+    # <https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getwindowtextlengthw>
+    # int GetWindowTextLengthW(
+    #   [in] HWND hWnd
+    # );
+    prototype = WINFUNCTYPE(ctypes.c_int, HWND)
+    paramflags_getwindowtextlengthw = (1, "hWnd"),
+    GetWindowTextLengthW = prototype(("GetWindowTextLengthW", windll.user32), paramflags_getwindowtextw)
 
     GetProcessHandleFromHwnd = ctypes.windll.oleacc.GetProcessHandleFromHwnd
 
@@ -2043,7 +2062,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 if h:
                     length = GetWindowTextLengthW(h) + 1
                     buf = ctypes.create_unicode_buffer(length)
-                    if GetWindowText(h, buf, length):
+                    if GetWindowTextW(h, buf, length):
                         return buf.value
                 return None
 
