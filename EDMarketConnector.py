@@ -1567,7 +1567,7 @@ class AppWindow(object):
                 return  # Startup
 
             if entry['event'] in ['StartUp', 'LoadGame'] and monitor.started:
-                logger.info('Startup or LoadGame event')
+                logger.info('StartUp or LoadGame event')
 
                 # Disable WinSparkle automatic update checks, IFF configured to do so when in-game
                 if config.get_int('disable_autoappupdatecheckingame') and 1:
