@@ -4,6 +4,7 @@
 # spell-checker: words joinacrew quitacrew sellshiponrebuy newbal navroute npccrewpaidwage sauto
 
 import json
+import os
 import pathlib
 import queue
 import re
@@ -53,6 +54,7 @@ elif sys.platform == 'win32':
     import win32con
     import win32gui
     import win32process
+    import win32security
     from watchdog.events import FileCreatedEvent, FileSystemEventHandler
     from watchdog.observers import Observer
 
@@ -129,6 +131,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         # The assumption is gameversion will parse via `coerce()` and always
         # be >= for Live, and < for Legacy.
         self.live_galaxy_base_version = semantic_version.Version('4.0.0')
+
+        if sys.platform == 'win32':
+            # Get the SID of the user we're running as for later use in
+            # `game_running()`
+            self.user_sid, self.user_domain, self.user_type = win32security.LookupAccountName(
+                None, os.environ['USERNAME']
+            )
 
         self.__init_state()
 
@@ -2030,21 +2039,30 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             def callback(hwnd, hwnds):
                 name = WindowTitle(hwnd)
                 if name and name.startswith('Elite - Dangerous'):
+                    # We've found a window that *looks* like an ED game process, but now we need to check
+                    # if it's owned by the current user.
+
+                    # Get the process_id of the window we found
                     # <https://mhammond.github.io/pywin32/win32process__GetWindowThreadProcessId_meth.html>
                     thread_id, process_id = win32process.GetWindowThreadProcessId(hwnd)
+
+                    # Use that to get a process handle
                     # <https://mhammond.github.io/pywin32/win32api__OpenProcess_meth.html>
                     # The first arg can't simply be `0`, and `win32con.PROCESS_TERMINATE` works
-                    handle = win32api.OpenProcess(win32con.PROCESS_TERMINATE, False, process_id)
+                    handle = win32api.OpenProcess(win32con.PROCESS_QUERY_INFORMATION, False, process_id)
                     if handle:
-                        # If OpenProcess succeeds then the app is already running in this User session
-                        # That *specifically* means "either this exact user, in this session, or another user via
-                        # `runas`, but in this session", i.e. visible in the windows UI.
-                        # If the process is running *in another session*, such that it's not actually visible right
-                        # now, then this code will not find it.
-                        #
-                        # Checking if the process User matches that of the current session is trickier.
-                        # There's a method using `wmi`, but it's **VERY SLOW**, so not appropriate here.
-                        hwnds.append(hwnd)
+                        # We got the handle OK, now we need a token for it
+                        process_token = win32security.OpenProcessToken(handle, win32security.TOKEN_QUERY)
+                        # So we can use that to get information about the User
+                        token_information, i = win32security.GetTokenInformation(
+                            process_token, win32security.TokenUser
+                        )
+                        # And lastly check if token_information, which should be a PySID object, matches
+                        # that of the current user we looked up in `__init__()`.
+                        if token_information == self.user_sid:
+                            # This can be used to convert the token to username, domain name, and account type
+                            # user, domain, name_use = win32security.LookupAccountSid(None, token_information)
+                            hwnds.append(hwnd)
 
                 return True
 
