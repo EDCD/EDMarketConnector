@@ -2035,7 +2035,15 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     # <https://mhammond.github.io/pywin32/win32api__OpenProcess_meth.html>
                     # The first arg can't simply be `0`, and `win32con.PROCESS_TERMINATE` works
                     handle = win32api.OpenProcess(win32con.PROCESS_TERMINATE, False, process_id)
-                    if handle:  # If OpenProcess succeeds then the app is already running as this user
+                    if handle:
+                        # If OpenProcess succeeds then the app is already running in this User session
+                        # That *specifically* means "either this exact user, in this session, or another user via
+                        # `runas`, but in this session", i.e. visible in the windows UI.
+                        # If the process is running *in another session*, such that it's not actually visible right
+                        # now, then this code will not find it.
+                        #
+                        # Checking if the process User matches that of the current session is trickier.
+                        # There's a method using `wmi`, but it's **VERY SLOW**, so not appropriate here.
                         hwnds.append(hwnd)
 
                 return True
