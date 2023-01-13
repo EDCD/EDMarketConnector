@@ -252,7 +252,6 @@ if __name__ == '__main__':  # noqa: C901
                 import win32process
                 from ctypes.wintypes import BOOL, HWND, INT, LPARAM, LPCWSTR, LPWSTR
 
-                EnumWindows = ctypes.windll.user32.EnumWindows  # noqa: N806
                 GetClassName = ctypes.windll.user32.GetClassNameW  # noqa: N806
                 GetClassName.argtypes = [HWND, LPWSTR, ctypes.c_int]
                 GetWindowText = ctypes.windll.user32.GetWindowTextW  # noqa: N806
@@ -278,7 +277,6 @@ if __name__ == '__main__':  # noqa: C901
 
                     return None
 
-                @ctypes.WINFUNCTYPE(BOOL, HWND, LPARAM)
                 def enumwindowsproc(window_handle, l_param):  # noqa: CCR001
                     """
                     Determine if any window for the Application exists.
@@ -293,25 +291,22 @@ if __name__ == '__main__':  # noqa: C901
                     :param l_param: The second parameter to the EnumWindows() call.
                     :return: False if we found a match, else True to continue iteration
                     """
-                    # class name limited to 256 - https://msdn.microsoft.com/en-us/library/windows/desktop/ms633576
-                    cls = ctypes.create_unicode_buffer(257)
-                    # This conditional is exploded to make debugging slightly easier
-                    if GetClassName(window_handle, cls, 257):
-                        if cls.value == 'TkTopLevel':
-                            if window_title(window_handle) == applongname:
-                                if GetProcessHandleFromHwnd(window_handle):
-                                    # If GetProcessHandleFromHwnd succeeds then the app is already running as this user
-                                    if len(sys.argv) > 1 and sys.argv[1].startswith(protocolhandler_redirect):
-                                        CoInitializeEx(0, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)
-                                        # Wait for it to be responsive to avoid ShellExecute recursing
-                                        ShowWindow(window_handle, SW_RESTORE)
-                                        ShellExecute(0, None, sys.argv[1], None, None, SW_RESTORE)
+                    class_name = win32gui.GetClassName(window_handle)
+                    if class_name == 'TkTopLevel':
+                        if window_title(window_handle) == applongname:
+                            if GetProcessHandleFromHwnd(window_handle):
+                                # If GetProcessHandleFromHwnd succeeds then the app is already running as this user
+                                if len(sys.argv) > 1 and sys.argv[1].startswith(protocolhandler_redirect):
+                                    CoInitializeEx(0, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)
+                                    # Wait for it to be responsive to avoid ShellExecute recursing
+                                    ShowWindow(window_handle, SW_RESTORE)
+                                    ShellExecute(0, None, sys.argv[1], None, None, SW_RESTORE)
 
-                                    else:
-                                        ShowWindowAsync(window_handle, SW_RESTORE)
-                                        SetForegroundWindow(window_handle)
+                                else:
+                                    ShowWindowAsync(window_handle, SW_RESTORE)
+                                    SetForegroundWindow(window_handle)
 
-                            return False  # Indicate window found, so stop iterating
+                        return False  # Indicate window found, so stop iterating
 
                     # Indicate that EnumWindows() needs to continue iterating
                     return True  # Do not remove, else this function as a callback breaks
@@ -321,7 +316,8 @@ if __name__ == '__main__':  # noqa: C901
                 # enumwindwsproc() on each.  When an invocation returns False it
                 # stops iterating.
                 # Ref: <https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-enumwindows>
-                EnumWindows(enumwindowsproc, 0)
+                edmc_windows: list[int] = []
+                win32gui.EnumWindows(enumwindowsproc, edmc_windows)
 
         return
 
