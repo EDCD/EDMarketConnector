@@ -287,7 +287,6 @@ if __name__ == '__main__':  # noqa: C901
                                 )
                                 if token_information == user_sid:
                                     if len(sys.argv) > 1 and sys.argv[1].startswith(protocolhandler_redirect):
-                                        logger.debug("This process is trying to do edmc:// ...")
                                         pythoncom.CoInitializeEx(
                                             pythoncom.COINIT_APARTMENTTHREADED | pythoncom.COINIT_DISABLE_OLE1DDE
                                         )
