@@ -2120,7 +2120,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         if entry['event'] == 'Location':
             logger.trace_if('journal.locations', '"Location" event')
 
-        if not self.live and entry['event'] not in (None, 'Fileheader'):
+        if not self.live and entry['event'] not in (None, 'Fileheader', 'ShutDown'):
             # Game not running locally, but Journal has been updated
             self.live = True
             entry = self.synthesize_startup_event()
