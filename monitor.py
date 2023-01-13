@@ -50,6 +50,7 @@ if sys.platform == 'darwin':
 
 elif sys.platform == 'win32':
     # pywin32 modules: <https://mhammond.github.io/pywin32/modules.html>
+    import pywintypes
     import win32api
     import win32con
     import win32gui
@@ -2063,12 +2064,24 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                             # This can be used to convert the token to username, domain name, and account type
                             # user, domain, name_use = win32security.LookupAccountSid(None, token_information)
                             hwnds.append(hwnd)
+                            return False  # Indicate window found, so stop iterating
 
                 return True
 
             # Ref: <http://timgolden.me.uk/python/win32_how_do_i/find-the-window-for-my-subprocess.html>
             ed_windows: list[int] = []
-            win32gui.EnumWindows(callback, ed_windows)
+            try:
+                win32gui.EnumWindows(callback, ed_windows)
+
+            except pywintypes.error as e:
+                # Ref: <https://lists.archive.carbon60.com/python/python/135503>
+                # Because False is returned in the callback to indicate "found the window, stop
+                # processing", this causes EnumWindows() to return `0`, which is generically
+                # treated as an error, so exception is raised.
+                # So, check the exception's .winerror, and ignore if `0`.
+                if e.winerror != 0:
+                    logger.exception("EnumWindows exception:")
+
             return True if len(ed_windows) > 0 else False
 
         return False
