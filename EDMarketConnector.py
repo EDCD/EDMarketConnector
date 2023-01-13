@@ -254,9 +254,6 @@ if __name__ == '__main__':  # noqa: C901
                 import win32process
                 import win32security
 
-                COINIT_APARTMENTTHREADED = 0x2  # noqa: N806
-                COINIT_DISABLE_OLE1DDE = 0x4  # noqa: N806
-
                 def window_title(h: int) -> Optional[str]:
                     if h:
                         return win32gui.GetWindowText(h)
@@ -290,7 +287,10 @@ if __name__ == '__main__':  # noqa: C901
                                 )
                                 if token_information == user_sid:
                                     if len(sys.argv) > 1 and sys.argv[1].startswith(protocolhandler_redirect):
-                                        pythoncom.CoInitializeEx(COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)
+                                        logger.debug("This process is trying to do edmc:// ...")
+                                        pythoncom.CoInitializeEx(
+                                            pythoncom.COINIT_APARTMENTTHREADED | pythoncom.COINIT_DISABLE_OLE1DDE
+                                        )
                                         # Wait for it to be responsive to avoid ShellExecute recursing
                                         win32gui.ShowWindow(window_handle, win32con.SW_RESTORE)
                                         win32api.ShellExecute(0, None, sys.argv[1], None, None, win32con.SW_RESTORE)
