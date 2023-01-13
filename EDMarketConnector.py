@@ -246,6 +246,10 @@ if __name__ == '__main__':  # noqa: C901
             # now need to do the edmc:// checks for auth callback
             if locked != JournalLockResult.LOCKED:
                 import ctypes
+                import win32api
+                import win32con
+                import win32gui
+                import win32process
                 from ctypes.wintypes import BOOL, HWND, INT, LPARAM, LPCWSTR, LPWSTR
 
                 EnumWindows = ctypes.windll.user32.EnumWindows  # noqa: N806
@@ -253,7 +257,6 @@ if __name__ == '__main__':  # noqa: C901
                 GetClassName.argtypes = [HWND, LPWSTR, ctypes.c_int]
                 GetWindowText = ctypes.windll.user32.GetWindowTextW  # noqa: N806
                 GetWindowText.argtypes = [HWND, LPWSTR, ctypes.c_int]
-                GetWindowTextLength = ctypes.windll.user32.GetWindowTextLengthW  # noqa: N806
                 GetProcessHandleFromHwnd = ctypes.windll.oleacc.GetProcessHandleFromHwnd  # noqa: N806
 
                 SW_RESTORE = 9  # noqa: N806
@@ -271,10 +274,7 @@ if __name__ == '__main__':  # noqa: C901
 
                 def window_title(h: int) -> Optional[str]:
                     if h:
-                        text_length = GetWindowTextLength(h) + 1
-                        buf = ctypes.create_unicode_buffer(text_length)
-                        if GetWindowText(h, buf, text_length):
-                            return buf.value
+                        return win32gui.GetWindowText(h)
 
                     return None
 
