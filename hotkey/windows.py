@@ -20,6 +20,7 @@ assert sys.platform == 'win32'
 
 logger = get_main_logger()
 
+# Not yet implmented in pywin32 - <https://github.com/mhammond/pywin32/issues/2004>
 UnregisterHotKey = ctypes.windll.user32.UnregisterHotKey
 # These don't seem to be in pywin32 at all
 # Ref: <https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerhotkey>
