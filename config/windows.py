@@ -1,14 +1,14 @@
 """Windows config implementation."""
 
 # spell-checker: words folderid deps hkey edcd
-import ctypes
 import functools
 import pathlib
 import sys
 import uuid
 import winreg
-from ctypes.wintypes import DWORD, HANDLE
 from typing import List, Literal, Optional, Union
+
+from win32comext.shell import shell
 
 from config import AbstractConfig, applongname, appname, logger, update_interval
 
@@ -16,34 +16,19 @@ assert sys.platform == 'win32'
 
 REG_RESERVED_ALWAYS_ZERO = 0
 
-# This is the only way to do this from python without external deps (which do this anyway).
-FOLDERID_Documents = uuid.UUID('{FDD39AD0-238F-46AF-ADB4-6C85480369C7}')
-FOLDERID_LocalAppData = uuid.UUID('{F1B32785-6FBA-4FCF-9D55-7B8E7F157091}')
-FOLDERID_Profile = uuid.UUID('{5E6C858F-0E22-4760-9AFE-EA3317B67173}')
-FOLDERID_SavedGames = uuid.UUID('{4C5C32FF-BB9D-43b0-B5B4-2D72E54EAAA4}')
-
-SHGetKnownFolderPath = ctypes.windll.shell32.SHGetKnownFolderPath
-SHGetKnownFolderPath.argtypes = [ctypes.c_char_p, DWORD, HANDLE, ctypes.POINTER(ctypes.c_wchar_p)]
-
-CoTaskMemFree = ctypes.windll.ole32.CoTaskMemFree
-CoTaskMemFree.argtypes = [ctypes.c_void_p]
-
 
 def known_folder_path(guid: uuid.UUID) -> Optional[str]:
     """Look up a Windows GUID to actual folder path name."""
-    buf = ctypes.c_wchar_p()
-    if SHGetKnownFolderPath(ctypes.create_string_buffer(guid.bytes_le), 0, 0, ctypes.byref(buf)):
-        return None
-    retval = buf.value  # copy data
-    CoTaskMemFree(buf)  # and free original
-    return retval
+    return shell.SHGetKnownFolderPath(guid, 0, 0)
 
 
 class WinConfig(AbstractConfig):
     """Implementation of AbstractConfig for Windows."""
 
     def __init__(self, do_winsparkle=True) -> None:
-        self.app_dir_path = pathlib.Path(str(known_folder_path(FOLDERID_LocalAppData))) / appname
+        if local_appdata := known_folder_path(shell.FOLDERID_LocalAppData):
+            self.app_dir_path = pathlib.Path(local_appdata) / appname
+
         self.app_dir_path.mkdir(exist_ok=True)
 
         self.plugin_dir_path = self.app_dir_path / 'plugins'
@@ -59,7 +44,7 @@ class WinConfig(AbstractConfig):
 
         self.home_path = pathlib.Path.home()
 
-        journal_dir_str = known_folder_path(FOLDERID_SavedGames)
+        journal_dir_str = known_folder_path(shell.FOLDERID_SavedGames)
         journaldir = pathlib.Path(journal_dir_str) if journal_dir_str is not None else None
         self.default_journal_dir_path = None  # type: ignore
         if journaldir is not None:
@@ -84,7 +69,7 @@ class WinConfig(AbstractConfig):
 
         self.identifier = applongname
         if (outdir_str := self.get_str('outdir')) is None or not pathlib.Path(outdir_str).is_dir():
-            docs = known_folder_path(FOLDERID_Documents)
+            docs = known_folder_path(shell.FOLDERID_Documents)
             self.set('outdir',  docs if docs is not None else self.home)
 
     def __setup_winsparkle(self):
