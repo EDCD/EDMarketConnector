@@ -2224,6 +2224,8 @@ def journal_entry(  # noqa: C901, CCR001
         if entry['MusicTrack'] == 'MainMenu':
             this.status_body_name = None
 
+    tracking_ui_update()
+
     # Events with their own EDDN schema
     if config.get_int('output') & config.OUT_EDDN_SEND_NON_STATION and not state['Captain']:
 
@@ -2408,8 +2410,6 @@ def journal_entry(  # noqa: C901, CCR001
         except Exception as e:
             logger.debug(f'Failed exporting {entry["event"]}', exc_info=e)
             return str(e)
-
-    tracking_ui_update()
 
     return None
 
