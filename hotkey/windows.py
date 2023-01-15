@@ -10,6 +10,7 @@ from ctypes.wintypes import DWORD, HWND, LONG, LPWSTR, MSG, ULONG, WORD
 from typing import Optional, Tuple, Union
 
 import pywintypes
+import win32api
 import win32gui
 
 from config import config
@@ -40,7 +41,6 @@ WM_APP = 0x8000
 WM_SND_GOOD = WM_APP + 1
 WM_SND_BAD = WM_APP + 2
 
-GetKeyState = ctypes.windll.user32.GetKeyState
 MapVirtualKey = ctypes.windll.user32.MapVirtualKeyW
 VK_BACK = 0x08
 VK_CLEAR = 0x0c
@@ -288,11 +288,11 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
         :param event: tk event ?
         :return: False to retain previous, None to not use, else (keycode, modifiers)
         """
-        modifiers = ((GetKeyState(VK_MENU) & 0x8000) and MOD_ALT) \
-            | ((GetKeyState(VK_CONTROL) & 0x8000) and MOD_CONTROL) \
-            | ((GetKeyState(VK_SHIFT) & 0x8000) and MOD_SHIFT) \
-            | ((GetKeyState(VK_LWIN) & 0x8000) and MOD_WIN) \
-            | ((GetKeyState(VK_RWIN) & 0x8000) and MOD_WIN)
+        modifiers = ((win32api.GetKeyState(VK_MENU) & 0x8000) and MOD_ALT) \
+            | ((win32api.GetKeyState(VK_CONTROL) & 0x8000) and MOD_CONTROL) \
+            | ((win32api.GetKeyState(VK_SHIFT) & 0x8000) and MOD_SHIFT) \
+            | ((win32api.GetKeyState(VK_LWIN) & 0x8000) and MOD_WIN) \
+            | ((win32api.GetKeyState(VK_RWIN) & 0x8000) and MOD_WIN)
         keycode = event.keycode
 
         if keycode in [VK_SHIFT, VK_CONTROL, VK_MENU, VK_LWIN, VK_RWIN]:
