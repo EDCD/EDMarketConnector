@@ -41,7 +41,7 @@ WM_APP = 0x8000
 WM_SND_GOOD = WM_APP + 1
 WM_SND_BAD = WM_APP + 2
 
-MapVirtualKey = ctypes.windll.user32.MapVirtualKeyW
+# Virtual key values
 VK_BACK = 0x08
 VK_CLEAR = 0x0c
 VK_RETURN = 0x0d
@@ -64,6 +64,14 @@ VK_NUMLOCK = 0x90
 VK_SCROLL = 0x91
 VK_PROCESSKEY = 0xe5
 VK_OEM_CLEAR = 0xfe
+
+# VirtualKey mapping values
+# <https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-mapvirtualkeyexa>
+MAPVK_VK_TO_VSC = 0
+MAPVK_VSC_TO_VK = 1
+MAPVK_VK_TO_CHAR = 2
+MAPVK_VSC_TO_VK_EX = 3
+MAPVK_VK_TO_VSC_EX = 4
 
 GetForegroundWindow = ctypes.windll.user32.GetForegroundWindow
 GetWindowText = ctypes.windll.user32.GetWindowTextW
@@ -359,7 +367,8 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
             text += WindowsHotkeyMgr.DISPLAY[keycode]
 
         else:
-            c = MapVirtualKey(keycode, 2)  # printable ?
+            # <https://mhammond.github.io/pywin32/win32api__MapVirtualKey_meth.html>
+            c = win32api.MapVirtualKey(keycode, MAPVK_VK_TO_CHAR)  # printable ?
             if not c:  # oops not printable
                 text += '⁈'
 
