@@ -9,6 +9,9 @@ import winsound
 from ctypes.wintypes import DWORD, HWND, LONG, LPWSTR, MSG, ULONG, WORD
 from typing import Optional, Tuple, Union
 
+import pywintypes
+import win32gui
+
 from config import config
 from EDMCLogging import get_main_logger
 from hotkey import AbstractHotkeyMgr
@@ -17,8 +20,9 @@ assert sys.platform == 'win32'
 
 logger = get_main_logger()
 
-RegisterHotKey = ctypes.windll.user32.RegisterHotKey
 UnregisterHotKey = ctypes.windll.user32.UnregisterHotKey
+# These don't seem to be in pywin32 at all
+# Ref: <https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerhotkey>
 MOD_ALT = 0x0001
 MOD_CONTROL = 0x0002
 MOD_SHIFT = 0x0004
@@ -210,8 +214,11 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
         """Handle hotkeys."""
         logger.debug('Begin...')
         # Hotkey must be registered by the thread that handles it
-        if not RegisterHotKey(None, 1, modifiers | MOD_NOREPEAT, keycode):
-            logger.debug("We're not the right thread?")
+        try:
+            win32gui.RegisterHotKey(None, 1, modifiers | MOD_NOREPEAT, keycode)
+
+        except pywintypes.error:
+            logger.exception("We're not the right thread?")
             self.thread = None  # type: ignore
             return
 
@@ -236,8 +243,11 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
                     logger.debug('Passing key on')
                     UnregisterHotKey(None, 1)
                     SendInput(1, fake, ctypes.sizeof(INPUT))
-                    if not RegisterHotKey(None, 1, modifiers | MOD_NOREPEAT, keycode):
-                        logger.debug("We aren't registered for this ?")
+                    try:
+                        win32gui.RegisterHotKey(None, 1, modifiers | MOD_NOREPEAT, keycode)
+
+                    except pywintypes.error:
+                        logger.exception("We aren't registered for this ?")
                         break
 
             elif msg.message == WM_SND_GOOD:
@@ -266,7 +276,7 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
         """Stop acquiring hotkey state."""
         pass
 
-    def fromevent(self, event) -> Optional[Union[bool, Tuple]]:  # noqa: CCR001
+    def fromevent(self, event) -> Optional[Union[bool, Tuple]]:
         """
         Return configuration (keycode, modifiers) or None=clear or False=retain previous.
 
@@ -305,11 +315,12 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
                 return (0, modifiers)
 
         # See if the keycode is usable and available
-        if RegisterHotKey(None, 2, modifiers | MOD_NOREPEAT, keycode):
+        try:
+            win32gui.RegisterHotKey(None, 2, modifiers | MOD_NOREPEAT, keycode)
             UnregisterHotKey(None, 2)
             return (keycode, modifiers)
 
-        else:
+        except pywintypes.error:
             winsound.MessageBeep()
             return None
 
