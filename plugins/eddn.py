@@ -87,6 +87,7 @@ class This:
         self.coordinates: Optional[Tuple] = None
         self.body_name: Optional[str] = None
         self.body_id: Optional[int] = None
+        self.body_type: Optional[int] = None
         self.station_name: str | None = None
         self.station_type: str | None = None
         self.station_marketid: str | None = None
@@ -125,6 +126,7 @@ class This:
         self.ui_system_address: tk.Label
         self.ui_j_body_name: tk.Label
         self.ui_j_body_id: tk.Label
+        self.ui_j_body_type: tk.Label
         self.ui_s_body_name: tk.Label
         self.ui_station_name: tk.Label
         self.ui_station_type: tk.Label
@@ -1978,13 +1980,13 @@ def plugin_app(parent: tk.Tk) -> Optional[tk.Frame]:
         # System
         #######################################################################
         # SystemName
-        system_name_label = tk.Label(this.ui, text="S:Name:")
+        system_name_label = tk.Label(this.ui, text="J:SystemName:")
         system_name_label.grid(row=row, column=0, sticky=tk.W)
         this.ui_system_name = tk.Label(this.ui, name='eddn_track_system_name', anchor=tk.W)
         this.ui_system_name.grid(row=row, column=1, sticky=tk.E)
         row += 1
         # SystemAddress
-        system_address_label = tk.Label(this.ui, text="S:Address:")
+        system_address_label = tk.Label(this.ui, text="J:SystemAddress:")
         system_address_label.grid(row=row, column=0, sticky=tk.W)
         this.ui_system_address = tk.Label(this.ui, name='eddn_track_system_address', anchor=tk.W)
         this.ui_system_address.grid(row=row, column=1, sticky=tk.E)
@@ -2005,6 +2007,12 @@ def plugin_app(parent: tk.Tk) -> Optional[tk.Frame]:
         journal_body_id_label.grid(row=row, column=0, sticky=tk.W)
         this.ui_j_body_id = tk.Label(this.ui, name='eddn_track_j_body_id', anchor=tk.W)
         this.ui_j_body_id.grid(row=row, column=1, sticky=tk.E)
+        row += 1
+        # Body Type from Journal
+        journal_body_type_label = tk.Label(this.ui, text="J:BodyType:")
+        journal_body_type_label.grid(row=row, column=0, sticky=tk.W)
+        this.ui_j_body_type = tk.Label(this.ui, name='eddn_track_j_body_type', anchor=tk.W)
+        this.ui_j_body_type.grid(row=row, column=1, sticky=tk.E)
         row += 1
         # Body Name from Status.json
         status_body_name_label = tk.Label(this.ui, text="S:BodyName:")
@@ -2062,6 +2070,10 @@ def tracking_ui_update() -> None:
     this.ui_j_body_id['text'] = '≪None≫'
     if this.body_id is not None:
         this.ui_j_body_id['text'] = str(this.body_id)
+
+    this.ui_j_body_type['text'] = '≪None≫'
+    if this.body_type is not None:
+        this.ui_j_body_type['text'] = str(this.body_type)
 
     this.ui_s_body_name['text'] = '≪None≫'
     if this.status_body_name is not None:
@@ -2288,6 +2300,7 @@ def journal_entry(  # noqa: C901, CCR001
     # outside of this function.
     this.body_name = state['Body']
     this.body_id = state['BodyID']
+    this.body_type = state['BodyType']
     this.coordinates = state['StarPos']
     this.system_address = state['SystemAddress']
     this.system_name = state['SystemName']
