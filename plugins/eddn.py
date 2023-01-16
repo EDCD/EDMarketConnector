@@ -82,10 +82,14 @@ class This:
         self.odyssey = False
 
         # Track location to add to Journal events
-        self.systemaddress: Optional[str] = None
+        self.system_address: Optional[str] = None
+        self.system_name: Optional[str] = None
         self.coordinates: Optional[Tuple] = None
         self.body_name: Optional[str] = None
         self.body_id: Optional[int] = None
+        self.station_name: str | None = None
+        self.station_type: str | None = None
+        self.station_marketid: str | None = None
         # Track Status.json data
         self.status_body_name: Optional[str] = None
 
@@ -117,9 +121,14 @@ class This:
 
         # Tracking UI
         self.ui: tk.Frame
+        self.ui_system_name: tk.Label
+        self.ui_system_address: tk.Label
         self.ui_j_body_name: tk.Label
         self.ui_j_body_id: tk.Label
         self.ui_s_body_name: tk.Label
+        self.ui_station_name: tk.Label
+        self.ui_station_type: tk.Label
+        self.ui_station_marketid: tk.Label
 
 
 this = This()
@@ -1116,11 +1125,11 @@ class EDDN:
                 entry['StarSystem'] = system_name
 
         if 'SystemAddress' not in entry:
-            if this.systemaddress is None:
+            if this.system_address is None:
                 logger.warning("this.systemaddress is None, can't add SystemAddress")
                 return "this.systemaddress is None, can't add SystemAddress"
 
-            entry['SystemAddress'] = this.systemaddress
+            entry['SystemAddress'] = this.system_address
 
         if 'StarPos' not in entry:
             # Prefer the passed-in version
@@ -1159,7 +1168,7 @@ class EDDN:
         #######################################################################
         # In this case should add StarPos, but only if the
         # SystemAddress of where we think we are matches.
-        if this.systemaddress is None or this.systemaddress != entry['SystemAddress']:
+        if this.system_address is None or this.system_address != entry['SystemAddress']:
             logger.warning("SystemAddress isn't current location! Can't add augmentations!")
             return 'Wrong System! Missed jump ?'
 
@@ -1201,7 +1210,7 @@ class EDDN:
         #######################################################################
         # In this case should add StarSystem and StarPos, but only if the
         # SystemAddress of where we think we are matches.
-        if this.systemaddress is None or this.systemaddress != entry['SystemAddress']:
+        if this.system_address is None or this.system_address != entry['SystemAddress']:
             logger.warning("SystemAddress isn't current location! Can't add augmentations!")
             return 'Wrong System! Missed jump ?'
 
@@ -1263,7 +1272,7 @@ class EDDN:
         #######################################################################
         # In this case should add StarPos, but only if the
         # SystemAddress of where we think we are matches.
-        if this.systemaddress is None or this.systemaddress != entry['SystemAddress']:
+        if this.system_address is None or this.system_address != entry['SystemAddress']:
             logger.warning("SystemAddress isn't current location! Can't add augmentations!")
             return 'Wrong System! Missed jump ?'
 
@@ -1357,7 +1366,7 @@ class EDDN:
         #######################################################################
         # In this case should add StarPos, but only if the
         # SystemAddress of where we think we are matches.
-        if this.systemaddress is None or this.systemaddress != entry['SystemAddress']:
+        if this.system_address is None or this.system_address != entry['SystemAddress']:
             logger.warning("SystemAddress isn't current location! Can't add augmentations!")
             return 'Wrong System! Missed jump ?'
 
@@ -1652,7 +1661,7 @@ class EDDN:
         #######################################################################
         # In this case should add SystemName and StarPos, but only if the
         # SystemAddress of where we think we are matches.
-        if this.systemaddress is None or this.systemaddress != entry['SystemAddress']:
+        if this.system_address is None or this.system_address != entry['SystemAddress']:
             logger.warning("SystemAddress isn't current location! Can't add augmentations!")
             return 'Wrong System! Missed jump ?'
 
@@ -1702,7 +1711,7 @@ class EDDN:
         #######################################################################
         # In this case should add StarPos, but only if the
         # SystemAddress of where we think we are matches.
-        if this.systemaddress is None or this.systemaddress != entry['SystemAddress']:
+        if this.system_address is None or this.system_address != entry['SystemAddress']:
             logger.warning("SystemAddress isn't current location! Can't add augmentations!")
             return 'Wrong System! Missed jump ?'
 
@@ -1758,7 +1767,7 @@ class EDDN:
         #######################################################################
         # In this case should add SystemName and StarPos, but only if the
         # SystemAddress of where we think we are matches.
-        if this.systemaddress is None or this.systemaddress != entry['SystemAddress']:
+        if this.system_address is None or this.system_address != entry['SystemAddress']:
             logger.warning("SystemAddress isn't current location! Can't add augmentations!")
             return 'Wrong System! Missed jump ?'
 
@@ -1816,11 +1825,11 @@ class EDDN:
 
         else:
             # Horizons order, so use tracked data for cross-check
-            if this.systemaddress is None or system_name is None or system_starpos is None:
-                logger.error(f'Location tracking failure: {this.systemaddress=}, {system_name=}, {system_starpos=}')
+            if this.system_address is None or system_name is None or system_starpos is None:
+                logger.error(f'Location tracking failure: {this.system_address=}, {system_name=}, {system_starpos=}')
                 return 'Current location not tracked properly, started after game?'
 
-            aug_systemaddress = this.systemaddress
+            aug_systemaddress = this.system_address
             aug_starsystem = system_name
             aug_starpos = system_starpos
 
@@ -1964,23 +1973,69 @@ def plugin_app(parent: tk.Tk) -> Optional[tk.Frame]:
         this.ui = tk.Frame(parent)
 
         row = this.ui.grid_size()[1]
+
+        #######################################################################
+        # System
+        #######################################################################
+        # SystemName
+        system_name_label = tk.Label(this.ui, text="S:Name:")
+        system_name_label.grid(row=row, column=0, sticky=tk.W)
+        this.ui_system_name = tk.Label(this.ui, name='eddn_track_system_name', anchor=tk.W)
+        this.ui_system_name.grid(row=row, column=1, sticky=tk.E)
+        row += 1
+        # SystemAddress
+        system_address_label = tk.Label(this.ui, text="S:Address:")
+        system_address_label.grid(row=row, column=0, sticky=tk.W)
+        this.ui_system_address = tk.Label(this.ui, name='eddn_track_system_address', anchor=tk.W)
+        this.ui_system_address.grid(row=row, column=1, sticky=tk.E)
+        row += 1
+        #######################################################################
+
+        #######################################################################
+        # Body
+        #######################################################################
+        # Body Name from Journal
         journal_body_name_label = tk.Label(this.ui, text="J:BodyName:")
         journal_body_name_label.grid(row=row, column=0, sticky=tk.W)
         this.ui_j_body_name = tk.Label(this.ui, name='eddn_track_j_body_name', anchor=tk.W)
         this.ui_j_body_name.grid(row=row, column=1, sticky=tk.E)
         row += 1
-
+        # Body ID from Journal
         journal_body_id_label = tk.Label(this.ui, text="J:BodyID:")
         journal_body_id_label.grid(row=row, column=0, sticky=tk.W)
         this.ui_j_body_id = tk.Label(this.ui, name='eddn_track_j_body_id', anchor=tk.W)
         this.ui_j_body_id.grid(row=row, column=1, sticky=tk.E)
         row += 1
-
+        # Body Name from Status.json
         status_body_name_label = tk.Label(this.ui, text="S:BodyName:")
         status_body_name_label.grid(row=row, column=0, sticky=tk.W)
         this.ui_s_body_name = tk.Label(this.ui, name='eddn_track_s_body_name', anchor=tk.W)
         this.ui_s_body_name.grid(row=row, column=1, sticky=tk.E)
         row += 1
+        #######################################################################
+
+        #######################################################################
+        # Station
+        #######################################################################
+        # Name
+        status_station_name_label = tk.Label(this.ui, text="J:StationName:")
+        status_station_name_label.grid(row=row, column=0, sticky=tk.W)
+        this.ui_station_name = tk.Label(this.ui, name='eddn_track_station_name', anchor=tk.W)
+        this.ui_station_name.grid(row=row, column=1, sticky=tk.E)
+        row += 1
+        # Type
+        status_station_type_label = tk.Label(this.ui, text="J:StationType:")
+        status_station_type_label.grid(row=row, column=0, sticky=tk.W)
+        this.ui_station_type = tk.Label(this.ui, name='eddn_track_station_type', anchor=tk.W)
+        this.ui_station_type.grid(row=row, column=1, sticky=tk.E)
+        row += 1
+        # MarketID
+        status_station_marketid_label = tk.Label(this.ui, text="J:StationID:")
+        status_station_marketid_label.grid(row=row, column=0, sticky=tk.W)
+        this.ui_station_marketid = tk.Label(this.ui, name='eddn_track_station_id', anchor=tk.W)
+        this.ui_station_marketid.grid(row=row, column=1, sticky=tk.E)
+        row += 1
+        #######################################################################
 
         return this.ui
 
@@ -1991,6 +2046,14 @@ def tracking_ui_update() -> None:
     """Update the Tracking UI with current data, if required."""
     if not config.eddn_tracking_ui:
         return
+
+    this.ui_system_name['text'] = '≪None≫'
+    if this.ui_system_name is not None:
+        this.ui_system_name['text'] = this.system_name
+
+    this.ui_system_address['text'] = '≪None≫'
+    if this.ui_system_address is not None:
+        this.ui_system_address['text'] = this.system_address
 
     this.ui_j_body_name['text'] = '≪None≫'
     if this.body_name is not None:
@@ -2003,6 +2066,18 @@ def tracking_ui_update() -> None:
     this.ui_s_body_name['text'] = '≪None≫'
     if this.status_body_name is not None:
         this.ui_s_body_name['text'] = this.status_body_name
+
+    this.ui_station_name['text'] = '≪None≫'
+    if this.station_name is not None:
+        this.ui_station_name['text'] = this.station_name
+
+    this.ui_station_type['text'] = '≪None≫'
+    if this.station_type is not None:
+        this.ui_station_type['text'] = this.station_type
+
+    this.ui_station_marketid['text'] = '≪None≫'
+    if this.station_marketid is not None:
+        this.ui_station_marketid['text'] = this.station_marketid
 
     this.ui.update_idletasks()
 
@@ -2214,7 +2289,11 @@ def journal_entry(  # noqa: C901, CCR001
     this.body_name = state['Body']
     this.body_id = state['BodyID']
     this.coordinates = state['StarPos']
-    this.systemaddress = state['SystemAddress']
+    this.system_address = state['SystemAddress']
+    this.system_name = state['SystemName']
+    this.station_name = state['StationName']
+    this.station_type = state['StationType']
+    this.station_marketid = state['MarketID']
 
     if event_name == 'docked':
         # Trigger a send/retry of pending EDDN messages
@@ -2339,7 +2418,7 @@ def journal_entry(  # noqa: C901, CCR001
 
         # add mandatory StarSystem and StarPos properties to events
         if 'StarSystem' not in entry:
-            if this.systemaddress is None or this.systemaddress != entry['SystemAddress']:
+            if this.system_address is None or this.system_address != entry['SystemAddress']:
                 logger.warning(f"event({entry['event']}) has no StarSystem, but SystemAddress isn't current location")
                 return "Wrong System! Delayed Scan event?"
 
@@ -2356,7 +2435,7 @@ def journal_entry(  # noqa: C901, CCR001
 
             # Gazelle[TD] reported seeing a lagged Scan event with incorrect
             # augmented StarPos: <https://github.com/EDCD/EDMarketConnector/issues/961>
-            if this.systemaddress is None or this.systemaddress != entry['SystemAddress']:
+            if this.system_address is None or this.system_address != entry['SystemAddress']:
                 logger.warning(f"event({entry['event']}) has no StarPos, but SystemAddress isn't current location")
                 return "Wrong System! Delayed Scan event?"
 
