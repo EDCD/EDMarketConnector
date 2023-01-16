@@ -1000,9 +1000,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['BodyType'] = None
 
             elif event_type == 'supercruiseentry':
-                # NB: Do **NOT** clear Body state, because we won't get a fresh
-                #     ApproachBody if we don't leave Orbital Cruise but land
-                #     again.
+                # We only clear Body state if the Type is Station.  This is
+                # because we won't get a fresh ApproachBody if we don't leave
+                # Orbital Cruise but land again.
+                if self.state['BodyType'] == 'Station':
+                    self.state['Body'] = None
+                    self.state['BodyID'] = None
+                    self.state['BodyType'] = None
 
                 ###############################################################
                 # Track: Current station, if applicable
