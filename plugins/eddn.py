@@ -82,10 +82,15 @@ class This:
         self.odyssey = False
 
         # Track location to add to Journal events
-        self.systemaddress: Optional[str] = None
+        self.system_address: Optional[str] = None
+        self.system_name: Optional[str] = None
         self.coordinates: Optional[Tuple] = None
         self.body_name: Optional[str] = None
         self.body_id: Optional[int] = None
+        self.body_type: Optional[int] = None
+        self.station_name: str | None = None
+        self.station_type: str | None = None
+        self.station_marketid: str | None = None
         # Track Status.json data
         self.status_body_name: Optional[str] = None
 
@@ -117,9 +122,15 @@ class This:
 
         # Tracking UI
         self.ui: tk.Frame
+        self.ui_system_name: tk.Label
+        self.ui_system_address: tk.Label
         self.ui_j_body_name: tk.Label
         self.ui_j_body_id: tk.Label
+        self.ui_j_body_type: tk.Label
         self.ui_s_body_name: tk.Label
+        self.ui_station_name: tk.Label
+        self.ui_station_type: tk.Label
+        self.ui_station_marketid: tk.Label
 
 
 this = This()
@@ -1116,18 +1127,17 @@ class EDDN:
                 entry['StarSystem'] = system_name
 
         if 'SystemAddress' not in entry:
-            if this.systemaddress is None:
+            if this.system_address is None:
                 logger.warning("this.systemaddress is None, can't add SystemAddress")
                 return "this.systemaddress is None, can't add SystemAddress"
 
-            entry['SystemAddress'] = this.systemaddress
+            entry['SystemAddress'] = this.system_address
 
         if 'StarPos' not in entry:
-            # Prefer the passed-in, probably monitor.state version
+            # Prefer the passed-in version
             if system_coordinates is not None:
                 entry['StarPos'] = system_coordinates
 
-            # TODO: Deprecate in-plugin tracking
             elif this.coordinates is not None:
                 entry['StarPos'] = list(this.coordinates)
 
@@ -1160,7 +1170,7 @@ class EDDN:
         #######################################################################
         # In this case should add StarPos, but only if the
         # SystemAddress of where we think we are matches.
-        if this.systemaddress is None or this.systemaddress != entry['SystemAddress']:
+        if this.system_address is None or this.system_address != entry['SystemAddress']:
             logger.warning("SystemAddress isn't current location! Can't add augmentations!")
             return 'Wrong System! Missed jump ?'
 
@@ -1202,7 +1212,7 @@ class EDDN:
         #######################################################################
         # In this case should add StarSystem and StarPos, but only if the
         # SystemAddress of where we think we are matches.
-        if this.systemaddress is None or this.systemaddress != entry['SystemAddress']:
+        if this.system_address is None or this.system_address != entry['SystemAddress']:
             logger.warning("SystemAddress isn't current location! Can't add augmentations!")
             return 'Wrong System! Missed jump ?'
 
@@ -1264,7 +1274,7 @@ class EDDN:
         #######################################################################
         # In this case should add StarPos, but only if the
         # SystemAddress of where we think we are matches.
-        if this.systemaddress is None or this.systemaddress != entry['SystemAddress']:
+        if this.system_address is None or this.system_address != entry['SystemAddress']:
             logger.warning("SystemAddress isn't current location! Can't add augmentations!")
             return 'Wrong System! Missed jump ?'
 
@@ -1279,6 +1289,8 @@ class EDDN:
             logger.warning(f'this.status_body_name was not set properly:'
                            f' "{this.status_body_name}" ({type(this.status_body_name)})')
 
+        # this.status_body_name is available for cross-checks, so try to set
+        # BodyName and ID.
         else:
             # In case Frontier add it in
             if 'BodyName' not in entry:
@@ -1356,7 +1368,7 @@ class EDDN:
         #######################################################################
         # In this case should add StarPos, but only if the
         # SystemAddress of where we think we are matches.
-        if this.systemaddress is None or this.systemaddress != entry['SystemAddress']:
+        if this.system_address is None or this.system_address != entry['SystemAddress']:
             logger.warning("SystemAddress isn't current location! Can't add augmentations!")
             return 'Wrong System! Missed jump ?'
 
@@ -1651,7 +1663,7 @@ class EDDN:
         #######################################################################
         # In this case should add SystemName and StarPos, but only if the
         # SystemAddress of where we think we are matches.
-        if this.systemaddress is None or this.systemaddress != entry['SystemAddress']:
+        if this.system_address is None or this.system_address != entry['SystemAddress']:
             logger.warning("SystemAddress isn't current location! Can't add augmentations!")
             return 'Wrong System! Missed jump ?'
 
@@ -1701,7 +1713,7 @@ class EDDN:
         #######################################################################
         # In this case should add StarPos, but only if the
         # SystemAddress of where we think we are matches.
-        if this.systemaddress is None or this.systemaddress != entry['SystemAddress']:
+        if this.system_address is None or this.system_address != entry['SystemAddress']:
             logger.warning("SystemAddress isn't current location! Can't add augmentations!")
             return 'Wrong System! Missed jump ?'
 
@@ -1757,7 +1769,7 @@ class EDDN:
         #######################################################################
         # In this case should add SystemName and StarPos, but only if the
         # SystemAddress of where we think we are matches.
-        if this.systemaddress is None or this.systemaddress != entry['SystemAddress']:
+        if this.system_address is None or this.system_address != entry['SystemAddress']:
             logger.warning("SystemAddress isn't current location! Can't add augmentations!")
             return 'Wrong System! Missed jump ?'
 
@@ -1815,11 +1827,11 @@ class EDDN:
 
         else:
             # Horizons order, so use tracked data for cross-check
-            if this.systemaddress is None or system_name is None or system_starpos is None:
-                logger.error(f'Location tracking failure: {this.systemaddress=}, {system_name=}, {system_starpos=}')
+            if this.system_address is None or system_name is None or system_starpos is None:
+                logger.error(f'Location tracking failure: {this.system_address=}, {system_name=}, {system_starpos=}')
                 return 'Current location not tracked properly, started after game?'
 
-            aug_systemaddress = this.systemaddress
+            aug_systemaddress = this.system_address
             aug_starsystem = system_name
             aug_starpos = system_starpos
 
@@ -1963,23 +1975,75 @@ def plugin_app(parent: tk.Tk) -> Optional[tk.Frame]:
         this.ui = tk.Frame(parent)
 
         row = this.ui.grid_size()[1]
+
+        #######################################################################
+        # System
+        #######################################################################
+        # SystemName
+        system_name_label = tk.Label(this.ui, text="J:SystemName:")
+        system_name_label.grid(row=row, column=0, sticky=tk.W)
+        this.ui_system_name = tk.Label(this.ui, name='eddn_track_system_name', anchor=tk.W)
+        this.ui_system_name.grid(row=row, column=1, sticky=tk.E)
+        row += 1
+        # SystemAddress
+        system_address_label = tk.Label(this.ui, text="J:SystemAddress:")
+        system_address_label.grid(row=row, column=0, sticky=tk.W)
+        this.ui_system_address = tk.Label(this.ui, name='eddn_track_system_address', anchor=tk.W)
+        this.ui_system_address.grid(row=row, column=1, sticky=tk.E)
+        row += 1
+        #######################################################################
+
+        #######################################################################
+        # Body
+        #######################################################################
+        # Body Name from Journal
         journal_body_name_label = tk.Label(this.ui, text="J:BodyName:")
         journal_body_name_label.grid(row=row, column=0, sticky=tk.W)
         this.ui_j_body_name = tk.Label(this.ui, name='eddn_track_j_body_name', anchor=tk.W)
         this.ui_j_body_name.grid(row=row, column=1, sticky=tk.E)
         row += 1
-
+        # Body ID from Journal
         journal_body_id_label = tk.Label(this.ui, text="J:BodyID:")
         journal_body_id_label.grid(row=row, column=0, sticky=tk.W)
         this.ui_j_body_id = tk.Label(this.ui, name='eddn_track_j_body_id', anchor=tk.W)
         this.ui_j_body_id.grid(row=row, column=1, sticky=tk.E)
         row += 1
-
+        # Body Type from Journal
+        journal_body_type_label = tk.Label(this.ui, text="J:BodyType:")
+        journal_body_type_label.grid(row=row, column=0, sticky=tk.W)
+        this.ui_j_body_type = tk.Label(this.ui, name='eddn_track_j_body_type', anchor=tk.W)
+        this.ui_j_body_type.grid(row=row, column=1, sticky=tk.E)
+        row += 1
+        # Body Name from Status.json
         status_body_name_label = tk.Label(this.ui, text="S:BodyName:")
         status_body_name_label.grid(row=row, column=0, sticky=tk.W)
         this.ui_s_body_name = tk.Label(this.ui, name='eddn_track_s_body_name', anchor=tk.W)
         this.ui_s_body_name.grid(row=row, column=1, sticky=tk.E)
         row += 1
+        #######################################################################
+
+        #######################################################################
+        # Station
+        #######################################################################
+        # Name
+        status_station_name_label = tk.Label(this.ui, text="J:StationName:")
+        status_station_name_label.grid(row=row, column=0, sticky=tk.W)
+        this.ui_station_name = tk.Label(this.ui, name='eddn_track_station_name', anchor=tk.W)
+        this.ui_station_name.grid(row=row, column=1, sticky=tk.E)
+        row += 1
+        # Type
+        status_station_type_label = tk.Label(this.ui, text="J:StationType:")
+        status_station_type_label.grid(row=row, column=0, sticky=tk.W)
+        this.ui_station_type = tk.Label(this.ui, name='eddn_track_station_type', anchor=tk.W)
+        this.ui_station_type.grid(row=row, column=1, sticky=tk.E)
+        row += 1
+        # MarketID
+        status_station_marketid_label = tk.Label(this.ui, text="J:StationID:")
+        status_station_marketid_label.grid(row=row, column=0, sticky=tk.W)
+        this.ui_station_marketid = tk.Label(this.ui, name='eddn_track_station_id', anchor=tk.W)
+        this.ui_station_marketid.grid(row=row, column=1, sticky=tk.E)
+        row += 1
+        #######################################################################
 
         return this.ui
 
@@ -1991,6 +2055,14 @@ def tracking_ui_update() -> None:
     if not config.eddn_tracking_ui:
         return
 
+    this.ui_system_name['text'] = '≪None≫'
+    if this.ui_system_name is not None:
+        this.ui_system_name['text'] = this.system_name
+
+    this.ui_system_address['text'] = '≪None≫'
+    if this.ui_system_address is not None:
+        this.ui_system_address['text'] = this.system_address
+
     this.ui_j_body_name['text'] = '≪None≫'
     if this.body_name is not None:
         this.ui_j_body_name['text'] = this.body_name
@@ -1999,9 +2071,25 @@ def tracking_ui_update() -> None:
     if this.body_id is not None:
         this.ui_j_body_id['text'] = str(this.body_id)
 
+    this.ui_j_body_type['text'] = '≪None≫'
+    if this.body_type is not None:
+        this.ui_j_body_type['text'] = str(this.body_type)
+
     this.ui_s_body_name['text'] = '≪None≫'
     if this.status_body_name is not None:
         this.ui_s_body_name['text'] = this.status_body_name
+
+    this.ui_station_name['text'] = '≪None≫'
+    if this.station_name is not None:
+        this.ui_station_name['text'] = this.station_name
+
+    this.ui_station_type['text'] = '≪None≫'
+    if this.station_type is not None:
+        this.ui_station_type['text'] = this.station_type
+
+    this.ui_station_marketid['text'] = '≪None≫'
+    if this.station_marketid is not None:
+        this.ui_station_marketid['text'] = this.station_marketid
 
     this.ui.update_idletasks()
 
@@ -2208,67 +2296,27 @@ def journal_entry(  # noqa: C901, CCR001
             entry
         )
 
-    # Track location
-    if event_name == 'supercruiseexit':
-        # For any orbital station we have no way of determining the body
-        # it orbits:
-        #
-        #   In-ship Status.json doesn't specify this.
-        #   On-foot Status.json lists the station itself as Body.
-        #   Location for stations (on-foot or in-ship) has station as Body.
-        #   SupercruiseExit (own ship or taxi) lists the station as the Body.
-        if entry['BodyType'] == 'Station':
-            this.body_name = None
-            this.body_id = None
+    # Copy some state into module-held variables because we might need it
+    # outside of this function.
+    this.body_name = state['Body']
+    this.body_id = state['BodyID']
+    this.body_type = state['BodyType']
+    this.coordinates = state['StarPos']
+    this.system_address = state['SystemAddress']
+    this.system_name = state['SystemName']
+    this.station_name = state['StationName']
+    this.station_type = state['StationType']
+    this.station_marketid = state['MarketID']
 
-    elif event_name in ('location', 'fsdjump', 'docked', 'carrierjump'):
-        if event_name in ('location', 'carrierjump'):
-            if entry.get('BodyType') == 'Planet':
-                this.body_name = entry.get('Body')
-                this.body_id = entry.get('BodyID')
-
-            else:
-                this.body_name = None
-
-        elif event_name == 'fsdjump':
-            this.body_name = None
-            this.body_id = None
-
-        if 'StarPos' in entry:
-            this.coordinates = tuple(entry['StarPos'])
-
-        elif this.systemaddress != entry.get('SystemAddress'):
-            this.coordinates = None  # Docked event doesn't include coordinates
-
-        if 'SystemAddress' not in entry:
-            logger.warning(f'"location" event without SystemAddress !!!:\n{entry}\n')
-
-        # But we'll still *use* the value, because if a 'location' event doesn't
-        # have this we've still moved and now don't know where and MUST NOT
-        # continue to use any old value.
-        # Yes, explicitly state `None` here, so it's crystal clear.
-        this.systemaddress = entry.get('SystemAddress', None)  # type: ignore
-
-        if event_name == 'docked':
-            this.eddn.parent.after(this.eddn.REPLAY_DELAY, this.eddn.sender.queue_check_and_send, False)
-
-    elif event_name == 'approachbody':
-        this.body_name = entry['Body']
-        this.body_id = entry.get('BodyID')
-
-    elif event_name == 'leavebody':
-        # NB: **NOT** SupercruiseEntry, because we won't get a fresh
-        #     ApproachBody if we don't leave Orbital Cruise and land again.
-        # *This* is triggered when you go above Orbital Cruise altitude.
-        # Status.json BodyName clears when the OC/Glide HUD is deactivated.
-        this.body_name = None
-        this.body_id = None
+    if event_name == 'docked':
+        # Trigger a send/retry of pending EDDN messages
+        this.eddn.parent.after(this.eddn.REPLAY_DELAY, this.eddn.sender.queue_check_and_send, False)
 
     elif event_name == 'music':
         if entry['MusicTrack'] == 'MainMenu':
-            this.body_name = None
-            this.body_id = None
             this.status_body_name = None
+
+    tracking_ui_update()
 
     # Events with their own EDDN schema
     if config.get_int('output') & config.OUT_EDDN_SEND_NON_STATION and not state['Captain']:
@@ -2359,9 +2407,10 @@ def journal_entry(  # noqa: C901, CCR001
             ]
 
         # add planet to Docked event for planetary stations if known
-        if event_name == 'docked' and this.body_name:
-            entry['Body'] = this.body_name
-            entry['BodyType'] = 'Planet'
+        if event_name == 'docked' and state['Body'] is not None:
+            if state['BodyType'] == 'Planet':
+                entry['Body'] = state['Body']
+                entry['BodyType'] = state['BodyType']
 
         # The generic journal schema is for events:
         #   Docked, FSDJump, Scan, Location, SAASignalsFound, CarrierJump
@@ -2382,7 +2431,7 @@ def journal_entry(  # noqa: C901, CCR001
 
         # add mandatory StarSystem and StarPos properties to events
         if 'StarSystem' not in entry:
-            if this.systemaddress is None or this.systemaddress != entry['SystemAddress']:
+            if this.system_address is None or this.system_address != entry['SystemAddress']:
                 logger.warning(f"event({entry['event']}) has no StarSystem, but SystemAddress isn't current location")
                 return "Wrong System! Delayed Scan event?"
 
@@ -2399,7 +2448,7 @@ def journal_entry(  # noqa: C901, CCR001
 
             # Gazelle[TD] reported seeing a lagged Scan event with incorrect
             # augmented StarPos: <https://github.com/EDCD/EDMarketConnector/issues/961>
-            if this.systemaddress is None or this.systemaddress != entry['SystemAddress']:
+            if this.system_address is None or this.system_address != entry['SystemAddress']:
                 logger.warning(f"event({entry['event']}) has no StarPos, but SystemAddress isn't current location")
                 return "Wrong System! Delayed Scan event?"
 
@@ -2454,8 +2503,6 @@ def journal_entry(  # noqa: C901, CCR001
             logger.debug(f'Failed exporting {entry["event"]}', exc_info=e)
             return str(e)
 
-    tracking_ui_update()
-
     return None
 
 
@@ -2494,7 +2541,7 @@ def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:  # noqa: CCR001
     ):
         this.cmdr_name = cmdr_name
 
-    if (data['commander'].get('docked') or (this.on_foot and monitor.station)
+    if (data['commander'].get('docked') or (this.on_foot and monitor.state['StationName'])
             and config.get_int('output') & config.OUT_EDDN_SEND_STATION_DATA):
         try:
             if this.marketId != data['lastStarport']['id']:

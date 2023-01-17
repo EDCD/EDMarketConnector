@@ -94,11 +94,11 @@ class This:
         self.newgame_docked: bool = False  # starting up while docked
         self.navbeaconscan: int = 0		# batch up burst of Scan events after NavBeaconScan
         self.system_link: tk.Widget | None = None
-        self.system: tk.Tk | None = None
+        self.system_name: tk.Tk | None = None
         self.system_address: int | None = None  # Frontier SystemAddress
         self.system_population: int | None = None
         self.station_link: tk.Widget | None = None
-        self.station: str | None = None
+        self.station_name: str | None = None
         self.station_marketid: int | None = None  # Frontier MarketID
         self.on_foot = False
 
@@ -186,9 +186,9 @@ def station_url(system_name: str, station_name: str) -> str:
         )
 
     # monitor state might think these are gone, but we don't yet
-    if this.system and this.station:
+    if this.system_name and this.station_name:
         return requests.utils.requote_uri(
-            f'https://www.edsm.net/en/system?systemName={this.system}&stationName={this.station}'
+            f'https://www.edsm.net/en/system?systemName={this.system_name}&stationName={this.station_name}'
         )
 
     if system_name:
@@ -525,6 +525,11 @@ def journal_entry(  # noqa: C901, CCR001
 
     this.game_version = state['GameVersion']
     this.game_build = state['GameBuild']
+    this.system_address = state['SystemAddress']
+    this.system_name = state['SystemName']
+    this.system_population = state['SystemPopulation']
+    this.station_name = state['StationName']
+    this.station_marketid = state['MarketID']
 
     entry = new_entry
 
@@ -538,38 +543,10 @@ Station: {station}
 state: {state!r}
 entry: {entry!r}'''
         )
-    # Always update our system address even if we're not currently the provider for system or station, but dont update
-    # on events that contain "future" data, such as FSDTarget
-    if entry['event'] in ('Location', 'Docked', 'CarrierJump', 'FSDJump'):
-        this.system_address = entry.get('SystemAddress', this.system_address)
-        this.system = entry.get('StarSystem', this.system)
-
-    # We need pop == 0 to set the value so as to clear 'x' in systems with
-    # no stations.
-    pop = entry.get('Population')
-    if pop is not None:
-        this.system_population = pop
-
-    this.station = entry.get('StationName', this.station)
-    # on_foot station detection
-    if entry['event'] == 'Location' and entry['BodyType'] == 'Station':
-        this.station = entry['Body']
-
-    this.station_marketid = entry.get('MarketID', this.station_marketid)
-    # We might pick up StationName in DockingRequested, make sure we clear it if leaving
-    if entry['event'] in ('Undocked', 'FSDJump', 'SupercruiseEntry'):
-        this.station = None
-        this.station_marketid = None
-
-    if entry['event'] == 'Embark' and not entry.get('OnStation'):
-        # If we're embarking OnStation to a Taxi/Dropship we'll also get an
-        # Undocked event.
-        this.station = None
-        this.station_marketid = None
 
     if config.get_str('station_provider') == 'EDSM':
-        to_set = this.station
-        if not this.station:
+        to_set = this.station_name
+        if not this.station_name:
             if this.system_population and this.system_population > 0:
                 to_set = STATION_UNDOCKED
 
@@ -578,7 +555,7 @@ entry: {entry!r}'''
 
         if this.station_link:
             this.station_link['text'] = to_set
-            this.station_link['url'] = station_url(str(this.system), str(this.station))
+            this.station_link['url'] = station_url(str(this.system_name), str(this.station_name))
             this.station_link.update_idletasks()
 
     # Update display of 'EDSM Status' image
@@ -685,25 +662,25 @@ def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:  # noqa: CCR001
         this.station_marketid = data['lastStarport']['id']
 
     # Only trust CAPI if these aren't yet set
-    if not this.system:
-        this.system = data['lastSystem']['name']
+    if not this.system_name:
+        this.system_name = data['lastSystem']['name']
 
-    if not this.station and data['commander']['docked']:
-        this.station = data['lastStarport']['name']
+    if not this.station_name and data['commander']['docked']:
+        this.station_name = data['lastStarport']['name']
 
     # TODO: Fire off the EDSM API call to trigger the callback for the icons
 
     if config.get_str('system_provider') == 'EDSM':
         if this.system_link:
-            this.system_link['text'] = this.system
+            this.system_link['text'] = this.system_name
             # Do *NOT* set 'url' here, as it's set to a function that will call
             # through correctly.  We don't want a static string.
             this.system_link.update_idletasks()
 
     if config.get_str('station_provider') == 'EDSM':
         if this.station_link:
-            if data['commander']['docked'] or this.on_foot and this.station:
-                this.station_link['text'] = this.station
+            if data['commander']['docked'] or this.on_foot and this.station_name:
+                this.station_link['text'] = this.station_name
 
             elif data['lastStarport']['name'] and data['lastStarport']['name'] != "":
                 this.station_link['text'] = STATION_UNDOCKED

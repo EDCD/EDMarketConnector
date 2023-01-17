@@ -326,10 +326,12 @@ sys.path: {sys.path}'''
             raise companion.CmdrError()
 
         elif (
-            data['lastSystem']['name'] != monitor.system or
-            ((data['commander']['docked'] and data['lastStarport']['name'] or None) != monitor.station) or
-            data['ship']['id'] != monitor.state['ShipID'] or
-            data['ship']['name'].lower() != monitor.state['ShipType']
+            data['lastSystem']['name'] != monitor.state['SystemName']
+            or (
+                (data['commander']['docked'] and data['lastStarport']['name'] or None) != monitor.state['StationName']
+            )
+            or data['ship']['id'] != monitor.state['ShipID']
+            or data['ship']['name'].lower() != monitor.state['ShipType']
         ):
             raise companion.ServerLagging()
 
@@ -431,10 +433,11 @@ sys.path: {sys.path}'''
 
             new_data = capi_response.capi_data
             # might have undocked while we were waiting for retry in which case station data is unreliable
-            if new_data['commander'].get('docked') and \
-                    deep_get(new_data, 'lastSystem', 'name') == monitor.system and \
-                    deep_get(new_data, 'lastStarport', 'name') == monitor.station:
-
+            if (
+                new_data['commander'].get('docked')
+                and deep_get(new_data, 'lastSystem', 'name') == monitor.state['SystemName']
+                and deep_get(new_data, 'lastStarport', 'name') == monitor.state['StationName']
+            ):
                 data = new_data
 
         if args.s:

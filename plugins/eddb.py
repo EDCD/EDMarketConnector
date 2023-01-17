@@ -42,7 +42,7 @@
 # ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $#
 # ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $#
 import tkinter
-from typing import TYPE_CHECKING, Any, Mapping, Optional
+from typing import TYPE_CHECKING, Any, Mapping
 
 import requests
 
@@ -69,12 +69,12 @@ class This:
     def __init__(self) -> None:
         # Main window clicks
         self.system_link: tkinter.Widget
-        self.system: Optional[str] = None
-        self.system_address: Optional[str] = None
-        self.system_population: Optional[int] = None
+        self.system_name: str | None = None
+        self.system_address: str | None = None
+        self.system_population: int | None = None
         self.station_link: tkinter.Widget
-        self.station: Optional[str] = None
-        self.station_marketid: Optional[int] = None
+        self.station_name: str | None = None
+        self.station_marketid: int | None = None
         self.on_foot = False
 
 
@@ -133,9 +133,9 @@ def plugin_app(parent: 'Tk'):
     """
     # system label in main window
     this.system_link = parent.nametowidget(f".{appname.lower()}.system")
-    this.system = None
+    this.system_name = None
     this.system_address = None
-    this.station = None
+    this.station_name = None
     this.station_marketid = None  # Frontier MarketID
     # station label in main window
     this.station_link = parent.nametowidget(f".{appname.lower()}.station")
@@ -154,7 +154,7 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
     pass
 
 
-def journal_entry(  # noqa: CCR001
+def journal_entry(
     cmdr: str, is_beta: bool, system: str, station: str,
     entry: dict[str, Any],
     state: Mapping[str, Any]
@@ -184,59 +184,35 @@ def journal_entry(  # noqa: CCR001
         return
 
     this.on_foot = state['OnFoot']
-    # Always update our system address even if we're not currently the provider for system or station, but dont update
-    # on events that contain "future" data, such as FSDTarget
-    if entry['event'] in ('Location', 'Docked', 'CarrierJump', 'FSDJump'):
-        this.system_address = entry.get('SystemAddress') or this.system_address
-        this.system = entry.get('StarSystem') or this.system
+    this.system_address = state['SystemAddress']
+    this.system_name = state['SystemName']
+    this.system_population = state['SystemPopulation']
+    this.station_name = state['StationName']
+    this.station_marketid = state['MarketID']
 
-    # We need pop == 0 to set the value so as to clear 'x' in systems with
-    # no stations.
-    pop = entry.get('Population')
-    if pop is not None:
-        this.system_population = pop
-
-    this.station = entry.get('StationName') or this.station
-    # on_foot station detection
-    if entry['event'] == 'Location' and entry['BodyType'] == 'Station':
-        this.station = entry['Body']
-
-    this.station_marketid = entry.get('MarketID') or this.station_marketid
-    # We might pick up StationName in DockingRequested, make sure we clear it if leaving
-    if entry['event'] in ('Undocked', 'FSDJump', 'SupercruiseEntry'):
-        this.station = None
-        this.station_marketid = None
-
-    if entry['event'] == 'Embark' and not entry.get('OnStation'):
-        # If we're embarking OnStation to a Taxi/Dropship we'll also get an
-        # Undocked event.
-        this.station = None
-        this.station_marketid = None
-
-    # Only actually change URLs if we are current provider.
-    if config.get_str('system_provider') == 'eddb':
-        this.system_link['text'] = this.system
+    # Only change URL text if we are current provider.
+    if config.get_str('station_provider') == 'eddb':
+        this.system_link['text'] = this.system_name
         # Do *NOT* set 'url' here, as it's set to a function that will call
         # through correctly.  We don't want a static string.
         this.system_link.update_idletasks()
 
-    # But only actually change the URL if we are current station provider.
-    if config.get_str('station_provider') == 'eddb':
-        text = this.station
-        if not text:
+        if this.station_name:
+            this.station_link['text'] = this.station_name
+
+        else:
             if this.system_population is not None and this.system_population > 0:
-                text = this.STATION_UNDOCKED
+                this.station_link['text'] = this.STATION_UNDOCKED
 
             else:
-                text = ''
+                this.station_link['text'] = ''
 
-        this.station_link['text'] = text
         # Do *NOT* set 'url' here, as it's set to a function that will call
         # through correctly.  We don't want a static string.
         this.station_link.update_idletasks()
 
 
-def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:
+def cmdr_data(data: CAPIData, is_beta: bool) -> str | None:
     """
     Process new CAPI data.
 
@@ -249,22 +225,22 @@ def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:
         this.station_marketid = data['lastStarport']['id']
 
     # Only trust CAPI if these aren't yet set
-    if not this.system:
-        this.system = data['lastSystem']['name']
+    if not this.system_name:
+        this.system_name = data['lastSystem']['name']
 
-    if not this.station and data['commander']['docked']:
-        this.station = data['lastStarport']['name']
+    if not this.station_name and data['commander']['docked']:
+        this.station_name = data['lastStarport']['name']
 
     # Override standard URL functions
     if config.get_str('system_provider') == 'eddb':
-        this.system_link['text'] = this.system
+        this.system_link['text'] = this.system_name
         # Do *NOT* set 'url' here, as it's set to a function that will call
         # through correctly.  We don't want a static string.
         this.system_link.update_idletasks()
 
     if config.get_str('station_provider') == 'eddb':
-        if data['commander']['docked'] or this.on_foot and this.station:
-            this.station_link['text'] = this.station
+        if data['commander']['docked'] or this.on_foot and this.station_name:
+            this.station_link['text'] = this.station_name
 
         elif data['lastStarport']['name'] and data['lastStarport']['name'] != "":
             this.station_link['text'] = this.STATION_UNDOCKED

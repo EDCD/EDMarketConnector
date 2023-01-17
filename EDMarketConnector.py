@@ -1089,7 +1089,7 @@ class AppWindow(object):
             self.status['text'] = _('CAPI query aborted: GameVersion unknown')
             return
 
-        if not monitor.system:
+        if not monitor.state['SystemName']:
             logger.trace_if('capi.worker', 'Aborting Query: Current star system unknown')
             # LANG: CAPI queries aborted because current star system name unknown
             self.status['text'] = _('CAPI query aborted: Current system unknown')
@@ -1272,30 +1272,32 @@ class AppWindow(object):
                                f"not {capi_response.capi_data['commander'].get('docked')!r}")
                 raise companion.ServerLagging()
 
-            elif capi_response.capi_data['lastSystem']['name'] != monitor.system:
+            elif capi_response.capi_data['lastSystem']['name'] != monitor.state['SystemName']:
                 # CAPI system must match last journal one
-                logger.warning(f"{capi_response.capi_data['lastSystem']['name']!r} != {monitor.system!r}")
+                logger.warning(f"{capi_response.capi_data['lastSystem']['name']!r} != "
+                               f"{monitor.state['SystemName']!r}")
                 raise companion.ServerLagging()
 
-            elif capi_response.capi_data['lastStarport']['name'] != monitor.station:
-                if monitor.state['OnFoot'] and monitor.station:
-                    logger.warning(f"({capi_response.capi_data['lastStarport']['name']!r} != {monitor.station!r}) AND "
-                                   f"{monitor.state['OnFoot']!r} and {monitor.station!r}")
+            elif capi_response.capi_data['lastStarport']['name'] != monitor.state['StationName']:
+                if monitor.state['OnFoot'] and monitor.state['StationName']:
+                    logger.warning(f"({capi_response.capi_data['lastStarport']['name']!r} != "
+                                   f"{monitor.state['StationName']!r}) AND "
+                                   f"{monitor.state['OnFoot']!r} and {monitor.state['StationName']!r}")
                     raise companion.ServerLagging()
 
-                elif capi_response.capi_data['commander']['docked'] and monitor.station is None:
+                elif capi_response.capi_data['commander']['docked'] and monitor.state['StationName'] is None:
                     # Likely (re-)Embarked on ship docked at an EDO settlement.
                     # Both Disembark and Embark have `"Onstation": false` in Journal.
                     # So there's nothing to tell us which settlement we're (still,
                     # or now, if we came here in Apex and then recalled ship) docked at.
-                    logger.debug("docked AND monitor.station is None - so EDO settlement?")
+                    logger.debug("docked AND monitor.state['StationName'] is None - so EDO settlement?")
                     raise companion.NoMonitorStation()
 
                 self.capi_query_holdoff_time = capi_response.query_time + companion.capi_query_cooldown
 
-            elif capi_response.capi_data['lastStarport']['id'] != monitor.station_marketid:
+            elif capi_response.capi_data['lastStarport']['id'] != monitor.state['MarketID']:
                 logger.warning(f"MarketID mis-match: {capi_response.capi_data['lastStarport']['id']!r} !="
-                               f" {monitor.station_marketid!r}")
+                               f" {monitor.state['MarketID']!r}")
                 raise companion.ServerLagging()
 
             elif not monitor.state['OnFoot'] and capi_response.capi_data['ship']['id'] != monitor.state['ShipID']:
@@ -1526,7 +1528,7 @@ class AppWindow(object):
             self.update_suit_text()
             self.suit_show_if_set()
 
-            self.edit_menu.entryconfigure(0, state=monitor.system and tk.NORMAL or tk.DISABLED)  # Copy
+            self.edit_menu.entryconfigure(0, state=monitor.state['SystemName'] and tk.NORMAL or tk.DISABLED)  # Copy
 
             if entry['event'] in (
                     'Undocked',
@@ -1589,8 +1591,8 @@ class AppWindow(object):
                 err = plug.notify_journal_entry(
                     monitor.cmdr,
                     monitor.is_beta,
-                    monitor.system,
-                    monitor.station,
+                    monitor.state['SystemName'],
+                    monitor.state['StationName'],
                     entry,
                     monitor.state
                 )
@@ -1606,7 +1608,7 @@ class AppWindow(object):
                 # Only if configured to do so
                 if (not config.get_int('output') & config.OUT_MKT_MANUAL
                         and config.get_int('output') & config.OUT_STATION_ANY):
-                    if entry['event'] in ('StartUp', 'Location', 'Docked') and monitor.station:
+                    if entry['event'] in ('StartUp', 'Location', 'Docked') and monitor.state['StationName']:
                         # TODO: Can you log out in a docked Taxi and then back in to
                         #       the taxi, so 'Location' should be covered here too ?
                         if entry['event'] == 'Docked' and entry.get('Taxi'):
@@ -1728,11 +1730,16 @@ class AppWindow(object):
 
     def system_url(self, system: str) -> str | None:
         """Despatch a system URL to the configured handler."""
-        return plug.invoke(config.get_str('system_provider'), 'EDSM', 'system_url', monitor.system)
+        return plug.invoke(
+            config.get_str('system_provider'), 'EDSM', 'system_url', monitor.state['SystemName']
+        )
 
     def station_url(self, station: str) -> str | None:
         """Despatch a station URL to the configured handler."""
-        return plug.invoke(config.get_str('station_provider'), 'eddb', 'station_url', monitor.system, monitor.station)
+        return plug.invoke(
+            config.get_str('station_provider'), 'eddb', 'station_url',
+            monitor.state['SystemName'], monitor.state['StationName']
+        )
 
     def cooldown(self) -> None:
         """Display and update the cooldown timer for 'Update' button."""
@@ -1746,12 +1753,14 @@ class AppWindow(object):
 
         else:
             self.button['text'] = self.theme_button['text'] = _('Update')  # LANG: Update button in main window
-            self.button['state'] = self.theme_button['state'] = (monitor.cmdr and
-                                                                 monitor.mode and
-                                                                 monitor.mode != 'CQC' and
-                                                                 not monitor.state['Captain'] and
-                                                                 monitor.system and
-                                                                 tk.NORMAL or tk.DISABLED)
+            self.button['state'] = self.theme_button['state'] = (
+                monitor.cmdr and
+                monitor.mode and
+                monitor.mode != 'CQC' and
+                not monitor.state['Captain'] and
+                monitor.state['SystemName'] and
+                tk.NORMAL or tk.DISABLED
+            )
 
     if sys.platform == 'win32':
         def ontop_changed(self, event=None) -> None:
@@ -1761,9 +1770,12 @@ class AppWindow(object):
 
     def copy(self, event=None) -> None:
         """Copy system, and possible station, name to clipboard."""
-        if monitor.system:
+        if monitor.state['SystemName']:
             self.w.clipboard_clear()
-            self.w.clipboard_append(monitor.station and f'{monitor.system},{monitor.station}' or monitor.system)
+            self.w.clipboard_append(
+                f"{monitor.state['SystemName']},{monitor.state['StationName']}" if monitor.state['StationName']
+                else monitor.state['SystemName']
+            )
 
     def help_general(self, event=None) -> None:
         """Open Wiki Help page in browser."""
@@ -1898,7 +1910,7 @@ class AppWindow(object):
             defaultextension=default_extension,
             filetypes=[('JSON', '.json'), ('All Files', '*')],
             initialdir=config.get_str('outdir'),
-            initialfile=f'{monitor.system}.{monitor.station}.{timestamp}'
+            initialfile=f"{monitor.state['SystemName']}.{monitor.state['StationName']}.{timestamp}"
         )
         if not f:
             return

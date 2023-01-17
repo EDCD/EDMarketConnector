@@ -119,7 +119,7 @@ class This:
 
         # Main window clicks
         self.system_link: tk.Widget = None  # type: ignore
-        self.system: Optional[str] = None  # type: ignore
+        self.system_name: Optional[str] = None  # type: ignore
         self.system_address: Optional[str] = None  # type: ignore
         self.system_population: Optional[int] = None
         self.station_link: tk.Widget = None  # type: ignore
@@ -169,10 +169,12 @@ if DEBUG:
 def system_url(system_name: str) -> str:
     """Get a URL for the current system."""
     if this.system_address:
-        return requests.utils.requote_uri(f'https://inara.cz/galaxy-starsystem/?search={this.system_address}')
+        return requests.utils.requote_uri(f'https://inara.cz/galaxy-starsystem/'
+                                          f'?search={this.system_address}')
 
     elif system_name:
-        return requests.utils.requote_uri(f'https://inara.cz/galaxy-starsystem/?search={system_name}')
+        return requests.utils.requote_uri(f'https://inara.cz/galaxy-starsystem/'
+                                          f'?search={system_name}')
 
     return ''
 
@@ -188,11 +190,13 @@ def station_url(system_name: str, station_name: str) -> str:
     :return: A URL to inara for the given system and station
     """
     if system_name and station_name:
-        return requests.utils.requote_uri(f'https://inara.cz/galaxy-station/?search={system_name}%20[{station_name}]')
+        return requests.utils.requote_uri(f'https://inara.cz/galaxy-station/'
+                                          f'?search={system_name}%20[{station_name}]')
 
     # monitor state might think these are gone, but we don't yet
-    if this.system and this.station:
-        return requests.utils.requote_uri(f'https://inara.cz/galaxy-station/?search={this.system}%20[{this.station}]')
+    if this.system_name and this.station:
+        return requests.utils.requote_uri(f'https://inara.cz/galaxy-station/'
+                                          f'?search={this.system_name}%20[{this.station}]')
 
     if system_name:
         return system_url(system_name)
@@ -371,6 +375,31 @@ def journal_entry(  # noqa: C901, CCR001
 
     :return: str - empty if no error, else error string.
     """
+    # This overall killswitch check is first in case, e.g. an EDMC bug is
+    # causing users to spam Inara with 'URL provider' queries, and we want to
+    # stop that.
+    should_return: bool
+    new_entry: Dict[str, Any] = {}
+
+    should_return, new_entry = killswitch.check_killswitch('plugins.inara.journal', entry, logger)
+    if should_return:
+        plug.show_error(_('Inara disabled. See Log.'))  # LANG: INARA support disabled via killswitch
+        logger.trace('returning due to killswitch match')
+        return ''
+
+    # But then we update all the tracking copies before any other checks,
+    # because they're relevant for URL providing even if *sending* isn't
+    # appropriate.
+    this.on_foot = state['OnFoot']
+    event_name: str = entry['event']
+    this.cmdr = cmdr
+    this.FID = state['FID']
+    this.multicrew = bool(state['Role'])
+    this.system_name = state['SystemName']
+    this.system_address = state['SystemAddress']
+    this.station = state['StationName']
+    this.station_marketid = state['MarketID']
+
     if not monitor.is_live_galaxy():
         # Since Update 14 on 2022-11-29 Inara only accepts Live data.
         if (
@@ -387,15 +416,6 @@ def journal_entry(  # noqa: C901, CCR001
 
         return ''
 
-    should_return: bool
-    new_entry: Dict[str, Any] = {}
-
-    should_return, new_entry = killswitch.check_killswitch('plugins.inara.journal', entry, logger)
-    if should_return:
-        plug.show_error(_('Inara disabled. See Log.'))  # LANG: INARA support disabled via killswitch
-        logger.trace('returning due to killswitch match')
-        return ''
-
     should_return, new_entry = killswitch.check_killswitch(
         f'plugins.inara.journal.event.{entry["event"]}', new_entry, logger
     )
@@ -405,12 +425,6 @@ def journal_entry(  # noqa: C901, CCR001
         return ''
 
     entry = new_entry
-    this.on_foot = state['OnFoot']
-    event_name: str = entry['event']
-    this.cmdr = cmdr
-    this.FID = state['FID']
-    this.multicrew = bool(state['Role'])
-
     if event_name == 'LoadGame' or this.newuser:
         # clear cached state
         if event_name == 'LoadGame':
@@ -431,10 +445,6 @@ def journal_entry(  # noqa: C901, CCR001
         this.loadout = None
         this.fleet = None
         this.shipswap = False
-        this.system = None
-        this.system_address = None
-        this.station = None
-        this.station_marketid = None
 
     elif event_name in ('Resurrect', 'ShipyardBuy', 'ShipyardSell', 'SellShipOnRebuy'):
         # Events that mean a significant change in credits, so we should send credits after next "Update"
@@ -442,35 +452,6 @@ def journal_entry(  # noqa: C901, CCR001
 
     elif event_name in ('ShipyardNew', 'ShipyardSwap') or (event_name == 'Location' and entry['Docked']):
         this.suppress_docked = True
-
-    # Always update our system address even if we're not currently the provider for system or station, but dont update
-    # on events that contain "future" data, such as FSDTarget
-    if entry['event'] in ('Location', 'Docked', 'CarrierJump', 'FSDJump'):
-        this.system_address = entry.get('SystemAddress') or this.system_address
-        this.system = entry.get('StarSystem') or this.system
-
-    # We need pop == 0 to set the value so as to clear 'x' in systems with
-    # no stations.
-    pop: Optional[int] = entry.get('Population')
-    if pop is not None:
-        this.system_population = pop
-
-    this.station = entry.get('StationName', this.station)
-    # on_foot station detection
-    if entry['event'] == 'Location' and entry['BodyType'] == 'Station':
-        this.station = entry['Body']
-
-    this.station_marketid = entry.get('MarketID', this.station_marketid) or this.station_marketid
-    # We might pick up StationName in DockingRequested, make sure we clear it if leaving
-    if event_name in ('Undocked', 'FSDJump', 'SupercruiseEntry'):
-        this.station = None
-        this.station_marketid = None
-
-    if entry['event'] == 'Embark' and not entry.get('OnStation'):
-        # If we're embarking OnStation to a Taxi/Dropship we'll also get an
-        # Undocked event.
-        this.station = None
-        this.station_marketid = None
 
     if config.get_int('inara_out') and not is_beta and not this.multicrew and credentials(cmdr):
         current_credentials = Credentials(this.cmdr, this.FID, str(credentials(this.cmdr)))
@@ -1158,7 +1139,7 @@ def journal_entry(  # noqa: C901, CCR001
 
             to_send_data: Optional[Dict[str, Any]] = {}  # This is a glorified sentinel until lower down.
             # On Horizons, neither of these exist on TouchDown
-            star_system_name = entry.get('StarSystem', this.system)
+            star_system_name = entry.get('StarSystem', this.system_name)
             body_name = entry.get('Body', state['Body'] if state['BodyType'] == 'Planet' else None)
 
             if star_system_name is None:
@@ -1377,7 +1358,7 @@ def journal_entry(  # noqa: C901, CCR001
 
     # Only actually change URLs if we are current provider.
     if config.get_str('system_provider') == 'Inara':
-        this.system_link['text'] = this.system
+        this.system_link['text'] = this.system_name
         # Do *NOT* set 'url' here, as it's set to a function that will call
         # through correctly.  We don't want a static string.
         this.system_link.update_idletasks()
@@ -1407,14 +1388,14 @@ def cmdr_data(data: CAPIData, is_beta):  # noqa: CCR001
         this.station_marketid = data['commander']['docked'] and data['lastStarport']['id']
 
     # Only trust CAPI if these aren't yet set
-    this.system = this.system if this.system else data['lastSystem']['name']
+    this.system_name = this.system_name if this.system_name else data['lastSystem']['name']
 
     if not this.station and data['commander']['docked']:
         this.station = data['lastStarport']['name']
 
     # Override standard URL functions
     if config.get_str('system_provider') == 'Inara':
-        this.system_link['text'] = this.system
+        this.system_link['text'] = this.system_name
         # Do *NOT* set 'url' here, as it's set to a function that will call
         # through correctly.  We don't want a static string.
         this.system_link.update_idletasks()

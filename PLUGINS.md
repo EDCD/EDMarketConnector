@@ -606,55 +606,63 @@ This gets called when EDMarketConnector sees a new entry in the game's journal.
 
 Content of `state` (updated to the current journal entry):
 
-| Field                |            Type             | Description                                                                                                     |
-| :------------------- | :-------------------------: |:----------------------------------------------------------------------------------------------------------------|
-| `GameLanguage`       |       `Optional[str]`       | `language` value from `Fileheader` event.                                                                       |
-| `GameVersion`        |       `Optional[str]`       | `version` value from `Fileheader` event.                                                                        |
-| `GameBuild`          |       `Optional[str]`       | `build` value from `Fileheader` event.                                                                          |
-| `Captain`            |       `Optional[str]`       | Name of the commander who's crew you're on, if any                                                              |
-| `Cargo`              |           `dict`            | Current cargo. Note that this will be totals, and any mission specific duplicates will be counted together      |
-| `CargoJSON`          |           `dict`            | content of cargo.json as of last read.                                                                          |
-| `Credits`            |            `int`            | Current credits balance                                                                                         |
-| `FID`                |            `str`            | Frontier commander ID                                                                                           |
-| `Horizons`           |           `bool`            | From `LoadGame` event.                                                                                          |
-| `Odyssey`            |           `bool`            | From `LoadGame` event.  `False` if not present, else the event value.                                           |
-| `Loan`               |       `Optional[int]`       | Current loan amount, if any                                                                                     |
-| `Raw`                |           `dict`            | Current raw engineering materials                                                                               |
-| `Manufactured`       |           `dict`            | Current manufactured engineering materials                                                                      |
-| `Encoded`            |           `dict`            | Current encoded engineering materials                                                                           |
-| `Component`          |           `dict`            | Current component materials                                                                                     |
-| `Engineers`          |           `dict`            | Current Raw engineering materials                                                                               |
-| `Rank`               | `Dict[str, Tuple[int, int]` | Current ranks, each entry is a tuple of the current rank, and age                                               |
-| `Statistics`         |           `dict`            | Contents of a Journal Statistics event, ie, data shown in the stats panel. See the Journal manual for more info |
-| `Role`               |       `Optional[str]`       | Current role if in multi-crew, one of `Idle`, `FireCon`, `FighterCon`                                           |
-| `Friends`            |            `set`            | Currently online friend                                                                                         |
-| `ShipID`             |            `int`            | Frontier ID of current ship                                                                                     |
-| `ShipIdent`          |            `str`            | Current user-set ship ID                                                                                        |
-| `ShipName`           |            `str`            | Current user-set ship name                                                                                      |
-| `ShipType`           |            `str`            | Internal name for the current ship type                                                                         |
-| `HullValue`          |            `int`            | Current ship value, excluding modules                                                                           |
-| `ModulesValue`       |            `int`            | Value of the current ship's modules                                                                             |
-| `Rebuy`              |            `int`            | Current ship's rebuy cost                                                                                       |
-| `Modules`            |           `dict`            | Currently fitted modules                                                                                        |
-| `NavRoute`           |           `dict`            | Last plotted multi-hop route[1]                                                                                 |
-| `ModuleInfo`         |           `dict`            | Last loaded ModulesInfo.json data                                                                               |
-| `IsDocked`           |           `bool`            | Whether the Cmdr is currently docked *in their own ship*.                                                       |
-| `OnFoot`             |           `bool`            | Whether the Cmdr is on foot                                                                                     |
-| `Component`          |           `dict`            | 'Component' MicroResources in Odyssey, `int` count each.                                                        |
-| `Item`               |           `dict`            | 'Item' MicroResources in Odyssey, `int` count each.                                                             |
-| `Consumable`         |           `dict`            | 'Consumable' MicroResources in Odyssey, `int` count each.                                                       |
-| `Data`               |           `dict`            | 'Data' MicroResources in Odyssey, `int` count each.                                                             |
-| `BackPack`           |           `dict`            | `dict` of Odyssey MicroResources in backpack.                                                                   |
-| `BackpackJSON`       |           `dict`            | Content of Backpack.json as of last read.                                                                       |
-| `ShipLockerJSON`     |           `dict`            | Content of ShipLocker.json as of last read.                                                                     |
-| `SuitCurrent`        |           `dict`            | CAPI-returned data of currently worn suit.  NB: May be `None` if no data.                                       |
-| `Suits`              |          `dict`[2]          | CAPI-returned data of owned suits.  NB: May be `None` if no data.                                               |
-| `SuitLoadoutCurrent` |           `dict`            | CAPI-returned data of current Suit Loadout.  NB: May be `None` if no data.                                      |
-| `SuitLoadouts`       |          `dict`[2]          | CAPI-returned data of all Suit Loadouts.  NB: May be `None` if no data.                                         |
-| `Taxi`               |      `Optional[bool]`       | Whether or not we're currently in a taxi. NB: This is best effort with what the journals provide.               |
-| `Dropship`           |      `Optional[bool]`       | Whether or not the above taxi is a Dropship                                                                     |
-| `Body`               |       `Optional[str]`       | The body we're currently on / in the SOI of                                                                     |
-| `BodyType`           |       `Optional[str]`       | The type of body that `Body` refers to                                                                          |
+| Field                 |            Type             | Description                                                                                                     |
+|:----------------------|:---------------------------:|:----------------------------------------------------------------------------------------------------------------|
+| `GameLanguage`        |       `Optional[str]`       | `language` value from `Fileheader` event.                                                                       |
+| `GameVersion`         |       `Optional[str]`       | `version` value from `Fileheader` event.                                                                        |
+| `GameBuild`           |       `Optional[str]`       | `build` value from `Fileheader` event.                                                                          |
+| `Captain`[3]          |       `Optional[str]`       | Name of the commander who's crew you're on, if any                                                              |
+| `Cargo`               |           `dict`            | Current cargo. Note that this will be totals, and any mission specific duplicates will be counted together      |
+| `CargoJSON`           |           `dict`            | content of cargo.json as of last read.                                                                          |
+| `Credits`             |            `int`            | Current credits balance                                                                                         |
+| `FID`                 |            `str`            | Frontier commander ID                                                                                           |
+| `Horizons`            |           `bool`            | From `LoadGame` event.                                                                                          |
+| `Odyssey`             |           `bool`            | From `LoadGame` event.  `False` if not present, else the event value.                                           |
+| `Loan`                |       `Optional[int]`       | Current loan amount, if any                                                                                     |
+| `Raw`                 |           `dict`            | Current raw engineering materials                                                                               |
+| `Manufactured`        |           `dict`            | Current manufactured engineering materials                                                                      |
+| `Encoded`             |           `dict`            | Current encoded engineering materials                                                                           |
+| `Component`           |           `dict`            | Current component materials                                                                                     |
+| `Engineers`           |           `dict`            | Current Raw engineering materials                                                                               |
+| `Rank`                | `Dict[str, Tuple[int, int]` | Current ranks, each entry is a tuple of the current rank, and age                                               |
+| `Statistics`          |           `dict`            | Contents of a Journal Statistics event, ie, data shown in the stats panel. See the Journal manual for more info |
+| `Role`                |       `Optional[str]`       | Current role if in multi-crew, one of `Idle`, `FireCon`, `FighterCon`                                           |
+| `Friends`             |            `set`            | Currently online friend                                                                                         |
+| `ShipID`              |            `int`            | Frontier ID of current ship                                                                                     |
+| `ShipIdent`           |            `str`            | Current user-set ship ID                                                                                        |
+| `ShipName`            |            `str`            | Current user-set ship name                                                                                      |
+| `ShipType`            |            `str`            | Internal name for the current ship type                                                                         |
+| `HullValue`           |            `int`            | Current ship value, excluding modules                                                                           |
+| `ModulesValue`        |            `int`            | Value of the current ship's modules                                                                             |
+| `Rebuy`               |            `int`            | Current ship's rebuy cost                                                                                       |
+| `Modules`             |           `dict`            | Currently fitted modules                                                                                        |
+| `NavRoute`            |           `dict`            | Last plotted multi-hop route[1]                                                                                 |
+| `ModuleInfo`          |           `dict`            | Last loaded ModulesInfo.json data                                                                               |
+| `IsDocked`            |           `bool`            | Whether the Cmdr is currently docked *in their own ship*.                                                       |
+| `OnFoot`[3]           |           `bool`            | Whether the Cmdr is on foot                                                                                     |
+| `Component`           |           `dict`            | 'Component' MicroResources in Odyssey, `int` count each.                                                        |
+| `Item`                |           `dict`            | 'Item' MicroResources in Odyssey, `int` count each.                                                             |
+| `Consumable`          |           `dict`            | 'Consumable' MicroResources in Odyssey, `int` count each.                                                       |
+| `Data`                |           `dict`            | 'Data' MicroResources in Odyssey, `int` count each.                                                             |
+| `BackPack`            |           `dict`            | `dict` of Odyssey MicroResources in backpack.                                                                   |
+| `BackpackJSON`        |           `dict`            | Content of Backpack.json as of last read.                                                                       |
+| `ShipLockerJSON`      |           `dict`            | Content of ShipLocker.json as of last read.                                                                     |
+| `SuitCurrent`         |           `dict`            | CAPI-returned data of currently worn suit.  NB: May be `None` if no data.                                       |
+| `Suits`               |          `dict`[2]          | CAPI-returned data of owned suits.  NB: May be `None` if no data.                                               |
+| `SuitLoadoutCurrent`  |           `dict`            | CAPI-returned data of current Suit Loadout.  NB: May be `None` if no data.                                      |
+| `SuitLoadouts`        |          `dict`[2]          | CAPI-returned data of all Suit Loadouts.  NB: May be `None` if no data.                                         |
+| `Taxi`                |      `Optional[bool]`       | Whether or not we're currently in a taxi. NB: This is best effort with what the journals provide.               |
+| `Dropship`            |      `Optional[bool]`       | Whether or not the above taxi is a Dropship                                                                     |
+| `SystemAddress`[3]    |       `Optional[int]`       | Unique [ID64](http://disc.thargoid.space/ID64) of the star system we're currently in                            |
+| `SystemName`[3]       |       `Optional[str]`       | Name of the star system we're currently in                                                                      |
+| `SystemPopulation`[3] |       `Optional[int]`       | Population of the star system we're currently in                                                                |
+| `StarPos`[3]          |  `Optional[tuple[float]]`   | Galaxy co-ordinates of the system we're currently in                                                            |
+| `Body`[3][4]          |       `Optional[str]`       | Name of the body we're currently on / in the SOI of                                                             |
+| `BodyID`[3][4]        |       `Optional[int]`       | ID of the body we're currently on / in the SOI of                                                               |
+| `BodyType`[3][4]      |       `Optional[str]`       | The type of body that `Body` refers to                                                                          |
+| `StationName`[3]      |       `Optional[str]`       | Name of the station we're docked at, if applicable                                                              |
+| `MarketID`[3]         |       `Optional[str]`       | MarketID of the station we're docked at, if applicable                                                          |
+| `StationType`[3]      |       `Optional[str]`       | Type of the station we're docked at, if applicable                                                              |
 
 [1] - Contents of `NavRoute` not changed if a `NavRouteClear` event is seen,
 but plugins will see the `NavRouteClear` event.
@@ -675,6 +683,31 @@ members are present) and other times as an integer-keyed `dict` (when at
 least one member is missing, so the indices are not contiguous).  We choose to
 always convert to the integer-keyed `dict` form so that code utilising the data
 is simpler.
+
+[3] - Forced to `None` if the player joins another player's ship in remote
+multi-crew.
+
+[4] - There are some caveats with the Body data.  Firstly the name and ID
+can be for the orbital station or fleet carrier the player is docked at.
+Check 'BodyType' before using the values.
+
+Secondly there is an issue with close-orbiting binary bodies.  If the player:
+
+1. Enters Orbital Cruise around a Body an 'ApproachBody' event is emitted
+  and the tracking will update to reflect this.
+2. If the player then flies *in Orbital Cruise without entering Supercruise
+  proper* to the close-orbiting binary partner of the Body then *there is no
+  new 'ApproachBody' event to indicate the new Body's details*.  **Thus this
+  tracking will incorrectly indicate the first Body still**.
+
+So, before making use of any of this Body state a plugin should:
+
+1. Have a `dashboard_entry()` method and track the Body name present in its
+  data.
+2. Cross-check that Body name with `state['Body']` before making use of any
+ of `state'`s Body data.
+
+See `plugins/eddn.py` for an example of this in `export_journal_codexentry()`.
 
 New in version 4.1.6:
 
@@ -765,13 +798,26 @@ re-start EDMarketConnector.  That will be present when plugins are invoked
 with the synthetic `StartUp` event.  NB: Might just be a `NavRouteClear` event
 if that's what was in the file.
 
+New in version 5.8.0:
+
+`StarPos`, `SystemAddress`, `SystemName` and `SystemPopulation` have been 
+added to the `state` dictionary.  Best efforts data pertaining to the star
+system the player is in.
+
+`BodyID` and `BodyType` have been added to the `state` dictionary.  These
+now track in the same manner as prior core EDDN plugin code.  Check the
+documentation above for some caveats.  Do not just blindly use this data, or
+the 'Body' name value.
+
+`StationName`, `MarketID`, and `StationType` added to the `state` dictionary.
+
 ___
 
 ##### Synthetic Events
 
 A special "StartUp" entry is sent if EDMarketConnector is started while the
 game is already running. In this case you won't receive initial events such as
-"LoadGame", "Rank", "Location", etc. However the `state` dictionary will
+"LoadGame", "Rank", "Location", etc. However, the `state` dictionary will
 reflect the cumulative effect of these missed events.
 
 **NB: Any of the values in this might be `None` if the Cmdr has loaded into
