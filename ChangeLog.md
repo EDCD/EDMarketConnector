@@ -27,6 +27,13 @@ produce the Windows executables and installer.
 
 ---
 
+Pre-Release 5.8.0-rc2
+===
+An issue with building the Windows executable has been found and fixed.  This
+release is otherwise identical to 5.8.0-rc1.
+
+---
+
 Pre-Release 5.8.0-rc1
 ===
 
