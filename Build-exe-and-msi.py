@@ -84,6 +84,7 @@ OPTIONS = {
         'packages': [
             'asyncio',  # No longer auto as of py3.10+py2exe 0.11
             'multiprocessing',  # No longer auto as of py3.10+py2exe 0.11
+            'pkg_resources._vendor.platformdirs',  # Necessary 2023-01-17
             'sqlite3',  # Included for plugins
             'util',  # 2022-02-01 only imported in plugins/eddn.py
         ],
