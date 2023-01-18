@@ -126,8 +126,11 @@ Live galaxy.  Note the implementation details of this.  At time of writing it
 performs a `semantic_version` >= check.
 
 `import timeout_session` - provides a method called `new_session` that creates
-a requests.session with a default timeout on all requests. Recommended to
-reduce noise in HTTP requests
+a `requests.session` with a default timeout on all requests. Recommended to
+reduce noise in HTTP requests.  This also ensures your requests use the central
+"User-Agent" header value.  If you do have reason to make a request otherwise
+please ensure you use the `config.user_agent` value as the User-Agent (you can
+append a string to call out your plugin if you wish).
 
 `from ttkHyperlinkLabel import HyperlinkLabel` and `import myNotebook as nb` -
 For creating UI elements.
