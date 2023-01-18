@@ -15,10 +15,9 @@
 # Thus you **MUST** check if any imports you add in this file are only
 # referenced in this file (or only in any other core plugin), and if so...
 #
-#     YOU MUST ENSURE THAT PERTINENT ADJUSTMENTS ARE MADE IN `setup.py`
-#     SO AS TO ENSURE THE FILES ARE ACTUALLY PRESENT IN AN END-USER
-#     INSTALLATION ON WINDOWS.
-#
+#     YOU MUST ENSURE THAT PERTINENT ADJUSTMENTS ARE MADE IN
+#     `Build-exe-and-msi.py` SO AS TO ENSURE THE FILES ARE ACTUALLY PRESENT
+#     IN AN END-USER INSTALLATION ON WINDOWS.
 #
 # ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $#
 # ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $#
@@ -27,6 +26,7 @@ import gzip
 import io
 import json
 import tkinter as tk
+from tkinter import ttk
 from typing import TYPE_CHECKING, Union
 
 import myNotebook as nb  # noqa: N813 # its not my fault.
@@ -80,7 +80,7 @@ def plugin_start3(path: str) -> str:
     return 'Coriolis'
 
 
-def plugin_prefs(parent: tk.Widget, cmdr: str, is_beta: bool) -> tk.Frame:
+def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> tk.Frame:
     """Set up plugin preferences."""
     PADX = 10  # noqa: N806
 
@@ -127,7 +127,7 @@ def plugin_prefs(parent: tk.Widget, cmdr: str, is_beta: bool) -> tk.Frame:
     return conf_frame
 
 
-def prefs_changed(cmdr: str, is_beta: bool) -> None:
+def prefs_changed(cmdr: str | None, is_beta: bool) -> None:
     """Update URLs."""
     global normal_url, beta_url, override_mode
     normal_url = normal_textvar.get()

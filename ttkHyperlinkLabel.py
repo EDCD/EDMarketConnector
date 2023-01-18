@@ -19,7 +19,7 @@ import tkinter as tk
 import webbrowser
 from tkinter import font as tk_font
 from tkinter import ttk
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     def _(x: str) -> str: ...
@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label, object):  # type: ignore
     """Clickable label for HTTP links."""
 
-    def __init__(self, master: Optional[tk.Tk] = None, **kw: Any) -> None:
+    def __init__(self, master: tk.Frame | None = None, **kw: Any) -> None:
         self.url = 'url' in kw and kw.pop('url') or None
         self.popup_copy = kw.pop('popup_copy', False)
         self.underline = kw.pop('underline', None)  # override ttk.Label's underline

@@ -27,7 +27,7 @@ class ClickCounter:
 
     def __init__(self) -> None:
         # Be sure to use names that wont collide in our config variables
-        self.click_count: Optional[tk.StringVar] = tk.StringVar(value=str(config.get_int('click_counter_count')))
+        self.click_count = tk.StringVar(value=str(config.get_int('click_counter_count')))
         logger.info("ClickCounter instantiated")
 
     def on_load(self) -> str:
@@ -99,8 +99,8 @@ class ClickCounter:
         )
         button.grid(row=current_row)
         current_row += 1
-        nb.Label(frame, text="Count:").grid(row=current_row, sticky=tk.W)
-        nb.Label(frame, textvariable=self.click_count).grid(row=current_row, column=1)
+        tk.Label(frame, text="Count:").grid(row=current_row, sticky=tk.W)
+        tk.Label(frame, textvariable=self.click_count).grid(row=current_row, column=1)
         return frame
 
 

@@ -1,0 +1,13 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Type=Application
+# Ref: <https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-1.5.html>
+Version=1.5
+Name=E:D Market Connector
+Comment=Utilise Elite Dangerous Journal and CAPI data
+Icon=io.edcd.EDMarketConnector
+Categories=Game;
+Keywords=Elite;Dangerous;EDDN;EDSM;EDDB;Inara;Spansh;
+Exec=edmarketconnector
+Terminal=false
+SingleMainWindow=true

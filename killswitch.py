@@ -1,6 +1,7 @@
 """Fetch kill switches from EDMC Repo."""
 from __future__ import annotations
 
+import json
 import threading
 from copy import deepcopy
 from typing import (
@@ -339,6 +340,16 @@ def fetch_kill_switches(target=DEFAULT_KILLSWITCH_URL) -> Optional[KillSwitchJSO
     :return: a list of dicts containing kill switch data, or None
     """
     logger.info("Attempting to fetch kill switches")
+    if target.startswith('file:'):
+        target = target.replace('file:', '')
+        try:
+            with open(target, 'r') as t:
+                return json.load(t)
+
+        except FileNotFoundError:
+            logger.warning(f"No such file '{target}'")
+            return None
+
     try:
         data = requests.get(target, timeout=10).json()
 
@@ -458,13 +469,16 @@ def get_kill_switches_thread(
 active: KillSwitchSet = KillSwitchSet([])
 
 
-def setup_main_list():
+def setup_main_list(filename: Optional[str]):
     """
     Set up the global set of kill switches for querying.
 
     Plugins should NOT call this EVER.
     """
-    if (data := get_kill_switches(DEFAULT_KILLSWITCH_URL, OLD_KILLSWITCH_URL)) is None:
+    if filename is None:
+        filename = DEFAULT_KILLSWITCH_URL
+
+    if (data := get_kill_switches(filename, OLD_KILLSWITCH_URL)) is None:
         logger.warning("Unable to fetch kill switches. Setting global set to an empty set")
         return
 

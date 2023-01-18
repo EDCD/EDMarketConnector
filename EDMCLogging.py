@@ -145,7 +145,7 @@ class Logger:
     logging.Logger instance.
     """
 
-    def __init__(self, logger_name: str, loglevel: int = _default_loglevel):
+    def __init__(self, logger_name: str, loglevel: int | str = _default_loglevel):
         """
         Set up a `logging.Logger` with our preferred configuration.
 
@@ -216,7 +216,7 @@ class Logger:
         """
         return self.logger_channel
 
-    def set_channels_loglevel(self, level: int) -> None:
+    def set_channels_loglevel(self, level: int | str) -> None:
         """
         Set the specified log level on the channels.
 
@@ -226,7 +226,7 @@ class Logger:
         self.logger_channel.setLevel(level)
         self.logger_channel_rotating.setLevel(level)
 
-    def set_console_loglevel(self, level: int) -> None:
+    def set_console_loglevel(self, level: int | str) -> None:
         """
         Set the specified log level on the console channel.
 
@@ -541,7 +541,7 @@ def get_main_logger(sublogger_name: str = '') -> 'LoggerMixin':
 
 
 # Singleton
-loglevel = config.get_str('loglevel')
+loglevel: str | int = config.get_str('loglevel')
 if not loglevel:
     loglevel = logging.INFO
 

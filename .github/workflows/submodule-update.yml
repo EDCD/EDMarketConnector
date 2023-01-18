@@ -2,8 +2,8 @@
 name: Submodule Updates
 
 on:
-  push:
-    branches: [ develop ]
+  #  push:
+  #    branches: [ develop ]
   schedule:
     - cron: '0 12 * * *'
 

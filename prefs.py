@@ -19,7 +19,6 @@ from EDMCLogging import edmclogger, get_main_logger
 from hotkey import hotkeymgr
 from l10n import Translations
 from monitor import monitor
-from myNotebook import Notebook
 from theme import theme
 from ttkHyperlinkLabel import HyperlinkLabel
 
@@ -182,7 +181,7 @@ if sys.platform == 'darwin':
 elif sys.platform == 'win32':
     import ctypes
     import winreg
-    from ctypes.wintypes import HINSTANCE, HWND, LPARAM, LPCWSTR, LPVOID, LPWSTR, MAX_PATH, POINT, RECT, SIZE, UINT
+    from ctypes.wintypes import HINSTANCE, HWND, LPCWSTR, LPWSTR, MAX_PATH, POINT, RECT, SIZE, UINT
     is_wine = False
     try:
         WINE_REGISTRY_KEY = r'HKEY_LOCAL_MACHINE\Software\Wine'
@@ -190,21 +189,8 @@ elif sys.platform == 'win32':
         winreg.OpenKey(reg, WINE_REGISTRY_KEY)
         is_wine = True
 
-    except OSError:
+    except OSError:  # Assumed to be 'path not found', i.e. not-wine
         pass
-
-    # https://msdn.microsoft.com/en-us/library/windows/desktop/bb762115
-    BIF_RETURNONLYFSDIRS = 0x00000001
-    BIF_USENEWUI = 0x00000050
-    BFFM_INITIALIZED = 1
-    BFFM_SETSELECTION = 0x00000467
-    BrowseCallbackProc = ctypes.WINFUNCTYPE(ctypes.c_int, HWND, ctypes.c_uint, LPARAM, LPARAM)
-
-    class BROWSEINFO(ctypes.Structure):
-        """Windows file browser fields."""
-
-        _fields_ = [("hwndOwner", HWND), ("pidlRoot", LPVOID), ("pszDisplayName", LPWSTR), ("lpszTitle", LPCWSTR),
-                    ("ulFlags", UINT), ("lpfn", BrowseCallbackProc), ("lParam", LPCWSTR), ("iImage", ctypes.c_int)]
 
     CalculatePopupWindowPosition = None
     if not is_wine:
@@ -279,7 +265,7 @@ class PreferencesDialog(tk.Toplevel):
         frame = ttk.Frame(self)
         frame.grid(sticky=tk.NSEW)
 
-        notebook = nb.Notebook(frame)
+        notebook: ttk.Notebook = nb.Notebook(frame)
         notebook.bind('<<NotebookTabChanged>>', self.tabchanged)  # Recompute on tab change
 
         self.PADX = 10
@@ -333,7 +319,7 @@ class PreferencesDialog(tk.Toplevel):
             ):
                 self.geometry(f"+{position.left}+{position.top}")
 
-    def __setup_output_tab(self, root_notebook: nb.Notebook) -> None:
+    def __setup_output_tab(self, root_notebook: ttk.Notebook) -> None:
         output_frame = nb.Frame(root_notebook)
         output_frame.columnconfigure(0, weight=1)
 
@@ -418,13 +404,13 @@ class PreferencesDialog(tk.Toplevel):
         # LANG: Label for 'Output' Settings/Preferences tab
         root_notebook.add(output_frame, text=_('Output'))  # Tab heading in settings
 
-    def __setup_plugin_tabs(self, notebook: Notebook) -> None:
+    def __setup_plugin_tabs(self, notebook: ttk.Notebook) -> None:
         for plugin in plug.PLUGINS:
             plugin_frame = plugin.get_prefs(notebook, monitor.cmdr, monitor.is_beta)
             if plugin_frame:
                 notebook.add(plugin_frame, text=plugin.name)
 
-    def __setup_config_tab(self, notebook: Notebook) -> None:  # noqa: CCR001
+    def __setup_config_tab(self, notebook: ttk.Notebook) -> None:  # noqa: CCR001
         config_frame = nb.Frame(notebook)
         config_frame.columnconfigure(1, weight=1)
         row = AutoInc(start=1)
@@ -470,6 +456,25 @@ class PreferencesDialog(tk.Toplevel):
                 command=self.logdir_reset,
                 state=tk.NORMAL if config.get_str('journaldir') else tk.DISABLED
             ).grid(column=2, pady=self.PADY, sticky=tk.EW, row=row.get())
+
+        # CAPI settings
+        self.capi_fleetcarrier = tk.BooleanVar(value=config.get_bool('capi_fleetcarrier'))
+
+        ttk.Separator(config_frame, orient=tk.HORIZONTAL).grid(
+                columnspan=4, padx=self.PADX, pady=self.PADY*4, sticky=tk.EW, row=row.get()
+            )
+
+        nb.Label(
+                config_frame,
+                text=_('CAPI Settings')  # LANG: Settings > Configuration - Label for CAPI section
+            ).grid(padx=self.PADX, sticky=tk.W, row=row.get())
+
+        nb.Checkbutton(
+                config_frame,
+                # LANG: Configuration - Enable or disable the Fleet Carrier CAPI calls
+                text=_('Enable Fleetcarrier CAPI Queries'),
+                variable=self.capi_fleetcarrier
+            ).grid(columnspan=4, padx=self.PADX, pady=(5, 0), sticky=tk.W, row=row.get())
 
         if sys.platform in ('darwin', 'win32'):
             ttk.Separator(config_frame, orient=tk.HORIZONTAL).grid(
@@ -675,7 +680,7 @@ class PreferencesDialog(tk.Toplevel):
         # LANG: Label for 'Configuration' tab in Settings
         notebook.add(config_frame, text=_('Configuration'))
 
-    def __setup_privacy_tab(self, notebook: Notebook) -> None:
+    def __setup_privacy_tab(self, notebook: ttk.Notebook) -> None:
         frame = nb.Frame(notebook)
         self.hide_multicrew_captain = tk.BooleanVar(value=config.get_bool('hide_multicrew_captain', default=False))
         self.hide_private_group = tk.BooleanVar(value=config.get_bool('hide_private_group', default=False))
@@ -697,7 +702,7 @@ class PreferencesDialog(tk.Toplevel):
 
         notebook.add(frame, text=_('Privacy'))  # LANG: Preferences privacy tab title
 
-    def __setup_appearance_tab(self, notebook: Notebook) -> None:
+    def __setup_appearance_tab(self, notebook: ttk.Notebook) -> None:
         self.languages = Translations.available_names()
         # Appearance theme and language setting
         # LANG: The system default language choice in Settings > Appearance
@@ -887,7 +892,7 @@ class PreferencesDialog(tk.Toplevel):
         # LANG: Label for Settings > Appearance tab
         notebook.add(appearance_frame, text=_('Appearance'))  # Tab heading in settings
 
-    def __setup_plugin_tab(self, notebook: Notebook) -> None:  # noqa: CCR001
+    def __setup_plugin_tab(self, notebook: ttk.Notebook) -> None:  # noqa: CCR001
         # Plugin settings and info
         plugins_frame = nb.Frame(notebook)
         plugins_frame.columnconfigure(0, weight=1)
@@ -1026,42 +1031,13 @@ class PreferencesDialog(tk.Toplevel):
         :param title: Title of the window
         :param pathvar: the path to start the dialog on
         """
-        import locale
-
-        # If encoding isn't UTF-8 we can't use the tkinter dialog
-        current_locale = locale.getlocale(locale.LC_CTYPE)
-        directory = None
-        if sys.platform == 'win32' and current_locale[1] not in ('utf8', 'UTF8', 'utf-8', 'UTF-8'):
-            def browsecallback(hwnd, uMsg, lParam, lpData):  # noqa: N803 # Windows API convention
-                # set initial folder
-                if uMsg == BFFM_INITIALIZED and lpData:
-                    ctypes.windll.user32.SendMessageW(hwnd, BFFM_SETSELECTION, 1, lpData)
-                return 0
-
-            browseInfo = BROWSEINFO()  # noqa: N806 # Windows convention
-            browseInfo.lpszTitle = title
-            browseInfo.ulFlags = BIF_RETURNONLYFSDIRS | BIF_USENEWUI
-            browseInfo.lpfn = BrowseCallbackProc(browsecallback)
-            browseInfo.lParam = pathvar.get().startswith('~') and join(config.home_path,
-                                                                       pathvar.get()[2:]) or pathvar.get()
-            ctypes.windll.ole32.CoInitialize(None)
-            pidl = ctypes.windll.shell32.SHBrowseForFolderW(ctypes.byref(browseInfo))
-            if pidl:
-                path = ctypes.create_unicode_buffer(MAX_PATH)
-                ctypes.windll.shell32.SHGetPathFromIDListW(pidl, path)
-                ctypes.windll.ole32.CoTaskMemFree(pidl)
-                directory = path.value
-            else:
-                directory = None
-
-        else:
-            import tkinter.filedialog
-            directory = tkinter.filedialog.askdirectory(
-                parent=self,
-                initialdir=expanduser(pathvar.get()),
-                title=title,
-                mustexist=tk.TRUE
-            )
+        import tkinter.filedialog
+        directory = tkinter.filedialog.askdirectory(
+            parent=self,
+            initialdir=expanduser(pathvar.get()),
+            title=title,
+            mustexist=tk.TRUE
+        )
 
         if directory:
             pathvar.set(directory)
@@ -1188,8 +1164,8 @@ class PreferencesDialog(tk.Toplevel):
         :return: "break" as a literal, to halt processing
         """
         good = hotkeymgr.fromevent(event)
-        if good:
-            (hotkey_code, hotkey_mods) = good
+        if good and isinstance(good, tuple):
+            hotkey_code, hotkey_mods = good
             event.widget.delete(0, tk.END)
             event.widget.insert(0, hotkeymgr.display(hotkey_code, hotkey_mods))
             if hotkey_code:
@@ -1244,6 +1220,8 @@ class PreferencesDialog(tk.Toplevel):
 
         else:
             config.set('journaldir', logdir)
+
+        config.set('capi_fleetcarrier', self.capi_fleetcarrier.get())
 
         if sys.platform in ('darwin', 'win32'):
             config.set('hotkey_code', self.hotkey_code)

@@ -38,16 +38,18 @@ from datetime import datetime, timedelta, timezone
 from queue import Queue
 from threading import Thread
 from time import sleep
-from typing import TYPE_CHECKING, Any, List, Literal, Mapping, MutableMapping, Optional, Set, Tuple, Union, cast
+from tkinter import ttk
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Mapping, MutableMapping, Optional, Set, Tuple, Union, cast
 
 import requests
 
 import killswitch
 import monitor
+import myNotebook
 import myNotebook as nb  # noqa: N813
 import plug
 from companion import CAPIData
-from config import applongname, appversion, config, debug_senders, user_agent
+from config import applongname, appname, appversion, config, debug_senders, user_agent
 from edmc_data import DEBUG_WEBSERVER_HOST, DEBUG_WEBSERVER_PORT
 from EDMCLogging import get_main_logger
 from ttkHyperlinkLabel import HyperlinkLabel
@@ -82,8 +84,8 @@ class This:
         self.session: requests.Session = requests.Session()
         self.session.headers['User-Agent'] = user_agent
         self.queue: Queue = Queue()		# Items to be sent to EDSM by worker thread
-        self.discarded_events: Set[str] = []  # List discarded events from EDSM
-        self.lastlookup: requests.Response  # Result of last system lookup
+        self.discarded_events: Set[str] = set()  # List discarded events from EDSM
+        self.lastlookup: Dict[str, Any]  # Result of last system lookup
 
         # Game state
         self.multicrew: bool = False  # don't send captain's ship info to EDSM while on a crew
@@ -91,13 +93,13 @@ class This:
         self.newgame: bool = False  # starting up - batch initial burst of events
         self.newgame_docked: bool = False  # starting up while docked
         self.navbeaconscan: int = 0		# batch up burst of Scan events after NavBeaconScan
-        self.system_link: tk.Widget = None
-        self.system: tk.Tk = None
-        self.system_address: Optional[int] = None  # Frontier SystemAddress
-        self.system_population: Optional[int] = None
-        self.station_link: tk.Widget = None
-        self.station: Optional[str] = None
-        self.station_marketid: Optional[int] = None  # Frontier MarketID
+        self.system_link: tk.Widget | None = None
+        self.system_name: tk.Tk | None = None
+        self.system_address: int | None = None  # Frontier SystemAddress
+        self.system_population: int | None = None
+        self.station_link: tk.Widget | None = None
+        self.station_name: str | None = None
+        self.station_marketid: int | None = None  # Frontier MarketID
         self.on_foot = False
 
         self._IMG_KNOWN = None
@@ -107,19 +109,19 @@ class This:
 
         self.thread: Optional[threading.Thread] = None
 
-        self.log = None
-        self.log_button = None
+        self.log: tk.IntVar | None = None
+        self.log_button: ttk.Checkbutton | None = None
 
-        self.label = None
+        self.label: tk.Widget | None = None
 
-        self.cmdr_label = None
-        self.cmdr_text = None
+        self.cmdr_label: myNotebook.Label | None = None
+        self.cmdr_text: myNotebook.Label | None = None
 
-        self.user_label = None
-        self.user = None
+        self.user_label: myNotebook.Label | None = None
+        self.user: myNotebook.Entry | None = None
 
-        self.apikey_label = None
-        self.apikey = None
+        self.apikey_label: myNotebook.Label | None = None
+        self.apikey: myNotebook.Entry | None = None
 
 
 this = This()
@@ -184,9 +186,9 @@ def station_url(system_name: str, station_name: str) -> str:
         )
 
     # monitor state might think these are gone, but we don't yet
-    if this.system and this.station:
+    if this.system_name and this.station_name:
         return requests.utils.requote_uri(
-            f'https://www.edsm.net/en/system?systemName={this.system}&stationName={this.station}'
+            f'https://www.edsm.net/en/system?systemName={this.system_name}&stationName={this.station_name}'
         )
 
     if system_name:
@@ -248,9 +250,15 @@ def plugin_app(parent: tk.Tk) -> None:
     :param parent: The tk parent to place our widgets into.
     :return: See PLUGINS.md#display
     """
-    this.system_link = parent.children['system']  # system label in main window
+    # system label in main window
+    this.system_link = parent.nametowidget(f".{appname.lower()}.system")
+    if this.system_link is None:
+        logger.error("Couldn't look up system widget!!!")
+        return
+
     this.system_link.bind_all('<<EDSMStatus>>', update_status)
-    this.station_link = parent.children['station']  # station label in main window
+    # station label in main window
+    this.station_link = parent.nametowidget(f".{appname.lower()}.station")
 
 
 def plugin_stop() -> None:
@@ -267,7 +275,7 @@ def plugin_stop() -> None:
     logger.debug('Done.')
 
 
-def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool) -> tk.Frame:
+def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> tk.Frame:
     """
     Plugin preferences setup hook.
 
@@ -300,7 +308,8 @@ def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool) -> tk.Frame:
         frame, text=_('Send flight log and Cmdr status to EDSM'), variable=this.log, command=prefsvarchanged
     )
 
-    this.log_button.grid(columnspan=2, padx=BUTTONX, pady=(5, 0), sticky=tk.W)
+    if this.log_button:
+        this.log_button.grid(columnspan=2, padx=BUTTONX, pady=(5, 0), sticky=tk.W)
 
     nb.Label(frame).grid(sticky=tk.W)  # big spacer
     # Section heading in settings
@@ -315,61 +324,77 @@ def plugin_prefs(parent: tk.Tk, cmdr: str, is_beta: bool) -> tk.Frame:
 
     cur_row = 10
 
-    this.label.grid(columnspan=2, padx=PADX, sticky=tk.W)
+    if this.label:
+        this.label.grid(columnspan=2, padx=PADX, sticky=tk.W)
 
-    # LANG: Game Commander name label in EDSM settings
-    this.cmdr_label = nb.Label(frame, text=_('Cmdr'))  # Main window
-    this.cmdr_label.grid(row=cur_row, padx=PADX, sticky=tk.W)
-    this.cmdr_text = nb.Label(frame)
-    this.cmdr_text.grid(row=cur_row, column=1, padx=PADX, pady=PADY, sticky=tk.W)
-
-    cur_row += 1
-
-    # LANG: EDSM Commander name label in EDSM settings
-    this.user_label = nb.Label(frame, text=_('Commander Name'))  # EDSM setting
-    this.user_label.grid(row=cur_row, padx=PADX, sticky=tk.W)
-    this.user = nb.Entry(frame)
-    this.user.grid(row=cur_row, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
+    if this.cmdr_label and this.cmdr_text:
+        # LANG: Game Commander name label in EDSM settings
+        this.cmdr_label = nb.Label(frame, text=_('Cmdr'))  # Main window
+        this.cmdr_label.grid(row=cur_row, padx=PADX, sticky=tk.W)
+        this.cmdr_text = nb.Label(frame)
+        this.cmdr_text.grid(row=cur_row, column=1, padx=PADX, pady=PADY, sticky=tk.W)
 
     cur_row += 1
 
-    # LANG: EDSM API key label
-    this.apikey_label = nb.Label(frame, text=_('API Key'))  # EDSM setting
-    this.apikey_label.grid(row=cur_row, padx=PADX, sticky=tk.W)
-    this.apikey = nb.Entry(frame)
-    this.apikey.grid(row=cur_row, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
+    if this.user_label and this.label:
+        # LANG: EDSM Commander name label in EDSM settings
+        this.user_label = nb.Label(frame, text=_('Commander Name'))  # EDSM setting
+        this.user_label.grid(row=cur_row, padx=PADX, sticky=tk.W)
+        this.user = nb.Entry(frame)
+        this.user.grid(row=cur_row, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
+
+    cur_row += 1
+
+    if this.apikey_label and this.apikey:
+        # LANG: EDSM API key label
+        this.apikey_label = nb.Label(frame, text=_('API Key'))  # EDSM setting
+        this.apikey_label.grid(row=cur_row, padx=PADX, sticky=tk.W)
+        this.apikey = nb.Entry(frame)
+        this.apikey.grid(row=cur_row, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
 
     prefs_cmdr_changed(cmdr, is_beta)
 
     return frame
 
 
-def prefs_cmdr_changed(cmdr: str, is_beta: bool) -> None:
+def prefs_cmdr_changed(cmdr: str | None, is_beta: bool) -> None:  # noqa: CCR001
     """
     Handle the Commander name changing whilst Settings was open.
 
     :param cmdr: The new current Commander name.
     :param is_beta: Whether game beta was detected.
     """
-    this.log_button['state'] = tk.NORMAL if cmdr and not is_beta else tk.DISABLED
-    this.user['state'] = tk.NORMAL
-    this.user.delete(0, tk.END)
-    this.apikey['state'] = tk.NORMAL
-    this.apikey.delete(0, tk.END)
+    if this.log_button:
+        this.log_button['state'] = tk.NORMAL if cmdr and not is_beta else tk.DISABLED
+
+    if this.user:
+        this.user['state'] = tk.NORMAL
+        this.user.delete(0, tk.END)
+
+    if this.apikey:
+        this.apikey['state'] = tk.NORMAL
+        this.apikey.delete(0, tk.END)
+
     if cmdr:
-        this.cmdr_text['text'] = f'{cmdr}{" [Beta]" if is_beta else ""}'
+        if this.cmdr_text:
+            this.cmdr_text['text'] = f'{cmdr}{" [Beta]" if is_beta else ""}'
+
         cred = credentials(cmdr)
 
         if cred:
-            this.user.insert(0, cred[0])
-            this.apikey.insert(0, cred[1])
+            if this.user:
+                this.user.insert(0, cred[0])
+
+            if this.apikey:
+                this.apikey.insert(0, cred[1])
 
     else:
-        # LANG: We have no data on the current commander
-        this.cmdr_text['text'] = _('None')
+        if this.cmdr_text:
+            # LANG: We have no data on the current commander
+            this.cmdr_text['text'] = _('None')
 
     to_set: Union[Literal['normal'], Literal['disabled']] = tk.DISABLED
-    if cmdr and not is_beta and this.log.get():
+    if cmdr and not is_beta and this.log and this.log.get():
         to_set = tk.NORMAL
 
     set_prefs_ui_states(to_set)
@@ -378,7 +403,7 @@ def prefs_cmdr_changed(cmdr: str, is_beta: bool) -> None:
 def prefsvarchanged() -> None:
     """Handle the 'Send data to EDSM' tickbox changing state."""
     to_set = tk.DISABLED
-    if this.log.get():
+    if this.log and this.log.get() and this.log_button:
         to_set = this.log_button['state']
 
     set_prefs_ui_states(to_set)
@@ -390,13 +415,17 @@ def set_prefs_ui_states(state: str) -> None:
 
     :param state: the state to set each entry to
     """
-    this.label['state'] = state
-    this.cmdr_label['state'] = state
-    this.cmdr_text['state'] = state
-    this.user_label['state'] = state
-    this.user['state'] = state
-    this.apikey_label['state'] = state
-    this.apikey['state'] = state
+    if (
+        this.label and this.cmdr_label and this.cmdr_text and this.user_label and this.user
+        and this.apikey_label and this.apikey
+    ):
+        this.label['state'] = state
+        this.cmdr_label['state'] = state
+        this.cmdr_text['state'] = state
+        this.user_label['state'] = state
+        this.user['state'] = state
+        this.apikey_label['state'] = state
+        this.apikey['state'] = state
 
 
 def prefs_changed(cmdr: str, is_beta: bool) -> None:
@@ -406,7 +435,8 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
     :param cmdr: Name of Commander.
     :param is_beta: Whether game beta was detected.
     """
-    config.set('edsm_out', this.log.get())
+    if this.log:
+        config.set('edsm_out', this.log.get())
 
     if cmdr and not is_beta:
         # TODO: remove this when config is rewritten.
@@ -414,17 +444,18 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
         usernames: List[str] = config.get_list('edsm_usernames', default=[])
         apikeys: List[str] = config.get_list('edsm_apikeys', default=[])
 
-        if cmdr in cmdrs:
-            idx = cmdrs.index(cmdr)
-            usernames.extend([''] * (1 + idx - len(usernames)))
-            usernames[idx] = this.user.get().strip()
-            apikeys.extend([''] * (1 + idx - len(apikeys)))
-            apikeys[idx] = this.apikey.get().strip()
+        if this.user and this.apikey:
+            if cmdr in cmdrs:
+                idx = cmdrs.index(cmdr)
+                usernames.extend([''] * (1 + idx - len(usernames)))
+                usernames[idx] = this.user.get().strip()
+                apikeys.extend([''] * (1 + idx - len(apikeys)))
+                apikeys[idx] = this.apikey.get().strip()
 
-        else:
-            config.set('edsm_cmdrs', cmdrs + [cmdr])
-            usernames.append(this.user.get().strip())
-            apikeys.append(this.apikey.get().strip())
+            else:
+                config.set('edsm_cmdrs', cmdrs + [cmdr])
+                usernames.append(this.user.get().strip())
+                apikeys.append(this.apikey.get().strip())
 
         config.set('edsm_usernames', usernames)
         config.set('edsm_apikeys', apikeys)
@@ -494,6 +525,11 @@ def journal_entry(  # noqa: C901, CCR001
 
     this.game_version = state['GameVersion']
     this.game_build = state['GameBuild']
+    this.system_address = state['SystemAddress']
+    this.system_name = state['SystemName']
+    this.system_population = state['SystemPopulation']
+    this.station_name = state['StationName']
+    this.station_marketid = state['MarketID']
 
     entry = new_entry
 
@@ -507,50 +543,23 @@ Station: {station}
 state: {state!r}
 entry: {entry!r}'''
         )
-    # Always update our system address even if we're not currently the provider for system or station, but dont update
-    # on events that contain "future" data, such as FSDTarget
-    if entry['event'] in ('Location', 'Docked', 'CarrierJump', 'FSDJump'):
-        this.system_address = entry.get('SystemAddress', this.system_address)
-        this.system = entry.get('StarSystem', this.system)
-
-    # We need pop == 0 to set the value so as to clear 'x' in systems with
-    # no stations.
-    pop = entry.get('Population')
-    if pop is not None:
-        this.system_population = pop
-
-    this.station = entry.get('StationName', this.station)
-    # on_foot station detection
-    if entry['event'] == 'Location' and entry['BodyType'] == 'Station':
-        this.station = entry['Body']
-
-    this.station_marketid = entry.get('MarketID', this.station_marketid)
-    # We might pick up StationName in DockingRequested, make sure we clear it if leaving
-    if entry['event'] in ('Undocked', 'FSDJump', 'SupercruiseEntry'):
-        this.station = None
-        this.station_marketid = None
-
-    if entry['event'] == 'Embark' and not entry.get('OnStation'):
-        # If we're embarking OnStation to a Taxi/Dropship we'll also get an
-        # Undocked event.
-        this.station = None
-        this.station_marketid = None
 
     if config.get_str('station_provider') == 'EDSM':
-        to_set = this.station
-        if not this.station:
+        to_set = this.station_name
+        if not this.station_name:
             if this.system_population and this.system_population > 0:
                 to_set = STATION_UNDOCKED
 
             else:
                 to_set = ''
 
-        this.station_link['text'] = to_set
-        this.station_link['url'] = station_url(str(this.system), str(this.station))
-        this.station_link.update_idletasks()
+        if this.station_link:
+            this.station_link['text'] = to_set
+            this.station_link['url'] = station_url(str(this.system_name), str(this.station_name))
+            this.station_link.update_idletasks()
 
     # Update display of 'EDSM Status' image
-    if this.system_link['text'] != system:
+    if this.system_link and this.system_link['text'] != system:
         this.system_link['text'] = system if system else ''
         this.system_link['image'] = ''
         this.system_link.update_idletasks()
@@ -596,9 +605,8 @@ entry: {entry!r}'''
             ):
                 # LANG: The Inara API only accepts Live galaxy data, not Legacy galaxy data
                 logger.info("EDSM only accepts Live galaxy data")
-                # this.parent.children['status']['text'] =
                 this.legacy_galaxy_last_notified = datetime.now(timezone.utc)
-                return _("EDSM only accepts Live galaxy data")
+                return _("EDSM only accepts Live galaxy data")  # LANG: EDSM - Only Live data
 
             return ''
 
@@ -639,7 +647,7 @@ Queueing: {entry!r}'''
 
 
 # Update system data
-def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:
+def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:  # noqa: CCR001
     """
     Process new CAPI data.
 
@@ -654,36 +662,38 @@ def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:
         this.station_marketid = data['lastStarport']['id']
 
     # Only trust CAPI if these aren't yet set
-    if not this.system:
-        this.system = data['lastSystem']['name']
+    if not this.system_name:
+        this.system_name = data['lastSystem']['name']
 
-    if not this.station and data['commander']['docked']:
-        this.station = data['lastStarport']['name']
+    if not this.station_name and data['commander']['docked']:
+        this.station_name = data['lastStarport']['name']
 
     # TODO: Fire off the EDSM API call to trigger the callback for the icons
 
     if config.get_str('system_provider') == 'EDSM':
-        this.system_link['text'] = this.system
-        # Do *NOT* set 'url' here, as it's set to a function that will call
-        # through correctly.  We don't want a static string.
-        this.system_link.update_idletasks()
+        if this.system_link:
+            this.system_link['text'] = this.system_name
+            # Do *NOT* set 'url' here, as it's set to a function that will call
+            # through correctly.  We don't want a static string.
+            this.system_link.update_idletasks()
 
     if config.get_str('station_provider') == 'EDSM':
-        if data['commander']['docked'] or this.on_foot and this.station:
-            this.station_link['text'] = this.station
+        if this.station_link:
+            if data['commander']['docked'] or this.on_foot and this.station_name:
+                this.station_link['text'] = this.station_name
 
-        elif data['lastStarport']['name'] and data['lastStarport']['name'] != "":
-            this.station_link['text'] = STATION_UNDOCKED
+            elif data['lastStarport']['name'] and data['lastStarport']['name'] != "":
+                this.station_link['text'] = STATION_UNDOCKED
 
-        else:
-            this.station_link['text'] = ''
+            else:
+                this.station_link['text'] = ''
 
-        # Do *NOT* set 'url' here, as it's set to a function that will call
-        # through correctly.  We don't want a static string.
+            # Do *NOT* set 'url' here, as it's set to a function that will call
+            # through correctly.  We don't want a static string.
 
-        this.station_link.update_idletasks()
+            this.station_link.update_idletasks()
 
-    if not this.system_link['text']:
+    if this.system_link and not this.system_link['text']:
         this.system_link['text'] = system
         this.system_link['image'] = ''
         this.system_link.update_idletasks()
@@ -759,9 +769,12 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
 
         retrying = 0
         while retrying < 3:
+            if item is None:
+                item = cast(Tuple[str, str, str, Mapping[str, Any]], ("", {}))
+
             should_skip, new_item = killswitch.check_killswitch(
                 'plugins.edsm.worker',
-                item if item is not None else cast(Tuple[str, Mapping[str, Any]], ("", {})),
+                item,
                 logger
             )
 
@@ -838,8 +851,12 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
                     if any(p for p in pending if p['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked')):
                         data_elided = data.copy()
                         data_elided['apiKey'] = '<elided>'
-                        data_elided['message'] = data_elided['message'].decode('utf-8')
-                        data_elided['commanderName'] = data_elided['commanderName'].decode('utf-8')
+                        if isinstance(data_elided['message'], bytes):
+                            data_elided['message'] = data_elided['message'].decode('utf-8')
+
+                        if isinstance(data_elided['commanderName'], bytes):
+                            data_elided['commanderName'] = data_elided['commanderName'].decode('utf-8')
+
                         logger.trace_if(
                             'journal.locations',
                             "pending has at least one of ('CarrierJump', 'FSDJump', 'Location', 'Docked')"
@@ -858,11 +875,11 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
                             'journal.locations', f'Overall POST data (elided) is:\n{json.dumps(data_elided, indent=2)}'
                         )
 
-                    r = this.session.post(TARGET_URL, data=data, timeout=_TIMEOUT)
-                    logger.trace_if('plugin.edsm.api', f'API response content: {r.content!r}')
-                    r.raise_for_status()
+                    response = this.session.post(TARGET_URL, data=data, timeout=_TIMEOUT)
+                    logger.trace_if('plugin.edsm.api', f'API response content: {response.content!r}')
+                    response.raise_for_status()
 
-                    reply = r.json()
+                    reply = response.json()
                     msg_num = reply['msgnum']
                     msg = reply['msg']
                     # 1xx = OK
@@ -893,7 +910,7 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
                                 # Update main window's system status
                                 this.lastlookup = r
                                 # calls update_status in main thread
-                                if not config.shutting_down:
+                                if not config.shutting_down and this.system_link is not None:
                                     this.system_link.event_generate('<<EDSMStatus>>', when="tail")
 
                             if r['msgnum'] // 100 != 1:  # type: ignore
@@ -996,18 +1013,19 @@ def update_status(event=None) -> None:
 # msgnum: 1xx = OK, 2xx = fatal error, 3xx = error, 4xx = ignorable errors.
 def edsm_notify_system(reply: Mapping[str, Any]) -> None:
     """Update the image next to the system link."""
-    if not reply:
-        this.system_link['image'] = this._IMG_ERROR
-        # LANG: EDSM Plugin - Error connecting to EDSM API
-        plug.show_error(_("Error: Can't connect to EDSM"))
+    if this.system_link is not None:
+        if not reply:
+            this.system_link['image'] = this._IMG_ERROR
+            # LANG: EDSM Plugin - Error connecting to EDSM API
+            plug.show_error(_("Error: Can't connect to EDSM"))
 
-    elif reply['msgnum'] // 100 not in (1, 4):
-        this.system_link['image'] = this._IMG_ERROR
-        # LANG: EDSM Plugin - Error message from EDSM API
-        plug.show_error(_('Error: EDSM {MSG}').format(MSG=reply['msg']))
+        elif reply['msgnum'] // 100 not in (1, 4):
+            this.system_link['image'] = this._IMG_ERROR
+            # LANG: EDSM Plugin - Error message from EDSM API
+            plug.show_error(_('Error: EDSM {MSG}').format(MSG=reply['msg']))
 
-    elif reply.get('systemCreated'):
-        this.system_link['image'] = this._IMG_NEW
+        elif reply.get('systemCreated'):
+            this.system_link['image'] = this._IMG_NEW
 
-    else:
-        this.system_link['image'] = this._IMG_KNOWN
+        else:
+            this.system_link['image'] = this._IMG_KNOWN

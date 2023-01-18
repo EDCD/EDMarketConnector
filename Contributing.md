@@ -197,6 +197,99 @@ matter handled as part of
 [the release process](docs/Releasing.md#distribution).
 
 ---
+## Python Environment
+Whilst you can use whatever IDE/development environment best suits you, much
+of the setup in this project has only been tested against PyCharm or VSCode,
+along with 'git bash' command-line.
+
+### Use the version denoted by `.python-version`
+We only test, and build with, the python version as defined in the file
+`.python-version`.  Trying to use any other version might mean things just
+don't run at all, or don't work as expected.
+
+### Use a Python virtual environment
+Always use a Python virtual environment specific to working on this project.
+
+An example, when using Python 3.11.x would be:
+```bash
+python -m venv ../edmc-venv-3.11
+```
+Note how the 'venv' is placed in a sub-directory *of the parent directory* of
+the project.  This avoids any issues with scripts working recursively picking
+up your 'venv' files.
+
+If you have good reason to put the 'venv' inside the project directory then
+you **MUST** use either `venv` or `.venv`, else you'll run into all sorts of
+problems with pre-commit checks.
+
+### Install the development requirements
+Whilst simply running the project only requires
+`pip install -r requirements.txt`-provided modules, development work will
+instead require:
+```bash
+pip install -r requirements-dev.txt
+```
+NB: This itself will also take note of `requirements.txt`.
+
+This will ensure you have all the necessary tools to hand for the pre-commit
+checks.
+
+### Set up `pre-commit`
+In order to have any submitted PR be in the least-worse shape when first opened
+you **MUST** run the checks as specified in `.pre-commit-config.yaml`.
+```bash
+pre-commit install --install-hooks
+```
+Now whenever you `git commit` the various checks will be run to ensure your
+code is compliant with our requirements.  If you have a *temporary* need to
+bypass this (e.g. wanting to commit one change and fix a non-compliant file
+later) you can add `-n` to the `git commit` arguments.
+
+**NB: There is [a problem](https://github.com/microsoft/vscode-python/issues/10165)
+with pre-commit if using VSCode.**  There's a workaround in
+[one of the comments](https://github.com/microsoft/vscode-python/issues/10165#issuecomment-1277237676).
+
+### Consider running `pytest` before any `git push`
+The GitHub workflows for PRs and pushes will run `pytest` and flag an error
+if the tests don't pass, so it's in your interests to ensure you've not broken
+any tests.
+
+You could endeavour to remember to run `pytest` manually, or you could add
+this git hook:
+
+`.git/hooks/pre-push`
+```bash
+#!/bin/sh
+
+# If this script exits with a non-zero status nothing will be pushed.
+#
+# This hook is called with the following parameters:
+#
+# $1 -- Name of the remote to which the push is being done
+# $2 -- URL to which the push is being done
+#
+# If pushing without using a named remote those arguments will be equal.
+#
+# Information about the commits which are being pushed is supplied as lines to
+# the standard input in the form:
+#
+#   <local ref> <local sha1> <remote ref> <remote sha1>
+
+remote="$1"
+url="$2"
+
+echo "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-"
+echo " Running pytest..."
+pytest || exit 1
+echo " All tests passed, proceeding..."
+echo "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-"
+
+exit 0
+```
+It's probably overkill, and will become painful if enough tests are added, to
+run `pytest` in a `pre-commit` hook.
+
+---
 
 ## Linting
 
@@ -296,7 +389,7 @@ information about this build process.
 
 Thus, you **MUST** check if any imports you add in `plugins/*.py` files are only
 referenced in that file (or also only in any other core plugin), and if so
-**YOU MUST ENSURE THAT PERTINENT ADJUSTMENTS ARE MADE IN `setup.py`
+**YOU MUST ENSURE THAT PERTINENT ADJUSTMENTS ARE MADE IN `Build-exe-and-msi.py`
 IN ORDER TO ENSURE THE FILES ARE ACTUALLY PRESENT IN AN END-USER
 INSTALLATION ON WINDOWS.**
 
@@ -316,8 +409,9 @@ the appropriate `packages` definition to:
 Note that in this case it's in `packages` because we want the whole directory
 adding.  For a single file an extra item in `includes` would suffice.
 
-Such additions to `setup.py` should not cause any issues if subsequent project
-changes cause `py2exe` to automatically pick up the same file(s).
+Such additions to `Build-exe-and-msi.py` should not cause any issues if
+subsequent project changes cause `py2exe` to automatically pick up the same
+file(s).
 
 ---
 

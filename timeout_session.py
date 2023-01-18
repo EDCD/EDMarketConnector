@@ -25,7 +25,9 @@ class TimeoutAdapter(HTTPAdapter):
         return super().send(*args, **kwargs)
 
 
-def new_session(timeout: int = REQUEST_TIMEOUT, session: requests.Session = None) -> requests.Session:
+def new_session(
+    timeout: int = REQUEST_TIMEOUT, session: requests.Session | None = None
+) -> requests.Session:
     """
     Create a new requests.Session and override the default HTTPAdapter with a TimeoutAdapter.
 

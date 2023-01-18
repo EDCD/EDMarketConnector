@@ -7,7 +7,8 @@ import os
 import sys
 import tkinter as tk
 from builtins import object, str
-from typing import Any, Callable, List, Mapping, MutableMapping, Optional, Tuple
+from tkinter import ttk
+from typing import Any, Callable, List, Mapping, MutableMapping, Optional
 
 import companion
 import myNotebook as nb  # noqa: N813
@@ -26,7 +27,7 @@ class LastError:
     """Holds the last plugin error."""
 
     msg: Optional[str]
-    root: tk.Frame
+    root: tk.Tk
 
     def __init__(self) -> None:
         self.msg = None
@@ -118,7 +119,7 @@ class Plugin(object):
 
         return None
 
-    def get_prefs(self, parent: tk.Frame, cmdr: str, is_beta: bool) -> Optional[tk.Frame]:
+    def get_prefs(self, parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> Optional[tk.Frame]:
         """
         If the plugin provides a prefs frame, create and return it.
 
@@ -140,7 +141,7 @@ class Plugin(object):
         return None
 
 
-def load_plugins(master: tk.Frame) -> None:  # noqa: CCR001
+def load_plugins(master: tk.Tk) -> None:  # noqa: CCR001
     """Find and load all plugins."""
     last_error.root = master
 
@@ -159,7 +160,10 @@ def load_plugins(master: tk.Frame) -> None:  # noqa: CCR001
     sys.path.append(config.plugin_dir)
 
     found = []
-    # Load any plugins that are also packages first
+    # Load any plugins that are also packages first, but note it's *still*
+    # 100% relying on there being a `load.py`, as only that will be loaded.
+    # The intent here is to e.g. have EDMC-Overlay load before any plugins
+    # that depend on it.
     for name in sorted(
         os.listdir(config.plugin_dir_path),
         key=lambda n: (not os.path.isfile(os.path.join(config.plugin_dir_path, n, '__init__.py')), n.lower())
@@ -198,7 +202,7 @@ def provides(fn_name: str) -> List[str]:
 
 
 def invoke(
-    plugin_name: str, fallback: str, fn_name: str, *args: Tuple
+    plugin_name: str, fallback: str | None, fn_name: str, *args: Any
 ) -> Optional[str]:
     """
     Invoke a function on a named plugin.
@@ -248,7 +252,7 @@ def notify_stop() -> Optional[str]:
     return error
 
 
-def notify_prefs_cmdr_changed(cmdr: str, is_beta: bool) -> None:
+def notify_prefs_cmdr_changed(cmdr: str | None, is_beta: bool) -> None:
     """
     Notify plugins that the Cmdr was changed while the settings dialog is open.
 
@@ -265,7 +269,7 @@ def notify_prefs_cmdr_changed(cmdr: str, is_beta: bool) -> None:
                 logger.exception(f'Plugin "{plugin.name}" failed')
 
 
-def notify_prefs_changed(cmdr: str, is_beta: bool) -> None:
+def notify_prefs_changed(cmdr: str | None, is_beta: bool) -> None:
     """
     Notify plugins that the settings dialog has been closed.
 
@@ -285,7 +289,7 @@ def notify_prefs_changed(cmdr: str, is_beta: bool) -> None:
 
 
 def notify_journal_entry(
-    cmdr: str, is_beta: bool, system: str, station: str,
+    cmdr: str, is_beta: bool, system: str | None, station: str | None,
     entry: MutableMapping[str, Any],
     state: Mapping[str, Any]
 ) -> Optional[str]:
@@ -397,6 +401,30 @@ def notify_capidata(
 
             except Exception:
                 logger.exception(f'Plugin "{plugin.name}" failed')
+
+    return error
+
+
+def notify_capi_fleetcarrierdata(
+    data: companion.CAPIData
+) -> str | None:
+    """
+    Send the latest CAPI Fleetcarrier data from the FD servers to each plugin.
+
+    :param data: The CAPIData returned in the CAPI response
+    :returns: Error message from the first plugin that returns one (if any)
+    """
+    error = None
+    for plugin in PLUGINS:
+        fc_callback = plugin._get_func('capi_fleetcarrier')
+        if fc_callback is not None and callable(fc_callback):
+            try:
+                # Pass a copy of the CAPIData in case the callee modifies it
+                newerror = fc_callback(copy.deepcopy(data))
+                error = error if error else newerror
+
+            except Exception:
+                logger.exception(f'Plugin "{plugin.name}" failed on receiving Fleetcarrier data')
 
     return error
 
