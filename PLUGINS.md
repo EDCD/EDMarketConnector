@@ -381,6 +381,20 @@ So instead use:
         # During shutdown
 ```
 
+### Use `requests`, not `urllib` for HTTP(S) requests
+We use `requests` in lots of core code, so it will always be available.  An
+advantage to using it, instead of the core `urllib`, is that it brings in
+`certifi` with its own set of trusted root certificates.
+
+We've seen issues where a plugin was using `urllib`, which uses the **system**
+certificate store, and a user's system didn't yet have a new root certificate
+that was necessary for the operation of a URL the plugin was acessing.
+
+We keep `requests`, and thus `certifi` up to date via GitHub's dependabot.  If
+there is ever a certificate update that we don't have in a release then
+please open a
+[bug report](https://github.com/EDCD/EDMarketConnector/issues/new?assignees=&labels=bug%2C+unconfirmed&template=bug_report.md&title=).
+
 ---
 
 ## Plugin Hooks
