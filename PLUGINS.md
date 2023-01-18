@@ -110,9 +110,9 @@ from the original files unless specified as allowed in this section.
 
 `import plug` - For using `plug.show_error()` only.
 
- Use `monitor.game_running()` as follows in case a plugin needs to know if we
- think the game is running.  *NB: This is a function, and should be called as
- such.  Using the bare word `game_running` will always be `True`.*
+Use `monitor.game_running()` as follows in case a plugin needs to know if we
+think the game is running.  *NB: This is a function, and should be called as
+such.  Using the bare word `game_running` will always be `True`.*
  
 ```
 from monitor import monitor
@@ -120,6 +120,10 @@ from monitor import monitor
 if monitor.game_running():
   ...
 ``` 
+
+Use `monitor.is_live_galaxy()` to determine if the player is playing in the
+Live galaxy.  Note the implementation details of this.  At time of writing it
+performs a `semantic_version` >= check.
 
 `import timeout_session` - provides a method called `new_session` that creates
 a requests.session with a default timeout on all requests. Recommended to
