@@ -6,8 +6,9 @@ exclude =
     dist.win32/
     FDevIDs/
     venv/
-    venv-py39/
+    .venv/
     wix/
+    hotkey/darwin.py  # FIXME: Check under macOS VM at some point
 
 # Show exactly where in a line the error happened
 #show-source = True

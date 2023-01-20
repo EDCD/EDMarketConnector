@@ -106,12 +106,12 @@ if sys.platform == 'darwin' and getattr(sys, 'frozen', False):  # noqa: C901 # i
 
         def handleEvent_withReplyEvent_(self, event, replyEvent) -> None:  # noqa: N802 N803 # Required to override
             """Actual event handling from NSAppleEventManager."""
-            protocolhandler.lasturl = urllib.parse.unquote(  # noqa: F821: type: ignore # Its going to be a DPH in
+            protocolhandler.lasturl = urllib.parse.unquote(  # noqa: F821: type: ignore # It's going to be a DPH in
                 # this code
                 event.paramDescriptorForKeyword_(keyDirectObject).stringValue()
             ).strip()
 
-            protocolhandler.master.after(DarwinProtocolHandler.POLL, protocolhandler.poll)  # noqa: F821: type: ignore
+            protocolhandler.master.after(DarwinProtocolHandler.POLL, protocolhandler.poll)  # noqa: F821 # type: ignore
 
 
 elif (config.auth_force_edmc_protocol
@@ -121,12 +121,16 @@ elif (config.auth_force_edmc_protocol
           and not is_wine
           and not config.auth_force_localserver
       )):
+    # This could be false if you use auth_force_edmc_protocol, but then you get to keep the pieces
+    assert sys.platform == 'win32'
     # spell-checker: words HBRUSH HICON WPARAM wstring WNDCLASS HMENU HGLOBAL
     from ctypes import windll  # type: ignore
-    from ctypes import POINTER, WINFUNCTYPE, Structure, byref, c_long, c_void_p, create_unicode_buffer, wstring_at
+    from ctypes import (  # type: ignore
+        POINTER, WINFUNCTYPE, Structure, byref, c_long, c_void_p, create_unicode_buffer, wstring_at
+    )
     from ctypes.wintypes import (
-        ATOM, BOOL, DWORD, HBRUSH, HGLOBAL, HICON, HINSTANCE, HMENU, HWND, INT, LPARAM, LPCWSTR, LPVOID, LPWSTR, MSG,
-        UINT, WPARAM
+        ATOM, BOOL, DWORD, HBRUSH, HGLOBAL, HICON, HINSTANCE, HMENU, HWND, INT, LPARAM, LPCWSTR, LPMSG, LPVOID, LPWSTR,
+        MSG, UINT, WPARAM
     )
 
     class WNDCLASS(Structure):
@@ -157,11 +161,25 @@ elif (config.auth_force_edmc_protocol
     CreateWindowExW.restype = HWND
     RegisterClassW = windll.user32.RegisterClassW
     RegisterClassW.argtypes = [POINTER(WNDCLASS)]
-    DefWindowProcW = windll.user32.DefWindowProcW
+    # DefWindowProcW
+    # Ref: <https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-defwindowprocw>
+    # LRESULT DefWindowProcW([in] HWND   hWnd,[in] UINT   Msg,[in] WPARAM wParam,[in] LPARAM lParam);
+    # As per example at <https://docs.python.org/3/library/ctypes.html#ctypes.WINFUNCTYPE>
+
+    prototype = WINFUNCTYPE(c_long, HWND, UINT, WPARAM, LPARAM)
+    paramflags = (1, "hWnd"), (1, "Msg"), (1, "wParam"), (1, "lParam")
+    DefWindowProcW = prototype(("DefWindowProcW", windll.user32), paramflags)
+
     GetParent = windll.user32.GetParent
     SetForegroundWindow = windll.user32.SetForegroundWindow
 
-    GetMessageW = windll.user32.GetMessageW
+    # <https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getmessagew>
+    # NB: Despite 'BOOL' return type, it *can* be >0, 0 or -1, so is actually
+    #     c_long
+    prototype = WINFUNCTYPE(c_long, LPMSG, HWND, UINT, UINT)
+    paramflags = (1, "lpMsg"), (1, "hWnd"), (1, "wMsgFilterMin"), (1, "wMsgFilterMax")
+    GetMessageW = prototype(("GetMessageW", windll.user32), paramflags)
+
     TranslateMessage = windll.user32.TranslateMessage
     DispatchMessageW = windll.user32.DispatchMessageW
     PostThreadMessageW = windll.user32.PostThreadMessageW
@@ -303,6 +321,17 @@ elif (config.auth_force_edmc_protocol
 
             msg = MSG()
             # Calls GetMessageW: https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getmessagew
+            # Something is off with the return from this, meaning you'll see:
+            # Exception ignored on converting result of ctypes callback function: <function WndProc
+            #    at 0x000001F5B8738FE0>
+            # Traceback (most recent call last):
+            #   File "C:\Users\Athan\Documents\Devel\EDMarketConnector\protocol.py", line 323, in worker
+            #     while int(GetMessageW(byref(msg), None, 0, 0)) != 0:
+            #               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            # TypeError: 'c_long' object cannot be interpreted as an integer
+            #
+            # But it does actually work.  Either getting a non-0 value and
+            # entering the loop, or getting 0 and exiting it.
             while GetMessageW(byref(msg), None, 0, 0) != 0:
                 logger.trace_if('frontier-auth.windows', f'DDE message of type: {msg.message}')
                 if msg.message == WM_DDE_EXECUTE:

@@ -40,7 +40,7 @@ import sys
 import traceback
 import warnings
 from abc import abstractmethod
-from typing import Any, Callable, List, Optional, Type, TypeVar, Union
+from typing import Any, Callable, Optional, Type, TypeVar
 
 import semantic_version
 
@@ -52,17 +52,17 @@ appcmdname = 'EDMC'
 # <https://semver.org/#semantic-versioning-specification-semver>
 # Major.Minor.Patch(-prerelease)(+buildmetadata)
 # NB: Do *not* import this, use the functions appversion() and appversion_nobuild()
-_static_appversion = '5.7.0'
+_static_appversion = '5.8.0'
 _cached_version: Optional[semantic_version.Version] = None
-copyright = '© 2015-2019 Jonathan Harris, 2020-2022 EDCD'
+copyright = '© 2015-2019 Jonathan Harris, 2020-2023 EDCD'
 
 update_feed = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml'
 update_interval = 8*60*60
 # Providers marked to be in debug mode. Generally this is expected to switch to sending data to a log file
-debug_senders: List[str] = []
+debug_senders: list[str] = []
 # TRACE logging code that should actually be used.  Means not spamming it
 # *all* if only interested in some things.
-trace_on: List[str] = []
+trace_on: list[str] = []
 
 capi_pretend_down: bool = False
 capi_debug_access_token: Optional[str] = None
@@ -293,7 +293,7 @@ class AbstractConfig(abc.ABC):
 
     @staticmethod
     def _suppress_call(
-        func: Callable[..., _T], exceptions: Union[Type[BaseException], List[Type[BaseException]]] = Exception,
+        func: Callable[..., _T], exceptions: Type[BaseException] | list[Type[BaseException]] = Exception,
         *args: Any, **kwargs: Any
     ) -> Optional[_T]:
         if exceptions is None:
@@ -307,7 +307,10 @@ class AbstractConfig(abc.ABC):
 
         return None
 
-    def get(self, key: str, default: Union[list, str, bool, int] = None) -> Union[list, str, bool, int]:
+    def get(
+        self, key: str,
+        default: list | str | bool | int | None = None
+    ) -> list | str | bool | int | None:
         """
         Return the data for the requested key, or a default.
 
@@ -334,7 +337,7 @@ class AbstractConfig(abc.ABC):
         return default  # type: ignore
 
     @abstractmethod
-    def get_list(self, key: str, *, default: list = None) -> list:
+    def get_list(self, key: str, *, default: list | None = None) -> list:
         """
         Return the list referred to by the given key if it exists, or the default.
 
@@ -343,7 +346,7 @@ class AbstractConfig(abc.ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_str(self, key: str, *, default: str = None) -> str:
+    def get_str(self, key: str, *, default: str | None = None) -> str:
         """
         Return the string referred to by the given key if it exists, or the default.
 
@@ -356,7 +359,7 @@ class AbstractConfig(abc.ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_bool(self, key: str, *, default: bool = None) -> bool:
+    def get_bool(self, key: str, *, default: bool | None = None) -> bool:
         """
         Return the bool referred to by the given key if it exists, or the default.
 
@@ -396,7 +399,7 @@ class AbstractConfig(abc.ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def set(self, key: str, val: Union[int, str, List[str], bool]) -> None:
+    def set(self, key: str, val: int | str | list[str] | bool) -> None:
         """
         Set the given key's data to the given value.
 

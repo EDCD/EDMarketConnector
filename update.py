@@ -221,6 +221,9 @@ class Updater(object):
             status['text'] = newversion.title + ' is available'
             self.root.update_idletasks()
 
+        else:
+            logger.info("No new version available at this time")
+
     def close(self) -> None:
         """
         Handle the EDMarketConnector.AppWindow.onexit() request.

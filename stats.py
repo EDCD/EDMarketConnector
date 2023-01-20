@@ -5,7 +5,7 @@ import sys
 import tkinter
 import tkinter as tk
 from tkinter import ttk
-from typing import TYPE_CHECKING, Any, AnyStr, Callable, Dict, List, NamedTuple, Optional, Sequence, cast
+from typing import TYPE_CHECKING, Any, AnyStr, Callable, NamedTuple, Sequence, cast
 
 import companion
 import EDMCLogging
@@ -45,7 +45,7 @@ RANK_LINES_END = 9
 POWERPLAY_LINES_START = 9
 
 
-def status(data: Dict[str, Any]) -> List[List[str]]:
+def status(data: dict[str, Any]) -> list[list[str]]:
     """
     Get the current status of the cmdr referred to by data.
 
@@ -211,7 +211,7 @@ def status(data: Dict[str, Any]) -> List[List[str]]:
     return res
 
 
-def export_status(data: Dict[str, Any], filename: AnyStr) -> None:
+def export_status(data: dict[str, Any], filename: AnyStr) -> None:
     """
     Export status data to a CSV file.
 
@@ -236,21 +236,21 @@ class ShipRet(NamedTuple):
     value: str
 
 
-def ships(companion_data: Dict[str, Any]) -> List[ShipRet]:
+def ships(companion_data: dict[str, Any]) -> list[ShipRet]:
     """
     Return a list of 5 tuples of ship information.
 
     :param data: [description]
     :return: A 5 tuple of strings containing: Ship ID, Ship Type Name (internal), Ship Name, System, Station, and Value
     """
-    ships: List[Dict[str, Any]] = companion.listify(cast(list, companion_data.get('ships')))
+    ships: list[dict[str, Any]] = companion.listify(cast(list, companion_data.get('ships')))
     current = companion_data['commander'].get('currentShipId')
 
     if isinstance(current, int) and current < len(ships) and ships[current]:
         ships.insert(0, ships.pop(current))  # Put current ship first
 
         if not companion_data['commander'].get('docked'):
-            out: List[ShipRet] = []
+            out: list[ShipRet] = []
             # Set current system, not last docked
             out.append(ShipRet(
                 id=str(ships[0]['id']),
@@ -285,7 +285,7 @@ def ships(companion_data: Dict[str, Any]) -> List[ShipRet]:
     ]
 
 
-def export_ships(companion_data: Dict[str, Any], filename: AnyStr) -> None:
+def export_ships(companion_data: dict[str, Any], filename: AnyStr) -> None:
     """
     Export the current ships to a CSV file.
 
@@ -335,8 +335,6 @@ class StatsDialog():
         elif (
             not capi_data.get('lastSystem')
             or not capi_data['lastSystem'].get('name', '').strip()
-            or not capi_data.get('lastStarport')
-            or not capi_data['lastStarport'].get('name', '').strip()
         ):
             # Shouldn't happen
             # LANG: Unknown location
@@ -358,7 +356,7 @@ class StatsDialog():
 class StatsResults(tk.Toplevel):
     """Status window."""
 
-    def __init__(self, parent: tk.Tk, data: Dict[str, Any]) -> None:
+    def __init__(self, parent: tk.Tk, data: dict[str, Any]) -> None:
         tk.Toplevel.__init__(self, parent)
 
         self.parent = parent
@@ -442,7 +440,9 @@ class StatsResults(tk.Toplevel):
             ):
                 self.geometry(f"+{position.left}+{position.top}")
 
-    def addpage(self, parent, header: List[str] = None, align: Optional[str] = None) -> tk.Frame:
+    def addpage(
+        self, parent, header: list[str] | None = None, align: str | None = None
+    ) -> ttk.Frame:
         """
         Add a page to the StatsResults screen.
 
@@ -462,7 +462,7 @@ class StatsResults(tk.Toplevel):
 
         return page
 
-    def addpageheader(self, parent: tk.Frame, header: Sequence[str], align: Optional[str] = None) -> None:
+    def addpageheader(self, parent: ttk.Frame, header: Sequence[str], align: str | None = None) -> None:
         """
         Add the column headers to the page, followed by a separator.
 
@@ -478,7 +478,7 @@ class StatsResults(tk.Toplevel):
         self.addpagerow(parent, [''])
 
     def addpagerow(
-        self, parent: tk.Frame, content: Sequence[str], align: Optional[str] = None, with_copy: bool = False
+        self, parent: ttk.Frame, content: Sequence[str], align: str | None = None, with_copy: bool = False
     ):
         """
         Add a single row to parent.

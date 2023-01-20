@@ -46,12 +46,12 @@ repos:
 # mypy - static type checking
 # mypy --follow-imports skip <file>
 -   repo: https://github.com/pre-commit/mirrors-mypy
-    rev: 'v0.931'
+    rev: 'v0.991'
     hooks:
       - id: mypy
         # verbose: true
         # log_file: 'pre-commit_mypy.log'
-        additional_dependencies: [ types-requests ]
+        additional_dependencies: [ types-pkg-resources, types-requests, types-urllib3 ]
         # args: [ "--follow-imports", "skip", "--ignore-missing-imports", "--scripts-are-modules" ]
 
 ### # pydocstyle.exe <file>

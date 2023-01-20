@@ -99,8 +99,8 @@ liable to change without notice.
 `from prefs import prefsVersion` - to allow for versioned preferences.
 
 `from companion import CAPIData, SERVER_LIVE, SERVER_LEGACY, SERVER_BETA` -
-`CAPIData` is the actual type of `data` as passed into `cmdr_data()` and
-`cmdr_data_legacy()`.
+`CAPIData` is the actual type of `data` as passed into `cmdr_data()`,
+`cmdr_data_legacy()` and `capi_fleetcarrier()`.
 See [Commander Data from Frontier CAPI](#commander-data-from-frontier-capi))
 for further information.
 
@@ -561,9 +561,9 @@ See [Avoiding potential pitfalls](#avoiding-potential-pitfalls).
 ### Events
 
 Once you have created your plugin and EDMarketConnector has loaded it there
-are four other functions you can define to be notified by EDMarketConnector
+are five other functions you can define to be notified by EDMarketConnector
 when something happens: `journal_entry()`, `journal_entry_cqc()`,
-`dashboard_entry()` and `cmdr_data()`.
+`dashboard_entry()`, `cmdr_data()` and `capi_fleetcarrier()`.
 
 Your events all get called on the main Tkinter loop so be sure not to block for
 very long or the app will appear to freeze. If you have a long running
@@ -606,55 +606,63 @@ This gets called when EDMarketConnector sees a new entry in the game's journal.
 
 Content of `state` (updated to the current journal entry):
 
-| Field                |            Type             | Description                                                                                                     |
-| :------------------- | :-------------------------: |:----------------------------------------------------------------------------------------------------------------|
-| `GameLanguage`       |       `Optional[str]`       | `language` value from `Fileheader` event.                                                                       |
-| `GameVersion`        |       `Optional[str]`       | `version` value from `Fileheader` event.                                                                        |
-| `GameBuild`          |       `Optional[str]`       | `build` value from `Fileheader` event.                                                                          |
-| `Captain`            |       `Optional[str]`       | Name of the commander who's crew you're on, if any                                                              |
-| `Cargo`              |           `dict`            | Current cargo. Note that this will be totals, and any mission specific duplicates will be counted together      |
-| `CargoJSON`          |           `dict`            | content of cargo.json as of last read.                                                                          |
-| `Credits`            |            `int`            | Current credits balance                                                                                         |
-| `FID`                |            `str`            | Frontier commander ID                                                                                           |
-| `Horizons`           |           `bool`            | From `LoadGame` event.                                                                                          |
-| `Odyssey`            |           `bool`            | From `LoadGame` event.  `False` if not present, else the event value.                                           |
-| `Loan`               |       `Optional[int]`       | Current loan amount, if any                                                                                     |
-| `Raw`                |           `dict`            | Current raw engineering materials                                                                               |
-| `Manufactured`       |           `dict`            | Current manufactured engineering materials                                                                      |
-| `Encoded`            |           `dict`            | Current encoded engineering materials                                                                           |
-| `Component`          |           `dict`            | Current component materials                                                                                     |
-| `Engineers`          |           `dict`            | Current Raw engineering materials                                                                               |
-| `Rank`               | `Dict[str, Tuple[int, int]` | Current ranks, each entry is a tuple of the current rank, and age                                               |
-| `Statistics`         |           `dict`            | Contents of a Journal Statistics event, ie, data shown in the stats panel. See the Journal manual for more info |
-| `Role`               |       `Optional[str]`       | Current role if in multi-crew, one of `Idle`, `FireCon`, `FighterCon`                                           |
-| `Friends`            |            `set`            | Currently online friend                                                                                         |
-| `ShipID`             |            `int`            | Frontier ID of current ship                                                                                     |
-| `ShipIdent`          |            `str`            | Current user-set ship ID                                                                                        |
-| `ShipName`           |            `str`            | Current user-set ship name                                                                                      |
-| `ShipType`           |            `str`            | Internal name for the current ship type                                                                         |
-| `HullValue`          |            `int`            | Current ship value, excluding modules                                                                           |
-| `ModulesValue`       |            `int`            | Value of the current ship's modules                                                                             |
-| `Rebuy`              |            `int`            | Current ship's rebuy cost                                                                                       |
-| `Modules`            |           `dict`            | Currently fitted modules                                                                                        |
-| `NavRoute`           |           `dict`            | Last plotted multi-hop route[1]                                                                                 |
-| `ModuleInfo`         |           `dict`            | Last loaded ModulesInfo.json data                                                                               |
-| `IsDocked`           |           `bool`            | Whether the Cmdr is currently docked *in their own ship*.                                                       |
-| `OnFoot`             |           `bool`            | Whether the Cmdr is on foot                                                                                     |
-| `Component`          |           `dict`            | 'Component' MicroResources in Odyssey, `int` count each.                                                        |
-| `Item`               |           `dict`            | 'Item' MicroResources in Odyssey, `int` count each.                                                             |
-| `Consumable`         |           `dict`            | 'Consumable' MicroResources in Odyssey, `int` count each.                                                       |
-| `Data`               |           `dict`            | 'Data' MicroResources in Odyssey, `int` count each.                                                             |
-| `BackPack`           |           `dict`            | `dict` of Odyssey MicroResources in backpack.                                                                   |
-| `BackpackJSON`       |           `dict`            | Content of Backpack.json as of last read.                                                                       |
-| `ShipLockerJSON`     |           `dict`            | Content of ShipLocker.json as of last read.                                                                     |
-| `SuitCurrent`        |           `dict`            | CAPI-returned data of currently worn suit.  NB: May be `None` if no data.                                       |
-| `Suits`              |          `dict`[2]          | CAPI-returned data of owned suits.  NB: May be `None` if no data.                                               |
-| `SuitLoadoutCurrent` |           `dict`            | CAPI-returned data of current Suit Loadout.  NB: May be `None` if no data.                                      |
-| `SuitLoadouts`       |          `dict`[2]          | CAPI-returned data of all Suit Loadouts.  NB: May be `None` if no data.                                         |
-| `Taxi`               |      `Optional[bool]`       | Whether or not we're currently in a taxi. NB: This is best effort with what the journals provide.               |
-| `Dropship`           |      `Optional[bool]`       | Whether or not the above taxi is a Dropship                                                                     |
-| `Body`               |       `Optional[str]`       | The body we're currently on / in the SOI of                                                                     |
-| `BodyType`           |       `Optional[str]`       | The type of body that `Body` refers to                                                                          |
+| Field                 |            Type             | Description                                                                                                     |
+|:----------------------|:---------------------------:|:----------------------------------------------------------------------------------------------------------------|
+| `GameLanguage`        |       `Optional[str]`       | `language` value from `Fileheader` event.                                                                       |
+| `GameVersion`         |       `Optional[str]`       | `version` value from `Fileheader` event.                                                                        |
+| `GameBuild`           |       `Optional[str]`       | `build` value from `Fileheader` event.                                                                          |
+| `Captain`[3]          |       `Optional[str]`       | Name of the commander who's crew you're on, if any                                                              |
+| `Cargo`               |           `dict`            | Current cargo. Note that this will be totals, and any mission specific duplicates will be counted together      |
+| `CargoJSON`           |           `dict`            | content of cargo.json as of last read.                                                                          |
+| `Credits`             |            `int`            | Current credits balance                                                                                         |
+| `FID`                 |            `str`            | Frontier commander ID                                                                                           |
+| `Horizons`            |           `bool`            | From `LoadGame` event.                                                                                          |
+| `Odyssey`             |           `bool`            | From `LoadGame` event.  `False` if not present, else the event value.                                           |
+| `Loan`                |       `Optional[int]`       | Current loan amount, if any                                                                                     |
+| `Raw`                 |           `dict`            | Current raw engineering materials                                                                               |
+| `Manufactured`        |           `dict`            | Current manufactured engineering materials                                                                      |
+| `Encoded`             |           `dict`            | Current encoded engineering materials                                                                           |
+| `Component`           |           `dict`            | Current component materials                                                                                     |
+| `Engineers`           |           `dict`            | Current Raw engineering materials                                                                               |
+| `Rank`                | `Dict[str, Tuple[int, int]` | Current ranks, each entry is a tuple of the current rank, and age                                               |
+| `Statistics`          |           `dict`            | Contents of a Journal Statistics event, ie, data shown in the stats panel. See the Journal manual for more info |
+| `Role`                |       `Optional[str]`       | Current role if in multi-crew, one of `Idle`, `FireCon`, `FighterCon`                                           |
+| `Friends`             |            `set`            | Currently online friend                                                                                         |
+| `ShipID`              |            `int`            | Frontier ID of current ship                                                                                     |
+| `ShipIdent`           |            `str`            | Current user-set ship ID                                                                                        |
+| `ShipName`            |            `str`            | Current user-set ship name                                                                                      |
+| `ShipType`            |            `str`            | Internal name for the current ship type                                                                         |
+| `HullValue`           |            `int`            | Current ship value, excluding modules                                                                           |
+| `ModulesValue`        |            `int`            | Value of the current ship's modules                                                                             |
+| `Rebuy`               |            `int`            | Current ship's rebuy cost                                                                                       |
+| `Modules`             |           `dict`            | Currently fitted modules                                                                                        |
+| `NavRoute`            |           `dict`            | Last plotted multi-hop route[1]                                                                                 |
+| `ModuleInfo`          |           `dict`            | Last loaded ModulesInfo.json data                                                                               |
+| `IsDocked`            |           `bool`            | Whether the Cmdr is currently docked *in their own ship*.                                                       |
+| `OnFoot`[3]           |           `bool`            | Whether the Cmdr is on foot                                                                                     |
+| `Component`           |           `dict`            | 'Component' MicroResources in Odyssey, `int` count each.                                                        |
+| `Item`                |           `dict`            | 'Item' MicroResources in Odyssey, `int` count each.                                                             |
+| `Consumable`          |           `dict`            | 'Consumable' MicroResources in Odyssey, `int` count each.                                                       |
+| `Data`                |           `dict`            | 'Data' MicroResources in Odyssey, `int` count each.                                                             |
+| `BackPack`            |           `dict`            | `dict` of Odyssey MicroResources in backpack.                                                                   |
+| `BackpackJSON`        |           `dict`            | Content of Backpack.json as of last read.                                                                       |
+| `ShipLockerJSON`      |           `dict`            | Content of ShipLocker.json as of last read.                                                                     |
+| `SuitCurrent`         |           `dict`            | CAPI-returned data of currently worn suit.  NB: May be `None` if no data.                                       |
+| `Suits`               |          `dict`[2]          | CAPI-returned data of owned suits.  NB: May be `None` if no data.                                               |
+| `SuitLoadoutCurrent`  |           `dict`            | CAPI-returned data of current Suit Loadout.  NB: May be `None` if no data.                                      |
+| `SuitLoadouts`        |          `dict`[2]          | CAPI-returned data of all Suit Loadouts.  NB: May be `None` if no data.                                         |
+| `Taxi`                |      `Optional[bool]`       | Whether or not we're currently in a taxi. NB: This is best effort with what the journals provide.               |
+| `Dropship`            |      `Optional[bool]`       | Whether or not the above taxi is a Dropship                                                                     |
+| `SystemAddress`[3]    |       `Optional[int]`       | Unique [ID64](http://disc.thargoid.space/ID64) of the star system we're currently in                            |
+| `SystemName`[3]       |       `Optional[str]`       | Name of the star system we're currently in                                                                      |
+| `SystemPopulation`[3] |       `Optional[int]`       | Population of the star system we're currently in                                                                |
+| `StarPos`[3]          |  `Optional[tuple[float]]`   | Galaxy co-ordinates of the system we're currently in                                                            |
+| `Body`[3][4]          |       `Optional[str]`       | Name of the body we're currently on / in the SOI of                                                             |
+| `BodyID`[3][4]        |       `Optional[int]`       | ID of the body we're currently on / in the SOI of                                                               |
+| `BodyType`[3][4]      |       `Optional[str]`       | The type of body that `Body` refers to                                                                          |
+| `StationName`[3]      |       `Optional[str]`       | Name of the station we're docked at, if applicable                                                              |
+| `MarketID`[3]         |       `Optional[str]`       | MarketID of the station we're docked at, if applicable                                                          |
+| `StationType`[3]      |       `Optional[str]`       | Type of the station we're docked at, if applicable                                                              |
 
 [1] - Contents of `NavRoute` not changed if a `NavRouteClear` event is seen,
 but plugins will see the `NavRouteClear` event.
@@ -675,6 +683,31 @@ members are present) and other times as an integer-keyed `dict` (when at
 least one member is missing, so the indices are not contiguous).  We choose to
 always convert to the integer-keyed `dict` form so that code utilising the data
 is simpler.
+
+[3] - Forced to `None` if the player joins another player's ship in remote
+multi-crew.
+
+[4] - There are some caveats with the Body data.  Firstly the name and ID
+can be for the orbital station or fleet carrier the player is docked at.
+Check 'BodyType' before using the values.
+
+Secondly there is an issue with close-orbiting binary bodies.  If the player:
+
+1. Enters Orbital Cruise around a Body an 'ApproachBody' event is emitted
+  and the tracking will update to reflect this.
+2. If the player then flies *in Orbital Cruise without entering Supercruise
+  proper* to the close-orbiting binary partner of the Body then *there is no
+  new 'ApproachBody' event to indicate the new Body's details*.  **Thus this
+  tracking will incorrectly indicate the first Body still**.
+
+So, before making use of any of this Body state a plugin should:
+
+1. Have a `dashboard_entry()` method and track the Body name present in its
+  data.
+2. Cross-check that Body name with `state['Body']` before making use of any
+ of `state'`s Body data.
+
+See `plugins/eddn.py` for an example of this in `export_journal_codexentry()`.
 
 New in version 4.1.6:
 
@@ -765,13 +798,26 @@ re-start EDMarketConnector.  That will be present when plugins are invoked
 with the synthetic `StartUp` event.  NB: Might just be a `NavRouteClear` event
 if that's what was in the file.
 
+New in version 5.8.0:
+
+`StarPos`, `SystemAddress`, `SystemName` and `SystemPopulation` have been 
+added to the `state` dictionary.  Best efforts data pertaining to the star
+system the player is in.
+
+`BodyID` and `BodyType` have been added to the `state` dictionary.  These
+now track in the same manner as prior core EDDN plugin code.  Check the
+documentation above for some caveats.  Do not just blindly use this data, or
+the 'Body' name value.
+
+`StationName`, `MarketID`, and `StationType` added to the `state` dictionary.
+
 ___
 
 ##### Synthetic Events
 
 A special "StartUp" entry is sent if EDMarketConnector is started while the
 game is already running. In this case you won't receive initial events such as
-"LoadGame", "Rank", "Location", etc. However the `state` dictionary will
+"LoadGame", "Rank", "Location", etc. However, the `state` dictionary will
 reflect the cumulative effect of these missed events.
 
 **NB: Any of the values in this might be `None` if the Cmdr has loaded into
@@ -908,12 +954,11 @@ constants.
 
 ---
 
-### Commander Data from Frontier CAPI
-If a plugin has a `cmdr_data()` function it gets called when the application
-has just fetched fresh Cmdr and station data from Frontier's servers, **but not
-for the Legacy galaxy**.  See `cmdr_data_legacy()` below for Legacy data
-handling.
+### Data from Frontier CAPI
 
+#### Commander, Market and Shipyard Data
+
+If a plugin has a `cmdr_data()` function it gets called when the application has just fetched fresh CMDR, station and shipyard data from Frontier's CAPI servers, **but not for the Legacy galaxy**.  See `cmdr_data_legacy()` below for Legacy data handling.
 ```python
 from companion import CAPIData, SERVER_LIVE, SERVER_LEGACY, SERVER_BETA
 
@@ -941,19 +986,59 @@ def cmdr_data(data, is_beta):
 | :-------- | :--------------: | :------------------------------------------------------------------------------------------------------- |
 | `data`    |     `CAPIData`   | `/profile` API response, with `/market` and `/shipyard` added under the keys `marketdata` and `shipdata` |
 | `is_beta` |      `bool`      | If the game is currently in beta                                                                         |
-`CAPIData` is a class, which you can `from companion import CAPIDATA`, and is
-based on `UserDict`.  The actual data from CAPI queries is thus accessible
-via python's normal `data['key']` syntax.  However, being a class, it can also
-have extra properties, such as `source_host`, as shown above.  Plugin authors
-are free to use *that* property, **but MUST NOT rely on any other extra
-properties present in `CAPIData`, they are for internal use only.**
 
+#### Fleet Carrier Data
+
+If a plugin has a `capi_fleetcarrier()` function it gets called when the application has just fetched fresh Fleetcarrier data from Frontier's CAPI servers. This is done when `CarrierBuy`or `CarrierStats` events are detected in the Player Journal. To avoid flooding Frontier's CAPI server, a throttle is applied to ensure a significant interval between requests (currently 15 mins). Also be aware that calls to the `/fleetcarrier` CAPI endpoint have been reported to take a very long time to return, potentially up to 20 minutes. Delays in responses from this endpoint could delay other CAPI queries.
+
+```python
+from companion import CAPIData, SERVER_LIVE, SERVER_LEGACY, SERVER_BETA
+
+def capi_fleetcarrier(data):
+    """
+    We have new data on our Fleet Carrier
+    """
+    if data.get('name') is None or data['name'].get('callsign') is None:
+        raise ValueError("this isn't possible")
+
+    logger.info(data['name']['callsign'])
+
+    # Determining source galaxy for the data
+    if data.source_host == SERVER_LIVE:
+        ...
+
+    elif data.source_host == SERVER_BETA:
+        ...
+
+    elif data.source_host == SERVER_LEGACY:
+        ...
+```
+
+| Parameter |       Type       | Description                                                                                              |
+| :-------- | :--------------: | :------------------------------------------------------------------------------------------------------- |
+| `data`    |     `CAPIData`   | `/fleetcarrier` API response                                                                             |
+
+#### CAPIData and Available Properties
+
+`CAPIData` is a class, which you can `from companion import CAPIDATA`, and is based on `UserDict`.  The actual data from CAPI queries is thus accessible via python's normal `data['key']` syntax.  However, being a class, it can also have extra properties, such as `source_host`, as shown in the code example above.
+
+Plugin authors are free to use the following properties of `CAPIData`, **but MUST NOT rely on any other extra properties, they are for internal use only.**
+
+| Property       | Type             | Description                                                                                              |
+| :------------- | :--------------: | :------------------------------------------------------------------------------------------------------- |
+| `data`         | `Dict`            | The data returned by the CAPI query.  For the `cmdr_data()` callback, if the player is docked at a station, and the relevant services are available then the `lastStarport` key's value will have been augmented with `/market` and/or `/shipyard` data.  **Do not assume this will always be the case**. |
+| `source_host`  | `str`            | `SERVER_LIVE` \| `SERVER_BETA` \| `SERVER_LEGACY` the current galaxy mode. |
+| `request_cmdr` | `str`            | The name of the active CMDR _at the point the request was made_. In the case of a CAPI request taking a long time to return, the user may have switched CMDR during the request, so this may be different to the current CMDR. |
+
+See [this documentation](https://github.com/Athanasius/fd-api/blob/main/docs/FrontierDevelopments-CAPI-endpoints.md) for details of the expected content structure and data for CAPI queries.
+
+If there is a killswitch in effect for some of the CAPI endpoints, then the
+data passed to this function might not be as complete as you expect.  Code
+defensively.
 
 #### CAPI data for Legacy
-When CAPI data has been retrieved from the separate CAPI host for the Legacy
-galaxy, because the Journal gameversion indicated the player is playing/last
-played in that galaxy, a different function will be called,
-`cmdr_data_legacy()`.
+
+When CAPI data has been retrieved from the separate CAPI host for the Legacy galaxy, because the Journal gameversion indicated the player is playing / last played in that galaxy, a different function will be called, `cmdr_data_legacy()`.  Note that there is no legacy equivalent to `capi_fleetcarrier()`, so always use the `source_host` property to determine the user's galaxy.
 
 ```python
 def cmdr_data_legacy(data, is_beta):
@@ -1073,7 +1158,7 @@ time after the corresponding `journal_entry()` event.
 ## Error messages
 
 You can display an error in EDMarketConnector's status area by returning a
-string from your `journal_entry()`, `dashboard_entry()` or `cmdr_data()`
+string from your `journal_entry()`, `dashboard_entry()`, `cmdr_data()` or `capi_fleetcarrier()`
 function, or asynchronously (e.g. from a "worker" thread that is performing a
 long-running operation) by calling `plug.show_error()`. Either method will
 cause the "bad" sound to be played (unless the user has muted sound).
@@ -1099,7 +1184,7 @@ _ = functools.partial(l10n.Translations.translate, context=__file__)
 Wrap each string that needs translating with the `_()` function, e.g.:
 
 ```python
-    status["text"] = _('Happy!')  # Main window status
+    somewidget["text"] = _("Happy!")
 ```
 
 If you display localized strings in EDMarketConnector's main window you should
@@ -1302,7 +1387,7 @@ versions of EDMarketConnector:
     `Settings` > `Plugins` tab.
 
 - Check that callback functions `plugin_prefs`, `prefs_changed`,
-    `journal_entry`, `dashboard_entry` and `cmdr_data`, if used, are declared
+    `journal_entry`, `dashboard_entry`, `cmdr_data` and `capi_fleetcarrier`, if used, are declared
     with the correct number of arguments.  Older versions of this app were
     tolerant of missing arguments in these function declarations.
 

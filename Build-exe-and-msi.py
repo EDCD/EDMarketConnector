@@ -2,7 +2,6 @@
 """Build to executables and MSI installer using py2exe and other tools."""
 import os
 import pathlib
-import platform
 import re
 import shutil
 import sys
@@ -22,12 +21,14 @@ if sys.version_info[0:2] != (3, 11):
     raise AssertionError(f'Unexpected python version {sys.version}')
 
 if sys.platform == 'win32':
-    assert platform.architecture()[0] == '32bit', 'A Python 32bit build is required'
     import py2exe  # noqa: F401 # Yes, this *is* used
     dist_dir = 'dist.win32'
 
 else:
     raise AssertionError(f'Unsupported platform {sys.platform}')
+
+# This added to make mypy happy
+assert sys.platform == 'win32'
 ###########################################################################
 
 ###########################################################################
@@ -83,6 +84,7 @@ OPTIONS = {
         'packages': [
             'asyncio',  # No longer auto as of py3.10+py2exe 0.11
             'multiprocessing',  # No longer auto as of py3.10+py2exe 0.11
+            'pkg_resources._vendor.platformdirs',  # Necessary 2023-01-17
             'sqlite3',  # Included for plugins
             'util',  # 2022-02-01 only imported in plugins/eddn.py
         ],

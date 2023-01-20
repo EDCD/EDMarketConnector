@@ -11,7 +11,7 @@ addopts = "--cov . --cov plugins --cov-report=term-missing --no-cov-on-fail"
 # --cov-fail-under 80"
 
 [tool.coverage.run]
-omit = [ "tests/*", "venv/*", "dist.win32/*" ]
+omit = [ "tests/*", "venv/*", ".venv/*", "dist.win32/*" ]
 plugins = [ "coverage_conditional_plugin" ]
 
 [tool.coverage.coverage_conditional_plugin.rules]
