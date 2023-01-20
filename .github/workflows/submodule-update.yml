@@ -2,9 +2,10 @@
 name: Submodule Updates
 
 on:
-  # We might want this on a schedule once this is in `main`
-  push:
-    branches: [ develop ]
+  #  push:
+  #    branches: [ develop ]
+  schedule:
+    - cron: '0 12 * * *'
 
 jobs:
   check_submodules:
@@ -19,6 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
+          ref: '${{ env.CHECKOUT_BRANCH }}'
           submodules: true
 
       - name: Update submodules
@@ -33,50 +35,34 @@ jobs:
         continue-on-error: true
         run: |
           changes=$(git status --porcelain)
+          git status --porcelain
           if [ -n "${changes}" ];
           then
-            echo '::set-output changes=true'
+            echo 'changes=true' >> $GITHUB_OUTPUT
+            echo "changes_text=${changes}" >> $GITHUB_OUTPUT
+          else
+            echo 'changes=false' >> $GITHUB_OUTPUT
           fi
-          echo '::set-output changes=false'
           exit 0
       
       - name: Create submodules changes branch
         if: steps.check_for_changes.outputs.changes == 'true'
         run: |
-          git checkout -b $GITHUB_RUN_ID
+          git checkout -b "submodule-change/$GITHUB_RUN_ID" $CHECKOUT_BRANCH
           git commit -am "updating submodules"
-          git push --set-upstream origin $GITHUB_RUN_ID
+          git push --set-upstream origin "submodule-change/$GITHUB_RUN_ID"
 
       - name: Create pull request against target branch
         if: steps.check_for_changes.outputs.changes == 'true'
         uses: actions/github-script@v6
         with:
-          github-token: ${{ inputs.github_token }}
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
           script: |
             await github.rest.pulls.create({
-              owner: '${{ inputs.owner }}',
-              repo: '${{ inputs.parent_repository }}'.split('/')[1].trim(),
-              head: process.env.GITHUB_RUN_ID,
-              base: '${{ inputs.pr_against_branch }}',
+              owner: '${{ github.repository_owner }}',
+              repo: '${{ github.repository }}'.split('/')[1].trim(),
+              head: 'submodule-change/${{ github.run_id }}',
+              base: '${{ env.PR_AGAINST_BRANCH }}',
               title: `[Auto-generated] Submodule Updates ${process.env.GITHUB_RUN_ID}`,
-              body: `[Auto-generated] Submodule Updates ${process.env.GITHUB_RUN_ID}`,
-            });
-
-      - name: Add labels
-        if: steps.check_for_changes.outputs.changes == 'true'
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ inputs.github_token }}
-          script: |
-            const res = await github.rest.issues.listForRepo({
-              owner: '${{ inputs.owner }}',
-              repo: '${{ inputs.parent_repository }}'.split('/')[1].trim(),
-            });
-            const pr = res.data.filter(i => i.title.includes(process.env.GITHUB_RUN_ID));
-            const prNumber = pr[0].number;  
-            await github.rest.issues.addLabels({
-              issue_number: prNumber,
-              owner: '${{ inputs.owner }}',
-              repo: '${{ inputs.parent_repository }}'.split('/')[1].trim(),
-              labels: ['${{ inputs.label }}']
+              body: '${{ steps.check_for_changes.outputs.changes_text }}',
             });

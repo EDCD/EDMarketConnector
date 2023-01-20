@@ -6,7 +6,7 @@ this is to include an XML-format .manifest file at build time.
 
 ## Build time
 
-We specify .manifest files in setup.py.
+We specify .manifest files in `Build-exe-and-msi.py`.
 
 ## Editing or changing a manifest
 

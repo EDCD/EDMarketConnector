@@ -81,7 +81,7 @@ def export(data, filename=None) -> None:  # noqa: C901, CCR001
             if not v:
                 continue
 
-            module: __Module = outfitting.lookup(v['module'], ship_map)
+            module: __Module | None = outfitting.lookup(v['module'], ship_map)
             if not module:
                 continue
 

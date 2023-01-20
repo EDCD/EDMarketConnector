@@ -3,7 +3,6 @@ import os
 import pathlib
 import sys
 from configparser import ConfigParser
-from typing import List, Optional, Union
 
 from config import AbstractConfig, appname, logger
 
@@ -18,7 +17,7 @@ class LinuxConfig(AbstractConfig):
     __unescape_lut = {'\\': '\\', 'n': '\n', ';': ';', 'r': '\r', '#': '#'}
     __escape_lut = {'\\': '\\', '\n': 'n', ';': ';', '\r': 'r'}
 
-    def __init__(self, filename: Optional[str] = None) -> None:
+    def __init__(self, filename: str | None = None) -> None:
         super().__init__()
         # http://standards.freedesktop.org/basedir-spec/latest/ar01s03.html
         xdg_data_home = pathlib.Path(os.getenv('XDG_DATA_HOME', default='~/.local/share')).expanduser()
@@ -42,7 +41,7 @@ class LinuxConfig(AbstractConfig):
 
         self.filename.parent.mkdir(exist_ok=True, parents=True)
 
-        self.config: Optional[ConfigParser] = ConfigParser(comment_prefixes=('#',), interpolation=None)
+        self.config: ConfigParser | None = ConfigParser(comment_prefixes=('#',), interpolation=None)
         self.config.read(self.filename)  # read() ignores files that dont exist
 
         # Ensure that our section exists. This is here because configparser will happily create files for us, but it
@@ -85,7 +84,7 @@ class LinuxConfig(AbstractConfig):
         :param s: str - The string to unescape.
         :return: str - The unescaped string.
         """
-        out: List[str] = []
+        out: list[str] = []
         i = 0
         while i < len(s):
             c = s[i]
@@ -107,7 +106,7 @@ class LinuxConfig(AbstractConfig):
 
         return "".join(out)
 
-    def __raw_get(self, key: str) -> Optional[str]:
+    def __raw_get(self, key: str) -> str | None:
         """
         Get a raw data value from the config file.
 
@@ -119,7 +118,7 @@ class LinuxConfig(AbstractConfig):
 
         return self.config[self.SECTION].get(key)
 
-    def get_str(self, key: str, *, default: str = None) -> str:
+    def get_str(self, key: str, *, default: str | None = None) -> str:
         """
         Return the string referred to by the given key if it exists, or the default.
 
@@ -134,7 +133,7 @@ class LinuxConfig(AbstractConfig):
 
         return self.__unescape(data)
 
-    def get_list(self, key: str, *, default: list = None) -> list:
+    def get_list(self, key: str, *, default: list | None = None) -> list:
         """
         Return the list referred to by the given key if it exists, or the default.
 
@@ -168,7 +167,7 @@ class LinuxConfig(AbstractConfig):
         except ValueError as e:
             raise ValueError(f'requested {key=} as int cannot be converted to int') from e
 
-    def get_bool(self, key: str, *, default: bool = None) -> bool:
+    def get_bool(self, key: str, *, default: bool | None = None) -> bool:
         """
         Return the bool referred to by the given key if it exists, or the default.
 
@@ -183,7 +182,7 @@ class LinuxConfig(AbstractConfig):
 
         return bool(int(data))
 
-    def set(self, key: str, val: Union[int, str, List[str]]) -> None:
+    def set(self, key: str, val: int | str | list[str]) -> None:
         """
         Set the given key's data to the given value.
 
@@ -192,7 +191,7 @@ class LinuxConfig(AbstractConfig):
         if self.config is None:
             raise ValueError('attempt to use a closed config')
 
-        to_set: Optional[str] = None
+        to_set: str | None = None
         if isinstance(val, bool):
             to_set = str(int(val))
 

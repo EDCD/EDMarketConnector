@@ -139,7 +139,7 @@ def scan_file(path: pathlib.Path) -> list[ast.Call]:
     return out
 
 
-def scan_directory(path: pathlib.Path, skip: list[pathlib.Path] = None) -> dict[pathlib.Path, list[ast.Call]]:
+def scan_directory(path: pathlib.Path, skip: list[pathlib.Path] | None = None) -> dict[pathlib.Path, list[ast.Call]]:
     """
     Scan a directory for expected callsites.
 
@@ -293,7 +293,7 @@ def generate_lang_template(data: dict[pathlib.Path, list[ast.Call]]) -> str:
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--directory', help='Directory to search from', default='.')
-    parser.add_argument('--ignore', action='append', help='directories to ignore', default=['venv', '.git'])
+    parser.add_argument('--ignore', action='append', help='directories to ignore', default=['venv', '.venv', '.git'])
     group = parser.add_mutually_exclusive_group()
     group.add_argument('--json', action='store_true', help='JSON output')
     group.add_argument('--lang', help='en.template "strings" output to specified file, "-" for stdout')

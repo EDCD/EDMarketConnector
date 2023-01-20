@@ -13,9 +13,16 @@ produce the Windows executables and installer.
 
   **As a consequence of this we no longer support Windows 7.  
   This is due to
-  [Python 3.10.x itself not supporting Windows 7](https://www.python.org/downloads/windows/).
+  [Python 3.10.x and later not supporting Windows 7](https://www.python.org/downloads/windows/).
   The application (both EDMarketConnector.exe and EDMC.exe) will crash on
   startup due to a missing DLL.**
+
+  As [Windows 8.1 is now End-Of-Life](https://learn.microsoft.com/en-us/lifecycle/faq/windows#windows-8-1)
+  we no longer explicitly support it, but for the time being it will likely
+  continue to work.  This is dependent on future Python releases not dropping
+  support for Windows 8.1 in a manner that prevents it working.  Any bug report
+  made against Windows 8.1 use may be ignored unless reproduced on a supported
+  OS.
 
   This should have no other impact on users or plugin developers, other
   than the latter now being free to use features that were introduced since the
@@ -24,6 +31,215 @@ produce the Windows executables and installer.
   Developers can check the contents of the `.python-version` file
   in the source (it's not distributed with the Windows installer) for the
   currently used version in a given branch.
+
+---
+
+Release 5.8.0
+===
+This release is essentially the same as 5.8.0-rc3 with only the version and
+this changelog updated.
+
+It brings a new feature related to Fleetcarrier data, some convenience for
+Linux users, some fixes, and otherwise some internal changes that should not
+adversely affect either users or third-party plugins.  For the latter, read
+below for some new/changed things that could benefit you.
+
+* This release, and all future ones, now create two additional archive files
+  in the GitHub release:
+
+  1. `EDMarketConnector-release-<version>.zip`
+  2. `EDMarketConnector-release-<version>.tar.gz`
+
+    The advantage of these over the GitHub auto-generated ones is that they
+    have been hand-crafted to contain *all* the necessary files, and *only*
+    those files.
+
+    **If you use the application from source, and not via a git clone, then we
+    highly recommend you use one of these archives, not the GitHub
+    auto-generated ones.**
+
+    Anyone installing on Windows should continue to use the
+    `EDMarketConnector_win_<version>.msi` files as before.
+
+* **New Feature** - You can now have the application query the `/fleetcarrier`
+  CAPI endpoint for data about your Fleet Carrier.  The data will then be
+  passed to interested plugins.
+
+  Note that there are some caveats:
+
+  1. This feature defaults to *Off*.  The option is on the Configuration tab
+    of Settings as "Enable Fleetcarrier CAPI Queries".  **It is advised to only
+    enable this if you know you utilise plugins that make use of the data.**
+  2. These queries are *only* triggered by `CarrierBuy` and `CarrierStats`
+    Journal events, i.e. upon buying a Fleetcarrier or opening the Carrier
+    Management UI in-game.  **NB: There is a 15 minute cooldown between
+    queries.**
+    
+  3. If you have Fleetcarrier cargo which got into the cargo hold through a lot
+    of individual transactions, or if you have a lot of separate buy/sell
+    orders then these queries can take a *long* time to complete.
+  
+      **If this happens with your game account then all other CAPI queries will
+    be blocked until the `/fleetcarrier` query completes.**  'Other CAPI
+    queries' means those usually triggered upon docking to gather station
+    market, shipyard and outfitting data.  To ameliorate the effects of this
+    there is currently a timeout of 60 seconds on `/fleetcarrier` queries,
+    **and will not occur more often than every 15 minutes**.
+
+      We plan to address this by moving the `/fleetcarrier` queries into their
+    own separate thread in the future.
+
+* The code for choosing the 'Output' folder is now simply the `tkinter`
+  function for such a dialogue, rather than a special case on Windows.  In
+  the past the former had issues with Unicode characters, but in testing no
+  such issue was observed (on a supported OS).
+
+* There are two new items on the "Help" menu:
+  1. Troubleshooting -> [Wiki:Troubleshooting](https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting)
+  2. Report A Bug -> [Issues - New Bug Report](https://github.com/EDCD/EDMarketConnector/issues/new?assignees=&labels=bug%2C+unconfirmed&template=bug_report.md&title=)
+
+* Translations have been updated.  Thanks again to our volunteer translators!
+
+* If we ever activate any functionality killswitches, the popup denoting which
+  are active has been made more readable.
+
+* There's a new section in `Contributing.md` - "Python Environment".  This
+  should aid any new developers in getting things set up.
+
+Linux Users
+---
+We now ship an `io.edcd.EDMarketConnector.desktop` file.  To make use of this
+you should run `scripts/linux-setup.sh` *once*.  This will:
+
+1. Check that you have `$HOME/bin` in your PATH.  If not, it will abort.
+2. Create a shell script `edmarketconnector` in `$HOME/bin` to launch the
+  application.
+
+    NB: This relies on the filesystem location you placed the source in not
+    changing. So if you move the source you will need to re-run the script.
+3. Copy the .desktop and .icon files into appropriate locations.  The .desktop
+  file utilises the shell script created in step 2, and thus relies on it
+  existing *and* on it being in a directory that is in your PATH.
+
+Once this has been completed any XDG-compliant desktops should have an entry
+for "E:D Market Connector" in their "Games" menu.
+
+Fixes
+---
+
+* The tracking of a Cmdr's location that was being performed by the core EDDN
+  plugin has been moved into the Journal monitoring code.  This results in
+  the tracking being correct upon application (re)start, reflecting the state
+  from the latest Journal file, rather than only picking up with any
+  subsequent new Journal events.
+
+  This change should remove instances of "Wrong System! Missed Jump ?" and
+  similar sanity-check "errors" when continuing to play after a user restarts
+  the application whilst the game is running.
+
+  Plugin developers, see below for how this change can positively affect you.
+
+* The name of the files written by "File" > "Save Raw Data" now have a `.`
+  between the system and station names.
+
+* Use of CAPI data in `EDMC.exe` when invoked with either `-s` or `-n`
+  arguments hadn't been updated for prior changes, causing such invocations to
+  fail.  This has been fixed.
+
+Plugin Developers
+---
+
+* Each plugin is now handed its own sub-frame as the `parent` parameter passed
+  to `plugin_app()` *instead of the actual main UI frame*.  These new Frames
+  are placed in the position that plugin UI would have gone into. This should
+  have no side effects on well-behaved plugins.
+
+  However, if you have code that attempts to do things like `parent.children()`
+  or the like in your `plugin_app()` implementation, this might have stopped
+  working.  You shouldn't be trying to do anything with any of the UI outside
+  your plugin *anyway*, but if you definitely have a need then look things up
+  using `.nametowidget()`.  There are examples in the core plugins (which *DO*
+  have good reason, due to maintaining main UI label values).
+
+  All of the plugins listed on our Wiki were given *perfunctory* testing and no
+  issues from this change were observed.
+
+  This is a necessary first step to some pending plugin/UI work:
+
+  * [UI: Alllow for re-ordering third-party plugins' UIs](https://github.com/EDCD/EDMarketConnector/issues/1792)
+  * [UI: Allow configuration of number of UI columns.](https://github.com/EDCD/EDMarketConnector/issues/1813)
+  * [Re-work how Plugins' Settings are accessed](https://github.com/EDCD/EDMarketConnector/issues/1814)
+* **New** - `capi_fleetcarrier()` function to receive the data from a CAPI
+  `/fleetcarrier` query.  See PLUGINS.md for details.
+
+* It was found that the `ShutDown` event (note the capitalisation, this is
+  distinct from the actual Journal `Shutdown` event) synthesized for plugins
+  when it is detected that the game has exited was never actually being
+  delivered. Instead this was erroneously replaced with a synthesized `StartUp`
+  event. This has been fixed.
+
+* As the location tracking has been moved out of the core EDDN plugin, and into
+  monitor.py all of it is now available as members of the `state` dictionary
+  which is passed to `journal_entry()`.
+
+  This both means that no plugin should need to perform such location state
+  tracking itself *and* they can take advantage of it being fully up to date
+  when a user restarts the application with the game running.
+
+  A reminder: When performing 'catch up' on the newest Journal file found at
+  startup, the application does **not** pass any events to the
+  `journal_entry()` method in plugins.  This is to avoid spamming with
+  data/state that has possibly already been handled, and in the case of the
+  Cmdr moving around will end up not being relevant by the time the end of the
+  file is reached.  This limitation was also why the core EDDN plugin couldn't
+  properly initiate its location tracking state in this scenario.
+
+  See PLUGINS.md for details of the new `state` members.  Pay particular
+  attention to the footnote that details the caveats around Body tracking.
+
+  Careful testing has been done for *only* the following. So, if you make use
+  of any of the other new state values and spot a bug, please report it:
+
+  1. SystemName
+  2. SystemAddress
+  3. Body (Name)
+  4. BodyID
+  5. BodyType
+  6. StationName
+  7. StationType
+  8. (Station) MarketID
+
+* There is an additional property `request_cmdr` on `CAPIData` objects, which
+  records the name of the Cmdr the request was made for.
+
+* `FDevIDs` files are their latest versions at time of this version's build.
+
+* `examples\plugintest` - dropped the "pre-5.0.0 config" code, as it's long
+  since irrelevant.
+
+Developers
+---
+
+* If you utilise a git clone of the source code, you should also ensure the
+  sub-modules are initialised and synchronised.
+  [wiki:Running from source](https://github.com/EDCD/EDMarketConnector/wiki/Running-from-source#obtain-a-copy-of-the-application-source)
+  has been updated to include the necessary commands.
+
+* The `coriolis-data` git sub-module now uses an HTTPS, not "git" URL, so won't
+  require authentication for a simple `git pull`.
+
+* If you have a `dump` directory in CWD when running EDMarketConnector.py under
+  a debugger you will get files in that location when CAPI queries complete.
+  This will now include files with names of the form
+  `FleetCarrier.<callsign>.<timstamp>.json` for `/fleetcarrier` data.
+
+* All the main UI tk widgets are now properly named.  This might make things
+  easier if debugging UI widgets as you'll no longer see a bunch of `!label1`,
+  `!frame1` and the like.
+
+  Each plugin's separator is named as per the scheme `plugin_hr_<X>`, and when
+  a plugin has UI its new container Frame is named `plugin_X`.  Both of these
+  start with `1`, not `0`.
 
 ---
 

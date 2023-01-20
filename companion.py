@@ -28,6 +28,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, OrderedDic
 import requests
 
 import config as conf_module
+import killswitch
 import protocol
 from config import config, user_agent
 from edmc_data import companion_category_map as category_map
@@ -45,7 +46,9 @@ else:
 
 
 capi_query_cooldown = 60  # Minimum time between (sets of) CAPI queries
+capi_fleetcarrier_query_cooldown = 60 * 15  # Minimum time between CAPI fleetcarrier queries
 capi_default_requests_timeout = 10
+capi_fleetcarrier_requests_timeout = 60
 auth_timeout = 30  # timeout for initial auth
 
 # Used by both class Auth and Session
@@ -65,7 +68,8 @@ class CAPIData(UserDict):
             self,
             data: Union[str, Dict[str, Any], 'CAPIData', None] = None,
             source_host: Optional[str] = None,
-            source_endpoint: Optional[str] = None
+            source_endpoint: Optional[str] = None,
+            request_cmdr: Optional[str] = None
     ) -> None:
         if data is None:
             super().__init__()
@@ -80,6 +84,7 @@ class CAPIData(UserDict):
 
         self.source_host = source_host
         self.source_endpoint = source_endpoint
+        self.request_cmdr = request_cmdr
 
         if source_endpoint is None:
             return
@@ -325,6 +330,14 @@ class Auth(object):
         """
         logger.debug(f'Trying for "{self.cmdr}"')
 
+        should_return: bool
+        new_data: dict[str, Any]
+
+        should_return, new_data = killswitch.check_killswitch('capi.auth', {})
+        if should_return:
+            logger.warning('capi.auth has been disabled via killswitch. Returning.')
+            return None
+
         self.verifier = None
         cmdrs = config.get_list('cmdrs', default=[])
         logger.debug(f'Cmdrs: {cmdrs}')
@@ -393,9 +406,11 @@ class Auth(object):
         return None
 
     def authorize(self, payload: str) -> str:  # noqa: CCR001
-        """Handle oAuth authorization callback.
+        """
+        Handle oAuth authorization callback.
 
-        :return: access token if successful, otherwise raises CredentialsError.
+        :return: access token if successful
+        :raises CredentialsError
         """
         logger.debug('Checking oAuth authorization callback')
         if '?' not in payload:
@@ -593,7 +608,7 @@ class EDMCCAPIFailedRequest(EDMCCAPIReturn):
     ):
         super().__init__(query_time=query_time, play_sound=play_sound, auto_update=auto_update)
         self.message: str = message  # User-friendly reason for failure.
-        self.exception: int = exception  # Exception that recipient should raise.
+        self.exception: Exception = exception  # Exception that recipient should raise.
 
 
 class Session(object):
@@ -604,6 +619,8 @@ class Session(object):
     FRONTIER_CAPI_PATH_PROFILE = '/profile'
     FRONTIER_CAPI_PATH_MARKET = '/market'
     FRONTIER_CAPI_PATH_SHIPYARD = '/shipyard'
+    FRONTIER_CAPI_PATH_FLEETCARRIER = '/fleetcarrier'
+
     # This is a dummy value, to signal to Session.capi_query_worker that we
     # the 'station' triplet of queries.
     _CAPI_PATH_STATION = '_edmc_station'
@@ -611,7 +628,7 @@ class Session(object):
     def __init__(self) -> None:
         self.state = Session.STATE_INIT
         self.credentials: Optional[Dict[str, Any]] = None
-        self.requests_session: Optional[requests.Session] = None
+        self.requests_session = requests.Session()
         self.auth: Optional[Auth] = None
         self.retrying = False  # Avoid infinite loop when successful auth / unsuccessful query
         self.tk_master: Optional[tk.Tk] = None
@@ -644,9 +661,9 @@ class Session(object):
     def start_frontier_auth(self, access_token: str) -> None:
         """Start an oAuth2 session."""
         logger.debug('Starting session')
-        self.requests_session = requests.Session()
         self.requests_session.headers['Authorization'] = f'Bearer {access_token}'
         self.requests_session.headers['User-Agent'] = user_agent
+
         self.state = Session.STATE_OK
 
     def login(self, cmdr: Optional[str] = None, is_beta: Optional[bool] = None) -> bool:
@@ -655,6 +672,14 @@ class Session(object):
 
         :return: True if login succeeded, False if re-authorization initiated.
         """
+        should_return: bool
+        new_data: dict[str, Any]
+
+        should_return, new_data = killswitch.check_killswitch('capi.auth', {})
+        if should_return:
+            logger.warning('capi.auth has been disabled via killswitch. Returning.')
+            return False
+
         if not Auth.CLIENT_ID:
             logger.error('self.CLIENT_ID is None')
             raise CredentialsError('cannot login without a valid Client ID')
@@ -680,7 +705,7 @@ class Session(object):
 
             else:
                 logger.debug('changed account or retrying login during auth')
-                self.close()
+                self.reinit_session()
                 self.credentials = credentials
 
         self.state = Session.STATE_INIT
@@ -720,22 +745,30 @@ class Session(object):
             raise  # Bad thing happened
 
     def close(self) -> None:
-        """Close Frontier authorization session."""
+        """Close the `request.Session()."""
+        try:
+            self.requests_session.close()
+
+        except Exception as e:
+            logger.debug('Frontier Auth: closing', exc_info=e)
+
+    def reinit_session(self, reopen: bool = True) -> None:
+        """
+        Re-initialise the session's `request.Session()`.
+
+        :param reopen: Whether to open a new session.
+        """
         self.state = Session.STATE_INIT
-        if self.requests_session:
-            try:
-                self.requests_session.close()
+        self.close()
 
-            except Exception as e:
-                logger.debug('Frontier Auth: closing', exc_info=e)
-
-        self.requests_session = None
+        if reopen:
+            self.requests_session = requests.Session()
 
     def invalidate(self) -> None:
         """Invalidate Frontier authorization credentials."""
         logger.debug('Forcing a full re-authentication')
         # Force a full re-authentication
-        self.close()
+        self.reinit_session()
         Auth.invalidate(self.credentials['cmdr'])  # type: ignore
     ######################################################################
 
@@ -759,9 +792,17 @@ class Session(object):
             :param timeout: requests query timeout to use.
             :return: The resulting CAPI data, of type CAPIData.
             """
-            capi_data: CAPIData
+            capi_data: CAPIData = CAPIData()
+            should_return: bool
+            new_data: dict[str, Any]
+
+            should_return, new_data = killswitch.check_killswitch('capi.request.' + capi_endpoint, {})
+            if should_return:
+                logger.warning(f"capi.request.{capi_endpoint} has been disabled by killswitch.  Returning.")
+                return capi_data
+
             try:
-                logger.trace_if('capi.worker', 'Sending HTTP request...')
+                logger.trace_if('capi.worker', f'Sending HTTP request for {capi_endpoint} ...')
                 if conf_module.capi_pretend_down:
                     raise ServerConnectionError(f'Pretending CAPI down: {capi_endpoint}')
 
@@ -778,7 +819,7 @@ class Session(object):
                 # r.status_code = 401
                 # raise requests.HTTPError
                 capi_json = r.json()
-                capi_data = CAPIData(capi_json, capi_host, capi_endpoint)
+                capi_data = CAPIData(capi_json, capi_host, capi_endpoint, monitor.cmdr)
                 self.capi_raw_data.record_endpoint(
                     capi_endpoint, r.content.decode(encoding='utf-8'),
                     datetime.datetime.utcnow()
@@ -841,6 +882,10 @@ class Session(object):
             """
             station_data = capi_single_query(capi_host, self.FRONTIER_CAPI_PATH_PROFILE, timeout=timeout)
 
+            if not station_data.get('commander'):
+                # If even this doesn't exist, probably killswitched.
+                return station_data
+
             if not station_data['commander'].get('docked') and not monitor.state['OnFoot']:
                 return station_data
 
@@ -881,6 +926,10 @@ class Session(object):
 
             if services.get('commodities'):
                 market_data = capi_single_query(capi_host, self.FRONTIER_CAPI_PATH_MARKET, timeout=timeout)
+                if not market_data.get('id'):
+                    # Probably killswitched
+                    return station_data
+
                 if last_starport_id != int(market_data['id']):
                     logger.warning(f"{last_starport_id!r} != {int(market_data['id'])!r}")
                     raise ServerLagging()
@@ -891,6 +940,10 @@ class Session(object):
 
             if services.get('outfitting') or services.get('shipyard'):
                 shipyard_data = capi_single_query(capi_host, self.FRONTIER_CAPI_PATH_SHIPYARD, timeout=timeout)
+                if not shipyard_data.get('id'):
+                    # Probably killswitched
+                    return station_data
+
                 if last_starport_id != int(shipyard_data['id']):
                     logger.warning(f"{last_starport_id!r} != {int(shipyard_data['id'])!r}")
                     raise ServerLagging()
@@ -917,6 +970,10 @@ class Session(object):
             try:
                 if query.endpoint == self._CAPI_PATH_STATION:
                     capi_data = capi_station_queries(query.capi_host)
+
+                elif query.endpoint == self.FRONTIER_CAPI_PATH_FLEETCARRIER:
+                    capi_data = capi_single_query(query.capi_host, self.FRONTIER_CAPI_PATH_FLEETCARRIER,
+                                                  timeout=capi_fleetcarrier_requests_timeout)
 
                 else:
                     capi_data = capi_single_query(query.capi_host, self.FRONTIER_CAPI_PATH_PROFILE)
@@ -946,7 +1003,8 @@ class Session(object):
             # event too, so assume it will be polling the response queue.
             if query.tk_response_event is not None:
                 logger.trace_if('capi.worker', 'Sending <<CAPIResponse>>')
-                self.tk_master.event_generate('<<CAPIResponse>>')
+                if self.tk_master is not None:
+                    self.tk_master.event_generate('<<CAPIResponse>>')
 
         logger.info('CAPI worker thread DONE')
 
@@ -982,6 +1040,35 @@ class Session(object):
             EDMCCAPIRequest(
                 capi_host=capi_host,
                 endpoint=self._CAPI_PATH_STATION,
+                tk_response_event=tk_response_event,
+                query_time=query_time,
+                play_sound=play_sound,
+                auto_update=auto_update
+            )
+        )
+
+    def fleetcarrier(
+            self, query_time: int, tk_response_event: str | None = None,
+            play_sound: bool = False, auto_update: bool = False
+    ) -> None:
+        """
+        Perform CAPI query for fleetcarrier data.
+
+        :param query_time: When this query was initiated.
+        :param tk_response_event: Name of tk event to generate when response queued.
+        :param play_sound: Whether the app should play a sound on error.
+        :param auto_update: Whether this request was triggered automatically.
+        """
+        capi_host = self.capi_host_for_galaxy()
+        if not capi_host:
+            return
+
+        # Ask the thread worker to perform a fleetcarrier query
+        logger.trace_if('capi.worker', 'Enqueueing fleetcarrier request')
+        self.capi_request_queue.put(
+            EDMCCAPIRequest(
+                capi_host=capi_host,
+                endpoint=self.FRONTIER_CAPI_PATH_FLEETCARRIER,
                 tk_response_event=tk_response_event,
                 query_time=query_time,
                 play_sound=play_sound,
@@ -1038,24 +1125,27 @@ class Session(object):
     def dump_capi_data(self, data: CAPIData) -> None:
         """Dump CAPI data to file for examination."""
         if os.path.isdir('dump'):
-            try:
-                system = data['lastSystem']['name']
+            file_name: str = ""
+            if data.source_endpoint == self.FRONTIER_CAPI_PATH_FLEETCARRIER:
+                file_name += f"FleetCarrier.{data['name']['callsign']}"
 
-            except (KeyError, ValueError):
-                system = '<unknown system>'
+            else:
+                try:
+                    file_name += data['lastSystem']['name']
 
-            try:
-                if data['commander'].get('docked'):
-                    station = f'.{data["lastStarport"]["name"]}'
+                except (KeyError, ValueError):
+                    file_name += 'unknown system'
 
-                else:
-                    station = ''
+                try:
+                    if data['commander'].get('docked'):
+                        file_name += f'.{data["lastStarport"]["name"]}'
 
-            except (KeyError, ValueError):
-                station = '<unknown station>'
+                except (KeyError, ValueError):
+                    file_name += '.unknown station'
 
-            timestamp = time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime())
-            with open(f'dump/{system}{station}.{timestamp}.json', 'wb') as h:
+            file_name += time.strftime('.%Y-%m-%dT%H.%M.%S', time.localtime())
+            file_name += '.json'
+            with open(f'dump/{file_name}', 'wb') as h:
                 h.write(json.dumps(data, cls=CAPIDataEncoder,
                                    ensure_ascii=False,
                                    indent=2,

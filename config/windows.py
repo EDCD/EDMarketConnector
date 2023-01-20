@@ -8,7 +8,7 @@ import sys
 import uuid
 import winreg
 from ctypes.wintypes import DWORD, HANDLE
-from typing import List, Optional, Union
+from typing import List, Literal, Optional, Union
 
 from config import AbstractConfig, applongname, appname, logger, update_interval
 
@@ -142,7 +142,7 @@ class WinConfig(AbstractConfig):
             logger.warning(f'registry key {key=} returned unknown type {_type=} {value=}')
             return None
 
-    def get_str(self, key: str, *, default: str = None) -> str:
+    def get_str(self, key: str, *, default: str | None = None) -> str:
         """
         Return the string referred to by the given key if it exists, or the default.
 
@@ -157,7 +157,7 @@ class WinConfig(AbstractConfig):
 
         return res
 
-    def get_list(self, key: str, *, default: list = None) -> list:
+    def get_list(self, key: str, *, default: list | None = None) -> list:
         """
         Return the list referred to by the given key if it exists, or the default.
 
@@ -187,7 +187,7 @@ class WinConfig(AbstractConfig):
 
         return res
 
-    def get_bool(self, key: str, *, default: bool = None) -> bool:
+    def get_bool(self, key: str, *, default: bool | None = None) -> bool:
         """
         Return the bool referred to by the given key if it exists, or the default.
 
@@ -205,7 +205,8 @@ class WinConfig(AbstractConfig):
 
         Implements :meth:`AbstractConfig.set`.
         """
-        reg_type = None
+        # These are the types that winreg.REG_* below resolve to.
+        reg_type: Literal[1] | Literal[4] | Literal[7]
         if isinstance(val, str):
             reg_type = winreg.REG_SZ
             winreg.SetValueEx(self.__reg_handle, key, REG_RESERVED_ALWAYS_ZERO, winreg.REG_SZ, val)
