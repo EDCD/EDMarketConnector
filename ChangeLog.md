@@ -13,9 +13,16 @@ produce the Windows executables and installer.
 
   **As a consequence of this we no longer support Windows 7.  
   This is due to
-  [Python 3.10.x itself not supporting Windows 7](https://www.python.org/downloads/windows/).
+  [Python 3.10.x and later not supporting Windows 7](https://www.python.org/downloads/windows/).
   The application (both EDMarketConnector.exe and EDMC.exe) will crash on
   startup due to a missing DLL.**
+
+  As [Windows 8.1 is now End-Of-Life](https://learn.microsoft.com/en-us/lifecycle/faq/windows#windows-8-1)
+  we no longer explicitly support it, but for the time being it will likely
+  continue to work.  This is dependent on future Python releases not dropping
+  support for Windows 8.1 in a manner that prevents it working.  Any bug report
+  made against Windows 8.1 use may be ignored unless reproduced on a supported
+  OS.
 
   This should have no other impact on users or plugin developers, other
   than the latter now being free to use features that were introduced since the
@@ -27,22 +34,15 @@ produce the Windows executables and installer.
 
 ---
 
-Pre-Release 5.8.0-rc3
+Release 5.8.0
 ===
-A further issue with building the Windows executable has been found and fixed.
-This release is otherwise identical to 5.8.0-rc1 & -rc2 combined.
+This release is essentially the same as 5.8.0-rc3 with only the version and
+this changelog updated.
 
----
-
-Pre-Release 5.8.0-rc2
-===
-An issue with building the Windows executable has been found and fixed.  This
-release is otherwise identical to 5.8.0-rc1.
-
----
-
-Pre-Release 5.8.0-rc1
-===
+It brings a new feature related to Fleetcarrier data, some convenience for
+Linux users, some fixes, and otherwise some internal changes that should not
+adversely affect either users or third-party plugins.  For the latter, read
+below for some new/changed things that could benefit you.
 
 * This release, and all future ones, now create two additional archive files
   in the GitHub release:
