@@ -36,13 +36,244 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 5.7.0</title>
+			<title>Release 5.8.0</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
 
 <p>We now test against, and package with, Python 3.11.1.</p>
 <p><strong>As a consequence of this we no longer support Windows 7.</strong><br>
+
+<h2>Release 5.8.0</h2>
+<p>This release is essentially the same as 5.8.0-rc3 with only the version and
+this changelog updated.</p>
+<p>It brings a new feature related to Fleetcarrier data, some convenience for
+Linux users, some fixes, and otherwise some internal changes that should not
+adversely affect either users or third-party plugins.  For the latter, read
+below for some new/changed things that could benefit you.</p>
+<ul>
+<li>
+<p>This release, and all future ones, now create two additional archive files
+in the GitHub release:</p>
+<ol>
+<li><code>EDMarketConnector-release-&lt;version&gt;.zip</code></li>
+<li><code>EDMarketConnector-release-&lt;version&gt;.tar.gz</code></li>
+</ol>
+<p>The advantage of these over the GitHub auto-generated ones is that they
+have been hand-crafted to contain <em>all</em> the necessary files, and <em>only</em>
+those files.</p>
+<p><strong>If you use the application from source, and not via a git clone, then we
+highly recommend you use one of these archives, not the GitHub
+auto-generated ones.</strong></p>
+<p>Anyone installing on Windows should continue to use the
+<code>EDMarketConnector_win_&lt;version&gt;.msi</code> files as before.</p>
+</li>
+<li>
+<p><strong>New Feature</strong> - You can now have the application query the <code>/fleetcarrier</code>
+CAPI endpoint for data about your Fleet Carrier.  The data will then be
+passed to interested plugins.</p>
+<p>Note that there are some caveats:</p>
+<ol>
+<li>
+<p>This feature defaults to <em>Off</em>.  The option is on the Configuration tab
+of Settings as "Enable Fleetcarrier CAPI Queries".  <strong>It is advised to only
+enable this if you know you utilise plugins that make use of the data.</strong></p>
+</li>
+<li>
+<p>These queries are <em>only</em> triggered by <code>CarrierBuy</code> and <code>CarrierStats</code>
+Journal events, i.e. upon buying a Fleetcarrier or opening the Carrier
+Management UI in-game.  <strong>NB: There is a 15 minute cooldown between
+queries.</strong></p>
+</li>
+<li>
+<p>If you have Fleetcarrier cargo which got into the cargo hold through a lot
+of individual transactions, or if you have a lot of separate buy/sell
+orders then these queries can take a <em>long</em> time to complete.</p>
+<p><strong>If this happens with your game account then all other CAPI queries will
+be blocked until the <code>/fleetcarrier</code> query completes.</strong>  'Other CAPI
+queries' means those usually triggered upon docking to gather station
+market, shipyard and outfitting data.  To ameliorate the effects of this
+there is currently a timeout of 60 seconds on <code>/fleetcarrier</code> queries,
+<strong>and will not occur more often than every 15 minutes</strong>.</p>
+<p>We plan to address this by moving the <code>/fleetcarrier</code> queries into their
+own separate thread in the future.</p>
+</li>
+</ol>
+</li>
+<li>
+<p>The code for choosing the 'Output' folder is now simply the <code>tkinter</code>
+function for such a dialogue, rather than a special case on Windows.  In
+the past the former had issues with Unicode characters, but in testing no
+such issue was observed (on a supported OS).</p>
+</li>
+<li>
+<p>There are two new items on the "Help" menu:</p>
+<ol>
+<li>Troubleshooting -&gt; <a href="https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting">Wiki:Troubleshooting</a>
+</li>
+<li>Report A Bug -&gt; <a href="https://github.com/EDCD/EDMarketConnector/issues/new?assignees=&amp;labels=bug%2C+unconfirmed&amp;template=bug_report.md&amp;title=">Issues - New Bug Report</a>
+</li>
+</ol>
+</li>
+<li>
+<p>Translations have been updated.  Thanks again to our volunteer translators!</p>
+</li>
+<li>
+<p>If we ever activate any functionality killswitches, the popup denoting which
+are active has been made more readable.</p>
+</li>
+<li>
+<p>There's a new section in <code>Contributing.md</code> - "Python Environment".  This
+should aid any new developers in getting things set up.</p>
+</li>
+</ul>
+<h2><a id="user-content-linux-users" class="anchor" aria-hidden="true" href="#linux-users"><span aria-hidden="true" class="octicon octicon-link"></span></a>Linux Users</h2>
+<p>We now ship an <code>io.edcd.EDMarketConnector.desktop</code> file.  To make use of this
+you should run <code>scripts/linux-setup.sh</code> <em>once</em>.  This will:</p>
+<ol>
+<li>
+<p>Check that you have <code>$HOME/bin</code> in your PATH.  If not, it will abort.</p>
+</li>
+<li>
+<p>Create a shell script <code>edmarketconnector</code> in <code>$HOME/bin</code> to launch the
+application.</p>
+<p>NB: This relies on the filesystem location you placed the source in not
+changing. So if you move the source you will need to re-run the script.</p>
+</li>
+<li>
+<p>Copy the .desktop and .icon files into appropriate locations.  The .desktop
+file utilises the shell script created in step 2, and thus relies on it
+existing <em>and</em> on it being in a directory that is in your PATH.</p>
+</li>
+</ol>
+<p>Once this has been completed any XDG-compliant desktops should have an entry
+for "E:D Market Connector" in their "Games" menu.</p>
+<h2><a id="user-content-fixes" class="anchor" aria-hidden="true" href="#fixes"><span aria-hidden="true" class="octicon octicon-link"></span></a>Fixes</h2>
+<ul>
+<li>
+<p>The tracking of a Cmdr's location that was being performed by the core EDDN
+plugin has been moved into the Journal monitoring code.  This results in
+the tracking being correct upon application (re)start, reflecting the state
+from the latest Journal file, rather than only picking up with any
+subsequent new Journal events.</p>
+<p>This change should remove instances of "Wrong System! Missed Jump ?" and
+similar sanity-check "errors" when continuing to play after a user restarts
+the application whilst the game is running.</p>
+<p>Plugin developers, see below for how this change can positively affect you.</p>
+</li>
+<li>
+<p>The name of the files written by "File" &gt; "Save Raw Data" now have a <code>.</code>
+between the system and station names.</p>
+</li>
+<li>
+<p>Use of CAPI data in <code>EDMC.exe</code> when invoked with either <code>-s</code> or <code>-n</code>
+arguments hadn't been updated for prior changes, causing such invocations to
+fail.  This has been fixed.</p>
+</li>
+</ul>
+<h2><a id="user-content-plugin-developers" class="anchor" aria-hidden="true" href="#plugin-developers"><span aria-hidden="true" class="octicon octicon-link"></span></a>Plugin Developers</h2>
+<ul>
+<li>
+<p>Each plugin is now handed its own sub-frame as the <code>parent</code> parameter passed
+to <code>plugin_app()</code> <em>instead of the actual main UI frame</em>.  These new Frames
+are placed in the position that plugin UI would have gone into. This should
+have no side effects on well-behaved plugins.</p>
+<p>However, if you have code that attempts to do things like <code>parent.children()</code>
+or the like in your <code>plugin_app()</code> implementation, this might have stopped
+working.  You shouldn't be trying to do anything with any of the UI outside
+your plugin <em>anyway</em>, but if you definitely have a need then look things up
+using <code>.nametowidget()</code>.  There are examples in the core plugins (which <em>DO</em>
+have good reason, due to maintaining main UI label values).</p>
+<p>All of the plugins listed on our Wiki were given <em>perfunctory</em> testing and no
+issues from this change were observed.</p>
+<p>This is a necessary first step to some pending plugin/UI work:</p>
+<ul>
+<li><a href="https://github.com/EDCD/EDMarketConnector/issues/1792">UI: Alllow for re-ordering third-party plugins' UIs</a></li>
+<li><a href="https://github.com/EDCD/EDMarketConnector/issues/1813">UI: Allow configuration of number of UI columns.</a></li>
+<li><a href="https://github.com/EDCD/EDMarketConnector/issues/1814">Re-work how Plugins' Settings are accessed</a></li>
+</ul>
+</li>
+<li>
+<p><strong>New</strong> - <code>capi_fleetcarrier()</code> function to receive the data from a CAPI
+<code>/fleetcarrier</code> query.  See PLUGINS.md for details.</p>
+</li>
+<li>
+<p>It was found that the <code>ShutDown</code> event (note the capitalisation, this is
+distinct from the actual Journal <code>Shutdown</code> event) synthesized for plugins
+when it is detected that the game has exited was never actually being
+delivered. Instead this was erroneously replaced with a synthesized <code>StartUp</code>
+event. This has been fixed.</p>
+</li>
+<li>
+<p>As the location tracking has been moved out of the core EDDN plugin, and into
+monitor.py all of it is now available as members of the <code>state</code> dictionary
+which is passed to <code>journal_entry()</code>.</p>
+<p>This both means that no plugin should need to perform such location state
+tracking itself <em>and</em> they can take advantage of it being fully up to date
+when a user restarts the application with the game running.</p>
+<p>A reminder: When performing 'catch up' on the newest Journal file found at
+startup, the application does <strong>not</strong> pass any events to the
+<code>journal_entry()</code> method in plugins.  This is to avoid spamming with
+data/state that has possibly already been handled, and in the case of the
+Cmdr moving around will end up not being relevant by the time the end of the
+file is reached.  This limitation was also why the core EDDN plugin couldn't
+properly initiate its location tracking state in this scenario.</p>
+<p>See PLUGINS.md for details of the new <code>state</code> members.  Pay particular
+attention to the footnote that details the caveats around Body tracking.</p>
+<p>Careful testing has been done for <em>only</em> the following. So, if you make use
+of any of the other new state values and spot a bug, please report it:</p>
+<ol>
+<li>SystemName</li>
+<li>SystemAddress</li>
+<li>Body (Name)</li>
+<li>BodyID</li>
+<li>BodyType</li>
+<li>StationName</li>
+<li>StationType</li>
+<li>(Station) MarketID</li>
+</ol>
+</li>
+<li>
+<p>There is an additional property <code>request_cmdr</code> on <code>CAPIData</code> objects, which
+records the name of the Cmdr the request was made for.</p>
+</li>
+<li>
+<p><code>FDevIDs</code> files are their latest versions at time of this version's build.</p>
+</li>
+<li>
+<p><code>examples\plugintest</code> - dropped the "pre-5.0.0 config" code, as it's long
+since irrelevant.</p>
+</li>
+</ul>
+<h2><a id="user-content-developers" class="anchor" aria-hidden="true" href="#developers"><span aria-hidden="true" class="octicon octicon-link"></span></a>Developers</h2>
+<ul>
+<li>
+<p>If you utilise a git clone of the source code, you should also ensure the
+sub-modules are initialised and synchronised.
+<a href="https://github.com/EDCD/EDMarketConnector/wiki/Running-from-source#obtain-a-copy-of-the-application-source">wiki:Running from source</a>
+has been updated to include the necessary commands.</p>
+</li>
+<li>
+<p>The <code>coriolis-data</code> git sub-module now uses an HTTPS, not "git" URL, so won't
+require authentication for a simple <code>git pull</code>.</p>
+</li>
+<li>
+<p>If you have a <code>dump</code> directory in CWD when running EDMarketConnector.py under
+a debugger you will get files in that location when CAPI queries complete.
+This will now include files with names of the form
+<code>FleetCarrier.&lt;callsign&gt;.&lt;timstamp&gt;.json</code> for <code>/fleetcarrier</code> data.</p>
+</li>
+<li>
+<p>All the main UI tk widgets are now properly named.  This might make things
+easier if debugging UI widgets as you'll no longer see a bunch of <code>!label1</code>,
+<code>!frame1</code> and the like.</p>
+<p>Each plugin's separator is named as per the scheme <code>plugin_hr_&lt;X&gt;</code>, and when
+a plugin has UI its new container Frame is named <code>plugin_X</code>.  Both of these
+start with <code>1</code>, not <code>0</code>.</p>
+</li>
+</ul>
+<hr>
+
 
 <h2>Release 5.7.0</h2>
 <p>This release re-enables CAPI queries for Legacy players.  As a result, the
@@ -1780,11 +2011,11 @@ about this:
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.7.0/EDMarketConnector_win_5.7.0.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.8.0/EDMarketConnector_win_5.8.0.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="5.7.0"
-				length="19374080"
+				sparkle:version="5.8.0"
+				length="19054592"
 				type="application/octet-stream"
 			/>
 		</item>
