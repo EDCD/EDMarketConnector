@@ -2507,6 +2507,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         """
         Indicate if current tracking indicates Live galaxy.
 
+        NB: **MAY** be used by third-party plugins.
+
         We assume:
          1) `gameversion` remains something that semantic_verison.Version.coerce() can parse.
          2) Any Live galaxy client reports a version >= the defined base version.

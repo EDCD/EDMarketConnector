@@ -110,9 +110,9 @@ from the original files unless specified as allowed in this section.
 
 `import plug` - For using `plug.show_error()` only.
 
- Use `monitor.game_running()` as follows in case a plugin needs to know if we
- think the game is running.  *NB: This is a function, and should be called as
- such.  Using the bare word `game_running` will always be `True`.*
+Use `monitor.game_running()` as follows in case a plugin needs to know if we
+think the game is running.  *NB: This is a function, and should be called as
+such.  Using the bare word `game_running` will always be `True`.*
  
 ```
 from monitor import monitor
@@ -121,9 +121,16 @@ if monitor.game_running():
   ...
 ``` 
 
+Use `monitor.is_live_galaxy()` to determine if the player is playing in the
+Live galaxy.  Note the implementation details of this.  At time of writing it
+performs a `semantic_version` >= check.
+
 `import timeout_session` - provides a method called `new_session` that creates
-a requests.session with a default timeout on all requests. Recommended to
-reduce noise in HTTP requests
+a `requests.session` with a default timeout on all requests. Recommended to
+reduce noise in HTTP requests.  This also ensures your requests use the central
+"User-Agent" header value.  If you do have reason to make a request otherwise
+please ensure you use the `config.user_agent` value as the User-Agent (you can
+append a string to call out your plugin if you wish).
 
 `from ttkHyperlinkLabel import HyperlinkLabel` and `import myNotebook as nb` -
 For creating UI elements.
@@ -376,6 +383,20 @@ So instead use:
     if config.shutting_down:
         # During shutdown
 ```
+
+### Use `requests`, not `urllib` for HTTP(S) requests
+We use `requests` in lots of core code, so it will always be available.  An
+advantage to using it, instead of the core `urllib`, is that it brings in
+`certifi` with its own set of trusted root certificates.
+
+We've seen issues where a plugin was using `urllib`, which uses the **system**
+certificate store, and a user's system didn't yet have a new root certificate
+that was necessary for the operation of a URL the plugin was acessing.
+
+We keep `requests`, and thus `certifi` up to date via GitHub's dependabot.  If
+there is ever a certificate update that we don't have in a release then
+please open a
+[bug report](https://github.com/EDCD/EDMarketConnector/issues/new?assignees=&labels=bug%2C+unconfirmed&template=bug_report.md&title=).
 
 ---
 

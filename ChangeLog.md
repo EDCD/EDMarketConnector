@@ -34,6 +34,11 @@ produce the Windows executables and installer.
 
 ---
 
+Release 5.8.1
+===
+This fixes a bug where the Cmdr/APIKey sections on Settings > EDSM would never
+be shown.
+
 Release 5.8.0
 ===
 This release is essentially the same as 5.8.0-rc3 with only the version and
