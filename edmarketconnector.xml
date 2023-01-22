@@ -2015,11 +2015,11 @@ about this:
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.8.0/EDMarketConnector_win_5.8.0.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.8.1/EDMarketConnector_win_5.8.1.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="5.8.0"
-				length="19054592"
+				sparkle:version="5.8.1"
+				length="19062784"
 				type="application/octet-stream"
 			/>
 		</item>
