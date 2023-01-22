@@ -327,30 +327,27 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> tk.Fr
     if this.label:
         this.label.grid(columnspan=2, padx=PADX, sticky=tk.W)
 
-    if this.cmdr_label and this.cmdr_text:
-        # LANG: Game Commander name label in EDSM settings
-        this.cmdr_label = nb.Label(frame, text=_('Cmdr'))  # Main window
-        this.cmdr_label.grid(row=cur_row, padx=PADX, sticky=tk.W)
-        this.cmdr_text = nb.Label(frame)
-        this.cmdr_text.grid(row=cur_row, column=1, padx=PADX, pady=PADY, sticky=tk.W)
+    # LANG: Game Commander name label in EDSM settings
+    this.cmdr_label = nb.Label(frame, text=_('Cmdr'))  # Main window
+    this.cmdr_label.grid(row=cur_row, padx=PADX, sticky=tk.W)
+    this.cmdr_text = nb.Label(frame)
+    this.cmdr_text.grid(row=cur_row, column=1, padx=PADX, pady=PADY, sticky=tk.W)
 
     cur_row += 1
 
-    if this.user_label and this.label:
-        # LANG: EDSM Commander name label in EDSM settings
-        this.user_label = nb.Label(frame, text=_('Commander Name'))  # EDSM setting
-        this.user_label.grid(row=cur_row, padx=PADX, sticky=tk.W)
-        this.user = nb.Entry(frame)
-        this.user.grid(row=cur_row, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
+    # LANG: EDSM Commander name label in EDSM settings
+    this.user_label = nb.Label(frame, text=_('Commander Name'))  # EDSM setting
+    this.user_label.grid(row=cur_row, padx=PADX, sticky=tk.W)
+    this.user = nb.Entry(frame)
+    this.user.grid(row=cur_row, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
 
     cur_row += 1
 
-    if this.apikey_label and this.apikey:
-        # LANG: EDSM API key label
-        this.apikey_label = nb.Label(frame, text=_('API Key'))  # EDSM setting
-        this.apikey_label.grid(row=cur_row, padx=PADX, sticky=tk.W)
-        this.apikey = nb.Entry(frame)
-        this.apikey.grid(row=cur_row, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
+    # LANG: EDSM API key label
+    this.apikey_label = nb.Label(frame, text=_('API Key'))  # EDSM setting
+    this.apikey_label.grid(row=cur_row, padx=PADX, sticky=tk.W)
+    this.apikey = nb.Entry(frame)
+    this.apikey.grid(row=cur_row, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
 
     prefs_cmdr_changed(cmdr, is_beta)
 
