@@ -36,13 +36,17 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 5.8.0</title>
+			<title>Release 5.8.1</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
 
 <p>We now test against, and package with, Python 3.11.1.</p>
 <p><strong>As a consequence of this we no longer support Windows 7.</strong><br>
+
+<h2>Release 5.8.1</h2>
+<p>This fixes a bug where the Cmdr/APIKey sections on Settings > EDSM would never be shown.</p>
+<hr>
 
 <h2>Release 5.8.0</h2>
 <p>This release is essentially the same as 5.8.0-rc3 with only the version and
