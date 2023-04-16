@@ -2,10 +2,10 @@
 name: Submodule Updates
 
 on:
-  #  push:
-  #    branches: [ develop ]
-  schedule:
-    - cron: '0 12 * * *'
+  push:
+    branches: [ develop ]
+  # schedule:
+  # - cron: '0 12 * * *'
 
 jobs:
   check_submodules:
