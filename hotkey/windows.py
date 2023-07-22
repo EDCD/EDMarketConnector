@@ -9,6 +9,10 @@ import winsound
 from ctypes.wintypes import DWORD, HWND, LONG, LPWSTR, MSG, ULONG, WORD
 from typing import Optional, Tuple, Union
 
+import pywintypes
+import win32api
+import win32gui
+
 from config import config
 from EDMCLogging import get_main_logger
 from hotkey import AbstractHotkeyMgr
@@ -17,8 +21,10 @@ assert sys.platform == 'win32'
 
 logger = get_main_logger()
 
-RegisterHotKey = ctypes.windll.user32.RegisterHotKey
+# Not yet implmented in pywin32 - <https://github.com/mhammond/pywin32/issues/2004>
 UnregisterHotKey = ctypes.windll.user32.UnregisterHotKey
+# These don't seem to be in pywin32 at all
+# Ref: <https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerhotkey>
 MOD_ALT = 0x0001
 MOD_CONTROL = 0x0002
 MOD_SHIFT = 0x0004
@@ -35,8 +41,7 @@ WM_APP = 0x8000
 WM_SND_GOOD = WM_APP + 1
 WM_SND_BAD = WM_APP + 2
 
-GetKeyState = ctypes.windll.user32.GetKeyState
-MapVirtualKey = ctypes.windll.user32.MapVirtualKeyW
+# Virtual key values
 VK_BACK = 0x08
 VK_CLEAR = 0x0c
 VK_RETURN = 0x0d
@@ -59,6 +64,14 @@ VK_NUMLOCK = 0x90
 VK_SCROLL = 0x91
 VK_PROCESSKEY = 0xe5
 VK_OEM_CLEAR = 0xfe
+
+# VirtualKey mapping values
+# <https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-mapvirtualkeyexa>
+MAPVK_VK_TO_VSC = 0
+MAPVK_VSC_TO_VK = 1
+MAPVK_VK_TO_CHAR = 2
+MAPVK_VSC_TO_VK_EX = 3
+MAPVK_VK_TO_VSC_EX = 4
 
 GetForegroundWindow = ctypes.windll.user32.GetForegroundWindow
 GetWindowText = ctypes.windll.user32.GetWindowTextW
@@ -210,8 +223,11 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
         """Handle hotkeys."""
         logger.debug('Begin...')
         # Hotkey must be registered by the thread that handles it
-        if not RegisterHotKey(None, 1, modifiers | MOD_NOREPEAT, keycode):
-            logger.debug("We're not the right thread?")
+        try:
+            win32gui.RegisterHotKey(None, 1, modifiers | MOD_NOREPEAT, keycode)
+
+        except pywintypes.error:
+            logger.exception("We're not the right thread?")
             self.thread = None  # type: ignore
             return
 
@@ -236,8 +252,11 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
                     logger.debug('Passing key on')
                     UnregisterHotKey(None, 1)
                     SendInput(1, fake, ctypes.sizeof(INPUT))
-                    if not RegisterHotKey(None, 1, modifiers | MOD_NOREPEAT, keycode):
-                        logger.debug("We aren't registered for this ?")
+                    try:
+                        win32gui.RegisterHotKey(None, 1, modifiers | MOD_NOREPEAT, keycode)
+
+                    except pywintypes.error:
+                        logger.exception("We aren't registered for this ?")
                         break
 
             elif msg.message == WM_SND_GOOD:
@@ -266,7 +285,7 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
         """Stop acquiring hotkey state."""
         pass
 
-    def fromevent(self, event) -> Optional[Union[bool, Tuple]]:  # noqa: CCR001
+    def fromevent(self, event) -> Optional[Union[bool, Tuple]]:
         """
         Return configuration (keycode, modifiers) or None=clear or False=retain previous.
 
@@ -277,11 +296,11 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
         :param event: tk event ?
         :return: False to retain previous, None to not use, else (keycode, modifiers)
         """
-        modifiers = ((GetKeyState(VK_MENU) & 0x8000) and MOD_ALT) \
-            | ((GetKeyState(VK_CONTROL) & 0x8000) and MOD_CONTROL) \
-            | ((GetKeyState(VK_SHIFT) & 0x8000) and MOD_SHIFT) \
-            | ((GetKeyState(VK_LWIN) & 0x8000) and MOD_WIN) \
-            | ((GetKeyState(VK_RWIN) & 0x8000) and MOD_WIN)
+        modifiers = ((win32api.GetKeyState(VK_MENU) & 0x8000) and MOD_ALT) \
+            | ((win32api.GetKeyState(VK_CONTROL) & 0x8000) and MOD_CONTROL) \
+            | ((win32api.GetKeyState(VK_SHIFT) & 0x8000) and MOD_SHIFT) \
+            | ((win32api.GetKeyState(VK_LWIN) & 0x8000) and MOD_WIN) \
+            | ((win32api.GetKeyState(VK_RWIN) & 0x8000) and MOD_WIN)
         keycode = event.keycode
 
         if keycode in [VK_SHIFT, VK_CONTROL, VK_MENU, VK_LWIN, VK_RWIN]:
@@ -305,11 +324,12 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
                 return (0, modifiers)
 
         # See if the keycode is usable and available
-        if RegisterHotKey(None, 2, modifiers | MOD_NOREPEAT, keycode):
+        try:
+            win32gui.RegisterHotKey(None, 2, modifiers | MOD_NOREPEAT, keycode)
             UnregisterHotKey(None, 2)
             return (keycode, modifiers)
 
-        else:
+        except pywintypes.error:
             winsound.MessageBeep()
             return None
 
@@ -347,7 +367,8 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
             text += WindowsHotkeyMgr.DISPLAY[keycode]
 
         else:
-            c = MapVirtualKey(keycode, 2)  # printable ?
+            # <https://mhammond.github.io/pywin32/win32api__MapVirtualKey_meth.html>
+            c = win32api.MapVirtualKey(keycode, MAPVK_VK_TO_CHAR)  # printable ?
             if not c:  # oops not printable
                 text += '⁈'
 

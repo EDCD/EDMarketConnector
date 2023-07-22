@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import html
 import locale
+import os
 import pathlib
 import queue
 import re
@@ -245,41 +246,21 @@ if __name__ == '__main__':  # noqa: C901
             # If *this* instance hasn't locked, then another already has and we
             # now need to do the edmc:// checks for auth callback
             if locked != JournalLockResult.LOCKED:
-                import ctypes
-                from ctypes.wintypes import BOOL, HWND, INT, LPARAM, LPCWSTR, LPWSTR
-
-                EnumWindows = ctypes.windll.user32.EnumWindows  # noqa: N806
-                GetClassName = ctypes.windll.user32.GetClassNameW  # noqa: N806
-                GetClassName.argtypes = [HWND, LPWSTR, ctypes.c_int]
-                GetWindowText = ctypes.windll.user32.GetWindowTextW  # noqa: N806
-                GetWindowText.argtypes = [HWND, LPWSTR, ctypes.c_int]
-                GetWindowTextLength = ctypes.windll.user32.GetWindowTextLengthW  # noqa: N806
-                GetProcessHandleFromHwnd = ctypes.windll.oleacc.GetProcessHandleFromHwnd  # noqa: N806
-
-                SW_RESTORE = 9  # noqa: N806
-                SetForegroundWindow = ctypes.windll.user32.SetForegroundWindow  # noqa: N806
-                ShowWindow = ctypes.windll.user32.ShowWindow  # noqa: N806
-                ShowWindowAsync = ctypes.windll.user32.ShowWindowAsync  # noqa: N806
-
-                COINIT_MULTITHREADED = 0  # noqa: N806,F841
-                COINIT_APARTMENTTHREADED = 0x2  # noqa: N806
-                COINIT_DISABLE_OLE1DDE = 0x4  # noqa: N806
-                CoInitializeEx = ctypes.windll.ole32.CoInitializeEx  # noqa: N806
-
-                ShellExecute = ctypes.windll.shell32.ShellExecuteW  # noqa: N806
-                ShellExecute.argtypes = [HWND, LPCWSTR, LPCWSTR, LPCWSTR, LPCWSTR, INT]
+                import pythoncom
+                import pywintypes
+                import win32api
+                import win32con
+                import win32gui
+                import win32process
+                import win32security
 
                 def window_title(h: int) -> Optional[str]:
                     if h:
-                        text_length = GetWindowTextLength(h) + 1
-                        buf = ctypes.create_unicode_buffer(text_length)
-                        if GetWindowText(h, buf, text_length):
-                            return buf.value
+                        return win32gui.GetWindowText(h)
 
                     return None
 
-                @ctypes.WINFUNCTYPE(BOOL, HWND, LPARAM)
-                def enumwindowsproc(window_handle, l_param):  # noqa: CCR001
+                def enumwindowsproc(window_handle, edmc_windows):  # noqa: CCR001
                     """
                     Determine if any window for the Application exists.
 
@@ -293,35 +274,49 @@ if __name__ == '__main__':  # noqa: C901
                     :param l_param: The second parameter to the EnumWindows() call.
                     :return: False if we found a match, else True to continue iteration
                     """
-                    # class name limited to 256 - https://msdn.microsoft.com/en-us/library/windows/desktop/ms633576
-                    cls = ctypes.create_unicode_buffer(257)
-                    # This conditional is exploded to make debugging slightly easier
-                    if GetClassName(window_handle, cls, 257):
-                        if cls.value == 'TkTopLevel':
-                            if window_title(window_handle) == applongname:
-                                if GetProcessHandleFromHwnd(window_handle):
-                                    # If GetProcessHandleFromHwnd succeeds then the app is already running as this user
+                    class_name = win32gui.GetClassName(window_handle)
+                    if class_name == 'TkTopLevel':
+                        if window_title(window_handle) == applongname:
+                            # See monitor.py EDLogs.game_running() for references
+                            thread_id, process_id = win32process.GetWindowThreadProcessId(window_handle)
+                            handle = win32api.OpenProcess(win32con.PROCESS_QUERY_INFORMATION, False, process_id)
+                            if handle:
+                                process_token = win32security.OpenProcessToken(handle, win32security.TOKEN_QUERY)
+                                token_information, i = win32security.GetTokenInformation(
+                                    process_token, win32security.TokenUser
+                                )
+                                if token_information == user_sid:
                                     if len(sys.argv) > 1 and sys.argv[1].startswith(protocolhandler_redirect):
-                                        CoInitializeEx(0, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)
+                                        pythoncom.CoInitializeEx(
+                                            pythoncom.COINIT_APARTMENTTHREADED | pythoncom.COINIT_DISABLE_OLE1DDE
+                                        )
                                         # Wait for it to be responsive to avoid ShellExecute recursing
-                                        ShowWindow(window_handle, SW_RESTORE)
-                                        ShellExecute(0, None, sys.argv[1], None, None, SW_RESTORE)
+                                        win32gui.ShowWindow(window_handle, win32con.SW_RESTORE)
+                                        win32api.ShellExecute(0, None, sys.argv[1], None, None, win32con.SW_RESTORE)
 
                                     else:
-                                        ShowWindowAsync(window_handle, SW_RESTORE)
-                                        SetForegroundWindow(window_handle)
+                                        win32gui.ShowWindow(window_handle, win32con.SW_RESTORE)
+                                        win32gui.SetForegroundWindow(window_handle)
 
-                            return False  # Indicate window found, so stop iterating
+                                    edmc_windows.append(window_handle)
+                                    return False  # Indicate window found, so stop iterating
 
                     # Indicate that EnumWindows() needs to continue iterating
                     return True  # Do not remove, else this function as a callback breaks
 
                 # This performs the edmc://auth check and forward
-                # EnumWindows() will iterate through all open windows, calling
-                # enumwindwsproc() on each.  When an invocation returns False it
-                # stops iterating.
-                # Ref: <https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-enumwindows>
-                EnumWindows(enumwindowsproc, 0)
+                user_sid, user_domain, user_type = win32security.LookupAccountName(
+                    None, os.environ['USERNAME']
+                )
+                edmc_windows: list[int] = []
+                # Iterate over all windows, calling enumwindowsproc for each
+                try:
+                    win32gui.EnumWindows(enumwindowsproc, edmc_windows)
+
+                except pywintypes.error as e:
+                    # Ref: <https://lists.archive.carbon60.com/python/python/135503>
+                    if e.winerror != 0:
+                        logger.exception("EnumWindows exception:")
 
         return
 

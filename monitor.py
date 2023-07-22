@@ -4,6 +4,7 @@
 # spell-checker: words joinacrew quitacrew sellshiponrebuy newbal navroute npccrewpaidwage sauto
 
 import json
+import os
 import pathlib
 import queue
 import re
@@ -46,22 +47,15 @@ if sys.platform == 'darwin':
     F_GLOBAL_NOCACHE = 55
 
 elif sys.platform == 'win32':
-    import ctypes
-    from ctypes.wintypes import BOOL, HWND, LPARAM, LPWSTR
-
+    # pywin32 modules: <https://mhammond.github.io/pywin32/modules.html>
+    import pywintypes
+    import win32api
+    import win32con
+    import win32gui
+    import win32process
+    import win32security
     from watchdog.events import FileCreatedEvent, FileSystemEventHandler
     from watchdog.observers import Observer
-
-    EnumWindows = ctypes.windll.user32.EnumWindows
-    EnumWindowsProc = ctypes.WINFUNCTYPE(BOOL, HWND, LPARAM)
-
-    CloseHandle = ctypes.windll.kernel32.CloseHandle
-
-    GetWindowText = ctypes.windll.user32.GetWindowTextW
-    GetWindowText.argtypes = [HWND, LPWSTR, ctypes.c_int]
-    GetWindowTextLength = ctypes.windll.user32.GetWindowTextLengthW
-
-    GetProcessHandleFromHwnd = ctypes.windll.oleacc.GetProcessHandleFromHwnd
 
 else:
     # Linux's inotify doesn't work over CIFS or NFS, so poll
@@ -128,6 +122,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         # The assumption is gameversion will parse via `coerce()` and always
         # be >= for Live, and < for Legacy.
         self.live_galaxy_base_version = semantic_version.Version('4.0.0')
+
+        if sys.platform == 'win32':
+            # Get the SID of the user we're running as for later use in
+            # `game_running()`
+            self.user_sid, self.user_domain, self.user_type = win32security.LookupAccountName(
+                None, os.environ['USERNAME']
+            )
 
         self.__init_state()
 
@@ -2151,23 +2152,56 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         elif sys.platform == 'win32':
             def WindowTitle(h):  # noqa: N802 # type: ignore
                 if h:
-                    length = GetWindowTextLength(h) + 1
-                    buf = ctypes.create_unicode_buffer(length)
-                    if GetWindowText(h, buf, length):
-                        return buf.value
+                    return win32gui.GetWindowText(h)
+
                 return None
 
-            def callback(hWnd, lParam):  # noqa: N803
-                name = WindowTitle(hWnd)
+            def callback(hwnd, hwnds):
+                name = WindowTitle(hwnd)
                 if name and name.startswith('Elite - Dangerous'):
-                    handle = GetProcessHandleFromHwnd(hWnd)
-                    if handle:  # If GetProcessHandleFromHwnd succeeds then the app is already running as this user
-                        CloseHandle(handle)
-                        return False  # stop enumeration
+                    # We've found a window that *looks* like an ED game process, but now we need to check
+                    # if it's owned by the current user.
+
+                    # Get the process_id of the window we found
+                    # <https://mhammond.github.io/pywin32/win32process__GetWindowThreadProcessId_meth.html>
+                    thread_id, process_id = win32process.GetWindowThreadProcessId(hwnd)
+
+                    # Use that to get a process handle
+                    # <https://mhammond.github.io/pywin32/win32api__OpenProcess_meth.html>
+                    # The first arg can't simply be `0`, and `win32con.PROCESS_TERMINATE` works
+                    handle = win32api.OpenProcess(win32con.PROCESS_QUERY_INFORMATION, False, process_id)
+                    if handle:
+                        # We got the handle OK, now we need a token for it
+                        process_token = win32security.OpenProcessToken(handle, win32security.TOKEN_QUERY)
+                        # So we can use that to get information about the User
+                        token_information, i = win32security.GetTokenInformation(
+                            process_token, win32security.TokenUser
+                        )
+                        # And lastly check if token_information, which should be a PySID object, matches
+                        # that of the current user we looked up in `__init__()`.
+                        if token_information == self.user_sid:
+                            # This can be used to convert the token to username, domain name, and account type
+                            # user, domain, name_use = win32security.LookupAccountSid(None, token_information)
+                            hwnds.append(hwnd)
+                            return False  # Indicate window found, so stop iterating
 
                 return True
 
-            return not EnumWindows(EnumWindowsProc(callback), 0)
+            # Ref: <http://timgolden.me.uk/python/win32_how_do_i/find-the-window-for-my-subprocess.html>
+            ed_windows: list[int] = []
+            try:
+                win32gui.EnumWindows(callback, ed_windows)
+
+            except pywintypes.error as e:
+                # Ref: <https://lists.archive.carbon60.com/python/python/135503>
+                # Because False is returned in the callback to indicate "found the window, stop
+                # processing", this causes EnumWindows() to return `0`, which is generically
+                # treated as an error, so exception is raised.
+                # So, check the exception's .winerror, and ignore if `0`.
+                if e.winerror != 0:
+                    logger.exception("EnumWindows exception:")
+
+            return True if len(ed_windows) > 0 else False
 
         return False
 
