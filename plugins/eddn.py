@@ -692,8 +692,8 @@ class EDDN:
         # not send an empty commodities list, as the EDDN Schema doesn't allow
         # it (as of 2020-09-28).
         # BUT, Fleet Carriers can go from having buy/sell orders to having
-        # none and that really does need to be recorded over EDDN so that, e.g.
-        # EDDB can update in a timely manner.
+        # none and that really does need to be recorded over EDDN so that
+        # tools can update in a timely manner.
         if this.commodities != commodities:
             message: OrderedDictT[str, Any] = OrderedDict([
                 ('timestamp',   data['timestamp']),
@@ -929,8 +929,8 @@ class EDDN:
         # not send an empty commodities list, as the EDDN Schema doesn't allow
         # it (as of 2020-09-28).
         # BUT, Fleet Carriers can go from having buy/sell orders to having
-        # none and that really does need to be recorded over EDDN so that, e.g.
-        # EDDB can update in a timely manner.
+        # none and that really does need to be recorded over EDDN so that
+        # tools can update in a timely manner.
         if this.commodities != commodities:
             self.send_message(cmdr, {
                 '$schemaRef': f'https://eddn.edcd.io/schemas/commodity/3{"/test" if is_beta else ""}',
