@@ -232,9 +232,6 @@
 /* coriolis.py: Settings>Coriolis - invalid override mode found; In files: coriolis.py:156; */
 "Invalid Coriolis override mode!" = "Niewłaściwy tryb nadpisania Coriolis!";
 
-/* eddb.py: Journal Processing disabled due to an active killswitch; In files: eddb.py:179; */
-"EDDB Journal processing disabled. See Log." = "Wyłączone przetwarzanie dziennika EDDB. Sprawdź logi.";
-
 /* eddn.py: Error while trying to send data to EDDN; In files: eddn.py:458; eddn.py:2413; eddn.py:2451; eddn.py:2519; */
 "Error: Can't connect to EDDN" = "Błąd: Brak połączenia z EDDN";
 
@@ -257,7 +254,7 @@
 "Delay sending until docked" = "Czekaj z wysłaniem na zadokowanie";
 
 /* eddn.py: Killswitch disabled EDDN; In files: eddn.py:2178; */
-"EDDN journal handler disabled. See Log." = "Wyłączona obsługa dziennika EDDB. Sprawdź logi.";
+"EDDN journal handler disabled. See Log." = "Wyłączona obsługa dziennika EDDN. Sprawdź logi.";
 
 /* eddn.py: Status text shown while attempting to send data; In files: eddn.py:2507; */
 "Sending data to EDDN..." = "Wysłanie danych do EDDN...";
@@ -278,7 +275,7 @@
 "None" = "Brak";
 
 /* edsm.py: EDSM plugin - Journal handling disabled by killswitch; In files: edsm.py:516; */
-"EDSM Handler disabled. See Log." = "Wyłączona obsługa EDDB. Sprawdź logi.";
+"EDSM Handler disabled. See Log." = "Wyłączona obsługa EDSM. Sprawdź logi.";
 
 /* edsm.py: EDSM Plugin - Error message from EDSM API; In files: edsm.py:916; edsm.py:1048; */
 "Error: EDSM {MSG}" = "Błąd: EDSM {MSG}";
