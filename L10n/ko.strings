@@ -229,9 +229,6 @@
 /* coriolis.py: Settings>Coriolis - invalid override mode found; In files: coriolis.py:156; */
 "Invalid Coriolis override mode!" = "잘못된 Coriolis 오버라이딩 모드입니다!";
 
-/* eddb.py: Journal Processing disabled due to an active killswitch; In files: eddb.py:179; */
-"EDDB Journal processing disabled. See Log." = "EDDB 저널 처리 비활성화됨. 로그 참고 바람.";
-
 /* eddn.py: Error while trying to send data to EDDN; In files: eddn.py:458; eddn.py:2413; eddn.py:2451; eddn.py:2519; */
 "Error: Can't connect to EDDN" = "오류: EDDN에 연결할 수 없음";
 

@@ -178,9 +178,6 @@
 /* l10n.py: The system default language choice in Settings > Appearance; prefs.py: Settings > Configuration - Label on 'reset journal files location to default' button; prefs.py: The system default language choice in Settings > Appearance; prefs.py: Label for 'Default' theme radio button; In files: l10n.py:193; prefs.py:455; prefs.py:709; prefs.py:742; */
 "Default" = "Oletus";
 
-/* eddb.py: Journal Processing disabled due to an active killswitch; In files: eddb.py:179; */
-"EDDB Journal processing disabled. See Log." = "EDDB lokikirjan käsittely ei käytössä. Katso lokitiedot.";
-
 /* eddn.py: Error while trying to send data to EDDN; In files: eddn.py:458; eddn.py:2413; eddn.py:2451; eddn.py:2519; */
 "Error: Can't connect to EDDN" = "Virhe: ei saatu yhteyttä EDDN:ään";
 
@@ -192,9 +189,6 @@
 
 /* eddn.py: EDDN delay sending until docked option is on, this message notes that a send was skipped due to this; In files: eddn.py:2063; */
 "Delay sending until docked" = "Lähetä tiedot vasta telakoitumisen jälkeen";
-
-/* eddn.py: Killswitch disabled EDDN; In files: eddn.py:2178; */
-"EDDN journal handler disabled. See Log." = "EDDB lokikirjan käsittelijä ei käytössä. Katso lokitiedot.";
 
 /* eddn.py: Status text shown while attempting to send data; In files: eddn.py:2507; */
 "Sending data to EDDN..." = "Lähetetään tietoja EDDN:ään...";

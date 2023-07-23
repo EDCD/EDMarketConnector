@@ -22,7 +22,7 @@ SAFE_TRANSLATE = str.maketrans({x: '_' for x in "!@#$%^&*()./\\\r\n[]-+='\";:?<>
 class LoggingHandler(server.BaseHTTPRequestHandler):
     """HTTP Handler implementation that logs to EDMCs logger and writes data to files on disk."""
 
-    def __init__(self, request: bytes, client_address: Tuple[str, int], server) -> None:
+    def __init__(self, request, client_address: Tuple[str, int], server) -> None:
         super().__init__(request, client_address, server)
 
     def log_message(self, format: str, *args: Any) -> None:

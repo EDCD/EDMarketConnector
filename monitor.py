@@ -43,6 +43,7 @@ if sys.platform == 'darwin':
     from AppKit import NSWorkspace
     from watchdog.events import FileSystemEventHandler
     from watchdog.observers import Observer
+    from watchdog.observers.api import BaseObserver
     F_GLOBAL_NOCACHE = 55
 
 elif sys.platform == 'win32':
@@ -51,6 +52,7 @@ elif sys.platform == 'win32':
 
     from watchdog.events import FileCreatedEvent, FileSystemEventHandler
     from watchdog.observers import Observer
+    from watchdog.observers.api import BaseObserver
 
     EnumWindows = ctypes.windll.user32.EnumWindows
     EnumWindowsProc = ctypes.WINFUNCTYPE(BOOL, HWND, LPARAM)
@@ -70,6 +72,7 @@ else:
         # this isn't ever used, but this will make type checking happy
         from watchdog.events import FileCreatedEvent
         from watchdog.observers import Observer
+        from watchdog.observers.api import BaseObserver
 
 
 # Journal handler
@@ -91,7 +94,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self.root: 'tkinter.Tk' = None  # type: ignore # Don't use Optional[] - mypy thinks no methods
         self.currentdir: str | None = None  # The actual logdir that we're monitoring
         self.logfile: str | None = None
-        self.observer: 'Observer' | None = None
+        self.observer: BaseObserver | None = None
         self.observed = None  # a watchdog ObservedWatch, or None if polling
         self.thread: threading.Thread | None = None
         # For communicating journal entries back to main thread
