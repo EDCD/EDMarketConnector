@@ -7,7 +7,7 @@ import time
 import tkinter as tk
 from calendar import timegm
 from os.path import getsize, isdir, isfile
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from config import config
 from EDMCLogging import get_main_logger
@@ -34,7 +34,7 @@ class Dashboard(FileSystemEventHandler):
 
     def __init__(self) -> None:
         FileSystemEventHandler.__init__(self)  # futureproofing - not need for current version of watchdog
-        self.session_start: Optional[int] = None
+        self.session_start: int = int(time.time())
         self.root: tk.Tk = None  # type: ignore
         self.currentdir: str = None                 # type: ignore # The actual logdir that we're monitoring
         self.observer: Observer = None  # type: ignore
