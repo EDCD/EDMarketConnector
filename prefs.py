@@ -625,7 +625,7 @@ class PreferencesDialog(tk.Toplevel):
         with row as cur_row:
             station_provider = config.get_str('station_provider')
             self.station_provider = tk.StringVar(
-                value=str(station_provider if station_provider in plug.provides('station_url') else 'edsm')
+                value=str(station_provider if station_provider in plug.provides('station_url') else 'EDSM')
             )
 
             # LANG: Configuration - Label for selection of 'Station' provider website
