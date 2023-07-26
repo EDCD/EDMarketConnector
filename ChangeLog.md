@@ -34,10 +34,13 @@ produce the Windows executables and installer.
 
 ---
 
-Pre-Release 5.9.0-rc1 
+Release 5.9.0
 ===
+This release is essentially the same as 5.9.0-rc1 with only a typo, the version and
+this changelog updated.
+
 This release contains the removal of the EDDB module, as well as a few under-the-hood
-updates. 
+updates.
 
 * Removes the EDDB plugin due to EDDB shutting down.
 * Unsets EDDB as the default handler for certain URL preferences.
