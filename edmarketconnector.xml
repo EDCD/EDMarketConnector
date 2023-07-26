@@ -36,13 +36,26 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 5.8.1</title>
+			<title>Release 5.9.0</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
 
 <p>We now test against, and package with, Python 3.11.1.</p>
 <p><strong>As a consequence of this we no longer support Windows 7.</strong><br>
+
+<h2>Release 5.9.0</h2>
+<p>This release is essentially the same as 5.9.0-rc1 with only a typo, the version and
+this changelog updated.</p>
+<p>This release contains the removal of the EDDB module, as well as a few under-the-hood
+updates.</p>
+<ul>
+<li>Removes the EDDB plugin due to EDDB shutting down.</li>
+<li>Unsets EDDB as the default handler for certain URL preferences.</li>
+<li>Updates the FDevIDs to latest versions.</li>
+<li>Removes EDDB references from help string documentations.</li>
+<li>Updated a number of dependencies to their latest working versions</li>
+</ul><hr>
 
 <h2>Release 5.8.1</h2>
 <p>This fixes a bug where the Cmdr/APIKey sections on Settings > EDSM would never be shown.</p>
@@ -2015,11 +2028,11 @@ about this:
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.8.1/EDMarketConnector_win_5.8.1.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.9.0/EDMarketConnector_win_5.9.0.msi"
 				sparkle:os="windows"
 				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="5.8.1"
-				length="19062784"
+				sparkle:version="5.9.0"
+				length="21475328"
 				type="application/octet-stream"
 			/>
 		</item>
