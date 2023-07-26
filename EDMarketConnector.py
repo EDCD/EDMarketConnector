@@ -1737,7 +1737,7 @@ class AppWindow(object):
     def station_url(self, station: str) -> str | None:
         """Despatch a station URL to the configured handler."""
         return plug.invoke(
-            config.get_str('station_provider'), 'edsm', 'station_url',
+            config.get_str('station_provider'), 'EDSM', 'station_url',
             monitor.state['SystemName'], monitor.state['StationName']
         )
 
