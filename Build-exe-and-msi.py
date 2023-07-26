@@ -70,7 +70,6 @@ APP = 'EDMarketConnector.py'
 APPCMD = 'EDMC.py'
 PLUGINS = [
     'plugins/coriolis.py',
-    'plugins/eddb.py',
     'plugins/eddn.py',
     'plugins/edsm.py',
     'plugins/edsy.py',

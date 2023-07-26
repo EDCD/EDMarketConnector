@@ -23,10 +23,6 @@ KNOWN_KILLSWITCH_NAMES: list[str] = [
     'plugins.eddn.send',
     'plugins.eddn.journal',
     'plugins.eddn.journal.event.$event',
-
-    # eddb
-    'plugins.eddb.journal',
-    'plugins.eddb.journal.event.$event'
 ]
 
 SPLIT_KNOWN_NAMES = [x.split('.') for x in KNOWN_KILLSWITCH_NAMES]

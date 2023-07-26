@@ -205,9 +205,6 @@
 /* coriolis.py: Settings>Coriolis - invalid override mode found; In files: coriolis.py:156; */
 "Invalid Coriolis override mode!" = "Neplatný režim přepisu Coriolis!";
 
-/* eddb.py: Journal Processing disabled due to an active killswitch; In files: eddb.py:179; */
-"EDDB Journal processing disabled. See Log." = "Zpracování EDDB deníku je deaktivováno. Zkontrolujte log.";
-
 /* eddn.py: Error while trying to send data to EDDN; In files: eddn.py:458; eddn.py:2413; eddn.py:2451; eddn.py:2519; */
 "Error: Can't connect to EDDN" = "Chyba: Nelze se připojit k EDDN";
 

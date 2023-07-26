@@ -544,9 +544,6 @@
 							<File KeyPath="yes" Source="SourceDir\plugins\coriolis.py" />
 						</Component>
 						<Component Guid="*">
-							<File KeyPath="yes" Source="SourceDir\plugins\eddb.py" />
-						</Component>
-						<Component Guid="*">
 							<File KeyPath="yes" Source="SourceDir\plugins\eddn.py" />
 						</Component>
 						<Component Guid="*">
@@ -709,7 +706,6 @@
 			<ComponentRef Id="winTheme.tcl" />
 			<ComponentRef Id="xpTheme.tcl" />
 			<ComponentRef Id="coriolis.py" />
-			<ComponentRef Id="eddb.py" />
 			<ComponentRef Id="eddn.py" />
 			<ComponentRef Id="edsm.py" />
 			<ComponentRef Id="edsy.py" />

@@ -67,7 +67,7 @@ if __name__ == '__main__':  # noqa: C901
         description="Utilises Elite Dangerous Journal files and the Frontier "
                     "Companion API (CAPI) service to gather data about a "
                     "player's state and actions to upload to third-party sites "
-                    "such as EDSM, Inara.cz and EDDB."
+                    "such as EDSM and Inara.cz."
     )
 
     ###########################################################################
@@ -534,7 +534,7 @@ class AppWindow(object):
         self.station_label = tk.Label(frame, name='station_label')
         self.station = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.station_url, name='station')
         # system and station text is set/updated by the 'provider' plugins
-        # eddb, edsm and inara.  Look for:
+        # edsm and inara.  Look for:
         #
         # parent.nametowidget(f".{appname.lower()}.system")
         # parent.nametowidget(f".{appname.lower()}.station")
@@ -1737,7 +1737,7 @@ class AppWindow(object):
     def station_url(self, station: str) -> str | None:
         """Despatch a station URL to the configured handler."""
         return plug.invoke(
-            config.get_str('station_provider'), 'eddb', 'station_url',
+            config.get_str('station_provider'), 'EDSM', 'station_url',
             monitor.state['SystemName'], monitor.state['StationName']
         )
 
