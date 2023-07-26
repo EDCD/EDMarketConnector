@@ -106,9 +106,9 @@ jobs:
 
       - name: Download winsparkle
         run: |
-          Invoke-Webrequest -UseBasicParsing https://github.com/vslavik/winsparkle/releases/download/v0.7.0/WinSparkle-0.7.0.zip -OutFile out.zip
+          Invoke-Webrequest -UseBasicParsing https://github.com/vslavik/winsparkle/releases/download/v0.8.0/WinSparkle-0.8.0.zip -OutFile out.zip
           Expand-Archive out.zip
-          Move-Item 'out\WinSparkle-0.7.0\Release\*' '.\'
+          Move-Item 'out\WinSparkle-0.8.0\Release\*' '.\'
 
       - name: Build EDMC
         run: |

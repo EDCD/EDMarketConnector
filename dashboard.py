@@ -7,7 +7,9 @@ import time
 import tkinter as tk
 from calendar import timegm
 from os.path import getsize, isdir, isfile
-from typing import Any, Dict
+from typing import Any, Dict, Optional, cast
+
+from watchdog.observers.api import BaseObserver
 
 from config import config
 from EDMCLogging import get_main_logger
@@ -34,9 +36,10 @@ class Dashboard(FileSystemEventHandler):
 
     def __init__(self) -> None:
         FileSystemEventHandler.__init__(self)  # futureproofing - not need for current version of watchdog
+        self.session_start: int = int(time.time())
         self.root: tk.Tk = None  # type: ignore
         self.currentdir: str = None                 # type: ignore # The actual logdir that we're monitoring
-        self.observer: Observer = None  # type: ignore
+        self.observer: Optional[Observer] = None  # type: ignore
         self.observed = None                   # a watchdog ObservedWatch, or None if polling
         self.status: Dict[str, Any] = {}       # Current status for communicating status back to main thread
 
@@ -86,7 +89,7 @@ class Dashboard(FileSystemEventHandler):
 
         if not self.observed and not (sys.platform != 'win32'):
             logger.debug('Starting observer...')
-            self.observed = self.observer.schedule(self, self.currentdir)
+            self.observed = cast(BaseObserver, self.observer).schedule(self, self.currentdir)
             logger.debug('Done')
 
         logger.info(f'{(sys.platform != "win32") and "Polling" or "Monitoring"} Dashboard "{self.currentdir}"')
