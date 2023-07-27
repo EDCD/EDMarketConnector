@@ -43,7 +43,7 @@ jobs:
               --exclude=.git* \
               --exclude=.mypy.ini \
               --exclude=.pre-commit-config.yaml \
-              --exclude=Build-exe-and-msi.py \
+              --exclude=build.py \
               --exclude=*.manifest \
               --exclude=coriolis-data \
               --exclude=img \
@@ -92,7 +92,7 @@ jobs:
           #   directory.
           # NB: If this gets too long it can cause zip 'Command Line Error',
           #   presumably due to a Windows CL length limit.
-          exclusions: 'EDMarketConnector/EDMarketConnector-release-*.* EDMarketConnector/.editorconfig EDMarketConnector/.flake8 EDMarketConnector/.git* EDMarketConnector/.mypy.ini EDMarketConnector/.pre-commit-config.yaml EDMarketConnector/Build-exe-and-msi.py EDMarketConnector/*.manifest EDMarketConnector/coriolis-data/ EDMarketConnector/img/ EDMarketConnector/pyproject.toml EDMarketConnector/scripts/ EDMarketConnector/tests/ EDMarketConnector/wix/'
+          exclusions: 'EDMarketConnector/EDMarketConnector-release-*.* EDMarketConnector/.editorconfig EDMarketConnector/.flake8 EDMarketConnector/.git* EDMarketConnector/.mypy.ini EDMarketConnector/.pre-commit-config.yaml EDMarketConnector/build.py EDMarketConnector/*.manifest EDMarketConnector/coriolis-data/ EDMarketConnector/img/ EDMarketConnector/pyproject.toml EDMarketConnector/scripts/ EDMarketConnector/tests/ EDMarketConnector/wix/'
 
       - uses: actions/setup-python@v4
         with:
@@ -112,7 +112,7 @@ jobs:
 
       - name: Build EDMC
         run: |
-          python Build-exe-and-msi.py
+          python build.py
 
       - name: Upload build files
         uses: actions/upload-artifact@v3

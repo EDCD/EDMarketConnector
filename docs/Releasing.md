@@ -61,7 +61,7 @@ You will need several pieces of software installed, or the files from their
 
 If you are using different versions of any of these tools then please ensure
 that the paths where they're installed match the associated lines in
-`Build-exe-and-msi.py`.  i.e. if you're using later WiX you might need to edit
+`build.py`.  i.e. if you're using later WiX you might need to edit
 the WIXPATH line, and likewise the SDKPATH line if you're using a later
 Windows SDK kit.
 
@@ -100,13 +100,13 @@ resulting .exe and/or .msi files. **But** realise that the resulting program
 will still try to check for new versions at the main URL unless you change
 that.
 
-1. Company is set in  `Build-exe-and-msi.py`. Search for `company_name`.  This
+1. Company is set in  `build.py`. Search for `company_name`.  This
  is what appears in the EXE properties, and is also used as the location of
  WinSparkle registry entries on Windows.
 
 1. Application names, version and URL of the file with latest release
  information. These are all in the `config/__init__.py` file.  See the
- `from config import ...` lines in `Build-exe-and-msi.py`:
+ `from config import ...` lines in `build.py`:
     1. `appname`: The short appname, e.g. 'EDMarketConnector'
     2. `applongname`: The long appname, e.g. 'E:D Market Connector'
     3. `appcmdname`: The CLI appname, e.g. 'EDMC'
@@ -144,9 +144,9 @@ that.
 If you add a new file to the program that needs to be distributed to users as
 well then you will need to properly add it to the build process.
 
-### Build-exe-and-msi.py
+### build.py
 
-You'll need to add it in `Build-exe-and-msi.py` so that py2exe includes it in
+You'll need to add it in `build.py` so that py2exe includes it in
 the build.  Add the file to the DATA_FILES statement.
 
 ### WiX
@@ -260,19 +260,19 @@ a 'Git bash' window.  The 'Terminal' tab of PyCharm works fine.
 Assuming the correct python.exe is associated with .py files then simply run:
 
 ```batch
-Build-exe-and-msi.py
+build.py
 ```
 
 else you might need this, which assumes correct python.exe is in your PATH:
 
 ```batch
-python.exe Build-exe-and-msi.py
+python.exe build.py
 ```
 
 else you'll have to specify the path to python.exe, e.g.:
 
 ```batch
-"C:\Program Files \(x86)\Python38-32\python.exe" Build-exe-and-msi.py
+"C:\Program Files \(x86)\Python38-32\python.exe" build.py
 ```
 
 Output will be something like (`...` denoting parts elided for brevity):
@@ -308,7 +308,7 @@ Done
 
 **Do check the output** for things like not properly specifying extra files
 to be included in the install.  If they're not picked up by current rules in
-`Build-exe-and-msi.py` then you will need to add them to the `win32`
+`build.py` then you will need to add them to the `win32`
 `DATA_FILES` array.
 
 You should now have one new/updated folder `dist.win32` and two new files
@@ -456,6 +456,6 @@ When changing the Python version (Major.Minor.Patch) used:
 
 1. Major or Minor level changes:
 
-    1. `Build-exe-and-msi.py` will need its version check updating.
+    1. `build.py` will need its version check updating.
     2. `.pre-commit-config.yaml` will need the `default_language_version`
        section updated to the appropriate version.

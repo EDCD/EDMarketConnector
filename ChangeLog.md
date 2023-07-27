@@ -611,7 +611,7 @@ Developers
 * We now build using the new, `setuptools` mediated py2exe `freeze()` method,
   so we're in the clear for when `distutils` is removed in Python 3.12.
 * The old `setup.py` file, along with associated `py2exe.cmd` have been removed
-   in favour of the new `Build-exe-and-msi.py` file.  Documentation updated.
+   in favour of the new `build.py` file.  Documentation updated.
 
 ---
 
