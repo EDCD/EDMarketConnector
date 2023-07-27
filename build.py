@@ -23,9 +23,10 @@ from config import (
     copyright,
     git_shorthash_from_head,
 )
+from typing import List, Tuple
 
 
-def system_check(dist_dir):
+def system_check(dist_dir: str) -> str:
     """Check if the system is able to build."""
     if sys.version_info < (3, 11):
         sys.exit(f"Unexpected Python version {sys.version}")
@@ -48,7 +49,9 @@ def system_check(dist_dir):
     return gitversion_file
 
 
-def generate_data_files(app_name, gitversion_file):
+def generate_data_files(
+    app_name: str, gitversion_file: str
+) -> List[Tuple[str, List[str]]]:
     """Create the required datafiles to build."""
     l10n_dir = "L10n"
     fdevids_dir = "FDevIDs"
@@ -88,7 +91,7 @@ def generate_data_files(app_name, gitversion_file):
     return data_files
 
 
-def windows_installer_display_lang(app_name, filename):
+def windows_installer_display_lang(app_name: str, filename: str) -> None:
     """Configure the Windows Installer Display Language."""
     lcids = [
         int(x)
@@ -111,7 +114,7 @@ def windows_installer_display_lang(app_name, filename):
         )
         os.system(
             rf'"{SDKPATH}\MsiTran.Exe" -g {gettempdir()}\{app_name}_1033.msi'
-            rf' {gettempdir()}\{app_name}_{lcid}.msi {gettempdir()}\{lcid}.mst'
+            rf" {gettempdir()}\{app_name}_{lcid}.msi {gettempdir()}\{lcid}.mst"
         )
         os.system(
             rf'cscript /nologo "{SDKPATH}\WiSubStg.vbs" {filename} {gettempdir()}\{lcid}.mst {lcid}'
@@ -119,19 +122,20 @@ def windows_installer_display_lang(app_name, filename):
 
 
 if __name__ == "__main__":
-    DIST_DIR = "dist.win32"
-    GITVERSION_FILENAME = system_check(DIST_DIR)
+    DIST_DIR: str = "dist.win32"
+    GITVERSION_FILENAME: str = system_check(DIST_DIR)
+
     # Constants
-    WIXPATH = rf"{os.environ['WIX']}\bin"
-    SDKPATH = r"C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x86"
-    PLUGINS = [
+    WIXPATH: str = rf"{os.environ['WIX']}\bin"
+    SDKPATH: str = r"C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x86"
+    PLUGINS: List[str] = [
         "plugins/coriolis.py",
         "plugins/eddn.py",
         "plugins/edsm.py",
         "plugins/edsy.py",
         "plugins/inara.py",
     ]
-    OPTIONS = {
+    OPTIONS: dict = {
         "py2exe": {
             "dist_dir": DIST_DIR,
             "optimize": 2,
@@ -158,9 +162,11 @@ if __name__ == "__main__":
     }
 
     # Function to generate DATA_FILES list
-    DATA_FILES = generate_data_files(appname, GITVERSION_FILENAME)
+    DATA_FILES: List[Tuple[str, List[str]]] = generate_data_files(
+        appname, GITVERSION_FILENAME
+    )
 
-    version_info = {
+    version_info: dict = {
         "description": "Downloads commodity market and other station data from the game"
         " Elite Dangerous for use with all popular online and offline trading tools.",
         "company_name": "EDCD",  # Used by WinSparkle
@@ -171,7 +177,7 @@ if __name__ == "__main__":
         "language": "English (United States)",
     }
 
-    windows_config = {
+    windows_config: dict = {
         "dest_base": appname,
         "script": "EDMarketConnector.py",
         "icon_resources": [(0, f"{appname}.ico")],
@@ -180,7 +186,7 @@ if __name__ == "__main__":
         ],
     }
 
-    console_config = {
+    console_config: dict = {
         "dest_base": appcmdname,
         "script": "EDMC.py",
         "other_resources": [
@@ -299,8 +305,10 @@ if __name__ == "__main__":
         raise AssertionError(f"No {appname}.wixobj: candle.exe failed?")
 
     package_filename = f"{appname}_win_{appversion_nobuild()}.msi"
-    light_command = rf'"{WIXPATH}\light.exe" -b {DIST_DIR}\ -sacl -spdb ' \
-                    rf'-sw1076 {appname}.wixobj -out {package_filename}'
+    light_command = (
+        rf'"{WIXPATH}\light.exe" -b {DIST_DIR}\ -sacl -spdb '
+        rf"-sw1076 {appname}.wixobj -out {package_filename}"
+    )
     subprocess.run(light_command, shell=True, check=True)
 
     if not exists(package_filename):
