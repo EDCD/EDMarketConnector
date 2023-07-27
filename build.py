@@ -91,8 +91,6 @@ if __name__ == "__main__":
     GITVERSION_FILENAME: str = system_check(DIST_DIR)
 
     # Constants
-    WIXPATH: str = rf"{os.environ['WIX']}\bin"
-    SDKPATH: str = r"C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x86"
     PLUGINS: List[str] = [
         "plugins/coriolis.py",
         "plugins/eddn.py",
