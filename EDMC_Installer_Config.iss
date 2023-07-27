@@ -33,6 +33,7 @@ WizardStyle=modern
 InfoBeforeFile=dist.win32\Changelog.md
 OutputDir=.
 LicenseFile=LICENSE
+LanguageDetectionMethod=uilanguage
 
 
 [Languages]

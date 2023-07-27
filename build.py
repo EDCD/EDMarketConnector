@@ -9,8 +9,9 @@ import os
 import shutil
 import sys
 import pathlib
-import py2exe
+from typing import List, Tuple
 from os.path import join, isdir
+import py2exe
 from config import (
     appcmdname,
     appname,
@@ -18,7 +19,6 @@ from config import (
     copyright,
     git_shorthash_from_head,
 )
-from typing import List, Tuple
 
 
 def system_check(dist_dir: str) -> str:
@@ -45,7 +45,7 @@ def system_check(dist_dir: str) -> str:
 
 
 def generate_data_files(
-    app_name: str, gitversion_file: str
+    app_name: str, gitversion_file: str, plugins: List[str]
 ) -> List[Tuple[str, List[str]]]:
     """Create the required datafiles to build."""
     l10n_dir = "L10n"
@@ -81,26 +81,27 @@ def generate_data_files(
                 join(fdevids_dir, "rare_commodity.csv"),
             ],
         ),
-        ("plugins", PLUGINS),
+        ("plugins", plugins),
     ]
     return data_files
 
 
-if __name__ == "__main__":
-    DIST_DIR: str = "dist.win32"
-    GITVERSION_FILENAME: str = system_check(DIST_DIR)
+def build() -> None:
+    """Build EDMarketConnector using Py2Exe."""
+    dist_dir: str = "dist.win32"
+    gitversion_filename: str = system_check(dist_dir)
 
     # Constants
-    PLUGINS: List[str] = [
+    plugins: List[str] = [
         "plugins/coriolis.py",
         "plugins/eddn.py",
         "plugins/edsm.py",
         "plugins/edsy.py",
         "plugins/inara.py",
     ]
-    OPTIONS: dict = {
+    options: dict = {
         "py2exe": {
-            "dist_dir": DIST_DIR,
+            "dist_dir": dist_dir,
             "optimize": 2,
             "packages": [
                 "asyncio",
@@ -125,8 +126,8 @@ if __name__ == "__main__":
     }
 
     # Function to generate DATA_FILES list
-    DATA_FILES: List[Tuple[str, List[str]]] = generate_data_files(
-        appname, GITVERSION_FILENAME
+    data_files: List[Tuple[str, List[str]]] = generate_data_files(
+        appname, gitversion_filename, plugins
     )
 
     version_info: dict = {
@@ -161,6 +162,10 @@ if __name__ == "__main__":
         version_info=version_info,
         windows=[windows_config],
         console=[console_config],
-        data_files=DATA_FILES,
-        options=OPTIONS,
+        data_files=data_files,
+        options=options,
     )
+
+
+if __name__ == "__main__":
+    build()
