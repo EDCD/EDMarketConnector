@@ -50,7 +50,6 @@ jobs:
               --exclude=pyproject.toml \
               --exclude=scripts \
               --exclude=tests \
-              --exclude=wix \
               EDMarketConnector
             mv ../EDMarketConnector-release-${{ needs.variables.outputs.sem_ver }}.tar.gz .
 
@@ -92,7 +91,7 @@ jobs:
           #   directory.
           # NB: If this gets too long it can cause zip 'Command Line Error',
           #   presumably due to a Windows CL length limit.
-          exclusions: 'EDMarketConnector/EDMarketConnector-release-*.* EDMarketConnector/.editorconfig EDMarketConnector/.flake8 EDMarketConnector/.git* EDMarketConnector/.mypy.ini EDMarketConnector/.pre-commit-config.yaml EDMarketConnector/build.py EDMarketConnector/*.manifest EDMarketConnector/coriolis-data/ EDMarketConnector/img/ EDMarketConnector/pyproject.toml EDMarketConnector/scripts/ EDMarketConnector/tests/ EDMarketConnector/wix/'
+          exclusions: 'EDMarketConnector/EDMarketConnector-release-*.* EDMarketConnector/.editorconfig EDMarketConnector/.flake8 EDMarketConnector/.git* EDMarketConnector/.mypy.ini EDMarketConnector/.pre-commit-config.yaml EDMarketConnector/build.py EDMarketConnector/*.manifest EDMarketConnector/coriolis-data/ EDMarketConnector/img/ EDMarketConnector/pyproject.toml EDMarketConnector/scripts/ EDMarketConnector/tests/'
 
       - uses: actions/setup-python@v4
         with:
@@ -114,12 +113,17 @@ jobs:
         run: |
           python build.py
 
+      - name: InnoSetup
+        uses: nadeemjazmawe/inno-setup-action-cli@v6.0.5
+        with:
+            filepath: './EDMC_Installer_Config.iss'
+
       - name: Upload build files
         uses: actions/upload-artifact@v3
         with:
           name: Built files
           path: |
-              EDMarketConnector_win_*.msi
+              EDMarketConnector_Installer_*.exe
               EDMarketConnector-release-*.zip
 
   release:
@@ -136,7 +140,7 @@ jobs:
           path: ./
           
       - name: Hash files
-        run: sha256sum EDMarketConnector_win_*.msi EDMarketConnector-release-*.{zip,tar.gz} > ./hashes.sum
+        run: sha256sum EDMarketConnector_Installer_*.exe EDMarketConnector-release-*.{zip,tar.gz} > ./hashes.sum
 
       - name: Create Draft Release
         uses: "softprops/action-gh-release@v1"
@@ -146,7 +150,7 @@ jobs:
           prerelease: true
           discussion_category_name: "Announcement"
           files: |
-            ./EDMarketConnector_win_*.msi
+            ./EDMarketConnector_Installer_*.exe
             ./EDMarketConnector-release-*.zip
             ./EDMarketConnector-release-*.tar.gz
             ./hashes.sum

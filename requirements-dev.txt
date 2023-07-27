@@ -34,11 +34,7 @@ pre-commit==3.3.3
 grip==4.6.1
 
 # Packaging
-# Used to put together a WiX configuration from template/auto-gen
-lxml==4.9.3
 # We only need py2exe on windows.
-# Pre-release version addressing semantic_version 2.9.0+ issues:
-# <https://github.com/py2exe/py2exe/issues/126>
 py2exe==0.13.0.0; sys_platform == 'win32'
 
 # Testing

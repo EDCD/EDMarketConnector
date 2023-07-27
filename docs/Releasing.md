@@ -26,8 +26,6 @@ This is principally due to the Windows Registry handling in
 You will need several pieces of software installed, or the files from their
 .zip archives, in order to build the .exe and generate the .msi
 
-1. [WiX Toolset](https://wixtoolset.org/): 3.11.2 is the most recently tested
- version.
 1. [WinSparkle](https://github.com/vslavik/winsparkle): `winsparkle.dll` and
  `winsparkle.pdb` from the release's .zip file.  v0.7.0 is the most recently
  tested version.  Copy the two files, found at `<zip file>\<version>\Release`,
@@ -61,9 +59,8 @@ You will need several pieces of software installed, or the files from their
 
 If you are using different versions of any of these tools then please ensure
 that the paths where they're installed match the associated lines in
-`build.py`.  i.e. if you're using later WiX you might need to edit
-the WIXPATH line, and likewise the SDKPATH line if you're using a later
-Windows SDK kit.
+`build.py`.  i.e. if you're using later Windows SDK kit you might need to edit
+the SDKPATH line.
 
 # Version Strings
 
@@ -148,43 +145,6 @@ well then you will need to properly add it to the build process.
 
 You'll need to add it in `build.py` so that py2exe includes it in
 the build.  Add the file to the DATA_FILES statement.
-
-### WiX
-
-You will *also* need to add the file to the `EDMarketConnector.wxs` file so 
-that it's actually included in the installer.
-
-1. Location the the appropriate part of the:
-
-    ```xml
-    <Directory Id="ProgramFilesFolder">
-   ```
-   section and add a new sub-section:
-
-   ```xml
-   <Component Id="<valid_component_id>" Guid=""*">
-        <File KeyPath="yes" Source="SourceDir\\<file name>" />
-   </Component>
-   ```
-
-   Note that you only need `Id="<valid_component_id>"` if the filename itself
-   is not a valid Id, e.g. because it contains spaces.
-
-   If the new file is in a new sub-directory then you'll need to add that as
-   well.  See the `L10n` example.
-
-2. Now find the:
-
-    ```xml
-   <Feature Id='Complete' Level='1'> 
-   ```
-
-   section and add an appropriate line to it.  Remember to use either the
-   specific Id you set above or the filename (without directory) for this:
-
-   ```xml
-   <ComponentRef Id="<valid_component_id>" />
-   ```
 
 # Pre-Packaging Steps
 
@@ -284,26 +244,6 @@ INFO:runtime:Found 695 modules, 60 are missing, 0 may be missing
 ...
 Building 'dist.win32\EDMC.exe'.
 Building 'dist.win32\EDMarketConnector.exe'.
-...
-Windows Installer XML Toolset Toolset Harvester version 3.11.2.4516
-Copyright (c) .NET Foundation and contributors. All rights reserved.
-
-Windows Installer XML Toolset Compiler version 3.11.2.4516
-Copyright (c) .NET Foundation and contributors. All rights reserved.
-
-EDMarketConnector.wxs
-Windows Installer XML Toolset Linker version 3.11.2.4516
-Copyright (c) .NET Foundation and contributors. All rights reserved.
-...
-Package language = 1033,1029,1031,1034,1035,1036,1038,1040,1041,1043,1045,1046,1049,1058,1062,2052,2070,2074,6170,1060,1053,18,0, ProductLanguage = 1029, Database codepage = 0
-MsiTran V 5.0
-Copyright (c) Microsoft Corporation. All Rights Reserved
-...
-DonePackage language = 1033,1029,1031,1034,1035,1036,1038,1040,1041,1043,1045,1046,1049,1058,1062,2052,2070,2074,6170,1060,1053,18,0, ProductLanguage = 0, Database codepage = 0
-MsiTran V 5.0
-Copyright (c) Microsoft Corporation. All Rights Reserved
-
-Done
 ```
 
 **Do check the output** for things like not properly specifying extra files
@@ -319,19 +259,16 @@ Check that the `EDMarketConnector.exe` in the `dist.win32` folder does run
 without errors.
 
 Finally, uninstall your current version of ED Market Connector and re-install
-using the newly generated `EDMarketConnector_win_4.0.2.msi` file.  Check the
+using the newly generated `EDMarketConnector_installer_4.0.2.exe` file.  Check the
 resulting installation does work (the installer will run the program for you).
-If it doesn't then check if there are any files, particularly `.dll` or `.pyd`
-files in `dist.win32` that aren't yet specified in the `EDMarketConnector.wxs`
-file, i.e. they're not packaged into the installer.
 
 Update `edmarketconnector.xml` once more to set the `length=` attribute of the
-enclosure to match the file size of the `EDMarketConnector_win_4.0.2.msi` file.
+enclosure to match the file size of the `EDMarketConnector_win_4.0.2.exe` file.
 The git commit for this should end up being the release tag as below.
 
 # Distribution
 
-Whether you built it manually or automatically you **MUST** test the `.msi` 
+Whether you built it manually or automatically you **MUST** test the `.exe` 
 installer file prior to making the release live.
 
 Once that is done then for manually built installers:
