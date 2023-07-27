@@ -1,5 +1,6 @@
 """
-build.py - Build the Installer
+build.py - Build the Installer.
+
 Copyright (c) EDCD, All Rights Reserved
 Licensed under the GNU General Public License.
 See LICENSE file.
@@ -10,10 +11,10 @@ import shutil
 import subprocess
 import sys
 import pathlib
+import py2exe
 from os.path import exists, join, isdir
 from tempfile import gettempdir
 from lxml import etree
-import py2exe
 from config import (
     appcmdname,
     appname,
@@ -25,6 +26,7 @@ from config import (
 
 
 def system_check(dist_dir):
+    """Check if the system is able to build."""
     if sys.version_info < (3, 11):
         sys.exit(f"Unexpected Python version {sys.version}")
 
@@ -47,6 +49,7 @@ def system_check(dist_dir):
 
 
 def generate_data_files(app_name, gitversion_file):
+    """Create the required datafiles to build."""
     l10n_dir = "L10n"
     fdevids_dir = "FDevIDs"
     data_files = [
@@ -86,6 +89,7 @@ def generate_data_files(app_name, gitversion_file):
 
 
 def windows_installer_display_lang(app_name, filename):
+    """Configure the Windows Installer Display Language."""
     lcids = [
         int(x)
         for x in re.search(  # type: ignore
@@ -106,8 +110,9 @@ def windows_installer_display_lang(app_name, filename):
             rf'cscript /nologo "{SDKPATH}\WiLangId.vbs" {gettempdir()}\{app_name}_{lcid}.msi Product {lcid}'
         )
         os.system(
-            rf'"{SDKPATH}\MsiTran.Exe" -g {gettempdir()}\{app_name}_1033.msi {gettempdir()}\{app_name}_{lcid}.msi {gettempdir()}\{lcid}.mst'
-        )  # noqa: E501 # Not going to get shorter
+            rf'"{SDKPATH}\MsiTran.Exe" -g {gettempdir()}\{app_name}_1033.msi'
+            rf' {gettempdir()}\{app_name}_{lcid}.msi {gettempdir()}\{lcid}.mst'
+        )
         os.system(
             rf'cscript /nologo "{SDKPATH}\WiSubStg.vbs" {filename} {gettempdir()}\{lcid}.mst {lcid}'
         )
@@ -294,7 +299,8 @@ if __name__ == "__main__":
         raise AssertionError(f"No {appname}.wixobj: candle.exe failed?")
 
     package_filename = f"{appname}_win_{appversion_nobuild()}.msi"
-    light_command = rf'"{WIXPATH}\light.exe" -b {DIST_DIR}\ -sacl -spdb -sw1076 {appname}.wixobj -out {package_filename}'
+    light_command = rf'"{WIXPATH}\light.exe" -b {DIST_DIR}\ -sacl -spdb ' \
+                    rf'-sw1076 {appname}.wixobj -out {package_filename}'
     subprocess.run(light_command, shell=True, check=True)
 
     if not exists(package_filename):
