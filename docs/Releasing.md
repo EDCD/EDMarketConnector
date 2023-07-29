@@ -263,7 +263,7 @@ using the newly generated `EDMarketConnector_installer_4.0.2.exe` file.  Check t
 resulting installation does work (the installer will run the program for you).
 
 Update `edmarketconnector.xml` once more to set the `length=` attribute of the
-enclosure to match the file size of the `EDMarketConnector_win_4.0.2.exe` file.
+enclosure to match the file size of the `EDMarketConnector_installer_4.0.2.exe` file.
 The git commit for this should end up being the release tag as below.
 
 # Distribution
