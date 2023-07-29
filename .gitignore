@@ -9,6 +9,8 @@ dump
 *.pyo
 *.dll
 *.pdb
+*.msi
+*.wixobj
 EDMarketConnector_Installer_*.exe
 appcast_win_*.xml
 appcast_mac_*.xml
