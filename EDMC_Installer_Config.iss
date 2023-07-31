@@ -1,14 +1,12 @@
 #define MyAppName "EDMarketConnector"
-#define MyAppVersion "5.9.1-alpha1"
+#define MyAppVersion "5.9.1-alpha2"
 #define MyAppPublisher "EDCD"
 #define MyAppURL "https://edcd.github.io/"
 #define SuppURL "https://github.com/EDCD/EDMarketConnector/"
 #define MyAppExeName "EDMarketConnector.exe"
 
 [Setup]
-; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
-; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{5B5AB12D-23A6-47BB-B937-07F23FF0BF86}
+AppId={{5E9AD4D3-0365-41D5-9586-9368745DD109}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppVerName={#MyAppName} {#MyAppVersion}
@@ -23,8 +21,6 @@ DefaultDirName={autopf}\{#MyAppName}
 DisableProgramGroupPage=yes
 DirExistsWarning=yes
 AllowNoIcons=yes
-; Uncomment the following line to run in non administrative install mode (install for current user only.)
-;PrivilegesRequired=lowest
 OutputBaseFilename=EDMarketConnector_Installer_{#MyAppVersion}
 SetupIconFile=dist.win32\EDMarketConnector.ico
 Compression=lzma2/max
@@ -45,7 +41,6 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 [Files]
 Source: "dist.win32\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "dist.win32\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
@@ -53,3 +48,19 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: de
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
+
+;Check if a WiX-based installation exists. If so, kill it with fire.
+[Code]
+procedure CurStepChanged(CurStep: TSetupStep);
+var
+  ResultCode: Integer;
+  Uninstall: String;
+begin
+  if (CurStep = ssInstall) then begin
+    if RegQueryStringValue(HKLM, 'SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{5E9AD4D3-0365-41D5-9586-9368745DD109}', 'UninstallString', Uninstall) then begin
+      MsgBox('Warning: an old version of EDMC is installed! Now the old one will be removed and installed the new!', mbInformation, MB_OK);
+      Uninstall := '/x {5E9AD4D3-0365-41D5-9586-9368745DD109}';
+      Exec('MsiExec.exe', Uninstall, '', SW_SHOW, ewWaitUntilTerminated, ResultCode);
+    end;
+  end;
+end;
