@@ -1,5 +1,5 @@
 #define MyAppName "EDMarketConnector"
-#define MyAppVersion "5.9.1-alpha2"
+#define MyAppVersion "$appver"
 #define MyAppPublisher "EDCD"
 #define MyAppURL "https://edcd.github.io/"
 #define SuppURL "https://github.com/EDCD/EDMarketConnector/"
@@ -29,7 +29,8 @@ WizardStyle=modern
 InfoBeforeFile=dist.win32\Changelog.md
 OutputDir=.
 LicenseFile=LICENSE
-LanguageDetectionMethod=uilanguage
+AlwaysShowDirOnReadyPage=yes
+UninstallDisplayIcon={app}\{#MyAppExeName}
 
 
 [Languages]

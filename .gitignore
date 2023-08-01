@@ -16,6 +16,7 @@ appcast_win_*.xml
 appcast_mac_*.xml
 EDMarketConnector.VisualElementsManifest.xml
 *.zip
+EDMC_Installer_Config.iss
 
 .idea
 .vscode
