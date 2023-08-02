@@ -10,6 +10,7 @@ import shutil
 import sys
 import pathlib
 from typing import List, Tuple
+from string import Template
 from os.path import join, isdir
 import py2exe
 from config import (
@@ -18,7 +19,18 @@ from config import (
     appversion,
     copyright,
     git_shorthash_from_head,
+    _static_appversion,
 )
+
+
+def iss_build(template_path: str, output_file: str) -> None:
+    """Build the .iss file needed for building the installer EXE."""
+    sub_vals = {"appver": _static_appversion}
+    with open(template_path, encoding="UTF8") as template_file:
+        src = Template(template_file.read())
+        newfile = src.substitute(sub_vals)
+    with open(output_file, "w", encoding="UTF8") as new_file:
+        new_file.write(newfile)
 
 
 def system_check(dist_dir: str) -> str:
@@ -165,6 +177,11 @@ def build() -> None:
         data_files=data_files,
         options=options,
     )
+
+    iss_template_path: str = "./resources/EDMC_Installer_Config_template.txt"
+    iss_file_path: str = "./EDMC_Installer_Config.iss"
+    # Build the ISS file
+    iss_build(iss_template_path, iss_file_path)
 
 
 if __name__ == "__main__":
