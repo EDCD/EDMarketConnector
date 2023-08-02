@@ -52,7 +52,7 @@ def run_inno_setup_installer(iss_path: str) -> None:
 if __name__ == "__main__":
     build()
     # Add the ISS Template File
-    iss_template_path: str = "./EDMC_Installer_Config_template.txt"
+    iss_template_path: str = "./resources/EDMC_Installer_Config_template.txt"
     iss_file_path: str = "./EDMC_Installer_Config.iss"
     # Build the ISS file
     iss_build(iss_template_path, iss_file_path)
