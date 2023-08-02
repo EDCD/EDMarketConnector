@@ -59,7 +59,7 @@ var
 begin
   if (CurStep = ssInstall) then begin
     if RegQueryStringValue(HKLM, 'SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{5E9AD4D3-0365-41D5-9586-9368745DD109}', 'UninstallString', Uninstall) then begin
-      MsgBox('Warning: an old version of EDMC is installed! Now the old one will be removed and installed the new!', mbInformation, MB_OK);
+      MsgBox('Warning: an old version of EDMC is installed! Please close EDMC while we remove the old version!', mbInformation, MB_OK);
       Uninstall := '/x {5E9AD4D3-0365-41D5-9586-9368745DD109}';
       Exec('MsiExec.exe', Uninstall, '', SW_SHOW, ewWaitUntilTerminated, ResultCode);
     end;
