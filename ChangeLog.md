@@ -33,6 +33,21 @@ produce the Windows executables and installer.
   currently used version in a given branch.
 
 ---
+Release 5.9.1
+===
+This release updates the build system in use for EDMC to a more feature-rich installer, as well 
+as updating the commodity information to be up-to-date for Update 16.
+
+NOTE: This version hands over the installer to an EXE file for Windows instead of an MSI.
+This does not change any functionality or plugin capability of EDMC. You **_may_** need to 
+manually close EDMC during the update process if updating from version 5.9.0 or earlier.
+
+* Removed the old WiX Build System
+* Handed over the Build system to Inno Setup
+* Broke apart the Build and Installer scripts for ease of development
+* Updated FDevIDs to latest version
+* Updated coriolis-data to latest version
+* Updated some internal documentation.
 
 Release 5.9.0
 ===
