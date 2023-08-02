@@ -36,13 +36,28 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 5.9.0</title>
+			<title>Release 5.9.1</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
 
 <p>We now test against, and package with, Python 3.11.1.</p>
 <p><strong>As a consequence of this we no longer support Windows 7.</strong><br>
+
+<h2>Release 5.9.1</h2>
+<p>This release updates the build system in use for EDMC to a more feature-rich installer, as well
+as updating the commodity information to be up-to-date for Update 16.</p>
+<p>NOTE: This version hands over the installer to an EXE file for Windows instead of an MSI.
+This does not change any functionality or plugin capability of EDMC. You may need to
+manually close EDMC during the update process if updating from version 5.9.0 or earlier.</p>
+<ul>
+<li>Removed the old WiX Build System</li>
+<li>Handed over the Build system to Inno Setup</li>
+<li>Broke apart the Build and Installer scripts for ease of development</li>
+<li>Updated FDevIDs to latest version</li>
+<li>Updated coriolis-data to latest version</li>
+<li>Updated some internal documentation</li>
+</ul><hr>
 
 <h2>Release 5.9.0</h2>
 <p>This release is essentially the same as 5.9.0-rc1 with only a typo, the version and
@@ -2028,12 +2043,11 @@ about this:
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release/5.9.0/EDMarketConnector_win_5.9.0.msi"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F5.9.1/EDMarketConnector_Installer_5.9.1.exe"
 				sparkle:os="windows"
-				sparkle:installerArguments="/passive LAUNCH=yes"
-				sparkle:version="5.9.0"
-				length="21475328"
-				type="application/octet-stream"
+				sparkle:version="5.9.1"
+				length="14510827"
+				type="application/x-ms-dos-executable"
 			/>
 		</item>
 
