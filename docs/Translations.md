@@ -101,35 +101,3 @@ To add a new language to the app:
     1. Be sure to go through and Finalize any phrases that shouldn't be translated.  See [Translations]() in the Wiki.
 
     Remember that until there are translations all strings will default to the English version (actually the key, which is always specified in English).
-
-1. You need to get the new `.strings` file added to the files the installer will install:
-    1. Edit `EDMarketConnector.wxs` to add an appropriate section to the:
-    
-            `<Directory Id="L10n" Name="L10n">`
-       section, e.g.:
-       
-                <Component Guid="*">
-		            <File KeyPath="yes" Source="SourceDir\L10n\sr-Latn-BA.strings" />
-                </Component>`
-    1. You also need to add a line in the:
-    
-            <Feature Id='Complete' Level='1'>
-    
-        section, e.g.:
-    
-                <ComponentRef Id="sr_Latn_BA.strings" />
-        Note how the `-` characters have been changed to `_`.  If needs be run the build process once and look out for
-        lines like:
-     
-                \EDMarketConnector\EDMarketConnector.wxs(264) : error LGHT0204 : ICE21: Component: 'sr_Latn_BA.strings' does not belong to any Feature.
-        to see what the applicable string is.
-
-1. You will also want to add it to the installer's languages.  This is simple enough, only requiring you add a number to an array in `EDMarketConnector.wxs`.
-
-    1. In `EDMarketConnector.wxs` find the line beginning `Languages="1033,`, e.g.
-
-    		Languages="1033,1029,1031,1034,1035,1036,1038,1040,1041,1043,1045,1046,1049,1058,1062,2052,2070,2074,6170,0" />
-    1. Now you'll need to consult the latest [[MS-LCID]: Windows Language Code Identifier (LCID) Reference](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-lcid/70feba9f-294e-491e-b6eb-56532684c37f) for the correct numerical code to add to the list.
-    1. Convert the hexadecimal Language ID to the equivalent in decimal.
-    1. Add the new decimal value as the last but one value in the list, keeping the `,0` at the end.
-    1. Update the comment on the next line to reflect what you added.

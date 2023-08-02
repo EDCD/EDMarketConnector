@@ -16,7 +16,7 @@
 # referenced in this file (or only in any other core plugin), and if so...
 #
 #     YOU MUST ENSURE THAT PERTINENT ADJUSTMENTS ARE MADE IN
-#     `Build-exe-and-msi.py` SO AS TO ENSURE THE FILES ARE ACTUALLY PRESENT IN
+#     `build.py` SO AS TO ENSURE THE FILES ARE ACTUALLY PRESENT IN
 #     AN END-USER INSTALLATION ON WINDOWS.
 #
 #

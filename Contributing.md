@@ -389,7 +389,7 @@ information about this build process.
 
 Thus, you **MUST** check if any imports you add in `plugins/*.py` files are only
 referenced in that file (or also only in any other core plugin), and if so
-**YOU MUST ENSURE THAT PERTINENT ADJUSTMENTS ARE MADE IN `Build-exe-and-msi.py`
+**YOU MUST ENSURE THAT PERTINENT ADJUSTMENTS ARE MADE IN `build.py`
 IN ORDER TO ENSURE THE FILES ARE ACTUALLY PRESENT IN AN END-USER
 INSTALLATION ON WINDOWS.**
 
@@ -409,7 +409,7 @@ the appropriate `packages` definition to:
 Note that in this case it's in `packages` because we want the whole directory
 adding.  For a single file an extra item in `includes` would suffice.
 
-Such additions to `Build-exe-and-msi.py` should not cause any issues if
+Such additions to `build.py` should not cause any issues if
 subsequent project changes cause `py2exe` to automatically pick up the same
 file(s).
 
