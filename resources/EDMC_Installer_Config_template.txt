@@ -31,6 +31,7 @@ OutputDir=.
 LicenseFile=LICENSE
 AlwaysShowDirOnReadyPage=yes
 UninstallDisplayIcon={app}\{#MyAppExeName}
+MinVersion=6.2
 
 
 [Languages]
@@ -65,3 +66,15 @@ begin
     end;
   end;
 end;
+
+
+[Registry]
+; Create the registry key for the custom file type
+Root: HKCR; Subkey: "edmc"; Flags: uninsdeletekey
+; Create the registry values for the custom file type
+Root: HKCR; Subkey: "edmc"; ValueType: string; ValueName: ""; ValueData: "{#MyAppName}"; Flags: uninsdeletevalue
+Root: HKCR; Subkey: "edmc\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\{#MyAppExeName},0"; Flags: uninsdeletevalue
+Root: HKCR; Subkey: "edmc\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""%1"""; Flags: uninsdeletevalue
+
+; Register the URL protocol handler
+Root: HKCR; Subkey: "edmc"; ValueType: string; ValueName: "URL Protocol"; ValueData: ""; Flags: uninsdeletevalue
