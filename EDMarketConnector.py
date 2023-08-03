@@ -427,7 +427,7 @@ import tkinter as tk
 import tkinter.filedialog
 import tkinter.font
 import tkinter.messagebox
-from tkinter import ttk
+from tkinter import ttk, constants as tkc
 
 import commodity
 import plug
@@ -1844,7 +1844,11 @@ class AppWindow(object):
             # version <link to changelog>
             tk.Label(frame).grid(row=row, column=0)  # spacer
             row += 1
-            self.appversion_label = tk.Label(frame, text=appversion())
+            self.appversion_label = tk.Text(frame, height=1, width=20, wrap=tkc.NONE, bd=0)
+            self.appversion_label.insert("1.0", str(appversion()))
+            self.appversion_label.tag_configure("center", justify="center")
+            self.appversion_label.tag_add("center", "1.0", "end")
+            self.appversion_label.config(state=tkc.DISABLED, bg=frame.cget("background"), font="TkDefaultFont")
             self.appversion_label.grid(row=row, column=0, sticky=tk.E)
             # LANG: Help > Release Notes
             self.appversion = HyperlinkLabel(frame, compound=tk.RIGHT, text=_('Release Notes'),
