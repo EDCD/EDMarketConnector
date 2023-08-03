@@ -143,7 +143,8 @@ def build() -> None:
     )
 
     version_info: dict = {
-        "description": "Downloads commodity market and other station data from the game"
+        "description": "Elite Dangerous Market Connector (EDMC)",
+        "comments": "Downloads commodity market and other station data from the game"
         " Elite Dangerous for use with all popular online and offline trading tools.",
         "company_name": "EDCD",  # Used by WinSparkle
         "product_name": appname,  # Used by WinSparkle
