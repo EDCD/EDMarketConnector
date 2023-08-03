@@ -1844,7 +1844,7 @@ class AppWindow(object):
             # version <link to changelog>
             tk.Label(frame).grid(row=row, column=0)  # spacer
             row += 1
-            self.appversion_label = tk.Text(frame, height=1, width=20, wrap=tkc.NONE, bd=0)
+            self.appversion_label = tk.Text(frame, height=1, width=len(str(appversion())), wrap=tkc.NONE, bd=0)
             self.appversion_label.insert("1.0", str(appversion()))
             self.appversion_label.tag_configure("center", justify="center")
             self.appversion_label.tag_add("center", "1.0", "end")
