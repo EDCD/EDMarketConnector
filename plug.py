@@ -58,11 +58,10 @@ class Plugin(object):
             try:
                 filename = 'plugin_'
                 filename += name.encode(encoding='ascii', errors='replace').decode('utf-8').replace('.', '_')
-                module = importlib.machinery.SourceFileLoader(
-                    filename,
-                    loadfile
-                ).load_module()
-
+                spec = importlib.util.spec_from_file_location(filename, loadfile)  # type: ignore
+                module = importlib.util.module_from_spec(spec)  # type: ignore
+                spec.loader.exec_module(module)  # type: ignore
+                # These type-ignores will need to be looked at. MyPy is wrong.
                 if getattr(module, 'plugin_start3', None):
                     newname = module.plugin_start3(os.path.dirname(loadfile))
                     self.name = newname and str(newname) or name

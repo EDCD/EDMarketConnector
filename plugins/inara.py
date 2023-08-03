@@ -152,6 +152,8 @@ class This:
 
 
 this = This()
+show_password_var = tk.BooleanVar()
+
 # last time we updated, if unset in config this is 0, which means an instant update
 LAST_UPDATE_CONF_KEY = 'inara_last_update'
 EVENT_COLLECT_TIME = 31  # Minimum time to take collecting events before requesting a send
@@ -242,6 +244,14 @@ def plugin_stop() -> None:
     logger.debug('Done.')
 
 
+def toggle_password_visibility():
+    """Toggle if the API Key is visible or not."""
+    if show_password_var.get():
+        this.apikey.config(show="")
+    else:
+        this.apikey.config(show="*")
+
+
 def plugin_prefs(parent: ttk.Notebook, cmdr: str, is_beta: bool) -> tk.Frame:
     """Plugin Preferences UI hook."""
     x_padding = 10
@@ -281,10 +291,19 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str, is_beta: bool) -> tk.Frame:
     # LANG: Inara API key label
     this.apikey_label = nb.Label(frame, text=_('API Key'))  # Inara setting
     this.apikey_label.grid(row=12, padx=x_padding, sticky=tk.W)
-    this.apikey = nb.Entry(frame)
+    this.apikey = nb.Entry(frame, show="*", width=50)
     this.apikey.grid(row=12, column=1, padx=x_padding, pady=y_padding, sticky=tk.EW)
 
     prefs_cmdr_changed(cmdr, is_beta)
+
+    show_password_var.set(False)  # Password is initially masked
+    show_password_checkbox = nb.Checkbutton(
+        frame,
+        text="Show API Key",
+        variable=show_password_var,
+        command=toggle_password_visibility,
+    )
+    show_password_checkbox.grid(columnspan=2, padx=x_padding, pady=(5, 0), sticky=tk.W)
 
     return frame
 

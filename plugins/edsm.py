@@ -125,6 +125,7 @@ class This:
 
 
 this = This()
+show_password_var = tk.BooleanVar()
 
 STATION_UNDOCKED: str = '×'  # "Station" name to display when not docked = U+00D7
 __cleanup = str.maketrans({' ': None, '\n': None})
@@ -275,6 +276,14 @@ def plugin_stop() -> None:
     logger.debug('Done.')
 
 
+def toggle_password_visibility():
+    """Toggle if the API Key is visible or not."""
+    if show_password_var.get():
+        this.apikey.config(show="")  # type: ignore
+    else:
+        this.apikey.config(show="*")  # type: ignore
+
+
 def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> tk.Frame:
     """
     Plugin preferences setup hook.
@@ -346,10 +355,19 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> tk.Fr
     # LANG: EDSM API key label
     this.apikey_label = nb.Label(frame, text=_('API Key'))  # EDSM setting
     this.apikey_label.grid(row=cur_row, padx=PADX, sticky=tk.W)
-    this.apikey = nb.Entry(frame)
+    this.apikey = nb.Entry(frame, show="*", width=50)
     this.apikey.grid(row=cur_row, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
 
     prefs_cmdr_changed(cmdr, is_beta)
+
+    show_password_var.set(False)  # Password is initially masked
+    show_password_checkbox = nb.Checkbutton(
+        frame,
+        text="Show API Key",
+        variable=show_password_var,
+        command=toggle_password_visibility,
+    )
+    show_password_checkbox.grid(columnspan=2, padx=BUTTONX, pady=(5, 0), sticky=tk.W)
 
     return frame
 
