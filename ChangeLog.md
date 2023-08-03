@@ -41,7 +41,7 @@ Windows registry to allow for protocol handling. All users are **strongly** enco
 - Fixes a critical bug with the installer on new installs not creating registry keys (#2046)
 - Re-enables automatic submodule updates (#1443)
 - Help -> About Version String can now be copied to clipboard (#1936)
-- EDSM Task Manager Printout now is less useless (#2045)
+- EDMC Task Manager Printout now is less useless (#2045)
 - Deprecated load_module() is now retired (#1462)
 - API Keys are masked in Settings (#2047)
 - Installer will now refuse to install on Win7 and Earlier (#1122)

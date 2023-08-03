@@ -36,13 +36,27 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 5.9.1</title>
+			<title>Release 5.9.2</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
 
 <p>We now test against, and package with, Python 3.11.1.</p>
 <p><strong>As a consequence of this we no longer support Windows 7.</strong><br>
+
+<h2>Release 5.9.2</h2>
+<p>This release fixes a critical issue on clean installs which would not update
+the Windows registry to allow for protocol handling.</p>
+<p>All users are strongly encouraged to update.</p>
+<ul>
+<li>Fixes a critical bug with the installer on new installs not creating registry keys (#2046)</li>
+<li>Re-enables automatic submodule updates (#1443)</li>
+<li>Help -> About Version String can now be copied to clipboard (#1936)</li>
+<li>EDMC Task Manager Printout now is less useless (#2045)</li>
+<li>Deprecated load_module() is now retired (#1462)</li>
+<li>API Keys are masked in Settings (#2047)</li>
+<li>Installer will now refuse to install on Win7 and Earlier (#1122)</li>
+</ul><hr>
 
 <h2>Release 5.9.1</h2>
 <p>This release updates the build system in use for EDMC to a more feature-rich installer, as well
@@ -2043,10 +2057,10 @@ about this:
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F5.9.1/EDMarketConnector_Installer_5.9.1.exe"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F5.9.2/EDMarketConnector_Installer_5.9.2.exe"
 				sparkle:os="windows"
-				sparkle:version="5.9.1"
-				length="14510827"
+				sparkle:version="5.9.2"
+				length="14483637"
 				type="application/x-ms-dos-executable"
 			/>
 		</item>
