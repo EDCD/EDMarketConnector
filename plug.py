@@ -58,8 +58,8 @@ class Plugin(object):
             try:
                 filename = 'plugin_'
                 filename += name.encode(encoding='ascii', errors='replace').decode('utf-8').replace('.', '_')
-                spec = importlib.util.spec_from_file_location(filename, loadfile)
-                module = importlib.util.module_from_spec(spec)
+                spec = importlib.util.spec_from_file_location(filename, loadfile)  # type: ignore
+                module = importlib.util.module_from_spec(spec)  # type: ignore
                 spec.loader.exec_module(module)
 
                 if getattr(module, 'plugin_start3', None):

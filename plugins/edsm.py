@@ -279,9 +279,9 @@ def plugin_stop() -> None:
 def toggle_password_visibility():
     """Toggle if the API Key is visible or not."""
     if show_password_var.get():
-        this.apikey.config(show="")
+        this.apikey.config(show="")  # type: ignore
     else:
-        this.apikey.config(show="*")
+        this.apikey.config(show="*")  # type: ignore
 
 
 def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> tk.Frame:
