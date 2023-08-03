@@ -58,10 +58,9 @@ class Plugin(object):
             try:
                 filename = 'plugin_'
                 filename += name.encode(encoding='ascii', errors='replace').decode('utf-8').replace('.', '_')
-                module = importlib.machinery.SourceFileLoader(
-                    filename,
-                    loadfile
-                ).load_module()
+                spec = importlib.util.spec_from_file_location(filename, loadfile)
+                module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
 
                 if getattr(module, 'plugin_start3', None):
                     newname = module.plugin_start3(os.path.dirname(loadfile))
