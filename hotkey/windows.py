@@ -285,33 +285,32 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
         keycode = event.keycode
 
         if keycode in [VK_SHIFT, VK_CONTROL, VK_MENU, VK_LWIN, VK_RWIN]:
-            return (0, modifiers)
+            return 0, modifiers
 
         if not modifiers:
             if keycode == VK_ESCAPE:  # Esc = retain previous
                 return False
 
-            elif keycode in [VK_BACK, VK_DELETE, VK_CLEAR, VK_OEM_CLEAR]:  # BkSp, Del, Clear = clear hotkey
+            if keycode in [VK_BACK, VK_DELETE, VK_CLEAR, VK_OEM_CLEAR]:  # BkSp, Del, Clear = clear hotkey
                 return None
 
-            elif (
+            if (
                 keycode in [VK_RETURN, VK_SPACE, VK_OEM_MINUS] or ord('A') <= keycode <= ord('Z')
             ):  # don't allow keys needed for typing in System Map
                 winsound.MessageBeep()
                 return None
 
-            elif (keycode in [VK_NUMLOCK, VK_SCROLL, VK_PROCESSKEY]
-                  or VK_CAPITAL <= keycode <= VK_MODECHANGE):  # ignore unmodified mode switch keys
-                return (0, modifiers)
+            # ignore unmodified mode switch keys
+            if keycode in [VK_NUMLOCK, VK_SCROLL, VK_PROCESSKEY] or VK_CAPITAL <= keycode <= VK_MODECHANGE:
+                return 0, modifiers
 
         # See if the keycode is usable and available
         if RegisterHotKey(None, 2, modifiers | MOD_NOREPEAT, keycode):
             UnregisterHotKey(None, 2)
-            return (keycode, modifiers)
+            return keycode, modifiers
 
-        else:
-            winsound.MessageBeep()
-            return None
+        winsound.MessageBeep()
+        return None
 
     def display(self, keycode, modifiers) -> str:
         """

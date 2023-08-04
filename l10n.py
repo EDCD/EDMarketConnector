@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Localization with gettext is a pain on non-Unix systems. Use OSX-style strings files instead."""
+from __future__ import annotations
 
 import builtins
 import locale
@@ -13,6 +14,8 @@ from collections import OrderedDict
 from contextlib import suppress
 from os.path import basename, dirname, isdir, isfile, join
 from typing import TYPE_CHECKING, Dict, Iterable, Optional, Set, TextIO, Union, cast
+from config import config
+from EDMCLogging import get_main_logger
 
 if TYPE_CHECKING:
     def _(x: str) -> str: ...
@@ -24,9 +27,6 @@ try:
 except Exception:
     # Locale env variables incorrect or locale package not installed/configured on Linux, mysterious reasons on Windows
     print("Can't set locale!")
-
-from config import config
-from EDMCLogging import get_main_logger
 
 logger = get_main_logger()
 
@@ -208,7 +208,7 @@ class _Translations:
 
             return pathlib.Path(dirname(sys.executable)) / LOCALISATION_DIR
 
-        elif __file__:
+        if __file__:
             return pathlib.Path(__file__).parents[0] / LOCALISATION_DIR
 
         return pathlib.Path(LOCALISATION_DIR)
@@ -227,15 +227,15 @@ class _Translations:
                 return None
 
             try:
-                return f.open('r', encoding='utf-8')
+                return f.open(encoding='utf-8')
 
             except OSError:
                 logger.exception(f'could not open {f}')
 
         elif getattr(sys, 'frozen', False) and sys.platform == 'darwin':
-            return (self.respath() / f'{lang}.lproj' / 'Localizable.strings').open('r', encoding='utf-16')
+            return (self.respath() / f'{lang}.lproj' / 'Localizable.strings').open(encoding='utf-16')
 
-        return (self.respath() / f'{lang}.strings').open('r', encoding='utf-8')
+        return (self.respath() / f'{lang}.strings').open(encoding='utf-8')
 
 
 class _Locale:
@@ -286,8 +286,7 @@ class _Locale:
         if not decimals and isinstance(number, numbers.Integral):
             return locale.format_string('%d', number, True)
 
-        else:
-            return locale.format_string('%.*f', (decimals, number), True)
+        return locale.format_string('%.*f', (decimals, number), True)
 
     def number_from_string(self, string: str) -> Union[int, float, None]:
         """
@@ -326,7 +325,7 @@ class _Locale:
         elif sys.platform != 'win32':
             # POSIX
             lang = locale.getlocale()[0]
-            languages = lang and [lang.replace('_', '-')] or []
+            languages = [lang.replace('_', '-')] if lang else []
 
         else:
             def wszarray_to_list(array):
@@ -369,14 +368,13 @@ Translations = _Translations()
 # generate template strings file - like xgettext
 # parsing is limited - only single ' or " delimited strings, and only one string per line
 if __name__ == "__main__":
-    import re
     regexp = re.compile(r'''_\([ur]?(['"])(((?<!\\)\\\1|.)+?)\1\)[^#]*(#.+)?''')  # match a single line python literal
     seen: Dict[str, str] = {}
     for f in (
         sorted(x for x in os.listdir('.') if x.endswith('.py')) +
         sorted(join('plugins', x) for x in (os.listdir('plugins') if isdir('plugins') else []) if x.endswith('.py'))
     ):
-        with open(f, 'r', encoding='utf-8') as h:
+        with open(f, encoding='utf-8') as h:
             lineno = 0
             for line in h:
                 lineno += 1

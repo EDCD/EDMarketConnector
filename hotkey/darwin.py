@@ -107,7 +107,7 @@ class MacHotkeyMgr(AbstractHotkeyMgr):
                 # suppress the event by not chaining the old function
                 return the_event
 
-            elif the_event.type() in (NSKeyDown, NSKeyUp):
+            if the_event.type() in (NSKeyDown, NSKeyUp):
                 c = the_event.charactersIgnoringModifiers()
                 self.acquire_key = (c and ord(c[0]) or 0) | \
                                    (the_event.modifierFlags() & NSDeviceIndependentModifierFlagsMask)
@@ -209,12 +209,12 @@ class MacHotkeyMgr(AbstractHotkeyMgr):
                 return False
 
             # BkSp, Del, Clear = clear hotkey
-            elif keycode in [0x7f, ord(NSDeleteFunctionKey), ord(NSClearLineFunctionKey)]:
+            if keycode in [0x7f, ord(NSDeleteFunctionKey), ord(NSClearLineFunctionKey)]:
                 self.acquire_state = MacHotkeyMgr.ACQUIRE_INACTIVE
                 return None
 
             # don't allow keys needed for typing in System Map
-            elif keycode in [0x13, 0x20, 0x2d] or 0x61 <= keycode <= 0x7a:
+            if keycode in [0x13, 0x20, 0x2d] or 0x61 <= keycode <= 0x7a:
                 NSBeep()
                 self.acquire_state = MacHotkeyMgr.ACQUIRE_INACTIVE
                 return None
