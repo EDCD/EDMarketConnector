@@ -4,6 +4,7 @@ Theme support.
 Because of various ttk limitations this app is an unholy mix of Tk and ttk widgets.
 So can't use ttk's theme support. So have to change colors manually.
 """
+from __future__ import annotations
 
 import os
 import sys
@@ -36,7 +37,7 @@ if sys.platform == 'win32':
     AddFontResourceEx.restypes = [LPCWSTR, DWORD, LPCVOID]  # type: ignore
     FR_PRIVATE = 0x10
     FR_NOT_ENUM = 0x20
-    AddFontResourceEx(join(config.respath, u'EUROCAPS.TTF'), FR_PRIVATE, 0)
+    AddFontResourceEx(join(config.respath, 'EUROCAPS.TTF'), FR_PRIVATE, 0)
 
 elif sys.platform == 'linux':
     # pyright: reportUnboundVariable=false
@@ -143,7 +144,7 @@ class _Theme:
     def register(self, widget: tk.Widget | tk.BitmapImage) -> None:  # noqa: CCR001, C901
         # Note widget and children for later application of a theme. Note if
         # the widget has explicit fg or bg attributes.
-        assert isinstance(widget, tk.Widget) or isinstance(widget, tk.BitmapImage), widget
+        assert isinstance(widget, (tk.BitmapImage, tk.Widget)), widget
         if not self.defaults:
             # Can't initialise this til window is created       # Windows, MacOS
             self.defaults = {
@@ -169,14 +170,14 @@ class _Theme:
                     attribs.add('fg')
                 if widget['background'] not in ['', self.defaults['bitmapbg']]:
                     attribs.add('bg')
-            elif isinstance(widget, tk.Entry) or isinstance(widget, ttk.Entry):
+            elif isinstance(widget, (tk.Entry, ttk.Entry)):
                 if widget['foreground'] not in ['', self.defaults['entryfg']]:
                     attribs.add('fg')
                 if widget['background'] not in ['', self.defaults['entrybg']]:
                     attribs.add('bg')
                 if 'font' in widget.keys() and str(widget['font']) not in ['', self.defaults['entryfont']]:
                     attribs.add('font')
-            elif isinstance(widget, tk.Frame) or isinstance(widget, ttk.Frame) or isinstance(widget, tk.Canvas):
+            elif isinstance(widget, (tk.Canvas, tk.Frame, ttk.Frame)):
                 if (
                     ('background' in widget.keys() or isinstance(widget, tk.Canvas))
                     and widget['background'] not in ['', self.defaults['frame']]
@@ -200,7 +201,7 @@ class _Theme:
                     attribs.add('font')
             self.widgets[widget] = attribs
 
-        if isinstance(widget, tk.Frame) or isinstance(widget, ttk.Frame):
+        if isinstance(widget, (tk.Frame, ttk.Frame)):
             for child in widget.winfo_children():
                 self.register(child)
 
@@ -299,13 +300,13 @@ class _Theme:
         Also, register it for future updates.
         :param widget: Target widget.
         """
-        assert isinstance(widget, tk.Widget) or isinstance(widget, tk.BitmapImage), widget
+        assert isinstance(widget, (tk.BitmapImage, tk.Widget)), widget
         if not self.current:
             return  # No need to call this for widgets created in plugin_app()
 
         self.register(widget)
         self._update_widget(widget)
-        if isinstance(widget, tk.Frame) or isinstance(widget, ttk.Frame):
+        if isinstance(widget, (tk.Frame, ttk.Frame)):
             for child in widget.winfo_children():
                 self._update_widget(child)
 
@@ -420,8 +421,7 @@ class _Theme:
         if self.active == theme:
             return  # Don't need to mess with the window manager
 
-        else:
-            self.active = theme
+        self.active = theme
 
         if sys.platform == 'darwin':
             from AppKit import NSAppearance, NSApplication, NSMiniaturizableWindowMask, NSResizableWindowMask

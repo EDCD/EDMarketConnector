@@ -1,8 +1,9 @@
 """CMDR Status information."""
+from __future__ import annotations
+
 import csv
 import json
 import sys
-import tkinter
 import tkinter as tk
 from tkinter import ttk
 from typing import TYPE_CHECKING, Any, AnyStr, Callable, NamedTuple, Sequence, cast
@@ -477,9 +478,7 @@ class StatsResults(tk.Toplevel):
         """Add a spacer to the page."""
         self.addpagerow(parent, [''])
 
-    def addpagerow(
-        self, parent: ttk.Frame, content: Sequence[str], align: str | None = None, with_copy: bool = False
-    ):
+    def addpagerow(self, parent: ttk.Frame, content: Sequence[str], align: str | None = None, with_copy: bool = False):
         """
         Add a single row to parent.
 
@@ -488,19 +487,17 @@ class StatsResults(tk.Toplevel):
         :param align: The alignment of the data, defaults to tk.W
         """
         row = -1  # To silence unbound warnings
-        for i in range(len(content)):
-            # label = HyperlinkLabel(parent, text=content[i], popup_copy=True)
-            label = nb.Label(parent, text=content[i])
+        for i, col_content in enumerate(content):
+            # label = HyperlinkLabel(parent, text=col_content, popup_copy=True)
+            label = nb.Label(parent, text=col_content)
             if with_copy:
-                label.bind('<Button-1>', self.copy_callback(label, content[i]))
+                label.bind('<Button-1>', self.copy_callback(label, col_content))
 
             if i == 0:
                 label.grid(padx=10, sticky=tk.W)
-                row = parent.grid_size()[1]-1
-
+                row = parent.grid_size()[1] - 1
             elif align is None and i == len(content) - 1:  # Assumes last column right justified if unspecified
                 label.grid(row=row, column=i, padx=10, sticky=tk.E)
-
             else:
                 label.grid(row=row, column=i, padx=10, sticky=align or tk.W)
 
@@ -512,7 +509,7 @@ class StatsResults(tk.Toplevel):
     @staticmethod
     def copy_callback(label: tk.Label, text_to_copy: str) -> Callable[..., None]:
         """Copy data in Label to clipboard."""
-        def do_copy(event: tkinter.Event) -> None:
+        def do_copy(event: tk.Event) -> None:
             label.clipboard_clear()
             label.clipboard_append(text_to_copy)
             old_bg = label['bg']

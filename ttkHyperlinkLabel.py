@@ -14,6 +14,8 @@ In addition to standard ttk.Label arguments, takes the following arguments:
 
 May be imported by plugins
 """
+from __future__ import annotations
+
 import sys
 import tkinter as tk
 import webbrowser
@@ -26,7 +28,7 @@ if TYPE_CHECKING:
 
 
 # FIXME: Split this into multi-file module to separate the platforms
-class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label, object):  # type: ignore
+class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label):  # type: ignore
     """Clickable label for HTTP links."""
 
     def __init__(self, master: tk.Frame | None = None, **kw: Any) -> None:
@@ -85,18 +87,18 @@ class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label, object)
             self.font_n = kw['font']
             self.font_u = tk_font.Font(font=self.font_n)
             self.font_u.configure(underline=True)
-            kw['font'] = self.underline is True and self.font_u or self.font_n
+            kw['font'] = self.font_u if self.underline is True else self.font_n
 
         if 'cursor' not in kw:
             if (kw['state'] if 'state' in kw else str(self['state'])) == tk.DISABLED:
                 kw['cursor'] = 'arrow'  # System default
             elif self.url and (kw['text'] if 'text' in kw else self['text']):
-                kw['cursor'] = sys.platform == 'darwin' and 'pointinghand' or 'hand2'
+                kw['cursor'] = 'pointinghand' if sys.platform == 'darwin' else 'hand2'
             else:
                 kw['cursor'] = (sys.platform == 'darwin' and 'notallowed') or (
                     sys.platform == 'win32' and 'no') or 'circle'
 
-        return super(HyperlinkLabel, self).configure(cnf, **kw)
+        return super().configure(cnf, **kw)
 
     def __setitem__(self, key: str, value: Any) -> None:
         """
@@ -109,11 +111,11 @@ class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label, object)
 
     def _enter(self, event: tk.Event) -> None:
         if self.url and self.underline is not False and str(self['state']) != tk.DISABLED:
-            super(HyperlinkLabel, self).configure(font=self.font_u)
+            super().configure(font=self.font_u)
 
     def _leave(self, event: tk.Event) -> None:
         if not self.underline:
-            super(HyperlinkLabel, self).configure(font=self.font_n)
+            super().configure(font=self.font_n)
 
     def _click(self, event: tk.Event) -> None:
         if self.url and self['text'] and str(self['state']) != tk.DISABLED:
