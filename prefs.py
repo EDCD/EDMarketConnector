@@ -384,10 +384,10 @@ class PreferencesDialog(tk.Toplevel):
         self.outdir_entry.grid(columnspan=2, padx=self.PADX, pady=(0, self.PADY), sticky=tk.EW, row=row.get())
 
         if sys.platform == 'darwin':
-            text = (_('Change...'))  # LANG: macOS Preferences - files location selection button
+            text = _('Change...')  # LANG: macOS Preferences - files location selection button
 
         else:
-            text = (_('Browse...'))  # LANG: NOT-macOS Settings - files location selection button
+            text = _('Browse...')  # LANG: NOT-macOS Settings - files location selection button
 
         self.outbutton = nb.Button(
             output_frame,
@@ -434,10 +434,10 @@ class PreferencesDialog(tk.Toplevel):
         self.logdir_entry.grid(columnspan=4, padx=self.PADX, pady=(0, self.PADY), sticky=tk.EW, row=row.get())
 
         if sys.platform == 'darwin':
-            text = (_('Change...'))  # LANG: macOS Preferences - files location selection button
+            text = _('Change...')  # LANG: macOS Preferences - files location selection button
 
         else:
-            text = (_('Browse...'))  # LANG: NOT-macOS Setting - files location selection button
+            text = _('Browse...')  # LANG: NOT-macOS Setting - files location selection button
 
         self.logbutton = nb.Button(
             config_frame,
@@ -924,7 +924,7 @@ class PreferencesDialog(tk.Toplevel):
         ).grid(columnspan=2, padx=self.PADX, pady=10, sticky=tk.NSEW, row=row.get())
 
         enabled_plugins = list(filter(lambda x: x.folder and x.module, plug.PLUGINS))
-        if len(enabled_plugins):
+        if enabled_plugins:
             ttk.Separator(plugins_frame, orient=tk.HORIZONTAL).grid(
                 columnspan=3, padx=self.PADX, pady=self.PADY * 8, sticky=tk.EW
             )
@@ -946,7 +946,7 @@ class PreferencesDialog(tk.Toplevel):
         ############################################################
         # Show which plugins don't have Python 3.x support
         ############################################################
-        if len(plug.PLUGINS_not_py3):
+        if plug.PLUGINS_not_py3:
             ttk.Separator(plugins_frame, orient=tk.HORIZONTAL).grid(
                 columnspan=3, padx=self.PADX, pady=self.PADY * 8, sticky=tk.EW, row=row.get()
             )
@@ -966,24 +966,29 @@ class PreferencesDialog(tk.Toplevel):
             ).grid(columnspan=2, padx=self.PADX, sticky=tk.W)
         ############################################################
 
-        disabled_plugins = list(filter(lambda x: x.folder and not x.module, plug.PLUGINS))
-        if len(disabled_plugins):
+        # Get disabled plugins (plugins without a folder or module)
+        disabled_plugins = [x for x in plug.PLUGINS if x.folder and not x.module]
+
+        if disabled_plugins:
+            # Create a separator
             ttk.Separator(plugins_frame, orient=tk.HORIZONTAL).grid(
                 columnspan=3, padx=self.PADX, pady=self.PADY * 8, sticky=tk.EW, row=row.get()
             )
+            # Label for the section of disabled plugins
             nb.Label(
                 plugins_frame,
                 # LANG: Lable on list of user-disabled plugins
-                text=_('Disabled Plugins')+':'  # List of plugins in settings
+                text=_('Disabled Plugins') + ':'  # List of plugins in settings
             ).grid(padx=self.PADX, sticky=tk.W, row=row.get())
 
+            # Show disabled plugins
             for plugin in disabled_plugins:
                 nb.Label(plugins_frame, text=plugin.name).grid(
-                    columnspan=2, padx=self.PADX*2, sticky=tk.W, row=row.get()
+                    columnspan=2, padx=self.PADX * 2, sticky=tk.W, row=row.get()
                 )
 
         # LANG: Label on Settings > Plugins tab
-        notebook.add(plugins_frame, text=_('Plugins'))		# Tab heading in settings
+        notebook.add(plugins_frame, text=_('Plugins'))  # Tab heading in settings
 
     def cmdrchanged(self, event=None):
         """

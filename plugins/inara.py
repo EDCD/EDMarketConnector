@@ -174,7 +174,7 @@ def system_url(system_name: str) -> str:
         return requests.utils.requote_uri(f'https://inara.cz/galaxy-starsystem/'
                                           f'?search={this.system_address}')
 
-    elif system_name:
+    if system_name:
         return requests.utils.requote_uri(f'https://inara.cz/galaxy-starsystem/'
                                           f'?search={system_name}')
 
@@ -382,8 +382,7 @@ def credentials(cmdr: Optional[str]) -> Optional[str]:
     if cmdr in cmdrs and config.get_list('inara_apikeys'):
         return config.get_list('inara_apikeys')[cmdrs.index(cmdr)]
 
-    else:
-        return None
+    return None
 
 
 def journal_entry(  # noqa: C901, CCR001

@@ -124,9 +124,8 @@ elif (config.auth_force_edmc_protocol
     # This could be false if you use auth_force_edmc_protocol, but then you get to keep the pieces
     assert sys.platform == 'win32'
     # spell-checker: words HBRUSH HICON WPARAM wstring WNDCLASS HMENU HGLOBAL
-    from ctypes import windll  # type: ignore
     from ctypes import (  # type: ignore
-        POINTER, WINFUNCTYPE, Structure, byref, c_long, c_void_p, create_unicode_buffer, wstring_at
+        windll, POINTER, WINFUNCTYPE, Structure, byref, c_long, c_void_p, create_unicode_buffer, wstring_at
     )
     from ctypes.wintypes import (
         ATOM, BOOL, DWORD, HBRUSH, HGLOBAL, HICON, HINSTANCE, HMENU, HWND, INT, LPARAM, LPCWSTR, LPMSG, LPVOID, LPWSTR,
@@ -426,9 +425,8 @@ else:  # Linux / Run from source
                 protocolhandler.event(url)  # noqa: F821
                 self.send_response(200)
                 return True
-            else:
-                self.send_response(404)  # Not found
-                return False
+            self.send_response(404)  # Not found
+            return False
 
         def do_HEAD(self) -> None:  # noqa: N802 # Required to override
             """Handle HEAD Request."""
@@ -459,14 +457,13 @@ def get_handler_impl() -> Type[GenericProtocolHandler]:
     if sys.platform == 'darwin' and getattr(sys, 'frozen', False):
         return DarwinProtocolHandler  # pyright: reportUnboundVariable=false
 
-    elif (
+    if (
         (sys.platform == 'win32' and config.auth_force_edmc_protocol)
         or (getattr(sys, 'frozen', False) and not is_wine and not config.auth_force_localserver)
     ):
         return WindowsProtocolHandler
 
-    else:
-        return LinuxProtocolHandler
+    return LinuxProtocolHandler
 
 
 # *late init* singleton
