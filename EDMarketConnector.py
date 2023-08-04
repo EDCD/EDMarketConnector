@@ -12,7 +12,7 @@ import re
 import sys
 import threading
 import webbrowser
-from builtins import object, str
+from builtins import str
 from os import chdir, environ
 from os.path import dirname, join
 from time import localtime, strftime, time
@@ -462,7 +462,7 @@ SHIPYARD_HTML_TEMPLATE = """
 """
 
 
-class AppWindow(object):
+class AppWindow:
     """Define the main application window."""
 
     _CAPI_RESPONSE_TK_EVENT_NAME = '<<CAPIResponse>>'
@@ -2205,10 +2205,10 @@ sys.path: {sys.path}'''
     # logger.debug('Test from __main__')
     # test_logging()
 
-    class A(object):
+    class A:
         """Simple top-level class."""
 
-        class B(object):
+        class B:
             """Simple second-level class."""
 
             def __init__(self):

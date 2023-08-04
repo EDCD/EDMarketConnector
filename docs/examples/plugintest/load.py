@@ -44,7 +44,7 @@ class This:
 this = This()
 
 
-class PluginTest(object):
+class PluginTest:
     """Class that performs actual tests on bundled modules."""
 
     def __init__(self, directory: str):

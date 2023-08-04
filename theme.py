@@ -121,7 +121,7 @@ elif sys.platform == 'linux':
             dpy = None
 
 
-class _Theme(object):
+class _Theme:
 
     # Enum ?  Remember these are, probably, based on 'value' of a tk
     # RadioButton set.  Looking in prefs.py, they *appear* to be hard-coded

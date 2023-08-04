@@ -6,7 +6,7 @@ import operator
 import os
 import sys
 import tkinter as tk
-from builtins import object, str
+from builtins import str
 from tkinter import ttk
 from typing import Any, Callable, List, Mapping, MutableMapping, Optional
 
@@ -36,7 +36,7 @@ class LastError:
 last_error = LastError()
 
 
-class Plugin(object):
+class Plugin:
     """An EDMC plugin."""
 
     def __init__(self, name: str, loadfile: Optional[str], plugin_logger: Optional[logging.Logger]):

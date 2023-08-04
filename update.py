@@ -19,7 +19,7 @@ from EDMCLogging import get_main_logger
 logger = get_main_logger()
 
 
-class EDMCVersion(object):
+class EDMCVersion:
     """
     Hold all the information about an EDMC version.
 
@@ -39,7 +39,7 @@ class EDMCVersion(object):
         self.sv: semantic_version.base.Version = sv
 
 
-class Updater(object):
+class Updater:
     """
     Handle checking for updates.
 

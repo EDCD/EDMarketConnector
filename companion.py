@@ -20,7 +20,7 @@ import time
 import tkinter as tk
 import urllib.parse
 import webbrowser
-from builtins import object, range, str
+from builtins import range, str
 from email.utils import parsedate
 from queue import Queue
 from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, OrderedDict, TypeVar, Union
@@ -296,7 +296,7 @@ class CmdrError(Exception):
             self.args = (_('Error: Wrong Cmdr'),)
 
 
-class Auth(object):
+class Auth:
     """Handles authentication with the Frontier CAPI service via oAuth2."""
 
     # Currently the "Elite Dangerous Market Connector (EDCD/Athanasius)" one in
@@ -611,7 +611,7 @@ class EDMCCAPIFailedRequest(EDMCCAPIReturn):
         self.exception: Exception = exception  # Exception that recipient should raise.
 
 
-class Session(object):
+class Session:
     """Methods for handling Frontier Auth and CAPI queries."""
 
     STATE_INIT, STATE_AUTH, STATE_OK = list(range(3))
