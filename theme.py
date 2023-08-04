@@ -355,7 +355,7 @@ class _Theme:
                 # e.g. tk.Button, tk.Label, tk.Menu
                 if 'fg' not in attribs:
                     widget['foreground'] = self.current['foreground']
-                    widget['activeforeground'] = self.current['activeforeground'],
+                    widget['activeforeground'] = self.current['activeforeground']
                     widget['disabledforeground'] = self.current['disabledforeground']
 
                 if 'bg' not in attribs:

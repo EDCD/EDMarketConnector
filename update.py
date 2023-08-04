@@ -9,12 +9,11 @@ from xml.etree import ElementTree
 
 import requests
 import semantic_version
+from config import appname, appversion_nobuild, config, update_feed
+from EDMCLogging import get_main_logger
 
 if TYPE_CHECKING:
     import tkinter as tk
-
-from config import appname, appversion_nobuild, config, update_feed
-from EDMCLogging import get_main_logger
 
 logger = get_main_logger()
 
