@@ -1,4 +1,5 @@
 """Windows config implementation."""
+from __future__ import annotations
 
 # spell-checker: words folderid deps hkey edcd
 import ctypes
@@ -43,6 +44,7 @@ class WinConfig(AbstractConfig):
     """Implementation of AbstractConfig for Windows."""
 
     def __init__(self, do_winsparkle=True) -> None:
+        super().__init__()
         self.app_dir_path = pathlib.Path(str(known_folder_path(FOLDERID_LocalAppData))) / appname
         self.app_dir_path.mkdir(exist_ok=True)
 
@@ -132,15 +134,14 @@ class WinConfig(AbstractConfig):
         if _type == winreg.REG_SZ:
             return str(value)
 
-        elif _type == winreg.REG_DWORD:
+        if _type == winreg.REG_DWORD:
             return int(value)
 
-        elif _type == winreg.REG_MULTI_SZ:
+        if _type == winreg.REG_MULTI_SZ:
             return list(value)
 
-        else:
-            logger.warning(f'registry key {key=} returned unknown type {_type=} {value=}')
-            return None
+        logger.warning(f'registry key {key=} returned unknown type {_type=} {value=}')
+        return None
 
     def get_str(self, key: str, *, default: str | None = None) -> str:
         """
@@ -152,7 +153,7 @@ class WinConfig(AbstractConfig):
         if res is None:
             return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
 
-        elif not isinstance(res, str):
+        if not isinstance(res, str):
             raise ValueError(f'Data from registry is not a string: {type(res)=} {res=}')
 
         return res
@@ -167,7 +168,7 @@ class WinConfig(AbstractConfig):
         if res is None:
             return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
 
-        elif not isinstance(res, list):
+        if not isinstance(res, list):
             raise ValueError(f'Data from registry is not a list: {type(res)=} {res}')
 
         return res

@@ -5,6 +5,7 @@ Deals with initiating authentication for, and use of, CAPI.
 Some associated code is in protocol.py which creates and handles the edmc://
 protocol used for the callback.
 """
+from __future__ import annotations
 
 import base64
 import collections
@@ -43,7 +44,6 @@ if TYPE_CHECKING:
     UserDict = collections.UserDict[str, Any]  # indicate to our type checkers what this generic class holds normally
 else:
     UserDict = collections.UserDict  # type: ignore # Otherwise simply use the actual class
-
 
 capi_query_cooldown = 60  # Minimum time between (sets of) CAPI queries
 capi_fleetcarrier_query_cooldown = 60 * 15  # Minimum time between CAPI fleetcarrier queries
@@ -195,10 +195,10 @@ def listify(thing: Union[List, Dict]) -> List:
     if thing is None:
         return []  # data is not present
 
-    elif isinstance(thing, list):
+    if isinstance(thing, list):
         return list(thing)  # array is not sparse
 
-    elif isinstance(thing, dict):
+    if isinstance(thing, dict):
         retval: List[Any] = []
         for k, v in thing.items():
             idx = int(k)
@@ -211,8 +211,7 @@ def listify(thing: Union[List, Dict]) -> List:
 
         return retval
 
-    else:
-        raise ValueError(f"expected an array or sparse array, got {thing!r}")
+    raise ValueError(f"expected an array or sparse array, got {thing!r}")
 
 
 class ServerError(Exception):
@@ -346,7 +345,7 @@ class Auth:
         logger.debug(f'idx = {idx}')
 
         tokens = config.get_list('fdev_apikeys', default=[])
-        tokens = tokens + [''] * (len(cmdrs) - len(tokens))
+        tokens += [''] * (len(cmdrs) - len(tokens))
         if tokens[idx]:
             logger.debug('We have a refresh token for that idx')
             data = {
@@ -371,9 +370,8 @@ class Auth:
 
                     return data.get('access_token')
 
-                else:
-                    logger.error(f"Frontier CAPI Auth: Can't refresh token for \"{self.cmdr}\"")
-                    self.dump(r)
+                logger.error(f"Frontier CAPI Auth: Can't refresh token for \"{self.cmdr}\"")
+                self.dump(r)
 
             except (ValueError, requests.RequestException, ) as e:
                 logger.exception(f"Frontier CAPI Auth: Can't refresh token for \"{self.cmdr}\"\n{e!r}")
@@ -489,7 +487,7 @@ class Auth:
                 cmdrs = config.get_list('cmdrs', default=[])
                 idx = cmdrs.index(self.cmdr)
                 tokens = config.get_list('fdev_apikeys', default=[])
-                tokens = tokens + [''] * (len(cmdrs) - len(tokens))
+                tokens += [''] * (len(cmdrs) - len(tokens))
                 tokens[idx] = data_token.get('refresh_token', '')
                 config.set('fdev_apikeys', tokens)
                 config.save()  # Save settings now for use by command-line app
@@ -530,7 +528,7 @@ class Auth:
             cmdrs = config.get_list('cmdrs', default=[])
             idx = cmdrs.index(cmdr)
             to_set = config.get_list('fdev_apikeys', default=[])
-            to_set = to_set + [''] * (len(cmdrs) - len(to_set))  # type: ignore
+            to_set += [''] * (len(cmdrs) - len(to_set))  # type: ignore
             to_set[idx] = ''
 
         if to_set is None:
@@ -693,7 +691,7 @@ class Session:
                 logger.error('self.credentials is None')
                 raise CredentialsError('Missing credentials')  # Shouldn't happen
 
-            elif self.state == Session.STATE_OK:
+            if self.state == Session.STATE_OK:
                 logger.debug('already logged in (state == STATE_OK)')
                 return True  # already logged in
 
@@ -703,10 +701,9 @@ class Session:
                 logger.debug(f'already logged in (is_beta = {is_beta})')
                 return True  # already logged in
 
-            else:
-                logger.debug('changed account or retrying login during auth')
-                self.reinit_session()
-                self.credentials = credentials
+            logger.debug('changed account or retrying login during auth')
+            self.reinit_session()
+            self.credentials = credentials
 
         self.state = Session.STATE_INIT
         self.auth = Auth(self.credentials['cmdr'])
@@ -718,11 +715,10 @@ class Session:
             self.start_frontier_auth(access_token)
             return True
 
-        else:
-            logger.debug('We do NOT have an access_token')
-            self.state = Session.STATE_AUTH
-            return False
-            # Wait for callback
+        logger.debug('We do NOT have an access_token')
+        self.state = Session.STATE_AUTH
+        return False
+        # Wait for callback
 
     # Callback from protocol handler
     def auth_callback(self) -> None:
@@ -934,9 +930,8 @@ class Session:
                     logger.warning(f"{last_starport_id!r} != {int(market_data['id'])!r}")
                     raise ServerLagging()
 
-                else:
-                    market_data['name'] = last_starport_name
-                    station_data['lastStarport'].update(market_data)
+                market_data['name'] = last_starport_name
+                station_data['lastStarport'].update(market_data)
 
             if services.get('outfitting') or services.get('shipyard'):
                 shipyard_data = capi_single_query(capi_host, self.FRONTIER_CAPI_PATH_SHIPYARD, timeout=timeout)
@@ -948,9 +943,8 @@ class Session:
                     logger.warning(f"{last_starport_id!r} != {int(shipyard_data['id'])!r}")
                     raise ServerLagging()
 
-                else:
-                    shipyard_data['name'] = last_starport_name
-                    station_data['lastStarport'].update(shipyard_data)
+                shipyard_data['name'] = last_starport_name
+                station_data['lastStarport'].update(shipyard_data)
             # WORKAROUND END
 
             return station_data
@@ -1173,11 +1167,9 @@ class Session:
             logger.debug(f"Using {SERVER_LIVE} because monitor.is_live_galaxy() was True")
             return SERVER_LIVE
 
-        else:
-            logger.debug(f"Using {SERVER_LEGACY} because monitor.is_live_galaxy() was False")
-            return SERVER_LEGACY
+        logger.debug(f"Using {SERVER_LEGACY} because monitor.is_live_galaxy() was False")
+        return SERVER_LEGACY
 
-        return ''
     ######################################################################
 
 
@@ -1194,7 +1186,7 @@ def fixup(data: CAPIData) -> CAPIData:  # noqa: C901, CCR001 # Can't be usefully
     if not commodity_map:
         # Lazily populate
         for f in ('commodity.csv', 'rare_commodity.csv'):
-            with open(config.respath_path / 'FDevIDs' / f, 'r') as csvfile:
+            with open(config.respath_path / 'FDevIDs' / f) as csvfile:
                 reader = csv.DictReader(csvfile)
 
                 for row in reader:
@@ -1315,11 +1307,10 @@ def index_possibly_sparse_list(data: Union[Mapping[str, V], List[V]], key: int) 
     if isinstance(data, list):
         return data[key]
 
-    elif isinstance(data, (dict, OrderedDict)):
+    if isinstance(data, (dict, OrderedDict)):
         return data[str(key)]
 
-    else:
-        raise ValueError(f'Unexpected data type {type(data)}')
+    raise ValueError(f'Unexpected data type {type(data)}')
 ######################################################################
 
 

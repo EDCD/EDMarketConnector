@@ -34,6 +34,7 @@ To utilise logging in a 'found' (third-party) plugin, include this:
     # See, plug.py:load_plugins()
     logger = logging.getLogger(f'{appname}.{plugin_name}')
 """
+from __future__ import annotations
 
 import inspect
 import logging
@@ -183,18 +184,12 @@ class Logger:
         # rotated versions.
         # This is {logger_name} so that EDMC.py logs to a different file.
         logfile_rotating = pathlib.Path(tempfile.gettempdir())
-        logfile_rotating = logfile_rotating / f'{appname}'
+        logfile_rotating /= f'{appname}'
         logfile_rotating.mkdir(exist_ok=True)
-        logfile_rotating = logfile_rotating / f'{logger_name}-debug.log'
+        logfile_rotating /= f'{logger_name}-debug.log'
 
-        self.logger_channel_rotating = logging.handlers.RotatingFileHandler(
-            logfile_rotating,
-            mode='a',
-            maxBytes=1024 * 1024,  # 1MiB
-            backupCount=10,
-            encoding='utf-8',
-            delay=False
-        )
+        self.logger_channel_rotating = logging.handlers.RotatingFileHandler(logfile_rotating, maxBytes=1024 * 1024,
+                                                                            backupCount=10, encoding='utf-8')
         # Yes, we always want these rotated files to be at TRACE level
         self.logger_channel_rotating.setLevel(logging.TRACE)  # type: ignore
         self.logger_channel_rotating.setFormatter(self.logger_formatter)
@@ -535,9 +530,8 @@ def get_main_logger(sublogger_name: str = '') -> 'LoggerMixin':
     if not os.getenv("EDMC_NO_UI"):
         # GUI app being run
         return cast('LoggerMixin', logging.getLogger(appname))
-    else:
-        # Must be the CLI
-        return cast('LoggerMixin', logging.getLogger(appcmdname))
+    # Must be the CLI
+    return cast('LoggerMixin', logging.getLogger(appcmdname))
 
 
 # Singleton

@@ -99,7 +99,7 @@ class MacConfig(AbstractConfig):
         if res is None:
             return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
 
-        elif not isinstance(res, list):
+        if not isinstance(res, list):
             raise ValueError(f'__raw_get returned unexpected type {type(res)=} {res!r}')
 
         return res
@@ -114,7 +114,7 @@ class MacConfig(AbstractConfig):
         if res is None:
             return default
 
-        elif not isinstance(res, (str, int)):
+        if not isinstance(res, (str, int)):
             raise ValueError(f'__raw_get returned unexpected type {type(res)=} {res!r}')
 
         try:
@@ -134,7 +134,7 @@ class MacConfig(AbstractConfig):
         if res is None:
             return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
 
-        elif not isinstance(res, bool):
+        if not isinstance(res, bool):
             raise ValueError(f'__raw_get returned unexpected type {type(res)=} {res!r}')
 
         return res

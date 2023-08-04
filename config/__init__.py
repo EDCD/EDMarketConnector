@@ -6,6 +6,7 @@ Linux uses a file, but for commonality it's still a flat data structure.
 macOS uses a 'defaults' object.
 """
 
+from __future__ import annotations
 
 __all__ = [
     # defined in the order they appear in the file
@@ -90,13 +91,10 @@ def git_shorthash_from_head() -> str:
     shorthash: str = None  # type: ignore
 
     try:
-        git_cmd = subprocess.Popen('git rev-parse --short HEAD'.split(),
-                                   stdout=subprocess.PIPE,
-                                   stderr=subprocess.STDOUT
-                                   )
-        out, err = git_cmd.communicate()
+        result = subprocess.run(['git', 'rev-parse', '--short', 'HEAD'], capture_output=True, text=True)
+        out = result.stdout.strip()
 
-    except Exception as e:
+    except subprocess.CalledProcessError as e:
         logger.info(f"Couldn't run git command for short hash: {e!r}")
 
     else:
@@ -325,13 +323,13 @@ class AbstractConfig(abc.ABC):
         if (a_list := self._suppress_call(self.get_list, ValueError, key, default=None)) is not None:
             return a_list
 
-        elif (a_str := self._suppress_call(self.get_str, ValueError, key, default=None)) is not None:
+        if (a_str := self._suppress_call(self.get_str, ValueError, key, default=None)) is not None:
             return a_str
 
-        elif (a_bool := self._suppress_call(self.get_bool, ValueError, key, default=None)) is not None:
+        if (a_bool := self._suppress_call(self.get_bool, ValueError, key, default=None)) is not None:
             return a_bool
 
-        elif (an_int := self._suppress_call(self.get_int, ValueError, key, default=None)) is not None:
+        if (an_int := self._suppress_call(self.get_int, ValueError, key, default=None)) is not None:
             return an_int
 
         return default  # type: ignore
@@ -461,16 +459,15 @@ def get_config(*args, **kwargs) -> AbstractConfig:
         from .darwin import MacConfig
         return MacConfig(*args, **kwargs)
 
-    elif sys.platform == "win32":  # pragma: sys-platform-win32
+    if sys.platform == "win32":  # pragma: sys-platform-win32
         from .windows import WinConfig
         return WinConfig(*args, **kwargs)
 
-    elif sys.platform == "linux":  # pragma: sys-platform-linux
+    if sys.platform == "linux":  # pragma: sys-platform-linux
         from .linux import LinuxConfig
         return LinuxConfig(*args, **kwargs)
 
-    else:  # pragma: sys-platform-not-known
-        raise ValueError(f'Unknown platform: {sys.platform=}')
+    raise ValueError(f'Unknown platform: {sys.platform=}')
 
 
 config = get_config()
