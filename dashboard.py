@@ -1,4 +1,5 @@
 """Handle the game Status.json file."""
+from __future__ import annotations
 
 import json
 import pathlib
@@ -16,11 +17,7 @@ from EDMCLogging import get_main_logger
 
 logger = get_main_logger()
 
-if sys.platform == 'darwin':
-    from watchdog.events import FileSystemEventHandler
-    from watchdog.observers import Observer
-
-elif sys.platform == 'win32':
+if sys.platform in ('darwin', 'win32'):
     from watchdog.events import FileSystemEventHandler
     from watchdog.observers import Observer
 
@@ -74,7 +71,7 @@ class Dashboard(FileSystemEventHandler):
         # File system events are unreliable/non-existent over network drives on Linux.
         # We can't easily tell whether a path points to a network drive, so assume
         # any non-standard logdir might be on a network drive and poll instead.
-        if not (sys.platform != 'win32') and not self.observer:
+        if sys.platform == 'win32' and not self.observer:
             logger.debug('Setting up observer...')
             self.observer = Observer()
             self.observer.daemon = True
@@ -87,7 +84,7 @@ class Dashboard(FileSystemEventHandler):
             self.observer = None  # type: ignore
             logger.debug('Done')
 
-        if not self.observed and not (sys.platform != 'win32'):
+        if not self.observed and sys.platform == 'win32':
             logger.debug('Starting observer...')
             self.observed = cast(BaseObserver, self.observer).schedule(self, self.currentdir)
             logger.debug('Done')

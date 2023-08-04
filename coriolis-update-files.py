@@ -14,6 +14,7 @@ import pickle
 import subprocess
 import sys
 from collections import OrderedDict
+from pathlib import Path
 
 import outfitting
 from edmc_data import coriolis_ship_map, ship_name_map
@@ -29,7 +30,9 @@ if __name__ == "__main__":
     # Regenerate coriolis-data distribution
     subprocess.check_call('npm install', cwd='coriolis-data', shell=True, stdout=sys.stdout, stderr=sys.stderr)
 
-    data = json.load(open('coriolis-data/dist/index.json'))
+    coriolis_data_file = Path('coriolis-data/dist/index.json')
+    with open(coriolis_data_file) as coriolis_data_file_handle:
+        data = json.load(coriolis_data_file_handle)
 
     # Symbolic name from in-game name
     reverse_ship_map = {v: k for k, v in list(ship_name_map.items())}
@@ -44,11 +47,14 @@ if __name__ == "__main__":
         name = coriolis_ship_map.get(m['properties']['name'], str(m['properties']['name']))
         assert name in reverse_ship_map, name
         ships[name] = {'hullMass': m['properties']['hullMass']}
-        for i in range(len(bulkheads)):
-            modules['_'.join([reverse_ship_map[name], 'armour', bulkheads[i]])] = {'mass': m['bulkheads'][i]['mass']}
+        for bulkhead in bulkheads:
+            module_name = '_'.join([reverse_ship_map[name], 'armour', bulkhead])
+            modules[module_name] = {'mass': m['bulkheads'][bulkhead]['mass']}
 
-    ships = OrderedDict([(k, ships[k]) for k in sorted(ships)])  # sort for easier diffing
-    pickle.dump(ships, open('ships.p', 'wb'))
+    ships = OrderedDict([(k, ships[k]) for k in sorted(ships)])  # Sort for easier diffing
+    ships_file = Path('ships.p')
+    with open(ships_file, 'wb') as ships_file_handle:
+        pickle.dump(ships, ships_file_handle)
 
     # Module masses
     for cat in list(data['Modules'].values()):
@@ -82,4 +88,6 @@ if __name__ == "__main__":
     add(modules, 'hpt_multicannon_fixed_medium_advanced',         {'mass': 4})
 
     modules = OrderedDict([(k, modules[k]) for k in sorted(modules)])  # sort for easier diffing
-    pickle.dump(modules, open('modules.p', 'wb'))
+    modules_file = Path('modules.p')
+    with open(modules_file, 'wb') as modules_file_handle:
+        pickle.dump(modules, modules_file_handle)

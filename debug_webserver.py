@@ -1,4 +1,6 @@
 """Simple HTTP listener to be used with debugging various EDMC sends."""
+from __future__ import annotations
+
 import gzip
 import json
 import pathlib
@@ -85,7 +87,6 @@ class LoggingHandler(server.BaseHTTPRequestHandler):
         :raises ValueError: If compression is unknown
         :return: printable strings
         """
-        ret: bytes = b''
         if compression is None:
             ret = data
 

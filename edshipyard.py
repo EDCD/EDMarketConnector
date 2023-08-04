@@ -1,4 +1,5 @@
 """Export ship loadout in ED Shipyard plain text format."""
+from __future__ import annotations
 
 import os
 import pathlib
@@ -24,7 +25,9 @@ ship_map = ship_name_map.copy()
 
 # Ship masses
 # TODO: prefer something other than pickle for this storage (dev readability, security)
-ships = pickle.load(open(pathlib.Path(config.respath_path) / 'ships.p', 'rb'))
+ships_file = pathlib.Path(config.respath_path) / 'ships.p'
+with open(ships_file, 'rb') as ships_file_handle:
+    ships = pickle.load(ships_file_handle)
 
 
 def export(data, filename=None) -> None:  # noqa: C901, CCR001
@@ -116,9 +119,9 @@ def export(data, filename=None) -> None:  # noqa: C901, CCR001
 
             jumpboost += module.get('jumpboost', 0)  # type: ignore
 
-            for s in slot_map:
-                if slot.lower().startswith(s):
-                    loadout[slot_map[s]].append(cr + name)
+            for slot_prefix, index in slot_map.items():
+                if slot.lower().startswith(slot_prefix):
+                    loadout[index].append(cr + name)
                     break
 
             else:
