@@ -1,4 +1,6 @@
 """Search all given paths recursively for localised string calls."""
+from __future__ import annotations
+
 import argparse
 import ast
 import dataclasses
@@ -16,11 +18,9 @@ def get_func_name(thing: ast.AST) -> str:
     if isinstance(thing, ast.Name):
         return thing.id
 
-    elif isinstance(thing, ast.Attribute):
+    if isinstance(thing, ast.Attribute):
         return get_func_name(thing.value)
-
-    else:
-        return ''
+    return ''
 
 
 def get_arg(call: ast.Call) -> str:
@@ -31,10 +31,9 @@ def get_arg(call: ast.Call) -> str:
     arg = call.args[0]
     if isinstance(arg, ast.Constant):
         return arg.value
-    elif isinstance(arg, ast.Name):
+    if isinstance(arg, ast.Name):
         return f'VARIABLE! CHECK CODE! {arg.id}'
-    else:
-        return f'Unknown! {type(arg)=} {ast.dump(arg)} ||| {ast.unparse(arg)}'
+    return f'Unknown! {type(arg)=} {ast.dump(arg)} ||| {ast.unparse(arg)}'
 
 
 def find_calls_in_stmt(statement: ast.AST) -> list[ast.Call]:
@@ -174,7 +173,7 @@ def parse_template(path) -> set[str]:
 
     :param path: The path to the lang file
     """
-    lang_re = re.compile(r'\s*"((?:[^"]|(?:\"))+)"\s*=\s*"((?:[^"]|(?:\"))+)"\s*;\s*$')
+    lang_re = re.compile(r'\s*"([^"]+)"\s*=\s*"([^"]+)"\s*;\s*$')
     out = set()
     for line in pathlib.Path(path).read_text(encoding='utf-8').splitlines():
         match = lang_re.match(line)
@@ -270,15 +269,15 @@ def generate_lang_template(data: dict[pathlib.Path, list[ast.Call]]) -> str:
     for entry in deduped:
         assert len(entry.comments) == len(entry.locations)
         comment = ''
-        files = 'In files: ' + entry.files()
+        files = f'In files: {entry.files()}'
         string = f'"{entry.string}"'
 
-        for i in range(len(entry.comments)):
-            if entry.comments[i] is None:
+        for i, comment_text in enumerate(entry.comments):
+            if comment_text is None:
                 continue
 
             loc = entry.locations[i]
-            to_append = f'{loc.path.name}: {entry.comments[i]}; '
+            to_append = f'{loc.path.name}: {comment_text}; '
             if to_append not in comment:
                 comment += to_append
 

@@ -116,9 +116,7 @@ if __name__ == '__main__':
     if file_name == '-':
         file = sys.stdin
     else:
-        file = open(file_name)
-
-    res = json.load(file)
-    file.close()
+        with open(file_name) as file:
+            res = json.load(file)
 
     show_killswitch_set_info(KillSwitchSet(parse_kill_switches(res)))
