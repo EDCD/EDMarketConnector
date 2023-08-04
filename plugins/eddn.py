@@ -1,4 +1,5 @@
 """Handle exporting data to EDDN."""
+from __future__ import annotations
 
 # ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $#
 # ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $#
@@ -156,7 +157,7 @@ class EDDNSender:
     UNKNOWN_SCHEMA_RE = re.compile(
         r"^FAIL: \[JsonValidationException\('Schema "
         r"https://eddn.edcd.io/schemas/(?P<schema_name>.+)/(?P<schema_version>[0-9]+) is unknown, "
-        r"unable to validate.',\)\]$"
+        r"unable to validate.',\)]$"
     )
 
     def __init__(self, eddn: 'EDDN', eddn_endpoint: str) -> None:
@@ -454,7 +455,7 @@ class EDDNSender:
                 # This dropping is to cater for the time period when EDDN doesn't *yet* support a new schema.
                 return True
 
-            elif e.response.status_code == http.HTTPStatus.BAD_REQUEST:
+            if e.response.status_code == http.HTTPStatus.BAD_REQUEST:
                 # EDDN straight up says no, so drop the message
                 logger.debug(f"EDDN responded '400 Bad Request' to the message, dropping:\n{msg!r}")
                 return True
@@ -497,7 +498,7 @@ class EDDNSender:
         # Used to indicate if we've rescheduled at the faster rate already.
         have_rescheduled = False
         # We send either if docked or 'Delay sending until docked' not set
-        if this.docked or not (config.get_int('output') & config.OUT_EDDN_DELAY):
+        if this.docked or not config.get_int('output') & config.OUT_EDDN_DELAY:
             logger.trace_if("plugin.eddn.send", "Should send")
             # We need our own cursor here, in case the semantics of
             # tk `after()` could allow this to run in the middle of other
@@ -1050,7 +1051,7 @@ class EDDN:
                 msg['header'] = self.standard_header()
 
             msg_id = self.sender.add_message(cmdr, msg)
-            if this.docked or not (config.get_int('output') & config.OUT_EDDN_DELAY):
+            if this.docked or not config.get_int('output') & config.OUT_EDDN_DELAY:
                 # No delay in sending configured, so attempt immediately
                 logger.trace_if("plugin.eddn.send", "Sending 'non-station' message")
                 self.sender.send_message_by_id(msg_id)
@@ -2107,7 +2108,7 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:
     BUTTONX = 12  # noqa: N806 # indent Checkbuttons and Radiobuttons
 
     if prefsVersion.shouldSetDefaults('0.0.0.0', not bool(config.get_int('output'))):
-        output: int = (config.OUT_EDDN_SEND_STATION_DATA | config.OUT_EDDN_SEND_NON_STATION)  # default settings
+        output: int = config.OUT_EDDN_SEND_STATION_DATA | config.OUT_EDDN_SEND_NON_STATION  # default settings
 
     else:
         output = config.get_int('output')

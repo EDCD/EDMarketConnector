@@ -1,4 +1,5 @@
 """Coriolis ship export."""
+from __future__ import annotations
 
 # ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $#
 # ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $#
@@ -32,13 +33,11 @@ from typing import TYPE_CHECKING, Union
 import myNotebook as nb  # noqa: N813 # its not my fault.
 from EDMCLogging import get_main_logger
 from plug import show_error
+from config import config
 
 if TYPE_CHECKING:
     def _(s: str) -> str:
         ...
-
-# Migrate settings from <= 3.01
-from config import config
 
 if not config.get_str('shipyard_provider') and config.get_int('shipyard'):
     config.set('shipyard_provider', 'Coriolis')
@@ -160,7 +159,7 @@ def _get_target_url(is_beta: bool) -> str:
     if override_mode == 'beta':
         return beta_url
 
-    elif override_mode == 'normal':
+    if override_mode == 'normal':
         return normal_url
 
     # Must be auto

@@ -1,4 +1,5 @@
 """Show EDSM data in display and handle lookups."""
+from __future__ import annotations
 
 # TODO:
 #  1) Re-factor EDSM API calls out of journal_entry() into own function.
@@ -45,7 +46,6 @@ import requests
 
 import killswitch
 import monitor
-import myNotebook
 import myNotebook as nb  # noqa: N813
 import plug
 from companion import CAPIData
@@ -114,14 +114,14 @@ class This:
 
         self.label: tk.Widget | None = None
 
-        self.cmdr_label: myNotebook.Label | None = None
-        self.cmdr_text: myNotebook.Label | None = None
+        self.cmdr_label: nb.Label | None = None
+        self.cmdr_text: nb.Label | None = None
 
-        self.user_label: myNotebook.Label | None = None
-        self.user: myNotebook.Entry | None = None
+        self.user_label: nb.Label | None = None
+        self.user: nb.Entry | None = None
 
-        self.apikey_label: myNotebook.Label | None = None
-        self.apikey: myNotebook.Entry | None = None
+        self.apikey_label: nb.Label | None = None
+        self.apikey: nb.Entry | None = None
 
 
 this = This()
@@ -504,11 +504,10 @@ def credentials(cmdr: str) -> Optional[Tuple[str, str]]:
 
         logger.trace_if(CMDR_CREDS, f'{cmdr=}: returning ({edsm_usernames[idx]=}, {edsm_apikeys[idx]=})')
 
-        return (edsm_usernames[idx], edsm_apikeys[idx])
+        return edsm_usernames[idx], edsm_apikeys[idx]
 
-    else:
-        logger.trace_if(CMDR_CREDS, f'{cmdr=}: returning None')
-        return None
+    logger.trace_if(CMDR_CREDS, f'{cmdr=}: returning None')
+    return None
 
 
 def journal_entry(  # noqa: C901, CCR001
@@ -840,7 +839,7 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
                                         "('CarrierJump', 'FSDJump', 'Location', 'Docked')"
                                         " and it passed should_send()")
                         for p in pending:
-                            if p['event'] in ('Location'):
+                            if p['event'] in 'Location':
                                 logger.trace_if(
                                     'journal.locations',
                                     f'"Location" event in pending passed should_send(),timestamp: {p["timestamp"]}'
@@ -880,7 +879,7 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
 
                         for p in pending:
                             logger.trace_if('journal.locations', f"Event: {p!r}")
-                            if p['event'] in ('Location'):
+                            if p['event'] in 'Location':
                                 logger.trace_if(
                                     'journal.locations',
                                     f'Attempting API call for "Location" event with timestamp: {p["timestamp"]}'
@@ -956,8 +955,6 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
         last_game_version = game_version
         last_game_build = game_build
 
-    logger.debug('Done.')
-
 
 def should_send(entries: List[Mapping[str, Any]], event: str) -> bool:  # noqa: CCR001
     """
@@ -998,7 +995,7 @@ def should_send(entries: List[Mapping[str, Any]], event: str) -> bool:  # noqa: 
 
             return True
 
-        elif this.newgame:
+        if this.newgame:
             pass
 
         elif entry['event'] not in (
