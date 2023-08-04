@@ -36,13 +36,19 @@
 		<!-- Windows -->
 
 		<item>
-			<title>Release 5.9.2</title>
+			<title>Release 5.9.3</title>
 			<description>
 				<![CDATA[
 <style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
 
 <p>We now test against, and package with, Python 3.11.1.</p>
 <p><strong>As a consequence of this we no longer support Windows 7.</strong><br>
+
+<h2>Release 5.9.3</h2>
+<p>This release is identical to 5.9.2, except reverts a bad change. </p>
+<ul>
+<li>REVERTS Deprecated load_module() is now retired (#1462)</li>
+</ul><hr>
 
 <h2>Release 5.9.2</h2>
 <p>This release fixes a critical issue on clean installs which would not update
@@ -2057,10 +2063,10 @@ about this:
 				]]>
 			</description>
 			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F5.9.2/EDMarketConnector_Installer_5.9.2.exe"
+				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F5.9.3/EDMarketConnector_Installer_5.9.3.exe"
 				sparkle:os="windows"
-				sparkle:version="5.9.2"
-				length="14483637"
+				sparkle:version="5.9.3"
+				length="14489944"
 				type="application/x-ms-dos-executable"
 			/>
 		</item>

@@ -35,7 +35,7 @@ produce the Windows executables and installer.
 ---
 Release 5.9.3
 ===
-This release is identical to 5.9.3, except reverts a bad change. 
+This release is identical to 5.9.2, except reverts a bad change. 
 
 - REVERTS Deprecated load_module() is now retired (#1462)
 
