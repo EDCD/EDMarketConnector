@@ -33,7 +33,7 @@ def export(data: companion.CAPIData, requested_filename: Optional[str] = None) -
             h.write(string)
         return
 
-    elif not requested_filename:
+    if not requested_filename:
         logger.error(f"{requested_filename=} is not valid")
         return
 

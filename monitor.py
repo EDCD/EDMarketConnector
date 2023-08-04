@@ -1,4 +1,6 @@
 """Monitor for new Journal files and contents of latest."""
+from __future__ import annotations
+
 #                                                                             v [sic]
 # spell-checker: words onfoot unforseen relog fsdjump suitloadoutid slotid suitid loadoutid fauto Intimidator
 # spell-checker: words joinacrew quitacrew sellshiponrebuy newbal navroute npccrewpaidwage sauto
@@ -16,15 +18,16 @@ from os.path import basename, expanduser, getctime, isdir, join
 from time import gmtime, localtime, mktime, sleep, strftime, strptime, time
 from typing import TYPE_CHECKING, Any, BinaryIO, MutableMapping, Tuple
 
-if TYPE_CHECKING:
-    import tkinter
-
 import semantic_version
 
-import util_ships
 from config import config
 from edmc_data import edmc_suit_shortnames, edmc_suit_symbol_localised
 from EDMCLogging import get_main_logger
+import util_ships
+
+
+if TYPE_CHECKING:
+    import tkinter
 
 # spell-checker: words navroute
 
@@ -98,7 +101,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self.observed = None  # a watchdog ObservedWatch, or None if polling
         self.thread: threading.Thread | None = None
         # For communicating journal entries back to main thread
-        self.event_queue: queue.Queue = queue.Queue(maxsize=0)
+        self.event_queue: queue.Queue = queue.Queue()
 
         # On startup we might be:
         # 1) Looking at an old journal file because the game isn't running or the user has exited to the main menu.
@@ -276,20 +279,19 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         """
         Determine the newest Journal file name.
 
+        Odyssey Update 11 has, e.g.    Journal.2022-03-15T152503.01.log
+        Horizons Update 11 equivalent: Journal.220315152335.01.log
+
         :param journals_dir: The directory to check
         :return: The `str` form of the full path to the newest Journal file
         """
-        # os.listdir(None) returns CWD's contents
         if journals_dir is None:
             return None
 
-        journal_files = (x for x in listdir(journals_dir) if self._RE_LOGFILE.search(x))
-        if journal_files:
-            # Odyssey Update 11 has, e.g.    Journal.2022-03-15T152503.01.log
-            # Horizons Update 11 equivalent: Journal.220315152335.01.log
-            # So we can no longer use a naive sort.
-            journals_dir_path = pathlib.Path(journals_dir)
-            journal_files = (journals_dir_path / pathlib.Path(x) for x in journal_files)
+        journals_dir_path = pathlib.Path(journals_dir)
+        journal_files = [journals_dir_path / pathlib.Path(x) for x in listdir(journals_dir) if
+                         self._RE_LOGFILE.search(x)]
+        if any(journal_files):
             return str(max(journal_files, key=getctime))
 
         return None
@@ -514,8 +516,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             else:
                 self.game_was_running = self.game_running()
-
-        logger.debug('Done.')
 
     def synthesize_startup_event(self) -> dict[str, Any]:
         """
@@ -1551,7 +1551,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                         entry = json.load(mf)
 
                     except json.JSONDecodeError:
-                        logger.exception('Failed decoding ModulesInfo.json', exc_info=True)
+                        logger.exception('Failed decoding ModulesInfo.json')
 
                     else:
                         self.state['ModuleInfo'] = entry
@@ -1812,7 +1812,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['Credits'] -= entry.get('Price', 0)
 
             elif event_type == 'carrierbanktransfer':
-                if (newbal := entry.get('PlayerBalance')):
+                if newbal := entry.get('PlayerBalance'):
                     self.state['Credits'] = newbal
 
             elif event_type == 'carrierdecommission':
@@ -2265,14 +2265,14 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         oldfiles = sorted((x for x in listdir(config.get_str('outdir')) if regexp.match(x)))  # type: ignore
         if oldfiles:
             try:
-                with open(join(config.get_str('outdir'), oldfiles[-1]), 'r', encoding='utf-8') as h:  # type: ignore
+                with open(join(config.get_str('outdir'), oldfiles[-1]), encoding='utf-8') as h:  # type: ignore
                     if h.read() == string:
                         return  # same as last time - don't write
 
             except UnicodeError:
                 logger.exception("UnicodeError reading old ship loadout with utf-8 encoding, trying without...")
                 try:
-                    with open(join(config.get_str('outdir'), oldfiles[-1]), 'r') as h:  # type: ignore
+                    with open(join(config.get_str('outdir'), oldfiles[-1])) as h:  # type: ignore
                         if h.read() == string:
                             return  # same as last time - don't write
 
@@ -2380,7 +2380,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         try:
 
-            with open(join(self.currentdir, 'NavRoute.json'), 'r') as f:
+            with open(join(self.currentdir, 'NavRoute.json')) as f:
                 raw = f.read()
 
         except Exception as e:
@@ -2391,7 +2391,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             data = json.loads(raw)
 
         except json.JSONDecodeError:
-            logger.exception('Failed to decode NavRoute.json', exc_info=True)
+            logger.exception('Failed to decode NavRoute.json')
             return None
 
         if 'timestamp' not in data:  # quick sanity check
@@ -2406,7 +2406,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         try:
 
-            with open(join(self.currentdir, 'FCMaterials.json'), 'r') as f:
+            with open(join(self.currentdir, 'FCMaterials.json')) as f:
                 raw = f.read()
 
         except Exception as e:

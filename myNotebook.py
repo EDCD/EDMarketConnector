@@ -10,6 +10,8 @@ OSX and Windows.
 
 Entire file may be imported by plugins.
 """
+from __future__ import annotations
+
 import sys
 import tkinter as tk
 from tkinter import ttk
