@@ -1,4 +1,6 @@
 """Plugin API."""
+from __future__ import annotations
+
 import copy
 import importlib
 import logging
@@ -64,7 +66,7 @@ class Plugin:
                 ).load_module()
                 if getattr(module, 'plugin_start3', None):
                     newname = module.plugin_start3(os.path.dirname(loadfile))
-                    self.name = newname and str(newname) or name
+                    self.name = str(newname) if newname else name
                     self.module = module
                 elif getattr(module, 'plugin_start', None):
                     logger.warning(f'plugin {name} needs migrating\n')
@@ -100,7 +102,7 @@ class Plugin:
                 if appitem is None:
                     return None
 
-                elif isinstance(appitem, tuple):
+                if isinstance(appitem, tuple):
                     if (
                         len(appitem) != 2
                         or not isinstance(appitem[0], tk.Widget)

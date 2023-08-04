@@ -51,7 +51,8 @@ def lookup(module, ship_map, entitled=False) -> Optional[dict]:  # noqa: C901, C
     """
     # Lazily populate
     if not moduledata:
-        moduledata.update(pickle.load(open(join(config.respath_path, 'modules.p'),  'rb')))
+        with open(join(config.respath_path, 'modules.p'), 'rb') as file:
+            moduledata.update(pickle.load(file))
 
     if not module.get('name'):
         raise AssertionError(f'{module["id"]}')
