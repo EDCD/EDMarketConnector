@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Command-line interface. Requires prior setup through the GUI."""
-
+from __future__ import annotations
 
 import argparse
 import json
@@ -9,6 +9,7 @@ import os
 import queue
 import sys
 from os.path import getmtime
+from pathlib import Path
 from time import sleep, time
 from typing import TYPE_CHECKING, Any, List, Optional
 
@@ -155,7 +156,7 @@ def main():  # noqa: C901, CCR001
         args = parser.parse_args()
 
         if args.version:
-            updater = Updater(provider='internal')
+            updater = Updater()
             newversion: Optional[EDMCVersion] = updater.check_appcast()
             if newversion:
                 print(f'{appversion()} ({newversion.title!r} is available)')
@@ -207,10 +208,13 @@ sys.path: {sys.path}'''
             # system, chances are its the current locale, and not utf-8. Otherwise if it was copied, its probably
             # utf8. Either way, try the system FIRST because reading something like cp1251 in UTF-8 results in garbage
             # but the reverse results in an exception.
+            json_file = Path(args.j)
             try:
-                data = json.load(open(args.j))
+                with open(json_file) as file_handle:
+                    data = json.load(file_handle)
             except UnicodeDecodeError:
-                data = json.load(open(args.j, encoding='utf-8'))
+                with open(json_file, encoding='utf-8') as file_handle:
+                    data = json.load(file_handle)
 
             config.set('querytime', int(getmtime(args.j)))
 
@@ -293,8 +297,7 @@ sys.path: {sys.path}'''
                 if capi_response.exception:
                     raise capi_response.exception
 
-                else:
-                    raise ValueError(capi_response.message)
+                raise ValueError(capi_response.message)
 
             logger.trace_if('capi.worker', 'Answer is not a Failure')
             if not isinstance(capi_response, companion.EDMCCAPIResponse):
@@ -366,17 +369,17 @@ sys.path: {sys.path}'''
         else:
             print(deep_get(data, 'lastSystem', 'name', default='Unknown'))
 
-        if (args.m or args.o or args.s or args.n or args.j):
+        if args.m or args.o or args.s or args.n or args.j:
             if not data['commander'].get('docked'):
                 logger.error("Can't use -m, -o, -s, -n or -j because you're not currently docked!")
                 return
 
-            elif not deep_get(data, 'lastStarport', 'name'):
+            if not deep_get(data, 'lastStarport', 'name'):
                 logger.error("No data['lastStarport']['name'] from CAPI")
                 sys.exit(EXIT_LAGGING)
 
             # Ignore possibly missing shipyard info
-            elif not (data['lastStarport'].get('commodities') or data['lastStarport'].get('modules')):
+            if not (data['lastStarport'].get('commodities') or data['lastStarport'].get('modules')):
                 logger.error("No commodities or outfitting (modules) in CAPI data")
                 return
 
@@ -462,12 +465,12 @@ sys.path: {sys.path}'''
             except Exception:
                 logger.exception('Failed to send data to EDDN')
 
-    except companion.ServerError:
-        logger.exception('Frontier CAPI Server returned an error')
-        sys.exit(EXIT_SERVER)
-
     except companion.ServerConnectionError:
         logger.exception('Exception while contacting server')
+        sys.exit(EXIT_SERVER)
+
+    except companion.ServerError:
+        logger.exception('Frontier CAPI Server returned an error')
         sys.exit(EXIT_SERVER)
 
     except companion.CredentialsError:

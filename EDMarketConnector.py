@@ -9,6 +9,7 @@ import locale
 import pathlib
 import queue
 import re
+import subprocess
 import sys
 import threading
 import webbrowser
@@ -216,7 +217,7 @@ if __name__ == '__main__':  # noqa: C901
         else:
             print("--force-edmc-protocol is only valid on Windows")
             parser.print_help()
-            exit(1)
+            sys.exit(1)
 
     if args.debug_sender and len(args.debug_sender) > 0:
         import config as conf_module
@@ -276,8 +277,6 @@ if __name__ == '__main__':  # noqa: C901
                         if GetWindowText(h, buf, text_length):
                             return buf.value
 
-                    return None
-
                 @ctypes.WINFUNCTYPE(BOOL, HWND, LPARAM)
                 def enumwindowsproc(window_handle, l_param):  # noqa: CCR001
                     """
@@ -323,13 +322,9 @@ if __name__ == '__main__':  # noqa: C901
                 # Ref: <https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-enumwindows>
                 EnumWindows(enumwindowsproc, 0)
 
-        return
 
     def already_running_popup():
         """Create the "already running" popup."""
-        import tkinter as tk
-        from tkinter import ttk
-
         # Check for CL arg that suppresses this popup.
         if args.suppress_dupe_process_popup:
             sys.exit(0)
@@ -373,15 +368,10 @@ if __name__ == '__main__':  # noqa: C901
 
     git_branch = ""
     try:
-        import subprocess
-        git_cmd = subprocess.Popen('git branch --show-current'.split(),
-                                   stdout=subprocess.PIPE,
-                                   stderr=subprocess.STDOUT
-                                   )
-        out, err = git_cmd.communicate()
-        git_branch = out.decode().rstrip('\n')
+        result = subprocess.run(['git', 'branch', '--show-current'], capture_output=True, text=True)
+        git_branch = result.stdout.strip()
 
-    except Exception:
+    except subprocess.CalledProcessError:
         pass
 
     if (
@@ -637,7 +627,7 @@ class AppWindow:
             self.updater = update.Updater(tkroot=self.w, provider='external')
 
         else:
-            self.updater = update.Updater(tkroot=self.w, provider='internal')
+            self.updater = update.Updater(tkroot=self.w)
             self.updater.check_for_updates()  # Sparkle / WinSparkle does this automatically for packaged apps
 
         if sys.platform == 'darwin':
@@ -1016,7 +1006,7 @@ class AppWindow:
 
         :return: True if all OK, else False to trigger play_bad in caller.
         """
-        if config.get_int('output') & (config.OUT_STATION_ANY):
+        if config.get_int('output') & config.OUT_STATION_ANY:
             if not data['commander'].get('docked') and not monitor.state['OnFoot']:
                 if not self.status['text']:
                     # Signal as error because the user might actually be docked
@@ -1121,7 +1111,7 @@ class AppWindow:
 
                 return
 
-            elif play_sound:
+            if play_sound:
                 hotkeymgr.play_good()
 
             # LANG: Status - Attempting to retrieve data from Frontier CAPI
@@ -1201,9 +1191,7 @@ class AppWindow:
                 logger.trace_if('capi.worker', f'Failed Request: {capi_response.message}')
                 if capi_response.exception:
                     raise capi_response.exception
-
-                else:
-                    raise ValueError(capi_response.message)
+                raise ValueError(capi_response.message)
 
             logger.trace_if('capi.worker', 'Answer is not a Failure')
             if not isinstance(capi_response, companion.EDMCCAPIResponse):
@@ -1285,7 +1273,7 @@ class AppWindow:
                                    f"{monitor.state['OnFoot']!r} and {monitor.state['StationName']!r}")
                     raise companion.ServerLagging()
 
-                elif capi_response.capi_data['commander']['docked'] and monitor.state['StationName'] is None:
+                if capi_response.capi_data['commander']['docked'] and monitor.state['StationName'] is None:
                     # Likely (re-)Embarked on ship docked at an EDO settlement.
                     # Both Disembark and Embark have `"Onstation": false` in Journal.
                     # So there's nothing to tell us which settlement we're (still,
@@ -1381,9 +1369,12 @@ class AppWindow:
             # TODO: Set status text
             return
 
-        except companion.ServerConnectionError:
+        except companion.ServerConnectionError as e:
             # LANG: Frontier CAPI server error when fetching data
             self.status['text'] = _('Frontier CAPI server error')
+            logger.warning(f'Exception while contacting server: {e}')
+            err = self.status['text'] = str(e)
+            play_bad = True
 
         except companion.CredentialsRequireRefresh:
             # We need to 'close' the auth else it'll see STATE_OK and think login() isn't needed
@@ -1420,11 +1411,6 @@ class AppWindow:
             play_bad = True
             companion.session.invalidate()
             self.login()
-
-        except companion.ServerConnectionError as e:  # TODO: unreachable (subclass of ServerLagging -- move to above)
-            logger.warning(f'Exception while contacting server: {e}')
-            err = self.status['text'] = str(e)
-            play_bad = True
 
         except Exception as e:  # Including CredentialsError, ServerError
             logger.debug('"other" exception', exc_info=e)
@@ -1572,7 +1558,7 @@ class AppWindow:
                 logger.info('StartUp or LoadGame event')
 
                 # Disable WinSparkle automatic update checks, IFF configured to do so when in-game
-                if config.get_int('disable_autoappupdatecheckingame') and 1:
+                if config.get_int('disable_autoappupdatecheckingame'):
                     if self.updater is not None:
                         self.updater.set_automatic_updates_check(False)
 
@@ -2264,7 +2250,7 @@ sys.path: {sys.path}'''
     def messagebox_not_py3():
         """Display message about plugins not updated for Python 3.x."""
         plugins_not_py3_last = config.get_int('plugins_not_py3_last', default=0)
-        if (plugins_not_py3_last + 86400) < int(time()) and len(plug.PLUGINS_not_py3):
+        if (plugins_not_py3_last + 86400) < int(time()) and plug.PLUGINS_not_py3:
             # LANG: Popup-text about 'active' plugins without Python 3.x support
             popup_text = _(
                 "One or more of your enabled plugins do not yet have support for Python 3.x. Please see the "

@@ -438,8 +438,23 @@ else:  # Linux / Run from source
             if self.parse():
                 self.send_header('Content-Type', 'text/html')
                 self.end_headers()
-                self.wfile.write('<html><head><title>Authentication successful</title></head>'.encode('utf-8'))
-                self.wfile.write('<body><p>Authentication successful</p></body>'.encode('utf-8'))
+                self.wfile.write('<html>'.encode('utf-8'))
+                self.wfile.write('<head>'.encode('utf-8'))
+                self.wfile.write('<title>Authentication successful - Elite: Dangerous</title>'.encode('utf-8'))
+                self.wfile.write('<style>'.encode('utf-8'))
+                self.wfile.write(
+                    'body { background-color: #000; color: #fff; font-family: "Helvetica Neue", Arial, sans-serif; }'.encode(
+                        'utf-8'))
+                self.wfile.write('h1 { text-align: center; margin-top: 100px; }'.encode('utf-8'))
+                self.wfile.write('p { text-align: center; }'.encode('utf-8'))
+                self.wfile.write('</style>'.encode('utf-8'))
+                self.wfile.write('</head>'.encode('utf-8'))
+                self.wfile.write('<body>'.encode('utf-8'))
+                self.wfile.write('<h1>Authentication successful</h1>'.encode('utf-8'))
+                self.wfile.write('<p>Thank you for authenticating.</p>'.encode('utf-8'))
+                self.wfile.write('<p>Please close this browser tab now.</p>'.encode('utf-8'))
+                self.wfile.write('</body>'.encode('utf-8'))
+                self.wfile.write('</html>'.encode('utf-8'))
             else:
                 self.end_headers()
 

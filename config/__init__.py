@@ -91,8 +91,12 @@ def git_shorthash_from_head() -> str:
     shorthash: str = None  # type: ignore
 
     try:
-        result = subprocess.run(['git', 'rev-parse', '--short', 'HEAD'], capture_output=True, text=True)
-        out = result.stdout.strip()
+        git_cmd = subprocess.Popen(
+            "git rev-parse --short HEAD".split(),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+        )
+        out, err = git_cmd.communicate()
 
     except subprocess.CalledProcessError as e:
         logger.info(f"Couldn't run git command for short hash: {e!r}")
@@ -128,7 +132,7 @@ def appversion() -> semantic_version.Version:
     if getattr(sys, 'frozen', False):
         # Running frozen, so we should have a .gitversion file
         # Yes, .parent because if frozen we're inside library.zip
-        with open(pathlib.Path(sys.path[0]).parent / GITVERSION_FILE, 'r', encoding='utf-8') as gitv:
+        with open(pathlib.Path(sys.path[0]).parent / GITVERSION_FILE, encoding='utf-8') as gitv:
             shorthash = gitv.read()
 
     else:
