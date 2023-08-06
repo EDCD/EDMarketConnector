@@ -13,7 +13,7 @@ import sys
 import threading
 import webbrowser
 from builtins import object, str
-from os import chdir, environ, system
+from os import chdir, environ
 from os.path import dirname, join
 from time import localtime, strftime, time
 from typing import TYPE_CHECKING, Any, Literal, Optional, Tuple, Union
