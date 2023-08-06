@@ -699,7 +699,7 @@ class AppWindow(object):
             self.help_menu.add_command(command=lambda: self.updater.check_for_updates())  # Check for Updates...
             # About E:D Market Connector
             self.help_menu.add_command(command=lambda: not self.HelpAbout.showing and self.HelpAbout(self.w))
-            self.help_menu.add_command(command=self.help_open_log_folder)  # Open Log Folder
+            self.help_menu.add_command(command=prefs.help_open_log_folder)  # Open Log Folder
 
             self.menubar.add_cascade(menu=self.help_menu)
             if sys.platform == 'win32':
@@ -1793,20 +1793,6 @@ class AppWindow(object):
         """Open Wiki Privacy page in browser."""
         webbrowser.open("https://github.com/EDCD/EDMarketConnector/issues/new?assignees=&labels=bug%2C+unconfirmed"
                         "&template=bug_report.md&title=")
-
-    def help_open_log_folder(self, event=None) -> None:
-        """Open the folder logs are stored in."""
-        logfile_loc = pathlib.Path(tempfile.gettempdir())
-        logfile_loc /= f'{appname}'
-        if sys.platform.startswith('win'):
-            # On Windows, use the "start" command to open the folder
-            system(f'start "" "{logfile_loc}"')
-        elif sys.platform.startswith('darwin'):
-            # On macOS, use the "open" command to open the folder
-            system(f'open "{logfile_loc}"')
-        elif sys.platform.startswith('linux'):
-            # On Linux, use the "xdg-open" command to open the folder
-            system(f'xdg-open "{logfile_loc}"')
 
     def help_privacy(self, event=None) -> None:
         """Open Wiki Privacy page in browser."""
