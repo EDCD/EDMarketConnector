@@ -74,21 +74,20 @@ begin
 end;
 
 
-
 [Registry]
 ; Create the main registry key under HKCR
-Root: HKCR; Subkey: "edmc"; Flags: uninsdeletevalue
+Root: HKCR; Subkey: "edmc"; Flags: uninsdeletekey
 ; Create a default value under the "edmc" key
-Root: HKCR; Subkey: "edmc"; ValueType: string; ValueName: ""; ValueData: "{#MyAppName}"; Flags: uninsdeletevalue
+Root: HKCR; Subkey: "edmc"; ValueType: string; ValueName: ""; ValueData: "{#MyAppName}"; Flags: uninsdeletekey
 ; Create the "URL Protocol" value under the "edmc" key
-Root: HKCR; Subkey: "edmc"; ValueType: string; ValueName: "URL Protocol"; ValueData: ""; Flags: uninsdeletevalue
+Root: HKCR; Subkey: "edmc"; ValueType: string; ValueName: "URL Protocol"; ValueData: ""; Flags: uninsdeletekey
 ; Create the "DefaultIcon" subkey under the "edmc" key
-Root: HKCR; Subkey: "edmc\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\EDMarketConnector.exe,0"; Flags: uninsdeletevalue
+Root: HKCR; Subkey: "edmc\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\EDMarketConnector.exe,0"; Flags: uninsdeletekey
 ; Create the "shell" subkey under the "edmc" key
-Root: HKCR; Subkey: "edmc\shell"; Flags: uninsdeletevalue
+Root: HKCR; Subkey: "edmc\shell"; Flags: uninsdeletekey
 ; Create the "open" subkey under the "shell" subkey
-Root: HKCR; Subkey: "edmc\shell\open"; Flags: uninsdeletevalue
+Root: HKCR; Subkey: "edmc\shell\open"; Flags: uninsdeletekey
 ; Create the "command" subkey under the "open" subkey
-Root: HKCR; Subkey: "edmc\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\EDMarketConnector.exe"" ""%1"""; Flags: uninsdeletevalue
+Root: HKCR; Subkey: "edmc\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\EDMarketConnector.exe"" ""%1"""; Flags: uninsdeletekey
 ; Create the "ddeexec" subkey under the "open" subkey
-Root: HKCR; Subkey: "edmc\shell\open\ddeexec"; ValueType: string; ValueName: ""; ValueData: "Open(""%1"")"; Flags: uninsdeletevalue
+Root: HKCR; Subkey: "edmc\shell\open\ddeexec"; ValueType: string; ValueName: ""; ValueData: "Open(""%1"")"; Flags: uninsdeletekey
