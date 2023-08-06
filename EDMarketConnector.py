@@ -13,7 +13,7 @@ import sys
 import threading
 import webbrowser
 from builtins import object, str
-from os import chdir, environ
+from os import chdir, environ, system
 from os.path import dirname, join
 from time import localtime, strftime, time
 from typing import TYPE_CHECKING, Any, Literal, Optional, Tuple, Union
@@ -699,6 +699,7 @@ class AppWindow(object):
             self.help_menu.add_command(command=lambda: self.updater.check_for_updates())  # Check for Updates...
             # About E:D Market Connector
             self.help_menu.add_command(command=lambda: not self.HelpAbout.showing and self.HelpAbout(self.w))
+            self.help_menu.add_command(command=self.help_open_log_folder)  # Open Log Folder
 
             self.menubar.add_cascade(menu=self.help_menu)
             if sys.platform == 'win32':
@@ -935,6 +936,8 @@ class AppWindow(object):
             self.help_menu.entryconfigure(3, label=_('Report A Bug'))  # LANG: Help > Report A Bug
             self.help_menu.entryconfigure(4, label=_('Privacy Policy'))  # LANG: Help > Privacy Policy
             self.help_menu.entryconfigure(5, label=_('Release Notes'))  # LANG: Help > Release Notes
+            self.help_menu.entryconfigure(6, label=_('Open Log Folder'))  # LANG: Help > Open Log Folder
+
         else:
             self.menubar.entryconfigure(1, label=_('File'))  # LANG: 'File' menu title
             self.menubar.entryconfigure(2, label=_('Edit'))  # LANG: 'Edit' menu title
@@ -957,6 +960,7 @@ class AppWindow(object):
             self.help_menu.entryconfigure(4, label=_('Release Notes'))  # LANG: Help > Release Notes
             self.help_menu.entryconfigure(5, label=_('Check for Updates...'))  # LANG: Help > Check for Updates...
             self.help_menu.entryconfigure(6, label=_("About {APP}").format(APP=applongname))  # LANG: Help > About App
+            self.help_menu.entryconfigure(7, label=_('Open Log Folder'))  # LANG: Help > Open Log Folder
 
         # Edit menu
         self.edit_menu.entryconfigure(0, label=_('Copy'))  # LANG: Label for 'Copy' as in 'Copy and Paste'
@@ -1789,6 +1793,20 @@ class AppWindow(object):
         """Open Wiki Privacy page in browser."""
         webbrowser.open("https://github.com/EDCD/EDMarketConnector/issues/new?assignees=&labels=bug%2C+unconfirmed"
                         "&template=bug_report.md&title=")
+
+    def help_open_log_folder(self, event=None) -> None:
+        """Open the folder logs are stored in."""
+        logfile_loc = pathlib.Path(tempfile.gettempdir())
+        logfile_loc /= f'{appname}'
+        if sys.platform.startswith('win'):
+            # On Windows, use the "start" command to open the folder
+            system(f'start "" "{logfile_loc}"')
+        elif sys.platform.startswith('darwin'):
+            # On macOS, use the "open" command to open the folder
+            system(f'open "{logfile_loc}"')
+        elif sys.platform.startswith('linux'):
+            # On Linux, use the "xdg-open" command to open the folder
+            system(f'xdg-open "{logfile_loc}"')
 
     def help_privacy(self, event=None) -> None:
         """Open Wiki Privacy page in browser."""
