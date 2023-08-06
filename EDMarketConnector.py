@@ -14,7 +14,7 @@ import sys
 import threading
 import webbrowser
 from builtins import str
-from os import chdir, environ
+from os import chdir, environ, system
 from os.path import dirname, join
 from time import localtime, strftime, time
 from typing import TYPE_CHECKING, Any, Literal, Optional, Tuple, Union
@@ -368,10 +368,13 @@ if __name__ == '__main__':  # noqa: C901
 
     git_branch = ""
     try:
-        result = subprocess.run(['git', 'branch', '--show-current'], capture_output=True, text=True)
-        git_branch = result.stdout.strip()
-
-    except subprocess.CalledProcessError:
+        git_cmd = subprocess.Popen('git branch --show-current'.split(),
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.STDOUT
+                                   )
+        out, err = git_cmd.communicate()
+        git_branch = out.decode().rstrip('\n')
+    except Exception:
         pass
 
     if (
