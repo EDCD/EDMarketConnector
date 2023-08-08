@@ -1,4 +1,5 @@
 #define MyAppName "EDMarketConnector"
+#define MyAppLongName "Elite Dangerous Market Connector"
 #define MyAppVersion "$appver"
 #define MyAppPublisher "EDCD"
 #define MyAppURL "https://edcd.github.io/"
@@ -45,8 +46,8 @@ Source: "dist.win32\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "dist.win32\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
+Name: "{autoprograms}\{#MyAppLongName}"; Filename: "{app}\{#MyAppExeName}"; Comment: "EDMC";
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon;
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
