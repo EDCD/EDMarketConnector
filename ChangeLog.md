@@ -33,6 +33,12 @@ produce the Windows executables and installer.
   currently used version in a given branch.
 
 ---
+Release 5.9.3
+===
+This release is identical to 5.9.3, except reverts a bad change. 
+
+- REVERTS Deprecated load_module() is now retired (#1462)
+
 Release 5.9.2
 ===
 This release fixes a critical issue on clean installs which would not update the
