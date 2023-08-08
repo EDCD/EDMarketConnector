@@ -1,4 +1,5 @@
 #define MyAppName "EDMarketConnector"
+#define MyAppLongName "Elite Dangerous Market Connector"
 #define MyAppVersion "$appver"
 #define MyAppPublisher "EDCD"
 #define MyAppURL "https://edcd.github.io/"
@@ -32,7 +33,7 @@ LicenseFile=LICENSE
 AlwaysShowDirOnReadyPage=yes
 UninstallDisplayIcon={app}\{#MyAppExeName}
 MinVersion=6.2
-
+ChangesAssociations = yes
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -45,36 +46,49 @@ Source: "dist.win32\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "dist.win32\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
+Name: "{autoprograms}\{#MyAppLongName}"; Filename: "{app}\{#MyAppExeName}"; Comment: "EDMC";
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon;
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 
 ;Check if a WiX-based installation exists. If so, kill it with fire.
 [Code]
+function IsWixInstalled: Boolean;
+var
+  Uninstall: String;
+begin
+  Result := RegQueryStringValue(HKLM, 'SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{5E9AD4D3-0365-41D5-9586-9368745DD109}', 'UninstallString', Uninstall);
+end;
+
 procedure CurStepChanged(CurStep: TSetupStep);
 var
   ResultCode: Integer;
   Uninstall: String;
 begin
-  if (CurStep = ssInstall) then begin
-    if RegQueryStringValue(HKLM, 'SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{5E9AD4D3-0365-41D5-9586-9368745DD109}', 'UninstallString', Uninstall) then begin
-      MsgBox('Warning: an old version of EDMC is installed! Please close EDMC while we remove the old version!', mbInformation, MB_OK);
-      Uninstall := '/x {5E9AD4D3-0365-41D5-9586-9368745DD109}';
-      Exec('MsiExec.exe', Uninstall, '', SW_SHOW, ewWaitUntilTerminated, ResultCode);
-    end;
+  if (CurStep = ssInstall) and IsWixInstalled then
+  begin
+    MsgBox('Warning: an old version of EDMC is installed! Please close EDMC while we remove the old version!', mbInformation, MB_OK);
+    Uninstall := '/x {5E9AD4D3-0365-41D5-9586-9368745DD109}';
+    Exec('MsiExec.exe', Uninstall, '', SW_SHOW, ewWaitUntilTerminated, ResultCode);
   end;
 end;
 
 
 [Registry]
-; Create the registry key for the custom file type
+; Create the main registry key under HKCR
 Root: HKCR; Subkey: "edmc"; Flags: uninsdeletekey
-; Create the registry values for the custom file type
-Root: HKCR; Subkey: "edmc"; ValueType: string; ValueName: ""; ValueData: "{#MyAppName}"; Flags: uninsdeletevalue
-Root: HKCR; Subkey: "edmc\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\{#MyAppExeName},0"; Flags: uninsdeletevalue
-Root: HKCR; Subkey: "edmc\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""%1"""; Flags: uninsdeletevalue
-
-; Register the URL protocol handler
-Root: HKCR; Subkey: "edmc"; ValueType: string; ValueName: "URL Protocol"; ValueData: ""; Flags: uninsdeletevalue
+; Create a default value under the "edmc" key
+Root: HKCR; Subkey: "edmc"; ValueType: string; ValueName: ""; ValueData: "{#MyAppName}"; Flags: uninsdeletekey
+; Create the "URL Protocol" value under the "edmc" key
+Root: HKCR; Subkey: "edmc"; ValueType: string; ValueName: "URL Protocol"; ValueData: ""; Flags: uninsdeletekey
+; Create the "DefaultIcon" subkey under the "edmc" key
+Root: HKCR; Subkey: "edmc\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\EDMarketConnector.exe,0"; Flags: uninsdeletekey
+; Create the "shell" subkey under the "edmc" key
+Root: HKCR; Subkey: "edmc\shell"; Flags: uninsdeletekey
+; Create the "open" subkey under the "shell" subkey
+Root: HKCR; Subkey: "edmc\shell\open"; Flags: uninsdeletekey
+; Create the "command" subkey under the "open" subkey
+Root: HKCR; Subkey: "edmc\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\EDMarketConnector.exe"" ""%1"""; Flags: uninsdeletekey
+; Create the "ddeexec" subkey under the "open" subkey
+Root: HKCR; Subkey: "edmc\shell\open\ddeexec"; ValueType: string; ValueName: ""; ValueData: "Open(""%1"")"; Flags: uninsdeletekey
