@@ -1,17 +1,13 @@
-<?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/">
-	<channel>
-		<title>E:D Market Connector</title>
-		<link>https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml</link>
-		<description>Most recent changes with links to updates.</description>
-
-		<!-- Important: Mac must be listed before Windows since Sparkle < 1.18.1 on OSX doesn't check sparkle:os -->
-
-		<item>
-			<title>Release 3.44</title>
-			<description>
-				<![CDATA[
-<style>h2 { font-size: 105%; }</style>
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+   <channel>
+      <title>E:D Market Connector</title>
+      <link>https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml</link>
+      <description>Most recent changes with links to updates.</description>
+      <!-- Important: Mac must be listed before Windows since Sparkle < 1.18.1 on OSX doesn't check sparkle:os -->
+      <item>
+         <title>Release 3.44</title>
+         <description><![CDATA[<style>h2 { font-size: 105%; }</style>
 <h2>Release 3.44</h2>
 <p><b>CHANGE OF MAINTAINER</b></p>
 <p>Due to a lack of time to give the project the attention it needs Marginal has handed over ownership of the EDMarketConnector GitHub repository to the EDCD (Elite Dangerous Community Developers) organisation.</p>
@@ -21,28 +17,24 @@
 <ul>
  <li>Version increased to 3.4.4.0 / 3.44.</li>
  <li>URL the application checks for updates changed to point to github,</li>
-</ul>
-				]]>
-			</description>
-			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/rel-344/EDMarketConnector_mac_344.zip"
-				sparkle:os="macos"
-				sparkle:version="3.4.4.0"
-				length="6058091"
-				type="application/octet-stream"
-			/>
-		</item>
-
-		<!-- Windows -->
-
-		<item>
-			<title>Release 5.9.3</title>
-			<description>
-				<![CDATA[
-<style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
+</ul>]]></description>
+         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/rel-344/EDMarketConnector_mac_344.zip" sparkle:os="macos" sparkle:version="3.4.4.0" length="6058091" type="application/octet-stream" />
+      </item>
+      <!-- Windows -->
+      <item>
+         <title>Release 5.9.4</title>
+         <description><![CDATA[<style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
 
 <p>We now test against, and package with, Python 3.11.1.</p>
 <p><strong>As a consequence of this we no longer support Windows 7.</strong><br>
+
+<h2>Release 5.9.4</h2>
+<p>This release fixes a widely-reported bug that resulted in the cAPI Authentication flow being disrupted for a subset of users. Thank you to all the CMDRs who reported this to us and provided logs to us so that we could get the issue isolated.
+</p>
+<ul>
+<li>Fixes a missing registry issue that could cause the EDMC:// protocol to fail. (#2061, #2059, #2058, #2057)</li>
+<li>Renames the default start menu shortcut to be more clear. (#2062)</li>
+</ul><hr>
 
 <h2>Release 5.9.3</h2>
 <p>This release is identical to 5.9.2, except reverts a bad change. </p>
@@ -2057,19 +2049,8 @@ core EDMC code copes with this.  Please add a reproduction to the issue
 about this:
 <a href="https://issues.frontierstore.net/issue-detail/28638" rel="nofollow">PTS CAPI saying Commander is Docked after jumping to new system</a>.</p>
 </li>
-</ul>
-
-
-				]]>
-			</description>
-			<enclosure
-				url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F5.9.3/EDMarketConnector_Installer_5.9.3.exe"
-				sparkle:os="windows"
-				sparkle:version="5.9.3"
-				length="14489944"
-				type="application/x-ms-dos-executable"
-			/>
-		</item>
-
-	</channel>
+</ul>]]></description>
+         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F5.9.4/EDMarketConnector_Installer_5.9.4.exe" sparkle:os="windows" sparkle:version="5.9.4" length="14486541" type="application/x-ms-dos-executable" />
+      </item>
+   </channel>
 </rss>
