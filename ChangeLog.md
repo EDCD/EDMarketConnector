@@ -33,6 +33,21 @@ produce the Windows executables and installer.
   currently used version in a given branch.
 
 ---
+Release 5.9.4
+===
+This release fixes a widely-reported bug that resulted in the cAPI Authentication
+flow being disrupted for a subset of users. Thank you to all the CMDRs who reported this to
+us and provided logs to us so that we could get the issue isolated.
+
+- Fixes a missing registry issue that could cause the EDMC:// protocol to fail.
+(#2061, #2059, #2058, #2057)
+- Renames the default start menu shortcut to be more clear. (#2062)
+
+Known Issues
+--
+- The popup on the EDMC Authentication Box is not translated yet. Ich spreche kein Deutsch.
+- The cAPI is giving an Error: 500 on the /shipyard endpoint on carriers. We think this is an FDEV issue.
+
 Release 5.9.3
 ===
 This release is identical to 5.9.2, except reverts a bad change. 
