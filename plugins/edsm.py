@@ -4,40 +4,22 @@ edsm.py - Handling EDSM Data and Display.
 Copyright (c) EDCD, All Rights Reserved
 Licensed under the GNU General Public License.
 See LICENSE file.
+
+This is an EDMC 'core' plugin.
+All EDMC plugins are *dynamically* loaded at run-time.
+
+We build for Windows using `py2exe`.
+`py2exe` can't possibly know about anything in the dynamically loaded core plugins.
+
+Thus, you **MUST** check if any imports you add in this file are only
+referenced in this file (or only in any other core plugin), and if so...
+
+    YOU MUST ENSURE THAT PERTINENT ADJUSTMENTS ARE MADE IN
+    `build.py` TO ENSURE THE FILES ARE ACTUALLY PRESENT
+    IN AN END-USER INSTALLATION ON WINDOWS.
 """
 from __future__ import annotations
 
-# TODO:
-#  1) Re-factor EDSM API calls out of journal_entry() into own function.
-#  2) Fix how StartJump already changes things, but only partially.
-#  3) Possibly this and other two 'provider' plugins could do with being
-#    based on a single class that they extend.  There's a lot of duplicated
-#    logic.
-#  4) Ensure the EDSM API call(back) for setting the image at end of system
-#    text is always fired.  i.e. CAPI cmdr_data() processing.
-
-# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $#
-# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $#
-#
-# This is an EDMC 'core' plugin.
-#
-# All EDMC plugins are *dynamically* loaded at run-time.
-#
-# We build for Windows using `py2exe`.
-#
-# `py2exe` can't possibly know about anything in the dynamically loaded
-# core plugins.
-#
-# Thus you **MUST** check if any imports you add in this file are only
-# referenced in this file (or only in any other core plugin), and if so...
-#
-#     YOU MUST ENSURE THAT PERTINENT ADJUSTMENTS ARE MADE IN
-#     `build.py` SO AS TO ENSURE THE FILES ARE ACTUALLY PRESENT IN
-#     AN END-USER INSTALLATION ON WINDOWS.
-#
-#
-# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $#
-# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $#
 import json
 import threading
 import tkinter as tk
@@ -63,6 +45,15 @@ from ttkHyperlinkLabel import HyperlinkLabel
 if TYPE_CHECKING:
     def _(x: str) -> str:
         return x
+
+# TODO:
+#  1) Re-factor EDSM API calls out of journal_entry() into own function.
+#  2) Fix how StartJump already changes things, but only partially.
+#  3) Possibly this and other two 'provider' plugins could do with being
+#    based on a single class that they extend.  There's a lot of duplicated
+#    logic.
+#  4) Ensure the EDSM API call(back) for setting the image at end of system
+#    text is always fired.  i.e. CAPI cmdr_data() processing.
 
 logger = get_main_logger()
 
