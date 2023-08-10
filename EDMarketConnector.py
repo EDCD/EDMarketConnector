@@ -699,6 +699,7 @@ class AppWindow(object):
             self.help_menu.add_command(command=lambda: self.updater.check_for_updates())  # Check for Updates...
             # About E:D Market Connector
             self.help_menu.add_command(command=lambda: not self.HelpAbout.showing and self.HelpAbout(self.w))
+            self.help_menu.add_command(command=prefs.help_open_log_folder)  # Open Log Folder
 
             self.menubar.add_cascade(menu=self.help_menu)
             if sys.platform == 'win32':
@@ -935,6 +936,8 @@ class AppWindow(object):
             self.help_menu.entryconfigure(3, label=_('Report A Bug'))  # LANG: Help > Report A Bug
             self.help_menu.entryconfigure(4, label=_('Privacy Policy'))  # LANG: Help > Privacy Policy
             self.help_menu.entryconfigure(5, label=_('Release Notes'))  # LANG: Help > Release Notes
+            self.help_menu.entryconfigure(6, label=_('Open Log Folder'))  # LANG: Help > Open Log Folder
+
         else:
             self.menubar.entryconfigure(1, label=_('File'))  # LANG: 'File' menu title
             self.menubar.entryconfigure(2, label=_('Edit'))  # LANG: 'Edit' menu title
@@ -957,6 +960,7 @@ class AppWindow(object):
             self.help_menu.entryconfigure(4, label=_('Release Notes'))  # LANG: Help > Release Notes
             self.help_menu.entryconfigure(5, label=_('Check for Updates...'))  # LANG: Help > Check for Updates...
             self.help_menu.entryconfigure(6, label=_("About {APP}").format(APP=applongname))  # LANG: Help > About App
+            self.help_menu.entryconfigure(7, label=_('Open Log Folder'))  # LANG: Help > Open Log Folder
 
         # Edit menu
         self.edit_menu.entryconfigure(0, label=_('Copy'))  # LANG: Label for 'Copy' as in 'Copy and Paste'
