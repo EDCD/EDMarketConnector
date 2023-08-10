@@ -276,6 +276,7 @@ if __name__ == '__main__':  # noqa: C901
                         buf = ctypes.create_unicode_buffer(text_length)
                         if GetWindowText(h, buf, text_length):
                             return buf.value
+                    return None
 
                 @ctypes.WINFUNCTYPE(BOOL, HWND, LPARAM)
                 def enumwindowsproc(window_handle, l_param):  # noqa: CCR001
