@@ -1,7 +1,6 @@
 """Windows config implementation."""
 from __future__ import annotations
 
-# spell-checker: words folderid deps hkey edcd
 import ctypes
 import functools
 import pathlib
@@ -212,7 +211,7 @@ class WinConfig(AbstractConfig):
             reg_type = winreg.REG_SZ
             winreg.SetValueEx(self.__reg_handle, key, REG_RESERVED_ALWAYS_ZERO, winreg.REG_SZ, val)
 
-        elif isinstance(val, int):  # The original code checked for numbers.Integral, I dont think that is needed.
+        elif isinstance(val, int):  # The original code checked for numbers.Integral, I don't think that is needed.
             reg_type = winreg.REG_DWORD
 
         elif isinstance(val, list):

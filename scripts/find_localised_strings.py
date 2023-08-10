@@ -8,7 +8,8 @@ import json
 import pathlib
 import re
 import sys
-from typing import Optional
+from typing import Optional, List, Dict
+
 
 # spell-checker: words dedupe deduping deduped
 
@@ -61,7 +62,7 @@ COMMENT_SAME_LINE_RE = re.compile(r'^.*?(#.*)$')
 COMMENT_OWN_LINE_RE = re.compile(r'^\s*?(#.*)$')
 
 
-def extract_comments(call: ast.Call, lines: list[str], file: pathlib.Path) -> Optional[str]:  # noqa: CCR001
+def extract_comments(call: ast.Call, lines: List[str], file: pathlib.Path) -> Optional[str]:
     """
     Extract comments from source code based on the given call.
 
@@ -73,72 +74,55 @@ def extract_comments(call: ast.Call, lines: list[str], file: pathlib.Path) -> Op
     :param file: The path to the file this call node came from
     :return: The first comment that matches the rules, or None
     """
-    out: Optional[str] = None
-    above = call.lineno - 2
-    current = call.lineno - 1
+    above_line_number = call.lineno - 2
+    current_line_number = call.lineno - 1
 
-    above_line = lines[above].strip() if len(lines) >= above else None
-    above_comment: Optional[str] = None
-    current_line = lines[current].strip()
-    current_comment: Optional[str] = None
+    def extract_lang_comment(line: str) -> Optional[str]:
+        """
+        Extract a language comment from a given line.
 
-    bad_comment: Optional[str] = None
-    if above_line is not None:
-        match = COMMENT_OWN_LINE_RE.match(above_line)
-        if match:
-            above_comment = match.group(1).strip()
-            if not above_comment.startswith('# LANG:'):
-                bad_comment = f'Unknown comment for {file}:{call.lineno} {above_line}'
-                above_comment = None
+        :param line: The line to extract the language comment from.
+        :return: The extracted language comment, or None if no valid comment is found.
+        """
+        match = COMMENT_OWN_LINE_RE.match(line)
+        if match and match.group(1).startswith('# LANG:'):
+            return match.group(1).replace('# LANG:', '').strip()
+        return None
 
-            else:
-                above_comment = above_comment.replace('# LANG:', '').strip()
+    above_comment = extract_lang_comment(lines[above_line_number]) if len(lines) >= above_line_number else None
+    current_comment = extract_lang_comment(lines[current_line_number])
 
-    if current_line is not None:
-        match = COMMENT_SAME_LINE_RE.match(current_line)
-        if match:
-            current_comment = match.group(1).strip()
-            if not current_comment.startswith('# LANG:'):
-                bad_comment = f'Unknown comment for {file}:{call.lineno} {current_line}'
-                current_comment = None
+    if current_comment is None:
+        current_comment = above_comment
 
-            else:
-                current_comment = current_comment.replace('# LANG:', '').strip()
+    if current_comment is None:
+        print(f'No comment for {file}:{call.lineno} {lines[current_line_number]}', file=sys.stderr)
+        return None
 
-    if current_comment is not None:
-        out = current_comment
-
-    elif above_comment is not None:
-        out = above_comment
-
-    elif bad_comment is not None:
-        print(bad_comment, file=sys.stderr)
-
-    if out is None:
-        print(f'No comment for {file}:{call.lineno} {current_line}', file=sys.stderr)
-
-    return out
+    return current_comment
 
 
-def scan_file(path: pathlib.Path) -> list[ast.Call]:
+def scan_file(path: pathlib.Path) -> List[ast.Call]:
     """Scan a file for ast.Calls."""
     data = path.read_text(encoding='utf-8')
     lines = data.splitlines()
     parsed = ast.parse(data)
-    out: list[ast.Call] = []
+    calls = []
 
     for statement in parsed.body:
-        out.extend(find_calls_in_stmt(statement))
+        calls.extend(find_calls_in_stmt(statement))
 
-    # see if we can extract any comments
-    for call in out:
-        setattr(call, 'comment', extract_comments(call, lines, path))
+    # Extract and assign comments to each call
+    for call in calls:
+        call.comment = extract_comments(call, lines, path)  # type: ignore
 
-    out.sort(key=lambda c: c.lineno)
-    return out
+    # Sort the calls by line number
+    calls.sort(key=lambda c: c.lineno)
+
+    return calls
 
 
-def scan_directory(path: pathlib.Path, skip: list[pathlib.Path] | None = None) -> dict[pathlib.Path, list[ast.Call]]:
+def scan_directory(path: pathlib.Path, skip: Optional[List[pathlib.Path]] = None) -> Dict[pathlib.Path, List[ast.Call]]:
     """
     Scan a directory for expected callsites.
 
@@ -149,40 +133,34 @@ def scan_directory(path: pathlib.Path, skip: list[pathlib.Path] | None = None) -
     for thing in path.iterdir():
         if skip is not None and any(s.name == thing.name for s in skip):
             continue
-
         if thing.is_file():
             if not thing.name.endswith('.py'):
                 continue
-
             out[thing] = scan_file(thing)
-
         elif thing.is_dir():
             out |= scan_directory(thing)
-
         else:
             raise ValueError(type(thing), thing)
-
     return out
 
 
-def parse_template(path) -> set[str]:
+def parse_template(path: pathlib.Path) -> set[str]:
     """
     Parse a lang.template file.
 
-    The regexp this uses was extracted from l10n.py.
+    The regular expression used here was extracted from l10n.py.
 
     :param path: The path to the lang file
     """
     lang_re = re.compile(r'\s*"([^"]+)"\s*=\s*"([^"]+)"\s*;\s*$')
-    out = set()
+    result = set()
+
     for line in pathlib.Path(path).read_text(encoding='utf-8').splitlines():
         match = lang_re.match(line)
-        if not match:
-            continue
-        if match.group(1) != '!Language':
-            out.add(match.group(1))
+        if match and match.group(1) != '!Language':
+            result.add(match.group(1))
 
-    return out
+    return result
 
 
 @dataclasses.dataclass
@@ -216,46 +194,42 @@ class LangEntry:
 
     def files(self) -> str:
         """Return a string representation of all the files this LangEntry is in, and its location therein."""
-        out = ''
-        for loc in self.locations:
-            start = loc.line_start
-            end = loc.line_end
-            end_str = f':{end}' if end is not None and end != start else ''
-            out += f'{loc.path.name}:{start}{end_str}; '
+        file_locations = [
+            f'{loc.path.name}:{loc.line_start}' +
+            (f':{loc.line_end}' if loc.line_end is not None and loc.line_end != loc.line_start else '')
+            for loc in self.locations
+        ]
 
-        return out
+        return '; '.join(file_locations)
 
 
 def dedupe_lang_entries(entries: list[LangEntry]) -> list[LangEntry]:
     """
     Deduplicate a list of lang entries.
 
-    This will coalesce LangEntries that have that same string but differing files and comments into a single
-    LangEntry that cotains all comments and FileLocations
+    This will coalesce LangEntries that have the same string but differing files and comments into a single
+    LangEntry that contains all comments and FileLocations.
 
     :param entries: The list to deduplicate
     :return: The deduplicated list
     """
-    deduped: list[LangEntry] = []
+    deduped: dict[str, LangEntry] = {}
+
     for e in entries:
-        cont = False
-        for d in deduped:
-            if d.string == e.string:
-                cont = True
-                d.locations.append(e.locations[0])
-                d.comments.extend(e.comments)
+        existing = deduped.get(e.string)
+        if existing:
+            existing.locations.extend(e.locations)
+            existing.comments.extend(e.comments)
+        else:
+            deduped[e.string] = LangEntry(locations=e.locations[:], string=e.string, comments=e.comments[:])
 
-        if cont:
-            continue
-
-        deduped.append(e)
-
-    return deduped
+    return list(deduped.values())
 
 
 def generate_lang_template(data: dict[pathlib.Path, list[ast.Call]]) -> str:
     """Generate a full en.template from the given data."""
     entries: list[LangEntry] = []
+
     for path, calls in data.items():
         for c in calls:
             entries.append(LangEntry([FileLocation.from_call(path, c)], get_arg(c), [getattr(c, 'comment')]))
@@ -266,10 +240,10 @@ def generate_lang_template(data: dict[pathlib.Path, list[ast.Call]]) -> str:
 
 '''
     print(f'Done Deduping entries {len(entries)=}  {len(deduped)=}', file=sys.stderr)
+
     for entry in deduped:
         assert len(entry.comments) == len(entry.locations)
-        comment = ''
-        files = f'In files: {entry.files()}'
+        comment_parts = []
         string = f'"{entry.string}"'
 
         for i, comment_text in enumerate(entry.comments):
@@ -277,19 +251,61 @@ def generate_lang_template(data: dict[pathlib.Path, list[ast.Call]]) -> str:
                 continue
 
             loc = entry.locations[i]
-            to_append = f'{loc.path.name}: {comment_text}; '
-            if to_append not in comment:
-                comment += to_append
+            comment_parts.append(f'{loc.path.name}: {comment_text};')
 
-        header = f'{comment.strip()} {files}'.strip()
-        out += f'/* {header} */\n'
-        out += f'{string} = {string};\n'
-        out += '\n'
+        if comment_parts:
+            header = ' '.join(comment_parts)
+            out += f'/* {header} */\n'
+
+        out += f'{string} = {string};\n\n'
 
     return out
 
 
-if __name__ == '__main__':
+def compare_lang_with_template(template: set[str], res: dict[pathlib.Path, list[ast.Call]]) -> None:
+    """
+    Compare language entries in source code with a given language template.
+
+    :param template: A set of language entries from a language template.
+    :param res: A dictionary containing source code paths as keys and lists of ast.Call objects as values.
+    """
+    seen = set()
+
+    for file, calls in res.items():
+        for c in calls:
+            arg = get_arg(c)
+            if arg in template:
+                seen.add(arg)
+            else:
+                print(f'NEW! {file}:{c.lineno}: {arg!r}')
+
+    for old in set(template) ^ seen:
+        print(f'No longer used: {old}')
+
+
+def print_json_output(res: dict[pathlib.Path, list[ast.Call]]) -> None:
+    """
+    Print JSON output of extracted language entries.
+
+    :param res: A dictionary containing source code paths as keys and lists of ast.Call objects as values.
+    """
+    to_print_data = [
+        {
+            'path': str(path),
+            'string': get_arg(c),
+            'reconstructed': ast.unparse(c),
+            'start_line': c.lineno,
+            'start_offset': c.col_offset,
+            'end_line': c.end_lineno,
+            'end_offset': c.end_col_offset,
+            'comment': getattr(c, 'comment', None)
+        } for (path, calls) in res.items() for c in calls
+    ]
+
+    print(json.dumps(to_print_data, indent=2))
+
+
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--directory', help='Directory to search from', default='.')
     parser.add_argument('--ignore', action='append', help='directories to ignore', default=['venv', '.venv', '.git'])
@@ -301,50 +317,26 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     directory = pathlib.Path(args.directory)
-    res = scan_directory(directory, [pathlib.Path(p) for p in args.ignore])
+    skip = [pathlib.Path(p) for p in args.ignore]
+    res = scan_directory(directory, skip)
 
-    if args.compare_lang is not None and len(args.compare_lang) > 0:
-        seen = set()
+    if args.compare_lang:
         template = parse_template(args.compare_lang)
-
-        for file, calls in res.items():
-            for c in calls:
-                arg = get_arg(c)
-                if arg in template:
-                    seen.add(arg)
-                else:
-                    print(f'NEW! {file}:{c.lineno}: {arg!r}')
-
-        for old in set(template) ^ seen:
-            print(f'No longer used: {old}')
+        compare_lang_with_template(template, res)
 
     elif args.json:
-        to_print_data = [
-            {
-                'path': str(path),
-                'string': get_arg(c),
-                'reconstructed': ast.unparse(c),
-                'start_line': c.lineno,
-                'start_offset': c.col_offset,
-                'end_line': c.end_lineno,
-                'end_offset': c.end_col_offset,
-                'comment': getattr(c, 'comment', None)
-            } for (path, calls) in res.items() for c in calls
-        ]
-
-        print(json.dumps(to_print_data, indent=2))
+        print_json_output(res)
 
     elif args.lang:
         if args.lang == '-':
             print(generate_lang_template(res))
-
         else:
             with open(args.lang, mode='w+', newline='\n') as langfile:
                 langfile.writelines(generate_lang_template(res))
 
     else:
         for path, calls in res.items():
-            if len(calls) == 0:
+            if not calls:
                 continue
 
             print(path)
@@ -352,5 +344,4 @@ if __name__ == '__main__':
                 print(
                     f'    {c.lineno:4d}({c.col_offset:3d}):{c.end_lineno:4d}({c.end_col_offset:3d})\t', ast.unparse(c)
                 )
-
             print()
