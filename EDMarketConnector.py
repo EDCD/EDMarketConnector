@@ -14,7 +14,7 @@ import sys
 import threading
 import webbrowser
 from builtins import str
-from os import chdir, environ, system
+from os import chdir, environ
 from os.path import dirname, join
 from time import localtime, strftime, time
 from typing import TYPE_CHECKING, Any, Literal, Optional, Tuple, Union
@@ -321,7 +321,6 @@ if __name__ == '__main__':  # noqa: C901
                 # stops iterating.
                 # Ref: <https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-enumwindows>
                 EnumWindows(enumwindowsproc, 0)
-
 
     def already_running_popup():
         """Create the "already running" popup."""

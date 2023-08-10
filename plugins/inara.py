@@ -1,26 +1,24 @@
-"""Inara Sync."""
+"""
+inara.py - Sync with INARA.
 
-# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $#
-# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $#
-#
-# This is an EDMC 'core' plugin.
-#
-# All EDMC plugins are *dynamically* loaded at run-time.
-#
-# We build for Windows using `py2exe`.
-#
-# `py2exe` can't possibly know about anything in the dynamically loaded
-# core plugins.
-#
-# Thus you **MUST** check if any imports you add in this file are only
-# referenced in this file (or only in any other core plugin), and if so...
-#
-#     YOU MUST ENSURE THAT PERTINENT ADJUSTMENTS ARE MADE IN
-#     `build.py` SO AS TO ENSURE THE FILES ARE ACTUALLY PRESENT
-#     IN AN END-USER INSTALLATION ON WINDOWS.
-#
-# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $#
-# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $#
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
+
+This is an EDMC 'core' plugin.
+All EDMC plugins are *dynamically* loaded at run-time.
+
+We build for Windows using `py2exe`.
+`py2exe` can't possibly know about anything in the dynamically loaded core plugins.
+
+Thus, you **MUST** check if any imports you add in this file are only
+referenced in this file (or only in any other core plugin), and if so...
+
+    YOU MUST ENSURE THAT PERTINENT ADJUSTMENTS ARE MADE IN
+    `build.py` TO ENSURE THE FILES ARE ACTUALLY PRESENT
+    IN AN END-USER INSTALLATION ON WINDOWS.
+"""
+
 import json
 import threading
 import time
@@ -34,9 +32,7 @@ from tkinter import ttk
 from typing import TYPE_CHECKING, Any, Callable, Deque, Dict, List, Mapping, NamedTuple, Optional
 from typing import OrderedDict as OrderedDictT
 from typing import Sequence, Union, cast
-
 import requests
-
 import edmc_data
 import killswitch
 import myNotebook as nb  # noqa: N813
@@ -168,6 +164,7 @@ if DEBUG:
     TARGET_URL = f'http://{edmc_data.DEBUG_WEBSERVER_HOST}:{edmc_data.DEBUG_WEBSERVER_PORT}/inara'
 
 
+# noinspection PyUnresolvedReferences
 def system_url(system_name: str) -> str:
     """Get a URL for the current system."""
     if this.system_address:
@@ -192,13 +189,11 @@ def station_url(system_name: str, station_name: str) -> str:
     :return: A URL to inara for the given system and station
     """
     if system_name and station_name:
-        return requests.utils.requote_uri(f'https://inara.cz/galaxy-station/'
-                                          f'?search={system_name}%20[{station_name}]')
+        return requests.utils.requote_uri(f'https://inara.cz/galaxy-station/?search={system_name}%20[{station_name}]')
 
-    # monitor state might think these are gone, but we don't yet
     if this.system_name and this.station:
-        return requests.utils.requote_uri(f'https://inara.cz/galaxy-station/'
-                                          f'?search={this.system_name}%20[{this.station}]')
+        return requests.utils.requote_uri(
+            f'https://inara.cz/galaxy-station/?search={this.system_name}%20[{this.station}]')
 
     if system_name:
         return system_url(system_name)
@@ -224,9 +219,7 @@ def plugin_start3(plugin_dir: str) -> str:
 def plugin_app(parent: tk.Tk) -> None:
     """Plugin UI setup Hook."""
     this.parent = parent
-    # system label in main window
     this.system_link = parent.nametowidget(f".{appname.lower()}.system")
-    # station label in main window
     this.station_link = parent.nametowidget(f".{appname.lower()}.station")
     this.system_link.bind_all('<<InaraLocation>>', update_location)
     this.system_link.bind_all('<<InaraShip>>', update_ship)
@@ -379,8 +372,12 @@ def credentials(cmdr: Optional[str]) -> Optional[str]:
         return None
 
     cmdrs = config.get_list('inara_cmdrs', default=[])
-    if cmdr in cmdrs and config.get_list('inara_apikeys'):
-        return config.get_list('inara_apikeys')[cmdrs.index(cmdr)]
+    apikeys = config.get_list('inara_apikeys', default=[])
+
+    if cmdr in cmdrs:
+        idx = cmdrs.index(cmdr)
+        if idx < len(apikeys):
+            return apikeys[idx]
 
     return None
 
@@ -421,11 +418,9 @@ def journal_entry(  # noqa: C901, CCR001
     if not monitor.is_live_galaxy():
         # Since Update 14 on 2022-11-29 Inara only accepts Live data.
         if (
-            (
-                this.legacy_galaxy_last_notified is None
-                or (datetime.now(timezone.utc) - this.legacy_galaxy_last_notified) > timedelta(seconds=300)
-            )
-            and config.get_int('inara_out') and not is_beta and not this.multicrew and credentials(cmdr)
+            (this.legacy_galaxy_last_notified is None or
+             (datetime.now(timezone.utc) - this.legacy_galaxy_last_notified) > timedelta(seconds=300))
+            and config.get_int('inara_out') and not (is_beta or this.multicrew or credentials(cmdr))
         ):
             # LANG: The Inara API only accepts Live galaxy data, not Legacy galaxy data
             logger.info(_("Inara only accepts Live galaxy data"))
@@ -474,92 +469,48 @@ def journal_entry(  # noqa: C901, CCR001
     if config.get_int('inara_out') and not is_beta and not this.multicrew and credentials(cmdr):
         current_credentials = Credentials(this.cmdr, this.FID, str(credentials(this.cmdr)))
         try:
-            # Dump starting state to Inara
-            if (this.newuser or event_name == 'StartUp' or (this.newsession and event_name == 'Cargo')):
+            if this.newuser or event_name == 'StartUp' or (this.newsession and event_name == 'Cargo'):
                 this.newuser = False
                 this.newsession = False
 
-                # Don't send the API call with no values.
                 if state['Reputation']:
-                    new_add_event(
-                        'setCommanderReputationMajorFaction',
-                        entry['timestamp'],
-                        [
-                            {'majorfactionName': k.lower(), 'majorfactionReputation': v / 100.0}
-                            for k, v in state['Reputation'].items() if v is not None
-                        ]
-                    )
+                    reputation_data = [
+                        {'majorfactionName': k.lower(), 'majorfactionReputation': v / 100.0}
+                        for k, v in state['Reputation'].items() if v is not None
+                    ]
+                    new_add_event('setCommanderReputationMajorFaction', entry['timestamp'], reputation_data)
 
-                if state['Engineers']:  # Not populated < 3.3
-                    to_send_list: List[Mapping[str, Any]] = []
-                    for k, v in state['Engineers'].items():
-                        e = {'engineerName': k}
-                        if isinstance(v, tuple):
-                            e['rankValue'] = v[0]
+                if state['Engineers']:
+                    engineer_data = [
+                        {'engineerName': k, 'rankValue': v[0] if isinstance(v, tuple) else None, 'rankStage': v}
+                        for k, v in state['Engineers'].items()
+                    ]
+                    new_add_event('setCommanderRankEngineer', entry['timestamp'], engineer_data)
 
-                        else:
-                            e['rankStage'] = v
-
-                        to_send_list.append(e)
-
-                    new_add_event(
-                        'setCommanderRankEngineer',
-                        entry['timestamp'],
-                        to_send_list,
-                    )
-
-                # Update location
-                # Might not be available if this event is a 'StartUp' and we're replaying
-                # a log.
-                # XXX: This interferes with other more specific setCommanderTravelLocation events in the same
-                #      batch.
-                #  if system:
-                #      new_add_event(
-                #          'setCommanderTravelLocation',
-                #          entry['timestamp'],
-                #          OrderedDict([
-                #              ('starsystemName', system),
-                #              ('stationName', station),  # Can be None
-                #          ])
-                #      )
-
-                # Update ship
-                if state['ShipID']:  # Unknown if started in Fighter or SRV
-                    cur_ship: Dict[str, Any] = {
+                if state['ShipID']:
+                    cur_ship = {
                         'shipType': state['ShipType'],
                         'shipGameID': state['ShipID'],
                         'shipName': state['ShipName'],
                         'shipIdent': state['ShipIdent'],
                         'isCurrentShip': True,
-
                     }
-
                     if state['HullValue']:
                         cur_ship['shipHullValue'] = state['HullValue']
-
                     if state['ModulesValue']:
                         cur_ship['shipModulesValue'] = state['ModulesValue']
-
                     cur_ship['shipRebuyCost'] = state['Rebuy']
                     new_add_event('setCommanderShip', entry['timestamp'], cur_ship)
-
                     this.loadout = make_loadout(state)
                     new_add_event('setCommanderShipLoadout', entry['timestamp'], this.loadout)
 
-            # Trigger off the "only observed as being after Ranks" event so that
-            # we have both current Ranks *and* current Progress within them.
             elif event_name == 'Progress':
-                # Send rank info to Inara on startup
-                new_add_event(
-                    'setCommanderRankPilot',
-                    entry['timestamp'],
-                    [
-                        {'rankName': k.lower(), 'rankValue': v[0], 'rankProgress': v[1] / 100.0}
-                        for k, v in state['Rank'].items() if v is not None
-                    ]
-                )
+                rank_data = [
+                    {'rankName': k.lower(), 'rankValue': v[0], 'rankProgress': v[1] / 100.0}
+                    for k, v in state['Rank'].items() if v is not None
+                ]
+                new_add_event('setCommanderRankPilot', entry['timestamp'], rank_data)
 
-            # Promotions
             elif event_name == 'Promotion':
                 for k, v in state['Rank'].items():
                     if k in entry:
@@ -570,41 +521,25 @@ def journal_entry(  # noqa: C901, CCR001
                         )
 
             elif event_name == 'EngineerProgress' and 'Engineer' in entry:
-                # TODO: due to this var name being used above, the types are weird
-                to_send_dict = {'engineerName': entry['Engineer']}
-                if 'Rank' in entry:
-                    to_send_dict['rankValue'] = entry['Rank']
-
-                else:
-                    to_send_dict['rankStage'] = entry['Progress']
-
-                new_add_event(
-                    'setCommanderRankEngineer',
-                    entry['timestamp'],
-                    to_send_dict
-                )
+                engineer_rank_data = {
+                    'engineerName': entry['Engineer'],
+                    'rankValue': entry['Rank'] if 'Rank' in entry else None,
+                    'rankStage': entry['Progress'] if 'Progress' in entry else None,
+                }
+                new_add_event('setCommanderRankEngineer', entry['timestamp'], engineer_rank_data)
 
             # PowerPlay status change
-            if event_name == 'PowerplayJoin':
-                new_add_event(
-                    'setCommanderRankPower',
-                    entry['timestamp'],
-                    {'powerName': entry['Power'], 'rankValue': 1}
-                )
+            elif event_name == 'PowerplayJoin':
+                power_join_data = {'powerName': entry['Power'], 'rankValue': 1}
+                new_add_event('setCommanderRankPower', entry['timestamp'], power_join_data)
 
             elif event_name == 'PowerplayLeave':
-                new_add_event(
-                    'setCommanderRankPower',
-                    entry['timestamp'],
-                    {'powerName': entry['Power'], 'rankValue': 0}
-                )
+                power_leave_data = {'powerName': entry['Power'], 'rankValue': 0}
+                new_add_event('setCommanderRankPower', entry['timestamp'], power_leave_data)
 
             elif event_name == 'PowerplayDefect':
-                new_add_event(
-                    'setCommanderRankPower',
-                    entry['timestamp'],
-                    {'powerName': entry['ToPower'], 'rankValue': 1}
-                )
+                power_defect_data = {'powerName': entry["ToPower"], 'rankValue': 1}
+                new_add_event('setCommanderRankPower', entry['timestamp'], power_defect_data)
 
             # Ship change
             if event_name == 'Loadout' and this.shipswap:
@@ -682,7 +617,7 @@ def journal_entry(  # noqa: C901, CCR001
 
             elif event_name == 'SupercruiseExit':
                 to_send = {
-                    'starsystemName':   entry['StarSystem'],
+                    'starsystemName': entry['StarSystem'],
                 }
 
                 if entry['BodyType'] == 'Planet':
@@ -695,9 +630,9 @@ def journal_entry(  # noqa: C901, CCR001
                 # we might not yet have system logged for use.
                 if system:
                     to_send = {
-                        'starsystemName':       system,
-                        'stationName':          entry['Name'],
-                        'starsystemBodyName':   entry['BodyName'],
+                        'starsystemName': system,
+                        'stationName': entry['Name'],
+                        'starsystemBodyName': entry['BodyName'],
                         'starsystemBodyCoords': [entry['Latitude'], entry['Longitude']]
                     }
                     # Not present on, e.g. Ancient Ruins
@@ -774,22 +709,19 @@ def journal_entry(  # noqa: C901, CCR001
                 # Ignore the following 'Docked' event
                 this.suppress_docked = True
 
-            cargo: List[OrderedDictT[str, Any]]
-            cargo = [OrderedDict({'itemName': k, 'itemCount': state['Cargo'][k]}) for k in sorted(state['Cargo'])]
-
             # Send cargo and materials if changed
+            cargo = [OrderedDict({'itemName': k, 'itemCount': state['Cargo'][k]}) for k in sorted(state['Cargo'])]
             if this.cargo != cargo:
                 new_add_event('setCommanderInventoryCargo', entry['timestamp'], cargo)
                 this.cargo = cargo
 
-            materials: List[OrderedDictT[str, Any]] = []
-            for category in ('Raw', 'Manufactured', 'Encoded'):
-                materials.extend(
-                    [OrderedDict([('itemName', k), ('itemCount', state[category][k])]) for k in sorted(state[category])]
-                )
-
+            materials = [
+                OrderedDict([('itemName', k), ('itemCount', state[category][k])])
+                for category in ('Raw', 'Manufactured', 'Encoded')
+                for k in sorted(state[category])
+            ]
             if this.materials != materials:
-                new_add_event('setCommanderInventoryMaterials', entry['timestamp'],  materials)
+                new_add_event('setCommanderInventoryMaterials', entry['timestamp'], materials)
                 this.materials = materials
 
         except Exception as e:
@@ -1397,7 +1329,7 @@ def journal_entry(  # noqa: C901, CCR001
     return ''  # No error
 
 
-def cmdr_data(data: CAPIData, is_beta):  # noqa: CCR001
+def cmdr_data(data: CAPIData, is_beta):
     """CAPI event hook."""
     this.cmdr = data['commander']['name']
 
@@ -1406,10 +1338,15 @@ def cmdr_data(data: CAPIData, is_beta):  # noqa: CCR001
         this.station_marketid = data['commander']['docked'] and data['lastStarport']['id']
 
     # Only trust CAPI if these aren't yet set
-    this.system_name = this.system_name if this.system_name else data['lastSystem']['name']
+    if not this.system_name:
+        this.system_name = data['lastSystem']['name']
 
-    if not this.station and data['commander']['docked']:
+    if data['commander']['docked']:
         this.station = data['lastStarport']['name']
+    elif data['lastStarport']['name'] and data['lastStarport']['name'] != "":
+        this.station = STATION_UNDOCKED
+    else:
+        this.station = ''
 
     # Override standard URL functions
     if config.get_str('system_provider') == 'Inara':
@@ -1419,15 +1356,7 @@ def cmdr_data(data: CAPIData, is_beta):  # noqa: CCR001
         this.system_link.update_idletasks()
 
     if config.get_str('station_provider') == 'Inara':
-        if data['commander']['docked'] or this.on_foot and this.station:
-            this.station_link['text'] = this.station
-
-        elif data['lastStarport']['name'] and data['lastStarport']['name'] != "":
-            this.station_link['text'] = STATION_UNDOCKED
-
-        else:
-            this.station_link['text'] = ''
-
+        this.station_link['text'] = this.station
         # Do *NOT* set 'url' here, as it's set to a function that will call
         # through correctly.  We don't want a static string.
         this.station_link.update_idletasks()
@@ -1538,17 +1467,22 @@ def new_add_event(
 
 
 def clean_event_list(event_list: List[Event]) -> List[Event]:
-    """Check for killswitched events and remove or modify them as requested."""
-    out = []
-    for e in event_list:
-        bad, new_event = killswitch.check_killswitch(f'plugins.inara.worker.{e.name}', e.data, logger)
-        if bad:
+    """
+    Check for killswitched events and remove or modify them as requested.
+
+    :param event_list: List of events to clean
+    :return: Cleaned list of events
+    """
+    cleaned_events = []
+    for event in event_list:
+        is_bad, new_event = killswitch.check_killswitch(f'plugins.inara.worker.{event.name}', event.data, logger)
+        if is_bad:
             continue
 
-        e.data = new_event
-        out.append(e)
+        event.data = new_event
+        cleaned_events.append(event)
 
-    return out
+    return cleaned_events
 
 
 def new_worker():
@@ -1560,14 +1494,19 @@ def new_worker():
     logger.debug('Starting...')
     while True:
         events = get_events()
-        if (res := killswitch.get_disabled("plugins.inara.worker")).disabled:
-            logger.warning(f"Inara worker disabled via killswitch. ({res.reason})")
+        disabled_killswitch = killswitch.get_disabled("plugins.inara.worker")
+        if disabled_killswitch.disabled:
+            logger.warning(f"Inara worker disabled via killswitch. ({disabled_killswitch.reason})")
             continue
 
         for creds, event_list in events.items():
             event_list = clean_event_list(event_list)
             if not event_list:
                 continue
+
+            event_data = [
+                {'eventName': e.name, 'eventTimestamp': e.timestamp, 'eventData': e.data} for e in event_list
+            ]
 
             data = {
                 'header': {
@@ -1577,12 +1516,10 @@ def new_worker():
                     'commanderName': creds.cmdr,
                     'commanderFrontierID': creds.fid,
                 },
-                'events': [
-                    {'eventName': e.name, 'eventTimestamp': e.timestamp, 'eventData': e.data} for e in event_list
-                ]
+                'events': event_data
             }
 
-            logger.info(f'sending {len(data["events"])} events for {creds.cmdr}')
+            logger.info(f'Sending {len(event_data)} events for {creds.cmdr}')
             logger.trace_if('plugin.inara.events', f'Events:\n{json.dumps(data)}\n')
 
             try_send_data(TARGET_URL, data)
@@ -1594,94 +1531,129 @@ def new_worker():
 
 def get_events(clear: bool = True) -> Dict[Credentials, List[Event]]:
     """
-    Fetch a frozen copy of all events from the current queue.
+    Fetch a copy of all events from the current queue.
 
-    :param clear: whether or not to clear the queues as we go, defaults to True
-    :return: the frozen event list
+    :param clear: whether to clear the queues as we go, defaults to True
+    :return: a copy of the event dictionary
     """
-    out: Dict[Credentials, List[Event]] = {}
+    events_copy: Dict[Credentials, List[Event]] = {}
+
     with this.event_lock:
         for key, events in this.events.items():
-            out[key] = list(events)
+            events_copy[key] = list(events)
             if clear:
                 events.clear()
 
-    return out
+    return events_copy
 
 
 def try_send_data(url: str, data: Mapping[str, Any]) -> None:
     """
-    Attempt repeatedly to send the payload forward.
+    Attempt repeatedly to send the payload.
 
     :param url: target URL for the payload
     :param data: the payload
     """
-    for i in range(3):
-        logger.debug(f"sending data to API, attempt #{i}")
+    for attempt in range(3):
+        logger.debug(f"Sending data to API, attempt #{attempt + 1}")
         try:
             if send_data(url, data):
                 break
 
         except Exception as e:
-            logger.debug('unable to send events', exc_info=e)
+            logger.debug('Unable to send events', exc_info=e)
             return
 
 
-def send_data(url: str, data: Mapping[str, Any]) -> bool:  # noqa: CCR001
+def send_data(url: str, data: Mapping[str, Any]) -> bool:
     """
-    Write a set of events to the inara API.
+    Send a set of events to the Inara API.
 
-    :param url: the target URL to post to
-    :param data: the data to POST
-    :return: success state
+    :param url: The target URL to post the data.
+    :param data: The data to be POSTed.
+    :return: True if the data was sent successfully, False otherwise.
     """
-    # NB: As of 2022-01-25 Artie has stated the Inara API does *not* support compression
-    r = this.session.post(url, data=json.dumps(data, separators=(',', ':')), timeout=_TIMEOUT)
-    r.raise_for_status()
-    reply = r.json()
+    response = this.session.post(url, data=json.dumps(data, separators=(',', ':')), timeout=_TIMEOUT)
+    response.raise_for_status()
+    reply = response.json()
     status = reply['header']['eventStatus']
 
     if status // 100 != 2:  # 2xx == OK (maybe with warnings)
-        # Log fatal errors
-        logger.warning(f'Inara\t{status} {reply["header"].get("eventStatusText", "")}')
-        logger.debug(f'JSON data:\n{json.dumps(data, indent=2, separators = (",", ": "))}')
-        # LANG: INARA API returned some kind of error (error message will be contained in {MSG})
-        plug.show_error(_('Error: Inara {MSG}').format(MSG=reply['header'].get('eventStatusText', status)))
-
+        handle_api_error(data, status, reply)
     else:
-        # Log individual errors and warnings
-        for data_event, reply_event in zip(data['events'], reply['events']):
-            if reply_event['eventStatus'] != 200:
-                if ("Everything was alright, the near-neutral status just wasn't stored."
-                        not in reply_event.get("eventStatusText")):
-                    logger.warning(f'Inara\t{status} {reply_event.get("eventStatusText", "")}')
-                    logger.debug(f'JSON data:\n{json.dumps(data_event)}')
+        handle_success_reply(data, reply)
 
-                if reply_event['eventStatus'] // 100 != 2:
-                    # LANG: INARA API returned some kind of error (error message will be contained in {MSG})
-                    plug.show_error(_('Error: Inara {MSG}').format(
-                        MSG=f'{data_event["eventName"]},'
-                            f'{reply_event.get("eventStatusText", reply_event["eventStatus"])}'
-                    ))
+    return True  # Regardless of errors above, we DID manage to send it, therefore inform our caller as such
 
-            if data_event['eventName'] in (
-                'addCommanderTravelCarrierJump',
-                'addCommanderTravelDock',
-                'addCommanderTravelFSDJump',
-                'setCommanderTravelLocation'
-            ):
-                this.lastlocation = reply_event.get('eventData', {})
-                # calls update_location in main thread
-                if not config.shutting_down:
-                    this.system_link.event_generate('<<InaraLocation>>', when="tail")
 
-            elif data_event['eventName'] in ['addCommanderShip', 'setCommanderShip']:
-                this.lastship = reply_event.get('eventData', {})
-                # calls update_ship in main thread
-                if not config.shutting_down:
-                    this.system_link.event_generate('<<InaraShip>>', when="tail")
+def handle_api_error(data: Mapping[str, Any], status: int, reply: Dict[str, Any]) -> None:
+    """
+    Handle API error response.
 
-    return True  # regardless of errors above, we DID manage to send it, therefore inform our caller as such
+    :param data: The original data that was sent.
+    :param status: The HTTP status code of the API response.
+    :param reply: The JSON reply from the API.
+    """
+    error_message = reply['header'].get('eventStatusText', "")
+    logger.warning(f'Inara\t{status} {error_message}')
+    logger.debug(f'JSON data:\n{json.dumps(data, indent=2, separators = (",", ": "))}')
+    plug.show_error(_('Error: Inara {MSG}').format(MSG=error_message))
+
+
+def handle_success_reply(data: Mapping[str, Any], reply: Dict[str, Any]) -> None:
+    """
+    Handle successful API response.
+
+    :param data: The original data that was sent.
+    :param reply: The JSON reply from the API.
+    """
+    for data_event, reply_event in zip(data['events'], reply['events']):
+        reply_status = reply_event['eventStatus']
+        reply_text = reply_event.get("eventStatusText", "")
+        if reply_status != 200:
+            handle_individual_error(data_event, reply_status, reply_text)
+        handle_special_events(data_event, reply_event)
+
+
+def handle_individual_error(data_event: Dict[str, Any], reply_status: int, reply_text: str) -> None:
+    """
+    Handle individual API error.
+
+    :param data_event: The event data that was sent.
+    :param reply_status: The event status code from the API response.
+    :param reply_text: The event status text from the API response.
+    """
+    if ("Everything was alright, the near-neutral status just wasn't stored."
+            not in reply_text):
+        logger.warning(f'Inara\t{reply_status} {reply_text}')
+        logger.debug(f'JSON data:\n{json.dumps(data_event)}')
+
+    if reply_status // 100 != 2:
+        plug.show_error(_('Error: Inara {MSG}').format(
+            MSG=f'{data_event["eventName"]}, {reply_text}'
+        ))
+
+
+def handle_special_events(data_event: Dict[str, Any], reply_event: Dict[str, Any]) -> None:
+    """
+    Handle special events in the API response.
+
+    :param data_event: The event data that was sent.
+    :param reply_event: The event data from the API reply.
+    """
+    if data_event['eventName'] in (
+        'addCommanderTravelCarrierJump',
+        'addCommanderTravelDock',
+        'addCommanderTravelFSDJump',
+        'setCommanderTravelLocation'
+    ):
+        this.lastlocation = reply_event.get('eventData', {})
+        if not config.shutting_down:
+            this.system_link.event_generate('<<InaraLocation>>', when="tail")
+    elif data_event['eventName'] in ['addCommanderShip', 'setCommanderShip']:
+        this.lastship = reply_event.get('eventData', {})
+        if not config.shutting_down:
+            this.system_link.event_generate('<<InaraShip>>', when="tail")
 
 
 def update_location(event=None) -> None:

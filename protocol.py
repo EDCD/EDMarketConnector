@@ -443,8 +443,8 @@ else:  # Linux / Run from source
                 self.wfile.write('<title>Authentication successful - Elite: Dangerous</title>'.encode('utf-8'))
                 self.wfile.write('<style>'.encode('utf-8'))
                 self.wfile.write(
-                    'body { background-color: #000; color: #fff; font-family: "Helvetica Neue", Arial, sans-serif; }'.encode(
-                        'utf-8'))
+                    'body { background-color: #000; color: #fff; font-family: "Helvetica Neue",'
+                    ' Arial, sans-serif; }'.encode('utf-8'))
                 self.wfile.write('h1 { text-align: center; margin-top: 100px; }'.encode('utf-8'))
                 self.wfile.write('p { text-align: center; }'.encode('utf-8'))
                 self.wfile.write('</style>'.encode('utf-8'))
