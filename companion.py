@@ -16,6 +16,7 @@ import json
 import numbers
 import os
 import random
+import sys
 import threading
 import time
 import tkinter as tk
@@ -739,6 +740,10 @@ class Session:
             self.state = Session.STATE_INIT  # Will try to authorize again on next login or query
             self.auth = None
             raise  # Bad thing happened
+        if getattr(sys, 'frozen', False):
+            tk.messagebox.showinfo(title="Authentication Successful",
+                                   message="Authentication with cAPI Successful.\n"
+                                           "You may now close the Frontier login tab if it is still open.")
 
     def close(self) -> None:
         """Close the `request.Session()."""
