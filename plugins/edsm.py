@@ -1,4 +1,10 @@
-"""Show EDSM data in display and handle lookups."""
+"""
+edsm.py - Handling EDSM Data and Display.
+
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
+"""
 from __future__ import annotations
 
 # TODO:
@@ -297,8 +303,8 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> tk.Fr
     :return: An instance of `myNotebook.Frame`.
     """
     PADX = 10  # noqa: N806
-    BUTTONX = 12  # indent Checkbuttons and Radiobuttons # noqa: N806
-    PADY = 2		# close spacing # noqa: N806
+    BUTTONX = 12  # noqa: N806
+    PADY = 2  # noqa: N806
 
     frame = nb.Frame(parent)
     frame.columnconfigure(1, weight=1)
@@ -309,63 +315,62 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> tk.Fr
         background=nb.Label().cget('background'),
         url='https://www.edsm.net/',
         underline=True
-    ).grid(columnspan=2, padx=PADX, sticky=tk.W)  # Don't translate
+    ).grid(columnspan=2, padx=PADX, sticky=tk.W)
 
     this.log = tk.IntVar(value=config.get_int('edsm_out') and 1)
     this.log_button = nb.Checkbutton(
-        # LANG: Settings>EDSM - Label on checkbox for 'send data'
-        frame, text=_('Send flight log and Cmdr status to EDSM'), variable=this.log, command=prefsvarchanged
+        frame,
+        text=_('Send flight log and Cmdr status to EDSM'),
+        variable=this.log,
+        command=prefsvarchanged
     )
-
     if this.log_button:
         this.log_button.grid(columnspan=2, padx=BUTTONX, pady=(5, 0), sticky=tk.W)
 
     nb.Label(frame).grid(sticky=tk.W)  # big spacer
-    # Section heading in settings
+
     this.label = HyperlinkLabel(
         frame,
-        # LANG: Settings>EDSM - Label on header/URL to EDSM API key page
         text=_('Elite Dangerous Star Map credentials'),
         background=nb.Label().cget('background'),
         url='https://www.edsm.net/settings/api',
         underline=True
     )
-
     cur_row = 10
-
     if this.label:
         this.label.grid(columnspan=2, padx=PADX, sticky=tk.W)
 
-    # LANG: Game Commander name label in EDSM settings
-    this.cmdr_label = nb.Label(frame, text=_('Cmdr'))  # Main window
+    this.cmdr_label = nb.Label(frame, text=_('Cmdr'))
     this.cmdr_label.grid(row=cur_row, padx=PADX, sticky=tk.W)
+
     this.cmdr_text = nb.Label(frame)
     this.cmdr_text.grid(row=cur_row, column=1, padx=PADX, pady=PADY, sticky=tk.W)
 
     cur_row += 1
 
-    # LANG: EDSM Commander name label in EDSM settings
-    this.user_label = nb.Label(frame, text=_('Commander Name'))  # EDSM setting
+    this.user_label = nb.Label(frame, text=_('Commander Name'))
     this.user_label.grid(row=cur_row, padx=PADX, sticky=tk.W)
+
     this.user = nb.Entry(frame)
     this.user.grid(row=cur_row, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
 
     cur_row += 1
 
-    # LANG: EDSM API key label
-    this.apikey_label = nb.Label(frame, text=_('API Key'))  # EDSM setting
+    this.apikey_label = nb.Label(frame, text=_('API Key'))
     this.apikey_label.grid(row=cur_row, padx=PADX, sticky=tk.W)
+
     this.apikey = nb.Entry(frame, show="*", width=50)
     this.apikey.grid(row=cur_row, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
 
     prefs_cmdr_changed(cmdr, is_beta)
 
     show_password_var.set(False)  # Password is initially masked
+
     show_password_checkbox = nb.Checkbutton(
         frame,
         text="Show API Key",
         variable=show_password_var,
-        command=toggle_password_visibility,
+        command=toggle_password_visibility
     )
     show_password_checkbox.grid(columnspan=2, padx=BUTTONX, pady=(5, 0), sticky=tk.W)
 
@@ -430,17 +435,19 @@ def set_prefs_ui_states(state: str) -> None:
 
     :param state: the state to set each entry to
     """
-    if (
-        this.label and this.cmdr_label and this.cmdr_text and this.user_label and this.user
-        and this.apikey_label and this.apikey
-    ):
-        this.label['state'] = state
-        this.cmdr_label['state'] = state
-        this.cmdr_text['state'] = state
-        this.user_label['state'] = state
-        this.user['state'] = state
-        this.apikey_label['state'] = state
-        this.apikey['state'] = state
+    elements = [
+        this.label,
+        this.cmdr_label,
+        this.cmdr_text,
+        this.user_label,
+        this.user,
+        this.apikey_label,
+        this.apikey
+    ]
+
+    for element in elements:
+        if element:
+            element['state'] = state
 
 
 def prefs_changed(cmdr: str, is_beta: bool) -> None:
@@ -454,7 +461,6 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
         config.set('edsm_out', this.log.get())
 
     if cmdr and not is_beta:
-        # TODO: remove this when config is rewritten.
         cmdrs: List[str] = config.get_list('edsm_cmdrs', default=[])
         usernames: List[str] = config.get_list('edsm_usernames', default=[])
         apikeys: List[str] = config.get_list('edsm_apikeys', default=[])
@@ -495,16 +501,13 @@ def credentials(cmdr: str) -> Optional[Tuple[str, str]]:
         cmdrs = [cmdr]
         config.set('edsm_cmdrs', cmdrs)
 
-    if (cmdr in cmdrs and (edsm_usernames := config.get_list('edsm_usernames'))
-            and (edsm_apikeys := config.get_list('edsm_apikeys'))):
+    edsm_usernames = config.get_list('edsm_usernames')
+    edsm_apikeys = config.get_list('edsm_apikeys')
+
+    if cmdr in cmdrs and len(cmdrs) == len(edsm_usernames) == len(edsm_apikeys):
         idx = cmdrs.index(cmdr)
-        # The EDSM cmdr and apikey might not exist yet!
-        if idx >= len(edsm_usernames) or idx >= len(edsm_apikeys):
-            return None
-
-        logger.trace_if(CMDR_CREDS, f'{cmdr=}: returning ({edsm_usernames[idx]=}, {edsm_apikeys[idx]=})')
-
-        return edsm_usernames[idx], edsm_apikeys[idx]
+        if idx < len(edsm_usernames) and idx < len(edsm_apikeys):
+            return edsm_usernames[idx], edsm_apikeys[idx]
 
     logger.trace_if(CMDR_CREDS, f'{cmdr=}: returning None')
     return None
@@ -695,16 +698,13 @@ def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:  # noqa: CCR001
         if this.station_link:
             if data['commander']['docked'] or this.on_foot and this.station_name:
                 this.station_link['text'] = this.station_name
-
             elif data['lastStarport']['name'] and data['lastStarport']['name'] != "":
                 this.station_link['text'] = STATION_UNDOCKED
-
             else:
                 this.station_link['text'] = ''
 
             # Do *NOT* set 'url' here, as it's set to a function that will call
             # through correctly.  We don't want a static string.
-
             this.station_link.update_idletasks()
 
     if this.system_link and not this.system_link['text']:
@@ -721,13 +721,22 @@ if 'edsm' in debug_senders:
 
 
 def get_discarded_events_list() -> None:
-    """Retrieve the list of to-discard events from EDSM."""
+    """
+    Retrieve the list of events to discard from EDSM.
+
+    This function queries the EDSM API to obtain the list of events that should be discarded,
+    and stores them in the `discarded_events` attribute.
+
+    :return: None
+    """
     try:
         r = this.session.get('https://www.edsm.net/api-journal-v1/discard', timeout=_TIMEOUT)
         r.raise_for_status()
         this.discarded_events = set(r.json())
 
-        this.discarded_events.discard('Docked')  # should_send() assumes that we send 'Docked' events
+        # We discard 'Docked' events because should_send() assumes that we send them
+        this.discarded_events.discard('Docked')
+
         if not this.discarded_events:
             logger.warning(
                 'Unexpected empty discarded events list from EDSM: '
@@ -735,16 +744,17 @@ def get_discarded_events_list() -> None:
             )
 
     except Exception as e:
-        logger.warning('Exception whilst trying to set this.discarded_events:', exc_info=e)
+        logger.warning('Exception while trying to set this.discarded_events:', exc_info=e)
 
 
-def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
+def worker() -> None:  # noqa: CCR001 C901
     """
     Handle uploading events to EDSM API.
 
-    Target function of a thread.
+    This function is the target function of a thread. It processes events from the queue until the
+    queued item is None, uploading the events to the EDSM API.
 
-    Processes `this.queue` until the queued item is None.
+    :return: None
     """
     logger.debug('Starting...')
     pending: List[Mapping[str, Any]] = []  # Unsent events
@@ -779,7 +789,7 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
         else:
             logger.debug('Empty queue message, setting closing = True')
             closing = True  # Try to send any unsent events before we close
-            entry = {'event': 'ShutDown'}  # Dummy to allow for `uentry['event']` belowt
+            entry = {'event': 'ShutDown'}  # Dummy to allow for `entry['event']` below
 
         retrying = 0
         while retrying < 3:
@@ -842,7 +852,7 @@ def worker() -> None:  # noqa: CCR001 C901 # Cant be broken up currently
                             if p['event'] in 'Location':
                                 logger.trace_if(
                                     'journal.locations',
-                                    f'"Location" event in pending passed should_send(),timestamp: {p["timestamp"]}'
+                                    f'"Location" event in pending passed should_send(), timestamp: {p["timestamp"]}'
                                 )
 
                     creds = credentials(cmdr)
@@ -964,54 +974,42 @@ def should_send(entries: List[Mapping[str, Any]], event: str) -> bool:  # noqa: 
     :param event: The latest event being processed
     :return: bool indicating whether or not to send said entries
     """
-    # We MUST flush pending on logout, in case new login is a different Commander
+    def should_send_entry(entry: Mapping[str, Any]) -> bool:
+        if entry['event'] == 'Cargo':
+            return not this.newgame_docked
+        if entry['event'] == 'Docked':
+            return True
+        if this.newgame:
+            return True
+        if entry['event'] not in (
+            'CommunityGoal',
+            'ModuleBuy',
+            'ModuleSell',
+            'ModuleSwap',
+            'ShipyardBuy',
+            'ShipyardNew',
+            'ShipyardSwap'
+        ):
+            return True
+        return False
+
     if event.lower() in ('shutdown', 'fileheader'):
         logger.trace_if(CMDR_EVENTS, f'True because {event=}')
-
         return True
 
-    # batch up burst of Scan events after NavBeaconScan
     if this.navbeaconscan:
         if entries and entries[-1]['event'] == 'Scan':
             this.navbeaconscan -= 1
-            if this.navbeaconscan:
-                logger.trace_if(CMDR_EVENTS, f'False because {this.navbeaconscan=}')
+            should_send_result = this.navbeaconscan == 0
+            logger.trace_if(CMDR_EVENTS, f'False because {this.navbeaconscan=}' if not should_send_result else '')
+            return should_send_result
+        logger.error('Invalid state NavBeaconScan exists, but passed entries either '
+                     "doesn't exist or doesn't have the expected content")
+        this.navbeaconscan = 0
 
-                return False
-
-        else:
-            logger.error(
-                'Invalid state NavBeaconScan exists, but passed entries either '
-                "doesn't exist or doesn't have the expected content"
-            )
-            this.navbeaconscan = 0
-
-    for entry in entries:
-        if (entry['event'] == 'Cargo' and not this.newgame_docked) or entry['event'] == 'Docked':
-            # Cargo is the last event on startup, unless starting when docked in which case Docked is the last event
-            this.newgame = False
-            this.newgame_docked = False
-            logger.trace_if(CMDR_EVENTS, f'True because {entry["event"]=}')
-
-            return True
-
-        if this.newgame:
-            pass
-
-        elif entry['event'] not in (
-                'CommunityGoal',  # Spammed periodically
-                'ModuleBuy', 'ModuleSell', 'ModuleSwap',		# will be shortly followed by "Loadout"
-                'ShipyardBuy', 'ShipyardNew', 'ShipyardSwap'):  # "
-            logger.trace_if(CMDR_EVENTS, f'True because {entry["event"]=}')
-
-            return True
-
-        else:
-            logger.trace_if(CMDR_EVENTS, f'{entry["event"]=}, {this.newgame_docked=}')
-
-    logger.trace_if(CMDR_EVENTS, f'False as default: {this.newgame_docked=}')
-
-    return False
+    should_send_result = any(should_send_entry(entry) for entry in entries)
+    logger.trace_if(CMDR_EVENTS, f'False as default: {this.newgame_docked=}' if not should_send_result else '')
+    return should_send_result
 
 
 def update_status(event=None) -> None:

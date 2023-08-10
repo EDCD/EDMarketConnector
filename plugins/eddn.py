@@ -1,4 +1,23 @@
-"""Handle exporting data to EDDN."""
+"""
+eddn.py - Exporting Data to EDDN.
+
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
+
+This is an EDMC 'core' plugin.
+All EDMC plugins are *dynamically* loaded at run-time.
+
+We build for Windows using `py2exe`.
+`py2exe` can't possibly know about anything in the dynamically loaded core plugins.
+
+Thus, you **MUST** check if any imports you add in this file are only
+referenced in this file (or only in any other core plugin), and if so...
+
+    YOU MUST ENSURE THAT PERTINENT ADJUSTMENTS ARE MADE IN
+    `build.py` TO ENSURE THE FILES ARE ACTUALLY PRESENT
+    IN AN END-USER INSTALLATION ON WINDOWS.
+"""
 from __future__ import annotations
 
 # ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $#
@@ -204,10 +223,8 @@ class EDDNSender:
         db = db_conn.cursor()
 
         try:
-            db.execute(
-                """
-                CREATE TABLE messages
-                (
+            db.execute("""
+                CREATE TABLE IF NOT EXISTS messages (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     created TEXT NOT NULL,
                     cmdr TEXT NOT NULL,
@@ -216,26 +233,12 @@ class EDDNSender:
                     game_build TEXT,
                     message TEXT NOT NULL
                 )
-                """
-            )
+            """)
 
-            db.execute(
-                """
-                CREATE INDEX messages_created ON messages
-                (
-                    created
-                )
-                """
-            )
+            db.execute("CREATE INDEX IF NOT EXISTS messages_created ON messages (created)")
+            db.execute("CREATE INDEX IF NOT EXISTS messages_cmdr ON messages (cmdr)")
 
-            db.execute(
-                """
-                CREATE INDEX messages_cmdr ON messages
-                (
-                    cmdr
-                )
-                """
-            )
+            logger.info("New 'eddn_queue-v1.db' created")
 
         except sqlite3.OperationalError as e:
             if str(e) != "table messages already exists":
@@ -243,12 +246,6 @@ class EDDNSender:
                 db.close()
                 db_conn.close()
                 raise e
-
-        else:
-            logger.info("New `eddn_queue-v1.db` created")
-
-        # We return only the connection, so tidy up
-        db.close()
 
         return db_conn
 
@@ -265,11 +262,10 @@ class EDDNSender:
         except FileNotFoundError:
             return
 
+        logger.info("Conversion to `eddn_queue-v1.db` complete, removing `replay.jsonl`")
         # Best effort at removing the file/contents
-        # NB: The legacy code assumed it could write to the file.
-        logger.info("Conversion` to `eddn_queue-v1.db` complete, removing `replay.jsonl`")
-        replay_file = open(filename, 'w')  # Will truncate
-        replay_file.close()
+        with open(filename, 'w') as replay_file:
+            replay_file.truncate()
         os.unlink(filename)
 
     def close(self) -> None:
@@ -460,9 +456,8 @@ class EDDNSender:
                 logger.debug(f"EDDN responded '400 Bad Request' to the message, dropping:\n{msg!r}")
                 return True
 
-            else:
-                # This should catch anything else, e.g. timeouts, gateway errors
-                self.set_ui_status(self.http_error_to_log(e))
+            # This should catch anything else, e.g. timeouts, gateway errors
+            self.set_ui_status(self.http_error_to_log(e))
 
         except requests.exceptions.RequestException as e:
             logger.debug('Failed sending', exc_info=e)
@@ -482,21 +477,26 @@ class EDDNSender:
         :param reschedule: Boolean indicating if we should call `after()` again.
         """
         logger.trace_if("plugin.eddn.send", "Called")
+
         # Mutex in case we're already processing
-        if not self.queue_processing.acquire(blocking=False):
-            logger.trace_if("plugin.eddn.send", "Couldn't obtain mutex")
+        if self.queue_processing.acquire(blocking=False):
+            logger.trace_if("plugin.eddn.send", "Obtained mutex")
+
+            have_rescheduled = False
+
             if reschedule:
                 logger.trace_if("plugin.eddn.send", f"Next run scheduled for {self.eddn.REPLAY_PERIOD}ms from now")
                 self.eddn.parent.after(self.eddn.REPLAY_PERIOD, self.queue_check_and_send, reschedule)
+                have_rescheduled = True
 
-            else:
+            logger.trace_if("plugin.eddn.send", "Mutex released")
+            self.queue_processing.release()
+        else:
+            logger.trace_if("plugin.eddn.send", "Couldn't obtain mutex")
+
+            if not reschedule:
                 logger.trace_if("plugin.eddn.send", "NO next run scheduled (there should be another one already set)")
 
-            return
-
-        logger.trace_if("plugin.eddn.send", "Obtained mutex")
-        # Used to indicate if we've rescheduled at the faster rate already.
-        have_rescheduled = False
         # We send either if docked or 'Delay sending until docked' not set
         if this.docked or not config.get_int('output') & config.OUT_EDDN_DELAY:
             logger.trace_if("plugin.eddn.send", "Should send")
@@ -517,7 +517,7 @@ class EDDNSender:
                 db_cursor.execute(
                     """
                     SELECT id FROM messages
-                    ORDER BY created ASC
+                    ORDER BY created
                     LIMIT 1
                     """
                 )
@@ -587,16 +587,15 @@ class EDDNSender:
             # LANG: EDDN has banned this version of our client
             return _('EDDN Error: EDMC is too old for EDDN. Please update.')
 
-        elif status_code == 400:
+        if status_code == 400:
             # we a validation check or something else.
             logger.warning(f'EDDN Error: {status_code} -- {exception.response}')
             # LANG: EDDN returned an error that indicates something about what we sent it was wrong
             return _('EDDN Error: Validation Failed (EDMC Too Old?). See Log')
 
-        else:
-            logger.warning(f'Unknown status code from EDDN: {status_code} -- {exception.response}')
-            # LANG: EDDN returned some sort of HTTP error, one we didn't expect. {STATUS} contains a number
-            return _('EDDN Error: Returned {STATUS} status code').format(STATUS=status_code)
+        logger.warning(f'Unknown status code from EDDN: {status_code} -- {exception.response}')
+        # LANG: EDDN returned some sort of HTTP error, one we didn't expect. {STATUS} contains a number
+        return _('EDDN Error: Returned {STATUS} status code').format(STATUS=status_code)
 
 
 # TODO: a good few of these methods are static or could be classmethods. they should be created as such.
@@ -1124,8 +1123,7 @@ class EDDN:
                 logger.warning(f'No system name in entry, and system_name was not set either!  entry:\n{entry!r}\n')
                 return "passed-in system_name is empty, can't add System"
 
-            else:
-                entry['StarSystem'] = system_name
+            entry['StarSystem'] = system_name
 
         if 'SystemAddress' not in entry:
             if this.system_address is None:
@@ -1919,7 +1917,7 @@ class EDDN:
         gv = ''
         #######################################################################
         # Base string
-        if capi_host == companion.SERVER_LIVE or capi_host == companion.SERVER_BETA:
+        if capi_host in (companion.SERVER_LIVE, companion.SERVER_BETA):
             gv = 'CAPI-Live-'
 
         elif capi_host == companion.SERVER_LEGACY:
@@ -2168,7 +2166,7 @@ def prefsvarchanged(event=None) -> None:
     this.eddn_system_button['state'] = tk.NORMAL
     # This line will grey out the 'Delay sending ...' option if the 'Send
     #  system and scan data' option is off.
-    this.eddn_delay_button['state'] = this.eddn_system.get() and tk.NORMAL or tk.DISABLED
+    this.eddn_delay_button['state'] = tk.NORMAL if this.eddn_system.get() else tk.DISABLED
 
 
 def prefs_changed(cmdr: str, is_beta: bool) -> None:
@@ -2325,22 +2323,22 @@ def journal_entry(  # noqa: C901, CCR001
         if event_name == 'fssdiscoveryscan':
             return this.eddn.export_journal_fssdiscoveryscan(cmdr, system, state['StarPos'], is_beta, entry)
 
-        elif event_name == 'navbeaconscan':
+        if event_name == 'navbeaconscan':
             return this.eddn.export_journal_navbeaconscan(cmdr, system, state['StarPos'], is_beta, entry)
 
-        elif event_name == 'codexentry':
+        if event_name == 'codexentry':
             return this.eddn.export_journal_codexentry(cmdr, state['StarPos'], is_beta, entry)
 
-        elif event_name == 'scanbarycentre':
+        if event_name == 'scanbarycentre':
             return this.eddn.export_journal_scanbarycentre(cmdr, state['StarPos'], is_beta, entry)
 
-        elif event_name == 'navroute':
+        if event_name == 'navroute':
             return this.eddn.export_journal_navroute(cmdr, is_beta, entry)
 
-        elif event_name == 'fcmaterials':
+        if event_name == 'fcmaterials':
             return this.eddn.export_journal_fcmaterials(cmdr, is_beta, entry)
 
-        elif event_name == 'approachsettlement':
+        if event_name == 'approachsettlement':
             # An `ApproachSettlement` can appear *before* `Location` if you
             # logged at one.  We won't have necessary augmentation data
             # at this point, so bail.
@@ -2355,10 +2353,10 @@ def journal_entry(  # noqa: C901, CCR001
                 entry
             )
 
-        elif event_name == 'fsssignaldiscovered':
+        if event_name == 'fsssignaldiscovered':
             this.eddn.enqueue_journal_fsssignaldiscovered(entry)
 
-        elif event_name == 'fssallbodiesfound':
+        if event_name == 'fssallbodiesfound':
             return this.eddn.export_journal_fssallbodiesfound(
                 cmdr,
                 system,
@@ -2367,7 +2365,7 @@ def journal_entry(  # noqa: C901, CCR001
                 entry
             )
 
-        elif event_name == 'fssbodysignals':
+        if event_name == 'fssbodysignals':
             return this.eddn.export_journal_fssbodysignals(
                 cmdr,
                 system,

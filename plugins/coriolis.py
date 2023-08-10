@@ -1,27 +1,25 @@
-"""Coriolis ship export."""
+"""
+coriolis.py - Coriolis Ship Export.
+
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
+
+This is an EDMC 'core' plugin.
+All EDMC plugins are *dynamically* loaded at run-time.
+
+We build for Windows using `py2exe`.
+`py2exe` can't possibly know about anything in the dynamically loaded core plugins.
+
+Thus, you **MUST** check if any imports you add in this file are only
+referenced in this file (or only in any other core plugin), and if so...
+
+    YOU MUST ENSURE THAT PERTINENT ADJUSTMENTS ARE MADE IN
+    `build.py` TO ENSURE THE FILES ARE ACTUALLY PRESENT
+    IN AN END-USER INSTALLATION ON WINDOWS.
+"""
 from __future__ import annotations
 
-# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $#
-# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $#
-#
-# This is an EDMC 'core' plugin.
-#
-# All EDMC plugins are *dynamically* loaded at run-time.
-#
-# We build for Windows using `py2exe`.
-#
-# `py2exe` can't possibly know about anything in the dynamically loaded
-# core plugins.
-#
-# Thus you **MUST** check if any imports you add in this file are only
-# referenced in this file (or only in any other core plugin), and if so...
-#
-#     YOU MUST ENSURE THAT PERTINENT ADJUSTMENTS ARE MADE IN
-#     `build.py` SO AS TO ENSURE THE FILES ARE ACTUALLY PRESENT
-#     IN AN END-USER INSTALLATION ON WINDOWS.
-#
-# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $#
-# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $# ! $#
 import base64
 import gzip
 import io
@@ -127,25 +125,33 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> tk.Fr
 
 
 def prefs_changed(cmdr: str | None, is_beta: bool) -> None:
-    """Update URLs."""
+    """
+    Update URLs and override mode based on user preferences.
+
+    :param cmdr: Commander name, if available
+    :param is_beta: Whether the game mode is beta
+    """
     global normal_url, beta_url, override_mode
+
     normal_url = normal_textvar.get()
     beta_url = beta_textvar.get()
     override_mode = override_textvar.get()
-    override_mode = {  # Convert to unlocalised names
+
+    # Convert to unlocalised names
+    override_mode = {
         _('Normal'): 'normal',  # LANG: Coriolis normal/beta selection - normal
-        _('Beta'): 'beta',  # LANG: Coriolis normal/beta selection - beta
-        _('Auto'): 'auto',  # LANG: Coriolis normal/beta selection - auto
+        _('Beta'): 'beta',      # LANG: Coriolis normal/beta selection - beta
+        _('Auto'): 'auto',      # LANG: Coriolis normal/beta selection - auto
     }.get(override_mode, override_mode)
 
     if override_mode not in ('beta', 'normal', 'auto'):
-        logger.warning(f'Unexpected value {override_mode=!r}. defaulting to "auto"')
+        logger.warning(f'Unexpected value {override_mode=!r}. Defaulting to "auto"')
         override_mode = 'auto'
         override_textvar.set(value=_('Auto'))  # LANG: 'Auto' label for Coriolis site override selection
 
     config.set('coriolis_normal_url', normal_url)
     config.set('coriolis_beta_url', beta_url)
-    config.set('coriolis_overide_url_selection', override_mode)
+    config.set('coriolis_override_url_selection', override_mode)
 
 
 def _get_target_url(is_beta: bool) -> str:
