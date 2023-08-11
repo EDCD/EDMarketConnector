@@ -1,4 +1,10 @@
-"""Utility functions relating to ships."""
+"""
+util_ships.py - Ship Utilities
+
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
+"""
 from edmc_data import ship_name_map
 
 

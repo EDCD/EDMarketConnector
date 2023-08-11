@@ -1,4 +1,10 @@
-"""Checking for updates to this application."""
+"""
+update.py - Checking for Program Updates
+
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
+"""
 import os
 import sys
 import threading
@@ -160,7 +166,7 @@ class Updater:
         newversion = None
         items = {}
         try:
-            r = requests.get(update_feed, timeout=10)
+            request = requests.get(update_feed, timeout=10)
 
         except requests.RequestException as ex:
             logger.exception(f'Error retrieving update_feed file: {ex}')
@@ -168,7 +174,7 @@ class Updater:
             return None
 
         try:
-            feed = ElementTree.fromstring(r.text)
+            feed = ElementTree.fromstring(request.text)
 
         except SyntaxError as ex:
             logger.exception(f'Syntax error in update_feed file: {ex}')
@@ -195,12 +201,12 @@ class Updater:
                 continue
 
             # This will change A.B.C.D to A.B.C+D
-            sv = semantic_version.Version.coerce(ver)
+            semver = semantic_version.Version.coerce(ver)
 
-            items[sv] = EDMCVersion(
+            items[semver] = EDMCVersion(
                 version=str(ver),  # sv might have mangled version
                 title=item.find('title').text,  # type: ignore
-                sv=sv
+                sv=semver
             )
 
         # Look for any remaining version greater than appversion
