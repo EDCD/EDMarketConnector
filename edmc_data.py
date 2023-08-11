@@ -1,5 +1,9 @@
 """
-Static data.
+edmc_data.py - Static App Data
+
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
 
 For easy reference any variable should be prefixed with the name of the file it
 was either in originally, or where the primary code utilising it is.

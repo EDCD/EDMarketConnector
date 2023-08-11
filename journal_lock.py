@@ -1,4 +1,11 @@
-"""Implements locking of Journal directory."""
+"""
+journal_lock.py - Locking of the Journal Directory
+
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
+"""
+from __future__ import annotations
 
 import pathlib
 import sys
@@ -7,7 +14,6 @@ from enum import Enum
 from os import getpid as os_getpid
 from tkinter import ttk
 from typing import TYPE_CHECKING, Callable, Optional
-
 from config import config
 from EDMCLogging import get_main_logger
 
@@ -33,6 +39,8 @@ class JournalLock:
 
     def __init__(self) -> None:
         """Initialise where the journal directory and lock file are."""
+        self.retry_popup = None
+        self.journal_dir_lockfile = None
         self.journal_dir: str | None = config.get_str('journaldir') or config.default_journal_dir
         self.journal_dir_path: Optional[pathlib.Path] = None
         self.set_path_from_journaldir()
@@ -178,7 +186,7 @@ class JournalLock:
             else:
                 unlocked = True
 
-        # Close the file whether or not the unlocking succeeded.
+        # Close the file whether the unlocking succeeded.
         if hasattr(self, 'journal_dir_lockfile'):
             self.journal_dir_lockfile.close()
 

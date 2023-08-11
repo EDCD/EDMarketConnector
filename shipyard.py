@@ -1,6 +1,11 @@
-"""Export list of ships as CSV."""
-import csv
+"""
+constants.py - Export Ships as CSV
 
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
+"""
+import csv
 import companion
 from edmc_data import ship_name_map
 
@@ -17,9 +22,9 @@ def export(data: companion.CAPIData, filename: str) -> None:
     assert data['lastStarport'].get('name')
     assert data['lastStarport'].get('ships')
 
-    with open(filename, 'w', newline='') as f:
-        c = csv.writer(f)
-        c.writerow(('System', 'Station', 'Ship', 'FDevID', 'Date'))
+    with open(filename, 'w', newline='') as csv_file:
+        csv_line = csv.writer(csv_file)
+        csv_line.writerow(('System', 'Station', 'Ship', 'FDevID', 'Date'))
 
         for (name, fdevid) in [
             (
@@ -29,7 +34,7 @@ def export(data: companion.CAPIData, filename: str) -> None:
                 (data['lastStarport']['ships'].get('shipyard_list') or {}).values()
             ) + data['lastStarport']['ships'].get('unavailable_list')
         ]:
-            c.writerow((
+            csv_line.writerow((
                 data['lastSystem']['name'], data['lastStarport']['name'],
                 name, fdevid, data['timestamp']
             ))

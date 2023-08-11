@@ -1,5 +1,10 @@
-"""Export various CSV formats."""
-# -*- coding: utf-8 -*-
+"""
+commodity.py - Export various CSV formats
+
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
+"""
 
 import time
 from os.path import join
