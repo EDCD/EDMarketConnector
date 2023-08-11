@@ -1,5 +1,5 @@
 """
-ttkHyperlinkLabel.py - Clickable ttk labels
+ttkHyperlinkLabel.py - Clickable ttk labels.
 
 Copyright (c) EDCD, All Rights Reserved
 Licensed under the GNU General Public License.
@@ -80,7 +80,7 @@ class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label):
         )
 
     def configure(self, cnf: Optional[dict[str, Any]] = None, **kw: Any) ->\
-            Optional[dict[str, tuple[str, str, str, Any, Any]]]:
+            Optional[dict[str, tuple[str, str, str, Any, Any]]]:  # noqa: CCR001
         """
         Change cursor and appearance depending on state and text.
 
@@ -160,7 +160,7 @@ class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label):
 
 
 def openurl(url: str) -> None:
-    """
+    r"""
     Open the given URL in appropriate browser.
 
     2022-12-06:

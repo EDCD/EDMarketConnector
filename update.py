@@ -1,5 +1,5 @@
 """
-update.py - Checking for Program Updates
+update.py - Checking for Program Updates.
 
 Copyright (c) EDCD, All Rights Reserved
 Licensed under the GNU General Public License.

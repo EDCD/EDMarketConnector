@@ -1,13 +1,15 @@
-"""protocol handler for cAPI authorisation."""
-# spell-checker: words ntdll GURL alloc wfile instantiatable pyright
+"""
+protocol.py - Protocol Handler for cAPI Auth.
+
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
+"""
 import os
 import sys
 import threading
-import urllib.error
-import urllib.parse
-import urllib.request
-from typing import TYPE_CHECKING, Optional, Type
-
+from urllib import parse
+from typing import TYPE_CHECKING, Optional, Type, Union
 from config import config
 from constants import appname, protocolhandler_redirect
 from EDMCLogging import get_main_logger
@@ -106,7 +108,7 @@ if sys.platform == 'darwin' and getattr(sys, 'frozen', False):  # noqa: C901 # i
 
         def handleEvent_withReplyEvent_(self, event, replyEvent) -> None:  # noqa: N802 N803 # Required to override
             """Actual event handling from NSAppleEventManager."""
-            protocolhandler.lasturl = urllib.parse.unquote(  # noqa: F821: type: ignore # It's going to be a DPH in
+            protocolhandler.lasturl = parse.unquote(  # noqa: F821: type: ignore # It's going to be a DPH in
                 # this code
                 event.paramDescriptorForKeyword_(keyDirectObject).stringValue()
             ).strip()
@@ -341,7 +343,7 @@ elif (config.auth_force_edmc_protocol
 
                     if args.lower().startswith('open("') and args.endswith('")'):
                         logger.trace_if('frontier-auth.windows', f'args are: {args}')
-                        url = urllib.parse.unquote(args[6:-2]).strip()
+                        url = parse.unquote(args[6:-2]).strip()
                         if url.startswith(self.redirect):
                             logger.debug(f'Message starts with {self.redirect}')
                             self.event(url)
@@ -368,9 +370,9 @@ else:  # Linux / Run from source
 
     class LinuxProtocolHandler(GenericProtocolHandler):
         """
-        Implementation of GenericProtocolHandler.
+        Implementation of GenericProtocolHandler for Linux.
 
-        This implementation uses a localhost HTTP server
+        This implementation uses a localhost HTTP server.
         """
 
         def __init__(self) -> None:
@@ -410,16 +412,21 @@ else:  # Linux / Run from source
 
         def worker(self) -> None:
             """HTTP Worker."""
-            # TODO: This should probably be more ephemeral, and only handle one request, as its all we're expecting
+            # TODO: This should probably be more ephemeral, and only handle one request,
+            # as it's all we're expecting
             self.httpd.serve_forever()
 
     class HTTPRequestHandler(BaseHTTPRequestHandler):
-        """Simple HTTP server to handle IPC from protocol handler."""
+        """Simple HTTP server to handle IPC from the protocol handler."""
 
         def parse(self) -> bool:
-            """Parse a request."""
+            """
+            Parse a request and handle authentication.
+
+            :return: True if the request was handled successfully, False otherwise.
+            """
             logger.trace_if('frontier-auth.http', f'Got message on path: {self.path}')
-            url = urllib.parse.unquote(self.path)
+            url = parse.unquote(self.path)
             if url.startswith('/auth'):
                 logger.debug('Request starts with /auth, sending to protocolhandler.event()')
                 protocolhandler.event(url)  # noqa: F821
@@ -428,39 +435,49 @@ else:  # Linux / Run from source
             self.send_response(404)  # Not found
             return False
 
-        def do_HEAD(self) -> None:  # noqa: N802 # Required to override
+        def do_HEAD(self) -> None:  # noqa: N802
             """Handle HEAD Request."""
             self.parse()
             self.end_headers()
 
-        def do_GET(self) -> None:  # noqa: N802 # Required to override
-            """Handle GET Request."""
+        def do_GET(self) -> None:  # noqa: N802
+            """Handle GET Request and send authentication response."""
             if self.parse():
+                self.send_response(200)
                 self.send_header('Content-Type', 'text/html')
                 self.end_headers()
-                self.wfile.write('<html>'.encode('utf-8'))
-                self.wfile.write('<head>'.encode('utf-8'))
-                self.wfile.write('<title>Authentication successful - Elite: Dangerous</title>'.encode('utf-8'))
-                self.wfile.write('<style>'.encode('utf-8'))
-                self.wfile.write(
-                    'body { background-color: #000; color: #fff; font-family: "Helvetica Neue",'
-                    ' Arial, sans-serif; }'.encode('utf-8'))
-                self.wfile.write('h1 { text-align: center; margin-top: 100px; }'.encode('utf-8'))
-                self.wfile.write('p { text-align: center; }'.encode('utf-8'))
-                self.wfile.write('</style>'.encode('utf-8'))
-                self.wfile.write('</head>'.encode('utf-8'))
-                self.wfile.write('<body>'.encode('utf-8'))
-                self.wfile.write('<h1>Authentication successful</h1>'.encode('utf-8'))
-                self.wfile.write('<p>Thank you for authenticating.</p>'.encode('utf-8'))
-                self.wfile.write('<p>Please close this browser tab now.</p>'.encode('utf-8'))
-                self.wfile.write('</body>'.encode('utf-8'))
-                self.wfile.write('</html>'.encode('utf-8'))
+                self.wfile.write(self._generate_auth_response().encode('utf-8'))
             else:
+                self.send_response(404)
                 self.end_headers()
 
-        def log_request(self, code: int | str = '-', size: int | str = '-') -> None:
-            """Override to prevent logging."""
+        def log_request(self, code: Union[int, str] = '-', size: Union[int, str] = '-') -> None:
+            """Override to prevent logging HTTP requests."""
             pass
+
+        def _generate_auth_response(self) -> str:
+            """
+            Generate the authentication response HTML.
+
+            :return: The HTML content of the authentication response.
+            """
+            return (
+                '<html>'
+                '<head>'
+                '<title>Authentication successful - Elite: Dangerous</title>'
+                '<style>'
+                'body { background-color: #000; color: #fff; font-family: "Helvetica Neue", Arial, sans-serif; }'
+                'h1 { text-align: center; margin-top: 100px; }'
+                'p { text-align: center; }'
+                '</style>'
+                '</head>'
+                '<body>'
+                '<h1>Authentication successful</h1>'
+                '<p>Thank you for authenticating.</p>'
+                '<p>Please close this browser tab now.</p>'
+                '</body>'
+                '</html>'
+            )
 
 
 def get_handler_impl() -> Type[GenericProtocolHandler]:

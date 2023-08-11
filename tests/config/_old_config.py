@@ -1,4 +1,4 @@
-"""Old Configuration Test File"""
+"""Old Configuration Test File."""
 import numbers
 import sys
 import warnings

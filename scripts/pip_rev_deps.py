@@ -1,4 +1,4 @@
-"""Search for dependencies given a package"""
+"""Search for dependencies given a package."""
 import sys
 import pkg_resources
 

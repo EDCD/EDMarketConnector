@@ -1,11 +1,16 @@
-"""CMDR Status information."""
+"""
+stats.py - CMDR Status Information.
+
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
+"""
 import csv
 import json
 import sys
 import tkinter as tk
 from tkinter import ttk
-from typing import TYPE_CHECKING, Any, AnyStr, Callable, NamedTuple, Sequence, cast, Optional
-
+from typing import TYPE_CHECKING, Any, AnyStr, Callable, NamedTuple, Sequence, cast, Optional, List
 import companion
 import EDMCLogging
 import myNotebook as nb  # noqa: N813
@@ -51,149 +56,46 @@ def status(data: dict[str, Any]) -> list[list[str]]:
     :param data: Data to generate status from
     :return: Status information about the given cmdr
     """
-    # StatsResults assumes these three things are first
     res = [
         [_('Cmdr'),    data['commander']['name']],                 # LANG: Cmdr stats
         [_('Balance'), str(data['commander'].get('credits', 0))],  # LANG: Cmdr stats
         [_('Loan'),    str(data['commander'].get('debt', 0))],     # LANG: Cmdr stats
     ]
 
-    _ELITE_RANKS = [  # noqa: N806 # Its a constant, just needs to be updated at runtime
-        _('Elite'),      # LANG: Top rank
-        _('Elite I'),    # LANG: Top rank +1
-        _('Elite II'),   # LANG: Top rank +2
-        _('Elite III'),  # LANG: Top rank +3
-        _('Elite IV'),   # LANG: Top rank +4
-        _('Elite V'),    # LANG: Top rank +5
+    _ELITE_RANKS = [  # noqa: N806
+        _('Elite'), _('Elite I'), _('Elite II'), _('Elite III'), _('Elite IV'), _('Elite V')
+    ]  # noqa: N806
+
+    RANKS = [  # noqa: N806
+        (_('Combat'), 'combat'), (_('Trade'), 'trade'), (_('Explorer'), 'explore'),
+        (_('Mercenary'), 'soldier'), (_('Exobiologist'), 'exobiologist'), (_('CQC'), 'cqc'),
+        (_('Federation'), 'federation'), (_('Empire'), 'empire'), (_('Powerplay'), 'power'),
     ]
 
-    RANKS = [  # noqa: N806 # Its a constant, just needs to be updated at runtime
-        # in output order
-        # Names we show people, vs internal names
-        (_('Combat'), 'combat'),                # LANG: Ranking
-        (_('Trade'), 'trade'),                  # LANG: Ranking
-        (_('Explorer'), 'explore'),             # LANG: Ranking
-        (_('Mercenary'), 'soldier'),            # LANG: Ranking
-        (_('Exobiologist'), 'exobiologist'),    # LANG: Ranking
-        (_('CQC'), 'cqc'),                      # LANG: Ranking
-        (_('Federation'), 'federation'),        # LANG: Ranking
-        (_('Empire'), 'empire'),                # LANG: Ranking
-        (_('Powerplay'), 'power'),              # LANG: Ranking
-        # ???            , 'crime'),            # LANG: Ranking
-        # ???            , 'service'),          # LANG: Ranking
-    ]
-
-    RANK_NAMES = {  # noqa: N806 # Its a constant, just needs to be updated at runtime
-        # These names are the fdev side name (but lower()ed)
-        # http://elite-dangerous.wikia.com/wiki/Pilots_Federation#Ranks
-        'combat': [
-            _('Harmless'),                # LANG: Combat rank
-            _('Mostly Harmless'),         # LANG: Combat rank
-            _('Novice'),                  # LANG: Combat rank
-            _('Competent'),               # LANG: Combat rank
-            _('Expert'),                  # LANG: Combat rank
-            _('Master'),                  # LANG: Combat rank
-            _('Dangerous'),               # LANG: Combat rank
-            _('Deadly'),                  # LANG: Combat rank
-        ] + _ELITE_RANKS,
-        'trade': [
-            _('Penniless'),               # LANG: Trade rank
-            _('Mostly Penniless'),        # LANG: Trade rank
-            _('Peddler'),                 # LANG: Trade rank
-            _('Dealer'),                  # LANG: Trade rank
-            _('Merchant'),                # LANG: Trade rank
-            _('Broker'),                  # LANG: Trade rank
-            _('Entrepreneur'),            # LANG: Trade rank
-            _('Tycoon'),                  # LANG: Trade rank
-        ] + _ELITE_RANKS,
-        'explore': [
-            _('Aimless'),                 # LANG: Explorer rank
-            _('Mostly Aimless'),          # LANG: Explorer rank
-            _('Scout'),                   # LANG: Explorer rank
-            _('Surveyor'),                # LANG: Explorer rank
-            _('Trailblazer'),             # LANG: Explorer rank
-            _('Pathfinder'),              # LANG: Explorer rank
-            _('Ranger'),                  # LANG: Explorer rank
-            _('Pioneer'),                 # LANG: Explorer rank
-
-        ] + _ELITE_RANKS,
-        'soldier': [
-            _('Defenceless'),               # LANG: Mercenary rank
-            _('Mostly Defenceless'),        # LANG: Mercenary rank
-            _('Rookie'),                    # LANG: Mercenary rank
-            _('Soldier'),                   # LANG: Mercenary rank
-            _('Gunslinger'),                # LANG: Mercenary rank
-            _('Warrior'),                   # LANG: Mercenary rank
-            _('Gunslinger'),                # LANG: Mercenary rank
-            _('Deadeye'),                   # LANG: Mercenary rank
-        ] + _ELITE_RANKS,
-        'exobiologist': [
-            _('Directionless'),             # LANG: Exobiologist rank
-            _('Mostly Directionless'),      # LANG: Exobiologist rank
-            _('Compiler'),                  # LANG: Exobiologist rank
-            _('Collector'),                 # LANG: Exobiologist rank
-            _('Cataloguer'),                # LANG: Exobiologist rank
-            _('Taxonomist'),                # LANG: Exobiologist rank
-            _('Ecologist'),                 # LANG: Exobiologist rank
-            _('Geneticist'),                # LANG: Exobiologist rank
-        ] + _ELITE_RANKS,
-        'cqc': [
-            _('Helpless'),                # LANG: CQC rank
-            _('Mostly Helpless'),         # LANG: CQC rank
-            _('Amateur'),                 # LANG: CQC rank
-            _('Semi Professional'),       # LANG: CQC rank
-            _('Professional'),            # LANG: CQC rank
-            _('Champion'),                # LANG: CQC rank
-            _('Hero'),                    # LANG: CQC rank
-            _('Gladiator'),               # LANG: CQC rank
-        ] + _ELITE_RANKS,
-
-        # http://elite-dangerous.wikia.com/wiki/Federation#Ranks
+    RANK_NAMES = {  # noqa: N806
+        'combat': [_('Harmless'), _('Mostly Harmless'), _('Novice'), _('Competent'),
+                   _('Expert'), _('Master'), _('Dangerous'), _('Deadly')] + _ELITE_RANKS,
+        'trade': [_('Penniless'), _('Mostly Penniless'), _('Peddler'), _('Dealer'),
+                  _('Merchant'), _('Broker'), _('Entrepreneur'), _('Tycoon')] + _ELITE_RANKS,
+        'explore': [_('Aimless'), _('Mostly Aimless'), _('Scout'), _('Surveyor'),
+                    _('Trailblazer'), _('Pathfinder'), _('Ranger'), _('Pioneer')] + _ELITE_RANKS,
+        'soldier': [_('Defenceless'), _('Mostly Defenceless'), _('Rookie'), _('Soldier'),
+                    _('Gunslinger'), _('Warrior'), _('Gunslinger'), _('Deadeye')] + _ELITE_RANKS,
+        'exobiologist': [_('Directionless'), _('Mostly Directionless'), _('Compiler'), _('Collector'),
+                         _('Cataloguer'), _('Taxonomist'), _('Ecologist'), _('Geneticist')] + _ELITE_RANKS,
+        'cqc': [_('Helpless'), _('Mostly Helpless'), _('Amateur'), _('Semi Professional'),
+                _('Professional'), _('Champion'), _('Hero'), _('Gladiator')] + _ELITE_RANKS,
         'federation': [
-            _('None'),                    # LANG: No rank
-            _('Recruit'),                 # LANG: Federation rank
-            _('Cadet'),                   # LANG: Federation rank
-            _('Midshipman'),              # LANG: Federation rank
-            _('Petty Officer'),           # LANG: Federation rank
-            _('Chief Petty Officer'),     # LANG: Federation rank
-            _('Warrant Officer'),         # LANG: Federation rank
-            _('Ensign'),                  # LANG: Federation rank
-            _('Lieutenant'),              # LANG: Federation rank
-            _('Lieutenant Commander'),    # LANG: Federation rank
-            _('Post Commander'),          # LANG: Federation rank
-            _('Post Captain'),            # LANG: Federation rank
-            _('Rear Admiral'),            # LANG: Federation rank
-            _('Vice Admiral'),            # LANG: Federation rank
-            _('Admiral')                  # LANG: Federation rank
+            _('None'), _('Recruit'), _('Cadet'), _('Midshipman'), _('Petty Officer'), _('Chief Petty Officer'),
+            _('Warrant Officer'), _('Ensign'), _('Lieutenant'), _('Lieutenant Commander'), _('Post Commander'),
+            _('Post Captain'), _('Rear Admiral'), _('Vice Admiral'), _('Admiral')
         ],
-
-        # http://elite-dangerous.wikia.com/wiki/Empire#Ranks
         'empire': [
-            _('None'),                    # LANG: No rank
-            _('Outsider'),                # LANG: Empire rank
-            _('Serf'),                    # LANG: Empire rank
-            _('Master'),                  # LANG: Empire rank
-            _('Squire'),                  # LANG: Empire rank
-            _('Knight'),                  # LANG: Empire rank
-            _('Lord'),                    # LANG: Empire rank
-            _('Baron'),                   # LANG: Empire rank
-            _('Viscount'),                # LANG: Empire rank
-            _('Count'),                   # LANG: Empire rank
-            _('Earl'),                    # LANG: Empire rank
-            _('Marquis'),                 # LANG: Empire rank
-            _('Duke'),                    # LANG: Empire rank
-            _('Prince'),                  # LANG: Empire rank
-            _('King')                     # LANG: Empire rank
+            _('None'), _('Outsider'), _('Serf'), _('Master'), _('Squire'), _('Knight'), _('Lord'), _('Baron'),
+            _('Viscount'), _('Count'), _('Earl'), _('Marquis'), _('Duke'), _('Prince'), _('King')
         ],
-
-        # http://elite-dangerous.wikia.com/wiki/Ratings
         'power': [
-            _('None'),                    # LANG: No rank
-            _('Rating 1'),                # LANG: Power rank
-            _('Rating 2'),                # LANG: Power rank
-            _('Rating 3'),                # LANG: Power rank
-            _('Rating 4'),                # LANG: Power rank
-            _('Rating 5')                 # LANG: Power rank
+            _('None'), _('Rating 1'), _('Rating 2'), _('Rating 3'), _('Rating 4'), _('Rating 5')
         ],
     }
 
@@ -203,7 +105,6 @@ def status(data: dict[str, Any]) -> list[list[str]]:
         names = RANK_NAMES[thing]
         if isinstance(rank, int):
             res.append([title, names[rank] if rank < len(names) else f'Rank {rank}'])
-
         else:
             res.append([title, _('None')])  # LANG: No rank
 
@@ -235,21 +136,22 @@ class ShipRet(NamedTuple):
     value: str
 
 
-def ships(companion_data: dict[str, Any]) -> list[ShipRet]:
+def ships(companion_data: dict[str, Any]) -> List[ShipRet]:
     """
-    Return a list of 5 tuples of ship information.
+    Return a list of ship information.
 
-    :param data: [description]
-    :return: A 5 tuple of strings containing: Ship ID, Ship Type Name (internal), Ship Name, System, Station, and Value
+    :param companion_data: Companion data containing ship information
+    :return: List of ship information tuples containing Ship ID, Ship Type Name (internal),
+             Ship Name, System, Station, and Value
     """
-    ships: list[dict[str, Any]] = companion.listify(cast(list, companion_data.get('ships')))
+    ships: List[dict[str, Any]] = companion.listify(cast(List, companion_data.get('ships')))
     current = companion_data['commander'].get('currentShipId')
 
     if isinstance(current, int) and current < len(ships) and ships[current]:
         ships.insert(0, ships.pop(current))  # Put current ship first
 
         if not companion_data['commander'].get('docked'):
-            out: list[ShipRet] = []
+            out: List[ShipRet] = []
             # Set current system, not last docked
             out.append(ShipRet(
                 id=str(ships[0]['id']),
@@ -476,7 +378,8 @@ class StatsResults(tk.Toplevel):
         """Add a spacer to the page."""
         self.addpagerow(parent, [''])
 
-    def addpagerow(self, parent: ttk.Frame, content: Sequence[str], align: Optional[str] = None, with_copy: bool = False):
+    def addpagerow(self, parent: ttk.Frame, content: Sequence[str],
+                   align: Optional[str] = None, with_copy: bool = False):
         """
         Add a single row to parent.
 

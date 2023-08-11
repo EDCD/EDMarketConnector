@@ -1,5 +1,5 @@
 """
-edmc_data.py - Static App Data
+edmc_data.py - Static App Data.
 
 Copyright (c) EDCD, All Rights Reserved
 Licensed under the GNU General Public License.

@@ -22,6 +22,7 @@ else:
     # Linux's inotify doesn't work over CIFS or NFS, so poll
     class FileSystemEventHandler:  # type: ignore
         """Dummy class to represent a file system event handler on platforms other than macOS and Windows."""
+
         pass  # dummy
 
 

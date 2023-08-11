@@ -1,5 +1,5 @@
 """
-timeout_session.py - requests session with timeout adapter
+timeout_session.py - requests session with timeout adapter.
 
 Copyright (c) EDCD, All Rights Reserved
 Licensed under the GNU General Public License.
@@ -34,7 +34,6 @@ class TimeoutAdapter(HTTPAdapter):
 def new_session(
     timeout: int = REQUEST_TIMEOUT, session: Optional[Session] = None
 ) -> Session:
-
     """
     Create a new requests.Session and override the default HTTPAdapter with a TimeoutAdapter.
 

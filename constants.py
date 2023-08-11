@@ -1,5 +1,5 @@
 """
-constants.py - Constants for the app
+constants.py - Constants for the app.
 
 Copyright (c) EDCD, All Rights Reserved
 Licensed under the GNU General Public License.

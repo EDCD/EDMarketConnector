@@ -1,5 +1,5 @@
 """
-util_ships.py - Ship Utilities
+util_ships.py - Ship Utilities.
 
 Copyright (c) EDCD, All Rights Reserved
 Licensed under the GNU General Public License.

@@ -1,5 +1,5 @@
 """
-text.py - Dealing with Text and Bytes
+text.py - Dealing with Text and Bytes.
 
 Copyright (c) EDCD, All Rights Reserved
 Licensed under the GNU General Public License.

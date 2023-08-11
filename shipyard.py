@@ -1,5 +1,5 @@
 """
-constants.py - Export Ships as CSV
+constants.py - Export Ships as CSV.
 
 Copyright (c) EDCD, All Rights Reserved
 Licensed under the GNU General Public License.

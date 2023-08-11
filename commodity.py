@@ -1,5 +1,5 @@
 """
-commodity.py - Export various CSV formats
+commodity.py - Export various CSV formats.
 
 Copyright (c) EDCD, All Rights Reserved
 Licensed under the GNU General Public License.
