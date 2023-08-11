@@ -1,12 +1,10 @@
 """CMDR Status information."""
-from __future__ import annotations
-
 import csv
 import json
 import sys
 import tkinter as tk
 from tkinter import ttk
-from typing import TYPE_CHECKING, Any, AnyStr, Callable, NamedTuple, Sequence, cast
+from typing import TYPE_CHECKING, Any, AnyStr, Callable, NamedTuple, Sequence, cast, Optional
 
 import companion
 import EDMCLogging
@@ -442,7 +440,7 @@ class StatsResults(tk.Toplevel):
                 self.geometry(f"+{position.left}+{position.top}")
 
     def addpage(
-        self, parent, header: list[str] | None = None, align: str | None = None
+        self, parent, header: Optional[list[str]] = None, align: Optional[str] = None
     ) -> ttk.Frame:
         """
         Add a page to the StatsResults screen.
@@ -463,7 +461,7 @@ class StatsResults(tk.Toplevel):
 
         return page
 
-    def addpageheader(self, parent: ttk.Frame, header: Sequence[str], align: str | None = None) -> None:
+    def addpageheader(self, parent: ttk.Frame, header: Sequence[str], align: Optional[str] = None) -> None:
         """
         Add the column headers to the page, followed by a separator.
 
@@ -478,7 +476,7 @@ class StatsResults(tk.Toplevel):
         """Add a spacer to the page."""
         self.addpagerow(parent, [''])
 
-    def addpagerow(self, parent: ttk.Frame, content: Sequence[str], align: str | None = None, with_copy: bool = False):
+    def addpagerow(self, parent: ttk.Frame, content: Sequence[str], align: Optional[str] = None, with_copy: bool = False):
         """
         Add a single row to parent.
 

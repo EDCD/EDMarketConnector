@@ -1,6 +1,4 @@
 """Search all given paths recursively for localised string calls."""
-from __future__ import annotations
-
 import argparse
 import ast
 import dataclasses
@@ -9,9 +7,6 @@ import pathlib
 import re
 import sys
 from typing import Optional, List, Dict
-
-
-# spell-checker: words dedupe deduping deduped
 
 
 def get_func_name(thing: ast.AST) -> str:

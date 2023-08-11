@@ -1,6 +1,4 @@
 """Plugin API."""
-from __future__ import annotations
-
 import copy
 import importlib
 import logging
@@ -11,7 +9,6 @@ import tkinter as tk
 from builtins import str
 from tkinter import ttk
 from typing import Any, Callable, List, Mapping, MutableMapping, Optional
-
 import companion
 import myNotebook as nb  # noqa: N813
 from config import config
@@ -120,7 +117,7 @@ class Plugin:
 
         return None
 
-    def get_prefs(self, parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> Optional[tk.Frame]:
+    def get_prefs(self, parent: ttk.Notebook, cmdr: Optional[str], is_beta: bool) -> Optional[tk.Frame]:
         """
         If the plugin provides a prefs frame, create and return it.
 
@@ -203,7 +200,7 @@ def provides(fn_name: str) -> List[str]:
 
 
 def invoke(
-    plugin_name: str, fallback: str | None, fn_name: str, *args: Any
+    plugin_name: str, fallback: Optional[str], fn_name: str, *args: Any
 ) -> Optional[str]:
     """
     Invoke a function on a named plugin.
@@ -253,7 +250,7 @@ def notify_stop() -> Optional[str]:
     return error
 
 
-def notify_prefs_cmdr_changed(cmdr: str | None, is_beta: bool) -> None:
+def notify_prefs_cmdr_changed(cmdr: Optional[str], is_beta: bool) -> None:
     """
     Notify plugins that the Cmdr was changed while the settings dialog is open.
 
@@ -270,7 +267,7 @@ def notify_prefs_cmdr_changed(cmdr: str | None, is_beta: bool) -> None:
                 logger.exception(f'Plugin "{plugin.name}" failed')
 
 
-def notify_prefs_changed(cmdr: str | None, is_beta: bool) -> None:
+def notify_prefs_changed(cmdr: Optional[str], is_beta: bool) -> None:
     """
     Notify plugins that the settings dialog has been closed.
 
@@ -290,7 +287,7 @@ def notify_prefs_changed(cmdr: str | None, is_beta: bool) -> None:
 
 
 def notify_journal_entry(
-    cmdr: str, is_beta: bool, system: str | None, station: str | None,
+    cmdr: str, is_beta: bool, system: Optional[str], station: Optional[str],
     entry: MutableMapping[str, Any],
     state: Mapping[str, Any]
 ) -> Optional[str]:
@@ -408,7 +405,7 @@ def notify_capidata(
 
 def notify_capi_fleetcarrierdata(
     data: companion.CAPIData
-) -> str | None:
+) -> Optional[str]:
     """
     Send the latest CAPI Fleetcarrier data from the FD servers to each plugin.
 

@@ -14,14 +14,12 @@ In addition to standard ttk.Label arguments, takes the following arguments:
 
 May be imported by plugins
 """
-from __future__ import annotations
-
 import sys
 import tkinter as tk
 import webbrowser
 from tkinter import font as tk_font
 from tkinter import ttk
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Optional
 
 if TYPE_CHECKING:
     def _(x: str) -> str: ...
@@ -31,7 +29,7 @@ if TYPE_CHECKING:
 class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label):  # type: ignore
     """Clickable label for HTTP links."""
 
-    def __init__(self, master: tk.Frame | None = None, **kw: Any) -> None:
+    def __init__(self, master: Optional[tk.Frame] = None, **kw: Any) -> None:
         self.url = 'url' in kw and kw.pop('url') or None
         self.popup_copy = kw.pop('popup_copy', False)
         self.underline = kw.pop('underline', None)  # override ttk.Label's underline
@@ -64,8 +62,8 @@ class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label):  # typ
                        font=kw.get('font', ttk.Style().lookup('TLabel', 'font')))
 
     def configure(  # noqa: CCR001
-        self, cnf: dict[str, Any] | None = None, **kw: Any
-    ) -> dict[str, tuple[str, str, str, Any, Any]] | None:
+        self, cnf: Optional[dict[str, Any]] = None, **kw: Any
+    ) -> Optional[dict[str, tuple[str, str, str, Any, Any]]]:
         """Change cursor and appearance depending on state and text."""
         # This class' state
         for thing in ['url', 'popup_copy', 'underline']:

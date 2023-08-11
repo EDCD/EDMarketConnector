@@ -18,16 +18,13 @@ referenced in this file (or only in any other core plugin), and if so...
     `build.py` TO ENSURE THE FILES ARE ACTUALLY PRESENT
     IN AN END-USER INSTALLATION ON WINDOWS.
 """
-from __future__ import annotations
-
 import base64
 import gzip
 import io
 import json
 import tkinter as tk
 from tkinter import ttk
-from typing import TYPE_CHECKING, Union
-
+from typing import TYPE_CHECKING, Union, Optional
 import myNotebook as nb  # noqa: N813 # its not my fault.
 from EDMCLogging import get_main_logger
 from plug import show_error
@@ -77,7 +74,7 @@ def plugin_start3(path: str) -> str:
     return 'Coriolis'
 
 
-def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> tk.Frame:
+def plugin_prefs(parent: ttk.Notebook, cmdr: Optional[str], is_beta: bool) -> tk.Frame:
     """Set up plugin preferences."""
     PADX = 10  # noqa: N806
 
@@ -124,7 +121,7 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> tk.Fr
     return conf_frame
 
 
-def prefs_changed(cmdr: str | None, is_beta: bool) -> None:
+def prefs_changed(cmdr: Optional[str], is_beta: bool) -> None:
     """
     Update URLs and override mode based on user preferences.
 

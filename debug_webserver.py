@@ -1,6 +1,4 @@
 """Simple HTTP listener to be used with debugging various EDMC sends."""
-from __future__ import annotations
-
 import gzip
 import json
 import pathlib
@@ -10,7 +8,6 @@ import zlib
 from http import server
 from typing import Any, Callable, Literal, Tuple, Union
 from urllib.parse import parse_qs
-
 from config import appname
 from EDMCLogging import get_main_logger
 
@@ -78,7 +75,7 @@ class LoggingHandler(server.BaseHTTPRequestHandler):
             f.write(to_save + "\n\n")
 
     @staticmethod
-    def get_printable(data: bytes, compression: Literal['deflate'] | Literal['gzip'] | str | None = None) -> str:
+    def get_printable(data: bytes, compression: Union[Literal['deflate'], Literal['gzip'], str, None] = None) -> str:
         """
         Convert an incoming data stream into a string.
 

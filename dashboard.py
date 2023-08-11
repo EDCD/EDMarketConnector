@@ -1,6 +1,4 @@
 """Handle the game Status.json file."""
-from __future__ import annotations
-
 import json
 import pathlib
 import sys
@@ -168,7 +166,7 @@ class Dashboard(FileSystemEventHandler):
             # Can get on_modified events when the file is emptied
             self.process(event.src_path if not event.is_directory else None)
 
-    def process(self, logfile: str | None = None) -> None:
+    def process(self, logfile: Optional[str] = None) -> None:
         """
         Process the contents of current Status.json file.
 

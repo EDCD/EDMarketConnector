@@ -10,8 +10,6 @@ OSX and Windows.
 
 Entire file may be imported by plugins.
 """
-from __future__ import annotations
-
 import sys
 import tkinter as tk
 from tkinter import ttk
@@ -60,7 +58,7 @@ class Notebook(ttk.Notebook):
 class Frame(sys.platform == 'darwin' and tk.Frame or ttk.Frame):  # type: ignore
     """Custom t(t)k.Frame class to fix some display issues."""
 
-    def __init__(self, master: ttk.Notebook | None = None, **kw):
+    def __init__(self, master: Optional[ttk.Notebook] = None, **kw):
         if sys.platform == 'darwin':
             kw['background'] = kw.pop('background', PAGEBG)
             tk.Frame.__init__(self, master, **kw)

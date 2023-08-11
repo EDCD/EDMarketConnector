@@ -4,16 +4,13 @@ Theme support.
 Because of various ttk limitations this app is an unholy mix of Tk and ttk widgets.
 So can't use ttk's theme support. So have to change colors manually.
 """
-from __future__ import annotations
-
 import os
 import sys
 import tkinter as tk
 from os.path import join
 from tkinter import font as tk_font
 from tkinter import ttk
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Set, Tuple
-
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Set, Tuple, Union
 from config import config
 from EDMCLogging import get_main_logger
 from ttkHyperlinkLabel import HyperlinkLabel
@@ -132,16 +129,16 @@ class _Theme:
     THEME_TRANSPARENT = 2
 
     def __init__(self) -> None:
-        self.active: int | None = None  # Starts out with no theme
+        self.active: Optional[int] = None  # Starts out with no theme
         self.minwidth: Optional[int] = None
-        self.widgets: Dict[tk.Widget | tk.BitmapImage, Set] = {}
+        self.widgets: Dict[Union[tk.Widget, tk.BitmapImage], Set] = {}
         self.widgets_pair: List = []
         self.defaults: Dict = {}
         self.current: Dict = {}
-        self.default_ui_scale: float | None = None  # None == not yet known
-        self.startup_ui_scale: int | None = None
+        self.default_ui_scale: Optional[float] = None  # None == not yet known
+        self.startup_ui_scale: Optional[int] = None
 
-    def register(self, widget: tk.Widget | tk.BitmapImage) -> None:  # noqa: CCR001, C901
+    def register(self, widget: Union[tk.Widget, tk.BitmapImage]) -> None:  # noqa: CCR001, C901
         # Note widget and children for later application of a theme. Note if
         # the widget has explicit fg or bg attributes.
         assert isinstance(widget, (tk.BitmapImage, tk.Widget)), widget
@@ -311,7 +308,7 @@ class _Theme:
                 self._update_widget(child)
 
     # Apply current theme to a single widget
-    def _update_widget(self, widget: tk.Widget | tk.BitmapImage) -> None:  # noqa: CCR001, C901
+    def _update_widget(self, widget: Union[tk.Widget, tk.BitmapImage]) -> None:  # noqa: CCR001, C901
         if widget not in self.widgets:
             if isinstance(widget, tk.Widget):
                 w_class = widget.winfo_class()

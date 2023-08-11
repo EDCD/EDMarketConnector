@@ -5,8 +5,6 @@ Deals with initiating authentication for, and use of, CAPI.
 Some associated code is in protocol.py which creates and handles the edmc://
 protocol used for the callback.
 """
-from __future__ import annotations
-
 import base64
 import collections
 import csv
@@ -1047,7 +1045,7 @@ class Session:
         )
 
     def fleetcarrier(
-            self, query_time: int, tk_response_event: str | None = None,
+            self, query_time: int, tk_response_event: Optional[str] = None,
             play_sound: bool = False, auto_update: bool = False
     ) -> None:
         """

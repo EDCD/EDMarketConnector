@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Entry point for the main GUI application."""
-from __future__ import annotations
-
 import argparse
 import html
 import locale
@@ -1690,7 +1688,7 @@ class AppWindow:
             if not config.get_int('hotkey_mute'):
                 hotkeymgr.play_bad()
 
-    def shipyard_url(self, shipname: str) -> str | None:
+    def shipyard_url(self, shipname: str) -> Optional[str]:
         """Despatch a ship URL to the configured handler."""
         if not (loadout := monitor.ship()):
             logger.warning('No ship loadout, aborting.')
@@ -1717,13 +1715,13 @@ class AppWindow:
 
         return f'file://localhost/{file_name}'
 
-    def system_url(self, system: str) -> str | None:
+    def system_url(self, system: str) -> Optional[str]:
         """Despatch a system URL to the configured handler."""
         return plug.invoke(
             config.get_str('system_provider'), 'EDSM', 'system_url', monitor.state['SystemName']
         )
 
-    def station_url(self, station: str) -> str | None:
+    def station_url(self, station: str) -> Optional[str]:
         """Despatch a station URL to the configured handler."""
         return plug.invoke(
             config.get_str('station_provider'), 'EDSM', 'station_url',

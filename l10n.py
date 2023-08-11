@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 """Localization with gettext is a pain on non-Unix systems. Use OSX-style strings files instead."""
-from __future__ import annotations
-
 import builtins
 import locale
 import numbers
@@ -83,7 +81,7 @@ class _Translations:
         self.translations = {None: {}}
         builtins.__dict__['_'] = lambda x: str(x).replace(r'\"', '"').replace('{CR}', '\n')
 
-    def install(self, lang: str | None = None) -> None:  # noqa: CCR001
+    def install(self, lang: Optional[str] = None) -> None:  # noqa: CCR001
         """
         Install the translation function to the _ builtin.
 
@@ -250,7 +248,7 @@ class _Locale:
             self.float_formatter.setMinimumFractionDigits_(5)
             self.float_formatter.setMaximumFractionDigits_(5)
 
-    def stringFromNumber(self, number: Union[float, int], decimals: int | None = None) -> str:  # noqa: N802
+    def stringFromNumber(self, number: Union[float, int], decimals: Optional[int] = None) -> str:  # noqa: N802
         warnings.warn(DeprecationWarning('use _Locale.string_from_number instead.'))
         return self.string_from_number(number, decimals)  # type: ignore
 

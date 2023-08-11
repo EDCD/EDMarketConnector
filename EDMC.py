@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 """Command-line interface. Requires prior setup through the GUI."""
-from __future__ import annotations
-
 import argparse
 import json
 import locale
@@ -11,7 +9,7 @@ import sys
 from os.path import getmtime
 from pathlib import Path
 from time import sleep, time
-from typing import TYPE_CHECKING, Any, List, Optional
+from typing import TYPE_CHECKING, Any, List, Optional, Union
 
 # isort: off
 
@@ -72,7 +70,7 @@ def versioncmp(versionstring) -> List:
     return list(map(int, versionstring.split('.')))
 
 
-def deep_get(target: dict | companion.CAPIData, *args: str, default=None) -> Any:
+def deep_get(target: Union[dict, companion.CAPIData], *args: str, default=None) -> Any:
     """
     Walk into a dict and return the specified deep value.
 
@@ -205,7 +203,7 @@ sys.path: {sys.path}'''
             # Import and collate from JSON dump
             #
             # Try twice, once with the system locale and once enforcing utf-8. If the file was made on the current
-            # system, chances are its the current locale, and not utf-8. Otherwise if it was copied, its probably
+            # system, chances are it's the current locale, and not utf-8. Otherwise, if it was copied, its probably
             # utf8. Either way, try the system FIRST because reading something like cp1251 in UTF-8 results in garbage
             # but the reverse results in an exception.
             json_file = Path(args.j)

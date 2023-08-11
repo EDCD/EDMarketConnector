@@ -7,8 +7,6 @@ key deletions. Said modifications are to keys that are generated internally.
 Most of these tests are parity tests with the "old" config, and likely one day can be
 entirely removed.
 """
-from __future__ import annotations
-
 import contextlib
 import itertools
 import pathlib

@@ -1,15 +1,11 @@
 """Tests for journal_lock.py code."""
-from __future__ import annotations
-
 import multiprocessing as mp
 import os
 import pathlib
 import sys
-from typing import Generator
-
+from typing import Generator, Optional
 import pytest
 from pytest import MonkeyPatch, TempdirFactory, TempPathFactory
-
 from config import config
 from journal_lock import JournalLock, JournalLockResult
 
@@ -122,7 +118,7 @@ class TestJournalLock:
         tmp_path_factory: TempdirFactory
     ) -> Generator:
         """Fixture for mocking config.get_str('journaldir')."""
-        def get_str(key: str, *, default: str | None = None) -> str:
+        def get_str(key: str, *, default: Optional[str] = None) -> str:
             """Mock config.*Config get_str to provide fake journaldir."""
             if key == 'journaldir':
                 return str(tmp_path_factory.getbasetemp())
@@ -141,7 +137,7 @@ class TestJournalLock:
             tmp_path_factory: TempdirFactory
     ) -> Generator:
         """Fixture for mocking config.get_str('journaldir')."""
-        def get_str(key: str, *, default: str | None = None) -> str:
+        def get_str(key: str, *, default: Optional[str] = None) -> str:
             """Mock config.*Config get_str to provide fake journaldir."""
             if key == 'journaldir':
                 return tmp_path_factory.mktemp("changing")

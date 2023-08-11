@@ -1,10 +1,10 @@
 """Linux config implementation."""
-from __future__ import annotations
-
 import os
 import pathlib
 import sys
 from configparser import ConfigParser
+from typing import Optional, Union
+
 from config import AbstractConfig, appname, logger
 
 assert sys.platform == 'linux'
@@ -18,7 +18,7 @@ class LinuxConfig(AbstractConfig):
     __unescape_lut = {'\\': '\\', 'n': '\n', ';': ';', 'r': '\r', '#': '#'}
     __escape_lut = {'\\': '\\', '\n': 'n', ';': ';', '\r': 'r'}
 
-    def __init__(self, filename: str | None = None) -> None:
+    def __init__(self, filename: Optional[str] = None) -> None:
         """
         Initialize LinuxConfig instance.
 
@@ -42,7 +42,7 @@ class LinuxConfig(AbstractConfig):
         if filename is not None:
             self.filename = pathlib.Path(filename)
         self.filename.parent.mkdir(exist_ok=True, parents=True)
-        self.config: ConfigParser | None = ConfigParser(comment_prefixes=('#',), interpolation=None)
+        self.config: Optional[ConfigParser] = ConfigParser(comment_prefixes=('#',), interpolation=None)
         self.config.read(self.filename)  # read() ignores files that don't exist
         # Ensure that our section exists. This is here because configparser will happily create files for us, but it
         # does not magically create sections
@@ -101,7 +101,7 @@ class LinuxConfig(AbstractConfig):
 
         return "".join(out)
 
-    def __raw_get(self, key: str) -> str | None:
+    def __raw_get(self, key: str) -> Optional[str]:
         """
         Get a raw data value from the config file.
 
@@ -113,7 +113,7 @@ class LinuxConfig(AbstractConfig):
 
         return self.config[self.SECTION].get(key)
 
-    def get_str(self, key: str, *, default: str | None = None) -> str:
+    def get_str(self, key: str, *, default: Optional[str] = None) -> str:
         """
         Return the string referred to by the given key if it exists, or the default.
 
@@ -128,7 +128,7 @@ class LinuxConfig(AbstractConfig):
 
         return self.__unescape(data)
 
-    def get_list(self, key: str, *, default: list | None = None) -> list:
+    def get_list(self, key: str, *, default: Optional[list] = None) -> list:
         """
         Return the list referred to by the given key if it exists, or the default.
 
@@ -162,7 +162,7 @@ class LinuxConfig(AbstractConfig):
         except ValueError as e:
             raise ValueError(f'requested {key=} as int cannot be converted to int') from e
 
-    def get_bool(self, key: str, *, default: bool | None = None) -> bool:
+    def get_bool(self, key: str, *, default: Optional[bool] = None) -> bool:
         """
         Return the bool referred to by the given key if it exists, or the default.
 
@@ -177,7 +177,7 @@ class LinuxConfig(AbstractConfig):
 
         return bool(int(data))
 
-    def set(self, key: str, val: int | str | list[str]) -> None:
+    def set(self, key: str, val: Union[int, str, list[str]]) -> None:
         """
         Set the given key's data to the given value.
 

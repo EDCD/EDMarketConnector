@@ -1,6 +1,4 @@
 """Windows config implementation."""
-from __future__ import annotations
-
 import ctypes
 import functools
 import pathlib
@@ -142,7 +140,7 @@ class WinConfig(AbstractConfig):
         logger.warning(f'registry key {key=} returned unknown type {_type=} {value=}')
         return None
 
-    def get_str(self, key: str, *, default: str | None = None) -> str:
+    def get_str(self, key: str, *, default: Optional[str] = None) -> str:
         """
         Return the string referred to by the given key if it exists, or the default.
 
@@ -157,7 +155,7 @@ class WinConfig(AbstractConfig):
 
         return res
 
-    def get_list(self, key: str, *, default: list | None = None) -> list:
+    def get_list(self, key: str, *, default: Optional[list] = None) -> list:
         """
         Return the list referred to by the given key if it exists, or the default.
 
@@ -187,7 +185,7 @@ class WinConfig(AbstractConfig):
 
         return res
 
-    def get_bool(self, key: str, *, default: bool | None = None) -> bool:
+    def get_bool(self, key: str, *, default: Optional[bool] = None) -> bool:
         """
         Return the bool referred to by the given key if it exists, or the default.
 
@@ -206,7 +204,7 @@ class WinConfig(AbstractConfig):
         Implements :meth:`AbstractConfig.set`.
         """
         # These are the types that winreg.REG_* below resolve to.
-        reg_type: Literal[1] | Literal[4] | Literal[7]
+        reg_type: Union[Literal[1], Literal[4], Literal[7]]
         if isinstance(val, str):
             reg_type = winreg.REG_SZ
             winreg.SetValueEx(self.__reg_handle, key, REG_RESERVED_ALWAYS_ZERO, winreg.REG_SZ, val)

@@ -1,6 +1,4 @@
-# type: ignore
-from __future__ import annotations
-
+"""Old Configuration Test File"""
 import numbers
 import sys
 import warnings
@@ -8,7 +6,6 @@ from configparser import NoOptionError
 from os import getenv, makedirs, mkdir, pardir
 from os.path import dirname, expanduser, isdir, join, normpath
 from typing import TYPE_CHECKING, Optional, Union
-
 from config import applongname, appname, update_interval
 from EDMCLogging import get_main_logger
 
@@ -141,7 +138,7 @@ class OldConfig:
                 self.identifier = f'uk.org.marginal.{appname.lower()}'
                 NSBundle.mainBundle().infoDictionary()['CFBundleIdentifier'] = self.identifier
 
-            self.default_journal_dir: str | None = join(
+            self.default_journal_dir: Optional[str] = join(
                 NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, True)[0],
                 'Frontier Developments',
                 'Elite Dangerous'
@@ -224,13 +221,13 @@ class OldConfig:
 
             journaldir = known_folder_path(FOLDERID_SavedGames)
             if journaldir:
-                self.default_journal_dir: str | None = join(journaldir, 'Frontier Developments', 'Elite Dangerous')
+                self.default_journal_dir: Optional[str] = join(journaldir, 'Frontier Developments', 'Elite Dangerous')
 
             else:
                 self.default_journal_dir = None
 
             self.identifier = applongname
-            self.hkey: ctypes.c_void_p | None = HKEY()
+            self.hkey: Optional[ctypes.c_void_p] = HKEY()
             disposition = DWORD()
             if RegCreateKeyEx(
                     HKEY_CURRENT_USER,
@@ -376,7 +373,7 @@ class OldConfig:
                 mkdir(self.plugin_dir)
 
             self.internal_plugin_dir = join(dirname(__file__), 'plugins')
-            self.default_journal_dir: str | None = None
+            self.default_journal_dir: Optional[str] = None
             self.home = expanduser('~')
             self.respath = dirname(__file__)
             self.identifier = f'uk.org.marginal.{appname.lower()}'

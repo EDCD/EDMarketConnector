@@ -34,8 +34,6 @@ To utilise logging in a 'found' (third-party) plugin, include this:
     # See, plug.py:load_plugins()
     logger = logging.getLogger(f'{appname}.{plugin_name}')
 """
-from __future__ import annotations
-
 import inspect
 import logging
 import logging.handlers
@@ -49,7 +47,7 @@ from sys import _getframe as getframe
 from threading import get_native_id as thread_native_id
 from time import gmtime
 from traceback import print_exc
-from typing import TYPE_CHECKING, Tuple, cast
+from typing import TYPE_CHECKING, Tuple, cast, Union
 
 import config as config_mod
 from config import appcmdname, appname, config
@@ -146,7 +144,7 @@ class Logger:
     logging.Logger instance.
     """
 
-    def __init__(self, logger_name: str, loglevel: int | str = _default_loglevel):
+    def __init__(self, logger_name: str, loglevel: Union[int, str] = _default_loglevel):
         """
         Set up a `logging.Logger` with our preferred configuration.
 
@@ -211,7 +209,7 @@ class Logger:
         """
         return self.logger_channel
 
-    def set_channels_loglevel(self, level: int | str) -> None:
+    def set_channels_loglevel(self, level: Union[int, str]) -> None:
         """
         Set the specified log level on the channels.
 
@@ -221,7 +219,7 @@ class Logger:
         self.logger_channel.setLevel(level)
         self.logger_channel_rotating.setLevel(level)
 
-    def set_console_loglevel(self, level: int | str) -> None:
+    def set_console_loglevel(self, level: Union[int, str]) -> None:
         """
         Set the specified log level on the console channel.
 
@@ -535,7 +533,7 @@ def get_main_logger(sublogger_name: str = '') -> 'LoggerMixin':
 
 
 # Singleton
-loglevel: str | int = config.get_str('loglevel')
+loglevel: Union[str, int] = config.get_str('loglevel')
 if not loglevel:
     loglevel = logging.INFO
 

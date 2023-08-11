@@ -1,6 +1,4 @@
 """Fetch kill switches from EDMC Repo."""
-from __future__ import annotations
-
 import json
 import threading
 from copy import deepcopy
@@ -8,11 +6,9 @@ from typing import (
     TYPE_CHECKING, Any, Callable, Dict, List, Mapping, MutableMapping, MutableSequence, NamedTuple, Optional, Sequence,
     Tuple, TypedDict, TypeVar, Union, cast
 )
-
 import requests
 import semantic_version
 from semantic_version.base import Version
-
 import config
 import EDMCLogging
 
@@ -343,7 +339,7 @@ def fetch_kill_switches(target=DEFAULT_KILLSWITCH_URL) -> Optional[KillSwitchJSO
     if target.startswith('file:'):
         target = target.replace('file:', '')
         try:
-            with open(target, 'r') as t:
+            with open(target) as t:
                 return json.load(t)
 
         except FileNotFoundError:

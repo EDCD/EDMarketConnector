@@ -1,12 +1,17 @@
-"""Utilities for dealing with text (and byte representations thereof)."""
-from __future__ import annotations
+"""
+text.py - Dealing with Text and Bytes
 
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
+"""
+from typing import Union
 from gzip import compress
 
 __all__ = ['gzip']
 
 
-def gzip(data: str | bytes, max_size: int = 512, encoding='utf-8') -> tuple[bytes, bool]:
+def gzip(data: Union[str, bytes], max_size: int = 512, encoding='utf-8') -> tuple[bytes, bool]:
     """
     Compress the given data if the max size is greater than specified.
 

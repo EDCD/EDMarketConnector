@@ -18,8 +18,6 @@ referenced in this file (or only in any other core plugin), and if so...
     `build.py` TO ENSURE THE FILES ARE ACTUALLY PRESENT
     IN AN END-USER INSTALLATION ON WINDOWS.
 """
-from __future__ import annotations
-
 import http
 import itertools
 import json
@@ -36,9 +34,7 @@ from threading import Lock
 from typing import TYPE_CHECKING, Any, Iterator, Mapping, MutableMapping, Optional
 from typing import OrderedDict as OrderedDictT
 from typing import Tuple, Union
-
 import requests
-
 import companion
 import edmc_data
 import killswitch
@@ -87,9 +83,9 @@ class This:
         self.body_name: Optional[str] = None
         self.body_id: Optional[int] = None
         self.body_type: Optional[int] = None
-        self.station_name: str | None = None
-        self.station_type: str | None = None
-        self.station_marketid: str | None = None
+        self.station_name: Optional[str] = None
+        self.station_type: Optional[str] = None
+        self.station_marketid: Optional[str] = None
         # Track Status.json data
         self.status_body_name: Optional[str] = None
 
@@ -399,7 +395,7 @@ class EDDNSender:
 
         # Even the smallest possible message compresses somewhat, so always compress
         encoded, compressed = text.gzip(json.dumps(new_data, separators=(',', ':')), max_size=0)
-        headers: None | dict[str, str] = None
+        headers: Optional[dict[str, str]] = None
         if compressed:
             headers = {'Content-Encoding': 'gzip'}
 

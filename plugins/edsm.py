@@ -18,8 +18,6 @@ referenced in this file (or only in any other core plugin), and if so...
     `build.py` TO ENSURE THE FILES ARE ACTUALLY PRESENT
     IN AN END-USER INSTALLATION ON WINDOWS.
 """
-from __future__ import annotations
-
 import json
 import threading
 import tkinter as tk
@@ -29,9 +27,7 @@ from threading import Thread
 from time import sleep
 from tkinter import ttk
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Mapping, MutableMapping, Optional, Set, Tuple, Union, cast
-
 import requests
-
 import killswitch
 import monitor
 import myNotebook as nb  # noqa: N813
@@ -90,13 +86,13 @@ class This:
         self.newgame: bool = False  # starting up - batch initial burst of events
         self.newgame_docked: bool = False  # starting up while docked
         self.navbeaconscan: int = 0		# batch up burst of Scan events after NavBeaconScan
-        self.system_link: tk.Widget | None = None
-        self.system_name: tk.Tk | None = None
-        self.system_address: int | None = None  # Frontier SystemAddress
-        self.system_population: int | None = None
-        self.station_link: tk.Widget | None = None
-        self.station_name: str | None = None
-        self.station_marketid: int | None = None  # Frontier MarketID
+        self.system_link: Optional[tk.Widget] = None
+        self.system_name: Optional[tk.Tk] = None
+        self.system_address: Optional[int] = None  # Frontier SystemAddress
+        self.system_population: Optional[int] = None
+        self.station_link: Optional[tk.Widget] = None
+        self.station_name: Optional[str] = None
+        self.station_marketid: Optional[int] = None  # Frontier MarketID
         self.on_foot = False
 
         self._IMG_KNOWN = None
@@ -106,19 +102,19 @@ class This:
 
         self.thread: Optional[threading.Thread] = None
 
-        self.log: tk.IntVar | None = None
-        self.log_button: ttk.Checkbutton | None = None
+        self.log: Optional[tk.IntVar] = None
+        self.log_button: Optional[ttk.Checkbutton] = None
 
-        self.label: tk.Widget | None = None
+        self.label: Optional[tk.Widget] = None
 
-        self.cmdr_label: nb.Label | None = None
-        self.cmdr_text: nb.Label | None = None
+        self.cmdr_label: Optional[nb.Label] = None
+        self.cmdr_text: Optional[nb.Label] = None
 
-        self.user_label: nb.Label | None = None
-        self.user: nb.Entry | None = None
+        self.user_label: Optional[nb.Label] = None
+        self.user: Optional[nb.Entry] = None
 
-        self.apikey_label: nb.Label | None = None
-        self.apikey: nb.Entry | None = None
+        self.apikey_label: Optional[nb.Label] = None
+        self.apikey: Optional[nb.Entry] = None
 
 
 this = This()
@@ -281,7 +277,7 @@ def toggle_password_visibility():
         this.apikey.config(show="*")  # type: ignore
 
 
-def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> tk.Frame:
+def plugin_prefs(parent: ttk.Notebook, cmdr: Optional[str], is_beta: bool) -> tk.Frame:
     """
     Plugin preferences setup hook.
 
@@ -368,7 +364,7 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> tk.Fr
     return frame
 
 
-def prefs_cmdr_changed(cmdr: str | None, is_beta: bool) -> None:  # noqa: CCR001
+def prefs_cmdr_changed(cmdr: Optional[str], is_beta: bool) -> None:  # noqa: CCR001
     """
     Handle the Commander name changing whilst Settings was open.
 

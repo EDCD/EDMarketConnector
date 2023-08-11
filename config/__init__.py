@@ -5,9 +5,6 @@ Windows uses the Registry to store values in a flat manner.
 Linux uses a file, but for commonality it's still a flat data structure.
 macOS uses a 'defaults' object.
 """
-
-from __future__ import annotations
-
 __all__ = [
     # defined in the order they appear in the file
     'GITVERSION_FILE',
@@ -41,7 +38,7 @@ import sys
 import traceback
 import warnings
 from abc import abstractmethod
-from typing import Any, Callable, Optional, Type, TypeVar
+from typing import Any, Callable, Optional, Type, TypeVar, Union
 
 import semantic_version
 
@@ -296,7 +293,7 @@ class AbstractConfig(abc.ABC):
 
     @staticmethod
     def _suppress_call(
-        func: Callable[..., _T], exceptions: Type[BaseException] | list[Type[BaseException]] = Exception,
+        func: Callable[..., _T], exceptions: Union[Type[BaseException], list[Type[BaseException]]] = Exception,
         *args: Any, **kwargs: Any
     ) -> Optional[_T]:
         if exceptions is None:
@@ -312,8 +309,8 @@ class AbstractConfig(abc.ABC):
 
     def get(
         self, key: str,
-        default: list | str | bool | int | None = None
-    ) -> list | str | bool | int | None:
+        default: Union[list, str, bool, int, None] = None
+    ) -> Union[list, str, bool, int, None]:
         """
         Return the data for the requested key, or a default.
 
@@ -340,7 +337,7 @@ class AbstractConfig(abc.ABC):
         return default  # type: ignore
 
     @abstractmethod
-    def get_list(self, key: str, *, default: list | None = None) -> list:
+    def get_list(self, key: str, *, default: Optional[list] = None) -> list:
         """
         Return the list referred to by the given key if it exists, or the default.
 
@@ -349,7 +346,7 @@ class AbstractConfig(abc.ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_str(self, key: str, *, default: str | None = None) -> str:
+    def get_str(self, key: str, *, default: Optional[str] = None) -> str:
         """
         Return the string referred to by the given key if it exists, or the default.
 
@@ -362,7 +359,7 @@ class AbstractConfig(abc.ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_bool(self, key: str, *, default: bool | None = None) -> bool:
+    def get_bool(self, key: str, *, default: Optional[bool] = None) -> bool:
         """
         Return the bool referred to by the given key if it exists, or the default.
 
@@ -402,7 +399,7 @@ class AbstractConfig(abc.ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def set(self, key: str, val: int | str | list[str] | bool) -> None:
+    def set(self, key: str, val: Union[int, str, list[str], bool]) -> None:
         """
         Set the given key's data to the given value.
 

@@ -1,14 +1,11 @@
 """Export ship loadout in ED Shipyard plain text format."""
-from __future__ import annotations
-
 import os
 import pathlib
 import pickle
 import re
 import time
 from collections import defaultdict
-from typing import Dict, List, Union
-
+from typing import Dict, List, Union, Optional
 import outfitting
 import util_ships
 from config import config
@@ -84,7 +81,7 @@ def export(data, filename=None) -> None:  # noqa: C901, CCR001
             if not v:
                 continue
 
-            module: __Module | None = outfitting.lookup(v['module'], ship_map)
+            module: Optional[__Module] = outfitting.lookup(v['module'], ship_map)
             if not module:
                 continue
 
@@ -196,7 +193,7 @@ def export(data, filename=None) -> None:  # noqa: C901, CCR001
     regexp = re.compile(re.escape(ship) + r'\.\d{4}-\d\d-\d\dT\d\d\.\d\d\.\d\d\.txt')
     oldfiles = sorted([x for x in os.listdir(config.get_str('outdir')) if regexp.match(x)])
     if oldfiles:
-        with (pathlib.Path(config.get_str('outdir')) / oldfiles[-1]).open('r') as h:
+        with (pathlib.Path(config.get_str('outdir')) / oldfiles[-1]).open() as h:
             if h.read() == string:
                 return  # same as last time - don't write
 
