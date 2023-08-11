@@ -63,12 +63,13 @@ class JournalLock:
         """Open journal_dir lockfile ready for locking."""
         self.journal_dir_lockfile_name = self.journal_dir_path / 'edmc-journal-lock.txt'  # type: ignore
         logger.trace_if('journal-lock', f'journal_dir_lockfile_name = {self.journal_dir_lockfile_name!r}')
+        self.journal_dir_lockfile = None  # Initialize with None
         try:
             self.journal_dir_lockfile = open(self.journal_dir_lockfile_name, mode='w+', encoding='utf-8')
 
         # Linux CIFS read-only mount throws: OSError(30, 'Read-only file system')
         # Linux no-write-perm directory throws: PermissionError(13, 'Permission denied')
-        except Exception as e:  # For remote FS this could be any of a wide range of exceptions
+        except Exception as e:
             logger.warning(f"Couldn't open \"{self.journal_dir_lockfile_name}\" for \"w+\""
                            f" Aborting duplicate process checks: {e!r}")
             return False
