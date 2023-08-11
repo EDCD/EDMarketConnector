@@ -1,4 +1,6 @@
 # type: ignore
+from __future__ import annotations
+
 import numbers
 import sys
 import warnings
@@ -95,7 +97,7 @@ elif sys.platform == 'linux':
     from configparser import RawConfigParser
 
 
-class OldConfig():
+class OldConfig:
     """Object that holds all configuration data."""
 
     OUT_EDDN_SEND_STATION_DATA = 1
@@ -159,14 +161,13 @@ class OldConfig():
             if val is None:
                 return default
 
-            elif isinstance(val, str):
+            if isinstance(val, str):
                 return str(val)
 
-            elif isinstance(val, list):
+            if isinstance(val, list):
                 return list(val)  # make writeable
 
-            else:
-                return default
+            return default
 
         def getint(self, key: str, default: int = 0) -> int:
             """Look up an integer configuration value."""
@@ -304,11 +305,10 @@ class OldConfig():
             if RegQueryValueEx(self.hkey, key, 0, ctypes.byref(key_type), buf, ctypes.byref(key_size)):
                 return default
 
-            elif key_type.value == REG_MULTI_SZ:
+            if key_type.value == REG_MULTI_SZ:
                 return list(ctypes.wstring_at(buf, len(buf)-2).split('\x00'))
 
-            else:
-                return str(buf.value)
+            return str(buf.value)
 
         def getint(self, key: str, default: int = 0) -> int:
             """Look up an integer configuration value."""
@@ -328,8 +328,7 @@ class OldConfig():
             ):
                 return default
 
-            else:
-                return key_val.value
+            return key_val.value
 
         def set(self, key: str, val: Union[int, str, list]) -> None:
             """Set value on the specified configuration key."""
@@ -388,7 +387,7 @@ class OldConfig():
 
             self.config = RawConfigParser(comment_prefixes=('#',))
             try:
-                with codecs.open(self.filename, 'r') as h:
+                with codecs.open(self.filename) as h:
                     self.config.read_file(h)
 
             except Exception as e:
@@ -407,8 +406,7 @@ class OldConfig():
                     # so we add a spurious ';' entry in set() and remove it here
                     assert val.split('\n')[-1] == ';', val.split('\n')
                     return [self._unescape(x) for x in val.split('\n')[:-1]]
-                else:
-                    return self._unescape(val)
+                return self._unescape(val)
 
             except NoOptionError:
                 logger.debug(f'attempted to get key {key} that does not exist')
@@ -439,7 +437,7 @@ class OldConfig():
             if isinstance(val, bool):
                 self.config.set(self.SECTION, key, val and '1' or '0')  # type: ignore # Not going to change
 
-            elif isinstance(val, str) or isinstance(val, numbers.Integral):
+            elif isinstance(val, (numbers.Integral, str)):
                 self.config.set(self.SECTION, key, self._escape(val))  # type: ignore # Not going to change
 
             elif isinstance(val, list):

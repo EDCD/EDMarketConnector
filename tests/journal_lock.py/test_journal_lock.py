@@ -1,4 +1,6 @@
 """Tests for journal_lock.py code."""
+from __future__ import annotations
+
 import multiprocessing as mp
 import os
 import pathlib
