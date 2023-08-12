@@ -18,7 +18,7 @@ from config import config
 from EDMCLogging import get_main_logger
 from hotkey import AbstractHotkeyMgr
 
-assert sys.platform == 'win32'
+assert sys.platform == "win32"
 
 logger = get_main_logger()
 
@@ -43,27 +43,27 @@ WM_SND_BAD = WM_APP + 2
 GetKeyState = ctypes.windll.user32.GetKeyState
 MapVirtualKey = ctypes.windll.user32.MapVirtualKeyW
 VK_BACK = 0x08
-VK_CLEAR = 0x0c
-VK_RETURN = 0x0d
+VK_CLEAR = 0x0C
+VK_RETURN = 0x0D
 VK_SHIFT = 0x10
 VK_CONTROL = 0x11
 VK_MENU = 0x12
 VK_CAPITAL = 0x14
-VK_MODECHANGE = 0x1f
-VK_ESCAPE = 0x1b
+VK_MODECHANGE = 0x1F
+VK_ESCAPE = 0x1B
 VK_SPACE = 0x20
-VK_DELETE = 0x2e
-VK_LWIN = 0x5b
-VK_RWIN = 0x5c
+VK_DELETE = 0x2E
+VK_LWIN = 0x5B
+VK_RWIN = 0x5C
 VK_NUMPAD0 = 0x60
-VK_DIVIDE = 0x6f
+VK_DIVIDE = 0x6F
 VK_F1 = 0x70
 VK_F24 = 0x87
-VK_OEM_MINUS = 0xbd
+VK_OEM_MINUS = 0xBD
 VK_NUMLOCK = 0x90
 VK_SCROLL = 0x91
-VK_PROCESSKEY = 0xe5
-VK_OEM_CLEAR = 0xfe
+VK_PROCESSKEY = 0xE5
+VK_OEM_CLEAR = 0xFE
 
 GetForegroundWindow = ctypes.windll.user32.GetForegroundWindow
 GetWindowText = ctypes.windll.user32.GetWindowTextW
@@ -83,19 +83,19 @@ def window_title(h) -> str:
         with ctypes.create_unicode_buffer(title_length) as buf:
             if GetWindowText(h, buf, title_length):
                 return buf.value
-    return ''
+    return ""
 
 
 class MOUSEINPUT(ctypes.Structure):
     """Mouse Input structure."""
 
     _fields_ = [
-        ('dx', LONG),
-        ('dy', LONG),
-        ('mouseData', DWORD),
-        ('dwFlags', DWORD),
-        ('time', DWORD),
-        ('dwExtraInfo', ctypes.POINTER(ULONG))
+        ("dx", LONG),
+        ("dy", LONG),
+        ("mouseData", DWORD),
+        ("dwFlags", DWORD),
+        ("time", DWORD),
+        ("dwExtraInfo", ctypes.POINTER(ULONG)),
     ]
 
 
@@ -103,41 +103,30 @@ class KEYBDINPUT(ctypes.Structure):
     """Keyboard Input structure."""
 
     _fields_ = [
-        ('wVk', WORD),
-        ('wScan', WORD),
-        ('dwFlags', DWORD),
-        ('time', DWORD),
-        ('dwExtraInfo', ctypes.POINTER(ULONG))
+        ("wVk", WORD),
+        ("wScan", WORD),
+        ("dwFlags", DWORD),
+        ("time", DWORD),
+        ("dwExtraInfo", ctypes.POINTER(ULONG)),
     ]
 
 
 class HARDWAREINPUT(ctypes.Structure):
     """Hardware Input structure."""
 
-    _fields_ = [
-        ('uMsg', DWORD),
-        ('wParamL', WORD),
-        ('wParamH', WORD)
-    ]
+    _fields_ = [("uMsg", DWORD), ("wParamL", WORD), ("wParamH", WORD)]
 
 
 class INPUTUNION(ctypes.Union):
     """Input union."""
 
-    _fields_ = [
-        ('mi', MOUSEINPUT),
-        ('ki', KEYBDINPUT),
-        ('hi', HARDWAREINPUT)
-    ]
+    _fields_ = [("mi", MOUSEINPUT), ("ki", KEYBDINPUT), ("hi", HARDWAREINPUT)]
 
 
 class INPUT(ctypes.Structure):
     """Input structure."""
 
-    _fields_ = [
-        ('type', DWORD),
-        ('union', INPUTUNION)
-    ]
+    _fields_ = [("type", DWORD), ("union", INPUTUNION)]
 
 
 SendInput = ctypes.windll.user32.SendInput
@@ -154,22 +143,45 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
     # https://msdn.microsoft.com/en-us/library/windows/desktop/dd375731%28v=vs.85%29.aspx
     # Limit ourselves to symbols in Windows 7 Segoe UI
     DISPLAY = {
-        0x03: 'Break', 0x08: 'Bksp', 0x09: '↹', 0x0c: 'Clear', 0x0d: '↵', 0x13: 'Pause',
-        0x14: 'Ⓐ', 0x1b: 'Esc',
-        0x20: '⏘', 0x21: 'PgUp', 0x22: 'PgDn', 0x23: 'End', 0x24: 'Home',
-        0x25: '←', 0x26: '↑', 0x27: '→', 0x28: '↓',
-        0x2c: 'PrtScn', 0x2d: 'Ins', 0x2e: 'Del', 0x2f: 'Help',
-        0x5d: '▤', 0x5f: '☾',
-        0x90: '➀', 0x91: 'ScrLk',
-        0xa6: '⇦', 0xa7: '⇨', 0xa9: '⊗', 0xab: '☆', 0xac: '⌂', 0xb4: '✉',
+        0x03: "Break",
+        0x08: "Bksp",
+        0x09: "↹",
+        0x0C: "Clear",
+        0x0D: "↵",
+        0x13: "Pause",
+        0x14: "Ⓐ",
+        0x1B: "Esc",
+        0x20: "⏘",
+        0x21: "PgUp",
+        0x22: "PgDn",
+        0x23: "End",
+        0x24: "Home",
+        0x25: "←",
+        0x26: "↑",
+        0x27: "→",
+        0x28: "↓",
+        0x2C: "PrtScn",
+        0x2D: "Ins",
+        0x2E: "Del",
+        0x2F: "Help",
+        0x5D: "▤",
+        0x5F: "☾",
+        0x90: "➀",
+        0x91: "ScrLk",
+        0xA6: "⇦",
+        0xA7: "⇨",
+        0xA9: "⊗",
+        0xAB: "☆",
+        0xAC: "⌂",
+        0xB4: "✉",
     }
 
     def __init__(self) -> None:
         self.root: tk.Tk = None  # type: ignore
         self.thread: threading.Thread = None  # type: ignore
-        with open(pathlib.Path(config.respath) / 'snd_good.wav', 'rb') as sg:
+        with open(pathlib.Path(config.respath) / "snd_good.wav", "rb") as sg:
             self.snd_good = sg.read()
-        with open(pathlib.Path(config.respath) / 'snd_bad.wav', 'rb') as sb:
+        with open(pathlib.Path(config.respath) / "snd_bad.wav", "rb") as sb:
             self.snd_bad = sb.read()
         atexit.register(self.unregister)
 
@@ -178,66 +190,67 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
         self.root = root
 
         if self.thread:
-            logger.debug('Was already registered, unregistering...')
+            logger.debug("Was already registered, unregistering...")
             self.unregister()
 
         if keycode or modifiers:
-            logger.debug('Creating thread worker...')
+            logger.debug("Creating thread worker...")
             self.thread = threading.Thread(
                 target=self.worker,
                 name=f'Hotkey "{keycode}:{modifiers}"',
-                args=(keycode, modifiers)
+                args=(keycode, modifiers),
             )
             self.thread.daemon = True
-            logger.debug('Starting thread worker...')
+            logger.debug("Starting thread worker...")
             self.thread.start()
-            logger.debug('Done.')
+            logger.debug("Done.")
 
     def unregister(self) -> None:
         """Unregister the hotkey handling."""
         thread = self.thread
 
         if thread:
-            logger.debug('Thread is/was running')
+            logger.debug("Thread is/was running")
             self.thread = None  # type: ignore
-            logger.debug('Telling thread WM_QUIT')
+            logger.debug("Telling thread WM_QUIT")
             PostThreadMessage(thread.ident, WM_QUIT, 0, 0)
-            logger.debug('Joining thread')
+            logger.debug("Joining thread")
             thread.join()  # Wait for it to unregister hotkey and quit
 
         else:
-            logger.debug('No thread')
+            logger.debug("No thread")
 
-        logger.debug('Done.')
+        logger.debug("Done.")
 
     def worker(self, keycode, modifiers) -> None:  # noqa: CCR001
         """Handle hotkeys."""
-        logger.debug('Begin...')
+        logger.debug("Begin...")
         # Hotkey must be registered by the thread that handles it
         if not RegisterHotKey(None, 1, modifiers | MOD_NOREPEAT, keycode):
             logger.debug("We're not the right thread?")
             self.thread = None  # type: ignore
             return
 
-        fake = INPUT(INPUT_KEYBOARD, INPUTUNION(ki=KEYBDINPUT(keycode, keycode, 0, 0, None)))
+        fake = INPUT(
+            INPUT_KEYBOARD, INPUTUNION(ki=KEYBDINPUT(keycode, keycode, 0, 0, None))
+        )
 
         msg = MSG()
-        logger.debug('Entering GetMessage() loop...')
+        logger.debug("Entering GetMessage() loop...")
         while GetMessage(ctypes.byref(msg), None, 0, 0) != 0:
-            logger.debug('Got message')
+            logger.debug("Got message")
             if msg.message == WM_HOTKEY:
-                logger.debug('WM_HOTKEY')
+                logger.debug("WM_HOTKEY")
 
-                if (
-                    config.get_int('hotkey_always')
-                    or window_title(GetForegroundWindow()).startswith('Elite - Dangerous')
-                ):
+                if config.get_int("hotkey_always") or window_title(
+                    GetForegroundWindow()
+                ).startswith("Elite - Dangerous"):
                     if not config.shutting_down:
-                        logger.debug('Sending event <<Invoke>>')
-                        self.root.event_generate('<<Invoke>>', when="tail")
+                        logger.debug("Sending event <<Invoke>>")
+                        self.root.event_generate("<<Invoke>>", when="tail")
 
                 else:
-                    logger.debug('Passing key on')
+                    logger.debug("Passing key on")
                     UnregisterHotKey(None, 1)
                     SendInput(1, fake, ctypes.sizeof(INPUT))
                     if not RegisterHotKey(None, 1, modifiers | MOD_NOREPEAT, keycode):
@@ -245,22 +258,22 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
                         break
 
             elif msg.message == WM_SND_GOOD:
-                logger.debug('WM_SND_GOOD')
+                logger.debug("WM_SND_GOOD")
                 winsound.PlaySound(self.snd_good, winsound.SND_MEMORY)  # synchronous
 
             elif msg.message == WM_SND_BAD:
-                logger.debug('WM_SND_BAD')
+                logger.debug("WM_SND_BAD")
                 winsound.PlaySound(self.snd_bad, winsound.SND_MEMORY)  # synchronous
 
             else:
-                logger.debug('Something else')
+                logger.debug("Something else")
                 TranslateMessage(ctypes.byref(msg))
                 DispatchMessage(ctypes.byref(msg))
 
-        logger.debug('Exited GetMessage() loop.')
+        logger.debug("Exited GetMessage() loop.")
         UnregisterHotKey(None, 1)
         self.thread = None  # type: ignore
-        logger.debug('Done.')
+        logger.debug("Done.")
 
     def acquire_start(self) -> None:
         """Start acquiring hotkey state via polling."""
@@ -281,11 +294,13 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
         :param event: tk event ?
         :return: False to retain previous, None to not use, else (keycode, modifiers)
         """
-        modifiers = ((GetKeyState(VK_MENU) & 0x8000) and MOD_ALT) \
-            | ((GetKeyState(VK_CONTROL) & 0x8000) and MOD_CONTROL) \
-            | ((GetKeyState(VK_SHIFT) & 0x8000) and MOD_SHIFT) \
-            | ((GetKeyState(VK_LWIN) & 0x8000) and MOD_WIN) \
+        modifiers = (
+            ((GetKeyState(VK_MENU) & 0x8000) and MOD_ALT)
+            | ((GetKeyState(VK_CONTROL) & 0x8000) and MOD_CONTROL)
+            | ((GetKeyState(VK_SHIFT) & 0x8000) and MOD_SHIFT)
+            | ((GetKeyState(VK_LWIN) & 0x8000) and MOD_WIN)
             | ((GetKeyState(VK_RWIN) & 0x8000) and MOD_WIN)
+        )
         keycode = event.keycode
 
         if keycode in [VK_SHIFT, VK_CONTROL, VK_MENU, VK_LWIN, VK_RWIN]:
@@ -295,17 +310,27 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
             if keycode == VK_ESCAPE:  # Esc = retain previous
                 return False
 
-            if keycode in [VK_BACK, VK_DELETE, VK_CLEAR, VK_OEM_CLEAR]:  # BkSp, Del, Clear = clear hotkey
+            if keycode in [
+                VK_BACK,
+                VK_DELETE,
+                VK_CLEAR,
+                VK_OEM_CLEAR,
+            ]:  # BkSp, Del, Clear = clear hotkey
                 return None
 
-            if (
-                keycode in [VK_RETURN, VK_SPACE, VK_OEM_MINUS] or ord('A') <= keycode <= ord('Z')
+            if keycode in [VK_RETURN, VK_SPACE, VK_OEM_MINUS] or ord(
+                "A"
+            ) <= keycode <= ord(
+                "Z"
             ):  # don't allow keys needed for typing in System Map
                 winsound.MessageBeep()
                 return None
 
             # ignore unmodified mode switch keys
-            if keycode in [VK_NUMLOCK, VK_SCROLL, VK_PROCESSKEY] or VK_CAPITAL <= keycode <= VK_MODECHANGE:
+            if (
+                keycode in [VK_NUMLOCK, VK_SCROLL, VK_PROCESSKEY]
+                or VK_CAPITAL <= keycode <= VK_MODECHANGE
+            ):
                 return 0, modifiers
 
         # See if the keycode is usable and available
@@ -324,27 +349,27 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
         :param modifiers:
         :return: string form
         """
-        text = ''
+        text = ""
         if modifiers & MOD_WIN:
-            text += '❖+'
+            text += "❖+"
 
         if modifiers & MOD_CONTROL:
-            text += 'Ctrl+'
+            text += "Ctrl+"
 
         if modifiers & MOD_ALT:
-            text += 'Alt+'
+            text += "Alt+"
 
         if modifiers & MOD_SHIFT:
-            text += '⇧+'
+            text += "⇧+"
 
         if VK_NUMPAD0 <= keycode <= VK_DIVIDE:
-            text += '№'
+            text += "№"
 
         if not keycode:
             pass
 
         elif VK_F1 <= keycode <= VK_F24:
-            text += f'F{keycode + 1 - VK_F1}'
+            text += f"F{keycode + 1 - VK_F1}"
 
         elif keycode in WindowsHotkeyMgr.DISPLAY:  # specials
             text += WindowsHotkeyMgr.DISPLAY[keycode]
@@ -352,7 +377,7 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
         else:
             c = MapVirtualKey(keycode, 2)  # printable ?
             if not c:  # oops not printable
-                text += '⁈'
+                text += "⁈"
 
             elif c < 0x20:  # control keys
                 text += chr(c + 0x40)

@@ -1,5 +1,5 @@
 """
-coriolis-update-files.py - Build ship and module databases from https://github.com/EDCD/coriolis-data/
+coriolis-update-files.py - Build ship and module databases from https://github.com/EDCD/coriolis-data/.
 
 Copyright (c) EDCD, All Rights Reserved
 Licensed under the GNU General Public License.
@@ -22,16 +22,25 @@ import outfitting
 from edmc_data import coriolis_ship_map, ship_name_map
 
 if __name__ == "__main__":
+
     def add(modules, name, attributes) -> None:
         """Add the given module to the modules dict."""
-        assert name not in modules or modules[name] == attributes, f'{name}: {modules.get(name)} != {attributes}'
+        assert (
+            name not in modules or modules[name] == attributes
+        ), f"{name}: {modules.get(name)} != {attributes}"
         assert name not in modules, name
         modules[name] = attributes
 
     # Regenerate coriolis-data distribution
-    subprocess.check_call('npm install', cwd='coriolis-data', shell=True, stdout=sys.stdout, stderr=sys.stderr)
+    subprocess.check_call(
+        "npm install",
+        cwd="coriolis-data",
+        shell=True,
+        stdout=sys.stdout,
+        stderr=sys.stderr,
+    )
 
-    coriolis_data_file = Path('coriolis-data/dist/index.json')
+    coriolis_data_file = Path("coriolis-data/dist/index.json")
     with open(coriolis_data_file) as coriolis_data_file_handle:
         data = json.load(coriolis_data_file_handle)
 
@@ -44,51 +53,59 @@ if __name__ == "__main__":
     modules = {}
 
     # Ship and armour masses
-    for m in data['Ships'].values():
-        name = coriolis_ship_map.get(m['properties']['name'], str(m['properties']['name']))
+    for m in data["Ships"].values():
+        name = coriolis_ship_map.get(
+            m["properties"]["name"], str(m["properties"]["name"])
+        )
         assert name in reverse_ship_map, name
-        ships[name] = {'hullMass': m['properties']['hullMass']}
+        ships[name] = {"hullMass": m["properties"]["hullMass"]}
         for bulkhead in bulkheads:
-            module_name = '_'.join([reverse_ship_map[name], 'armour', bulkhead])
-            modules[module_name] = {'mass': m['bulkheads'][bulkhead]['mass']}
+            module_name = "_".join([reverse_ship_map[name], "armour", bulkhead])
+            modules[module_name] = {"mass": m["bulkheads"][bulkhead]["mass"]}
 
-    ships = OrderedDict([(k, ships[k]) for k in sorted(ships)])  # Sort for easier diffing
-    ships_file = Path('ships.p')
-    with open(ships_file, 'wb') as ships_file_handle:
+    ships = OrderedDict(
+        [(k, ships[k]) for k in sorted(ships)]
+    )  # Sort for easier diffing
+    ships_file = Path("ships.p")
+    with open(ships_file, "wb") as ships_file_handle:
         pickle.dump(ships, ships_file_handle)
 
     # Module masses
-    for cat in data['Modules'].values():
+    for cat in data["Modules"].values():
         for grp, mlist in cat.items():
             for m in mlist:
-                assert 'symbol' in m, m
-                key = str(m['symbol'].lower())
-                if grp == 'fsd':
+                assert "symbol" in m, m
+                key = str(m["symbol"].lower())
+                if grp == "fsd":
                     modules[key] = {
-                        'mass': m['mass'],
-                        'optmass': m['optmass'],
-                        'maxfuel': m['maxfuel'],
-                        'fuelmul': m['fuelmul'],
-                        'fuelpower': m['fuelpower'],
+                        "mass": m["mass"],
+                        "optmass": m["optmass"],
+                        "maxfuel": m["maxfuel"],
+                        "fuelmul": m["fuelmul"],
+                        "fuelpower": m["fuelpower"],
                     }
-                elif grp == 'gfsb':
+                elif grp == "gfsb":
                     modules[key] = {
-                        'mass': m['mass'],
-                        'jumpboost': m['jumpboost'],
+                        "mass": m["mass"],
+                        "jumpboost": m["jumpboost"],
                     }
                 else:
-                    modules[key] = {'mass': m.get('mass', 0)}  # Some modules don't have mass
+                    modules[key] = {
+                        "mass": m.get("mass", 0)
+                    }  # Some modules don't have mass
 
     # Pre 3.3 modules
-    add(modules, 'int_stellarbodydiscoveryscanner_standard', {'mass': 2})
-    add(modules, 'int_stellarbodydiscoveryscanner_intermediate', {'mass': 2})
-    add(modules, 'int_stellarbodydiscoveryscanner_advanced', {'mass': 2})
+    add(modules, "int_stellarbodydiscoveryscanner_standard", {"mass": 2})
+    add(modules, "int_stellarbodydiscoveryscanner_intermediate", {"mass": 2})
+    add(modules, "int_stellarbodydiscoveryscanner_advanced", {"mass": 2})
 
     # Missing
-    add(modules, 'hpt_multicannon_fixed_small_advanced', {'mass': 2})
-    add(modules, 'hpt_multicannon_fixed_medium_advanced', {'mass': 4})
+    add(modules, "hpt_multicannon_fixed_small_advanced", {"mass": 2})
+    add(modules, "hpt_multicannon_fixed_medium_advanced", {"mass": 4})
 
-    modules = OrderedDict([(k, modules[k]) for k in sorted(modules)])  # sort for easier diffing
-    modules_file = Path('modules.p')
-    with open(modules_file, 'wb') as modules_file_handle:
+    modules = OrderedDict(
+        [(k, modules[k]) for k in sorted(modules)]
+    )  # sort for easier diffing
+    modules_file = Path("modules.p")
+    with open(modules_file, "wb") as modules_file_handle:
         pickle.dump(modules, modules_file_handle)

@@ -9,7 +9,7 @@ from EDMCLogging import get_plugin_logger  # noqa: E402
 if TYPE_CHECKING:
     from _pytest.logging import LogCaptureFixture
 
-logger = get_plugin_logger('EDMCLogging.py')
+logger = get_plugin_logger("EDMCLogging.py")
 
 
 class ClassVarLogger:
@@ -26,7 +26,7 @@ def log_stuff(msg: str) -> None:
     ClassVarLogger.logger.debug(msg)  # type: ignore # its there
 
 
-def test_class_logger(caplog: 'LogCaptureFixture') -> None:
+def test_class_logger(caplog: "LogCaptureFixture") -> None:
     """
     Test that logging from a class variable doesn't explode.
 
@@ -35,11 +35,20 @@ def test_class_logger(caplog: 'LogCaptureFixture') -> None:
     we did not check for its existence before using it.
     """
     ClassVarLogger.set_logger(logger)
-    ClassVarLogger.logger.debug('test')  # type: ignore # its there
-    ClassVarLogger.logger.info('test2')  # type: ignore # its there
-    log_stuff('test3')  # type: ignore # its there
+    ClassVarLogger.logger.debug("test")  # type: ignore # its there
+    ClassVarLogger.logger.info("test2")  # type: ignore # its there
+    log_stuff("test3")  # type: ignore # its there
 
     # Dont move these, it relies on the line numbres.
-    assert 'EDMarketConnector.EDMCLogging.py:test_logging_classvar.py:38 test' in caplog.text
-    assert 'EDMarketConnector.EDMCLogging.py:test_logging_classvar.py:39 test2' in caplog.text
-    assert 'EDMarketConnector.EDMCLogging.py:test_logging_classvar.py:26 test3' in caplog.text
+    assert (
+        "EDMarketConnector.EDMCLogging.py:test_logging_classvar.py:38 test"
+        in caplog.text
+    )
+    assert (
+        "EDMarketConnector.EDMCLogging.py:test_logging_classvar.py:39 test2"
+        in caplog.text
+    )
+    assert (
+        "EDMarketConnector.EDMCLogging.py:test_logging_classvar.py:26 test3"
+        in caplog.text
+    )

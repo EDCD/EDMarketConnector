@@ -18,23 +18,27 @@ def export(data: companion.CAPIData, filename: str) -> None:
     :param filename: Optional filename to write to.
     :return:
     """
-    assert data['lastSystem'].get('name')
-    assert data['lastStarport'].get('name')
-    assert data['lastStarport'].get('ships')
+    assert data["lastSystem"].get("name")
+    assert data["lastStarport"].get("name")
+    assert data["lastStarport"].get("ships")
 
-    with open(filename, 'w', newline='') as csv_file:
+    with open(filename, "w", newline="") as csv_file:
         csv_line = csv.writer(csv_file)
-        csv_line.writerow(('System', 'Station', 'Ship', 'FDevID', 'Date'))
+        csv_line.writerow(("System", "Station", "Ship", "FDevID", "Date"))
 
-        for (name, fdevid) in [
-            (
-                ship_name_map.get(ship['name'].lower(), ship['name']),
-                ship['id']
-            ) for ship in list(
-                (data['lastStarport']['ships'].get('shipyard_list') or {}).values()
-            ) + data['lastStarport']['ships'].get('unavailable_list')
+        for name, fdevid in [
+            (ship_name_map.get(ship["name"].lower(), ship["name"]), ship["id"])
+            for ship in list(
+                (data["lastStarport"]["ships"].get("shipyard_list") or {}).values()
+            )
+            + data["lastStarport"]["ships"].get("unavailable_list")
         ]:
-            csv_line.writerow((
-                data['lastSystem']['name'], data['lastStarport']['name'],
-                name, fdevid, data['timestamp']
-            ))
+            csv_line.writerow(
+                (
+                    data["lastSystem"]["name"],
+                    data["lastStarport"]["name"],
+                    name,
+                    fdevid,
+                    data["timestamp"],
+                )
+            )

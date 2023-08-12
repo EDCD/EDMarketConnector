@@ -79,19 +79,22 @@ def get_hotkeymgr() -> AbstractHotkeyMgr:
     :return: Appropriate class instance.
     :raises ValueError: If unsupported platform.
     """
-    if sys.platform == 'darwin':
+    if sys.platform == "darwin":
         from hotkey.darwin import MacHotkeyMgr
+
         return MacHotkeyMgr()
 
-    if sys.platform == 'win32':
+    if sys.platform == "win32":
         from hotkey.windows import WindowsHotkeyMgr
+
         return WindowsHotkeyMgr()
 
-    if sys.platform == 'linux':
+    if sys.platform == "linux":
         from hotkey.linux import LinuxHotKeyMgr
+
         return LinuxHotKeyMgr()
 
-    raise ValueError(f'Unknown platform: {sys.platform}')
+    raise ValueError(f"Unknown platform: {sys.platform}")
 
 
 # singleton

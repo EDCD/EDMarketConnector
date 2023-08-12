@@ -18,16 +18,18 @@ plugin_name = os.path.basename(os.path.dirname(__file__))
 
 # Logger per found plugin, so the folder name is included in
 # the logging format.
-logger = logging.getLogger(f'{appname}.{plugin_name}')
+logger = logging.getLogger(f"{appname}.{plugin_name}")
 if not logger.hasHandlers():
     level = logging.INFO  # So logger.info(...) is equivalent to print()
 
     logger.setLevel(level)
     logger_channel = logging.StreamHandler()
     logger_channel.setLevel(level)
-    logger_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(module)s:%(lineno)d:%(funcName)s: %(message)s')  # noqa: E501
-    logger_formatter.default_time_format = '%Y-%m-%d %H:%M:%S'
-    logger_formatter.default_msec_format = '%s.%03d'
+    logger_formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(module)s:%(lineno)d:%(funcName)s: %(message)s"
+    )
+    logger_formatter.default_time_format = "%Y-%m-%d %H:%M:%S"
+    logger_formatter.default_msec_format = "%s.%03d"
     logger_channel.setFormatter(logger_formatter)
     logger.addHandler(logger_channel)
 
@@ -36,7 +38,7 @@ class This:
     """Module global variables."""
 
     def __init__(self):
-        self.DBFILE = 'plugintest.db'
+        self.DBFILE = "plugintest.db"
         self.plugin_test: PluginTest
         self.suba: SubA
 
@@ -52,24 +54,28 @@ class PluginTest:
         dbfile = os.path.join(directory, this.DBFILE)
 
         # Test 'import zipfile'
-        with zipfile.ZipFile(dbfile + '.zip', 'w') as zip:
+        with zipfile.ZipFile(dbfile + ".zip", "w") as zip:
             if os.path.exists(dbfile):
                 zip.write(dbfile)
         zip.close()
 
         # Testing 'import shutil'
         if os.path.exists(dbfile):
-            shutil.copyfile(dbfile, dbfile + '.bak')
+            shutil.copyfile(dbfile, dbfile + ".bak")
 
         # Testing 'import sqlite3'
         self.sqlconn = sqlite3.connect(dbfile)
         self.sqlc = self.sqlconn.cursor()
         try:
-            self.sqlc.execute('CREATE TABLE entries (timestamp TEXT, cmdrname TEXT, system TEXT, station TEXT, eventtype TEXT)')  # noqa: E501
+            self.sqlc.execute(
+                "CREATE TABLE entries (timestamp TEXT, cmdrname TEXT, system TEXT, station TEXT, eventtype TEXT)"
+            )
         except sqlite3.OperationalError:
-            logger.exception('sqlite3.OperationalError when CREATE TABLE entries:')
+            logger.exception("sqlite3.OperationalError when CREATE TABLE entries:")
 
-    def store(self, timestamp: str, cmdrname: str, system: str, station: str, event: str) -> None:
+    def store(
+        self, timestamp: str, cmdrname: str, system: str, station: str, event: str
+    ) -> None:
         """
         Store the provided data in sqlite database.
 
@@ -80,8 +86,14 @@ class PluginTest:
         :param event:
         :return: None
         """
-        logger.debug(f'timestamp = "{timestamp}", cmdr = "{cmdrname}", system = "{system}", station = "{station}", event = "{event}"')  # noqa: E501
-        self.sqlc.execute('INSERT INTO entries VALUES(?, ?, ?, ?, ?)', (timestamp, cmdrname, system, station, event))
+        logger.debug(
+            f'timestamp = "{timestamp}", cmdr = "{cmdrname}", '
+            f'system = "{system}", station = "{station}", event = "{event}"'
+        )
+        self.sqlc.execute(
+            "INSERT INTO entries VALUES(?, ?, ?, ?, ?)",
+            (timestamp, cmdrname, system, station, event),
+        )
         self.sqlconn.commit()
 
 
@@ -100,33 +112,33 @@ def plugin_start3(plugin_dir: str) -> str:
         # From 5.0.0-beta1 it's a function, returning semantic_version.Version
         core_version = appversion()
 
-    config.set('plugintest_bool', True)
-    somebool = config.get_bool('plugintest_bool')
-    logger.debug(f'Stored bool: {somebool=} ({type(somebool)})')
+    config.set("plugintest_bool", True)
+    somebool = config.get_bool("plugintest_bool")
+    logger.debug(f"Stored bool: {somebool=} ({type(somebool)})")
 
-    config.set('plugintest_str', 'Test String')
-    somestr = config.get_str('plugintest_str')
-    logger.debug(f'Stored str: {somestr=} ({type(somestr)})')
+    config.set("plugintest_str", "Test String")
+    somestr = config.get_str("plugintest_str")
+    logger.debug(f"Stored str: {somestr=} ({type(somestr)})")
 
-    config.set('plugintest_int', 42)
-    someint = config.get_int('plugintest_int')
-    logger.debug(f'Stored int: {someint=} ({type(someint)})')
+    config.set("plugintest_int", 42)
+    someint = config.get_int("plugintest_int")
+    logger.debug(f"Stored int: {someint=} ({type(someint)})")
 
-    config.set('plugintest_list', ['test', 'one', 'two'])
-    somelist = config.get_list('plugintest_list')
-    logger.debug(f'Stored list: {somelist=} ({type(somelist)})')
+    config.set("plugintest_list", ["test", "one", "two"])
+    somelist = config.get_list("plugintest_list")
+    logger.debug(f"Stored list: {somelist=} ({type(somelist)})")
 
-    logger.info(f'Core EDMC version: {core_version}')
+    logger.info(f"Core EDMC version: {core_version}")
     # And then compare like this
-    if core_version < semantic_version.Version('5.0.0-beta1'):
-        logger.info('EDMC core version is before 5.0.0-beta1')
+    if core_version < semantic_version.Version("5.0.0-beta1"):
+        logger.info("EDMC core version is before 5.0.0-beta1")
 
     else:
-        logger.info('EDMC core version is at least 5.0.0-beta1')
+        logger.info("EDMC core version is at least 5.0.0-beta1")
 
     # Yes, just blow up if config.appverison is neither str or callable
 
-    logger.info(f'Folder is {plugin_dir}')
+    logger.info(f"Folder is {plugin_dir}")
     this.plugin_test = PluginTest(plugin_dir)
 
     this.suba = SubA(logger)
@@ -142,10 +154,12 @@ def plugin_stop() -> None:
 
     :return:
     """
-    logger.info('Stopping')
+    logger.info("Stopping")
 
 
-def journal_entry(cmdrname: str, is_beta: bool, system: str, station: str, entry: dict, state: dict) -> None:
+def journal_entry(
+    cmdrname: str, is_beta: bool, system: str, station: str, entry: dict, state: dict
+) -> None:
     """
     Handle the given journal entry.
 
@@ -158,8 +172,10 @@ def journal_entry(cmdrname: str, is_beta: bool, system: str, station: str, entry
     :return: None
     """
     logger.debug(
-            f'cmdr = "{cmdrname}", is_beta = "{is_beta}"'
-            f', system = "{system}", station = "{station}"'
-            f', event = "{entry["event"]}"'
+        f'cmdr = "{cmdrname}", is_beta = "{is_beta}"'
+        f', system = "{system}", station = "{station}"'
+        f', event = "{entry["event"]}"'
     )
-    this.plugin_test.store(entry['timestamp'], cmdrname, system, station, entry['event'])
+    this.plugin_test.store(
+        entry["timestamp"], cmdrname, system, station, entry["event"]
+    )

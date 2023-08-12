@@ -27,7 +27,9 @@ class ClickCounter:
 
     def __init__(self) -> None:
         # Be sure to use names that wont collide in our config variables
-        self.click_count = tk.StringVar(value=str(config.get_int('click_counter_count')))
+        self.click_count = tk.StringVar(
+            value=str(config.get_int("click_counter_count"))
+        )
         logger.info("ClickCounter instantiated")
 
     def on_load(self) -> str:
@@ -48,7 +50,9 @@ class ClickCounter:
         """
         self.on_preferences_closed("", False)  # Save our prefs
 
-    def setup_preferences(self, parent: nb.Notebook, cmdr: str, is_beta: bool) -> Optional[tk.Frame]:
+    def setup_preferences(
+        self, parent: nb.Notebook, cmdr: str, is_beta: bool
+    ) -> Optional[tk.Frame]:
         """
         setup_preferences is called by plugin_prefs below.
 
@@ -63,9 +67,11 @@ class ClickCounter:
         frame = nb.Frame(parent)
 
         # setup our config in a "Click Count: number"
-        nb.Label(frame, text='Click Count').grid(row=current_row)
+        nb.Label(frame, text="Click Count").grid(row=current_row)
         nb.Entry(frame, textvariable=self.click_count).grid(row=current_row, column=1)
-        current_row += 1  # Always increment our row counter, makes for far easier tkinter design.
+        current_row += (
+            1  # Always increment our row counter, makes for far easier tkinter design.
+        )
         return frame
 
     def on_preferences_closed(self, cmdr: str, is_beta: bool) -> None:
@@ -79,7 +85,7 @@ class ClickCounter:
         """
         # You need to cast to `int` here to store *as* an `int`, so that
         # `config.get_int()` will work for re-loading the value.
-        config.set('click_counter_count', int(self.click_count.get()))  # type: ignore
+        config.set("click_counter_count", int(self.click_count.get()))  # type: ignore
 
     def setup_main_ui(self, parent: tk.Frame) -> tk.Frame:
         """
@@ -95,7 +101,7 @@ class ClickCounter:
         button = tk.Button(
             frame,
             text="Count me",
-            command=lambda: self.click_count.set(str(int(self.click_count.get()) + 1))  # type: ignore
+            command=lambda: self.click_count.set(str(int(self.click_count.get()) + 1)),  # type: ignore
         )
         button.grid(row=current_row)
         current_row += 1

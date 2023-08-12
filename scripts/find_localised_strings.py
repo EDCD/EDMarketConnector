@@ -16,20 +16,20 @@ def get_func_name(thing: ast.AST) -> str:
 
     if isinstance(thing, ast.Attribute):
         return get_func_name(thing.value)
-    return ''
+    return ""
 
 
 def get_arg(call: ast.Call) -> str:
     """Extract the argument string to the translate function."""
     if len(call.args) > 1:
-        print('??? > 1 args', call.args, file=sys.stderr)
+        print("??? > 1 args", call.args, file=sys.stderr)
 
     arg = call.args[0]
     if isinstance(arg, ast.Constant):
         return arg.value
     if isinstance(arg, ast.Name):
-        return f'VARIABLE! CHECK CODE! {arg.id}'
-    return f'Unknown! {type(arg)=} {ast.dump(arg)} ||| {ast.unparse(arg)}'
+        return f"VARIABLE! CHECK CODE! {arg.id}"
+    return f"Unknown! {type(arg)=} {ast.dump(arg)} ||| {ast.unparse(arg)}"
 
 
 def find_calls_in_stmt(statement: ast.AST) -> list[ast.Call]:
@@ -37,8 +37,7 @@ def find_calls_in_stmt(statement: ast.AST) -> list[ast.Call]:
     out = []
     for n in ast.iter_child_nodes(statement):
         out.extend(find_calls_in_stmt(n))
-    if isinstance(statement, ast.Call) and get_func_name(statement.func) == '_':
-
+    if isinstance(statement, ast.Call) and get_func_name(statement.func) == "_":
         out.append(statement)
 
     return out
@@ -53,11 +52,13 @@ COMMENT_OWN_LINE_RE is for a comment on its own line.
 The difference is necessary in order to tell if a 'above' LANG comment is for
 its own line (SAME_LINE), or meant to be for this following line (OWN_LINE).
 """
-COMMENT_SAME_LINE_RE = re.compile(r'^.*?(#.*)$')
-COMMENT_OWN_LINE_RE = re.compile(r'^\s*?(#.*)$')
+COMMENT_SAME_LINE_RE = re.compile(r"^.*?(#.*)$")
+COMMENT_OWN_LINE_RE = re.compile(r"^\s*?(#.*)$")
 
 
-def extract_comments(call: ast.Call, lines: List[str], file: pathlib.Path) -> Optional[str]:
+def extract_comments(
+    call: ast.Call, lines: List[str], file: pathlib.Path
+) -> Optional[str]:
     """
     Extract comments from source code based on the given call.
 
@@ -80,18 +81,25 @@ def extract_comments(call: ast.Call, lines: List[str], file: pathlib.Path) -> Op
         :return: The extracted language comment, or None if no valid comment is found.
         """
         match = COMMENT_OWN_LINE_RE.match(line)
-        if match and match.group(1).startswith('# LANG:'):
-            return match.group(1).replace('# LANG:', '').strip()
+        if match and match.group(1).startswith("# LANG:"):
+            return match.group(1).replace("# LANG:", "").strip()
         return None
 
-    above_comment = extract_lang_comment(lines[above_line_number]) if len(lines) >= above_line_number else None
+    above_comment = (
+        extract_lang_comment(lines[above_line_number])
+        if len(lines) >= above_line_number
+        else None
+    )
     current_comment = extract_lang_comment(lines[current_line_number])
 
     if current_comment is None:
         current_comment = above_comment
 
     if current_comment is None:
-        print(f'No comment for {file}:{call.lineno} {lines[current_line_number]}', file=sys.stderr)
+        print(
+            f"No comment for {file}:{call.lineno} {lines[current_line_number]}",
+            file=sys.stderr,
+        )
         return None
 
     return current_comment
@@ -99,7 +107,7 @@ def extract_comments(call: ast.Call, lines: List[str], file: pathlib.Path) -> Op
 
 def scan_file(path: pathlib.Path) -> List[ast.Call]:
     """Scan a file for ast.Calls."""
-    data = path.read_text(encoding='utf-8')
+    data = path.read_text(encoding="utf-8")
     lines = data.splitlines()
     parsed = ast.parse(data)
     calls = []
@@ -117,7 +125,9 @@ def scan_file(path: pathlib.Path) -> List[ast.Call]:
     return calls
 
 
-def scan_directory(path: pathlib.Path, skip: Optional[List[pathlib.Path]] = None) -> Dict[pathlib.Path, List[ast.Call]]:
+def scan_directory(
+    path: pathlib.Path, skip: Optional[List[pathlib.Path]] = None
+) -> Dict[pathlib.Path, List[ast.Call]]:
     """
     Scan a directory for expected callsites.
 
@@ -129,7 +139,7 @@ def scan_directory(path: pathlib.Path, skip: Optional[List[pathlib.Path]] = None
         if skip is not None and any(s.name == thing.name for s in skip):
             continue
         if thing.is_file():
-            if not thing.name.endswith('.py'):
+            if not thing.name.endswith(".py"):
                 continue
             out[thing] = scan_file(thing)
         elif thing.is_dir():
@@ -150,9 +160,9 @@ def parse_template(path: pathlib.Path) -> set[str]:
     lang_re = re.compile(r'\s*"([^"]+)"\s*=\s*"([^"]+)"\s*;\s*$')
     result = set()
 
-    for line in pathlib.Path(path).read_text(encoding='utf-8').splitlines():
+    for line in pathlib.Path(path).read_text(encoding="utf-8").splitlines():
         match = lang_re.match(line)
-        if match and match.group(1) != '!Language':
+        if match and match.group(1) != "!Language":
             result.add(match.group(1))
 
     return result
@@ -169,14 +179,16 @@ class FileLocation:
     line_end_col: Optional[int]
 
     @staticmethod
-    def from_call(path: pathlib.Path, c: ast.Call) -> 'FileLocation':
+    def from_call(path: pathlib.Path, c: ast.Call) -> "FileLocation":
         """
         Create a FileLocation from a Call and Path.
 
         :param path: Path to the file this FileLocation is in
         :param c: Call object to extract line information from
         """
-        return FileLocation(path, c.lineno, c.col_offset, c.end_lineno, c.end_col_offset)
+        return FileLocation(
+            path, c.lineno, c.col_offset, c.end_lineno, c.end_col_offset
+        )
 
 
 @dataclasses.dataclass
@@ -190,12 +202,16 @@ class LangEntry:
     def files(self) -> str:
         """Return a string representation of all the files this LangEntry is in, and its location therein."""
         file_locations = [
-            f'{loc.path.name}:{loc.line_start}' +
-            (f':{loc.line_end}' if loc.line_end is not None and loc.line_end != loc.line_start else '')
+            f"{loc.path.name}:{loc.line_start}"
+            + (
+                f":{loc.line_end}"
+                if loc.line_end is not None and loc.line_end != loc.line_start
+                else ""
+            )
             for loc in self.locations
         ]
 
-        return '; '.join(file_locations)
+        return "; ".join(file_locations)
 
 
 def dedupe_lang_entries(entries: list[LangEntry]) -> list[LangEntry]:
@@ -216,7 +232,9 @@ def dedupe_lang_entries(entries: list[LangEntry]) -> list[LangEntry]:
             existing.locations.extend(e.locations)
             existing.comments.extend(e.comments)
         else:
-            deduped[e.string] = LangEntry(locations=e.locations[:], string=e.string, comments=e.comments[:])
+            deduped[e.string] = LangEntry(
+                locations=e.locations[:], string=e.string, comments=e.comments[:]
+            )
 
     return list(deduped.values())
 
@@ -227,14 +245,20 @@ def generate_lang_template(data: dict[pathlib.Path, list[ast.Call]]) -> str:
 
     for path, calls in data.items():
         for c in calls:
-            entries.append(LangEntry([FileLocation.from_call(path, c)], get_arg(c), [getattr(c, 'comment')]))
+            entries.append(
+                LangEntry(
+                    [FileLocation.from_call(path, c)],
+                    get_arg(c),
+                    [getattr(c, "comment")],
+                )
+            )
 
     deduped = dedupe_lang_entries(entries)
-    out = '''/* Language name */
+    out = """/* Language name */
 "!Language" = "English";
 
-'''
-    print(f'Done Deduping entries {len(entries)=}  {len(deduped)=}', file=sys.stderr)
+"""
+    print(f"Done Deduping entries {len(entries)=}  {len(deduped)=}", file=sys.stderr)
 
     for entry in deduped:
         assert len(entry.comments) == len(entry.locations)
@@ -246,18 +270,20 @@ def generate_lang_template(data: dict[pathlib.Path, list[ast.Call]]) -> str:
                 continue
 
             loc = entry.locations[i]
-            comment_parts.append(f'{loc.path.name}: {comment_text};')
+            comment_parts.append(f"{loc.path.name}: {comment_text};")
 
         if comment_parts:
-            header = ' '.join(comment_parts)
-            out += f'/* {header} */\n'
+            header = " ".join(comment_parts)
+            out += f"/* {header} */\n"
 
-        out += f'{string} = {string};\n\n'
+        out += f"{string} = {string};\n\n"
 
     return out
 
 
-def compare_lang_with_template(template: set[str], res: dict[pathlib.Path, list[ast.Call]]) -> None:
+def compare_lang_with_template(
+    template: set[str], res: dict[pathlib.Path, list[ast.Call]]
+) -> None:
     """
     Compare language entries in source code with a given language template.
 
@@ -272,10 +298,10 @@ def compare_lang_with_template(template: set[str], res: dict[pathlib.Path, list[
             if arg in template:
                 seen.add(arg)
             else:
-                print(f'NEW! {file}:{c.lineno}: {arg!r}')
+                print(f"NEW! {file}:{c.lineno}: {arg!r}")
 
     for old in set(template) ^ seen:
-        print(f'No longer used: {old}')
+        print(f"No longer used: {old}")
 
 
 def print_json_output(res: dict[pathlib.Path, list[ast.Call]]) -> None:
@@ -286,15 +312,17 @@ def print_json_output(res: dict[pathlib.Path, list[ast.Call]]) -> None:
     """
     to_print_data = [
         {
-            'path': str(path),
-            'string': get_arg(c),
-            'reconstructed': ast.unparse(c),
-            'start_line': c.lineno,
-            'start_offset': c.col_offset,
-            'end_line': c.end_lineno,
-            'end_offset': c.end_col_offset,
-            'comment': getattr(c, 'comment', None)
-        } for (path, calls) in res.items() for c in calls
+            "path": str(path),
+            "string": get_arg(c),
+            "reconstructed": ast.unparse(c),
+            "start_line": c.lineno,
+            "start_offset": c.col_offset,
+            "end_line": c.end_lineno,
+            "end_offset": c.end_col_offset,
+            "comment": getattr(c, "comment", None),
+        }
+        for (path, calls) in res.items()
+        for c in calls
     ]
 
     print(json.dumps(to_print_data, indent=2))
@@ -302,12 +330,19 @@ def print_json_output(res: dict[pathlib.Path, list[ast.Call]]) -> None:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--directory', help='Directory to search from', default='.')
-    parser.add_argument('--ignore', action='append', help='directories to ignore', default=['venv', '.venv', '.git'])
+    parser.add_argument("--directory", help="Directory to search from", default=".")
+    parser.add_argument(
+        "--ignore",
+        action="append",
+        help="directories to ignore",
+        default=["venv", ".venv", ".git"],
+    )
     group = parser.add_mutually_exclusive_group()
-    group.add_argument('--json', action='store_true', help='JSON output')
-    group.add_argument('--lang', help='en.template "strings" output to specified file, "-" for stdout')
-    group.add_argument('--compare-lang', help='en.template file to compare against')
+    group.add_argument("--json", action="store_true", help="JSON output")
+    group.add_argument(
+        "--lang", help='en.template "strings" output to specified file, "-" for stdout'
+    )
+    group.add_argument("--compare-lang", help="en.template file to compare against")
 
     args = parser.parse_args()
 
@@ -323,10 +358,10 @@ if __name__ == "__main__":
         print_json_output(res)
 
     elif args.lang:
-        if args.lang == '-':
+        if args.lang == "-":
             print(generate_lang_template(res))
         else:
-            with open(args.lang, mode='w+', newline='\n') as langfile:
+            with open(args.lang, mode="w+", newline="\n") as langfile:
                 langfile.writelines(generate_lang_template(res))
 
     else:
@@ -337,6 +372,7 @@ if __name__ == "__main__":
             print(path)
             for c in calls:
                 print(
-                    f'    {c.lineno:4d}({c.col_offset:3d}):{c.end_lineno:4d}({c.end_col_offset:3d})\t', ast.unparse(c)
+                    f"    {c.lineno:4d}({c.col_offset:3d}):{c.end_lineno:4d}({c.end_col_offset:3d})\t",
+                    ast.unparse(c),
                 )
             print()

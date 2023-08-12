@@ -12,16 +12,16 @@ from configparser import ConfigParser
 from typing import Optional, Union, List
 from config import AbstractConfig, appname, logger
 
-assert sys.platform == 'linux'
+assert sys.platform == "linux"
 
 
 class LinuxConfig(AbstractConfig):
     """Linux implementation of AbstractConfig."""
 
-    SECTION = 'config'
+    SECTION = "config"
 
-    __unescape_lut = {'\\': '\\', 'n': '\n', ';': ';', 'r': '\r', '#': '#'}
-    __escape_lut = {'\\': '\\', '\n': 'n', ';': ';', '\r': 'r'}
+    __unescape_lut = {"\\": "\\", "n": "\n", ";": ";", "r": "\r", "#": "#"}
+    __escape_lut = {"\\": "\\", "\n": "n", ";": ";", "\r": "r"}
 
     def __init__(self, filename: Optional[str] = None) -> None:
         """
@@ -32,38 +32,48 @@ class LinuxConfig(AbstractConfig):
         super().__init__()
 
         # Initialize directory paths
-        xdg_data_home = pathlib.Path(os.getenv('XDG_DATA_HOME', default='~/.local/share')).expanduser()
+        xdg_data_home = pathlib.Path(
+            os.getenv("XDG_DATA_HOME", default="~/.local/share")
+        ).expanduser()
         self.app_dir_path = xdg_data_home / appname
         self.app_dir_path.mkdir(exist_ok=True, parents=True)
 
-        self.plugin_dir_path = self.app_dir_path / 'plugins'
+        self.plugin_dir_path = self.app_dir_path / "plugins"
         self.plugin_dir_path.mkdir(exist_ok=True)
         self.respath_path = pathlib.Path(__file__).parent.parent
-        self.internal_plugin_dir_path = self.respath_path / 'plugins'
+        self.internal_plugin_dir_path = self.respath_path / "plugins"
         self.default_journal_dir_path = None  # type: ignore
 
         # Configure the filename
-        config_home = pathlib.Path(os.getenv('XDG_CONFIG_HOME', default='~/.config')).expanduser()
-        self.filename = pathlib.Path(filename) if filename is not None else config_home / appname / f'{appname}.ini'
+        config_home = pathlib.Path(
+            os.getenv("XDG_CONFIG_HOME", default="~/.config")
+        ).expanduser()
+        self.filename = (
+            pathlib.Path(filename)
+            if filename is not None
+            else config_home / appname / f"{appname}.ini"
+        )
         self.filename.parent.mkdir(exist_ok=True, parents=True)
 
         # Initialize the configuration
-        self.config = ConfigParser(comment_prefixes=('#',), interpolation=None)
+        self.config = ConfigParser(comment_prefixes=("#",), interpolation=None)
         self.config.read(self.filename)
 
         # Ensure the section exists
         try:
             self.config[self.SECTION].get("this_does_not_exist")
         except KeyError:
-            logger.info("Config section not found. Backing up existing file (if any) and re-adding a section header")
-            backup_filename = self.filename.parent / f'{appname}.ini.backup'
+            logger.info(
+                "Config section not found. Backing up existing file (if any) and re-adding a section header"
+            )
+            backup_filename = self.filename.parent / f"{appname}.ini.backup"
             backup_filename.write_bytes(self.filename.read_bytes())
             self.config.add_section(self.SECTION)
 
         # Set 'outdir' if not specified or invalid
-        outdir = self.get_str('outdir')
+        outdir = self.get_str("outdir")
         if outdir is None or not pathlib.Path(outdir).is_dir():
-            self.set('outdir', self.home)
+            self.set("outdir", self.home)
 
     def __escape(self, s: str) -> str:
         """
@@ -77,7 +87,7 @@ class LinuxConfig(AbstractConfig):
         for c in s:
             escaped_chars.append(self.__escape_lut.get(c, c))
 
-        return ''.join(escaped_chars)
+        return "".join(escaped_chars)
 
     def __unescape(self, s: str) -> str:
         """
@@ -90,17 +100,17 @@ class LinuxConfig(AbstractConfig):
         i = 0
         while i < len(s):
             current_char = s[i]
-            if current_char != '\\':
+            if current_char != "\\":
                 unescaped_chars.append(current_char)
                 i += 1
                 continue
 
             if i == len(s) - 1:
-                raise ValueError('Escaped string has unescaped trailer')
+                raise ValueError("Escaped string has unescaped trailer")
 
             unescaped = self.__unescape_lut.get(s[i + 1])
             if unescaped is None:
-                raise ValueError(f'Unknown escape: \\{s[i + 1]}')
+                raise ValueError(f"Unknown escape: \\{s[i + 1]}")
 
             unescaped_chars.append(unescaped)
             i += 2
@@ -115,7 +125,7 @@ class LinuxConfig(AbstractConfig):
         :return: str - The raw data, if found.
         """
         if self.config is None:
-            raise ValueError('Attempt to use a closed config')
+            raise ValueError("Attempt to use a closed config")
 
         return self.config[self.SECTION].get(key)
 
@@ -129,8 +139,8 @@ class LinuxConfig(AbstractConfig):
         if data is None:
             return default or ""
 
-        if '\n' in data:
-            raise ValueError('Expected string, but got list')
+        if "\n" in data:
+            raise ValueError("Expected string, but got list")
 
         return self.__unescape(data)
 
@@ -144,9 +154,9 @@ class LinuxConfig(AbstractConfig):
         if data is None:
             return default or []
 
-        split = data.split('\n')
-        if split[-1] != ';':
-            raise ValueError('Encoded list does not have trailer sentinel')
+        split = data.split("\n")
+        if split[-1] != ";":
+            raise ValueError("Encoded list does not have trailer sentinel")
 
         return [self.__unescape(item) for item in split[:-1]]
 
@@ -163,7 +173,7 @@ class LinuxConfig(AbstractConfig):
         try:
             return int(data)
         except ValueError as e:
-            raise ValueError(f'Failed to convert {key=} to int') from e
+            raise ValueError(f"Failed to convert {key=} to int") from e
 
     def get_bool(self, key: str, *, default: Optional[bool] = None) -> bool:
         """
@@ -172,7 +182,7 @@ class LinuxConfig(AbstractConfig):
         Implements :meth:`AbstractConfig.get_bool`.
         """
         if self.config is None:
-            raise ValueError('Attempt to use a closed config')
+            raise ValueError("Attempt to use a closed config")
 
         data = self.__raw_get(key)
         if data is None:
@@ -187,7 +197,7 @@ class LinuxConfig(AbstractConfig):
         Implements :meth:`AbstractConfig.set`.
         """
         if self.config is None:
-            raise ValueError('Attempt to use a closed config')
+            raise ValueError("Attempt to use a closed config")
         if isinstance(val, bool):
             to_set = str(int(val))
         elif isinstance(val, str):
@@ -195,9 +205,9 @@ class LinuxConfig(AbstractConfig):
         elif isinstance(val, int):
             to_set = str(val)
         elif isinstance(val, list):
-            to_set = '\n'.join([self.__escape(s) for s in val] + [';'])
+            to_set = "\n".join([self.__escape(s) for s in val] + [";"])
         else:
-            raise ValueError(f'Unexpected type for value {type(val).__name__}')
+            raise ValueError(f"Unexpected type for value {type(val).__name__}")
 
         self.config.set(self.SECTION, key, to_set)
         self.save()
@@ -209,7 +219,7 @@ class LinuxConfig(AbstractConfig):
         Implements :meth:`AbstractConfig.delete`.
         """
         if self.config is None:
-            raise ValueError('Attempt to delete from a closed config')
+            raise ValueError("Attempt to delete from a closed config")
 
         self.config.remove_option(self.SECTION, key)
         self.save()
@@ -221,9 +231,9 @@ class LinuxConfig(AbstractConfig):
         Implements :meth:`AbstractConfig.save`.
         """
         if self.config is None:
-            raise ValueError('Attempt to save a closed config')
+            raise ValueError("Attempt to save a closed config")
 
-        with open(self.filename, 'w', encoding='utf-8') as f:
+        with open(self.filename, "w", encoding="utf-8") as f:
             self.config.write(f)
 
     def close(self) -> None:

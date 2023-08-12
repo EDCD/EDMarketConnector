@@ -10,8 +10,22 @@ import json
 import threading
 from copy import deepcopy
 from typing import (
-    TYPE_CHECKING, Any, Callable, Dict, List, Mapping, MutableMapping, MutableSequence, NamedTuple, Optional, Sequence,
-    Tuple, TypedDict, TypeVar, Union, cast
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    NamedTuple,
+    Optional,
+    Sequence,
+    Tuple,
+    TypedDict,
+    TypeVar,
+    Union,
+    cast,
 )
 import requests
 import semantic_version
@@ -21,13 +35,13 @@ import EDMCLogging
 
 logger = EDMCLogging.get_main_logger()
 
-OLD_KILLSWITCH_URL = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/killswitches.json'
-DEFAULT_KILLSWITCH_URL = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/killswitches_v2.json'
+OLD_KILLSWITCH_URL = "https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/killswitches.json"
+DEFAULT_KILLSWITCH_URL = "https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/killswitches_v2.json"
 CURRENT_KILLSWITCH_VERSION = 2
 UPDATABLE_DATA = Union[Mapping, Sequence]
 _current_version: semantic_version.Version = config.appversion_nobuild()
 
-T = TypeVar('T', bound=UPDATABLE_DATA)
+T = TypeVar("T", bound=UPDATABLE_DATA)
 
 
 class SingleKill(NamedTuple):
@@ -42,7 +56,10 @@ class SingleKill(NamedTuple):
     @property
     def has_rules(self) -> bool:
         """Return whether or not this SingleKill can apply rules to a dict to make it safe to use."""
-        return any(x is not None for x in (self.redact_fields, self.delete_fields, self.set_fields))
+        return any(
+            x is not None
+            for x in (self.redact_fields, self.delete_fields, self.set_fields)
+        )
 
     def apply_rules(self, target: T) -> T:
         """
@@ -53,13 +70,15 @@ class SingleKill(NamedTuple):
         :param target: data to apply a rule to
         :raises: Any and all exceptions _deep_apply and _apply can raise.
         """
-        for key, value in (self.set_fields if self .set_fields is not None else {}).items():
+        for key, value in (
+            self.set_fields if self.set_fields is not None else {}
+        ).items():
             _deep_apply(target, key, value)
 
-        for key in (self.redact_fields if self.redact_fields is not None else []):
+        for key in self.redact_fields if self.redact_fields is not None else []:
             _deep_apply(target, key, "REDACTED")
 
-        for key in (self.delete_fields if self.delete_fields is not None else []):
+        for key in self.delete_fields if self.delete_fields is not None else []:
             _deep_apply(target, key, delete=True)
 
         return target
@@ -85,7 +104,9 @@ def _apply(target: UPDATABLE_DATA, key: str, to_set: Any = None, delete: bool = 
     elif isinstance(target, MutableSequence):
         idx = _get_int(key)
         if idx is None:
-            raise ValueError(f'Cannot use string {key!r} as int for index into Sequence')
+            raise ValueError(
+                f"Cannot use string {key!r} as int for index into Sequence"
+            )
 
         if delete and len(target) > 0:
             length = len(target)
@@ -99,10 +120,12 @@ def _apply(target: UPDATABLE_DATA, key: str, to_set: Any = None, delete: bool = 
             target[idx] = to_set  # this can raise, that's fine
 
     else:
-        raise ValueError(f'Dont know how to apply data to {type(target)} {target!r}')
+        raise ValueError(f"Dont know how to apply data to {type(target)} {target!r}")
 
 
-def _deep_apply(target: UPDATABLE_DATA, path: str, to_set=None, delete=False):  # noqa: CCR001 # Recursive silliness.
+def _deep_apply(  # noqa: CCR001
+    target: UPDATABLE_DATA, path: str, to_set=None, delete=False
+):  # Recursive silliness.
     """
     Set the given path to the given value, if it exists.
 
@@ -117,22 +140,24 @@ def _deep_apply(target: UPDATABLE_DATA, path: str, to_set=None, delete=False):  
     """
     current = target
     key: str = ""
-    while '.' in path:
+    while "." in path:
         if path in current:
             # it exists on this level, dont go further
             break
 
-        if isinstance(current, Mapping) and any('.' in k and path.startswith(k) for k in current.keys()):
+        if isinstance(current, Mapping) and any(
+            "." in k and path.startswith(k) for k in current.keys()
+        ):
             # there is a dotted key in here that can be used for this
             # if theres a dotted key in here (must be a mapping), use that if we can
 
             keys = current.keys()
-            for k in filter(lambda x: '.' in x, keys):
+            for k in filter(lambda x: "." in x, keys):
                 if path.startswith(k):
                     key = k
                     path = path.removeprefix(k)
                     # we assume that the `.` here is for "accessing" the next key.
-                    if path[0] == '.':
+                    if path[0] == ".":
                         path = path[1:]
 
                 if len(path) == 0:
@@ -140,7 +165,7 @@ def _deep_apply(target: UPDATABLE_DATA, path: str, to_set=None, delete=False):  
                     break
 
         else:
-            key, _, path = path.partition('.')
+            key, _, path = path.partition(".")
 
         if isinstance(current, Mapping):
             current = current[key]  # type: ignore # I really dont know at this point what you want from me mypy.
@@ -150,10 +175,10 @@ def _deep_apply(target: UPDATABLE_DATA, path: str, to_set=None, delete=False):  
             if target_idx is not None:
                 current = current[target_idx]
             else:
-                raise ValueError(f'Cannot index sequence with non-int key {key!r}')
+                raise ValueError(f"Cannot index sequence with non-int key {key!r}")
 
         else:
-            raise ValueError(f'Dont know how to index a {type(current)} ({current!r})')
+            raise ValueError(f"Dont know how to index a {type(current)} ({current!r})")
 
     _apply(current, path, to_set, delete)
 
@@ -176,16 +201,18 @@ class KillSwitches(NamedTuple):
         """Create a KillSwitches instance from a dictionary."""
         ks = {}
 
-        for match, ks_data in data['kills'].items():
+        for match, ks_data in data["kills"].items():
             ks[match] = SingleKill(
                 match=match,
-                reason=ks_data['reason'],
-                redact_fields=ks_data.get('redact_fields'),
-                set_fields=ks_data.get('set_fields'),
-                delete_fields=ks_data.get('delete_fields')
+                reason=ks_data["reason"],
+                redact_fields=ks_data.get("redact_fields"),
+                set_fields=ks_data.get("set_fields"),
+                delete_fields=ks_data.get("delete_fields"),
             )
 
-        return KillSwitches(version=semantic_version.SimpleSpec(data['version']), kills=ks)
+        return KillSwitches(
+            version=semantic_version.SimpleSpec(data["version"]), kills=ks
+        )
 
 
 class DisabledResult(NamedTuple):
@@ -216,7 +243,9 @@ class KillSwitchSet:
     def __init__(self, kill_switches: List[KillSwitches]) -> None:
         self.kill_switches = kill_switches
 
-    def get_disabled(self, id: str, *, version: Union[Version, str] = _current_version) -> DisabledResult:
+    def get_disabled(
+        self, id: str, *, version: Union[Version, str] = _current_version
+    ) -> DisabledResult:
         """
         Return whether or not the given feature ID is disabled by a killswitch for the given version.
 
@@ -236,15 +265,21 @@ class KillSwitchSet:
 
         return DisabledResult(False, None)
 
-    def is_disabled(self, id: str, *, version: semantic_version.Version = _current_version) -> bool:
+    def is_disabled(
+        self, id: str, *, version: semantic_version.Version = _current_version
+    ) -> bool:
         """Return whether or not a given feature ID is disabled for the given version."""
         return self.get_disabled(id, version=version).disabled
 
-    def get_reason(self, id: str, version: semantic_version.Version = _current_version) -> str:
+    def get_reason(
+        self, id: str, version: semantic_version.Version = _current_version
+    ) -> str:
         """Return a reason for why the given id is disabled for the given version, if any."""
         return self.get_disabled(id, version=version).reason
 
-    def kills_for_version(self, version: semantic_version.Version = _current_version) -> List[KillSwitches]:
+    def kills_for_version(
+        self, version: semantic_version.Version = _current_version
+    ) -> List[KillSwitches]:
         """
         Get all killswitch entries that apply to the given version.
 
@@ -268,9 +303,11 @@ class KillSwitchSet:
         if not res.disabled:
             return False, data
 
-        log.info(f'Killswitch {name} is enabled. Checking if rules exist to make use safe')
+        log.info(
+            f"Killswitch {name} is enabled. Checking if rules exist to make use safe"
+        )
         if not res.has_rules():
-            logger.info('No rules exist. Stopping processing')
+            logger.info("No rules exist. Stopping processing")
             return True, data
 
         if TYPE_CHECKING:  # pyright, mypy, please -_-
@@ -280,13 +317,17 @@ class KillSwitchSet:
             new_data = res.kill.apply_rules(deepcopy(data))
 
         except Exception as e:
-            log.exception(f'Exception occurred while attempting to apply rules! bailing out! {e=}')
+            log.exception(
+                f"Exception occurred while attempting to apply rules! bailing out! {e=}"
+            )
             return True, data
 
-        log.info('Rules applied successfully, allowing execution to continue')
+        log.info("Rules applied successfully, allowing execution to continue")
         return False, new_data
 
-    def check_multiple_killswitches(self, data: T, *names: str, log=logger, version=_current_version) -> Tuple[bool, T]:
+    def check_multiple_killswitches(
+        self, data: T, *names: str, log=logger, version=_current_version
+    ) -> Tuple[bool, T]:
         """
         Check multiple killswitches in order.
 
@@ -298,7 +339,9 @@ class KillSwitchSet:
         :return: A two tuple of bool and updated data, where the bool is true when the caller _should_ halt processing
         """
         for name in names:
-            should_return, data = self.check_killswitch(name=name, data=data, log=log, version=version)
+            should_return, data = self.check_killswitch(
+                name=name, data=data, log=log, version=version
+            )
 
             if should_return:
                 return True, data
@@ -307,11 +350,11 @@ class KillSwitchSet:
 
     def __str__(self) -> str:
         """Return a string representation of KillSwitchSet."""
-        return f'KillSwitchSet: {str(self.kill_switches)}'
+        return f"KillSwitchSet: {str(self.kill_switches)}"
 
     def __repr__(self) -> str:
         """Return __repr__ for KillSwitchSet."""
-        return f'KillSwitchSet(kill_switches={self.kill_switches!r})'
+        return f"KillSwitchSet(kill_switches={self.kill_switches!r})"
 
 
 class BaseSingleKillSwitch(TypedDict):  # noqa: D101
@@ -319,8 +362,8 @@ class BaseSingleKillSwitch(TypedDict):  # noqa: D101
 
 
 class SingleKillSwitchJSON(BaseSingleKillSwitch, total=False):  # noqa: D101
-    redact_fields: list[str]    # set fields to "REDACTED"
-    delete_fields: list[str]    # remove fields entirely
+    redact_fields: list[str]  # set fields to "REDACTED"
+    delete_fields: list[str]  # remove fields entirely
     set_fields: dict[str, Any]  # set fields to given data
 
 
@@ -343,8 +386,8 @@ def fetch_kill_switches(target=DEFAULT_KILLSWITCH_URL) -> Optional[KillSwitchJSO
     :return: a list of dicts containing kill switch data, or None
     """
     logger.info("Attempting to fetch kill switches")
-    if target.startswith('file:'):
-        target = target.replace('file:', '')
+    if target.startswith("file:"):
+        target = target.replace("file:", "")
         try:
             with open(target) as t:
                 return json.load(t)
@@ -379,26 +422,30 @@ class _KillSwitchJSONFileV1(TypedDict):
 
 
 def _upgrade_kill_switch_dict(data: KillSwitchJSONFile) -> KillSwitchJSONFile:
-    version = data['version']
+    version = data["version"]
     if version == CURRENT_KILLSWITCH_VERSION:
         return data
 
     if version == 1:
-        logger.info('Got an old version killswitch file (v1) upgrading!')
+        logger.info("Got an old version killswitch file (v1) upgrading!")
         to_return: KillSwitchJSONFile = deepcopy(data)
         data_v1 = cast(_KillSwitchJSONFileV1, data)
 
-        to_return['kill_switches'] = [
-            cast(KillSwitchSetJSON, {  # I need to cheat here a touch. It is this I promise
-                'version': d['version'],
-                'kills': {
-                    match: {'reason': reason} for match, reason in d['kills'].items()
-                }
-            })
-            for d in data_v1['kill_switches']
+        to_return["kill_switches"] = [
+            cast(
+                KillSwitchSetJSON,
+                {  # I need to cheat here a touch. It is this I promise
+                    "version": d["version"],
+                    "kills": {
+                        match: {"reason": reason}
+                        for match, reason in d["kills"].items()
+                    },
+                },
+            )
+            for d in data_v1["kill_switches"]
         ]
 
-        to_return['version'] = CURRENT_KILLSWITCH_VERSION
+        to_return["version"] = CURRENT_KILLSWITCH_VERSION
 
         return to_return
 
@@ -413,15 +460,17 @@ def parse_kill_switches(data: KillSwitchJSONFile) -> List[KillSwitches]:
     :return: a list of all provided killswitches
     """
     data = _upgrade_kill_switch_dict(data)
-    last_updated = data['last_updated']
-    ks_version = data['version']
-    logger.info(f'Kill switches last updated {last_updated}')
+    last_updated = data["last_updated"]
+    ks_version = data["version"]
+    logger.info(f"Kill switches last updated {last_updated}")
 
     if ks_version != CURRENT_KILLSWITCH_VERSION:
-        logger.warning(f'Unknown killswitch version {ks_version} (expected {CURRENT_KILLSWITCH_VERSION}). Bailing out')
+        logger.warning(
+            f"Unknown killswitch version {ks_version} (expected {CURRENT_KILLSWITCH_VERSION}). Bailing out"
+        )
         return []
 
-    kill_switches = data['kill_switches']
+    kill_switches = data["kill_switches"]
     out = []
     for idx, ks_data in enumerate(kill_switches):
         try:
@@ -429,12 +478,14 @@ def parse_kill_switches(data: KillSwitchJSONFile) -> List[KillSwitches]:
             out.append(ks)
 
         except Exception as e:
-            logger.exception(f'Could not parse killswitch idx {idx}: {e}')
+            logger.exception(f"Could not parse killswitch idx {idx}: {e}")
 
     return out
 
 
-def get_kill_switches(target=DEFAULT_KILLSWITCH_URL, fallback: Optional[str] = None) -> Optional[KillSwitchSet]:
+def get_kill_switches(
+    target=DEFAULT_KILLSWITCH_URL, fallback: Optional[str] = None
+) -> Optional[KillSwitchSet]:
     """
     Get a kill switch set object.
 
@@ -443,18 +494,20 @@ def get_kill_switches(target=DEFAULT_KILLSWITCH_URL, fallback: Optional[str] = N
     """
     if (data := fetch_kill_switches(target)) is None:
         if fallback is not None:
-            logger.warning('could not get killswitches, trying fallback')
+            logger.warning("could not get killswitches, trying fallback")
             data = fetch_kill_switches(fallback)
 
         if data is None:
-            logger.warning('Could not get killswitches.')
+            logger.warning("Could not get killswitches.")
             return None
 
     return KillSwitchSet(parse_kill_switches(data))
 
 
 def get_kill_switches_thread(
-    target, callback: Callable[[Optional[KillSwitchSet]], None], fallback: Optional[str] = None,
+    target,
+    callback: Callable[[Optional[KillSwitchSet]], None],
+    fallback: Optional[str] = None,
 ) -> None:
     """
     Threaded version of get_kill_switches. Request is performed off thread, and callback is called when it is available.
@@ -463,6 +516,7 @@ def get_kill_switches_thread(
     :param callback: The callback to pass the newly created KillSwitchSet
     :param fallback: Fallback killswitch file, if any, defaults to None
     """
+
     def make_request():
         callback(get_kill_switches(target, fallback=fallback))
 
@@ -482,17 +536,21 @@ def setup_main_list(filename: Optional[str]):
         filename = DEFAULT_KILLSWITCH_URL
 
     if (data := get_kill_switches(filename, OLD_KILLSWITCH_URL)) is None:
-        logger.warning("Unable to fetch kill switches. Setting global set to an empty set")
+        logger.warning(
+            "Unable to fetch kill switches. Setting global set to an empty set"
+        )
         return
 
     global active
     active = data
-    logger.trace(f'{len(active.kill_switches)} Active Killswitches:')
+    logger.trace(f"{len(active.kill_switches)} Active Killswitches:")
     for v in active.kill_switches:
         logger.trace(v)
 
 
-def get_disabled(id: str, *, version: semantic_version.Version = _current_version) -> DisabledResult:
+def get_disabled(
+    id: str, *, version: semantic_version.Version = _current_version
+) -> DisabledResult:
     """
     Query the global KillSwitchSet for whether or not a given ID is disabled.
 
@@ -511,7 +569,9 @@ def check_multiple_killswitches(data: T, *names: str, log=logger) -> tuple[bool,
     return active.check_multiple_killswitches(data, *names, log=log)
 
 
-def is_disabled(id: str, *, version: semantic_version.Version = _current_version) -> bool:
+def is_disabled(
+    id: str, *, version: semantic_version.Version = _current_version
+) -> bool:
     """Query the global KillSwitchSet#is_disabled method."""
     return active.is_disabled(id, version=version)
 
@@ -521,6 +581,8 @@ def get_reason(id: str, *, version: semantic_version.Version = _current_version)
     return active.get_reason(id, version=version)
 
 
-def kills_for_version(version: semantic_version.Version = _current_version) -> List[KillSwitches]:
+def kills_for_version(
+    version: semantic_version.Version = _current_version,
+) -> List[KillSwitches]:
     """Query the global KillSwitchSet for kills matching a particular version."""
     return active.kills_for_version(version)
