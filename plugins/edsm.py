@@ -329,7 +329,6 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: Optional[str], is_beta: bool) -> tk
 
     this.cmdr_label = nb.Label(frame, text=_('Cmdr'))
     this.cmdr_label.grid(row=cur_row, padx=PADX, sticky=tk.W)
-
     this.cmdr_text = nb.Label(frame)
     this.cmdr_text.grid(row=cur_row, column=1, padx=PADX, pady=PADY, sticky=tk.W)
 
@@ -337,7 +336,6 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: Optional[str], is_beta: bool) -> tk
 
     this.user_label = nb.Label(frame, text=_('Commander Name'))
     this.user_label.grid(row=cur_row, padx=PADX, sticky=tk.W)
-
     this.user = nb.Entry(frame)
     this.user.grid(row=cur_row, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
 
@@ -345,7 +343,6 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: Optional[str], is_beta: bool) -> tk
 
     this.apikey_label = nb.Label(frame, text=_('API Key'))
     this.apikey_label.grid(row=cur_row, padx=PADX, sticky=tk.W)
-
     this.apikey = nb.Entry(frame, show="*", width=50)
     this.apikey.grid(row=cur_row, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
 
@@ -373,28 +370,21 @@ def prefs_cmdr_changed(cmdr: Optional[str], is_beta: bool) -> None:  # noqa: CCR
     """
     if this.log_button:
         this.log_button['state'] = tk.NORMAL if cmdr and not is_beta else tk.DISABLED
-
     if this.user:
         this.user['state'] = tk.NORMAL
         this.user.delete(0, tk.END)
-
     if this.apikey:
         this.apikey['state'] = tk.NORMAL
         this.apikey.delete(0, tk.END)
-
     if cmdr:
         if this.cmdr_text:
             this.cmdr_text['text'] = f'{cmdr}{" [Beta]" if is_beta else ""}'
-
         cred = credentials(cmdr)
-
         if cred:
             if this.user:
                 this.user.insert(0, cred[0])
-
             if this.apikey:
                 this.apikey.insert(0, cred[1])
-
     else:
         if this.cmdr_text:
             # LANG: We have no data on the current commander
@@ -459,7 +449,6 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
                 usernames[idx] = this.user.get().strip()
                 apikeys.extend([''] * (1 + idx - len(apikeys)))
                 apikeys[idx] = this.apikey.get().strip()
-
             else:
                 config.set('edsm_cmdrs', cmdrs + [cmdr])
                 usernames.append(this.user.get().strip())
@@ -553,7 +542,6 @@ entry: {entry!r}'''
         if not this.station_name:
             if this.system_population and this.system_population > 0:
                 to_set = STATION_UNDOCKED
-
             else:
                 to_set = ''
 
@@ -571,7 +559,6 @@ entry: {entry!r}'''
     this.multicrew = bool(state['Role'])
     if 'StarPos' in entry:
         this.coordinates = entry['StarPos']
-
     elif entry['event'] == 'LoadGame':
         this.coordinates = None
 
@@ -579,20 +566,16 @@ entry: {entry!r}'''
         this.newgame = True
         this.newgame_docked = False
         this.navbeaconscan = 0
-
     elif entry['event'] == 'StartUp':
         this.newgame = False
         this.newgame_docked = False
         this.navbeaconscan = 0
-
     elif entry['event'] == 'Location':
         this.newgame = True
         this.newgame_docked = entry.get('Docked', False)
         this.navbeaconscan = 0
-
     elif entry['event'] == 'NavBeaconScan':
         this.navbeaconscan = entry['NumBodies']
-
     elif entry['event'] == 'BackPack':
         # Use the stored file contents, not the empty journal event
         if state['BackpackJSON']:
@@ -635,7 +618,6 @@ entry: {entry!r}'''
             }
             materials.update(transient)
             logger.trace_if(CMDR_EVENTS, f'"LoadGame" event, queueing Materials: {cmdr=}')
-
             this.queue.put((cmdr, this.game_version, this.game_build, materials))
 
         if entry['event'] in ('CarrierJump', 'FSDJump', 'Location', 'Docked'):
@@ -644,7 +626,6 @@ entry: {entry!r}'''
 Queueing: {entry!r}'''
             )
         logger.trace_if(CMDR_EVENTS, f'"{entry["event"]=}" event, queueing: {cmdr=}')
-
         this.queue.put((cmdr, this.game_version, this.game_build, entry))
 
     return ''
@@ -664,11 +645,9 @@ def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:  # noqa: CCR001
     # Always store initially, even if we're not the *current* system provider.
     if not this.station_marketid and data['commander']['docked']:
         this.station_marketid = data['lastStarport']['id']
-
     # Only trust CAPI if these aren't yet set
     if not this.system_name:
         this.system_name = data['lastSystem']['name']
-
     if not this.station_name and data['commander']['docked']:
         this.station_name = data['lastStarport']['name']
 
@@ -680,7 +659,6 @@ def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:  # noqa: CCR001
             # Do *NOT* set 'url' here, as it's set to a function that will call
             # through correctly.  We don't want a static string.
             this.system_link.update_idletasks()
-
     if config.get_str('station_provider') == 'EDSM':
         if this.station_link:
             if data['commander']['docked'] or this.on_foot and this.station_name:
@@ -720,16 +698,13 @@ def get_discarded_events_list() -> None:
         r = this.session.get('https://www.edsm.net/api-journal-v1/discard', timeout=_TIMEOUT)
         r.raise_for_status()
         this.discarded_events = set(r.json())
-
         # We discard 'Docked' events because should_send() assumes that we send them
         this.discarded_events.discard('Docked')
-
         if not this.discarded_events:
             logger.warning(
                 'Unexpected empty discarded events list from EDSM: '
                 f'{type(this.discarded_events)} -- {this.discarded_events}'
             )
-
     except Exception as e:
         logger.warning('Exception while trying to set this.discarded_events:', exc_info=e)
 
@@ -749,13 +724,11 @@ def worker() -> None:  # noqa: CCR001 C901
     cmdr: str = ""
     last_game_version = ""
     last_game_build = ""
-    entry: Mapping[str, Any] = {}
 
     while not this.discarded_events:
         if this.shutting_down:
             logger.debug(f'returning from discarded_events loop due to {this.shutting_down=}')
             return
-
         get_discarded_events_list()
         if this.discarded_events:
             break
@@ -772,7 +745,6 @@ def worker() -> None:  # noqa: CCR001 C901
         if item:
             (cmdr, game_version, game_build, entry) = item
             logger.trace_if(CMDR_EVENTS, f'De-queued ({cmdr=}, {game_version=}, {game_build=}, {entry["event"]=})')
-
         else:
             logger.debug('Empty queue message, setting closing = True')
             closing = True  # Try to send any unsent events before we close
@@ -782,7 +754,6 @@ def worker() -> None:  # noqa: CCR001 C901
         while retrying < 3:
             if item is None:
                 item = cast(Tuple[str, str, str, Mapping[str, Any]], ("", {}))
-
             should_skip, new_item = killswitch.check_killswitch(
                 'plugins.edsm.worker',
                 item,
@@ -791,7 +762,6 @@ def worker() -> None:  # noqa: CCR001 C901
 
             if should_skip:
                 break
-
             if item is not None:
                 item = new_item
 
@@ -813,18 +783,14 @@ def worker() -> None:  # noqa: CCR001 C901
                         or last_game_version != game_version or last_game_build != game_build
                     ):
                         pending = []
-
                     pending.append(entry)
-
                 # drop events if required by killswitch
                 new_pending = []
                 for e in pending:
                     skip, new = killswitch.check_killswitch(f'plugin.edsm.worker.{e["event"]}', e, logger)
                     if skip:
                         continue
-
                     new_pending.append(new)
-
                 pending = new_pending
 
                 if pending and should_send(pending, entry['event']):
@@ -864,16 +830,13 @@ def worker() -> None:  # noqa: CCR001 C901
                         data_elided['apiKey'] = '<elided>'
                         if isinstance(data_elided['message'], bytes):
                             data_elided['message'] = data_elided['message'].decode('utf-8')
-
                         if isinstance(data_elided['commanderName'], bytes):
                             data_elided['commanderName'] = data_elided['commanderName'].decode('utf-8')
-
                         logger.trace_if(
                             'journal.locations',
                             "pending has at least one of ('CarrierJump', 'FSDJump', 'Location', 'Docked')"
                             " Attempting API call with the following events:"
                         )
-
                         for p in pending:
                             logger.trace_if('journal.locations', f"Event: {p!r}")
                             if p['event'] in 'Location':
@@ -881,7 +844,6 @@ def worker() -> None:  # noqa: CCR001 C901
                                     'journal.locations',
                                     f'Attempting API call for "Location" event with timestamp: {p["timestamp"]}'
                                 )
-
                         logger.trace_if(
                             'journal.locations', f'Overall POST data (elided) is:\n{json.dumps(data_elided, indent=2)}'
                         )
@@ -902,17 +864,13 @@ def worker() -> None:  # noqa: CCR001 C901
                         logger.warning(f'EDSM\t{msg_num} {msg}\t{json.dumps(pending, separators=(",", ": "))}')
                         # LANG: EDSM Plugin - Error message from EDSM API
                         plug.show_error(_('Error: EDSM {MSG}').format(MSG=msg))
-
                     else:
-
                         if msg_num // 100 == 1:
                             logger.trace_if('plugin.edsm.api', 'Overall OK')
                             pass
-
                         elif msg_num // 100 == 5:
                             logger.trace_if('plugin.edsm.api', 'Event(s) not currently processed, but saved for later')
                             pass
-
                         else:
                             logger.warning(f'EDSM API call status not 1XX, 2XX or 5XX: {msg.num}')
 
@@ -923,13 +881,10 @@ def worker() -> None:  # noqa: CCR001 C901
                                 # calls update_status in main thread
                                 if not config.shutting_down and this.system_link is not None:
                                     this.system_link.event_generate('<<EDSMStatus>>', when="tail")
-
                             if r['msgnum'] // 100 != 1:  # type: ignore
                                 logger.warning(f'EDSM event with not-1xx status:\n{r["msgnum"]}\n'  # type: ignore
                                                f'{r["msg"]}\n{json.dumps(e, separators = (",", ": "))}')
-
                         pending = []
-
                 break  # No exception, so assume success
 
             except Exception as e:
@@ -939,12 +894,10 @@ def worker() -> None:  # noqa: CCR001 C901
         else:
             # LANG: EDSM Plugin - Error connecting to EDSM API
             plug.show_error(_("Error: Can't connect to EDSM"))
-
         if entry['event'].lower() in ('shutdown', 'commander', 'fileheader'):
             # Game shutdown or new login, so we MUST not hang on to pending
             pending = []
             logger.trace_if(CMDR_EVENTS, f'Blanked pending because of event: {entry["event"]}')
-
         if closing:
             logger.debug('closing, so returning.')
             return
@@ -1015,14 +968,11 @@ def edsm_notify_system(reply: Mapping[str, Any]) -> None:
             this.system_link['image'] = this._IMG_ERROR
             # LANG: EDSM Plugin - Error connecting to EDSM API
             plug.show_error(_("Error: Can't connect to EDSM"))
-
         elif reply['msgnum'] // 100 not in (1, 4):
             this.system_link['image'] = this._IMG_ERROR
             # LANG: EDSM Plugin - Error message from EDSM API
             plug.show_error(_('Error: EDSM {MSG}').format(MSG=reply['msg']))
-
         elif reply.get('systemCreated'):
             this.system_link['image'] = this._IMG_NEW
-
         else:
             this.system_link['image'] = this._IMG_KNOWN

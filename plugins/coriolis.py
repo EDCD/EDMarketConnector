@@ -6,6 +6,7 @@ Licensed under the GNU General Public License.
 See LICENSE file.
 
 This is an EDMC 'core' plugin.
+
 All EDMC plugins are *dynamically* loaded at run-time.
 
 We build for Windows using `py2exe`.
@@ -18,6 +19,7 @@ referenced in this file (or only in any other core plugin), and if so...
     `build.py` TO ENSURE THE FILES ARE ACTUALLY PRESENT
     IN AN END-USER INSTALLATION ON WINDOWS.
 """
+
 import base64
 import gzip
 import io
@@ -34,43 +36,47 @@ if TYPE_CHECKING:
     def _(s: str) -> str:
         ...
 
-if not config.get_str('shipyard_provider') and config.get_int('shipyard'):
-    config.set('shipyard_provider', 'Coriolis')
 
-config.delete('shipyard', suppress=True)
+class CoriolisConfig:
+    """Coriolis Configuration."""
 
+    def __init__(self):
+        self.normal_url = ''
+        self.beta_url = ''
+        self.override_mode = ''
+
+        self.normal_textvar = tk.StringVar()
+        self.beta_textvar = tk.StringVar()
+        self.override_textvar = tk.StringVar()
+
+    def initialize_urls(self):
+        """Initialize Coriolis URLs and override mode from configuration."""
+        self.normal_url = config.get_str('coriolis_normal_url', default=DEFAULT_NORMAL_URL)
+        self.beta_url = config.get_str('coriolis_beta_url', default=DEFAULT_BETA_URL)
+        self.override_mode = config.get_str('coriolis_overide_url_selection', default=DEFAULT_OVERRIDE_MODE)
+
+        self.normal_textvar.set(value=self.normal_url)
+        self.beta_textvar.set(value=self.beta_url)
+        self.override_textvar.set(
+            value={
+                'auto': _('Auto'),  # LANG: 'Auto' label for Coriolis site override selection
+                'normal': _('Normal'),  # LANG: 'Normal' label for Coriolis site override selection
+                'beta': _('Beta')  # LANG: 'Beta' label for Coriolis site override selection
+            }.get(self.override_mode, _('Auto'))  # LANG: 'Auto' label for Coriolis site override selection
+        )
+
+
+coriolis_config = CoriolisConfig()
 logger = get_main_logger()
 
 DEFAULT_NORMAL_URL = 'https://coriolis.io/import?data='
 DEFAULT_BETA_URL = 'https://beta.coriolis.io/import?data='
 DEFAULT_OVERRIDE_MODE = 'auto'
 
-normal_url = ''
-beta_url = ''
-override_mode = ''
-
-normal_textvar = tk.StringVar()
-beta_textvar = tk.StringVar()
-override_textvar = tk.StringVar()  # This will always contain a _localised_ version
-
 
 def plugin_start3(path: str) -> str:
     """Set up URLs."""
-    global normal_url, beta_url, override_mode
-    normal_url = config.get_str('coriolis_normal_url', default=DEFAULT_NORMAL_URL)
-    beta_url = config.get_str('coriolis_beta_url', default=DEFAULT_BETA_URL)
-    override_mode = config.get_str('coriolis_overide_url_selection', default=DEFAULT_OVERRIDE_MODE)
-
-    normal_textvar.set(value=normal_url)
-    beta_textvar.set(value=beta_url)
-    override_textvar.set(
-        value={
-            'auto': _('Auto'),  # LANG: 'Auto' label for Coriolis site override selection
-            'normal': _('Normal'),  # LANG: 'Normal' label for Coriolis site override selection
-            'beta': _('Beta')  # LANG: 'Beta' label for Coriolis site override selection
-        }.get(override_mode, _('Auto'))  # LANG: 'Auto' label for Coriolis site override selection
-    )
-
+    coriolis_config.initialize_urls()
     return 'Coriolis'
 
 
@@ -89,18 +95,21 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: Optional[str], is_beta: bool) -> tk
 
     # LANG: Settings>Coriolis: Label for 'NOT alpha/beta game version' URL
     nb.Label(conf_frame, text=_('Normal URL')).grid(sticky=tk.W, row=cur_row, column=0, padx=PADX)
-    nb.Entry(conf_frame, textvariable=normal_textvar).grid(sticky=tk.EW, row=cur_row, column=1, padx=PADX)
+    nb.Entry(conf_frame,
+             textvariable=coriolis_config.normal_textvar).grid(sticky=tk.EW, row=cur_row, column=1, padx=PADX)
     # LANG: Generic 'Reset' button label
-    nb.Button(conf_frame, text=_("Reset"), command=lambda: normal_textvar.set(value=DEFAULT_NORMAL_URL)).grid(
+    nb.Button(conf_frame, text=_("Reset"),
+              command=lambda: coriolis_config.normal_textvar.set(value=DEFAULT_NORMAL_URL)).grid(
         sticky=tk.W, row=cur_row, column=2, padx=PADX
     )
     cur_row += 1
 
     # LANG: Settings>Coriolis: Label for 'alpha/beta game version' URL
     nb.Label(conf_frame, text=_('Beta URL')).grid(sticky=tk.W, row=cur_row, column=0, padx=PADX)
-    nb.Entry(conf_frame, textvariable=beta_textvar).grid(sticky=tk.EW, row=cur_row, column=1, padx=PADX)
+    nb.Entry(conf_frame, textvariable=coriolis_config.beta_textvar).grid(sticky=tk.EW, row=cur_row, column=1, padx=PADX)
     # LANG: Generic 'Reset' button label
-    nb.Button(conf_frame, text=_('Reset'), command=lambda: beta_textvar.set(value=DEFAULT_BETA_URL)).grid(
+    nb.Button(conf_frame, text=_('Reset'),
+              command=lambda: coriolis_config.beta_textvar.set(value=DEFAULT_BETA_URL)).grid(
         sticky=tk.W, row=cur_row, column=2, padx=PADX
     )
     cur_row += 1
@@ -110,8 +119,8 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: Optional[str], is_beta: bool) -> tk
     nb.Label(conf_frame, text=_('Override Beta/Normal Selection')).grid(sticky=tk.W, row=cur_row, column=0, padx=PADX)
     nb.OptionMenu(
         conf_frame,
-        override_textvar,
-        override_textvar.get(),
+        coriolis_config.override_textvar,
+        coriolis_config.override_textvar.get(),
         _('Normal'),  # LANG: 'Normal' label for Coriolis site override selection
         _('Beta'),  # LANG: 'Beta' label for Coriolis site override selection
         _('Auto')  # LANG: 'Auto' label for Coriolis site override selection
@@ -128,51 +137,42 @@ def prefs_changed(cmdr: Optional[str], is_beta: bool) -> None:
     :param cmdr: Commander name, if available
     :param is_beta: Whether the game mode is beta
     """
-    global normal_url, beta_url, override_mode
-
-    normal_url = normal_textvar.get()
-    beta_url = beta_textvar.get()
-    override_mode = override_textvar.get()
+    coriolis_config.normal_url = coriolis_config.normal_textvar.get()
+    coriolis_config.beta_url = coriolis_config.beta_textvar.get()
+    coriolis_config.override_mode = coriolis_config.override_textvar.get()
 
     # Convert to unlocalised names
-    override_mode = {
+    coriolis_config.override_mode = {
         _('Normal'): 'normal',  # LANG: Coriolis normal/beta selection - normal
         _('Beta'): 'beta',      # LANG: Coriolis normal/beta selection - beta
         _('Auto'): 'auto',      # LANG: Coriolis normal/beta selection - auto
-    }.get(override_mode, override_mode)
+    }.get(coriolis_config.override_mode, coriolis_config.override_mode)
 
-    if override_mode not in ('beta', 'normal', 'auto'):
-        logger.warning(f'Unexpected value {override_mode=!r}. Defaulting to "auto"')
-        override_mode = 'auto'
-        override_textvar.set(value=_('Auto'))  # LANG: 'Auto' label for Coriolis site override selection
+    if coriolis_config.override_mode not in ('beta', 'normal', 'auto'):
+        logger.warning(f'Unexpected value {coriolis_config.override_mode=!r}. Defaulting to "auto"')
+        coriolis_config.override_mode = 'auto'
+        coriolis_config.override_textvar.set(value=_('Auto'))  # LANG: 'Auto' label for Coriolis site override selection
 
-    config.set('coriolis_normal_url', normal_url)
-    config.set('coriolis_beta_url', beta_url)
-    config.set('coriolis_override_url_selection', override_mode)
+    config.set('coriolis_normal_url', coriolis_config.normal_url)
+    config.set('coriolis_beta_url', coriolis_config.beta_url)
+    config.set('coriolis_override_url_selection', coriolis_config.override_mode)
 
 
 def _get_target_url(is_beta: bool) -> str:
-    global override_mode
-    if override_mode not in ('auto', 'normal', 'beta'):
+    if coriolis_config.override_mode not in ('auto', 'normal', 'beta'):
         # LANG: Settings>Coriolis - invalid override mode found
         show_error(_('Invalid Coriolis override mode!'))
-        logger.warning(f'Unexpected override mode {override_mode!r}! defaulting to auto!')
-        override_mode = 'auto'
-
-    if override_mode == 'beta':
-        return beta_url
-
-    if override_mode == 'normal':
-        return normal_url
-
+        logger.warning(f'Unexpected override mode {coriolis_config.override_mode!r}! defaulting to auto!')
+        coriolis_config.override_mode = 'auto'
+    if coriolis_config.override_mode == 'beta':
+        return coriolis_config.beta_url
+    if coriolis_config.override_mode == 'normal':
+        return coriolis_config.normal_url
     # Must be auto
     if is_beta:
-        return beta_url
+        return coriolis_config.beta_url
 
-    return normal_url
-
-# to anyone reading this, no, this is NOT the correct return type. Its magic internal stuff that I WILL be changing
-# some day. Check PLUGINS.md for the right way to do this. -A_D
+    return coriolis_config.normal_url
 
 
 def shipyard_url(loadout, is_beta) -> Union[str, bool]:
@@ -181,11 +181,8 @@ def shipyard_url(loadout, is_beta) -> Union[str, bool]:
     string = json.dumps(loadout, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode('utf-8')
     if not string:
         return False
-
     out = io.BytesIO()
     with gzip.GzipFile(fileobj=out, mode='w') as f:
         f.write(string)
-
     encoded = base64.urlsafe_b64encode(out.getvalue()).decode().replace('=', '%3D')
-
     return _get_target_url(is_beta) + encoded
