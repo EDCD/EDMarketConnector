@@ -1,5 +1,9 @@
 """
-Code dealing with the configuration of the program.
+__init__.py - Code dealing with the configuration of the program.
+
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
 
 Windows uses the Registry to store values in a flat manner.
 Linux uses a file, but for commonality it's still a flat data structure.
@@ -39,9 +43,7 @@ import traceback
 import warnings
 from abc import abstractmethod
 from typing import Any, Callable, Optional, Type, TypeVar, Union
-
 import semantic_version
-
 from constants import GITVERSION_FILE, applongname, appname
 
 # Any of these may be imported by plugins
@@ -77,7 +79,6 @@ else:
 _T = TypeVar('_T')
 
 
-###########################################################################
 def git_shorthash_from_head() -> str:
     """
     Determine short hash for current git HEAD.
@@ -156,23 +157,15 @@ def appversion_nobuild() -> semantic_version.Version:
     :return: App version without any build meta data.
     """
     return appversion().truncate('prerelease')
-###########################################################################
 
 
 class AbstractConfig(abc.ABC):
     """Abstract root class of all platform specific Config implementations."""
 
     OUT_EDDN_SEND_STATION_DATA = 1
-    # OUT_MKT_BPC = 2	# No longer supported
     OUT_MKT_TD = 4
     OUT_MKT_CSV = 8
     OUT_SHIP = 16
-    # OUT_SHIP_EDS = 16	# Replaced by OUT_SHIP
-    # OUT_SYS_FILE = 32	# No longer supported
-    # OUT_STAT = 64	# No longer available
-    # OUT_SHIP_CORIOLIS = 128	# Replaced by OUT_SHIP
-    # OUT_SYS_EDSM = 256  # Now a plugin
-    # OUT_SYS_AUTO = 512  # Now always automatic
     OUT_MKT_MANUAL = 1024
     OUT_EDDN_SEND_NON_STATION = 2048
     OUT_EDDN_DELAY = 4096
@@ -184,7 +177,6 @@ class AbstractConfig(abc.ABC):
     respath_path: pathlib.Path
     home_path: pathlib.Path
     default_journal_dir_path: pathlib.Path
-
     identifier: str
 
     __in_shutdown = False  # Is the application currently shutting down ?

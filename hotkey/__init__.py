@@ -1,6 +1,10 @@
-"""Handle keyboard input for manual update triggering."""
-# -*- coding: utf-8 -*-
+"""
+__init__.py - Handle keyboard input for manual update triggering.
 
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
+"""
 import abc
 import sys
 from abc import abstractmethod

@@ -1,5 +1,12 @@
-"""Linux implementation of hotkey.AbstractHotkeyMgr."""
+"""
+linux.py - Linux implementation of hotkey.AbstractHotkeyMgr.
+
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
+"""
 import sys
+from typing import Union
 
 from EDMCLogging import get_main_logger
 from hotkey import AbstractHotkeyMgr
@@ -32,7 +39,7 @@ class LinuxHotKeyMgr(AbstractHotkeyMgr):
         """Stop acquiring hotkey state."""
         pass
 
-    def fromevent(self, event) -> bool | tuple | None:
+    def fromevent(self, event) -> Union[bool, tuple, None]:
         """
         Return configuration (keycode, modifiers) or None=clear or False=retain previous.
 

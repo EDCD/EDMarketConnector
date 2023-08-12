@@ -1,13 +1,17 @@
-"""Darwin/macOS implementation of AbstractConfig."""
+"""
+darwin.py - Darwin/macOS implementation of AbstractConfig.
+
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
+"""
 import pathlib
 import sys
 from typing import Any, Dict, List, Union
-
 from Foundation import (  # type: ignore
     NSApplicationSupportDirectory, NSBundle, NSDocumentDirectory, NSSearchPathForDirectoriesInDomains, NSUserDefaults,
     NSUserDomainMask
 )
-
 from config import AbstractConfig, appname, logger
 
 assert sys.platform == 'darwin'

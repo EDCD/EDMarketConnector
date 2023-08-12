@@ -1,5 +1,12 @@
-#!/usr/bin/env python3
-"""Localization with gettext is a pain on non-Unix systems. Use OSX-style strings files instead."""
+"""
+l10n.py - Localize using OSX-Style Strings.
+
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
+
+Localization with gettext is a pain on non-Unix systems.
+"""
 import builtins
 import locale
 import numbers
@@ -28,11 +35,9 @@ except Exception:
 
 logger = get_main_logger()
 
-
 # Language name
 LANGUAGE_ID = '!Language'
 LOCALISATION_DIR = 'L10n'
-
 
 if sys.platform == 'darwin':
     from Foundation import (  # type: ignore # exists on Darwin
@@ -305,7 +310,17 @@ class _Locale:
 
         return None
 
-    def preferred_languages(self) -> Iterable[str]:  # noqa: CCR001
+    def wszarray_to_list(self, array):
+        offset = 0
+        while offset < len(array):
+            sz = ctypes.wstring_at(ctypes.addressof(array) + offset * 2)
+            if sz:
+                yield sz
+                offset += len(sz) + 1
+            else:
+                break
+
+    def preferred_languages(self) -> Iterable[str]:
         """
         Return a list of preferred language codes.
 
@@ -316,39 +331,23 @@ class _Locale:
 
         :return: The preferred language list
         """
-        languages: Iterable[str]
+        languages = []
         if sys.platform == 'darwin':
             languages = NSLocale.preferredLanguages()
-
         elif sys.platform != 'win32':
-            # POSIX
             lang = locale.getlocale()[0]
             languages = [lang.replace('_', '-')] if lang else []
-
         else:
-            def wszarray_to_list(array):
-                offset = 0
-                while offset < len(array):
-                    sz = ctypes.wstring_at(ctypes.addressof(array) + offset*2)
-                    if sz:
-                        yield sz
-                        offset += len(sz)+1
-
-                    else:
-                        break
-
             num = ctypes.c_ulong()
             size = ctypes.c_ulong(0)
-            languages = []
             if GetUserPreferredUILanguages(
-                    MUI_LANGUAGE_NAME, ctypes.byref(num), None, ctypes.byref(size)
+                MUI_LANGUAGE_NAME, ctypes.byref(num), None, ctypes.byref(size)
             ) and size.value:
                 buf = ctypes.create_unicode_buffer(size.value)
-
                 if GetUserPreferredUILanguages(
-                        MUI_LANGUAGE_NAME, ctypes.byref(num), ctypes.byref(buf), ctypes.byref(size)
+                    MUI_LANGUAGE_NAME, ctypes.byref(num), ctypes.byref(buf), ctypes.byref(size)
                 ):
-                    languages = wszarray_to_list(buf)
+                    languages = self.wszarray_to_list(buf)
 
         # HACK: <n/a> | 2021-12-11: OneSky calls "Chinese Simplified" "zh-Hans"
         #    in the name of the file, but that will be zh-CN in terms of
@@ -368,10 +367,11 @@ Translations = _Translations()
 if __name__ == "__main__":
     regexp = re.compile(r'''_\([ur]?(['"])(((?<!\\)\\\1|.)+?)\1\)[^#]*(#.+)?''')  # match a single line python literal
     seen: Dict[str, str] = {}
-    for f in (
+    python_files = (
         sorted(x for x in os.listdir('.') if x.endswith('.py')) +
         sorted(join('plugins', x) for x in (os.listdir('plugins') if isdir('plugins') else []) if x.endswith('.py'))
-    ):
+    )
+    for f in python_files:
         with open(f, encoding='utf-8') as h:
             lineno = 0
             for line in h:

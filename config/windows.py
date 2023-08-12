@@ -1,4 +1,10 @@
-"""Windows config implementation."""
+"""
+windows.py - Windows config implementation.
+
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
+"""
 import ctypes
 import functools
 import pathlib
@@ -7,7 +13,6 @@ import uuid
 import winreg
 from ctypes.wintypes import DWORD, HANDLE
 from typing import List, Literal, Optional, Union
-
 from config import AbstractConfig, applongname, appname, logger, update_interval
 
 assert sys.platform == 'win32'
@@ -42,7 +47,7 @@ class WinConfig(AbstractConfig):
 
     def __init__(self, do_winsparkle=True) -> None:
         super().__init__()
-        self.app_dir_path = pathlib.Path(str(known_folder_path(FOLDERID_LocalAppData))) / appname
+        self.app_dir_path = pathlib.Path(known_folder_path(FOLDERID_LocalAppData)) / appname
         self.app_dir_path.mkdir(exist_ok=True)
 
         self.plugin_dir_path = self.app_dir_path / 'plugins'
@@ -51,19 +56,17 @@ class WinConfig(AbstractConfig):
         if getattr(sys, 'frozen', False):
             self.respath_path = pathlib.Path(sys.executable).parent
             self.internal_plugin_dir_path = self.respath_path / 'plugins'
-
         else:
             self.respath_path = pathlib.Path(__file__).parent.parent
             self.internal_plugin_dir_path = self.respath_path / 'plugins'
 
         self.home_path = pathlib.Path.home()
 
-        journal_dir_str = known_folder_path(FOLDERID_SavedGames)
-        journaldir = pathlib.Path(journal_dir_str) if journal_dir_str is not None else None
-        self.default_journal_dir_path = None  # type: ignore
-        if journaldir is not None:
-            self.default_journal_dir_path = journaldir / 'Frontier Developments' / 'Elite Dangerous'
+        journal_dir_path = pathlib.Path(
+            known_folder_path(FOLDERID_SavedGames)) / 'Frontier Developments' / 'Elite Dangerous'
+        self.default_journal_dir_path = journal_dir_path if journal_dir_path.is_dir() else None
 
+        REGISTRY_SUBKEY = r'Software\Marginal\EDMarketConnector'
         create_key_defaults = functools.partial(
             winreg.CreateKeyEx,
             key=winreg.HKEY_CURRENT_USER,
@@ -71,20 +74,21 @@ class WinConfig(AbstractConfig):
         )
 
         try:
-            self.__reg_handle: winreg.HKEYType = create_key_defaults(
-                sub_key=r'Software\Marginal\EDMarketConnector'
-            )
+            self.__reg_handle: winreg.HKEYType = create_key_defaults(sub_key=REGISTRY_SUBKEY)
             if do_winsparkle:
                 self.__setup_winsparkle()
 
         except OSError:
-            logger.exception('could not create required registry keys')
+            logger.exception('Could not create required registry keys')
             raise
 
         self.identifier = applongname
-        if (outdir_str := self.get_str('outdir')) is None or not pathlib.Path(outdir_str).is_dir():
-            docs = known_folder_path(FOLDERID_Documents)
-            self.set('outdir',  docs if docs is not None else self.home)
+        outdir_str = self.get_str('outdir')
+        docs_path = known_folder_path(FOLDERID_Documents)
+        self.set(
+            'outdir',
+            docs_path if docs_path is not None and pathlib.Path(outdir_str).is_dir() else self.home
+        )
 
     def __setup_winsparkle(self):
         """Ensure the necessary Registry keys for WinSparkle are present."""
@@ -93,30 +97,28 @@ class WinConfig(AbstractConfig):
             key=winreg.HKEY_CURRENT_USER,
             access=winreg.KEY_ALL_ACCESS | winreg.KEY_WOW64_64KEY,
         )
-        try:
-            edcd_handle: winreg.HKEYType = create_key_defaults(sub_key=r'Software\EDCD\EDMarketConnector')
-            winsparkle_reg: winreg.HKEYType = winreg.CreateKeyEx(
-                edcd_handle, sub_key='WinSparkle', access=winreg.KEY_ALL_ACCESS | winreg.KEY_WOW64_64KEY
-            )
 
+        try:
+            with create_key_defaults(sub_key=r'Software\EDCD\EDMarketConnector') as edcd_handle:
+                with winreg.CreateKeyEx(edcd_handle, sub_key='WinSparkle',
+                                        access=winreg.KEY_ALL_ACCESS | winreg.KEY_WOW64_64KEY) as winsparkle_reg:
+                    # Set WinSparkle defaults - https://github.com/vslavik/winsparkle/wiki/Registry-Settings
+                    UPDATE_INTERVAL_NAME = 'UpdateInterval'
+                    CHECK_FOR_UPDATES_NAME = 'CheckForUpdates'
+                    REG_SZ = winreg.REG_SZ
+
+                    winreg.SetValueEx(winsparkle_reg, UPDATE_INTERVAL_NAME, REG_RESERVED_ALWAYS_ZERO, REG_SZ,
+                                      str(update_interval))
+
+                    try:
+                        winreg.QueryValueEx(winsparkle_reg, CHECK_FOR_UPDATES_NAME)
+                    except FileNotFoundError:
+                        # Key doesn't exist, set it to a default
+                        winreg.SetValueEx(winsparkle_reg, CHECK_FOR_UPDATES_NAME, REG_RESERVED_ALWAYS_ZERO, REG_SZ,
+                                          '1')
         except OSError:
-            logger.exception('could not open WinSparkle handle')
+            logger.exception('Could not open WinSparkle handle')
             raise
-
-        # set WinSparkle defaults - https://github.com/vslavik/winsparkle/wiki/Registry-Settings
-        winreg.SetValueEx(
-            winsparkle_reg, 'UpdateInterval', REG_RESERVED_ALWAYS_ZERO, winreg.REG_SZ, str(update_interval)
-        )
-
-        try:
-            winreg.QueryValueEx(winsparkle_reg, 'CheckForUpdates')
-
-        except FileNotFoundError:
-            # Key doesn't exist, set it to a default
-            winreg.SetValueEx(winsparkle_reg, 'CheckForUpdates', REG_RESERVED_ALWAYS_ZERO, winreg.REG_SZ, '1')
-
-        winsparkle_reg.Close()
-        edcd_handle.Close()
 
     def __get_regentry(self, key: str) -> Union[None, list, str, int]:
         """Access the Registry for the raw entry."""
@@ -126,8 +128,6 @@ class WinConfig(AbstractConfig):
             # Key doesn't exist
             return None
 
-        # The type returned is actually as we'd expect for each of these. The casts are here for type checkers and
-        # For programmers who want to actually know what is going on
         if _type == winreg.REG_SZ:
             return str(value)
 
@@ -137,7 +137,7 @@ class WinConfig(AbstractConfig):
         if _type == winreg.REG_MULTI_SZ:
             return list(value)
 
-        logger.warning(f'registry key {key=} returned unknown type {_type=} {value=}')
+        logger.warning(f'Registry key {key=} returned unknown type {_type=} {value=}')
         return None
 
     def get_str(self, key: str, *, default: Optional[str] = None) -> str:
@@ -207,23 +207,22 @@ class WinConfig(AbstractConfig):
         reg_type: Union[Literal[1], Literal[4], Literal[7]]
         if isinstance(val, str):
             reg_type = winreg.REG_SZ
-            winreg.SetValueEx(self.__reg_handle, key, REG_RESERVED_ALWAYS_ZERO, winreg.REG_SZ, val)
+            winreg.SetValueEx(self.__reg_handle, key, REG_RESERVED_ALWAYS_ZERO, reg_type, val)
 
-        elif isinstance(val, int):  # The original code checked for numbers.Integral, I don't think that is needed.
+        elif isinstance(val, int):
             reg_type = winreg.REG_DWORD
+            winreg.SetValueEx(self.__reg_handle, key, REG_RESERVED_ALWAYS_ZERO, reg_type, int(val))
 
         elif isinstance(val, list):
             reg_type = winreg.REG_MULTI_SZ
+            winreg.SetValueEx(self.__reg_handle, key, REG_RESERVED_ALWAYS_ZERO, reg_type, val)
 
         elif isinstance(val, bool):
             reg_type = winreg.REG_DWORD
-            val = int(val)
+            winreg.SetValueEx(self.__reg_handle, key, REG_RESERVED_ALWAYS_ZERO, reg_type, int(val))
 
         else:
             raise ValueError(f'Unexpected type for value {type(val)=}')
-
-        # Its complaining about the list, it works, tested on windows, ignored.
-        winreg.SetValueEx(self.__reg_handle, key, REG_RESERVED_ALWAYS_ZERO, reg_type, val)  # type: ignore
 
     def delete(self, key: str, *, suppress=False) -> None:
         """

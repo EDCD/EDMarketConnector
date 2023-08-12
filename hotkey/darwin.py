@@ -1,20 +1,25 @@
-"""darwin/macOS implementation of hotkey.AbstractHotkeyMgr."""
+"""
+darwin.py - darwin/macOS implementation of hotkey.AbstractHotkeyMgr.
+
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
+"""
 import pathlib
 import sys
 import tkinter as tk
 from typing import Callable, Optional, Tuple, Union
-assert sys.platform == 'darwin'
-
 import objc
 from AppKit import (
     NSAlternateKeyMask, NSApplication, NSBeep, NSClearLineFunctionKey, NSCommandKeyMask, NSControlKeyMask,
     NSDeleteFunctionKey, NSDeviceIndependentModifierFlagsMask, NSEvent, NSF1FunctionKey, NSF35FunctionKey,
     NSFlagsChanged, NSKeyDown, NSKeyDownMask, NSKeyUp, NSNumericPadKeyMask, NSShiftKeyMask, NSSound, NSWorkspace
 )
-
 from config import config
 from EDMCLogging import get_main_logger
 from hotkey import AbstractHotkeyMgr
+
+assert sys.platform == 'darwin'
 
 logger = get_main_logger()
 
@@ -39,17 +44,13 @@ class MacHotkeyMgr(AbstractHotkeyMgr):
         self.MODIFIERMASK = NSShiftKeyMask | NSControlKeyMask | NSAlternateKeyMask | NSCommandKeyMask \
             | NSNumericPadKeyMask
         self.root: tk.Tk
-
         self.keycode = 0
         self.modifiers = 0
         self.activated = False
         self.observer = None
-
         self.acquire_key = 0
         self.acquire_state = MacHotkeyMgr.ACQUIRE_INACTIVE
-
         self.tkProcessKeyEvent_old: Callable
-
         self.snd_good = NSSound.alloc().initWithContentsOfFile_byReference_(
             pathlib.Path(config.respath_path) / 'snd_good.wav', False
         )
@@ -139,7 +140,6 @@ class MacHotkeyMgr(AbstractHotkeyMgr):
     def _poll(self):
         if config.shutting_down:
             return
-
         # No way of signalling to Tkinter from within the callback handler block that doesn't
         # cause Python to crash, so poll.
         if self.activated:

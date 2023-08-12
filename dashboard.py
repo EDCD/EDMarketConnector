@@ -1,15 +1,20 @@
-"""Handle the game Status.json file."""
+"""
+dashboard.py - Handle the game Status.json file.
+
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
+"""
 import json
-import pathlib
+import os
 import sys
 import time
 import tkinter as tk
 from calendar import timegm
-from os.path import getsize, isdir, isfile
+from os.path import getsize, isfile
+from pathlib import Path
 from typing import Any, Dict, Optional, cast
-
 from watchdog.observers.api import BaseObserver
-
 from config import config
 from EDMCLogging import get_main_logger
 
@@ -53,10 +58,8 @@ class Dashboard(FileSystemEventHandler):
         self.session_start = started
 
         logdir = config.get_str('journaldir', default=config.default_journal_dir)
-        if logdir == '':
-            logdir = config.default_journal_dir
-
-        if not logdir or not isdir(logdir):
+        logdir = logdir or config.default_journal_dir
+        if not os.path.isdir(logdir):
             logger.info(f"No logdir, or it isn't a directory: {logdir=}")
             self.stop()
             return False
@@ -176,23 +179,19 @@ class Dashboard(FileSystemEventHandler):
         if config.shutting_down:
             return
 
-        try:
-            with (pathlib.Path(self.currentdir) / 'Status.json').open('rb') as h:
-                data = h.read().strip()
-
-                if data:  # Can be empty if polling while the file is being re-written
-                    entry = json.loads(data)
-
-                    # Status file is shared between beta and live. So filter out status not in this game session.
-                    if (
-                            timegm(time.strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ')) >= self.session_start
-                            and self.status != entry
-                    ):
-                        self.status = entry
-                        self.root.event_generate('<<DashboardEvent>>', when="tail")
-
-        except Exception:
-            logger.exception('Processing Status.json')
+        status_path = Path(self.currentdir) / 'Status.json'
+        if status_path.is_file():
+            try:
+                with status_path.open('rb') as h:
+                    data = h.read().strip()
+                    if data:
+                        entry = json.loads(data)
+                        timestamp = entry.get('timestamp')
+                        if timestamp and timegm(time.strptime(timestamp, '%Y-%m-%dT%H:%M:%SZ')) >= self.session_start:
+                            self.status = entry
+                            self.root.event_generate('<<DashboardEvent>>', when="tail")
+            except Exception:
+                logger.exception('Processing Status.json')
 
 
 # singleton

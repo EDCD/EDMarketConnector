@@ -1,4 +1,10 @@
-"""Windows implementation of hotkey.AbstractHotkeyMgr."""
+"""
+Windows.py - Windows implementation of hotkey.AbstractHotkeyMgr.
+
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
+"""
 import atexit
 import ctypes
 import pathlib
@@ -8,7 +14,6 @@ import tkinter as tk
 import winsound
 from ctypes.wintypes import DWORD, HWND, LONG, LPWSTR, MSG, ULONG, WORD
 from typing import Optional, Tuple, Union
-
 from config import config
 from EDMCLogging import get_main_logger
 from hotkey import AbstractHotkeyMgr
@@ -75,10 +80,9 @@ def window_title(h) -> str:
     """
     if h:
         title_length = GetWindowTextLength(h) + 1
-        buf = ctypes.create_unicode_buffer(title_length)
-        if GetWindowText(h, buf, title_length):
-            return buf.value
-
+        with ctypes.create_unicode_buffer(title_length) as buf:
+            if GetWindowText(h, buf, title_length):
+                return buf.value
     return ''
 
 
