@@ -66,7 +66,7 @@ class WinConfig(AbstractConfig):
             known_folder_path(FOLDERID_SavedGames)) / 'Frontier Developments' / 'Elite Dangerous'
         self.default_journal_dir_path = journal_dir_path if journal_dir_path.is_dir() else None
 
-        REGISTRY_SUBKEY = r'Software\Marginal\EDMarketConnector'
+        REGISTRY_SUBKEY = r'Software\Marginal\EDMarketConnector'  # noqa: N806
         create_key_defaults = functools.partial(
             winreg.CreateKeyEx,
             key=winreg.HKEY_CURRENT_USER,
@@ -103,9 +103,9 @@ class WinConfig(AbstractConfig):
                 with winreg.CreateKeyEx(edcd_handle, sub_key='WinSparkle',
                                         access=winreg.KEY_ALL_ACCESS | winreg.KEY_WOW64_64KEY) as winsparkle_reg:
                     # Set WinSparkle defaults - https://github.com/vslavik/winsparkle/wiki/Registry-Settings
-                    UPDATE_INTERVAL_NAME = 'UpdateInterval'
-                    CHECK_FOR_UPDATES_NAME = 'CheckForUpdates'
-                    REG_SZ = winreg.REG_SZ
+                    UPDATE_INTERVAL_NAME = 'UpdateInterval'  # noqa: N806
+                    CHECK_FOR_UPDATES_NAME = 'CheckForUpdates'  # noqa: N806
+                    REG_SZ = winreg.REG_SZ  # noqa: N806
 
                     winreg.SetValueEx(winsparkle_reg, UPDATE_INTERVAL_NAME, REG_RESERVED_ALWAYS_ZERO, REG_SZ,
                                       str(update_interval))

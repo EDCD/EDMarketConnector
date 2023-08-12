@@ -1281,7 +1281,7 @@ def fixup(data: CAPIData) -> CAPIData:  # noqa: C901, CCR001 # Can't be usefully
     return datacopy
 
 
-def ship(data: CAPIData) -> CAPIData:
+def ship(data: CAPIData) -> CAPIData:  # noqa: CCR001
     """
     Construct a subset of the received data describing the current ship.
 
@@ -1307,7 +1307,7 @@ def ship(data: CAPIData) -> CAPIData:
                 continue  # Skip empty fields for brevity
 
             if k in ('alive', 'cargo', 'cockpitBreached', 'health', 'oxygenRemaining',
-                       'rebuilds', 'starsystem', 'station'):
+                     'rebuilds', 'starsystem', 'station'):
                 continue  # Noisy fields
 
             if k in ('locDescription', 'locName') or k.endswith('LocDescription') or k.endswith('LocName'):
