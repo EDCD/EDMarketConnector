@@ -3,28 +3,28 @@
 import pickle
 from collections import OrderedDict
 from os.path import join
-from typing import Optional
-from typing import OrderedDict as OrderedDictT
-
+from typing import Optional, OrderedDict as OrderedDictT
 from config import config
-from edmc_data import outfitting_armour_map as armour_map
-from edmc_data import outfitting_cabin_map as cabin_map
-from edmc_data import outfitting_corrosion_rating_map as corrosion_rating_map
-from edmc_data import outfitting_countermeasure_map as countermeasure_map
-from edmc_data import outfitting_fighter_rating_map as fighter_rating_map
-from edmc_data import outfitting_internal_map as internal_map
-from edmc_data import outfitting_misc_internal_map as misc_internal_map
-from edmc_data import outfitting_missiletype_map as missiletype_map
-from edmc_data import outfitting_planet_rating_map as planet_rating_map
-from edmc_data import outfitting_rating_map as rating_map
-from edmc_data import outfitting_standard_map as standard_map
-from edmc_data import outfitting_utility_map as utility_map
-from edmc_data import outfitting_weapon_map as weapon_map
-from edmc_data import outfitting_weaponclass_map as weaponclass_map
-from edmc_data import outfitting_weaponmount_map as weaponmount_map
-from edmc_data import outfitting_weaponoldvariant_map as weaponoldvariant_map
-from edmc_data import outfitting_weaponrating_map as weaponrating_map
-from edmc_data import ship_name_map
+from edmc_data import (
+    outfitting_armour_map as armour_map,
+    outfitting_cabin_map as cabin_map,
+    outfitting_corrosion_rating_map as corrosion_rating_map,
+    outfitting_countermeasure_map as countermeasure_map,
+    outfitting_fighter_rating_map as fighter_rating_map,
+    outfitting_internal_map as internal_map,
+    outfitting_misc_internal_map as misc_internal_map,
+    outfitting_missiletype_map as missiletype_map,
+    outfitting_planet_rating_map as planet_rating_map,
+    outfitting_rating_map as rating_map,
+    outfitting_standard_map as standard_map,
+    outfitting_utility_map as utility_map,
+    outfitting_weapon_map as weapon_map,
+    outfitting_weaponclass_map as weaponclass_map,
+    outfitting_weaponmount_map as weaponmount_map,
+    outfitting_weaponoldvariant_map as weaponoldvariant_map,
+    outfitting_weaponrating_map as weaponrating_map,
+    ship_name_map,
+)
 from EDMCLogging import get_main_logger
 
 logger = get_main_logger()
@@ -51,28 +51,30 @@ def lookup(module, ship_map, entitled=False) -> Optional[dict]:  # noqa: C901, C
     """
     # Lazily populate
     if not moduledata:
-        with open(join(config.respath_path, "modules.p"), "rb") as file:
+        modules_file_path = join(config.respath_path, "modules.p")
+        with open(modules_file_path, "rb") as file:
             moduledata.update(pickle.load(file))
 
     if not module.get("name"):
-        raise AssertionError(f'{module["id"]}')
+        raise AssertionError(f'Missing name for module id: {module["id"]}')
 
     name = module["name"].lower().split("_")
     new = {"id": module["id"], "symbol": module["name"]}
 
     # Armour - e.g. Federation_Dropship_Armour_Grade2
     if name[-2] == "armour":
-        name = (
-            module["name"].lower().rsplit("_", 2)
-        )  # Armour is ship-specific, and ship names can have underscores
+        # Armour is ship-specific, and ship names can have underscores
+        ship_name, armour_grade = module["name"].lower().rsplit("_", 2)[0:2]
+        if ship_name not in ship_map:
+            raise AssertionError(f"Unknown ship: {ship_name}")
         new["category"] = "standard"
-        new["name"] = armour_map[name[2]]
-        new["ship"] = ship_map[name[0]]  # Generate error on unknown ship
+        new["name"] = armour_map[armour_grade]
+        new["ship"] = ship_map[ship_name]
         new["class"] = "1"
         new["rating"] = "I"
 
     # Skip uninteresting stuff - some no longer present in ED 3.1 cAPI data
-    elif name[0] in [
+    if name[0] in {
         "bobble",
         "decal",
         "nameplate",
@@ -80,42 +82,41 @@ def lookup(module, ship_map, entitled=False) -> Optional[dict]:  # noqa: C901, C
         "enginecustomisation",
         "voicepack",
         "weaponcustomisation",
-    ] or name[1].startswith("shipkit"):
+    } or name[1].startswith("shipkit"):
         return None
 
     # Shouldn't be listing player-specific paid stuff or broker/powerplay-specific modules in outfitting,
     # other than Horizons
-    elif (
-        not entitled
-        and module.get("sku")
-        and module["sku"] != "ELITE_HORIZONS_V_PLANETARY_LANDINGS"
-    ):
+    if not entitled and module.get("sku") != "ELITE_HORIZONS_V_PLANETARY_LANDINGS":
         return None
 
-    # Don't report Planetary Approach Suite in outfitting
-    elif not entitled and name[1] == "planetapproachsuite":
+    if not entitled and name[1] == "planetapproachsuite":
         return None
 
-    # Countermeasures - e.g. Hpt_PlasmaPointDefence_Turret_Tiny
-    elif name[0] == "hpt" and name[1] in countermeasure_map:
-        new["category"] = "utility"
-        new["name"], new["rating"] = countermeasure_map[name[1]]
-        new["class"] = weaponclass_map[name[-1]]
+    if name[0] == "hpt":
+        # Countermeasures - e.g. Hpt_PlasmaPointDefence_Turret_Tiny
+        if name[1] in countermeasure_map:
+            new["category"] = "utility"
+            new["name"], new["rating"] = countermeasure_map[name[1]]
+            new["class"] = weaponclass_map[name[-1]]
+        # Utility - e.g. Hpt_CargoScanner_Size0_Class1
+        elif name[1] in utility_map:
+            new["category"] = "utility"
+            new["name"] = utility_map[name[1]]
+            class_info = name[2].split("_", 1)
+            if (
+                len(class_info) != 2
+                or not class_info[0].startswith("size")
+                or not class_info[1].startswith("class")
+            ):
+                raise AssertionError(
+                    f'{module["id"]}: Unknown class/rating "{class_info[0]}/{class_info[1]}"'
+                )
 
-    # Utility - e.g. Hpt_CargoScanner_Size0_Class1
-    elif name[0] == "hpt" and name[1] in utility_map:
-        new["category"] = "utility"
-        new["name"] = utility_map[name[1]]
-        if not name[2].startswith("size") or not name[3].startswith("class"):
-            raise AssertionError(
-                f'{module["id"]}: Unknown class/rating "{name[2]}/{name[3]}"'
-            )
+            new["class"] = class_info[0][4:]
+            new["rating"] = rating_map[class_info[1][5:]]
 
-        new["class"] = str(name[2][4:])
-        new["rating"] = rating_map[name[3][5:]]
-
-    # Hardpoints - e.g. Hpt_Slugshot_Fixed_Medium
-    elif name[0] == "hpt":
+    if name[0] == "hpt":
         # Hack 'Guardian' and 'Mining' prefixes
         if len(name) > 3 and name[3] in weaponmount_map:
             prefix = name.pop(1)
@@ -132,34 +133,27 @@ def lookup(module, ship_map, entitled=False) -> Optional[dict]:  # noqa: C901, C
 
         new["category"] = "hardpoint"
         if len(name) > 4:
-            if (
-                name[4] in weaponoldvariant_map
-            ):  # Old variants e.g. Hpt_PulseLaserBurst_Turret_Large_OC
+            if name[4] in weaponoldvariant_map:
+                # Old variants e.g. Hpt_PulseLaserBurst_Turret_Large_OC
                 new["name"] = weapon_map[name[1]] + " " + weaponoldvariant_map[name[4]]
                 new["rating"] = "?"
-
             elif "_".join(name[:4]) not in weaponrating_map:
                 raise AssertionError(
                     f'{module["id"]}: Unknown weapon rating "{module["name"]}"'
                 )
-
             else:
                 # PP faction-specific weapons e.g. Hpt_Slugshot_Fixed_Large_Range
                 new["name"] = weapon_map[(name[1], name[4])]
-                new["rating"] = weaponrating_map[
-                    "_".join(name[:4])
-                ]  # assumes same rating as base weapon
-
+                new["rating"] = weaponrating_map["_".join(name[:4])]
+                # Assumes same rating as base weapon
         elif module["name"].lower() not in weaponrating_map:
             raise AssertionError(
                 f'{module["id"]}: Unknown weapon rating "{module["name"]}"'
             )
-
         else:
             new["name"] = weapon_map[name[1]]
-            new["rating"] = weaponrating_map[
-                module["name"].lower()
-            ]  # no obvious rule - needs lookup table
+            new["rating"] = weaponrating_map[module["name"].lower()]
+            # No obvious rule - needs lookup table
 
         new["mount"] = weaponmount_map[name[2]]
         if name[1] in missiletype_map:
@@ -168,12 +162,12 @@ def lookup(module, ship_map, entitled=False) -> Optional[dict]:  # noqa: C901, C
 
         new["class"] = weaponclass_map[name[3]]
 
-    elif name[0] != "int":
+    if name[0] != "int":
         raise AssertionError(f'{module["id"]}: Unknown prefix "{name[0]}"')
 
     # Miscellaneous Class 1
     # e.g. Int_PlanetApproachSuite, Int_StellarBodyDiscoveryScanner_Advanced, Int_DockingComputer_Standard
-    elif name[1] in misc_internal_map:
+    if name[1] in misc_internal_map:
         new["category"] = "internal"
         new["name"], new["rating"] = misc_internal_map[name[1]]
         new["class"] = "1"
@@ -184,71 +178,65 @@ def lookup(module, ship_map, entitled=False) -> Optional[dict]:  # noqa: C901, C
         new["name"], new["rating"] = misc_internal_map[(name[1], name[2])]
         new["class"] = "1"
 
+    # Standard & Internal
+    if name[1] == "dronecontrol":  # e.g. Int_DroneControl_Collection_Size1_Class1
+        name.pop(0)
+
+    elif (
+        name[-1] == "free"
+    ):  # Starter Sidewinder or Freagle modules - treat them like vanilla modules
+        name.pop()
+
+    if (
+        name[1] in standard_map
+    ):  # e.g. Int_Engine_Size2_Class1, Int_ShieldGenerator_Size8_Class5_Strong
+        new["category"] = "standard"
+        new["name"] = standard_map[len(name) > 4 and (name[1], name[4]) or name[1]]
+
+    elif name[1] in internal_map:  # e.g. Int_CargoRack_Size8_Class1
+        new["category"] = "internal"
+        if name[1] == "passengercabin":
+            new["name"] = cabin_map[name[3][5:]]
+
+        else:
+            new["name"] = internal_map[len(name) > 4 and (name[1], name[4]) or name[1]]
     else:
-        # Standard & Internal
-        if name[1] == "dronecontrol":  # e.g. Int_DroneControl_Collection_Size1_Class1
-            name.pop(0)
+        raise AssertionError(f'{module["id"]}: Unknown module "{name[1]}"')
 
-        elif (
-            name[-1] == "free"
-        ):  # Starter Sidewinder or Freagle modules - just treat them like vanilla modules
-            name.pop()
+    if len(name) < 4 and name[1] == "unkvesselresearch":  # Hack! No size or class.
+        new["class"], new["rating"] = "1", "E"
 
-        if (
-            name[1] in standard_map
-        ):  # e.g. Int_Engine_Size2_Class1, Int_ShieldGenerator_Size8_Class5_Strong
-            new["category"] = "standard"
-            new["name"] = standard_map[len(name) > 4 and (name[1], name[4]) or name[1]]
+    elif (
+        len(name) < 4 and name[1] == "resourcesiphon"
+    ):  # Hack! 128066402 has no size or class.
+        new["class"], new["rating"] = "1", "I"
 
-        elif name[1] in internal_map:  # e.g. Int_CargoRack_Size8_Class1
-            new["category"] = "internal"
-            if name[1] == "passengercabin":
-                new["name"] = cabin_map[name[3][5:]]
+    elif len(name) < 4 and name[1] in [
+        "guardianpowerdistributor",
+        "guardianpowerplant",
+    ]:  # Hack! No class.
+        new["class"], new["rating"] = str(name[2][4:]), "A"
 
-            else:
-                new["name"] = internal_map[
-                    len(name) > 4 and (name[1], name[4]) or name[1]
-                ]
+    elif len(name) < 4 and name[1] in ["guardianfsdbooster"]:  # Hack! No class.
+        new["class"], new["rating"] = str(name[2][4:]), "H"
 
-        else:
-            raise AssertionError(f'{module["id"]}: Unknown module "{name[1]}"')
-
-        if len(name) < 4 and name[1] == "unkvesselresearch":  # Hack! No size or class.
-            (new["class"], new["rating"]) = ("1", "E")
-
-        elif (
-            len(name) < 4 and name[1] == "resourcesiphon"
-        ):  # Hack! 128066402 has no size or class.
-            (new["class"], new["rating"]) = ("1", "I")
-
-        elif len(name) < 4 and name[1] in [
-            "guardianpowerdistributor",
-            "guardianpowerplant",
-        ]:  # Hack! No class.
-            (new["class"], new["rating"]) = (str(name[2][4:]), "A")
-
-        elif len(name) < 4 and name[1] in ["guardianfsdbooster"]:  # Hack! No class.
-            (new["class"], new["rating"]) = (str(name[2][4:]), "H")
-
-        else:
-            if len(name) < 3:
-                raise AssertionError(f"{name}: length < 3]")
-
-            if not name[2].startswith("size") or not name[3].startswith("class"):
-                raise AssertionError(
-                    f'{module["id"]}: Unknown class/rating "{name[2]}/{name[3]}"'
-                )
-
-            new["class"] = str(name[2][4:])
-            new["rating"] = (
-                name[1] == "buggybay"
-                and planet_rating_map
-                or name[1] == "fighterbay"
-                and fighter_rating_map
-                or name[1] == "corrosionproofcargorack"
-                and corrosion_rating_map
-                or rating_map
-            )[name[3][5:]]
+    else:
+        if len(name) < 3:
+            raise AssertionError(f"{name}: length < 3]")
+        if not name[2].startswith("size") or not name[3].startswith("class"):
+            raise AssertionError(
+                f'{module["id"]}: Unknown class/rating "{name[2]}/{name[3]}"'
+            )
+        new["class"] = str(name[2][4:])
+        new["rating"] = (
+            planet_rating_map
+            if name[1] == "buggybay"
+            else fighter_rating_map
+            if name[1] == "fighterbay"
+            else corrosion_rating_map
+            if name[1] == "corrosionproofcargorack"
+            else rating_map
+        )[name[3][5:]]
 
     # Disposition of fitted modules
     if "on" in module and "priority" in module:
@@ -258,18 +246,14 @@ def lookup(module, ship_map, entitled=False) -> Optional[dict]:  # noqa: C901, C
         )  # priority is zero-based
 
     # Entitlements
-    if not module.get("sku"):
-        pass
-
-    else:
+    if module.get("sku"):
         new["entitlement"] = module["sku"]
 
     # Extra module data
     if module["name"].endswith("_free"):
         key = module["name"][
             :-5
-        ].lower()  # starter modules - treated like vanilla modules
-
+        ].lower()  # Starter modules - treated like vanilla modules
     else:
         key = module["name"].lower()
 
@@ -277,7 +261,6 @@ def lookup(module, ship_map, entitled=False) -> Optional[dict]:  # noqa: C901, C
         m = moduledata.get(key, {})
         if not m:
             print(f"No data for module {key}")
-
         elif new["name"] == "Frame Shift Drive":
             assert (
                 "mass" in m
@@ -286,23 +269,17 @@ def lookup(module, ship_map, entitled=False) -> Optional[dict]:  # noqa: C901, C
                 and "fuelmul" in m
                 and "fuelpower" in m
             ), m
-
         else:
             assert "mass" in m, m
 
+    # Update additional module data
     new.update(moduledata.get(module["name"].lower(), {}))
 
-    # check we've filled out mandatory fields
-    for thing in [
-        "id",
-        "symbol",
-        "category",
-        "name",
-        "class",
-        "rating",
-    ]:  # Don't consider mass etc as mandatory
-        if not new.get(thing):
-            raise AssertionError(f'{module["id"]}: failed to set {thing}')
+    # Check we've filled out mandatory fields
+    mandatory_fields = ["id", "symbol", "category", "name", "class", "rating"]
+    for field in mandatory_fields:
+        if not new.get(field):
+            raise AssertionError(f'{module["id"]}: failed to set {field}')
 
     if new["category"] == "hardpoint" and not new.get("mount"):
         raise AssertionError(f'{module["id"]}: failed to set mount')
@@ -317,8 +294,8 @@ def export(data, filename) -> None:
     :param data: CAPI data to export.
     :param filename: Filename to export into.
     """
-    assert data["lastSystem"].get("name")
-    assert data["lastStarport"].get("name")
+    assert "name" in data["lastSystem"]
+    assert "name" in data["lastStarport"]
 
     header = (
         "System,Station,Category,Name,Mount,Guidance,Ship,Class,Rating,FDevID,Date\n"
@@ -327,14 +304,14 @@ def export(data, filename) -> None:
 
     with open(filename, "wt") as h:
         h.write(header)
-        for v in list(data["lastStarport"].get("modules", {}).values()):
+        for v in data["lastStarport"].get("modules", {}).values():
             try:
                 m = lookup(v, ship_name_map)
                 if m:
                     h.write(
-                        f'{rowheader}, {m["category"]}, {m["name"]}, {m.get("mount","")},'
-                        f'{m.get("guidance","")}, {m.get("ship","")}, {m["class"]}, {m["rating"]},'
-                        f'{m["id"]}, {data["timestamp"]}\n'
+                        f'{rowheader},{m["category"]},{m["name"]},{m.get("mount","")},'
+                        f'{m.get("guidance","")},{m.get("ship","")},{m["class"]},{m["rating"]},'
+                        f'{m["id"]},{data["timestamp"]}\n'
                     )
 
             except AssertionError as e:
