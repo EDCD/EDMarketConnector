@@ -1,5 +1,10 @@
-"""Export ship loadout in Companion API json format."""
+"""
+prefs.py - Export ship loadout in Companion API json format.
 
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
+"""
 import json
 import os
 import pathlib
@@ -7,7 +12,6 @@ import re
 import time
 from os.path import join
 from typing import Optional
-
 import companion
 import util_ships
 from config import config
@@ -23,6 +27,7 @@ def export(data: companion.CAPIData, requested_filename: Optional[str] = None) -
     :param data: CAPI data containing ship loadout.
     :param requested_filename: Name of file to write to.
     """
+    # Convert ship data to JSON format
     string = json.dumps(
         companion.ship(data),
         cls=companion.CAPIDataEncoder,
@@ -33,10 +38,10 @@ def export(data: companion.CAPIData, requested_filename: Optional[str] = None) -
     )  # pretty print
 
     if requested_filename is not None and requested_filename:
+        # Write JSON data to the requested file
         with open(requested_filename, "wt") as h:
             h.write(string)
         return
-
     if not requested_filename:
         logger.error(f"{requested_filename=} is not valid")
         return
@@ -55,17 +60,12 @@ def export(data: companion.CAPIData, requested_filename: Optional[str] = None) -
                 return  # same as last time - don't write
 
     query_time = config.get_int("querytime", default=int(time.time()))
-
-    # Write
-
-    with open(
-        pathlib.Path(config.get_str("outdir"))
-        / pathlib.Path(
-            ship
-            + "."
-            + time.strftime("%Y-%m-%dT%H.%M.%S", time.localtime(query_time))
-            + ".txt"
-        ),
-        "wt",
-    ) as h:
+    # Write JSON data to the output file
+    output_file = pathlib.Path(config.get_str("outdir")) / pathlib.Path(
+        ship
+        + "."
+        + time.strftime("%Y-%m-%dT%H.%M.%S", time.localtime(query_time))
+        + ".txt"
+    )
+    with open(output_file, "wt") as h:
         h.write(string)

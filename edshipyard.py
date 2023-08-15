@@ -1,7 +1,13 @@
-"""Export ship loadout in ED Shipyard plain text format."""
+"""
+edshipyard.py - Export ship loadout in ED Shipyard plain text format.
+
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
+"""
 import os
 import pathlib
-import pickle
+import json
 import re
 import time
 from collections import defaultdict
@@ -21,10 +27,9 @@ __Module = Dict[str, Union[str, List[str]]]
 ship_map = ship_name_map.copy()
 
 # Ship masses
-# TODO: prefer something other than pickle for this storage (dev readability, security)
-ships_file = pathlib.Path(config.respath_path) / "ships.p"
-with open(ships_file, "rb") as ships_file_handle:
-    ships = pickle.load(ships_file_handle)
+ships_file = pathlib.Path(config.respath_path) / "resources" / "ships.json"
+with open(ships_file, encoding="utf-8") as ships_file_handle:
+    ships = json.load(ships_file_handle)
 
 
 def export(data, filename=None) -> None:  # noqa: C901, CCR001
@@ -51,7 +56,6 @@ def export(data, filename=None) -> None:  # noqa: C901, CCR001
         if "guidance" in module:  # Missiles
             if mod_mount is not None:
                 mount = mod_mount[0]
-
             else:
                 mount = "F"
 
@@ -91,7 +95,6 @@ def export(data, filename=None) -> None:  # noqa: C901, CCR001
                 mass += float(
                     module.get("mass", 0.0) * mods["OutfittingFieldType_Mass"]["value"]
                 )
-
             else:
                 mass += float(module.get("mass", 0.0))  # type: ignore
 
@@ -109,12 +112,10 @@ def export(data, filename=None) -> None:  # noqa: C901, CCR001
 
             if name == "Frame Shift Drive":
                 fsd = module  # save for range calculation
-
                 if mods.get("OutfittingFieldType_FSDOptimalMass"):
                     fsd["optmass"] *= mods["OutfittingFieldType_FSDOptimalMass"][
                         "value"
                     ]
-
                 if mods.get("OutfittingFieldType_MaxFuelPerJump"):
                     fsd["maxfuel"] *= mods["OutfittingFieldType_MaxFuelPerJump"][
                         "value"
@@ -126,11 +127,9 @@ def export(data, filename=None) -> None:  # noqa: C901, CCR001
                 if slot.lower().startswith(slot_prefix):
                     loadout[index].append(cr + name)
                     break
-
             else:
                 if slot.lower().startswith("slot"):
                     loadout[slot[-1]].append(cr + name)
-
                 elif not slot.lower().startswith("planetaryapproachsuite"):
                     logger.debug(f"EDShipyard: Unknown slot {slot}")
 
@@ -144,10 +143,8 @@ def export(data, filename=None) -> None:  # noqa: C901, CCR001
 
     # Construct description
     ship = ship_map.get(data["ship"]["name"].lower(), data["ship"]["name"])
-
     if data["ship"].get("shipName") is not None:
         _ships = f'{ship}, {data["ship"]["shipName"]}'
-
     else:
         _ships = ship
 
@@ -184,7 +181,6 @@ def export(data, filename=None) -> None:  # noqa: C901, CCR001
     for slot in slot_types:
         if not slot:
             string += "\n"
-
         elif slot in loadout:
             for name in loadout[slot]:
                 string += f"{slot}: {name}\n"
@@ -206,15 +202,13 @@ def export(data, filename=None) -> None:  # noqa: C901, CCR001
         multiplier = (
             pow(
                 min(fuel, fsd["maxfuel"]) / fsd["fuelmul"],
-                1.0 / fsd["fuelpower"],  # type: ignore
+                1.0 / fsd["fuelpower"],
             )
             * fsd["optmass"]
-        )  # type: ignore
+        )
 
         range_unladen = multiplier / (mass + fuel) + jumpboost
         range_laden = multiplier / (mass + fuel + cargo) + jumpboost
-        # As of 2021-04-07 edsy.org says text import not yet implemented, so ignore the possible issue with
-        # a locale that uses comma for decimal separator.
         string += f"Range : {range_unladen:.2f} LY unladen\n        {range_laden:.2f} LY laden\n"
 
     except Exception:
@@ -224,7 +218,6 @@ def export(data, filename=None) -> None:  # noqa: C901, CCR001
     if filename:
         with open(filename, "wt") as h:
             h.write(string)
-
         return
 
     # Look for last ship of this type

@@ -66,9 +66,9 @@ if __name__ == "__main__":
     ships = OrderedDict(
         [(k, ships[k]) for k in sorted(ships)]
     )  # Sort for easier diffing
-    ships_file = Path("ships.p")
-    with open(ships_file, "wb") as ships_file_handle:
-        pickle.dump(ships, ships_file_handle)
+    ships_file = Path("resources/ships.json")
+    with open(ships_file, "w") as ships_file_handle:
+        json.dump(ships, ships_file_handle, indent=2)
 
     # Module masses
     for cat in data["Modules"].values():

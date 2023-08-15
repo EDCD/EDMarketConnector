@@ -1,6 +1,10 @@
-# -*- coding: utf-8 -*-
-"""EDMC preferences library."""
+"""
+prefs.py - EDMC preferences library.
 
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
+"""
 import contextlib
 import logging
 import sys
@@ -10,8 +14,7 @@ from os.path import expanduser, expandvars, join, normpath
 from tkinter import colorchooser as tkColorChooser  # type: ignore # noqa: N812
 from tkinter import ttk
 from types import TracebackType
-from typing import TYPE_CHECKING, Any, Callable, Optional, Type, Union
-
+from typing import TYPE_CHECKING, Any, Callable, Optional, Type, Union, Dict
 import myNotebook as nb  # noqa: N813
 import plug
 from config import applongname, appversion_nobuild, config
@@ -47,7 +50,7 @@ class PrefsVersion:
     It allows new defaults to be set as they are added if they are found to be missing
     """
 
-    versions = {
+    VERSIONS: Dict[str, int] = {
         "0.0.0.0": 1,
         "1.0.0.0": 2,
         "3.4.6.0": 3,
@@ -58,62 +61,42 @@ class PrefsVersion:
         "current": 4,
     }
 
-    def __init__(self):
-        return
-
-    def stringToSerial(  # noqa: N802
-        self, versionStr: str  # noqa: N803
-    ) -> int:  # used in plugins
+    def stringToSerial(self, version_str: str) -> int:  # noqa: N802
         """
         Convert a version string into a preferences version serial number.
 
-        If the version string isn't known returns the 'current' (latest) serial number.
+        If the version string isn't known, returns the 'current' (latest) serial number.
 
-        :param versionStr:
-        :return int:
+        :param version_str: The version string to convert
+        :return: The version serial number
         """
-        if versionStr in self.versions:
-            return self.versions[versionStr]
-
-        return self.versions["current"]
+        return self.VERSIONS.get(version_str, self.VERSIONS["current"])
 
     def shouldSetDefaults(  # noqa: N802
-        self, addedAfter: str, oldTest: bool = True  # noqa: N803
-    ) -> bool:  # used in plugins
+        self, added_after: str, old_test: bool = True
+    ) -> bool:
         """
-        Whether or not defaults should be set if they were added after the specified version.
+        Determine whether or not defaults should be set if they were added after the specified version.
 
-        :param addedAfter: The version after which these settings were added
-        :param oldTest: Default, if we have no current settings version, defaults to True
-        :raises ValueError: on serial number after the current latest
-        :return: bool indicating the answer
+        :param added_after: The version after which these settings were added
+        :param old_test: Default, if we have no current settings version, defaults to True
+        :raises ValueError: if added_after is after the current latest version
+        :return: A boolean indicating whether defaults should be set
         """
-        # config.get('PrefsVersion') is the version preferences we last saved for
-        pv = config.get_int("PrefsVersion")
-        # If no PrefsVersion yet exists then return oldTest
-        if not pv:
-            return oldTest
+        current_version = self.VERSIONS["current"]
+        prefs_version = config.get_int("PrefsVersion", default=0)
 
-        # Convert addedAfter to a version serial number
-        if addedAfter not in self.versions:
-            # Assume it was added at the start
-            aa = 1
-
+        if added_after not in self.VERSIONS:
+            added_after_serial = 1
         else:
-            aa = self.versions[addedAfter]
-            # Sanity check, if something was added after then current should be greater
-            if aa >= self.versions["current"]:
+            added_after_serial = self.VERSIONS[added_after]
+            if added_after_serial >= current_version:
                 raise ValueError(
-                    "ERROR: Call to prefs.py:PrefsVersion.shouldSetDefaults() with "
-                    '"addedAfter" >= current latest in "versions" table.'
-                    '  You probably need to increase "current" serial number.'
+                    "ERROR: Call to PrefsVersion.shouldSetDefaults() with 'addedAfter'"
+                    " >= current latest in 'VERSIONS' table."
                 )
 
-        # If this preference was added after the saved PrefsVersion we should set defaults
-        if aa >= pv:
-            return True
-
-        return False
+        return added_after_serial >= prefs_version
 
 
 prefsVersion = PrefsVersion()  # noqa: N816 # Cannot rename as used in plugins
@@ -121,7 +104,7 @@ prefsVersion = PrefsVersion()  # noqa: N816 # Cannot rename as used in plugins
 
 class AutoInc(contextlib.AbstractContextManager):
     """
-    Autoinc is a self incrementing int.
+    Autoinc is a self-incrementing integer.
 
     As a context manager, it increments on enter, and does nothing on exit.
     """
@@ -130,7 +113,7 @@ class AutoInc(contextlib.AbstractContextManager):
         self.current = start
         self.step = step
 
-    def get(self, increment=True) -> int:
+    def get(self, increment: bool = True) -> int:
         """
         Get the current integer, optionally incrementing it.
 
@@ -140,10 +123,9 @@ class AutoInc(contextlib.AbstractContextManager):
         current = self.current
         if increment:
             self.current += self.step
-
         return current
 
-    def __enter__(self):
+    def __enter__(self) -> int:
         """
         Increments once, alias to .get.
 
@@ -155,18 +137,19 @@ class AutoInc(contextlib.AbstractContextManager):
         self,
         exc_type: Optional[Type[BaseException]],
         exc_value: Optional[BaseException],
-        traceback: Optional[TracebackType],
+        traceback: Optional[Union[TracebackType, None]],
     ) -> Optional[bool]:
         """Do nothing."""
         return None
 
 
 if sys.platform == "darwin":
+    # macOS-specific code
     import objc  # type: ignore
     from Foundation import NSFileManager  # type: ignore
 
     try:
-        from ApplicationServices import (  # type: ignore
+        from ApplicationServices import (
             AXIsProcessTrusted,
             AXIsProcessTrustedWithOptions,
             kAXTrustedCheckOptionPrompt,
@@ -192,6 +175,7 @@ if sys.platform == "darwin":
     was_accessible_at_launch = AXIsProcessTrusted()  # type: ignore
 
 elif sys.platform == "win32":
+    # Windows-specific code
     import ctypes
     import winreg
     from ctypes.wintypes import (
@@ -213,7 +197,7 @@ elif sys.platform == "win32":
         winreg.OpenKey(reg, WINE_REGISTRY_KEY)
         is_wine = True
 
-    except OSError:  # Assumed to be 'path not found', i.e. not-wine
+    except OSError:
         pass
 
     CalculatePopupWindowPosition = None
@@ -1297,28 +1281,32 @@ class PreferencesDialog(tk.Toplevel):
             pathvar.set(directory)
             self.outvarchanged()
 
-    def displaypath(self, pathvar: tk.StringVar, entryfield: tk.Entry) -> None:
+    def displaypath(  # noqa: CCR001
+        self, pathvar: tk.StringVar, entryfield: tk.Entry
+    ) -> None:
         """
         Display a path in a locked tk.Entry.
 
         :param pathvar: the path to display
         :param entryfield: the entry in which to display the path
         """
-        # TODO: This is awful.
-        entryfield["state"] = tk.NORMAL  # must be writable to update
+        entryfield.config(state=tk.NORMAL)  # Make the field writable to update
         entryfield.delete(0, tk.END)
+
+        path = pathvar.get()
+        home = config.home
+
         if sys.platform == "win32":
+            components = normpath(path).split("\\")
             start = (
-                len(config.home.split("\\"))
-                if pathvar.get().lower().startswith(config.home.lower())
-                else 0
+                len(home.split("\\")) if path.lower().startswith(home.lower()) else 0
             )
+
             display = []
-            components = normpath(pathvar.get()).split("\\")
-            buf = ctypes.create_unicode_buffer(MAX_PATH)
-            pidsRes = ctypes.c_int()  # noqa: N806 # Windows convention
-            for i in range(start, len(components)):
+            for i, component in enumerate(components[start:], start=start):
                 try:
+                    buf = ctypes.create_unicode_buffer(MAX_PATH)
+                    pidsRes = ctypes.c_int()  # noqa: N806
                     if not SHGetLocalizedName(
                         "\\".join(components[: i + 1]),
                         buf,
@@ -1331,51 +1319,37 @@ class PreferencesDialog(tk.Toplevel):
                         MAX_PATH,
                     ):
                         display.append(buf.value)
-
                     else:
-                        display.append(components[i])
-
+                        display.append(component)
                 except Exception:
-                    display.append(components[i])
+                    display.append(component)
 
             entryfield.insert(0, "\\".join(display))
-
-        #                                                   None if path doesn't exist
         elif (
             sys.platform == "darwin"
-            and NSFileManager.defaultManager().componentsToDisplayForPath_(
-                pathvar.get()
-            )
+            and NSFileManager.defaultManager().componentsToDisplayForPath_(path)
         ):
-            if pathvar.get().startswith(config.home):
-                display = [
-                    "~"
-                ] + NSFileManager.defaultManager().componentsToDisplayForPath_(
-                    pathvar.get()
-                )[
+            display = (
+                ["~"]
+                + NSFileManager.defaultManager().componentsToDisplayForPath_(path)[
                     len(
-                        NSFileManager.defaultManager().componentsToDisplayForPath_(
-                            config.home
-                        )
+                        NSFileManager.defaultManager().componentsToDisplayForPath_(home)
                     ) :  # noqa: E203
                 ]
-
-            else:
-                display = NSFileManager.defaultManager().componentsToDisplayForPath_(
-                    pathvar.get()
-                )
+                if path.startswith(home)
+                else NSFileManager.defaultManager().componentsToDisplayForPath_(path)
+            )
 
             entryfield.insert(0, "/".join(display))
         else:
-            if pathvar.get().startswith(config.home):
-                entryfield.insert(
-                    0, "~" + pathvar.get()[len(config.home) :]  # noqa: E203
-                )
+            entryfield.insert(
+                0,
+                "~" + path[len(home) :]  # noqa: E203
+                if path.startswith(home)
+                else path,
+            )
 
-            else:
-                entryfield.insert(0, pathvar.get())
-
-        entryfield["state"] = "readonly"
+        entryfield.config(state="readonly")
 
     def logdir_reset(self) -> None:
         """Reset the log dir to the default."""
@@ -1402,11 +1376,11 @@ class PreferencesDialog(tk.Toplevel):
 
         :param index: Index of the color type, 0 for dark text, 1 for dark highlight
         """
-        (_, color) = tkColorChooser.askcolor(
+        color = tkColorChooser.askcolor(
             self.theme_colors[index],
             title=self.theme_prompts[index],
             parent=self.parent,
-        )
+        )[1]
 
         if color:
             self.theme_colors[index] = color
@@ -1419,12 +1393,7 @@ class PreferencesDialog(tk.Toplevel):
             self.theme_button_1["foreground"],
         ) = self.theme_colors
 
-        if self.theme.get() == theme.THEME_DEFAULT:
-            state = tk.DISABLED  # type: ignore
-
-        else:
-            state = tk.NORMAL  # type: ignore
-
+        state = tk.DISABLED if self.theme.get() == theme.THEME_DEFAULT else tk.NORMAL
         self.theme_label_0["state"] = state
         self.theme_label_1["state"] = state
         self.theme_button_0["state"] = state
@@ -1445,7 +1414,6 @@ class PreferencesDialog(tk.Toplevel):
         event.widget.delete(0, tk.END)
         self.hotkey_text.insert(
             0,
-            # LANG: No hotkey/shortcut set
             hotkeymgr.display(self.hotkey_code, self.hotkey_mods)
             if self.hotkey_code
             else _("None"),
@@ -1459,35 +1427,42 @@ class PreferencesDialog(tk.Toplevel):
         :return: "break" as a literal, to halt processing
         """
         good = hotkeymgr.fromevent(event)
+
         if good and isinstance(good, tuple):
             hotkey_code, hotkey_mods = good
+            (self.hotkey_code, self.hotkey_mods) = (hotkey_code, hotkey_mods)
+            self.hotkey_only_btn["state"] = tk.NORMAL
+            self.hotkey_play_btn["state"] = tk.NORMAL
             event.widget.delete(0, tk.END)
             event.widget.insert(0, hotkeymgr.display(hotkey_code, hotkey_mods))
-            if hotkey_code:
-                # done
-                (self.hotkey_code, self.hotkey_mods) = (hotkey_code, hotkey_mods)
-                self.hotkey_only_btn["state"] = tk.NORMAL
-                self.hotkey_play_btn["state"] = tk.NORMAL
-                self.hotkey_only_btn.focus()  # move to next widget - calls hotkeyend() implicitly
+            self.hotkey_only_btn.focus()  # move to next widget - calls hotkeyend() implicitly
 
         else:
             if good is None:  # clear
                 (self.hotkey_code, self.hotkey_mods) = (0, 0)
-            event.widget.delete(0, tk.END)
-
-            if self.hotkey_code:
+            else:
                 event.widget.insert(
-                    0, hotkeymgr.display(self.hotkey_code, self.hotkey_mods)
+                    0,
+                    hotkeymgr.display(self.hotkey_code, self.hotkey_mods)
+                    if self.hotkey_code
+                    else _("None"),
                 )
                 self.hotkey_only_btn["state"] = tk.NORMAL
                 self.hotkey_play_btn["state"] = tk.NORMAL
 
-            else:
-                # LANG: No hotkey/shortcut set
-                event.widget.insert(0, _("None"))
-                self.hotkey_only_btn["state"] = tk.DISABLED
-                self.hotkey_play_btn["state"] = tk.DISABLED
-
+            event.widget.delete(0, tk.END)
+            event.widget.insert(
+                0,
+                _("None")
+                if not self.hotkey_code
+                else hotkeymgr.display(self.hotkey_code, self.hotkey_mods),
+            )
+            self.hotkey_only_btn["state"] = (
+                tk.DISABLED if not self.hotkey_code else tk.NORMAL
+            )
+            self.hotkey_play_btn["state"] = (
+                tk.DISABLED if not self.hotkey_code else tk.NORMAL
+            )
             self.hotkey_only_btn.focus()  # move to next widget - calls hotkeyend() implicitly
 
         return "break"  # stops further processing - insertion, Tab traversal etc
@@ -1495,8 +1470,8 @@ class PreferencesDialog(tk.Toplevel):
     def apply(self) -> None:
         """Update the config with the options set on the dialog."""
         config.set("PrefsVersion", prefsVersion.stringToSerial(appversion_nobuild()))
-        config.set(
-            "output",
+
+        output_flags = (
             (self.out_td.get() and config.OUT_MKT_TD)
             + (self.out_csv.get() and config.OUT_MKT_CSV)
             + (config.OUT_MKT_MANUAL if not self.out_auto.get() else 0)
@@ -1508,8 +1483,9 @@ class PreferencesDialog(tk.Toplevel):
                     | config.OUT_EDDN_SEND_NON_STATION
                     | config.OUT_EDDN_DELAY
                 )
-            ),
+            )
         )
+        config.set("output", output_flags)
 
         config.set(
             "outdir",
@@ -1524,7 +1500,6 @@ class PreferencesDialog(tk.Toplevel):
             and logdir.lower() == config.default_journal_dir.lower()
         ):
             config.set("journaldir", "")  # default location
-
         else:
             config.set("journaldir", logdir)
 
@@ -1542,13 +1517,10 @@ class PreferencesDialog(tk.Toplevel):
         config.set("loglevel", self.select_loglevel.get())
         edmclogger.set_console_loglevel(self.select_loglevel.get())
 
-        lang_codes = {v: k for k, v in self.languages.items()}  # Codes by name
-        config.set(
-            "language", lang_codes.get(self.lang.get()) or ""
-        )  # or '' used here due to Default being None above
-        Translations.install(config.get_str("language", default=None))  # type: ignore # This sets self in weird ways.
+        lang_codes = {v: k for k, v in self.languages.items()}
+        config.set("language", lang_codes.get(self.lang.get()) or "")
+        Translations.install(config.get_str("language", default=None))
 
-        # Privacy options
         config.set("hide_private_group", self.hide_private_group.get())
         config.set("hide_multicrew_captain", self.hide_multicrew_captain.get())
 
@@ -1561,7 +1533,6 @@ class PreferencesDialog(tk.Toplevel):
         config.set("dark_highlight", self.theme_colors[1])
         theme.apply(self.parent)
 
-        # Notify
         if self.callback:
             self.callback()
 
@@ -1585,22 +1556,20 @@ class PreferencesDialog(tk.Toplevel):
         def enableshortcuts(self) -> None:
             """Set up macOS preferences shortcut."""
             self.apply()
-            # popup System Preferences dialog
+            # Popup System Preferences dialog
             try:
-                # http://stackoverflow.com/questions/6652598/cocoa-button-opens-a-system-preference-page/6658201
                 from ScriptingBridge import SBApplication  # type: ignore
 
                 sysprefs = "com.apple.systempreferences"
                 prefs = SBApplication.applicationWithBundleIdentifier_(sysprefs)
-                pane = [
+                pane = next(
                     x
                     for x in prefs.panes()
                     if x.id() == "com.apple.preference.security"
-                ][0]
-                prefs.setCurrentPane_(pane)
-                anchor = [
+                )
+                anchor = next(
                     x for x in pane.anchors() if x.name() == "Privacy_Accessibility"
-                ][0]
+                )
                 anchor.reveal()
                 prefs.activate()
 

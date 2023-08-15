@@ -74,7 +74,8 @@ def generate_data_files(
                 "snd_good.wav",
                 "snd_bad.wav",
                 "modules.p",
-                "ships.p",
+                "resources/ships.json",
+                "ships.p",  # TODO: Remove in 6.0
                 f"{app_name}.VisualElementsManifest.xml",
                 f"{app_name}.ico",
                 "EDMarketConnector - TRACE.bat",
