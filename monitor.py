@@ -1,4 +1,10 @@
-"""Monitor for new Journal files and contents of latest."""
+"""
+monitor.py - Monitor for new Journal files and contents of latest.
+
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
+"""
 import json
 import pathlib
 import queue
@@ -10,23 +16,21 @@ from collections import OrderedDict, defaultdict
 from os import SEEK_END, SEEK_SET, listdir
 from os.path import basename, expanduser, getctime, isdir, join
 from time import gmtime, localtime, mktime, sleep, strftime, strptime, time
-from typing import TYPE_CHECKING, Any, BinaryIO, MutableMapping, Tuple, Optional
+from typing import TYPE_CHECKING, Any, BinaryIO, MutableMapping, Optional
 import semantic_version
 from config import config
 from edmc_data import edmc_suit_shortnames, edmc_suit_symbol_localised
 from EDMCLogging import get_main_logger
 import util_ships
 
-
 if TYPE_CHECKING:
     import tkinter
-
-# spell-checker: words navroute
 
 logger = get_main_logger()
 STARTUP = "journal.startup"
 MAX_NAVROUTE_DISCREPANCY = 5  # Timestamp difference in seconds
 MAX_FCMATERIALS_DISCREPANCY = 5  # Timestamp difference in seconds
+MAX_FILE_DISCREPANCY = 60
 
 if TYPE_CHECKING:
 
@@ -36,7 +40,6 @@ if TYPE_CHECKING:
 
 if sys.platform == "darwin":
     from fcntl import fcntl
-
     from AppKit import NSWorkspace
     from watchdog.events import FileSystemEventHandler
     from watchdog.observers import Observer
@@ -47,7 +50,6 @@ if sys.platform == "darwin":
 elif sys.platform == "win32":
     import ctypes
     from ctypes.wintypes import BOOL, HWND, LPARAM, LPWSTR
-
     from watchdog.events import FileCreatedEvent, FileSystemEventHandler
     from watchdog.observers import Observer
     from watchdog.observers.api import BaseObserver
@@ -74,11 +76,10 @@ else:
 
 
 # Journal handler
-class EDLogs(FileSystemEventHandler):  # type: ignore # See below
+class EDLogs(FileSystemEventHandler):
     """Monitoring of Journal files."""
 
     # Magic with FileSystemEventHandler can confuse type checkers when they do not have access to every import
-
     _POLL = 1  # Polling is cheap, so do it often
     _RE_CANONICALISE = re.compile(r"\$(.+)_name;")
     _RE_CATEGORY = re.compile(r"\$MICRORESOURCE_CATEGORY_(.+);")
@@ -91,17 +92,17 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
     )
 
     def __init__(self) -> None:
-        # TODO(A_D): A bunch of these should be switched to default values (eg '' for strings) and no longer be Optional
+        """Initialize the EDLogs class."""
         FileSystemEventHandler.__init__(
             self
-        )  # futureproofing - not need for current version of watchdog
-        self.root: "tkinter.Tk" = None  # type: ignore # Don't use Optional[] - mypy thinks no methods
+        )  # futureproofing - not needed for current version of watchdog
+        self.root: "tkinter.Tk" = None  # Don't use Optional[] - mypy thinks no methods
         self.currentdir: Optional[str] = None  # The actual logdir that we're monitoring
         self.logfile: Optional[str] = None
         self.observer: Optional[BaseObserver] = None
         self.observed = None  # a watchdog ObservedWatch, or None if polling
         self.thread: Optional[threading.Thread] = None
-        # For communicating journal entries back to main thread
+        # For communicating journal entries back to the main thread
         self.event_queue: queue.Queue = queue.Queue()
 
         # On startup we might be:
@@ -139,12 +140,11 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         self.__init_state()
 
     def __init_state(self) -> None:
-        # Cmdr state shared with EDSM and plugins
-        # If you change anything here update PLUGINS.md documentation!
+        """Initialize the state dictionary with default values."""
         self.state: dict = {
-            "GameLanguage": None,  # From `Fileheader
-            "GameVersion": None,  # From `Fileheader
-            "GameBuild": None,  # From `Fileheader
+            "GameLanguage": None,  # From `Fileheader`
+            "GameVersion": None,  # From `Fileheader`
+            "GameBuild": None,  # From `Fileheader`
             "Captain": None,  # On a crew
             "Cargo": defaultdict(int),
             "Credits": None,
@@ -231,11 +231,8 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         self.currentdir = logdir
 
-        # Latest pre-existing logfile - e.g. if E:D is already running.
-        # Do this before setting up the observer in case the journal directory has gone away
-        try:  # TODO: This should be replaced with something specific ONLY wrapping listdir
+        try:  # Get the latest pre-existing logfile - e.g. if E:D is already running.
             self.logfile = self.journal_newest_filename(self.currentdir)
-
         except Exception:
             logger.exception("Failed to find latest logfile")
             self.logfile = None
@@ -252,7 +249,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             self.observer.daemon = True
             self.observer.start()
             logger.debug("Done")
-
         elif polling and self.observer:
             logger.debug("Polling, but observer, so stopping observer...")
             self.observer.stop()
@@ -340,7 +336,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         logger.debug("Done.")
 
     def close(self) -> None:
-        """Close journal monitoring."""
+        """Close journal monitoring, stopping observer and worker thread."""
         logger.debug("Calling self.stop()...")
         self.stop()
         logger.debug("Done")
@@ -367,7 +363,11 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         return bool(self.thread and self.thread.is_alive())
 
     def on_created(self, event: "FileCreatedEvent") -> None:
-        """Watchdog callback when, e.g. client (re)started."""
+        """
+        Watchdog callback when a new file is created, e.g. client (re)started.
+
+        :param event: The event object representing the creation of a file.
+        """
         if not event.is_directory and self._RE_LOGFILE.search(basename(event.src_path)):
             self.logfile = event.src_path
 
@@ -575,7 +575,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             entry["MarketID"] = self.state["MarketID"]
             entry["StationName"] = self.state["StationName"]
             entry["StationType"] = self.state["StationType"]
-
         else:
             entry["Docked"] = False
 
@@ -603,16 +602,15 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             entry: MutableMapping[str, Any] = json.loads(
                 line, object_pairs_hook=OrderedDict
             )
-            entry[
-                "timestamp"
-            ]  # we expect this to exist # TODO: replace with assert? or an if key in check
-
+            assert "timestamp" in entry, "Key 'timestamp' does not exist in entry"
+            # Retry navroute if needed
             self.__navroute_retry()
-
+            # Get the event type
             event_type = entry["event"].lower()
+            # Handle different event types
             if event_type == "fileheader":
+                # Reset various state variables
                 self.live = False
-
                 self.cmdr = None
                 self.mode = None
                 self.group = None
@@ -627,13 +625,14 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state["StationType"] = None
                 self.stationservices = None
                 self.started = None
-                self.__init_state()
+                self.__init_state()  # Reinitialize state
 
-                # Do this AFTER __init_state() lest our nice new state entries be None
+                # Populate version info after resetting state
                 self.populate_version_info(entry)
 
             elif event_type == "commander":
-                self.live = True  # First event in 3.0
+                self.live = True
+
                 self.cmdr = entry["Name"]
                 self.state["FID"] = entry["FID"]
                 logger.trace_if(
@@ -645,21 +644,16 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # Odyssey Release Update 5 -- This contains data that doesn't match the format used in FileHeader above
                 self.populate_version_info(entry, suppress=True)
 
-                # alpha4
-                # Odyssey: bool
                 self.cmdr = entry["Commander"]
-                # 'Open', 'Solo', 'Group', or None for CQC (and Training - but no LoadGame event)
-                if (
-                    not entry.get("Ship")
-                    and not entry.get("GameMode")
+
+                if not entry.get("Ship") and (
+                    not entry.get("GameMode")
                     or entry.get("GameMode", "").lower() == "cqc"
                 ):
-                    logger.trace_if("journal.loadgame.cqc", f"loadgame to cqc: {entry}")
                     self.mode = "CQC"
 
                 else:
                     self.mode = entry.get("GameMode")
-
                 self.group = entry.get("Group")
                 self.state["SystemAddress"] = None
                 self.state["SystemName"] = None
@@ -676,20 +670,16 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     strptime(entry["timestamp"], "%Y-%m-%dT%H:%M:%SZ")
                 )
                 # Don't set Ship, ShipID etc since this will reflect Fighter or SRV if starting in those
+
                 self.state.update(
                     {
                         "Captain": None,
                         "Credits": entry["Credits"],
-                        "FID": entry.get("FID"),  # From 3.3
-                        "Horizons": entry["Horizons"],  # From 3.0
-                        "Odyssey": entry.get("Odyssey", False),  # From 4.0 Odyssey
+                        "FID": entry.get("FID"),
+                        "Horizons": entry["Horizons"],
+                        "Odyssey": entry.get("Odyssey", False),
                         "Loan": entry["Loan"],
-                        # For Odyssey, by 4.0.0.100, and at least from Horizons 3.8.0.201 the order of events changed
-                        # to LoadGame being after some 'status' events.
-                        # 'Engineers':          {},  # 'EngineerProgress' event now before 'LoadGame'
-                        # 'Rank':               {},  # 'Rank'/'Progress' events now before 'LoadGame'
-                        # 'Reputation':         {},  # 'Reputation' event now before 'LoadGame'
-                        "Statistics": {},  # Still after 'LoadGame' in 4.0.0.903
+                        "Statistics": {},
                         "Role": None,
                         "Taxi": None,
                         "Dropship": None,
@@ -699,7 +689,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     entry["Ship"]
                 ):
                     self.state["OnFoot"] = True
-
                 logger.trace_if(
                     STARTUP,
                     f'"LoadGame" event, {monitor.cmdr=}, {monitor.state["FID"]=}',
@@ -711,103 +700,109 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             elif event_type == "setusershipname":
                 self.state["ShipID"] = entry["ShipID"]
-                if "UserShipId" in entry:  # Only present when changing the ship's ident
+
+                if "UserShipId" in entry:
                     self.state["ShipIdent"] = entry["UserShipId"]
 
                 self.state["ShipName"] = entry.get("UserShipName")
                 self.state["ShipType"] = self.canonicalise(entry["Ship"])
 
             elif event_type == "shipyardbuy":
-                self.state["ShipID"] = None
-                self.state["ShipIdent"] = None
-                self.state["ShipName"] = None
-                self.state["ShipType"] = self.canonicalise(entry["ShipType"])
-                self.state["HullValue"] = None
-                self.state["ModulesValue"] = None
-                self.state["Rebuy"] = None
-                self.state["Modules"] = None
-
+                self.state.update(
+                    {
+                        "ShipID": None,
+                        "ShipIdent": None,
+                        "ShipName": None,
+                        "ShipType": self.canonicalise(entry["ShipType"]),
+                        "HullValue": None,
+                        "ModulesValue": None,
+                        "Rebuy": None,
+                        "Modules": None,
+                    }
+                )
                 self.state["Credits"] -= entry.get("ShipPrice", 0)
 
             elif event_type == "shipyardswap":
-                self.state["ShipID"] = entry["ShipID"]
-                self.state["ShipIdent"] = None
-                self.state["ShipName"] = None
-                self.state["ShipType"] = self.canonicalise(entry["ShipType"])
-                self.state["HullValue"] = None
-                self.state["ModulesValue"] = None
-                self.state["Rebuy"] = None
-                self.state["Modules"] = None
+                self.state.update(
+                    {
+                        "ShipID": entry["ShipID"],
+                        "ShipIdent": None,
+                        "ShipName": None,
+                        "ShipType": self.canonicalise(entry["ShipType"]),
+                        "HullValue": None,
+                        "ModulesValue": None,
+                        "Rebuy": None,
+                        "Modules": None,
+                    }
+                )
+            elif event_type == "loadout":
+                ship_canonicalised = self.canonicalise(entry["Ship"])
+                if (
+                    "fighter" not in ship_canonicalised
+                    and "buggy" not in ship_canonicalised
+                ):
+                    self.state.update(
+                        {
+                            "ShipID": entry["ShipID"],
+                            "ShipIdent": entry["ShipIdent"],
+                            "ShipName": entry["ShipName"]
+                            if entry["ShipName"] and entry["ShipName"] not in ("", " ")
+                            else None,
+                            "ShipType": self.canonicalise(entry["Ship"]),
+                            "HullValue": entry.get("HullValue"),
+                            "ModulesValue": entry.get("ModulesValue"),
+                            "Rebuy": entry.get("Rebuy"),
+                            "Modules": {},
+                        }
+                    )
 
-            elif (
-                event_type == "loadout"
-                and "fighter" not in self.canonicalise(entry["Ship"])
-                and "buggy" not in self.canonicalise(entry["Ship"])
-            ):
-                self.state["ShipID"] = entry["ShipID"]
-                self.state["ShipIdent"] = entry["ShipIdent"]
-
-                # Newly purchased ships can show a ShipName of "" initially,
-                # and " " after a game restart/relog.
-                # Players *can* also purposefully set " " as the name, but anyone
-                # doing that gets to live with EDMC showing ShipType instead.
-                if entry["ShipName"] and entry["ShipName"] not in ("", " "):
-                    self.state["ShipName"] = entry["ShipName"]
-
-                self.state["ShipType"] = self.canonicalise(entry["Ship"])
-                self.state["HullValue"] = entry.get(
-                    "HullValue"
-                )  # not present on exiting Outfitting
-                self.state["ModulesValue"] = entry.get(
-                    "ModulesValue"
-                )  # not present on exiting Outfitting
-                self.state["Rebuy"] = entry.get("Rebuy")
-                # Remove spurious differences between initial Loadout event and subsequent
-                self.state["Modules"] = {}
-                for module in entry["Modules"]:
-                    module = dict(module)
-                    module["Item"] = self.canonicalise(module["Item"])
-                    if (
-                        "Hardpoint" in module["Slot"]
-                        and not module["Slot"].startswith("TinyHardpoint")
-                        and module.get("AmmoInClip") == module.get("AmmoInHopper") == 1
-                    ):  # lasers
-                        module.pop("AmmoInClip")
-                        module.pop("AmmoInHopper")
-
-                    self.state["Modules"][module["Slot"]] = module
+                    for module in entry["Modules"]:
+                        module = dict(module)
+                        module["Item"] = self.canonicalise(module["Item"])
+                        if (
+                            "Hardpoint" in module["Slot"]
+                            and not module["Slot"].startswith("TinyHardpoint")
+                            and module.get("AmmoInClip")
+                            == module.get("AmmoInHopper")
+                            == 1
+                        ):
+                            module.pop("AmmoInClip")
+                            module.pop("AmmoInHopper")
+                        self.state["Modules"][module["Slot"]] = module
 
             elif event_type == "modulebuy":
-                self.state["Modules"][entry["Slot"]] = {
-                    "Slot": entry["Slot"],
+                slot = entry["Slot"]
+                self.state["Modules"][slot] = {
+                    "Slot": slot,
                     "Item": self.canonicalise(entry["BuyItem"]),
                     "On": True,
                     "Priority": 1,
                     "Health": 1.0,
                     "Value": entry["BuyPrice"],
                 }
-
                 self.state["Credits"] -= entry.get("BuyPrice", 0)
 
             elif event_type == "moduleretrieve":
                 self.state["Credits"] -= entry.get("Cost", 0)
 
             elif event_type == "modulesell":
-                self.state["Modules"].pop(entry["Slot"], None)
+                slot = entry["Slot"]
+                self.state["Modules"].pop(slot, None)
                 self.state["Credits"] += entry.get("SellPrice", 0)
 
             elif event_type == "modulesellremote":
                 self.state["Credits"] += entry.get("SellPrice", 0)
 
             elif event_type == "modulestore":
-                self.state["Modules"].pop(entry["Slot"], None)
+                slot = entry["Slot"]
+                self.state["Modules"].pop(slot, None)
                 self.state["Credits"] -= entry.get("Cost", 0)
 
             elif event_type == "moduleswap":
-                to_item = self.state["Modules"].get(entry["ToSlot"])
                 to_slot = entry["ToSlot"]
                 from_slot = entry["FromSlot"]
                 modules = self.state["Modules"]
+                to_item = modules.get(to_slot)
                 modules[to_slot] = modules[from_slot]
                 if to_item:
                     modules[from_slot] = to_item
@@ -816,11 +811,15 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     modules.pop(from_slot, None)
 
             elif event_type == "undocked":
-                self.state["StationName"] = None
-                self.state["MarketID"] = None
-                self.state["StationType"] = None
+                self.state.update(
+                    {
+                        "StationName": None,
+                        "MarketID": None,
+                        "StationType": None,
+                        "IsDocked": False,
+                    }
+                )
                 self.stationservices = None
-                self.state["IsDocked"] = False
 
             elif event_type == "embark":
                 # This event is logged when a player (on foot) gets into a ship or SRV
@@ -838,17 +837,20 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #     • StationName (if at a station)
                 #     • StationType
                 #     • MarketID
-                self.state["StationName"] = None
-                self.state["MarketID"] = None
+                self.state.update(
+                    {
+                        "OnFoot": False,
+                        "Taxi": entry["Taxi"],
+                        "Dropship": False,
+                    }
+                )
                 if entry.get("OnStation"):
-                    self.state["StationName"] = entry.get("StationName", "")
-                    self.state["MarketID"] = entry.get("MarketID", "")
-
-                self.state["OnFoot"] = False
-                self.state["Taxi"] = entry["Taxi"]
-
-                # We can't now have anything in the BackPack, it's all in the
-                # ShipLocker.
+                    self.state.update(
+                        {
+                            "StationName": entry.get("StationName", ""),
+                            "MarketID": entry.get("MarketID", ""),
+                        }
+                    )
                 self.backpack_set_empty()
 
             elif event_type == "disembark":
@@ -868,29 +870,32 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #     • StationName (if at a station)
                 #     • StationType
                 #     • MarketID
-
                 if entry.get("OnStation", False):
                     self.state["StationName"] = entry.get("StationName", "")
-
                 else:
                     self.state["StationName"] = None
-
-                self.state["OnFoot"] = True
                 if self.state["Taxi"] is not None and self.state["Taxi"] != entry.get(
                     "Taxi", False
                 ):
                     logger.warning(
                         "Disembarked from a taxi but we didn't know we were in a taxi?"
                     )
-
-                self.state["Taxi"] = False
-                self.state["Dropship"] = False
+                self.state.update(
+                    {
+                        "OnFoot": True,
+                        "Taxi": False,
+                        "Dropship": False,
+                    }
+                )
 
             elif event_type == "dropshipdeploy":
-                # We're definitely on-foot now
-                self.state["OnFoot"] = True
-                self.state["Taxi"] = False
-                self.state["Dropship"] = False
+                self.state.update(
+                    {
+                        "OnFoot": True,
+                        "Taxi": False,
+                        "Dropship": False,
+                    }
+                )
 
             elif event_type == "supercruiseexit":
                 # For any orbital station we have no way of determining the body
@@ -901,24 +906,23 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #   Location for stations (on-foot or in-ship) has station as Body.
                 #   SupercruiseExit (own ship or taxi) lists the station as the Body.
                 if entry["BodyType"] == "Station":
-                    self.state["Body"] = None
-                    self.state["BodyID"] = None
+                    self.state.update(
+                        {
+                            "Body": None,
+                            "BodyID": None,
+                        }
+                    )
 
             elif event_type == "docked":
-                ###############################################################
-                # Track: Station
-                ###############################################################
-                self.state["IsDocked"] = True
-                self.state["StationName"] = entry.get("StationName")  # It may be None
-                self.state["MarketID"] = entry.get("MarketID")  # It may be None
-                self.state["StationType"] = entry.get("StationType")  # It may be None
-                self.stationservices = entry.get(
-                    "StationServices"
-                )  # None under E:D < 2.4
-
-                # No need to set self.state['Taxi'] or Dropship here, if it's
-                # those, the next event is a Disembark anyway
-                ###############################################################
+                self.state.update(
+                    {
+                        "IsDocked": True,
+                        "StationName": entry.get("StationName"),
+                        "MarketID": entry.get("MarketID"),
+                        "StationType": entry.get("StationType"),
+                    }
+                )
+                self.stationservices = entry.get("StationServices")
 
             elif event_type in ("location", "fsdjump", "carrierjump"):
                 """
@@ -967,164 +971,119 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                   present in `Status.json` data, as this *will* correctly
                   reflect the second Body.
                 """
-                ###############################################################
-                # Track: Body
-                ###############################################################
-                if event_type in ("location", "carrierjump"):
-                    # We're not guaranteeing this is a planet, rather than a
-                    # station.
-                    self.state["Body"] = entry.get("Body")
-                    self.state["BodyID"] = entry.get("BodyID")
-                    self.state["BodyType"] = entry.get("BodyType")
+                self.state.update(
+                    {
+                        "Body": entry.get("Body"),
+                        "BodyID": entry.get("BodyID"),
+                        "BodyType": entry.get("BodyType"),
+                    }
+                )
 
-                elif event_type == "fsdjump":
-                    self.state["Body"] = None
-                    self.state["BodyID"] = None
-                    self.state["BodyType"] = None
-                ###############################################################
-
-                ###############################################################
-                # Track: IsDocked
-                ###############################################################
-                if event_type == "location":
-                    logger.trace_if("journal.locations", '"Location" event')
-                    self.state["IsDocked"] = entry.get("Docked", False)
-                ###############################################################
-
-                ###############################################################
-                # Track: Current System
-                ###############################################################
                 if "StarPos" in entry:
-                    # Plugins need this as well, so copy in state
-                    self.state["StarPos"] = tuple(entry["StarPos"])  # type: ignore
-
+                    self.state["StarPos"] = tuple(entry["StarPos"])
                 else:
                     logger.warning(
                         f"'{event_type}' event without 'StarPos' !!!:\n{entry}\n"
                     )
 
-                if "SystemAddress" not in entry:
-                    logger.warning(
-                        f"{event_type} event without SystemAddress !!!:\n{entry}\n"
-                    )
-
-                # But we'll still *use* the value, because if a 'location' event doesn't
-                # have this we've still moved and now don't know where and MUST NOT
-                # continue to use any old value.
-                # Yes, explicitly state `None` here, so it's crystal clear.
                 self.state["SystemAddress"] = entry.get("SystemAddress", None)
-
                 self.state["SystemPopulation"] = entry.get("Population")
 
                 if entry["StarSystem"] == "ProvingGround":
                     self.state["SystemName"] = "CQC"
-
                 else:
                     self.state["SystemName"] = entry["StarSystem"]
-                ###############################################################
 
-                ###############################################################
-                # Track: Current station, if applicable
-                ###############################################################
                 if event_type == "fsdjump":
-                    self.state["StationName"] = None
-                    self.state["MarketID"] = None
-                    self.state["StationType"] = None
+                    self.state.update(
+                        {
+                            "StationName": None,
+                            "MarketID": None,
+                            "StationType": None,
+                            "Taxi": None,
+                            "Dropship": None,
+                        }
+                    )
                     self.stationservices = None
-
                 else:
-                    self.state["StationName"] = entry.get(
-                        "StationName"
-                    )  # It may be None
-                    # If on foot in-station 'Docked' is false, but we have a
-                    # 'BodyType' of 'Station', and the 'Body' is the station name
-                    # NB: No MarketID
-                    if entry.get("BodyType") and entry["BodyType"] == "Station":
-                        self.state["StationName"] = entry.get("Body")
-
-                    self.state["MarketID"] = entry.get("MarketID")  # May be None
-                    self.state["StationType"] = entry.get("StationType")  # May be None
-                    self.stationservices = entry.get(
-                        "StationServices"
-                    )  # None in Odyssey for on-foot 'Location'
-                ###############################################################
-
-                ###############################################################
-                # Track: Whether in a Taxi/Dropship
-                ###############################################################
-                self.state["Taxi"] = entry.get("Taxi", None)
-                if not self.state["Taxi"]:
-                    self.state["Dropship"] = None
-                ###############################################################
+                    self.state.update(
+                        {
+                            "StationName": entry.get("StationName")
+                            if entry.get("OnStation")
+                            else None,
+                            "MarketID": entry.get("MarketID"),
+                            "StationType": entry.get("StationType"),
+                            "Taxi": entry.get("Taxi", None),
+                            "Dropship": None
+                            if not entry.get("Taxi", None)
+                            else self.state["Dropship"],
+                        }
+                    )
+                    self.stationservices = (
+                        entry.get("StationServices") if entry.get("OnStation") else None
+                    )
 
             elif event_type == "approachbody":
-                self.state["Body"] = entry["Body"]
-                self.state["BodyID"] = entry.get("BodyID")
-                # This isn't in the event, but Journal doc for ApproachBody says:
-                #   when in Supercruise, and distance from planet drops to within the 'Orbital Cruise' zone
-                # Used in plugins/eddn.py for setting entry Body/BodyType
-                # on 'docked' events when Planetary.
-                self.state["BodyType"] = "Planet"
+                self.state.update(
+                    {
+                        "Body": entry["Body"],
+                        "BodyID": entry.get("BodyID"),
+                        "BodyType": "Planet",  # Fixed value for ApproachBody event
+                    }
+                )
 
             elif event_type == "leavebody":
-                # Triggered when ship goes above Orbital Cruise altitude, such
-                # that a new 'ApproachBody' would get triggered if the ship
-                # went back down.
-                self.state["Body"] = None
-                self.state["BodyID"] = None
-                self.state["BodyType"] = None
+                self.state.update(
+                    {
+                        "Body": None,
+                        "BodyID": None,
+                        "BodyType": None,
+                    }
+                )
 
             elif event_type == "supercruiseentry":
-                # We only clear Body state if the Type is Station.  This is
-                # because we won't get a fresh ApproachBody if we don't leave
-                # Orbital Cruise but land again.
                 if self.state["BodyType"] == "Station":
-                    self.state["Body"] = None
-                    self.state["BodyID"] = None
-                    self.state["BodyType"] = None
-
-                ###############################################################
-                # Track: Current station, if applicable
-                ###############################################################
-                self.state["StationName"] = None
-                self.state["MarketID"] = None
-                self.state["StationType"] = None
-                self.stationservices = None
-                ###############################################################
+                    self.state.update(
+                        {
+                            "Body": None,
+                            "BodyID": None,
+                            "BodyType": None,
+                            "StationName": None,
+                            "MarketID": None,
+                            "StationType": None,
+                            "stationservices": None,
+                        }
+                    )
 
             elif event_type == "music":
                 if entry["MusicTrack"] == "MainMenu":
-                    # We'll get new Body state when the player logs back into
-                    # the game.
-                    self.state["Body"] = None
-                    self.state["BodyID"] = None
-                    self.state["BodyType"] = None
+                    self.state.update(
+                        {
+                            "Body": None,
+                            "BodyID": None,
+                            "BodyType": None,
+                        }
+                    )
 
             elif event_type in ("rank", "promotion"):
                 payload = dict(entry)
                 payload.pop("event")
                 payload.pop("timestamp")
-
                 self.state["Rank"].update({k: (v, 0) for k, v in payload.items()})
 
             elif event_type == "progress":
                 rank = self.state["Rank"]
                 for k, v in entry.items():
                     if k in rank:
-                        # perhaps not taken promotion mission yet
                         rank[k] = (rank[k][0], min(v, 100))
 
             elif event_type in ("reputation", "statistics"):
                 payload = OrderedDict(entry)
                 payload.pop("event")
                 payload.pop("timestamp")
-                # NB: We need the original casing for these keys
                 self.state[entry["event"]] = payload
 
             elif event_type == "engineerprogress":
-                # Sanity check - at least once the 'Engineer' (name) was missing from this in early
-                # Odyssey 4.0.0.100.  Might only have been a server issue causing incomplete data.
-
                 if self.event_valid_engineerprogress(entry):
                     engineers = self.state["Engineers"]
                     if "Engineers" in entry:  # Startup summary
@@ -1136,7 +1095,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                             )
                             for e in entry["Engineers"]
                         }
-
                     else:  # Promotion
                         engineer = entry["Engineer"]
                         if "Rank" in entry:
@@ -1144,45 +1102,39 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                                 entry["Rank"],
                                 entry.get("RankProgress", 0),
                             )
-
                         else:
                             engineers[engineer] = entry["Progress"]
 
             elif event_type == "cargo" and entry.get("Vessel") == "Ship":
                 self.state["Cargo"] = defaultdict(int)
-                # From 3.3 full Cargo event (after the first one) is written to a separate file
+
                 if "Inventory" not in entry:
-                    with open(join(self.currentdir, "Cargo.json"), "rb") as h:  # type: ignore
-                        entry = json.load(
-                            h, object_pairs_hook=OrderedDict
-                        )  # Preserve property order because why not?
-                        self.state["CargoJSON"] = entry
-
-                clean = self.coalesce_cargo(entry["Inventory"])
-
-                self.state["Cargo"].update(
-                    {self.canonicalise(x["Name"]): x["Count"] for x in clean}
-                )
+                    cargo_file_path = join(self.currentdir, "Cargo.json")
+                    with open(cargo_file_path, "rb") as h:
+                        cargo_json = json.load(h, object_pairs_hook=OrderedDict)
+                    self.state["CargoJSON"] = cargo_json
+                else:
+                    clean = self.coalesce_cargo(entry["Inventory"])
+                    self.state["Cargo"].update(
+                        {self.canonicalise(x["Name"]): x["Count"] for x in clean}
+                    )
 
             elif event_type == "cargotransfer":
                 for c in entry["Transfers"]:
                     name = self.canonicalise(c["Type"])
                     if c["Direction"] == "toship":
                         self.state["Cargo"][name] += c["Count"]
-
                     else:
-                        # So it's *from* the ship
                         self.state["Cargo"][name] -= c["Count"]
 
             elif event_type == "shiplocker":
-                # As of 4.0.0.400 (2021-06-10)
                 # "ShipLocker" will be a full list written to the journal at startup/boarding, and also
                 # written to a separate shiplocker.json file - other updates will just update that file and mention it
                 # has changed with an empty shiplocker event in the main journal.
-
                 # Always attempt loading of this, but if it fails we'll hope this was
                 # a startup/boarding version and thus `entry` contains
                 # the data anyway.
+                # Attempt loading ShipLocker.json and update entry if available
                 currentdir_path = pathlib.Path(str(self.currentdir))
                 shiplocker_filename = currentdir_path / "ShipLocker.json"
                 shiplocker_max_attempts = 5
@@ -1195,56 +1147,37 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                             entry = json.load(h, object_pairs_hook=OrderedDict)
                             self.state["ShipLockerJSON"] = entry
                             break
-
                     except FileNotFoundError:
                         logger.warning("ShipLocker event but no ShipLocker.json file")
                         sleep(shiplocker_fail_sleep)
-                        pass
-
                     except json.JSONDecodeError as e:
                         logger.warning(f"ShipLocker.json failed to decode:\n{e!r}\n")
                         sleep(shiplocker_fail_sleep)
-                        pass
-
                 else:
                     logger.warning(
-                        f"Failed to load & decode shiplocker after {shiplocker_max_attempts} tries. "
-                        "Giving up."
+                        f"Failed to load & decode shiplocker after {shiplocker_max_attempts} tries. Giving up."
                     )
 
-                if not all(
-                    t in entry for t in ("Components", "Consumables", "Data", "Items")
-                ):
+                # Check for required categories in ShipLocker event
+                required_categories = ("Components", "Consumables", "Data", "Items")
+                if not all(t in entry for t in required_categories):
                     logger.warning("ShipLocker event is missing at least one category")
 
-                # This event has the current totals, so drop any current data
+                # Reset current state for Component, Consumable, Item, and Data
                 self.state["Component"] = defaultdict(int)
                 self.state["Consumable"] = defaultdict(int)
                 self.state["Item"] = defaultdict(int)
                 self.state["Data"] = defaultdict(int)
 
-                clean_components = self.coalesce_cargo(entry["Components"])
-                self.state["Component"].update(
-                    {self.canonicalise(x["Name"]): x["Count"] for x in clean_components}
-                )
-
-                clean_consumables = self.coalesce_cargo(entry["Consumables"])
-                self.state["Consumable"].update(
-                    {
-                        self.canonicalise(x["Name"]): x["Count"]
-                        for x in clean_consumables
-                    }
-                )
-
-                clean_items = self.coalesce_cargo(entry["Items"])
-                self.state["Item"].update(
-                    {self.canonicalise(x["Name"]): x["Count"] for x in clean_items}
-                )
-
-                clean_data = self.coalesce_cargo(entry["Data"])
-                self.state["Data"].update(
-                    {self.canonicalise(x["Name"]): x["Count"] for x in clean_data}
-                )
+                # Coalesce and update each category
+                for category in required_categories:
+                    clean_category = self.coalesce_cargo(entry[category])
+                    self.state[category].update(
+                        {
+                            self.canonicalise(x["Name"]): x["Count"]
+                            for x in clean_category
+                        }
+                    )
 
             # Journal v31 implies this was removed before Odyssey launch
             elif event_type == "backpackmaterials":
@@ -1295,31 +1228,15 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     # Assume this reflects the current state when written
                     self.backpack_set_empty()
 
-                    clean_components = self.coalesce_cargo(entry["Components"])
-                    self.state["BackPack"]["Component"].update(
-                        {
-                            self.canonicalise(x["Name"]): x["Count"]
-                            for x in clean_components
-                        }
-                    )
-
-                    clean_consumables = self.coalesce_cargo(entry["Consumables"])
-                    self.state["BackPack"]["Consumable"].update(
-                        {
-                            self.canonicalise(x["Name"]): x["Count"]
-                            for x in clean_consumables
-                        }
-                    )
-
-                    clean_items = self.coalesce_cargo(entry["Items"])
-                    self.state["BackPack"]["Item"].update(
-                        {self.canonicalise(x["Name"]): x["Count"] for x in clean_items}
-                    )
-
-                    clean_data = self.coalesce_cargo(entry["Data"])
-                    self.state["BackPack"]["Data"].update(
-                        {self.canonicalise(x["Name"]): x["Count"] for x in clean_data}
-                    )
+                    categories = ("Components", "Consumables", "Items", "Data")
+                    for category in categories:
+                        clean_category = self.coalesce_cargo(entry[category])
+                        self.state["BackPack"][category].update(
+                            {
+                                self.canonicalise(x["Name"]): x["Count"]
+                                for x in clean_category
+                            }
+                        )
 
             elif event_type == "backpackchange":
                 # Changes to Odyssey Backpack contents *other* than from a Transfer
@@ -1348,13 +1265,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                         elif changes == "Added":
                             self.state["BackPack"][category][name] += c["Count"]
 
-                # Paranoia check to see if anything has gone negative.
-                # As of Odyssey Alpha Phase 1 Hotfix 2 keeping track of BackPack
-                # materials is impossible when used/picked up anyway.
-                for c in self.state["BackPack"]:
-                    for m in self.state["BackPack"][c]:
-                        if self.state["BackPack"][c][m] < 0:
-                            self.state["BackPack"][c][m] = 0
+                    # Paranoia check to see if anything has gone negative.
+                    # As of Odyssey Alpha Phase 1 Hotfix 2 keeping track of BackPack
+                    # materials is impossible when used/picked up anyway.
+                    for c in self.state["BackPack"]:
+                        for m in self.state["BackPack"][c]:
+                            if self.state["BackPack"][c][m] < 0:
+                                self.state["BackPack"][c][m] = 0
 
             elif event_type == "buymicroresources":
                 # From 4.0.0.400 we get an empty (see file) `ShipLocker` event,
@@ -1388,10 +1305,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 suit_slotid, suitloadout_slotid = self.suitloadout_store_from_event(
                     entry
                 )
-                if not self.suit_and_loadout_setcurrent(
-                    suit_slotid, suitloadout_slotid
-                ):
-                    logger.error(f"Event was: {entry}")
+                self.suit_and_loadout_setcurrent(suit_slotid, suitloadout_slotid)
 
             elif event_type == "switchsuitloadout":
                 # 4.0.0.101
@@ -1408,8 +1322,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #   "ModuleName_Localised":"Manticore Tormentor" } ] }
                 #
                 suitid, suitloadout_slotid = self.suitloadout_store_from_event(entry)
-                if not self.suit_and_loadout_setcurrent(suitid, suitloadout_slotid):
-                    logger.error(f"Event was: {entry}")
+                self.suit_and_loadout_setcurrent(suitid, suitloadout_slotid)
 
             elif event_type == "createsuitloadout":
                 # 4.0.0.101
@@ -1425,25 +1338,15 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 #
                 suitid, suitloadout_slotid = self.suitloadout_store_from_event(entry)
                 # Creation doesn't mean equipping it
-                #  if not self.suit_and_loadout_setcurrent(suitid, suitloadout_slotid):
-                #      logger.error(f"Event was: {entry}")
-
+                # self.suit_and_loadout_setcurrent(suitid, suitloadout_slotid, error_event=entry)
             elif event_type == "deletesuitloadout":
                 # alpha4:
                 # { "timestamp":"2021-04-29T10:32:27Z", "event":"DeleteSuitLoadout", "SuitID":1698365752966423,
                 # "SuitName":"explorationsuit_class1", "SuitName_Localised":"Artemis Suit", "LoadoutID":4293000003,
                 # "LoadoutName":"Loadout 1" }
-
                 if self.state["SuitLoadouts"]:
                     loadout_id = self.suit_loadout_id_from_loadoutid(entry["LoadoutID"])
-                    try:
-                        self.state["SuitLoadouts"].pop(f"{loadout_id}")
-
-                    except KeyError:
-                        # This should no longer happen, as we're now handling CreateSuitLoadout properly
-                        logger.debug(
-                            f"loadout slot id {loadout_id} doesn't exist, not in last CAPI pull ?"
-                        )
+                    self.state["SuitLoadouts"].pop(f"{loadout_id}", None)
 
             elif event_type == "renamesuitloadout":
                 # alpha4
@@ -1458,18 +1361,11 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # "LoadoutName":"Art L/K" }
                 if self.state["SuitLoadouts"]:
                     loadout_id = self.suit_loadout_id_from_loadoutid(entry["LoadoutID"])
-                    try:
-                        self.state["SuitLoadouts"][loadout_id]["name"] = entry[
-                            "LoadoutName"
-                        ]
-
-                    except KeyError:
-                        logger.debug(
-                            f"loadout slot id {loadout_id} doesn't exist, not in last CAPI pull ?"
-                        )
+                    self.state["SuitLoadouts"].get(loadout_id, {})["name"] = entry[
+                        "LoadoutName"
+                    ]
 
             elif event_type == "buysuit":
-                # alpha4 :
                 # { "timestamp":"2021-04-29T09:03:37Z", "event":"BuySuit", "Name":"UtilitySuit_Class1",
                 # "Name_Localised":"Maverick Suit", "Price":150000, "SuitID":1698364934364699 }
                 loc_name = entry.get("Name_Localised", entry["Name"])
@@ -1477,20 +1373,18 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     "name": entry["Name"],
                     "locName": loc_name,
                     "edmcName": self.suit_sane_name(loc_name),
-                    "id": None,  # Is this an FDev ID for suit type ?
+                    "id": None,  # Is this an FDev ID for suit type?
                     "suitId": entry["SuitID"],
                     "mods": entry[
                         "SuitMods"
                     ],  # Suits can (rarely) be bought with modules installed
                 }
 
-                # update credits
-                if price := entry.get("Price") is None:
+                price = entry.get("Price")
+                if price is None:
                     logger.error(f"BuySuit didn't contain Price: {entry}")
-
                 else:
                     self.state["Credits"] -= price
-
             elif event_type == "sellsuit":
                 # Remove from known suits
                 # As of Odyssey Alpha Phase 2, Hotfix 5 (4.0.0.13) this isn't possible as this event
@@ -1506,18 +1400,10 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # { "timestamp":"2021-04-29T09:15:51Z", "event":"SellSuit", "SuitID":1698364937435505,
                 # "Name":"explorationsuit_class1", "Name_Localised":"Artemis Suit", "Price":90000 }
                 if self.state["Suits"]:
-                    try:
-                        self.state["Suits"].pop(entry["SuitID"])
-
-                    except KeyError:
-                        logger.debug(
-                            f"SellSuit for a suit we didn't know about? {entry['SuitID']}"
-                        )
-
-                    # update credits total
-                    if price := entry.get("Price") is None:
+                    self.state["Suits"].pop(entry["SuitID"], None)
+                    price = entry.get("Price")
+                    if price is None:
                         logger.error(f"SellSuit didn't contain Price: {entry}")
-
                     else:
                         self.state["Credits"] += price
 
@@ -1534,97 +1420,75 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state["Credits"] -= entry.get("Cost", 0)
 
             elif event_type == "loadoutequipmodule":
-                # alpha4:
                 # { "timestamp":"2021-04-29T11:11:13Z", "event":"LoadoutEquipModule", "LoadoutName":"Dom L/K/K",
                 # "SuitID":1698364940285172, "SuitName":"tacticalsuit_class1", "SuitName_Localised":"Dominator Suit",
                 # "LoadoutID":4293000001, "SlotName":"PrimaryWeapon2", "ModuleName":"wpn_m_assaultrifle_laser_fauto",
                 # "ModuleName_Localised":"TK Aphelion", "SuitModuleID":1698372938719590 }
                 if self.state["SuitLoadouts"]:
                     loadout_id = self.suit_loadout_id_from_loadoutid(entry["LoadoutID"])
-                    try:
-                        self.state["SuitLoadouts"][loadout_id]["slots"][
-                            entry["SlotName"]
-                        ] = {
-                            "name": entry["ModuleName"],
-                            "locName": entry.get(
-                                "ModuleName_Localised", entry["ModuleName"]
-                            ),
-                            "id": None,
-                            "weaponrackId": entry["SuitModuleID"],
-                            "locDescription": "",
-                            "class": entry["Class"],
-                            "mods": entry["WeaponMods"],
+                    self.state["SuitLoadouts"].get(loadout_id, {}).setdefault(
+                        "slots", {}
+                    ).update(
+                        {
+                            entry["SlotName"]: {
+                                "name": entry["ModuleName"],
+                                "locName": entry.get(
+                                    "ModuleName_Localised", entry["ModuleName"]
+                                ),
+                                "id": None,
+                                "weaponrackId": entry["SuitModuleID"],
+                                "locDescription": "",
+                                "class": entry["Class"],
+                                "mods": entry["WeaponMods"],
+                            }
                         }
-
-                    except KeyError:
-                        # TODO: Log the exception details too, for some clue about *which* key
-                        logger.error(f"LoadoutEquipModule: {entry}")
+                    )
 
             elif event_type == "loadoutremovemodule":
-                # alpha4 - triggers if selecting an already-equipped weapon into a different slot
                 # { "timestamp":"2021-04-29T11:11:13Z", "event":"LoadoutRemoveModule", "LoadoutName":"Dom L/K/K",
                 # "SuitID":1698364940285172, "SuitName":"tacticalsuit_class1", "SuitName_Localised":"Dominator Suit",
                 # "LoadoutID":4293000001, "SlotName":"PrimaryWeapon1", "ModuleName":"wpn_m_assaultrifle_laser_fauto",
                 # "ModuleName_Localised":"TK Aphelion", "SuitModuleID":1698372938719590 }
                 if self.state["SuitLoadouts"]:
                     loadout_id = self.suit_loadout_id_from_loadoutid(entry["LoadoutID"])
-                    try:
-                        self.state["SuitLoadouts"][loadout_id]["slots"].pop(
-                            entry["SlotName"]
-                        )
-
-                    except KeyError:
-                        logger.error(f"LoadoutRemoveModule: {entry}")
+                    self.state["SuitLoadouts"].get(loadout_id, {}).get("slots", {}).pop(
+                        entry["SlotName"], None
+                    )
 
             elif event_type == "buyweapon":
-                # alpha4
                 # { "timestamp":"2021-04-29T11:10:51Z", "event":"BuyWeapon", "Name":"Wpn_M_AssaultRifle_Laser_FAuto",
                 # "Name_Localised":"TK Aphelion", "Price":125000, "SuitModuleID":1698372938719590 }
-                # update credits
-                if price := entry.get("Price") is None:
+                price = entry.get("Price")
+                if price is None:
                     logger.error(f"BuyWeapon didn't contain Price: {entry}")
-
                 else:
                     self.state["Credits"] -= price
 
             elif event_type == "sellweapon":
                 # We're not actually keeping track of all owned weapons, only those in
                 # Suit Loadouts.
-                # alpha4:
                 # { "timestamp":"2021-04-29T10:50:34Z", "event":"SellWeapon", "Name":"wpn_m_assaultrifle_laser_fauto",
                 # "Name_Localised":"TK Aphelion", "Price":75000, "SuitModuleID":1698364962722310 }
-
-                # We need to look over all Suit Loadouts for ones that used this specific weapon
-                # and update them to entirely empty that slot.
-                for sl in self.state["SuitLoadouts"]:
-                    for w in self.state["SuitLoadouts"][sl]["slots"]:
-                        if (
-                            self.state["SuitLoadouts"][sl]["slots"][w]["weaponrackId"]
-                            == entry["SuitModuleID"]
-                        ):
-                            self.state["SuitLoadouts"][sl]["slots"].pop(w)
-                            # We've changed the dict, so iteration breaks, but also the weapon
-                            # could only possibly have been here once.
-                            break
-
-                # Update credits total
-                if price := entry.get("Price") is None:
+                suit_module_id = entry["SuitModuleID"]
+                for loadout_id, loadout_data in self.state["SuitLoadouts"].items():
+                    slots = loadout_data.get("slots", {})
+                    for slot_name, slot_data in slots.items():
+                        if slot_data["weaponrackId"] == suit_module_id:
+                            slots.pop(slot_name, None)
+                price = entry.get("Price")
+                if price is None:
                     logger.error(f"SellWeapon didn't contain Price: {entry}")
-
                 else:
                     self.state["Credits"] += price
 
             elif event_type == "upgradeweapon":
-                # We're not actually keeping track of all owned weapons, only those in
-                # Suit Loadouts.
                 self.state["Credits"] -= entry.get("Cost", 0)
 
             elif event_type == "scanorganic":
-                # Nothing of interest to our state.
                 pass
 
             elif event_type == "sellorganicdata":
-                for bd in entry["BioData"]:
+                for bd in entry.get("BioData", []):
                     self.state["Credits"] += bd.get("Value", 0) + bd.get("Bonus", 0)
 
             elif event_type == "bookdropship":
@@ -1640,10 +1504,10 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 # In the second case we should instantly be in the Dropship and thus
                 # not still on-foot, BUT it doesn't really matter as the next significant
                 # event is going to be Disembark to on-foot anyway.
+                # No need to handle OnFoot status here as it will be updated by Disembark event
 
             elif event_type == "booktaxi":
                 self.state["Credits"] -= entry.get("Cost", 0)
-                # Dont set taxi state here, as we're not IN a taxi yet. Set it on Embark
 
             elif event_type == "canceldropship":
                 self.state["Credits"] += entry.get("Refund", 0)
@@ -1655,37 +1519,19 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state["Taxi"] = False
 
             elif event_type == "navroute" and not self.catching_up:
-                # assume we've failed out the gate, then pull it back if things are fine
-                self._last_navroute_journal_timestamp = mktime(
-                    strptime(entry["timestamp"], "%Y-%m-%dT%H:%M:%SZ")
-                )
-                self._navroute_retries_remaining = 11
-
-                # Added in ED 3.7 - multi-hop route details in NavRoute.json
-                # rather than duplicating this, lets just call the function
                 if self.__navroute_retry():
                     entry = self.state["NavRoute"]
 
             elif event_type == "fcmaterials" and not self.catching_up:
-                # assume we've failed out the gate, then pull it back if things are fine
-                self._last_fcmaterials_journal_timestamp = mktime(
-                    strptime(entry["timestamp"], "%Y-%m-%dT%H:%M:%SZ")
-                )
-                self._fcmaterials_retries_remaining = 11
-
-                # Added in ED 4.0.0.1300 - Fleet Carrier Materials market in FCMaterials.json
-                # rather than duplicating this, lets just call the function
                 if fcmaterials := self.__fcmaterials_retry():
                     entry = fcmaterials
 
             elif event_type == "moduleinfo":
-                with open(join(self.currentdir, "ModulesInfo.json"), "rb") as mf:  # type: ignore
+                with open(join(self.currentdir, "ModulesInfo.json"), "rb") as mf:
                     try:
                         entry = json.load(mf)
-
                     except json.JSONDecodeError:
                         logger.exception("Failed decoding ModulesInfo.json")
-
                     else:
                         self.state["ModuleInfo"] = entry
 
@@ -1697,11 +1543,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             ):
                 commodity = self.canonicalise(entry["Type"])
                 self.state["Cargo"][commodity] += entry.get("Count", 1)
-
-                if event_type == "buydrones":
-                    self.state["Credits"] -= entry.get("TotalCost", 0)
-
-                elif event_type == "marketbuy":
+                if event_type in ("buydrones", "marketbuy"):
                     self.state["Credits"] -= entry.get("TotalCost", 0)
 
             elif event_type in ("ejectcargo", "marketsell", "selldrones"):
@@ -1710,11 +1552,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 cargo[commodity] -= entry.get("Count", 1)
                 if cargo[commodity] <= 0:
                     cargo.pop(commodity)
-
-                if event_type == "marketsell":
-                    self.state["Credits"] += entry.get("TotalSale", 0)
-
-                elif event_type == "selldrones":
+                if event_type in ("marketsell", "selldrones"):
                     self.state["Credits"] += entry.get("TotalSale", 0)
 
             elif event_type == "searchandrescue":
@@ -1750,23 +1588,26 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 for category in ("Raw", "Manufactured", "Encoded"):
                     for x in entry["Materials"]:
                         material = self.canonicalise(x["Name"])
-                        if material in self.state[category]:
-                            self.state[category][material] -= x["Count"]
-                            if self.state[category][material] <= 0:
-                                self.state[category].pop(material)
+                        state_category = self.state[category]
+                        state_category[material] -= x["Count"]
+                        if state_category[material] <= 0:
+                            state_category.pop(material)
 
             elif event_type == "materialtrade":
-                category = self.category(entry["Paid"]["Category"])
-                state_category = self.state[category]
-                paid = entry["Paid"]
-                received = entry["Received"]
+                paid_category = self.category(entry["Paid"]["Category"])
+                received_category = self.category(entry["Received"]["Category"])
+                state_paid_category = self.state[paid_category]
+                state_received_category = self.state[received_category]
 
-                state_category[paid["Material"]] -= paid["Quantity"]
-                if state_category[paid["Material"]] <= 0:
-                    state_category.pop(paid["Material"])
+                state_paid_category[entry["Paid"]["Material"]] -= entry["Paid"][
+                    "Quantity"
+                ]
+                if state_paid_category[entry["Paid"]["Material"]] <= 0:
+                    state_paid_category.pop(entry["Paid"]["Material"])
 
-                category = self.category(received["Category"])
-                state_category[received["Material"]] += received["Quantity"]
+                state_received_category[entry["Received"]["Material"]] += entry[
+                    "Received"
+                ]["Quantity"]
 
             elif event_type == "engineercraft" or (
                 event_type == "engineerlegacyconvert" and not entry.get("IsPreview")
@@ -1774,10 +1615,10 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 for category in ("Raw", "Manufactured", "Encoded"):
                     for x in entry.get("Ingredients", []):
                         material = self.canonicalise(x["Name"])
-                        if material in self.state[category]:
-                            self.state[category][material] -= x["Count"]
-                            if self.state[category][material] <= 0:
-                                self.state[category].pop(material)
+                        state_category = self.state[category]
+                        state_category[material] -= x["Count"]
+                        if state_category[material] <= 0:
+                            state_category.pop(material)
 
                 module = self.state["Modules"][entry["Slot"]]
                 assert module["Item"] == self.canonicalise(entry["Module"])
@@ -1798,7 +1639,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     module["Engineering"]["ExperimentalEffect_Localised"] = entry[
                         "ExperimentalEffect_Localised"
                     ]
-
                 else:
                     module["Engineering"].pop("ExperimentalEffect", None)
                     module["Engineering"].pop("ExperimentalEffect_Localised", None)
@@ -1811,7 +1651,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     self.state["Cargo"][commodity] += reward.get("Count", 1)
 
                 for reward in entry.get("MaterialsReward", []):
-                    if "Category" in reward:  # Category not present in E:D 3.0
+                    if "Category" in reward:
                         category = self.category(reward["Category"])
                         material = self.canonicalise(reward["Name"])
                         self.state[category][material] += reward.get("Count", 1)
@@ -1832,7 +1672,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                                 self.state[category].pop(material)
 
             elif event_type == "technologybroker":
-                for thing in entry.get("Ingredients", []):  # 3.01
+                for thing in entry.get("Ingredients", []):
                     for category in ("Cargo", "Raw", "Manufactured", "Encoded"):
                         item = self.canonicalise(thing["Name"])
                         if item in self.state[category]:
@@ -1840,13 +1680,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                             if self.state[category][item] <= 0:
                                 self.state[category].pop(item)
 
-                for thing in entry.get("Commodities", []):  # 3.02
+                for thing in entry.get("Commodities", []):
                     commodity = self.canonicalise(thing["Name"])
                     self.state["Cargo"][commodity] -= thing["Count"]
                     if self.state["Cargo"][commodity] <= 0:
                         self.state["Cargo"].pop(commodity)
 
-                for thing in entry.get("Materials", []):  # 3.02
+                for thing in entry.get("Materials", []):
                     material = self.canonicalise(thing["Name"])
                     category = thing["Category"]
                     self.state[category][material] -= thing["Count"]
@@ -1854,50 +1694,55 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                         self.state[category].pop(material)
 
             elif event_type == "joinacrew":
-                self.state["Captain"] = entry["Captain"]
-                self.state["Role"] = "Idle"
-                self.state["StarPos"] = None
-                self.state["SystemName"] = None
-                self.state["SystemAddress"] = None
-                self.state["SystemPopulation"] = None
-                self.state["StarPos"] = None
-                self.state["Body"] = None
-                self.state["BodyID"] = None
-                self.state["BodyType"] = None
-                self.state["StationName"] = None
-                self.state["MarketID"] = None
-                self.state["StationType"] = None
-                self.stationservices = None
-                self.state["OnFoot"] = False
+                self.state.update(
+                    {
+                        "Captain": entry["Captain"],
+                        "Role": "Idle",
+                        "StarPos": None,
+                        "SystemName": None,
+                        "SystemAddress": None,
+                        "SystemPopulation": None,
+                        "StarPos": None,
+                        "Body": None,
+                        "BodyID": None,
+                        "BodyType": None,
+                        "StationName": None,
+                        "MarketID": None,
+                        "StationType": None,
+                        "stationservices": None,
+                        "OnFoot": False,
+                    }
+                )
 
             elif event_type == "changecrewrole":
                 self.state["Role"] = entry["Role"]
 
             elif event_type == "quitacrew":
-                self.state["Captain"] = None
-                self.state["Role"] = None
-                self.state["SystemName"] = None
-                self.state["SystemAddress"] = None
-                self.state["SystemPopulation"] = None
-                self.state["StarPos"] = None
-                self.state["Body"] = None
-                self.state["BodyID"] = None
-                self.state["BodyType"] = None
-                self.state["StationName"] = None
-                self.state["MarketID"] = None
-                self.state["StationType"] = None
-                self.stationservices = None
-
-                # TODO: on_foot: Will we get an event after this to know ?
+                self.state.update(
+                    {
+                        "Captain": None,
+                        "Role": None,
+                        "SystemName": None,
+                        "SystemAddress": None,
+                        "SystemPopulation": None,
+                        "StarPos": None,
+                        "Body": None,
+                        "BodyID": None,
+                        "BodyType": None,
+                        "StationName": None,
+                        "MarketID": None,
+                        "StationType": None,
+                        "stationservices": None,
+                    }
+                )
 
             elif event_type == "friends":
                 if entry["Status"] in ("Online", "Added"):
                     self.state["Friends"].add(entry["Name"])
-
                 else:
                     self.state["Friends"].discard(entry["Name"])
 
-            # Try to keep Credits total updated
+                # Try to keep Credits total updated
             elif event_type in ("multisellexplorationdata", "sellexplorationdata"):
                 self.state["Credits"] += entry.get("TotalEarnings", 0)
 
@@ -1918,11 +1763,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             elif event_type == "fetchremotemodule":
                 self.state["Credits"] -= entry.get("TransferCost", 0)
-
-            elif event_type == "missionabandoned":
-                # Is this paid at this point, or just a fine to pay later ?
-                # self.state['Credits'] -= entry.get('Fine', 0)
-                pass
 
             elif event_type in ("paybounties", "payfines", "paylegacyfines"):
                 self.state["Credits"] -= entry.get("Amount", 0)
@@ -1962,8 +1802,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state["Credits"] -= entry.get("Price", 0)
 
             elif event_type == "carrierbanktransfer":
-                if newbal := entry.get("PlayerBalance"):
-                    self.state["Credits"] = newbal
+                self.state["Credits"] = entry.get(
+                    "PlayerBalance", self.state["Credits"]
+                )
 
             elif event_type == "carrierdecommission":
                 # v30 doc says nothing about citing the refund amount
@@ -1974,7 +1815,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
             elif event_type == "resurrect":
                 self.state["Credits"] -= entry.get("Cost", 0)
-
                 # There should be a `Backpack` event as you 'come to' in the
                 # new location, so no need to zero out BackPack here.
 
@@ -1997,25 +1837,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             self.state["GameVersion"] = entry["gameversion"]
             self.state["GameBuild"] = entry["build"]
             self.version = self.state["GameVersion"]
-
             try:
-                self.version_semantic = semantic_version.Version.coerce(
-                    self.state["GameVersion"]
-                )
-
-            except Exception:
-                # Catching all Exceptions as this is *one* call, and we won't
-                # get caught out by any semantic_version changes.
+                self.version_semantic = semantic_version.Version.coerce(self.version)
+                logger.debug(f"Parsed {self.version} into {self.version_semantic}")
+            except semantic_version.InvalidVersion:
                 self.version_semantic = None
-                logger.error(f"Couldn't coerce {self.state['GameVersion']=}")
-                pass
-
-            else:
-                logger.debug(
-                    f"Parsed {self.state['GameVersion']=} into {self.version_semantic=}"
-                )
-
-            self.is_beta = any(v in self.version.lower() for v in ("alpha", "beta"))  # type: ignore
+                logger.error(f"Couldn't coerce {self.version=}")
+            self.is_beta = any(v in self.version.lower() for v in ("alpha", "beta"))
         except KeyError:
             if not suppress:
                 raise
@@ -2031,7 +1859,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         """
         Given an input suit name return the best 'sane' name we can.
 
-        AS of 4.0.0.102 the Journal events are fine for a Grade 1 suit, but
+        As of 4.0.0.102 the Journal events are fine for a Grade 1 suit, but
         anything above that has broken SuitName_Localised strings, e.g.
         $TacticalSuit_Class1_Name;
 
@@ -2046,79 +1874,22 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         :return: Our sane version of this suit's name.
         """
         # WORKAROUND 4.0.0.200 | 2021-05-27: Suit names above Grade 1 aren't localised
-        #    properly by Frontier, so we do it ourselves.
-        # Stage 1: Is it in `$<type>_Class<X>_Name;` form ?
-        if m := re.fullmatch(r"(?i)^\$([^_]+)_Class([0-9]+)_Name;$", name):
-            n, c = m.group(1, 2)
-            name = n
+        # properly by Frontier, so we do it ourselves.
+        match = re.match(r"(?i)^\$([^_]+)_Class([0-9]+)_Name;$", name)
+        if match:
+            name = match.group(1)
 
-        # Stage 2: Is it in `<type>_class<x>` form ?
-        elif m := re.fullmatch(r"(?i)^([^_]+)_class([0-9]+)$", name):
-            n, c = m.group(1, 2)
-            name = n
+        match = re.match(r"(?i)^([^_]+)_class([0-9]+)$", name)
+        if match:
+            name = match.group(1)
 
-        # Now turn either of those into a '<type> Suit' (modulo language) form
-        if loc_lookup := edmc_suit_symbol_localised.get(self.state["GameLanguage"]):
-            name = loc_lookup.get(name.lower(), name)
+        loc_lookup = edmc_suit_symbol_localised.get(self.state["GameLanguage"], {})
+        name = loc_lookup.get(name.lower(), name)
+
+        name = edmc_suit_shortnames.get(name, name)
         # WORKAROUND END
 
-        # Finally, map that to a form without the verbose ' Suit' on the end
-        name = edmc_suit_shortnames.get(name, name)
-
         return name
-
-    def suitloadout_store_from_event(self, entry) -> Tuple[int, int]:
-        """
-        Store Suit and SuitLoadout data from a journal event.
-
-        Also use set currently in-use instances of them as being as per this
-        event.
-
-        :param entry: Journal entry - 'SwitchSuitLoadout' or 'SuitLoadout'
-        :return Tuple[suit_slotid, suitloadout_slotid]: The IDs we set data for.
-        """
-        # This is the full ID from Frontier, it's not a sparse array slot id
-        suitid = entry["SuitID"]
-
-        # Check if this looks like a suit we already have stored, so as
-        # to avoid 'bad' Journal localised names.
-        suit = self.state["Suits"].get(f"{suitid}", None)
-        if suit is None:
-            # Initial suit containing just the data that is then embedded in
-            # the loadout
-
-            # TODO: Attempt to map SuitName_Localised to something sane, if it
-            #       isn't already.
-            suitname = entry.get("SuitName_Localised", entry["SuitName"])
-            edmc_suitname = self.suit_sane_name(suitname)
-            suit = {
-                "edmcName": edmc_suitname,
-                "locName": suitname,
-            }
-
-        # Overwrite with latest data, just in case, as this can be from CAPI which may or may not have had
-        # all the data we wanted
-        suit["suitId"] = entry["SuitID"]
-        suit["name"] = entry["SuitName"]
-        suit["mods"] = entry["SuitMods"]
-
-        suitloadout_slotid = self.suit_loadout_id_from_loadoutid(entry["LoadoutID"])
-        # Make the new loadout, in the CAPI format
-        new_loadout = {
-            "loadoutSlotId": suitloadout_slotid,
-            "suit": suit,
-            "name": entry["LoadoutName"],
-            "slots": self.suit_loadout_slots_array_to_dict(entry["Modules"]),
-        }
-        # Assign this loadout into our state
-        self.state["SuitLoadouts"][f"{suitloadout_slotid}"] = new_loadout
-
-        # Now add in the extra fields for new_suit to be a 'full' Suit structure
-        suit["id"] = suit.get("id")  # Not available in 4.0.0.100 journal event
-        # Ensure the suit is in self.state['Suits']
-        self.state["Suits"][f"{suitid}"] = suit
-
-        return suitid, suitloadout_slotid
 
     def suit_and_loadout_setcurrent(self, suitid: int, suitloadout_slotid: int) -> bool:
         """
@@ -2131,12 +1902,13 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         :param suitloadout_slotid: Numeric ID of the slot for the suit loadout.
         :return: True if we could do this, False if not.
         """
-        str_suitid = f"{suitid}"
-        str_suitloadoutid = f"{suitloadout_slotid}"
+        str_suitid = str(suitid)
+        str_suitloadoutid = str(suitloadout_slotid)
 
-        if self.state["Suits"].get(str_suitid, False) and self.state[
-            "SuitLoadouts"
-        ].get(str_suitloadoutid, False):
+        if (
+            str_suitid in self.state["Suits"]
+            and str_suitloadoutid in self.state["SuitLoadouts"]
+        ):
             self.state["SuitCurrent"] = self.state["Suits"][str_suitid]
             self.state["SuitLoadoutCurrent"] = self.state["SuitLoadouts"][
                 str_suitloadoutid
@@ -2151,74 +1923,69 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
     # TODO: *This* will need refactoring and a proper validation infrastructure
     #       designed for this in the future.  This is a bandaid for a known issue.
-    def event_valid_engineerprogress(self, entry) -> bool:  # noqa: CCR001 C901
+    def event_valid_engineerprogress(self, entry) -> bool:  # noqa: CCR001
         """
         Check an `EngineerProgress` Journal event for validity.
 
         :param entry: Journal event dict
         :return: True if passes validation, else False.
         """
-        # The event should have at least one of these
-        if "Engineers" not in entry and "Progress" not in entry:
-            logger.warning(
-                f"EngineerProgress has neither 'Engineers' nor 'Progress': {entry=}"
-            )
-            return False
-
-        # But not both of them
         if "Engineers" in entry and "Progress" in entry:
             logger.warning(
                 f"EngineerProgress has BOTH 'Engineers' and 'Progress': {entry=}"
             )
             return False
 
-        if "Engineers" in entry:
-            # 'Engineers' version should have a list as value
-            if not isinstance(entry["Engineers"], list):
-                logger.warning(f"EngineerProgress 'Engineers' is not a list: {entry=}")
-                return False
+        def event_valid_engineerprogress(self, entry) -> bool:
+            """
+            Check an `EngineerProgress` Journal event for validity.
 
-            # It should have at least one entry?  This might still be valid ?
-            if len(entry["Engineers"]) < 1:
-                logger.warning(
-                    f"EngineerProgress 'Engineers' list is empty ?: {entry=}"
-                )
-                # TODO: As this might be valid, we might want to only log
-                return False
+            :param entry: Journal event dict
+            :return: True if passes validation, else False.
+            """
+            if "Engineers" in entry:
+                return self._validate_engineers(entry["Engineers"])
 
-            # And that list should have all of these keys
-            for e in entry["Engineers"]:
-                for f in ("Engineer", "EngineerID", "Rank", "Progress", "RankProgress"):
-                    if f not in e:
-                        # For some Progress there's no Rank/RankProgress yet
-                        if f in ("Rank", "RankProgress"):
-                            if (progress := e.get("Progress", None)) is not None:
-                                if progress in ("Invited", "Known"):
-                                    continue
+            if "Progress" in entry:
+                # Progress is only a single Engineer, so it's not an array
+                # { "timestamp":"2021-05-24T17:57:52Z",
+                #   "event":"EngineerProgress",
+                #   "Engineer":"Felicity Farseer",
+                #   "EngineerID":300100,
+                #   "Progress":"Invited" }
+                return self._validate_engineer_progress(entry)
 
-                        logger.warning(
-                            f"Engineer entry without '{f}' key: {e=} in {entry=}"
-                        )
-                        return False
+            logger.warning(
+                f"EngineerProgress has neither 'Engineers' nor 'Progress': {entry=}"
+            )
+            return False
 
-        if "Progress" in entry:
-            # Progress is only a single Engineer, so it's not an array
-            # { "timestamp":"2021-05-24T17:57:52Z",
-            #   "event":"EngineerProgress",
-            #   "Engineer":"Felicity Farseer",
-            #   "EngineerID":300100,
-            #   "Progress":"Invited" }
-            for f in ("Engineer", "EngineerID", "Rank", "Progress", "RankProgress"):
-                if f not in entry:
-                    # For some Progress there's no Rank/RankProgress yet
-                    if f in ("Rank", "RankProgress"):
-                        if (progress := entry.get("Progress", None)) is not None:
-                            if progress in ("Invited", "Known"):
-                                continue
+        def _validate_engineers(self, engineers):
+            for engineer in engineers:
+                if not all(
+                    field in engineer
+                    for field in ("Engineer", "EngineerID", "Rank", "Progress")
+                ):
+                    if "Progress" in engineer and engineer["Progress"] in (
+                        "Invited",
+                        "Known",
+                    ):
+                        continue
 
-                    logger.warning(f"Progress event without '{f}' key: {entry=}")
+                    logger.warning(
+                        f"Engineer entry without required fields: {engineer=} in {entry=}"
+                    )
                     return False
+            return True
 
+    def _validate_engineer_progress(self, entry):
+        required_fields = ("Engineer", "EngineerID", "Rank", "Progress")
+        if not all(field in entry for field in required_fields):
+            if "Progress" in entry and entry["Progress"] in ("Invited", "Known"):
+                return True
+
+            logger.warning(f"Progress event without required fields: {entry=}")
+            return False
         return True
 
     def suit_loadout_id_from_loadoutid(self, journal_loadoutid: int) -> int:
@@ -2226,13 +1993,9 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         Determine the CAPI-oriented numeric slot id for a Suit Loadout.
 
         :param journal_loadoutid: Journal `LoadoutID` integer value.
-        :return:
+        :return: Numeric slot id for the Suit Loadout.
         """
-        # Observed LoadoutID in SwitchSuitLoadout events are, e.g.
-        # 4293000005 for CAPI slot 5.
-        # This *might* actually be "lower 6 bits", but maybe it's not.
-        slotid = journal_loadoutid - 4293000000
-        return slotid
+        return journal_loadoutid - 4293000000
 
     def canonicalise(self, item: Optional[str]) -> str:
         """
@@ -2252,10 +2015,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         item = item.lower()
         match = self._RE_CANONICALISE.match(item)
 
-        if match:
-            return match.group(1)
-
-        return item
+        return match.group(1) if match else item
 
     def category(self, item: str) -> str:
         """
@@ -2265,11 +2025,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         :return: str - The category for this item.
         """
         match = self._RE_CATEGORY.match(item)
-
-        if match:
-            return match.group(1).capitalize()
-
-        return item.capitalize()
+        return match.group(1).capitalize() if match else item.capitalize()
 
     def get_entry(self) -> Optional[MutableMapping[str, Any]]:
         """
@@ -2323,7 +2079,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             for app in NSWorkspace.sharedWorkspace().runningApplications():
                 if app.bundleIdentifier() == "uk.co.frontier.EliteDangerous":
                     return True
-
         elif sys.platform == "win32":
 
             def WindowTitle(h):  # noqa: N802 # type: ignore
@@ -2338,16 +2093,12 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 name = WindowTitle(hWnd)
                 if name and name.startswith("Elite - Dangerous"):
                     handle = GetProcessHandleFromHwnd(hWnd)
-                    if (
-                        handle
-                    ):  # If GetProcessHandleFromHwnd succeeds then the app is already running as this user
+                    if handle:
                         CloseHandle(handle)
                         return False  # stop enumeration
-
                 return True
 
             return not EnumWindows(EnumWindowsProc(callback), 0)
-
         return False
 
     def ship(self, timestamped=True) -> Optional[MutableMapping[str, Any]]:
@@ -2390,27 +2141,28 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             d["ShipIdent"] = self.state["ShipIdent"]
 
         # sort modules by slot - hardpoints, standard, internal
-        d["Modules"] = []
-
-        for slot in sorted(
-            self.state["Modules"],
-            key=lambda x: (
-                "Hardpoint" not in x,
-                len(standard_order)
-                if x not in standard_order
-                else standard_order.index(x),
-                "Slot" not in x,
-                x,
-            ),
-        ):
-            module = dict(self.state["Modules"][slot])
-            module.pop("Health", None)
-            module.pop("Value", None)
-            d["Modules"].append(module)
+        d["Modules"] = [
+            {
+                k: v
+                for k, v in self.state["Modules"][slot].items()
+                if k not in ("Health", "Value")
+            }
+            for slot in sorted(
+                self.state["Modules"],
+                key=lambda x: (
+                    "Hardpoint" not in x,
+                    len(standard_order)
+                    if x not in standard_order
+                    else standard_order.index(x),
+                    "Slot" not in x,
+                    x,
+                ),
+            )
+        ]
 
         return d
 
-    def export_ship(self, filename=None) -> None:  # noqa: C901, CCR001
+    def export_ship(self, filename=None) -> None:
         """
         Export ship loadout as a Loadout event.
 
@@ -2419,102 +2171,31 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         :param filename: Name of file to write to, if not default.
         """
-        # TODO(A_D): Some type checking has been disabled in here due to config.get getting weird outputs
         string = json.dumps(
             self.ship(False), ensure_ascii=False, indent=2, separators=(",", ": ")
         )  # pretty print
+
         if filename:
             try:
                 with open(filename, "wt", encoding="utf-8") as h:
                     h.write(string)
 
-            except UnicodeError:
-                logger.exception(
-                    "UnicodeError writing ship loadout to specified filename with utf-8 encoding"
-                    ", trying without..."
-                )
+            except (UnicodeError, OSError):
+                logger.exception("Error writing ship loadout to specified filename")
 
-                try:
-                    with open(filename, "wt") as h:
-                        h.write(string)
-
-                except OSError:
-                    logger.exception(
-                        "OSError writing ship loadout to specified filename with default encoding"
-                        ", aborting."
-                    )
-
-            except OSError:
-                logger.exception(
-                    "OSError writing ship loadout to specified filename with utf-8 encoding, aborting."
-                )
-
-            return
-
-        ship = util_ships.ship_file_name(self.state["ShipName"], self.state["ShipType"])
-        regexp = re.compile(
-            re.escape(ship) + r"\.\d{4}\-\d\d\-\d\dT\d\d\.\d\d\.\d\d\.txt"
-        )
-        oldfiles = sorted((x for x in listdir(config.get_str("outdir")) if regexp.match(x)))  # type: ignore
-        if oldfiles:
-            try:
-                with open(join(config.get_str("outdir"), oldfiles[-1]), encoding="utf-8") as h:  # type: ignore
-                    if h.read() == string:
-                        return  # same as last time - don't write
-
-            except UnicodeError:
-                logger.exception(
-                    "UnicodeError reading old ship loadout with utf-8 encoding, trying without..."
-                )
-                try:
-                    with open(join(config.get_str("outdir"), oldfiles[-1])) as h:  # type: ignore
-                        if h.read() == string:
-                            return  # same as last time - don't write
-
-                except OSError:
-                    logger.exception(
-                        "OSError reading old ship loadout default encoding."
-                    )
-
-                except ValueError:
-                    # User was on $OtherEncoding, updated windows to be sane and use utf8 everywhere, thus
-                    # the above open() fails, likely with a UnicodeDecodeError, which subclasses UnicodeError which
-                    # subclasses ValueError, this catches ValueError _instead_ of UnicodeDecodeError just to be sure
-                    # that if some other encoding error crops up we grab it too.
-                    logger.exception(
-                        "ValueError when reading old ship loadout default encoding"
-                    )
-
-            except OSError:
-                logger.exception(
-                    "OSError reading old ship loadout with default encoding"
-                )
-
-        # Write
-        ts = strftime("%Y-%m-%dT%H.%M.%S", localtime(time()))
-        filename = join(config.get_str("outdir"), f"{ship}.{ts}.txt")  # type: ignore
-
-        try:
-            with open(filename, "wt", encoding="utf-8") as h:
-                h.write(string)
-
-        except UnicodeError:
-            logger.exception(
-                "UnicodeError writing ship loadout to new filename with utf-8 encoding, trying without..."
+        else:
+            ship = util_ships.ship_file_name(
+                self.state["ShipName"], self.state["ShipType"]
             )
+            ts = strftime("%Y-%m-%dT%H.%M.%S", localtime(time()))
+            filename = join(config.get_str("outdir"), f"{ship}.{ts}.txt")
+
             try:
-                with open(filename, "wt") as h:
+                with open(filename, "wt", encoding="utf-8") as h:
                     h.write(string)
 
-            except OSError:
-                logger.exception(
-                    "OSError writing ship loadout to new filename with default encoding, aborting."
-                )
-
-        except OSError:
-            logger.exception(
-                "OSError writing ship loadout to new filename with utf-8 encoding, aborting."
-            )
+            except (UnicodeError, OSError):
+                logger.exception("Error writing ship loadout to new filename")
 
     def coalesce_cargo(
         self, raw_cargo: list[MutableMapping[str, Any]]
@@ -2526,46 +2207,20 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         side, this is represented as multiple entries in the `Inventory` List with the same names etc. Just a differing
         MissionID. We (as in EDMC Core) dont want to support the multiple mission IDs, but DO want to have correct cargo
         counts. Thus, we reduce all existing cargo down to one total.
-        >>> test = [
-        ...     { "Name":"basicmedicines", "Name_Localised":"BM", "MissionID":684359162, "Count":147, "Stolen":0 },
-        ...     { "Name":"survivalequipment", "Name_Localised":"SE", "MissionID":684358939, "Count":147, "Stolen":0 },
-        ...     { "Name":"survivalequipment", "Name_Localised":"SE", "MissionID":684359344, "Count":36, "Stolen":0 }
-        ... ]
-        >>> EDLogs().coalesce_cargo(test) # doctest: +NORMALIZE_WHITESPACE
-        [{'Name': 'basicmedicines', 'Name_Localised': 'BM', 'MissionID': 684359162, 'Count': 147, 'Stolen': 0},
-        {'Name': 'survivalequipment', 'Name_Localised': 'SE', 'MissionID': 684358939, 'Count': 183, 'Stolen': 0}]
 
         :param raw_cargo: Raw cargo data (usually from Cargo.json)
         :return: Coalesced data
         """
-        # self.state['Cargo'].update({self.canonicalise(x['Name']): x['Count'] for x in entry['Inventory']})
-        out: list[MutableMapping[str, Any]] = []
+        coalesced_cargo: dict[str, MutableMapping[str, Any]] = {}
+
         for inventory_item in raw_cargo:
-            if not any(
-                self.canonicalise(x["Name"])
-                == self.canonicalise(inventory_item["Name"])
-                for x in out
-            ):
-                out.append(dict(inventory_item))
-                continue
+            canonical_name = self.canonicalise(inventory_item["Name"])
+            if canonical_name not in coalesced_cargo:
+                coalesced_cargo[canonical_name] = dict(inventory_item)
+            else:
+                coalesced_cargo[canonical_name]["Count"] += inventory_item["Count"]
 
-            # We've seen this before, update that count
-            x = list(
-                filter(
-                    lambda x: self.canonicalise(x["Name"])
-                    == self.canonicalise(inventory_item["Name"]),
-                    out,
-                )
-            )
-
-            if len(x) != 1:
-                logger.debug(
-                    f"Unexpected number of items: {len(x)} where 1 was expected. {x}"
-                )
-
-            x[0]["Count"] += inventory_item["Count"]
-
-        return out
+        return list(coalesced_cargo.values())
 
     def suit_loadout_slots_array_to_dict(self, loadout: dict) -> dict:
         """
@@ -2574,25 +2229,103 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         :param loadout: e.g. Journal 'CreateSuitLoadout'->'Modules'.
         :return: CAPI-style dict for a suit loadout.
         """
-        loadout_slots = {x["SlotName"]: x for x in loadout}
         slots = {}
-        for s in ("PrimaryWeapon1", "PrimaryWeapon2", "SecondaryWeapon"):
-            if loadout_slots.get(s) is None:
-                continue
 
-            slots[s] = {
-                "name": loadout_slots[s]["ModuleName"],
-                "id": None,  # FDevID ?
-                "weaponrackId": loadout_slots[s]["SuitModuleID"],
-                "locName": loadout_slots[s].get(
-                    "ModuleName_Localised", loadout_slots[s]["ModuleName"]
-                ),
-                "locDescription": "",
-                "class": loadout_slots[s]["Class"],
-                "mods": loadout_slots[s]["WeaponMods"],
-            }
+        for module in loadout:
+            slot_name = module["SlotName"]
+            if slot_name in ("PrimaryWeapon1", "PrimaryWeapon2", "SecondaryWeapon"):
+                slots[slot_name] = {
+                    "name": module["ModuleName"],
+                    "id": None,  # FDevID ?
+                    "weaponrackId": module["SuitModuleID"],
+                    "locName": module.get("ModuleName_Localised", module["ModuleName"]),
+                    "locDescription": "",
+                    "class": module["Class"],
+                    "mods": module["WeaponMods"],
+                }
 
         return slots
+
+    def _parse_file(self, filename: str) -> Optional[dict[str, Any]]:
+        """Read and parse the specified JSON file."""
+        if self.currentdir is None:
+            raise ValueError("currentdir unset")
+
+        try:
+            with open(join(self.currentdir, filename)) as f:
+                raw = f.read()
+
+        except Exception as e:
+            logger.exception(f"Could not open {filename}. Bailing: {e}")
+            return None
+
+        try:
+            data = json.loads(raw)
+
+        except json.JSONDecodeError:
+            logger.exception(f"Failed to decode {filename}", exc_info=True)
+            return None
+
+        if "timestamp" not in data:  # quick sanity check
+            return None
+
+        return data
+
+    def _parse_journal_timestamp(self, source: str) -> float:
+        return mktime(strptime(source, "%Y-%m-%dT%H:%M:%SZ"))
+
+    def __retry_file_parsing(
+        self,
+        filename: str,
+        retries_remaining: int,
+        last_journal_timestamp: Optional[float],
+        data_key: Optional[str] = None,
+    ) -> bool:
+        """Retry reading and parsing JSON files."""
+        if retries_remaining == 0:
+            return False
+
+        logger.debug(f"File read retry [{retries_remaining}]")
+        retries_remaining -= 1
+
+        if last_journal_timestamp is None:
+            logger.critical(
+                f"Asked to retry for {filename} but also no set time to compare? This is a bug."
+            )
+            return False
+
+        if (file := self._parse_file(filename)) is None:
+            logger.debug(
+                f"Failed to parse {filename}. "
+                + ("Trying again" if retries_remaining > 0 else "Giving up")
+            )
+            return False
+
+        # _parse_file verifies that this exists for us
+        file_time = self._parse_journal_timestamp(file["timestamp"])
+        if abs(file_time - last_journal_timestamp) > MAX_FILE_DISCREPANCY:
+            logger.debug(
+                f"Time discrepancy of more than {MAX_FILE_DISCREPANCY}s --"
+                f" ({abs(file_time - last_journal_timestamp)})."
+                f' {"Trying again" if retries_remaining > 0 else "Giving up"}.'
+            )
+            return False
+
+        if data_key is None:
+            # everything is good, set the parsed data
+            logger.info(f"Successfully read {filename} for last event.")
+            self.state[filename[:-5]] = file
+        else:
+            # Handle specific key from data (e.g., "NavRoute" or "FCMaterials")
+            if file["event"].lower() == data_key.lower():
+                logger.info(f"{filename} file contained a {data_key}")
+                # Do not copy into/clear the `self.state[data_key]`
+            else:
+                # everything is good, set the parsed data
+                logger.info(f"Successfully read {filename} for last {data_key} event.")
+                self.state[data_key] = file
+
+        return True
 
     def _parse_navroute_file(self) -> Optional[dict[str, Any]]:
         """Read and parse NavRoute.json."""
@@ -2643,10 +2376,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             return None
 
         return data
-
-    @staticmethod
-    def _parse_journal_timestamp(source: str) -> float:
-        return mktime(strptime(source, "%Y-%m-%dT%H:%M:%SZ"))
 
     def __navroute_retry(self) -> bool:
         """Retry reading navroute files."""

@@ -73,7 +73,8 @@ def generate_data_files(
                 "ChangeLog.md",
                 "snd_good.wav",
                 "snd_bad.wav",
-                "modules.p",
+                "modules.p",  # TODO: Remove in 6.0
+                "resources/modules.json",
                 "resources/ships.json",
                 "ships.p",  # TODO: Remove in 6.0
                 f"{app_name}.VisualElementsManifest.xml",

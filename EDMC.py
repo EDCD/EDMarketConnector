@@ -1,5 +1,10 @@
-#!/usr/bin/env python3
-"""Command-line interface. Requires prior setup through the GUI."""
+"""
+EDMC.py - Command-line interface. Requires prior setup through the GUI.
+
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
+"""
 import argparse
 import json
 import locale
@@ -12,7 +17,6 @@ from time import sleep, time
 from typing import TYPE_CHECKING, Any, List, Optional, Union
 
 # isort: off
-
 os.environ["EDMC_NO_UI"] = "1"
 
 # See EDMCLogging.py docs.
@@ -25,7 +29,6 @@ if TYPE_CHECKING:
 edmclogger.set_channels_loglevel(logging.INFO)
 
 # isort: on
-
 import collate
 import commodity
 import companion
@@ -62,7 +65,6 @@ Locale LC_TIME: {locale.getlocale(locale.LC_TIME)}"""
 
 
 l10n.Translations.install_dummy()
-
 SERVER_RETRY = 5  # retry pause for Companion servers [s]
 (
     EXIT_SUCCESS,
@@ -87,7 +89,6 @@ def deep_get(target: Union[dict, companion.CAPIData], *args: str, default=None) 
     Walk into a dict and return the specified deep value.
 
     Example usage:
-
         >>> thing = {'a': {'b': {'c': 'foo'} } }
         >>> deep_get(thing, ('a', 'b', 'c'), None)
         'foo'
@@ -109,9 +110,7 @@ def deep_get(target: Union[dict, companion.CAPIData], *args: str, default=None) 
         res = current.get(arg)
         if res is None:
             return default
-
         current = res
-
     return current
 
 

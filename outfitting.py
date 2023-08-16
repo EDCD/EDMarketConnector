@@ -1,5 +1,10 @@
-"""Code dealing with ship outfitting."""
+"""
+outfitting.py - Code dealing with ship outfitting.
 
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
+"""
 import pickle
 from collections import OrderedDict
 from os.path import join
@@ -51,7 +56,7 @@ def lookup(module, ship_map, entitled=False) -> Optional[dict]:  # noqa: C901, C
     """
     # Lazily populate
     if not moduledata:
-        modules_file_path = join(config.respath_path, "modules.p")
+        modules_file_path = join(config.respath_path, "resources/modules.json")
         with open(modules_file_path, "rb") as file:
             moduledata.update(pickle.load(file))
 
