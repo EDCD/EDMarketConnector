@@ -1159,20 +1159,21 @@ class EDLogs(FileSystemEventHandler):
                     )
 
                 # Check for required categories in ShipLocker event
-                required_categories = ("Components", "Consumables", "Data", "Items")
+                required_categories = (
+                    ("Components", "Component"),
+                    ("Consumables", "Consumable"),
+                    ("Data", "Data"),
+                    ("Items", "Item"),
+                )
                 if not all(t in entry for t in required_categories):
                     logger.warning("ShipLocker event is missing at least one category")
 
-                # Reset current state for Component, Consumable, Item, and Data
-                self.state["Component"] = defaultdict(int)
-                self.state["Consumable"] = defaultdict(int)
-                self.state["Item"] = defaultdict(int)
-                self.state["Data"] = defaultdict(int)
-
                 # Coalesce and update each category
                 for category in required_categories:
-                    clean_category = self.coalesce_cargo(entry[category])
-                    self.state[category].update(
+                    # Reset current state for Component, Consumable, Item, and Data
+                    self.state[category[1]] = defaultdict(int)
+                    clean_category = self.coalesce_cargo(entry[category[0]])
+                    self.state[category[1]].update(
                         {
                             self.canonicalise(x["Name"]): x["Count"]
                             for x in clean_category
