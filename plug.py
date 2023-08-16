@@ -353,15 +353,23 @@ def notify_journal_entry(
     if entry["event"] in "Location":
         logger.trace_if("journal.locations", 'Notifying plugins of "Location" event')
 
-    return _notify_plugins(
-        "journal_entry",
-        {"entry": entry, "state": state},
-        "sending journal entry",
-        cmdr=cmdr,
-        is_beta=is_beta,
-        system=system,
-        station=station,
-    )
+    error = None
+    for plugin in PLUGINS:
+        journal_entry = plugin._get_func('journal_entry')
+        if journal_entry:
+            try:
+                newerror = journal_entry(
+                    cmdr=cmdr,
+                    is_beta=is_beta,
+                    system=system,
+                    station=station,
+                    entry=dict(entry),
+                    state=dict(state)
+                )
+                error = error or newerror
+            except Exception:
+                logger.exception(f'Plugin "{plugin.name}" failed')
+    return error
 
 
 def notify_journal_entry_cqc(
@@ -376,27 +384,16 @@ def notify_journal_entry_cqc(
     :param is_beta: whether the player is in a Beta universe.
     :returns: Error message from the first plugin that returns one (if any)
     """
-    return _notify_plugins(
-        "journal_entry_cqc",
-        {"entry": entry, "state": state},
-        "sending CQC journal entry",
-        cmdr=cmdr,
-        is_beta=is_beta,
-    )
-
-
-def _notify_plugins(
-    plugin_type: str, data: Any, error_message: str, **kwargs
-) -> Optional[str]:
     error = None
     for plugin in PLUGINS:
-        callback = plugin._get_func(plugin_type)
-        if callback is not None and callable(callback):
+        cqc_callback = plugin._get_func('journal_entry_cqc')
+        if cqc_callback is not None and callable(cqc_callback):
             try:
-                new_error = callback(copy.deepcopy(data), **kwargs)
-                error = error or new_error
+                # Pass a copy of the journal entry in case the callee modifies it
+                newerror = cqc_callback(cmdr, is_beta, copy.deepcopy(entry), copy.deepcopy(state))
+                error = error or newerror
             except Exception:
-                logger.exception(f'Plugin "{plugin.name}" failed: {error_message}')
+                logger.exception(f'Plugin "{plugin.name}" failed while handling CQC mode journal entry')
 
     return error
 
@@ -412,10 +409,17 @@ def notify_dashboard_entry(
     :param entry: The status entry as a dictionary
     :returns: Error message from the first plugin that returns one (if any)
     """
-    return _notify_plugins(
-        "dashboard_entry", entry, "sending status entry", cmdr=cmdr, is_beta=is_beta
-    )
-
+    error = None
+    for plugin in PLUGINS:
+        status = plugin._get_func('dashboard_entry')
+        if status:
+            try:
+                # Pass a copy of the status entry in case the callee modifies it
+                newerror = status(cmdr, is_beta, dict(entry))
+                error = error or newerror
+            except Exception:
+                logger.exception(f'Plugin "{plugin.name}" failed')
+    return error
 
 def notify_capidata(data: companion.CAPIData, is_beta: bool) -> Optional[str]:
     """
@@ -425,14 +429,20 @@ def notify_capidata(data: companion.CAPIData, is_beta: bool) -> Optional[str]:
     :param is_beta: whether the player is in a Beta universe.
     :returns: Error message from the first plugin that returns one (if any)
     """
-    return _notify_plugins(
-        "cmdr_data_legacy"
-        if data.source_host == companion.SERVER_LEGACY
-        else "cmdr_data",
-        data,
-        "sending EDMC data",
-        is_beta=is_beta,
-    )
+    error = None
+    for plugin in PLUGINS:
+        # TODO: Handle it being Legacy data
+        if data.source_host == companion.SERVER_LEGACY:
+            cmdr_data = plugin._get_func('cmdr_data_legacy')
+        else:
+            cmdr_data = plugin._get_func('cmdr_data')
+        if cmdr_data:
+            try:
+                newerror = cmdr_data(data, is_beta)
+                error = error or newerror
+            except Exception:
+                logger.exception(f'Plugin "{plugin.name}" failed')
+    return error
 
 
 def notify_capi_fleetcarrierdata(data: companion.CAPIData) -> Optional[str]:
@@ -442,7 +452,17 @@ def notify_capi_fleetcarrierdata(data: companion.CAPIData) -> Optional[str]:
     :param data: The CAPIData returned in the CAPI response
     :returns: Error message from the first plugin that returns one (if any)
     """
-    return _notify_plugins("capi_fleetcarrier", data, "receiving Fleetcarrier data")
+    error = None
+    for plugin in PLUGINS:
+        fc_callback = plugin._get_func('capi_fleetcarrier')
+        if fc_callback is not None and callable(fc_callback):
+            try:
+                # Pass a copy of the CAPIData in case the callee modifies it
+                newerror = fc_callback(copy.deepcopy(data))
+                error = error if error else newerror
+            except Exception:
+                logger.exception(f'Plugin "{plugin.name}" failed on receiving Fleetcarrier data')
+    return error
 
 
 def show_error(err: str) -> None:
