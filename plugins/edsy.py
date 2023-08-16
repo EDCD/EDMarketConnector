@@ -32,7 +32,7 @@ def plugin_start3(plugin_dir: str) -> str:
     :param plugin_dir: NAme of directory this was loaded from.
     :return: Identifier string for this plugin.
     """
-    return "EDSY"
+    return 'EDSY'
 
 
 # Return a URL for the current ship
@@ -45,18 +45,16 @@ def shipyard_url(loadout: Mapping[str, Any], is_beta: bool) -> Union[bool, str]:
     :return: The constructed URL for the ship loadout.
     """
     # Convert loadout to JSON and gzip compress it
-    string = json.dumps(
-        loadout, ensure_ascii=False, sort_keys=True, separators=(",", ":")
-    ).encode("utf-8")
+    string = json.dumps(loadout, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode('utf-8')
     if not string:
         return False
 
     out = io.BytesIO()
-    with gzip.GzipFile(fileobj=out, mode="w") as f:
+    with gzip.GzipFile(fileobj=out, mode='w') as f:
         f.write(string)
 
     # Construct the URL using the appropriate base URL based on is_beta
-    base_url = "https://edsy.org/beta/#/I=" if is_beta else "https://edsy.org/#/I="
-    encoded_data = base64.urlsafe_b64encode(out.getvalue()).decode().replace("=", "%3D")
+    base_url = 'https://edsy.org/beta/#/I=' if is_beta else 'https://edsy.org/#/I='
+    encoded_data = base64.urlsafe_b64encode(out.getvalue()).decode().replace('=', '%3D')
 
     return base_url + encoded_data

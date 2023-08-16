@@ -11,9 +11,9 @@ found necessary to move out of other files.
 """
 
 # config.py
-appname = "EDMarketConnector"
-applongname = "E:D Market Connector"
-GITVERSION_FILE = ".gitversion"
+appname = 'EDMarketConnector'
+applongname = 'E:D Market Connector'
+GITVERSION_FILE = '.gitversion'
 
 # protocol.py
-protocolhandler_redirect = "edmc://auth"
+protocolhandler_redirect = 'edmc://auth'

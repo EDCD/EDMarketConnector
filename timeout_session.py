@@ -42,7 +42,7 @@ def new_session(
     :return: The created Session
     """
     with Session() as session:
-        session.headers["User-Agent"] = user_agent
+        session.headers['User-Agent'] = user_agent
         adapter = TimeoutAdapter(timeout)
         session.mount("http://", adapter)
         session.mount("https://", adapter)

@@ -26,13 +26,11 @@ from tkinter import ttk
 from typing import TYPE_CHECKING, Any, Optional
 
 if TYPE_CHECKING:
-
-    def _(x: str) -> str:
-        ...
+    def _(x: str) -> str: ...
 
 
 # FIXME: Split this into multi-file module to separate the platforms
-class HyperlinkLabel(sys.platform == "darwin" and tk.Label or ttk.Label):
+class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label):
     """
     Clickable label for HTTP links.
 
@@ -49,47 +47,40 @@ class HyperlinkLabel(sys.platform == "darwin" and tk.Label or ttk.Label):
         """
         self.font_u = None
         self.font_n = None
-        self.url = kw.pop("url", None)
-        self.popup_copy = kw.pop("popup_copy", False)
-        self.underline = kw.pop("underline", None)  # override ttk.Label's underline
-        self.foreground = kw.get("foreground", "blue")
-        self.disabledforeground = kw.pop(
-            "disabledforeground",
-            ttk.Style().lookup("TLabel", "foreground", ("disabled",)),
-        )  # ttk.Label doesn't support disabledforeground option
+        self.url = kw.pop('url', None)
+        self.popup_copy = kw.pop('popup_copy', False)
+        self.underline = kw.pop('underline', None)  # override ttk.Label's underline
+        self.foreground = kw.get('foreground', 'blue')
+        self.disabledforeground = kw.pop('disabledforeground', ttk.Style().lookup(
+            'TLabel', 'foreground', ('disabled',)))  # ttk.Label doesn't support disabledforeground option
 
-        if sys.platform == "darwin":
+        if sys.platform == 'darwin':
             # Use tk.Label 'cos can't set ttk.Label background - http://www.tkdocs.com/tutorial/styles.html#whydifficult
-            kw["background"] = kw.pop("background", "systemDialogBackgroundActive")
-            kw["anchor"] = kw.pop("anchor", tk.W)  # like ttk.Label
+            kw['background'] = kw.pop('background', 'systemDialogBackgroundActive')
+            kw['anchor'] = kw.pop('anchor', tk.W)  # like ttk.Label
             tk.Label.__init__(self, master, **kw)
         else:
             ttk.Label.__init__(self, master, **kw)
 
-        self.bind("<Button-1>", self._click)
+        self.bind('<Button-1>', self._click)
 
         self.menu = tk.Menu(tearoff=tk.FALSE)
         # LANG: Label for 'Copy' as in 'Copy and Paste'
-        self.menu.add_command(
-            label=_("Copy"), command=self.copy
-        )  # As in Copy and Paste
-        self.bind(
-            sys.platform == "darwin" and "<Button-2>" or "<Button-3>", self._contextmenu
-        )
+        self.menu.add_command(label=_('Copy'), command=self.copy)  # As in Copy and Paste
+        self.bind(sys.platform == 'darwin' and '<Button-2>' or '<Button-3>', self._contextmenu)
 
-        self.bind("<Enter>", self._enter)
-        self.bind("<Leave>", self._leave)
+        self.bind('<Enter>', self._enter)
+        self.bind('<Leave>', self._leave)
 
         # set up initial appearance
         self.configure(
-            state=kw.get("state", tk.NORMAL),
-            text=kw.get("text"),
-            font=kw.get("font", ttk.Style().lookup("TLabel", "font")),
+            state=kw.get('state', tk.NORMAL),
+            text=kw.get('text'),
+            font=kw.get('font', ttk.Style().lookup('TLabel', 'font'))
         )
 
-    def configure(  # noqa: CCR001
-        self, cnf: Optional[dict[str, Any]] = None, **kw: Any
-    ) -> Optional[dict[str, tuple[str, str, str, Any, Any]]]:  # noqa: CCR001
+    def configure(self, cnf: Optional[dict[str, Any]] = None, **kw: Any) ->\
+            Optional[dict[str, tuple[str, str, str, Any, Any]]]:  # noqa: CCR001
         """
         Change cursor and appearance depending on state and text.
 
@@ -98,42 +89,39 @@ class HyperlinkLabel(sys.platform == "darwin" and tk.Label or ttk.Label):
         :return: A dictionary of configuration options.
         """
         # Update widget properties based on kw arguments
-        for thing in ["url", "popup_copy", "underline"]:
+        for thing in ['url', 'popup_copy', 'underline']:
             if thing in kw:
                 setattr(self, thing, kw.pop(thing))
 
-        for thing in ["foreground", "disabledforeground"]:
+        for thing in ['foreground', 'disabledforeground']:
             if thing in kw:
                 setattr(self, thing, kw[thing])
 
         # Emulate disabledforeground option for ttk.Label
-        if "state" in kw:
-            state = kw["state"]
-            if state == tk.DISABLED and "foreground" not in kw:
-                kw["foreground"] = self.disabledforeground
-            elif state != tk.DISABLED and "foreground" not in kw:
-                kw["foreground"] = self.foreground
+        if 'state' in kw:
+            state = kw['state']
+            if state == tk.DISABLED and 'foreground' not in kw:
+                kw['foreground'] = self.disabledforeground
+            elif state != tk.DISABLED and 'foreground' not in kw:
+                kw['foreground'] = self.foreground
 
         # Set font based on underline option
-        if "font" in kw:
-            self.font_n = kw["font"]
+        if 'font' in kw:
+            self.font_n = kw['font']
             self.font_u = tk_font.Font(font=self.font_n)
             self.font_u.configure(underline=True)
-            kw["font"] = self.font_u if self.underline is True else self.font_n
+            kw['font'] = self.font_u if self.underline is True else self.font_n
 
         # Set cursor based on state and URL
-        if "cursor" not in kw:
-            state = kw.get("state", str(self["state"]))
+        if 'cursor' not in kw:
+            state = kw.get('state', str(self['state']))
             if state == tk.DISABLED:
-                kw["cursor"] = "arrow"  # System default
-            elif self.url and (kw["text"] if "text" in kw else self["text"]):
-                kw["cursor"] = "pointinghand" if sys.platform == "darwin" else "hand2"
+                kw['cursor'] = 'arrow'  # System default
+            elif self.url and (kw['text'] if 'text' in kw else self['text']):
+                kw['cursor'] = 'pointinghand' if sys.platform == 'darwin' else 'hand2'
             else:
-                kw["cursor"] = (
-                    "notallowed"
-                    if sys.platform == "darwin"
-                    else ("no" if sys.platform == "win32" else "circle")
-                )
+                kw['cursor'] = 'notallowed' if sys.platform == 'darwin' else (
+                    'no' if sys.platform == 'win32' else 'circle')
 
         return super().configure(cnf, **kw)
 
@@ -147,11 +135,7 @@ class HyperlinkLabel(sys.platform == "darwin" and tk.Label or ttk.Label):
         self.configure(**{key: value})
 
     def _enter(self, event: tk.Event) -> None:
-        if (
-            self.url
-            and self.underline is not False
-            and str(self["state"]) != tk.DISABLED
-        ):
+        if self.url and self.underline is not False and str(self['state']) != tk.DISABLED:
             super().configure(font=self.font_u)
 
     def _leave(self, event: tk.Event) -> None:
@@ -159,29 +143,20 @@ class HyperlinkLabel(sys.platform == "darwin" and tk.Label or ttk.Label):
             super().configure(font=self.font_n)
 
     def _click(self, event: tk.Event) -> None:
-        if self.url and self["text"] and str(self["state"]) != tk.DISABLED:
-            url = self.url(self["text"]) if callable(self.url) else self.url
+        if self.url and self['text'] and str(self['state']) != tk.DISABLED:
+            url = self.url(self['text']) if callable(self.url) else self.url
             if url:
-                self._leave(
-                    event
-                )  # Remove underline before we change window to browser
+                self._leave(event)  # Remove underline before we change window to browser
                 openurl(url)
 
     def _contextmenu(self, event: tk.Event) -> None:
-        if self["text"] and (
-            self.popup_copy(self["text"])
-            if callable(self.popup_copy)
-            else self.popup_copy
-        ):
-            self.menu.post(
-                sys.platform == "darwin" and event.x_root + 1 or event.x_root,
-                event.y_root,
-            )
+        if self['text'] and (self.popup_copy(self['text']) if callable(self.popup_copy) else self.popup_copy):
+            self.menu.post(sys.platform == 'darwin' and event.x_root + 1 or event.x_root, event.y_root)
 
     def copy(self) -> None:
         """Copy the current text to the clipboard."""
         self.clipboard_clear()
-        self.clipboard_append(self["text"])
+        self.clipboard_append(self['text'])
 
 
 def openurl(url: str) -> None:

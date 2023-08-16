@@ -11,7 +11,7 @@ from typing import Union
 from EDMCLogging import get_main_logger
 from hotkey import AbstractHotkeyMgr
 
-assert sys.platform == "linux"
+assert sys.platform == 'linux'
 
 logger = get_main_logger()
 

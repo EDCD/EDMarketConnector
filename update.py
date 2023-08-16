@@ -55,7 +55,7 @@ class Updater:
     def shutdown_request(self) -> None:
         """Receive (Win)Sparkle shutdown request and send it to parent."""
         if not config.shutting_down and self.root:
-            self.root.event_generate("<<Quit>>", when="tail")
+            self.root.event_generate('<<Quit>>', when="tail")
 
     def use_internal(self) -> bool:
         """
@@ -63,26 +63,26 @@ class Updater:
 
         :return: bool
         """
-        if self.provider == "internal":
+        if self.provider == 'internal':
             return True
 
         return False
 
-    def __init__(self, tkroot: Optional["tk.Tk"] = None, provider: str = "internal"):
+    def __init__(self, tkroot: Optional['tk.Tk'] = None, provider: str = 'internal'):
         """
         Initialise an Updater instance.
 
         :param tkroot: reference to the root window of the GUI
         :param provider: 'internal' or other string if not
         """
-        self.root: Optional["tk.Tk"] = tkroot
+        self.root: Optional['tk.Tk'] = tkroot
         self.provider: str = provider
         self.thread: Optional[threading.Thread] = None
 
         if self.use_internal():
             return
 
-        if sys.platform == "win32":
+        if sys.platform == 'win32':
             import ctypes
 
             try:
@@ -96,9 +96,7 @@ class Updater:
                 # NB: It 'accidentally' supports pre-release due to how it
                 # splits and compares strings:
                 # <https://github.com/vslavik/winsparkle/issues/214>
-                self.updater.win_sparkle_set_app_build_version(
-                    str(appversion_nobuild())
-                )
+                self.updater.win_sparkle_set_app_build_version(str(appversion_nobuild()))
 
                 # set up shutdown callback
                 self.callback_t = ctypes.CFUNCTYPE(None)  # keep reference
@@ -114,19 +112,12 @@ class Updater:
 
             return
 
-        if sys.platform == "darwin":
+        if sys.platform == 'darwin':
             import objc
 
             try:
                 objc.loadBundle(
-                    "Sparkle",
-                    globals(),
-                    join(
-                        dirname(sys.executable),
-                        os.pardir,
-                        "Frameworks",
-                        "Sparkle.framework",
-                    ),
+                    'Sparkle', globals(), join(dirname(sys.executable), os.pardir, 'Frameworks', 'Sparkle.framework')
                 )
                 # loadBundle presumably supplies `SUUpdater`
                 self.updater = SUUpdater.sharedUpdater()  # noqa: F821
@@ -145,23 +136,23 @@ class Updater:
         if self.use_internal():
             return
 
-        if sys.platform == "win32" and self.updater:
+        if sys.platform == 'win32' and self.updater:
             self.updater.win_sparkle_set_automatic_check_for_updates(onoroff)
 
-        if sys.platform == "darwin" and self.updater:
+        if sys.platform == 'darwin' and self.updater:
             self.updater.SUEnableAutomaticChecks(onoroff)
 
     def check_for_updates(self) -> None:
         """Trigger the requisite method to check for an update."""
         if self.use_internal():
-            self.thread = threading.Thread(target=self.worker, name="update worker")
+            self.thread = threading.Thread(target=self.worker, name='update worker')
             self.thread.daemon = True
             self.thread.start()
 
-        elif sys.platform == "win32" and self.updater:
+        elif sys.platform == 'win32' and self.updater:
             self.updater.win_sparkle_check_update_with_ui()
 
-        elif sys.platform == "darwin" and self.updater:
+        elif sys.platform == 'darwin' and self.updater:
             self.updater.checkForUpdates_(None)
 
     def check_appcast(self) -> Optional[EDMCVersion]:
@@ -178,7 +169,7 @@ class Updater:
             request = requests.get(update_feed, timeout=10)
 
         except requests.RequestException as ex:
-            logger.exception(f"Error retrieving update_feed file: {ex}")
+            logger.exception(f'Error retrieving update_feed file: {ex}')
 
             return None
 
@@ -186,25 +177,25 @@ class Updater:
             feed = ElementTree.fromstring(request.text)
 
         except SyntaxError as ex:
-            logger.exception(f"Syntax error in update_feed file: {ex}")
+            logger.exception(f'Syntax error in update_feed file: {ex}')
 
             return None
 
-        if sys.platform == "darwin":
-            sparkle_platform = "macos"
+        if sys.platform == 'darwin':
+            sparkle_platform = 'macos'
 
         else:
             # For *these* purposes anything else is the same as 'windows', as
             # non-win32 would be running from source.
-            sparkle_platform = "windows"
+            sparkle_platform = 'windows'
 
-        for item in feed.findall("channel/item"):
+        for item in feed.findall('channel/item'):
             # xml is a pain with types, hence these ignores
-            ver = item.find("enclosure").attrib.get(  # type: ignore
-                "{http://www.andymatuschak.org/xml-namespaces/sparkle}version"
+            ver = item.find('enclosure').attrib.get(  # type: ignore
+                '{http://www.andymatuschak.org/xml-namespaces/sparkle}version'
             )
-            ver_platform = item.find("enclosure").attrib.get(  # type: ignore
-                "{http://www.andymatuschak.org/xml-namespaces/sparkle}os"
+            ver_platform = item.find('enclosure').attrib.get(  # type: ignore
+                '{http://www.andymatuschak.org/xml-namespaces/sparkle}os'
             )
             if ver_platform != sparkle_platform:
                 continue
@@ -214,12 +205,12 @@ class Updater:
 
             items[semver] = EDMCVersion(
                 version=str(ver),  # sv might have mangled version
-                title=item.find("title").text,  # type: ignore
-                sv=semver,
+                title=item.find('title').text,  # type: ignore
+                sv=semver
             )
 
         # Look for any remaining version greater than appversion
-        simple_spec = semantic_version.SimpleSpec(f">{appversion_nobuild()}")
+        simple_spec = semantic_version.SimpleSpec(f'>{appversion_nobuild()}')
         newversion = simple_spec.select(items.keys())
         if newversion:
             return items[newversion]
@@ -231,8 +222,8 @@ class Updater:
         newversion = self.check_appcast()
 
         if newversion and self.root:
-            status = self.root.nametowidget(f".{appname.lower()}.status")
-            status["text"] = newversion.title + " is available"
+            status = self.root.nametowidget(f'.{appname.lower()}.status')
+            status['text'] = newversion.title + ' is available'
             self.root.update_idletasks()
 
         else:

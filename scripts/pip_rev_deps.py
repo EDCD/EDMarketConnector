@@ -11,13 +11,12 @@ def find_reverse_deps(package_name: str) -> list[str]:
     :return: List of packages that depend on this one.
     """
     return [
-        pkg.project_name
-        for pkg in pkg_resources.WorkingSet()
+        pkg.project_name for pkg in pkg_resources.WorkingSet()
         if package_name in {req.project_name for req in pkg.requires()}
     ]
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     if len(sys.argv) != 2:
         print("Usage: python reverse_deps.py <package_name>")
         sys.exit(1)

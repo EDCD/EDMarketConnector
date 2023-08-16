@@ -16,8 +16,8 @@ from companion import CAPIData
 from config import applongname, appversion, config
 
 # These are specific to Trade Dangerous, so don't move to edmc_data.py
-demandbracketmap = {0: "?", 1: "L", 2: "M", 3: "H"}
-stockbracketmap = {0: "-", 1: "L", 2: "M", 3: "H"}
+demandbracketmap = {0: '?', 1: 'L', 2: 'M', 3: 'H'}
+stockbracketmap = {0: '-', 1: 'L', 2: 'M', 3: 'H'}
 
 
 def export(data: CAPIData) -> None:
@@ -27,42 +27,32 @@ def export(data: CAPIData) -> None:
     Args:  # noqa D407
         data (CAPIData): The data to be exported.
     """
-    data_path = pathlib.Path(config.get_str("outdir"))
-    timestamp = time.strftime(
-        "%Y-%m-%dT%H.%M.%S", time.strptime(data["timestamp"], "%Y-%m-%dT%H:%M:%SZ")
-    )
+    data_path = pathlib.Path(config.get_str('outdir'))
+    timestamp = time.strftime('%Y-%m-%dT%H.%M.%S', time.strptime(data['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
     data_filename = f"{data['lastSystem']['name'].strip()}.{data['lastStarport']['name'].strip()}.{timestamp}.prices"
 
-    with open(data_path / data_filename, "wb") as trade_file:
-        trade_file.write("#! trade.py import -\n".encode("utf-8"))
-        this_platform = "Mac OS" if sys.platform == "darwin" else system()
-        cmdr_name = data["commander"]["name"].strip()
+    with open(data_path / data_filename, 'wb') as trade_file:
+        trade_file.write('#! trade.py import -\n'.encode('utf-8'))
+        this_platform = 'Mac OS' if sys.platform == 'darwin' else system()
+        cmdr_name = data['commander']['name'].strip()
         trade_file.write(
-            f"# Created by {applongname} {appversion()} on {this_platform} for Cmdr {cmdr_name}.\n".encode(
-                "utf-8"
-            )
-        )
+            f'# Created by {applongname} {appversion()} on {this_platform} for Cmdr {cmdr_name}.\n'.encode('utf-8'))
         trade_file.write(
-            "#\n#    <item name>             <sellCR> <buyCR>   <demand>   <stock>  <timestamp>\n\n".encode(
-                "utf-8"
-            )
-        )
-        system_name = data["lastSystem"]["name"].strip()
-        starport_name = data["lastStarport"]["name"].strip()
-        trade_file.write(f"@ {system_name}/{starport_name}\n".encode("utf-8"))
+            '#\n#    <item name>             <sellCR> <buyCR>   <demand>   <stock>  <timestamp>\n\n'.encode('utf-8'))
+        system_name = data['lastSystem']['name'].strip()
+        starport_name = data['lastStarport']['name'].strip()
+        trade_file.write(f'@ {system_name}/{starport_name}\n'.encode('utf-8'))
 
         by_category = defaultdict(list)
-        for commodity in data["lastStarport"]["commodities"]:
-            by_category[commodity["categoryname"]].append(commodity)
+        for commodity in data['lastStarport']['commodities']:
+            by_category[commodity['categoryname']].append(commodity)
 
-        timestamp = time.strftime(
-            "%Y-%m-%d %H:%M:%S", time.strptime(data["timestamp"], "%Y-%m-%dT%H:%M:%SZ")
-        )
+        timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.strptime(data['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
         for category in sorted(by_category):
-            trade_file.write(f"   + {category}\n".encode("utf-8"))
-            for commodity in sorted(by_category[category], key=itemgetter("name")):
-                demand_bracket = demandbracketmap.get(commodity["demandBracket"], "")
-                stock_bracket = stockbracketmap.get(commodity["stockBracket"], "")
+            trade_file.write(f'   + {category}\n'.encode('utf-8'))
+            for commodity in sorted(by_category[category], key=itemgetter('name')):
+                demand_bracket = demandbracketmap.get(commodity['demandBracket'], '')
+                stock_bracket = stockbracketmap .get(commodity['stockBracket'], '')
                 trade_file.write(
                     f"      {commodity['name']:<23}"
                     f" {int(commodity['sellPrice']):7d}"
@@ -71,5 +61,5 @@ def export(data: CAPIData) -> None:
                     f"{demand_bracket:1}"
                     f" {int(commodity['stock']) if commodity['stockBracket'] else '':8}"
                     f"{stock_bracket:1}"
-                    f"  {timestamp}\n".encode("utf-8")
+                    f"  {timestamp}\n".encode('utf-8')
                 )
