@@ -1165,7 +1165,7 @@ class EDLogs(FileSystemEventHandler):
                     ("Data", "Data"),
                     ("Items", "Item"),
                 )
-                if not all(t in entry for t in required_categories):
+                if not all(category[0] in entry for category in required_categories):
                     logger.warning("ShipLocker event is missing at least one category")
 
                 # Coalesce and update each category
