@@ -115,4 +115,4 @@ Root: HKCR; Subkey: "edmc\shell\open\command"; ValueType: string; ValueName: "";
 Root: HKCR; Subkey: "edmc\shell\open\ddeexec"; ValueType: string; ValueName: ""; ValueData: "Open(""%1"")"; Flags: uninsdeletekey
 
 [InstallDelete]
-Type: filesandordirs; Name: "{app}/plugins"
+Type: filesandordirs; Name: "{app}"
