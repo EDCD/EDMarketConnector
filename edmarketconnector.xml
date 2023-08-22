@@ -22,15 +22,22 @@
       </item>
       <!-- Windows -->
       <item>
-         <title>Release 5.9.4</title>
+         <title>Release 5.9.5</title>
          <description><![CDATA[<style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
 
 <p>We now test against, and package with, Python 3.11.1.</p>
 <p><strong>As a consequence of this we no longer support Windows 7.</strong><br>
 
+<h2>Release 5.9.5</h2>
+<p>This release fixes an uncommon problem with the uninstaller logic if upgrading from a version prior to 5.9.0 to improve consistancy across versions.</p>
+<em>Note to plugin developers: modules.p and ships.p will be deprecated in the next version, and slated for removal in the next major release! Please look for that change coming soon.</em>
+<ul>
+<li>Updates Module pickle files to latest values.</li>
+<li>Fixes a problem with the uninstaller logic caused by prior versions having fluctuating GUIDs.</li>
+</ul><hr>
+
 <h2>Release 5.9.4</h2>
-<p>This release fixes a widely-reported bug that resulted in the cAPI Authentication flow being disrupted for a subset of users. Thank you to all the CMDRs who reported this to us and provided logs to us so that we could get the issue isolated.
-</p>
+<p>This release fixes a widely-reported bug that resulted in the cAPI Authentication flow being disrupted for a subset of users. Thank you to all the CMDRs who reported this to us and provided logs to us so that we could get the issue isolated.</p>
 <ul>
 <li>Fixes a missing registry issue that could cause the EDMC:// protocol to fail. (#2061, #2059, #2058, #2057)</li>
 <li>Renames the default start menu shortcut to be more clear. (#2062)</li>
@@ -2050,7 +2057,7 @@ about this:
 <a href="https://issues.frontierstore.net/issue-detail/28638" rel="nofollow">PTS CAPI saying Commander is Docked after jumping to new system</a>.</p>
 </li>
 </ul>]]></description>
-         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F5.9.4/EDMarketConnector_Installer_5.9.4.exe" sparkle:os="windows" sparkle:version="5.9.4" length="14486541" type="application/x-ms-dos-executable" />
+         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F5.9.5/EDMarketConnector_Installer_5.9.5.exe" sparkle:os="windows" sparkle:version="5.9.5" length="0" type="application/x-ms-dos-executable" />
       </item>
    </channel>
 </rss>
