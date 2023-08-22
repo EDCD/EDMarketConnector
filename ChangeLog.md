@@ -33,6 +33,17 @@ produce the Windows executables and installer.
   currently used version in a given branch.
 
 ---
+Release 5.9.5
+===
+This release fixes an uncommon problem with the uninstaller logic if upgrading from a version prior
+to 5.9.0 to improve consistancy across versions.
+
+Note to plugin developers: modules.p and ships.p will be deprecated in the next version, and slated
+for removal in the next major release! Please look for that change coming soon. 
+
+- Updates Module pickle files to latest values
+- Fixes a problem with the uninstaller logic caused by prior versions having fluctuating GUIDs.
+
 Release 5.9.4
 ===
 This release fixes a widely-reported bug that resulted in the cAPI Authentication
