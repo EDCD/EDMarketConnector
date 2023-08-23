@@ -826,8 +826,10 @@ class AppWindow:
 
         :param visible: Force visibility to this.
         """
-        if visible is None:
-            visible = not self.suit_shown
+        if visible is True:
+            self.suit_shown = False
+        elif visible is False:
+            self.suit_shown = True
 
         if not self.suit_shown:
             pady = 2 if sys.platform != 'win32' else 0

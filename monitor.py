@@ -2315,19 +2315,17 @@ class EDLogs(FileSystemEventHandler):
         """
         slots = {}
 
-        for slot_name in ("PrimaryWeapon1", "PrimaryWeapon2", "SecondaryWeapon"):
-            slot_data = loadout.get(slot_name)
-            if slot_data:
+        for module in loadout:
+            slot_name = module["SlotName"]
+            if slot_name in ("PrimaryWeapon1", "PrimaryWeapon2", "SecondaryWeapon"):
                 slots[slot_name] = {
-                    "name": slot_data["ModuleName"],
-                    "id": None,  # FDevID?
-                    "weaponrackId": slot_data["SuitModuleID"],
-                    "locName": slot_data.get(
-                        "ModuleName_Localised", slot_data["ModuleName"]
-                    ),
+                    "name": module["ModuleName"],
+                    "id": None,  # FDevID ?
+                    "weaponrackId": module["SuitModuleID"],
+                    "locName": module.get("ModuleName_Localised", module["ModuleName"]),
                     "locDescription": "",
-                    "class": slot_data["Class"],
-                    "mods": slot_data["WeaponMods"],
+                    "class": module["Class"],
+                    "mods": module["WeaponMods"],
                 }
 
         return slots
