@@ -7,9 +7,12 @@ See LICENSE file.
 """
 import contextlib
 import logging
+import pathlib
 import sys
+import tempfile
 import tkinter as tk
 import webbrowser
+from os import system
 from os.path import expanduser, expandvars, join, normpath
 from tkinter import colorchooser as tkColorChooser  # type: ignore # noqa: N812
 from tkinter import ttk
@@ -19,12 +22,12 @@ import myNotebook as nb  # noqa: N813
 import plug
 from config import applongname, appversion_nobuild, config
 from EDMCLogging import edmclogger, get_main_logger
+from constants import appname
 from hotkey import hotkeymgr
 from l10n import Translations
 from monitor import monitor
 from theme import theme
 from ttkHyperlinkLabel import HyperlinkLabel
-
 logger = get_main_logger()
 
 if TYPE_CHECKING:
@@ -41,6 +44,21 @@ if TYPE_CHECKING:
 ###########################################################################
 
 # May be imported by plugins
+
+
+def help_open_log_folder() -> None:
+    """Open the folder logs are stored in."""
+    logfile_loc = pathlib.Path(tempfile.gettempdir())
+    logfile_loc /= f'{appname}'
+    if sys.platform.startswith('win'):
+        # On Windows, use the "start" command to open the folder
+        system(f'start "" "{logfile_loc}"')
+    elif sys.platform.startswith('darwin'):
+        # On macOS, use the "open" command to open the folder
+        system(f'open "{logfile_loc}"')
+    elif sys.platform.startswith('linux'):
+        # On Linux, use the "xdg-open" command to open the folder
+        system(f'xdg-open "{logfile_loc}"')
 
 
 class PrefsVersion:
@@ -825,6 +843,13 @@ class PreferencesDialog(tk.Toplevel):
 
             self.loglevel_dropdown.configure(width=15)
             self.loglevel_dropdown.grid(column=1, sticky=tk.W, row=cur_row)
+
+            nb.Button(
+                config_frame,
+                # LANG: Label on button used to open a filesystem folder
+                text=_('Open Log Folder'),  # Button that opens a folder in Explorer/Finder
+                command=lambda: help_open_log_folder()
+            ).grid(column=2, padx=(0, self.PADX), sticky=tk.NSEW, row=cur_row)
 
         # Big spacer
         nb.Label(config_frame).grid(sticky=tk.W, row=row.get())
