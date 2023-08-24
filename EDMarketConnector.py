@@ -87,6 +87,10 @@ if __name__ == '__main__':  # noqa: C901
                         action='store_true'
                         )
 
+    parser.add_argument('--start_min',
+                        help="Start the application minimized",
+                        action="store_true"
+                        )
     ###########################################################################
     # Adjust logging
     ###########################################################################
@@ -181,7 +185,7 @@ if __name__ == '__main__':  # noqa: C901
     if args.capi_use_debug_access_token:
         import config as conf_module
 
-        with open(conf_module.config.app_dir_path / 'access_token.txt', 'r') as at:
+        with open(conf_module.config.app_dir_path / 'access_token.txt') as at:
             conf_module.capi_debug_access_token = at.readline().strip()
 
     level_to_set: Optional[int] = None
@@ -589,9 +593,9 @@ class AppWindow:
         self.status.grid(columnspan=2, sticky=tk.EW)
 
         for child in frame.winfo_children():
-            child.grid_configure(padx=self.PADX, pady=(
-                                                          sys.platform != 'win32' or isinstance(child,
-                                                                                                tk.Frame)) and 2 or 0)
+            child.grid_configure(padx=self.PADX,
+                                 pady=(sys.platform != 'win32' or isinstance(child, tk.Frame))
+                                 and 2 or 0)
 
         self.menubar = tk.Menu()
 
@@ -793,6 +797,12 @@ class AppWindow:
         config.delete('logdir', suppress=True)
         self.postprefs(False)  # Companion login happens in callback from monitor
         self.toggle_suit_row(visible=False)
+        if args.start_min:
+            logger.warning("Trying to start minimized")
+            if root.overrideredirect():
+                self.oniconify()
+            else:
+                self.w.wm_iconify()
 
     def update_suit_text(self) -> None:
         """Update the suit text for current type and loadout."""
