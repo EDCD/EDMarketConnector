@@ -37,8 +37,6 @@ class JournalLock:
 
     def __init__(self) -> None:
         """Initialise where the journal directory and lock file are."""
-        self.retry_popup = None
-        self.journal_dir_lockfile = None
         self.journal_dir: Optional[str] = config.get_str('journaldir') or config.default_journal_dir
         self.journal_dir_path: Optional[pathlib.Path] = None
         self.set_path_from_journaldir()
