@@ -6,7 +6,7 @@ import json
 import pathlib
 import re
 import sys
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Set
 
 
 def get_func_name(thing: ast.AST) -> str:
@@ -29,10 +29,10 @@ def get_arg(call: ast.Call) -> str:
         return arg.value
     if isinstance(arg, ast.Name):
         return f'VARIABLE! CHECK CODE! {arg.id}'
-    return f'Unknown! {type(arg)=} {ast.dump(arg)} ||| {ast.unparse(arg)}'
+    return f'Unknown! {type(arg)=} {ast.dump(arg)} ||| {ast.unparse(arg)}'  # type: ignore
 
 
-def find_calls_in_stmt(statement: ast.AST) -> list[ast.Call]:
+def find_calls_in_stmt(statement: ast.AST) -> List[ast.Call]:
     """Recursively find ast.Calls in a statement."""
     out = []
     for n in ast.iter_child_nodes(statement):
@@ -133,13 +133,13 @@ def scan_directory(path: pathlib.Path, skip: Optional[List[pathlib.Path]] = None
                 continue
             out[thing] = scan_file(thing)
         elif thing.is_dir():
-            out |= scan_directory(thing)
+            out |= scan_directory(thing)  # type: ignore
         else:
             raise ValueError(type(thing), thing)
     return out
 
 
-def parse_template(path: pathlib.Path) -> set[str]:
+def parse_template(path: pathlib.Path) -> Set[str]:
     """
     Parse a lang.template file.
 
@@ -183,9 +183,9 @@ class FileLocation:
 class LangEntry:
     """LangEntry is a single translation that may span multiple files or locations."""
 
-    locations: list[FileLocation]
+    locations: List[FileLocation]
     string: str
-    comments: list[Optional[str]]
+    comments: List[Optional[str]]
 
     def files(self) -> str:
         """Return a string representation of all the files this LangEntry is in, and its location therein."""
@@ -198,7 +198,7 @@ class LangEntry:
         return '; '.join(file_locations)
 
 
-def dedupe_lang_entries(entries: list[LangEntry]) -> list[LangEntry]:
+def dedupe_lang_entries(entries: List[LangEntry]) -> List[LangEntry]:
     """
     Deduplicate a list of lang entries.
 
@@ -208,7 +208,7 @@ def dedupe_lang_entries(entries: list[LangEntry]) -> list[LangEntry]:
     :param entries: The list to deduplicate
     :return: The deduplicated list
     """
-    deduped: dict[str, LangEntry] = {}
+    deduped: Dict[str, LangEntry] = {}
 
     for e in entries:
         existing = deduped.get(e.string)
@@ -221,9 +221,9 @@ def dedupe_lang_entries(entries: list[LangEntry]) -> list[LangEntry]:
     return list(deduped.values())
 
 
-def generate_lang_template(data: dict[pathlib.Path, list[ast.Call]]) -> str:
+def generate_lang_template(data: Dict[pathlib.Path, List[ast.Call]]) -> str:
     """Generate a full en.template from the given data."""
-    entries: list[LangEntry] = []
+    entries: List[LangEntry] = []
 
     for path, calls in data.items():
         for c in calls:
@@ -257,7 +257,7 @@ def generate_lang_template(data: dict[pathlib.Path, list[ast.Call]]) -> str:
     return out
 
 
-def compare_lang_with_template(template: set[str], res: dict[pathlib.Path, list[ast.Call]]) -> None:
+def compare_lang_with_template(template: Set[str], res: Dict[pathlib.Path, List[ast.Call]]) -> None:
     """
     Compare language entries in source code with a given language template.
 
@@ -278,7 +278,7 @@ def compare_lang_with_template(template: set[str], res: dict[pathlib.Path, list[
         print(f'No longer used: {old}')
 
 
-def print_json_output(res: dict[pathlib.Path, list[ast.Call]]) -> None:
+def print_json_output(res: Dict[pathlib.Path, List[ast.Call]]) -> None:
     """
     Print JSON output of extracted language entries.
 
@@ -288,7 +288,7 @@ def print_json_output(res: dict[pathlib.Path, list[ast.Call]]) -> None:
         {
             'path': str(path),
             'string': get_arg(c),
-            'reconstructed': ast.unparse(c),
+            'reconstructed': ast.unparse(c),  # type: ignore
             'start_line': c.lineno,
             'start_offset': c.col_offset,
             'end_line': c.end_lineno,
@@ -337,6 +337,7 @@ if __name__ == "__main__":
             print(path)
             for c in calls:
                 print(
-                    f'    {c.lineno:4d}({c.col_offset:3d}):{c.end_lineno:4d}({c.end_col_offset:3d})\t', ast.unparse(c)
+                    f'    {c.lineno:4d}({c.col_offset:3d}):{c.end_lineno:4d}('
+                    f'{c.end_col_offset:3d})\t', ast.unparse(c)  # type: ignore
                 )
             print()

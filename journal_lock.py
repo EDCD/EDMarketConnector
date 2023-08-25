@@ -123,15 +123,15 @@ class JournalLock:
                 return JournalLockResult.LOCKED
 
             try:
-                fcntl.flock(self.journal_dir_lockfile, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                fcntl.flock(self.journal_dir_lockfile, fcntl.LOCK_EX | fcntl.LOCK_NB)  # type: ignore
 
             except Exception as e:
                 logger.info(f"Exception: Couldn't lock journal directory \"{self.journal_dir}\", "
                             f"assuming another process running: {e!r}")
                 return JournalLockResult.ALREADY_LOCKED
 
-        self.journal_dir_lockfile.write(f"Path: {self.journal_dir}\nPID: {os_getpid()}\n")
-        self.journal_dir_lockfile.flush()
+        self.journal_dir_lockfile.write(f"Path: {self.journal_dir}\nPID: {os_getpid()}\n")  # type: ignore
+        self.journal_dir_lockfile.flush()  # type: ignore
 
         logger.trace_if('journal-lock', 'Done')
         self.locked = True
@@ -175,7 +175,7 @@ class JournalLock:
                 return True  # Lie about being unlocked
 
             try:
-                fcntl.flock(self.journal_dir_lockfile, fcntl.LOCK_UN)
+                fcntl.flock(self.journal_dir_lockfile, fcntl.LOCK_UN)  # type: ignore
 
             except Exception as e:
                 logger.info(f"Exception: Couldn't unlock journal directory \"{self.journal_dir}\": {e!r}")
@@ -185,7 +185,7 @@ class JournalLock:
 
         # Close the file whether the unlocking succeeded.
         if hasattr(self, 'journal_dir_lockfile'):
-            self.journal_dir_lockfile.close()
+            self.journal_dir_lockfile.close()  # type: ignore
 
         # Doing this makes it impossible for tests to ensure the file
         # is removed as a part of cleanup.  So don't.

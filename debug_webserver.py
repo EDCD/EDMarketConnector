@@ -6,7 +6,7 @@ import tempfile
 import threading
 import zlib
 from http import server
-from typing import Any, Callable, Literal, Tuple, Union
+from typing import Any, Callable, Literal, Tuple, Union, Dict
 from urllib.parse import parse_qs
 from config import appname
 from EDMCLogging import get_main_logger
@@ -68,7 +68,7 @@ class LoggingHandler(server.BaseHTTPRequestHandler):
         target_file = output_data_path / (safe_file_name(target_path) + '.log')
         if target_file.parent != output_data_path:
             logger.warning(f"REFUSING TO WRITE FILE THAT ISN'T IN THE RIGHT PLACE! {target_file=}")
-            logger.warning(f'DATA FOLLOWS\n{data}')  # type: ignore # mypy thinks data is a byte string here
+            logger.warning(f'DATA FOLLOWS\n{data}')
             return
 
         with output_lock, target_file.open('a') as f:
@@ -130,7 +130,7 @@ def generate_inara_response(raw_data: str) -> str:
     return json.dumps(out)
 
 
-def extract_edsm_data(data: str) -> dict[str, Any]:
+def extract_edsm_data(data: str) -> Dict[str, Any]:
     """Extract relevant data from edsm data."""
     res = parse_qs(data)
     return {name: data[0] for name, data in res.items()}

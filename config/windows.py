@@ -149,7 +149,7 @@ class WinConfig(AbstractConfig):
         """
         res = self.__get_regentry(key)
         if res is None:
-            return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
+            return default  # Yes it could be None, but we're _assuming_ that people gave us a default
 
         if not isinstance(res, str):
             raise ValueError(f'Data from registry is not a string: {type(res)=} {res=}')
@@ -164,7 +164,7 @@ class WinConfig(AbstractConfig):
         """
         res = self.__get_regentry(key)
         if res is None:
-            return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
+            return default  # Yes it could be None, but we're _assuming_ that people gave us a default
 
         if not isinstance(res, list):
             raise ValueError(f'Data from registry is not a list: {type(res)=} {res}')
@@ -192,9 +192,9 @@ class WinConfig(AbstractConfig):
 
         Implements :meth:`AbstractConfig.get_bool`.
         """
-        res = self.get_int(key, default=default)  # type: ignore
+        res = self.get_int(key, default=default)
         if res is None:
-            return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
+            return default  # Yes it could be None, but we're _assuming_ that people gave us a default
 
         return bool(res)
 

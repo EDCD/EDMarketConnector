@@ -22,7 +22,7 @@ from EDMCLogging import get_main_logger
 logger = get_main_logger()
 
 # List of loaded Plugins
-PLUGINS = []
+PLUGINS = []  # type: ignore
 PLUGINS_not_py3 = []
 
 
@@ -80,7 +80,7 @@ class Plugin:
     def _load_module(self, loadfile: str) -> None:
         try:
             filename = f"plugin_{self._encode_plugin_name()}"
-            self.module = importlib.machinery.SourceFileLoader(
+            self.module = importlib.machinery.SourceFileLoader(  # type: ignore
                 filename, loadfile
             ).load_module()
 
@@ -111,7 +111,7 @@ class Plugin:
         return hasattr(self.module, "plugin_start")
 
     def _set_plugin_name(self, loadfile: Optional[str]) -> None:
-        newname = self.module.plugin_start3(os.path.dirname(loadfile))
+        newname = self.module.plugin_start3(os.path.dirname(loadfile))  # type: ignore
         self.name = str(newname) if newname else self.name
 
     def _disable_plugin(self) -> None:
@@ -143,7 +143,7 @@ class Plugin:
                     if isinstance(appitem[0], tk.Widget) and isinstance(
                         appitem[1], tk.Widget
                     ):
-                        return appitem
+                        return appitem  # type: ignore
 
                 raise AssertionError
 
@@ -423,6 +423,7 @@ def notify_dashboard_entry(
             except Exception:
                 logger.exception(f'Plugin "{plugin.name}" failed')
     return error
+
 
 def notify_capidata(data: companion.CAPIData, is_beta: bool) -> Optional[str]:
     """

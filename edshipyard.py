@@ -201,10 +201,10 @@ def export(data, filename=None) -> None:  # noqa: C901, CCR001
 
         multiplier = (
             pow(
-                min(fuel, fsd["maxfuel"]) / fsd["fuelmul"],
-                1.0 / fsd["fuelpower"],
+                min(fuel, fsd["maxfuel"]) / fsd["fuelmul"],  # type: ignore
+                1.0 / fsd["fuelpower"],  # type: ignore
             )
-            * fsd["optmass"]
+            * fsd["optmass"]  # type: ignore
         )
 
         range_unladen = multiplier / (mass + fuel) + jumpboost

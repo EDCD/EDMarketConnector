@@ -79,7 +79,7 @@ class ClickCounter:
         """
         # You need to cast to `int` here to store *as* an `int`, so that
         # `config.get_int()` will work for re-loading the value.
-        config.set('click_counter_count', int(self.click_count.get()))  # type: ignore
+        config.set('click_counter_count', int(self.click_count.get()))
 
     def setup_main_ui(self, parent: tk.Frame) -> tk.Frame:
         """
@@ -95,7 +95,7 @@ class ClickCounter:
         button = tk.Button(
             frame,
             text="Count me",
-            command=lambda: self.click_count.set(str(int(self.click_count.get()) + 1))  # type: ignore
+            command=lambda: self.click_count.set(str(int(self.click_count.get()) + 1))
         )
         button.grid(row=current_row)
         current_row += 1

@@ -200,7 +200,7 @@ class OldConfig:
     elif sys.platform == 'win32':
 
         def __init__(self):
-            self.app_dir = join(known_folder_path(FOLDERID_LocalAppData), appname)  # type: ignore # Not going to change
+            self.app_dir = join(known_folder_path(FOLDERID_LocalAppData), appname)
             if not isdir(self.app_dir):
                 mkdir(self.app_dir)
 
@@ -277,7 +277,7 @@ class OldConfig:
                 RegSetValueEx(sparklekey, 'UpdateInterval', 0, 1, buf, len(buf) * 2)
                 RegCloseKey(sparklekey)
 
-            if not self.get('outdir') or not isdir(self.get('outdir')):  # type: ignore # Not going to change
+            if not self.get('outdir') or not isdir(self.get('outdir')):
                 self.set('outdir', known_folder_path(FOLDERID_Documents) or self.home)
 
         def get(self, key: str, default: Union[None, list, str] = None) -> Union[None, list, str]:
@@ -432,10 +432,10 @@ class OldConfig:
         def set(self, key: str, val: Union[int, str, list]) -> None:
             """Set value on the specified configuration key."""
             if isinstance(val, bool):
-                self.config.set(self.SECTION, key, val and '1' or '0')  # type: ignore # Not going to change
+                self.config.set(self.SECTION, key, val and '1' or '0')
 
             elif isinstance(val, (numbers.Integral, str)):
-                self.config.set(self.SECTION, key, self._escape(val))  # type: ignore # Not going to change
+                self.config.set(self.SECTION, key, self._escape(val))
 
             elif isinstance(val, list):
                 self.config.set(self.SECTION, key, '\n'.join([self._escape(x) for x in val] + [';']))
@@ -455,7 +455,7 @@ class OldConfig:
         def close(self) -> None:
             """Close the configuration."""
             self.save()
-            self.config = None
+            self.config = None  # type: ignore
 
         def _escape(self, val: str) -> str:
             """Escape a string for storage."""

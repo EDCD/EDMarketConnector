@@ -78,8 +78,8 @@ class Label(tk.Label):
     def __init__(self, master: Optional[ttk.Frame] = None, **kw):
         # This format chosen over `sys.platform in (...)` as mypy and friends dont understand that
         if sys.platform in ('darwin', 'win32'):
-            kw['foreground'] = kw.pop('foreground', PAGEFG)
-            kw['background'] = kw.pop('background', PAGEBG)
+            kw['foreground'] = kw.pop('foreground', PAGEFG)  # type: ignore
+            kw['background'] = kw.pop('background', PAGEBG)  # type: ignore
         else:
             kw['foreground'] = kw.pop('foreground', ttk.Style().lookup('TLabel', 'foreground'))
             kw['background'] = kw.pop('background', ttk.Style().lookup('TLabel', 'background'))

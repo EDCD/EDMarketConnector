@@ -1,12 +1,13 @@
 """Print information about killswitch json files."""
 import json
 import sys
+from typing import Tuple, List
 
 # Yes this is gross. No I cant fix it. EDMC doesn't use python modules currently and changing that would be messy.
 sys.path.append('.')
 from killswitch import KillSwitchSet, SingleKill, parse_kill_switches  # noqa: E402
 
-KNOWN_KILLSWITCH_NAMES: list[str] = [
+KNOWN_KILLSWITCH_NAMES: List[str] = [
     # edsm
     'plugins.edsm.worker',
     'plugins.edsm.worker.$event',
@@ -28,7 +29,7 @@ KNOWN_KILLSWITCH_NAMES: list[str] = [
 SPLIT_KNOWN_NAMES = [x.split('.') for x in KNOWN_KILLSWITCH_NAMES]
 
 
-def match_exists(match: str) -> tuple[bool, str]:
+def match_exists(match: str) -> Tuple[bool, str]:
     """Check that a match matching the above defined known list exists."""
     split_match = match.split('.')
     highest_match = 0

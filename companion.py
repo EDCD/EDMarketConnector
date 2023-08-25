@@ -40,7 +40,7 @@ if TYPE_CHECKING:
 
     UserDict = collections.UserDict[str, Any]  # indicate to our type checkers what this generic class holds normally
 else:
-    UserDict = collections.UserDict  # type: ignore # Otherwise simply use the actual class
+    UserDict = collections.UserDict  # Otherwise simply use the actual class
 
 capi_query_cooldown = 60  # Minimum time between (sets of) CAPI queries
 capi_fleetcarrier_query_cooldown = 60 * 15  # Minimum time between CAPI fleetcarrier queries
@@ -337,7 +337,7 @@ class Auth:
         logger.debug(f'Trying for "{self.cmdr}"')
 
         should_return: bool
-        new_data: dict[str, Any]
+        new_data: Dict[str, Any]
 
         should_return, new_data = killswitch.check_killswitch('capi.auth', {})
         if should_return:
@@ -533,7 +533,7 @@ class Auth:
             cmdrs = config.get_list('cmdrs', default=[])
             idx = cmdrs.index(cmdr)
             to_set = config.get_list('fdev_apikeys', default=[])
-            to_set += [''] * (len(cmdrs) - len(to_set))  # type: ignore
+            to_set += [''] * (len(cmdrs) - len(to_set))
             to_set[idx] = ''
 
         if to_set is None:
@@ -683,7 +683,7 @@ class Session:
         :return: True if login succeeded, False if re-authorization initiated.
         """
         should_return: bool
-        new_data: dict[str, Any]
+        new_data: Dict[str, Any]
 
         should_return, new_data = killswitch.check_killswitch('capi.auth', {})
         if should_return:
@@ -806,7 +806,9 @@ class Session:
 
             try:
                 # Check if the killswitch is enabled for the current endpoint
-                should_return, new_data = killswitch.check_killswitch('capi.request.' + capi_endpoint, {})
+                should_return, new_data = killswitch.check_killswitch(  # type: ignore
+                    'capi.request.' + capi_endpoint, {}
+                )
                 if should_return:
                     logger.warning(f"capi.request.{capi_endpoint} has been disabled by killswitch. Returning.")
                     return capi_data
@@ -855,7 +857,9 @@ class Session:
                 logger.error('No "commander" in returned data')
 
             if 'timestamp' not in capi_data:
-                capi_data['timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', parsedate(r.headers['Date']))
+                capi_data['timestamp'] = time.strftime(
+                    '%Y-%m-%dT%H:%M:%SZ', parsedate(r.headers['Date'])  # type: ignore
+                )
 
             return capi_data
 

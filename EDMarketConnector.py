@@ -18,7 +18,7 @@ import webbrowser
 from os import chdir, environ
 from os.path import dirname, join
 from time import localtime, strftime, time
-from typing import TYPE_CHECKING, Any, Literal, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Literal, Optional, Tuple, Union, Dict
 from constants import applongname, appname, protocolhandler_redirect
 
 # Have this as early as possible for people running EDMarketConnector.exe
@@ -650,14 +650,14 @@ class AppWindow:
             self.w.protocol("WM_DELETE_WINDOW", self.w.withdraw)  # close button shouldn't quit app
             self.w.resizable(tk.FALSE, tk.FALSE)  # Can't be only resizable on one axis
         else:
-            self.file_menu = self.view_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)  # type: ignore
+            self.file_menu = self.view_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)
             self.file_menu.add_command(command=lambda: stats.StatsDialog(self.w, self.status))
             self.file_menu.add_command(command=self.save_raw)
             self.file_menu.add_command(command=lambda: prefs.PreferencesDialog(self.w, self.postprefs))
             self.file_menu.add_separator()
             self.file_menu.add_command(command=self.onexit)
             self.menubar.add_cascade(menu=self.file_menu)
-            self.edit_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)  # type: ignore
+            self.edit_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)
             self.edit_menu.add_command(accelerator='Ctrl+C', state=tk.DISABLED, command=self.copy)
             self.menubar.add_cascade(menu=self.edit_menu)
             self.help_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)  # type: ignore
@@ -778,7 +778,7 @@ class AppWindow:
         self.w.bind('<KP_Enter>', self.capi_request_data)
         self.w.bind_all('<<Invoke>>', self.capi_request_data)  # Ask for CAPI queries to be performed
         self.w.bind_all(self._CAPI_RESPONSE_TK_EVENT_NAME, self.capi_handle_response)
-        self.w.bind_all('<<JournalEvent>>', self.journal_event)  # Journal monitoring
+        self.w.bind_all('<<JournalEvent>>', self.journal_event)  # type: ignore # Journal monitoring
         self.w.bind_all('<<DashboardEvent>>', self.dashboard_event)  # Dashboard monitoring
         self.w.bind_all('<<PluginError>>', self.plugin_error)  # Statusbar
         self.w.bind_all('<<CompanionAuthEvent>>', self.auth)  # cAPI auth
@@ -1029,7 +1029,7 @@ class AppWindow:
         """
         logger.trace_if('capi.worker', 'Begin')
 
-        should_return, new_data = killswitch.check_killswitch('capi.auth', {})
+        should_return, new_data = killswitch.check_killswitch('capi.auth', {})  # type: ignore
         if should_return:
             logger.warning('capi.auth has been disabled via killswitch. Returning.')
             # LANG: CAPI auth query aborted because of killswitch
@@ -1115,7 +1115,7 @@ class AppWindow:
         """
         logger.trace_if('capi.worker', 'Begin')
 
-        should_return, new_data = killswitch.check_killswitch('capi.request.fleetcarrier', {})
+        should_return, new_data = killswitch.check_killswitch('capi.request.fleetcarrier', {})  # type: ignore
         if should_return:
             logger.warning('capi.fleetcarrier has been disabled via killswitch. Returning.')
             # LANG: CAPI fleetcarrier query aborted because of killswitch
@@ -1319,7 +1319,7 @@ class AppWindow:
                     play_bad = True
 
                 should_return: bool
-                new_data: dict[str, Any]
+                new_data: Dict[str, Any]
 
                 should_return, new_data = killswitch.check_killswitch('capi.request./market', {})
                 if should_return:
@@ -1582,7 +1582,7 @@ class AppWindow:
                         auto_update = True
 
             should_return: bool
-            new_data: dict[str, Any]
+            new_data: Dict[str, Any]
 
             if auto_update:
                 should_return, new_data = killswitch.check_killswitch('capi.auth', {})

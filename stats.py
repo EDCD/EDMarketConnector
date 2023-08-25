@@ -10,7 +10,18 @@ import json
 import sys
 import tkinter as tk
 from tkinter import ttk
-from typing import TYPE_CHECKING, Any, AnyStr, Callable, NamedTuple, Sequence, cast, Optional, List
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    AnyStr,
+    Callable,
+    NamedTuple,
+    Sequence,
+    cast,
+    Optional,
+    List,
+    Dict,
+)
 import companion
 import EDMCLogging
 import myNotebook as nb  # noqa: N813
@@ -49,7 +60,7 @@ RANK_LINES_END = 9
 POWERPLAY_LINES_START = 9
 
 
-def status(data: dict[str, Any]) -> list[list[str]]:
+def status(data: Dict[str, Any]) -> List[List[str]]:
     """
     Get the current status of the cmdr referred to by data.
 
@@ -111,7 +122,7 @@ def status(data: dict[str, Any]) -> list[list[str]]:
     return res
 
 
-def export_status(data: dict[str, Any], filename: AnyStr) -> None:
+def export_status(data: Dict[str, Any], filename: AnyStr) -> None:
     """
     Export status data to a CSV file.
 
@@ -136,7 +147,7 @@ class ShipRet(NamedTuple):
     value: str
 
 
-def ships(companion_data: dict[str, Any]) -> List[ShipRet]:
+def ships(companion_data: Dict[str, Any]) -> List[ShipRet]:
     """
     Return a list of ship information.
 
@@ -144,7 +155,7 @@ def ships(companion_data: dict[str, Any]) -> List[ShipRet]:
     :return: List of ship information tuples containing Ship ID, Ship Type Name (internal),
              Ship Name, System, Station, and Value
     """
-    ships: List[dict[str, Any]] = companion.listify(cast(List, companion_data.get('ships')))
+    ships: List[Dict[str, Any]] = companion.listify(cast(List, companion_data.get('ships')))
     current = companion_data['commander'].get('currentShipId')
 
     if isinstance(current, int) and current < len(ships) and ships[current]:
@@ -186,7 +197,7 @@ def ships(companion_data: dict[str, Any]) -> List[ShipRet]:
     ]
 
 
-def export_ships(companion_data: dict[str, Any], filename: AnyStr) -> None:
+def export_ships(companion_data: Dict[str, Any], filename: AnyStr) -> None:
     """
     Export the current ships to a CSV file.
 
@@ -257,7 +268,7 @@ class StatsDialog():
 class StatsResults(tk.Toplevel):
     """Status window."""
 
-    def __init__(self, parent: tk.Tk, data: dict[str, Any]) -> None:
+    def __init__(self, parent: tk.Tk, data: Dict[str, Any]) -> None:
         tk.Toplevel.__init__(self, parent)
 
         self.parent = parent
@@ -342,7 +353,7 @@ class StatsResults(tk.Toplevel):
                 self.geometry(f"+{position.left}+{position.top}")
 
     def addpage(
-        self, parent, header: Optional[list[str]] = None, align: Optional[str] = None
+        self, parent, header: Optional[List[str]] = None, align: Optional[str] = None
     ) -> ttk.Frame:
         """
         Add a page to the StatsResults screen.

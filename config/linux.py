@@ -234,4 +234,4 @@ class LinuxConfig(AbstractConfig):
         Implements :meth:`AbstractConfig.close`.
         """
         self.save()
-        self.config = None
+        self.config = None  # type: ignore

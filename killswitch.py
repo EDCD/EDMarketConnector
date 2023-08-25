@@ -130,7 +130,7 @@ def _deep_apply(target: UPDATABLE_DATA, path: str, to_set=None, delete=False):  
             for k in filter(lambda x: '.' in x, keys):
                 if path.startswith(k):
                     key = k
-                    path = path.removeprefix(k)
+                    path = path.removeprefix(k)  # type: ignore
                     # we assume that the `.` here is for "accessing" the next key.
                     if path[0] == '.':
                         path = path[1:]
@@ -143,7 +143,7 @@ def _deep_apply(target: UPDATABLE_DATA, path: str, to_set=None, delete=False):  
             key, _, path = path.partition('.')
 
         if isinstance(current, Mapping):
-            current = current[key]  # type: ignore # I really dont know at this point what you want from me mypy.
+            current = current[key]
 
         elif isinstance(current, Sequence):
             target_idx = _get_int(key)  # mypy is broken. doesn't like := here.
@@ -319,9 +319,9 @@ class BaseSingleKillSwitch(TypedDict):  # noqa: D101
 
 
 class SingleKillSwitchJSON(BaseSingleKillSwitch, total=False):  # noqa: D101
-    redact_fields: list[str]    # set fields to "REDACTED"
-    delete_fields: list[str]    # remove fields entirely
-    set_fields: dict[str, Any]  # set fields to given data
+    redact_fields: List[str]    # set fields to "REDACTED"
+    delete_fields: List[str]    # remove fields entirely
+    set_fields: Dict[str, Any]  # set fields to given data
 
 
 class KillSwitchSetJSON(TypedDict):  # noqa: D101
@@ -506,7 +506,7 @@ def check_killswitch(name: str, data: T, log=logger) -> Tuple[bool, T]:
     return active.check_killswitch(name, data, log)
 
 
-def check_multiple_killswitches(data: T, *names: str, log=logger) -> tuple[bool, T]:
+def check_multiple_killswitches(data: T, *names: str, log=logger) -> Tuple[bool, T]:
     """Query the global KillSwitchSet#check_multiple method."""
     return active.check_multiple_killswitches(data, *names, log=log)
 

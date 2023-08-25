@@ -881,8 +881,8 @@ def worker() -> None:  # noqa: CCR001 C901
                                 # calls update_status in main thread
                                 if not config.shutting_down and this.system_link is not None:
                                     this.system_link.event_generate('<<EDSMStatus>>', when="tail")
-                            if r['msgnum'] // 100 != 1:  # type: ignore
-                                logger.warning(f'EDSM event with not-1xx status:\n{r["msgnum"]}\n'  # type: ignore
+                            if r['msgnum'] // 100 != 1:
+                                logger.warning(f'EDSM event with not-1xx status:\n{r["msgnum"]}\n'
                                                f'{r["msg"]}\n{json.dumps(e, separators = (",", ": "))}')
                         pending = []
                 break  # No exception, so assume success

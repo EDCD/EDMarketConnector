@@ -105,7 +105,7 @@ class EDLogs(FileSystemEventHandler):
         FileSystemEventHandler.__init__(
             self
         )  # futureproofing - not needed for current version of watchdog
-        self.root: "tkinter.Tk" = None  # Don't use Optional[] - mypy thinks no methods
+        self.root: "tkinter.Tk" = None  # type: ignore #Don't use Optional[] - mypy thinks no methods
         self.currentdir: Optional[str] = None  # The actual logdir that we're monitoring
         self.logfile: Optional[str] = None
         self.observer: Optional[BaseObserver] = None
@@ -555,7 +555,7 @@ class EDLogs(FileSystemEventHandler):
             else:
                 self.game_was_running = self.game_running()
 
-    def synthesize_startup_event(self) -> dict[str, Any]:
+    def synthesize_startup_event(self) -> Dict[str, Any]:
         """
         Synthesize a 'StartUp' event to notify plugins of initial state.
 
@@ -565,7 +565,7 @@ class EDLogs(FileSystemEventHandler):
 
         :return: Synthesized event as a dict
         """
-        entry: dict[str, Any] = {
+        entry: Dict[str, Any] = {
             "timestamp": strftime("%Y-%m-%dT%H:%M:%SZ", gmtime()),
             "event": "StartUp",
             "StarSystem": self.state["SystemName"],

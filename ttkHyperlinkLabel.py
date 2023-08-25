@@ -23,14 +23,14 @@ import tkinter as tk
 import webbrowser
 from tkinter import font as tk_font
 from tkinter import ttk
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, Optional, Tuple, Dict
 
 if TYPE_CHECKING:
     def _(x: str) -> str: ...
 
 
 # FIXME: Split this into multi-file module to separate the platforms
-class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label):
+class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label):  # type: ignore
     """
     Clickable label for HTTP links.
 
@@ -79,8 +79,8 @@ class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label):
             font=kw.get('font', ttk.Style().lookup('TLabel', 'font'))
         )
 
-    def configure(self, cnf: Optional[dict[str, Any]] = None, **kw: Any) ->\
-            Optional[dict[str, tuple[str, str, str, Any, Any]]]:  # noqa: CCR001
+    def configure(self, cnf: Optional[Dict[str, Any]] = None, **kw: Any) ->\
+            Optional[Dict[str, Tuple[str, str, str, Any, Any]]]:  # noqa: CCR001
         """
         Change cursor and appearance depending on state and text.
 
@@ -108,8 +108,8 @@ class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label):
         # Set font based on underline option
         if 'font' in kw:
             self.font_n = kw['font']
-            self.font_u = tk_font.Font(font=self.font_n)
-            self.font_u.configure(underline=True)
+            self.font_u = tk_font.Font(font=self.font_n)  # type: ignore
+            self.font_u.configure(underline=True)  # type: ignore
             kw['font'] = self.font_u if self.underline is True else self.font_n
 
         # Set cursor based on state and URL

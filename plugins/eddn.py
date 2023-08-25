@@ -31,7 +31,16 @@ from collections import OrderedDict
 from platform import system
 from textwrap import dedent
 from threading import Lock
-from typing import TYPE_CHECKING, Any, Iterator, Mapping, MutableMapping, Optional
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    Optional,
+    Dict,
+    List,
+)
 from typing import OrderedDict as OrderedDictT
 from typing import Tuple, Union
 import requests
@@ -91,13 +100,13 @@ class This:
 
         # Avoid duplicates
         self.marketId: Optional[str] = None
-        self.commodities: Optional[list[OrderedDictT[str, Any]]] = None
-        self.outfitting: Optional[Tuple[bool, list[str]]] = None
-        self.shipyard: Optional[Tuple[bool, list[Mapping[str, Any]]]] = None
+        self.commodities: Optional[List[OrderedDictT[str, Any]]] = None
+        self.outfitting: Optional[Tuple[bool, List[str]]] = None
+        self.shipyard: Optional[Tuple[bool, List[Mapping[str, Any]]]] = None
         self.fcmaterials_marketid: int = 0
-        self.fcmaterials: Optional[list[OrderedDictT[str, Any]]] = None
+        self.fcmaterials: Optional[List[OrderedDictT[str, Any]]] = None
         self.fcmaterials_capi_marketid: int = 0
-        self.fcmaterials_capi: Optional[list[OrderedDictT[str, Any]]] = None
+        self.fcmaterials_capi: Optional[List[OrderedDictT[str, Any]]] = None
 
         # For the tkinter parent window, so we can call update_idletasks()
         self.parent: tk.Tk
@@ -386,7 +395,7 @@ class EDDNSender:
         """
         logger.trace_if("plugin.eddn.send", "Sending message")
         should_return: bool
-        new_data: dict[str, Any]
+        new_data: Dict[str, Any]
 
         should_return, new_data = killswitch.check_killswitch('plugins.eddn.send', json.loads(msg))
         if should_return:
@@ -395,7 +404,7 @@ class EDDNSender:
 
         # Even the smallest possible message compresses somewhat, so always compress
         encoded, compressed = text.gzip(json.dumps(new_data, separators=(',', ':')), max_size=0)
-        headers: Optional[dict[str, str]] = None
+        headers: Optional[Dict[str, str]] = None
         if compressed:
             headers = {'Content-Encoding': 'gzip'}
 
@@ -601,7 +610,7 @@ class EDDN:
 
         self.sender = EDDNSender(self, self.eddn_url)
 
-        self.fss_signals: list[Mapping[str, Any]] = []
+        self.fss_signals: List[Mapping[str, Any]] = []
 
     def close(self):
         """Close down the EDDN class instance."""
@@ -625,7 +634,7 @@ class EDDN:
         :param is_beta: whether or not we're currently in beta mode
         """
         should_return: bool
-        new_data: dict[str, Any]
+        new_data: Dict[str, Any]
         should_return, new_data = killswitch.check_killswitch('capi.request./market', {})
         if should_return:
             logger.warning("capi.request./market has been disabled by killswitch.  Returning.")
@@ -642,7 +651,7 @@ class EDDN:
             modules,
             ships
         )
-        commodities: list[OrderedDictT[str, Any]] = []
+        commodities: List[OrderedDictT[str, Any]] = []
         for commodity in data['lastStarport'].get('commodities') or []:
             # Check 'marketable' and 'not prohibited'
             if (category_map.get(commodity['categoryname'], True)
@@ -715,7 +724,7 @@ class EDDN:
         :param data: The raw CAPI data.
         :return: Sanity-checked data.
         """
-        modules: dict[str, Any] = data['lastStarport'].get('modules')
+        modules: Dict[str, Any] = data['lastStarport'].get('modules')
         if modules is None or not isinstance(modules, dict):
             if modules is None:
                 logger.debug('modules was None.  FC or Damaged Station?')
@@ -732,7 +741,7 @@ class EDDN:
             # Set a safe value
             modules = {}
 
-        ships: dict[str, Any] = data['lastStarport'].get('ships')
+        ships: Dict[str, Any] = data['lastStarport'].get('ships')
         if ships is None or not isinstance(ships, dict):
             if ships is None:
                 logger.debug('ships was None')
@@ -758,7 +767,7 @@ class EDDN:
         :param is_beta: whether or not we're currently in beta mode
         """
         should_return: bool
-        new_data: dict[str, Any]
+        new_data: Dict[str, Any]
         should_return, new_data = killswitch.check_killswitch('capi.request./shipyard', {})
         if should_return:
             logger.warning("capi.request./shipyard has been disabled by killswitch.  Returning.")
@@ -785,7 +794,7 @@ class EDDN:
             modules.values()
         )
 
-        outfitting: list[str] = sorted(
+        outfitting: List[str] = sorted(
             self.MODULE_RE.sub(lambda match: match.group(0).capitalize(), mod['name'].lower()) for mod in to_search
         )
 
@@ -826,7 +835,7 @@ class EDDN:
         :param is_beta: whether or not we are in beta mode
         """
         should_return: bool
-        new_data: dict[str, Any]
+        new_data: Dict[str, Any]
         should_return, new_data = killswitch.check_killswitch('capi.request./shipyard', {})
         if should_return:
             logger.warning("capi.request./shipyard has been disabled by killswitch.  Returning.")
@@ -845,7 +854,7 @@ class EDDN:
             ships
         )
 
-        shipyard: list[Mapping[str, Any]] = sorted(
+        shipyard: List[Mapping[str, Any]] = sorted(
             itertools.chain(
                 (ship['name'].lower() for ship in (ships['shipyard_list'] or {}).values()),
                 (ship['name'].lower() for ship in ships['unavailable_list'] or {}),
@@ -888,8 +897,8 @@ class EDDN:
         :param is_beta: whether or not we're in beta mode
         :param entry: the journal entry containing the commodities data
         """
-        items: list[Mapping[str, Any]] = entry.get('Items') or []
-        commodities: list[OrderedDictT[str, Any]] = sorted((OrderedDict([
+        items: List[Mapping[str, Any]] = entry.get('Items') or []
+        commodities: List[OrderedDictT[str, Any]] = sorted((OrderedDict([
             ('name',          self.canonicalise(commodity['Name'])),
             ('meanPrice',     commodity['MeanPrice']),
             ('buyPrice',      commodity['BuyPrice']),
@@ -936,11 +945,11 @@ class EDDN:
         :param is_beta: Whether or not we're in beta mode
         :param entry: The relevant journal entry
         """
-        modules: list[Mapping[str, Any]] = entry.get('Items', [])
+        modules: List[Mapping[str, Any]] = entry.get('Items', [])
         horizons: bool = entry.get('Horizons', False)
         # outfitting = sorted([self.MODULE_RE.sub(lambda m: m.group(0).capitalize(), module['Name'])
         # for module in modules if module['Name'] != 'int_planetapproachsuite'])
-        outfitting: list[str] = sorted(
+        outfitting: List[str] = sorted(
             self.MODULE_RE.sub(lambda m: m.group(0).capitalize(), mod['Name']) for mod in
             filter(lambda m: m['Name'] != 'int_planetapproachsuite', modules)
         )
@@ -975,7 +984,7 @@ class EDDN:
         :param is_beta: Whether or not we're in beta mode
         :param entry: the relevant journal entry
         """
-        ships: list[Mapping[str, Any]] = entry.get('PriceList') or []
+        ships: List[Mapping[str, Any]] = entry.get('PriceList') or []
         horizons: bool = entry.get('Horizons', False)
         shipyard = sorted(ship['ShipType'] for ship in ships)
         # Don't send empty ships list - shipyard data is only guaranteed present if user has visited the shipyard.
@@ -2600,7 +2609,7 @@ def capi_is_horizons(economies: MAP_STR_ANY, modules: MAP_STR_ANY, ships: MAP_ST
     return economies_colony or modules_horizons or ship_horizons
 
 
-def dashboard_entry(cmdr: str, is_beta: bool, entry: dict[str, Any]) -> None:
+def dashboard_entry(cmdr: str, is_beta: bool, entry: Dict[str, Any]) -> None:
     """
     Process Status.json data to track things like current Body.
 

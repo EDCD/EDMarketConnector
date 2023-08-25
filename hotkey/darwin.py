@@ -79,14 +79,14 @@ class MacHotkeyMgr(AbstractHotkeyMgr):
         # Monkey-patch tk (tkMacOSXKeyEvent.c)
         if not callable(self.tkProcessKeyEvent_old):
             sel = b'tkProcessKeyEvent:'
-            cls = NSApplication.sharedApplication().class__()  # type: ignore
-            self.tkProcessKeyEvent_old = NSApplication.sharedApplication().methodForSelector_(sel)  # type: ignore
-            newmethod = objc.selector(  # type: ignore
+            cls = NSApplication.sharedApplication().class__()
+            self.tkProcessKeyEvent_old = NSApplication.sharedApplication().methodForSelector_(sel)
+            newmethod = objc.selector(
                 self.tkProcessKeyEvent,
                 selector=self.tkProcessKeyEvent_old.selector,
                 signature=self.tkProcessKeyEvent_old.signature
             )
-            objc.classAddMethod(cls, sel, newmethod)  # type: ignore
+            objc.classAddMethod(cls, sel, newmethod)
 
     def tkProcessKeyEvent(self, cls, the_event):  # noqa: N802
         """

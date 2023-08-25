@@ -86,7 +86,7 @@ class MacConfig(AbstractConfig):
         """
         res = self.__raw_get(key)
         if res is None:
-            return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
+            return default  # Yes it could be None, but we're _assuming_ that people gave us a default
 
         if not isinstance(res, str):
             raise ValueError(f'unexpected data returned from __raw_get: {type(res)=} {res}')
@@ -101,7 +101,7 @@ class MacConfig(AbstractConfig):
         """
         res = self.__raw_get(key)
         if res is None:
-            return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
+            return default  # Yes it could be None, but we're _assuming_ that people gave us a default
 
         if not isinstance(res, list):
             raise ValueError(f'__raw_get returned unexpected type {type(res)=} {res!r}')
@@ -126,7 +126,7 @@ class MacConfig(AbstractConfig):
 
         except ValueError as e:
             logger.error(f'__raw_get returned {res!r} which cannot be parsed to an int: {e}')
-            return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
+            return default  # Yes it could be None, but we're _assuming_ that people gave us a default
 
     def get_bool(self, key: str, *, default: bool = None) -> bool:
         """
@@ -136,7 +136,7 @@ class MacConfig(AbstractConfig):
         """
         res = self.__raw_get(key)
         if res is None:
-            return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
+            return default  # Yes it could be None, but we're _assuming_ that people gave us a default
 
         if not isinstance(res, bool):
             raise ValueError(f'__raw_get returned unexpected type {type(res)=} {res!r}')

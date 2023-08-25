@@ -313,7 +313,7 @@ class _Locale:
     def wszarray_to_list(self, array):
         offset = 0
         while offset < len(array):
-            sz = ctypes.wstring_at(ctypes.addressof(array) + offset * 2)
+            sz = ctypes.wstring_at(ctypes.addressof(array) + offset * 2)  # type: ignore
             if sz:
                 yield sz
                 offset += len(sz) + 1

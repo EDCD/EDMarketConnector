@@ -42,7 +42,7 @@ import sys
 import traceback
 import warnings
 from abc import abstractmethod
-from typing import Any, Callable, Optional, Type, TypeVar, Union
+from typing import Any, Callable, Optional, Type, TypeVar, Union, List
 import semantic_version
 from constants import GITVERSION_FILE, applongname, appname
 
@@ -60,10 +60,10 @@ copyright = '© 2015-2019 Jonathan Harris, 2020-2023 EDCD'
 update_feed = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml'
 update_interval = 8*60*60
 # Providers marked to be in debug mode. Generally this is expected to switch to sending data to a log file
-debug_senders: list[str] = []
+debug_senders: List[str] = []
 # TRACE logging code that should actually be used.  Means not spamming it
 # *all* if only interested in some things.
-trace_on: list[str] = []
+trace_on: List[str] = []
 
 capi_pretend_down: bool = False
 capi_debug_access_token: Optional[str] = None
@@ -285,7 +285,7 @@ class AbstractConfig(abc.ABC):
 
     @staticmethod
     def _suppress_call(
-        func: Callable[..., _T], exceptions: Union[Type[BaseException], list[Type[BaseException]]] = Exception,
+        func: Callable[..., _T], exceptions: Union[Type[BaseException], List[Type[BaseException]]] = Exception,
         *args: Any, **kwargs: Any
     ) -> Optional[_T]:
         if exceptions is None:
@@ -294,7 +294,7 @@ class AbstractConfig(abc.ABC):
         if not isinstance(exceptions, list):
             exceptions = [exceptions]
 
-        with contextlib.suppress(*exceptions):  # type: ignore # it works fine, mypy
+        with contextlib.suppress(*exceptions):  # it works fine, mypy
             return func(*args, **kwargs)
 
         return None
@@ -326,7 +326,7 @@ class AbstractConfig(abc.ABC):
         if (an_int := self._suppress_call(self.get_int, ValueError, key, default=None)) is not None:
             return an_int
 
-        return default  # type: ignore
+        return default
 
     @abstractmethod
     def get_list(self, key: str, *, default: Optional[list] = None) -> list:
@@ -391,7 +391,7 @@ class AbstractConfig(abc.ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def set(self, key: str, val: Union[int, str, list[str], bool]) -> None:
+    def set(self, key: str, val: Union[int, str, List[str], bool]) -> None:
         """
         Set the given key's data to the given value.
 

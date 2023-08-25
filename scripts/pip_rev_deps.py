@@ -1,9 +1,11 @@
 """Search for dependencies given a package."""
 import sys
+from typing import List
+
 import pkg_resources
 
 
-def find_reverse_deps(package_name: str) -> list[str]:
+def find_reverse_deps(package_name: str) -> List[str]:
     """
     Find the packages that depend on the named one.
 
