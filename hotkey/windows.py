@@ -80,7 +80,7 @@ def window_title(h) -> str:
     """
     if h:
         title_length = GetWindowTextLength(h) + 1
-        with ctypes.create_unicode_buffer(title_length) as buf:
+        with ctypes.create_unicode_buffer(title_length) as buf:  # type: ignore
             if GetWindowText(h, buf, title_length):
                 return buf.value
     return ''

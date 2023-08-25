@@ -47,7 +47,7 @@ class WinConfig(AbstractConfig):
 
     def __init__(self, do_winsparkle=True) -> None:
         super().__init__()
-        self.app_dir_path = pathlib.Path(known_folder_path(FOLDERID_LocalAppData)) / appname
+        self.app_dir_path = pathlib.Path(known_folder_path(FOLDERID_LocalAppData)) / appname  # type: ignore
         self.app_dir_path.mkdir(exist_ok=True)
 
         self.plugin_dir_path = self.app_dir_path / 'plugins'
@@ -63,8 +63,8 @@ class WinConfig(AbstractConfig):
         self.home_path = pathlib.Path.home()
 
         journal_dir_path = pathlib.Path(
-            known_folder_path(FOLDERID_SavedGames)) / 'Frontier Developments' / 'Elite Dangerous'
-        self.default_journal_dir_path = journal_dir_path if journal_dir_path.is_dir() else None
+            known_folder_path(FOLDERID_SavedGames)) / 'Frontier Developments' / 'Elite Dangerous'  # type: ignore
+        self.default_journal_dir_path = journal_dir_path if journal_dir_path.is_dir() else None  # type: ignore
 
         REGISTRY_SUBKEY = r'Software\Marginal\EDMarketConnector'  # noqa: N806
         create_key_defaults = functools.partial(
@@ -149,7 +149,7 @@ class WinConfig(AbstractConfig):
         """
         res = self.__get_regentry(key)
         if res is None:
-            return default  # Yes it could be None, but we're _assuming_ that people gave us a default
+            return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
 
         if not isinstance(res, str):
             raise ValueError(f'Data from registry is not a string: {type(res)=} {res=}')
@@ -164,7 +164,7 @@ class WinConfig(AbstractConfig):
         """
         res = self.__get_regentry(key)
         if res is None:
-            return default  # Yes it could be None, but we're _assuming_ that people gave us a default
+            return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
 
         if not isinstance(res, list):
             raise ValueError(f'Data from registry is not a list: {type(res)=} {res}')
@@ -192,7 +192,7 @@ class WinConfig(AbstractConfig):
 
         Implements :meth:`AbstractConfig.get_bool`.
         """
-        res = self.get_int(key, default=default)
+        res = self.get_int(key, default=default)  # type: ignore
         if res is None:
             return default  # Yes it could be None, but we're _assuming_ that people gave us a default
 
@@ -216,7 +216,7 @@ class WinConfig(AbstractConfig):
 
         elif isinstance(val, list):
             reg_type = winreg.REG_MULTI_SZ
-            winreg.SetValueEx(self.__reg_handle, key, REG_RESERVED_ALWAYS_ZERO, reg_type, val)
+            winreg.SetValueEx(self.__reg_handle, key, REG_RESERVED_ALWAYS_ZERO, reg_type, val)  # type: ignore
 
         elif isinstance(val, bool):
             reg_type = winreg.REG_DWORD

@@ -200,7 +200,7 @@ class OldConfig:
     elif sys.platform == 'win32':
 
         def __init__(self):
-            self.app_dir = join(known_folder_path(FOLDERID_LocalAppData), appname)
+            self.app_dir = join(known_folder_path(FOLDERID_LocalAppData), appname)  # type: ignore
             if not isdir(self.app_dir):
                 mkdir(self.app_dir)
 
@@ -277,7 +277,7 @@ class OldConfig:
                 RegSetValueEx(sparklekey, 'UpdateInterval', 0, 1, buf, len(buf) * 2)
                 RegCloseKey(sparklekey)
 
-            if not self.get('outdir') or not isdir(self.get('outdir')):
+            if not self.get('outdir') or not isdir(self.get('outdir')):  # type: ignore
                 self.set('outdir', known_folder_path(FOLDERID_Documents) or self.home)
 
         def get(self, key: str, default: Union[None, list, str] = None) -> Union[None, list, str]:

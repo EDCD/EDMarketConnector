@@ -105,7 +105,7 @@ class JournalLock:
             import msvcrt
 
             try:
-                msvcrt.locking(self.journal_dir_lockfile.fileno(), msvcrt.LK_NBLCK, 4096)
+                msvcrt.locking(self.journal_dir_lockfile.fileno(), msvcrt.LK_NBLCK, 4096)  # type: ignore
 
             except Exception as e:
                 logger.info(f"Exception: Couldn't lock journal directory \"{self.journal_dir}\""
@@ -156,8 +156,8 @@ class JournalLock:
             try:
                 # Need to seek to the start first, as lock range is relative to
                 # current position
-                self.journal_dir_lockfile.seek(0)
-                msvcrt.locking(self.journal_dir_lockfile.fileno(), msvcrt.LK_UNLCK, 4096)
+                self.journal_dir_lockfile.seek(0)  # type: ignore
+                msvcrt.locking(self.journal_dir_lockfile.fileno(), msvcrt.LK_UNLCK, 4096)  # type: ignore
 
             except Exception as e:
                 logger.info(f"Exception: Couldn't unlock journal directory \"{self.journal_dir}\": {e!r}")

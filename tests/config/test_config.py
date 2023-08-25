@@ -86,7 +86,7 @@ class TestNewConfig:
         if sys.platform != 'linux':
             return
 
-        from config.linux import LinuxConfig
+        from config.linux import LinuxConfig  # type: ignore
 
         if isinstance(config, LinuxConfig) and config.config is not None:
             config.config.read(config.filename)
@@ -177,7 +177,7 @@ class TestOldNewConfig:
         if sys.platform != 'linux':
             return
 
-        from config.linux import LinuxConfig
+        from config.linux import LinuxConfig  # type: ignore
         if isinstance(config, LinuxConfig) and config.config is not None:
             config.config.read(config.filename)
 
