@@ -1452,6 +1452,7 @@ class EDLogs(FileSystemEventHandler):
                         logger.error(f"LoadoutEquipModule: {entry}")
 
             elif event_type == "loadoutremovemodule":
+                # triggers if selecting an already-equipped weapon into a different slot
                 # { "timestamp":"2021-04-29T11:11:13Z", "event":"LoadoutRemoveModule", "LoadoutName":"Dom L/K/K",
                 # "SuitID":1698364940285172, "SuitName":"tacticalsuit_class1", "SuitName_Localised":"Dominator Suit",
                 # "LoadoutID":4293000001, "SlotName":"PrimaryWeapon1", "ModuleName":"wpn_m_assaultrifle_laser_fauto",
@@ -1479,6 +1480,7 @@ class EDLogs(FileSystemEventHandler):
                 # Suit Loadouts.
                 # { "timestamp":"2021-04-29T10:50:34Z", "event":"SellWeapon", "Name":"wpn_m_assaultrifle_laser_fauto",
                 # "Name_Localised":"TK Aphelion", "Price":75000, "SuitModuleID":1698364962722310 }
+                # We need to look over all Suit Loadouts for ones that used this specific weapon
                 for sl in self.state["SuitLoadouts"]:
                     for w in self.state["SuitLoadouts"][sl]["slots"]:
                         if (

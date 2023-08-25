@@ -31,6 +31,7 @@ def export(data: CAPIData) -> None:
     timestamp = time.strftime('%Y-%m-%dT%H.%M.%S', time.strptime(data['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
     data_filename = f"{data['lastSystem']['name'].strip()}.{data['lastStarport']['name'].strip()}.{timestamp}.prices"
 
+    # codecs can't automatically handle line endings, so encode manually where required
     with open(data_path / data_filename, 'wb') as trade_file:
         trade_file.write('#! trade.py import -\n'.encode('utf-8'))
         this_platform = 'Mac OS' if sys.platform == 'darwin' else system()

@@ -101,6 +101,7 @@ class PrefsVersion:
         :raises ValueError: if added_after is after the current latest version
         :return: A boolean indicating whether defaults should be set
         """
+        # config.get('PrefsVersion') is the version preferences we last saved for
         current_version = self.VERSIONS["current"]
         prefs_version = config.get_int("PrefsVersion", default=0)
 
@@ -108,6 +109,7 @@ class PrefsVersion:
             added_after_serial = 1
         else:
             added_after_serial = self.VERSIONS[added_after]
+            # Sanity check, if something was added after then current should be greater
             if added_after_serial >= current_version:
                 raise ValueError(
                     "ERROR: Call to PrefsVersion.shouldSetDefaults() with 'addedAfter'"

@@ -184,9 +184,10 @@ class Dashboard(FileSystemEventHandler):
             try:
                 with status_path.open('rb') as h:
                     data = h.read().strip()
-                    if data:
+                    if data:  # Can be empty if polling while the file is being re-written
                         entry = json.loads(data)
                         timestamp = entry.get('timestamp')
+                        # Status file is shared between beta and live. So filter out status not in this game session.
                         if timestamp and timegm(time.strptime(timestamp, '%Y-%m-%dT%H:%M:%SZ')) >= self.session_start:
                             self.status = entry
                             self.root.event_generate('<<DashboardEvent>>', when="tail")

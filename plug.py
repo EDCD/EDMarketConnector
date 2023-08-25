@@ -204,6 +204,9 @@ def load_plugins(master: tk.Tk) -> None:  # noqa: CCR001
 
     # Load external plugins
     external_plugins = []
+    # Load any plugins that are also packages first, but note it's *still*
+    # 100% relying on there being a `load.py`, as only that will be loaded.
+    # The intent here is to e.g. have EDMC-Overlay load before any plugins that depend on it.
     plugin_dir = config.plugin_dir_path
     for name in sorted(os.listdir(plugin_dir)):
         if os.path.isdir(os.path.join(plugin_dir, name)) and name[0] not in [".", "_"]:

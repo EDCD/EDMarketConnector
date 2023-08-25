@@ -381,8 +381,7 @@ if __name__ == '__main__':  # noqa: C901
             git_branch == '' and '-alpha0' in str(appversion())
         )
     ):
-        message = "You're running in a DEVELOPMENT branch build. You might encounter bugs!"
-        print(message)
+        print("You're running in a DEVELOPMENT branch build. You might encounter bugs!")
 
 # See EDMCLogging.py docs.
 # isort: off

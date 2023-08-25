@@ -326,21 +326,21 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: Optional[str], is_beta: bool) -> tk
     cur_row = 10
     if this.label:
         this.label.grid(columnspan=2, padx=PADX, sticky=tk.W)
-
+    # LANG: Game Commander name label in EDSM settings
     this.cmdr_label = nb.Label(frame, text=_('Cmdr'))
     this.cmdr_label.grid(row=cur_row, padx=PADX, sticky=tk.W)
     this.cmdr_text = nb.Label(frame)
     this.cmdr_text.grid(row=cur_row, column=1, padx=PADX, pady=PADY, sticky=tk.W)
 
     cur_row += 1
-
+    # LANG: EDSM Commander name label in EDSM settings
     this.user_label = nb.Label(frame, text=_('Commander Name'))
     this.user_label.grid(row=cur_row, padx=PADX, sticky=tk.W)
     this.user = nb.Entry(frame)
     this.user.grid(row=cur_row, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
 
     cur_row += 1
-
+    # LANG: EDSM API key label
     this.apikey_label = nb.Label(frame, text=_('API Key'))
     this.apikey_label.grid(row=cur_row, padx=PADX, sticky=tk.W)
     this.apikey = nb.Entry(frame, show="*", width=50)

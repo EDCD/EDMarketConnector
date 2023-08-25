@@ -51,7 +51,8 @@ class LinuxConfig(AbstractConfig):
         self.config = ConfigParser(comment_prefixes=('#',), interpolation=None)
         self.config.read(self.filename)
 
-        # Ensure the section exists
+        # Ensure that our section exists. This is here because configparser will happily create files for us, but it
+        # does not magically create sections
         try:
             self.config[self.SECTION].get("this_does_not_exist")
         except KeyError:

@@ -95,6 +95,7 @@ def lookup(module, ship_map, entitled=False) -> Optional[dict]:  # noqa: C901, C
     if not entitled and module.get("sku") != "ELITE_HORIZONS_V_PLANETARY_LANDINGS":
         return None
 
+    # Don't report Planetary Approach Suite in outfitting
     if not entitled and name[1] == "planetapproachsuite":
         return None
 

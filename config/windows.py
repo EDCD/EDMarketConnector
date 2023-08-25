@@ -128,6 +128,7 @@ class WinConfig(AbstractConfig):
             # Key doesn't exist
             return None
 
+        # For programmers who want to actually know what is going on
         if _type == winreg.REG_SZ:
             return str(value)
 

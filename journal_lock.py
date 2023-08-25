@@ -69,7 +69,7 @@ class JournalLock:
 
         # Linux CIFS read-only mount throws: OSError(30, 'Read-only file system')
         # Linux no-write-perm directory throws: PermissionError(13, 'Permission denied')
-        except Exception as e:
+        except Exception as e:  # For remote FS this could be any of a wide range of exceptions
             logger.warning(f"Couldn't open \"{self.journal_dir_lockfile_name}\" for \"w+\""
                            f" Aborting duplicate process checks: {e!r}")
             return False

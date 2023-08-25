@@ -486,7 +486,7 @@ def journal_entry(  # noqa: C901, CCR001
                         for k, v in state['Engineers'].items()
                     ]
                     new_add_event('setCommanderRankEngineer', entry['timestamp'], engineer_data)
-
+                # Update ship
                 if state['ShipID']:
                     cur_ship = {
                         'shipType': state['ShipType'],
@@ -503,7 +503,8 @@ def journal_entry(  # noqa: C901, CCR001
                     new_add_event('setCommanderShip', entry['timestamp'], cur_ship)
                     this.loadout = make_loadout(state)
                     new_add_event('setCommanderShipLoadout', entry['timestamp'], this.loadout)
-
+            # Trigger off the "only observed as being after Ranks" event so that
+            # we have both current Ranks *and* current Progress within them.
             elif event_name == 'Progress':
                 rank_data = [
                     {'rankName': k.lower(), 'rankValue': v[0], 'rankProgress': v[1] / 100.0}
