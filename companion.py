@@ -255,7 +255,7 @@ class NoMonitorStation(Exception):
     """
     Exception Class for being docked, but not knowing where in monitor.
 
-    Raised when CAPI says we're docked but we forgot where we were at an EDO
+    Raised when CAPI says we're docked, but we forgot where we were at an EDO
     Settlement, Disembarked, re-Embarked and then user hit 'Update'.
     As of 4.0.0.401 both Disembark and Embark say `"Onstation": false`.
     """
@@ -1193,15 +1193,15 @@ class Session:
             return ''
 
         if self.credentials['beta']:
-            logger.debug(f"Using {self.SERVER_BETA} because {self.credentials['beta']=}")
-            return self.SERVER_BETA
+            logger.debug(f"Using {SERVER_BETA} because {self.credentials['beta']=}")
+            return SERVER_BETA
 
         if monitor.is_live_galaxy():
-            logger.debug(f"Using {self.SERVER_LIVE} because monitor.is_live_galaxy() was True")
-            return self.SERVER_LIVE
+            logger.debug(f"Using {SERVER_LIVE} because monitor.is_live_galaxy() was True")
+            return SERVER_LIVE
 
-        logger.debug(f"Using {self.SERVER_LEGACY} because monitor.is_live_galaxy() was False")
-        return self.SERVER_LEGACY
+        logger.debug(f"Using {SERVER_LEGACY} because monitor.is_live_galaxy() was False")
+        return SERVER_LEGACY
 
 
 ######################################################################
