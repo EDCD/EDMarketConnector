@@ -171,11 +171,11 @@ if DEBUG:
 def system_url(system_name: str) -> str:
     """Get a URL for the current system."""
     if this.system_address:
-        return requests.utils.requote_uri(f'https://inara.cz/galaxy-starsystem/'
+        return requests.utils.requote_uri(f'https://inara.cz/elite/starsystem/'
                                           f'?search={this.system_address}')
 
     elif system_name:
-        return requests.utils.requote_uri(f'https://inara.cz/galaxy-starsystem/'
+        return requests.utils.requote_uri(f'https://inara.cz/elite/starsystem/'
                                           f'?search={system_name}')
 
     return ''
@@ -192,12 +192,12 @@ def station_url(system_name: str, station_name: str) -> str:
     :return: A URL to inara for the given system and station
     """
     if system_name and station_name:
-        return requests.utils.requote_uri(f'https://inara.cz/galaxy-station/'
+        return requests.utils.requote_uri(f'https://inara.cz/elite/station/'
                                           f'?search={system_name}%20[{station_name}]')
 
     # monitor state might think these are gone, but we don't yet
     if this.system_name and this.station:
-        return requests.utils.requote_uri(f'https://inara.cz/galaxy-station/'
+        return requests.utils.requote_uri(f'https://inara.cz/elite/station/'
                                           f'?search={this.system_name}%20[{this.station}]')
 
     if system_name:
