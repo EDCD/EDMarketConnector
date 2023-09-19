@@ -294,7 +294,7 @@ class AbstractConfig(abc.ABC):
         if not isinstance(exceptions, list):
             exceptions = [exceptions]
 
-        with contextlib.suppress(*exceptions):  # it works fine, mypy
+        with contextlib.suppress(*exceptions):
             return func(*args, **kwargs)
 
         return None

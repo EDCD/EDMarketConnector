@@ -83,12 +83,9 @@ class WinConfig(AbstractConfig):
             raise
 
         self.identifier = applongname
-        outdir_str = self.get_str('outdir')
-        docs_path = known_folder_path(FOLDERID_Documents)
-        self.set(
-            'outdir',
-            docs_path if docs_path is not None and pathlib.Path(outdir_str).is_dir() else self.home
-        )
+        if (outdir_str := self.get_str('outdir')) is None or not pathlib.Path(outdir_str).is_dir():
+            docs = known_folder_path(FOLDERID_Documents)
+            self.set("outdir", docs if docs is not None else self.home)
 
     def __setup_winsparkle(self):
         """Ensure the necessary Registry keys for WinSparkle are present."""
@@ -208,22 +205,21 @@ class WinConfig(AbstractConfig):
         reg_type: Union[Literal[1], Literal[4], Literal[7]]
         if isinstance(val, str):
             reg_type = winreg.REG_SZ
-            winreg.SetValueEx(self.__reg_handle, key, REG_RESERVED_ALWAYS_ZERO, reg_type, val)
 
         elif isinstance(val, int):
             reg_type = winreg.REG_DWORD
-            winreg.SetValueEx(self.__reg_handle, key, REG_RESERVED_ALWAYS_ZERO, reg_type, int(val))
 
         elif isinstance(val, list):
             reg_type = winreg.REG_MULTI_SZ
-            winreg.SetValueEx(self.__reg_handle, key, REG_RESERVED_ALWAYS_ZERO, reg_type, val)  # type: ignore
 
         elif isinstance(val, bool):
             reg_type = winreg.REG_DWORD
-            winreg.SetValueEx(self.__reg_handle, key, REG_RESERVED_ALWAYS_ZERO, reg_type, int(val))
+            val = int(val)
 
         else:
             raise ValueError(f'Unexpected type for value {type(val)=}')
+
+        winreg.SetValueEx(self.__reg_handle, key, REG_RESERVED_ALWAYS_ZERO, reg_type, val)
 
     def delete(self, key: str, *, suppress=False) -> None:
         """

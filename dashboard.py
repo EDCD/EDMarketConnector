@@ -188,7 +188,7 @@ class Dashboard(FileSystemEventHandler):
                         entry = json.loads(data)
                         timestamp = entry.get('timestamp')
                         # Status file is shared between beta and live. So filter out status not in this game session.
-                        if timestamp and timegm(time.strptime(timestamp, '%Y-%m-%dT%H:%M:%SZ')) >= self.session_start:
+                        if (timestamp and timegm(time.strptime(timestamp, '%Y-%m-%dT%H:%M:%SZ')) >= self.session_start) and self.status != entry:
                             self.status = entry
                             self.root.event_generate('<<DashboardEvent>>', when="tail")
             except Exception:

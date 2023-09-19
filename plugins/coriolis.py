@@ -155,7 +155,7 @@ def prefs_changed(cmdr: Optional[str], is_beta: bool) -> None:
 
     config.set('coriolis_normal_url', coriolis_config.normal_url)
     config.set('coriolis_beta_url', coriolis_config.beta_url)
-    config.set('coriolis_override_url_selection', coriolis_config.override_mode)
+    config.set('coriolis_overide_url_selection', coriolis_config.override_mode)
 
 
 def _get_target_url(is_beta: bool) -> str:
