@@ -57,8 +57,8 @@ class LinuxConfig(AbstractConfig):
             self.config[self.SECTION].get("this_does_not_exist")
         except KeyError:
             logger.info("Config section not found. Backing up existing file (if any) and re-adding a section header")
-            backup_filename = self.filename.parent / f'{appname}.ini.backup'
             if self.filename.exists():
+                backup_filename = self.filename.parent / f'{appname}.ini.backup'
                 backup_filename.write_bytes(self.filename.read_bytes())
             self.config.add_section(self.SECTION)
 
