@@ -1330,7 +1330,7 @@ def journal_entry(  # noqa: C901, CCR001
     return ''  # No error
 
 
-def cmdr_data(data: CAPIData, is_beta):
+def cmdr_data(data: CAPIData, is_beta):  # noqa: CCR001, reanalyze me later
     """CAPI event hook."""
     this.cmdr = data['commander']['name']
 
@@ -1339,15 +1339,10 @@ def cmdr_data(data: CAPIData, is_beta):
         this.station_marketid = data['commander']['docked'] and data['lastStarport']['id']
 
     # Only trust CAPI if these aren't yet set
-    if not this.system_name:
-        this.system_name = data['lastSystem']['name']
+    this.system_name = this.system_name if this.system_name else data['lastSystem']['name']
 
-    if data['commander']['docked']:
+    if not this.station and data['commander']['docked']:
         this.station = data['lastStarport']['name']
-    elif data['lastStarport']['name'] and data['lastStarport']['name'] != "":
-        this.station = STATION_UNDOCKED
-    else:
-        this.station = ''
 
     # Override standard URL functions
     if config.get_str('system_provider') == 'Inara':
@@ -1357,7 +1352,15 @@ def cmdr_data(data: CAPIData, is_beta):
         this.system_link.update_idletasks()
 
     if config.get_str('station_provider') == 'Inara':
-        this.station_link['text'] = this.station
+        if data['commander']['docked'] or this.on_foot and this.station:
+            this.station_link['text'] = this.station
+
+        elif data['lastStarport']['name'] and data['lastStarport']['name'] != "":
+            this.station_link['text'] = STATION_UNDOCKED
+
+        else:
+            this.station_link['text'] = ''
+
         # Do *NOT* set 'url' here, as it's set to a function that will call
         # through correctly.  We don't want a static string.
         this.station_link.update_idletasks()

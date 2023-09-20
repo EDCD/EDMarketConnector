@@ -411,6 +411,8 @@ def set_prefs_ui_states(state: str) -> None:
     Set the state of various config UI entries.
 
     :param state: the state to set each entry to
+
+    # NOTE: This may break things, watch out in testing. (5.10)
     """
     elements = [
         this.label,
@@ -483,6 +485,7 @@ def credentials(cmdr: str) -> Optional[Tuple[str, str]]:
     if cmdr in cmdrs and len(cmdrs) == len(edsm_usernames) == len(edsm_apikeys):
         idx = cmdrs.index(cmdr)
         if idx < len(edsm_usernames) and idx < len(edsm_apikeys):
+            logger.trace_if(CMDR_CREDS, f'{cmdr=}: returning ({edsm_usernames[idx]=}, {edsm_apikeys[idx]=})')
             return edsm_usernames[idx], edsm_apikeys[idx]
 
     logger.trace_if(CMDR_CREDS, f'{cmdr=}: returning None')

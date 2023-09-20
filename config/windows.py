@@ -219,7 +219,7 @@ class WinConfig(AbstractConfig):
         else:
             raise ValueError(f'Unexpected type for value {type(val)=}')
 
-        winreg.SetValueEx(self.__reg_handle, key, REG_RESERVED_ALWAYS_ZERO, reg_type, val)
+        winreg.SetValueEx(self.__reg_handle, key, REG_RESERVED_ALWAYS_ZERO, reg_type, val)  # type: ignore
 
     def delete(self, key: str, *, suppress=False) -> None:
         """

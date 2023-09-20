@@ -170,6 +170,7 @@ class Plugin:
                 frame = plugin_prefs(parent, cmdr, is_beta)
                 if isinstance(frame, nb.Frame):
                     return frame
+                raise AssertionError  # Intentionally throw an error here
             except Exception:
                 logger.exception(f'Failed for Plugin "{self.name}"')
         return None

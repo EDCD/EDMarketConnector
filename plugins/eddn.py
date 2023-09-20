@@ -461,26 +461,28 @@ class EDDNSender:
         :param reschedule: Boolean indicating if we should call `after()` again.
         """
         logger.trace_if("plugin.eddn.send", "Called")
-
         # Mutex in case we're already processing
-        if self.queue_processing.acquire(blocking=False):
-            logger.trace_if("plugin.eddn.send", "Obtained mutex")
-
-            have_rescheduled = False
-
-            if reschedule:
-                logger.trace_if("plugin.eddn.send", f"Next run scheduled for {self.eddn.REPLAY_PERIOD}ms from now")
-                self.eddn.parent.after(self.eddn.REPLAY_PERIOD, self.queue_check_and_send, reschedule)
-                have_rescheduled = True
-
-            logger.trace_if("plugin.eddn.send", "Mutex released")
-            self.queue_processing.release()
-        else:
+        if not self.queue_processing.acquire(blocking=False):
             logger.trace_if("plugin.eddn.send", "Couldn't obtain mutex")
+            if reschedule:
+                logger.trace_if(
+                    "plugin.eddn.send",
+                    f"Next run scheduled for {self.eddn.REPLAY_PERIOD}ms from now",
+                )
+                self.eddn.parent.after(
+                    self.eddn.REPLAY_PERIOD, self.queue_check_and_send, reschedule
+                )
 
-            if not reschedule:
-                logger.trace_if("plugin.eddn.send", "NO next run scheduled (there should be another one already set)")
+            else:
+                logger.trace_if(
+                    "plugin.eddn.send",
+                    "NO next run scheduled (there should be another one already set)",
+                )
 
+            return
+        logger.trace_if("plugin.eddn.send", "Obtained mutex")
+        # Used to indicate if we've rescheduled at the faster rate already.
+        have_rescheduled = False
         # We send either if docked or 'Delay sending until docked' not set
         if this.docked or not config.get_int('output') & config.OUT_EDDN_DELAY:
             logger.trace_if("plugin.eddn.send", "Should send")
