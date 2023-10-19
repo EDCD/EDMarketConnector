@@ -1,12 +1,14 @@
 """
-Code dealing with the configuration of the program.
+__init__.py - Code dealing with the configuration of the program.
+
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
 
 Windows uses the Registry to store values in a flat manner.
 Linux uses a file, but for commonality it's still a flat data structure.
 macOS uses a 'defaults' object.
 """
-
-
 __all__ = [
     # defined in the order they appear in the file
     'GITVERSION_FILE',
@@ -40,10 +42,8 @@ import sys
 import traceback
 import warnings
 from abc import abstractmethod
-from typing import Any, Callable, Optional, Type, TypeVar
-
+from typing import Any, Callable, Optional, Type, TypeVar, Union, List
 import semantic_version
-
 from constants import GITVERSION_FILE, applongname, appname
 
 # Any of these may be imported by plugins
@@ -52,7 +52,7 @@ appcmdname = 'EDMC'
 # <https://semver.org/#semantic-versioning-specification-semver>
 # Major.Minor.Patch(-prerelease)(+buildmetadata)
 # NB: Do *not* import this, use the functions appversion() and appversion_nobuild()
-_static_appversion = '5.9.5'
+_static_appversion = '5.10.0-alpha0'
 
 _cached_version: Optional[semantic_version.Version] = None
 copyright = '© 2015-2019 Jonathan Harris, 2020-2023 EDCD'
@@ -60,10 +60,10 @@ copyright = '© 2015-2019 Jonathan Harris, 2020-2023 EDCD'
 update_feed = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml'
 update_interval = 8*60*60
 # Providers marked to be in debug mode. Generally this is expected to switch to sending data to a log file
-debug_senders: list[str] = []
+debug_senders: List[str] = []
 # TRACE logging code that should actually be used.  Means not spamming it
 # *all* if only interested in some things.
-trace_on: list[str] = []
+trace_on: List[str] = []
 
 capi_pretend_down: bool = False
 capi_debug_access_token: Optional[str] = None
@@ -79,7 +79,6 @@ else:
 _T = TypeVar('_T')
 
 
-###########################################################################
 def git_shorthash_from_head() -> str:
     """
     Determine short hash for current git HEAD.
@@ -91,13 +90,14 @@ def git_shorthash_from_head() -> str:
     shorthash: str = None  # type: ignore
 
     try:
-        git_cmd = subprocess.Popen('git rev-parse --short HEAD'.split(),
-                                   stdout=subprocess.PIPE,
-                                   stderr=subprocess.STDOUT
-                                   )
+        git_cmd = subprocess.Popen(
+            "git rev-parse --short HEAD".split(),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+        )
         out, err = git_cmd.communicate()
 
-    except Exception as e:
+    except subprocess.CalledProcessError as e:
         logger.info(f"Couldn't run git command for short hash: {e!r}")
 
     else:
@@ -131,7 +131,7 @@ def appversion() -> semantic_version.Version:
     if getattr(sys, 'frozen', False):
         # Running frozen, so we should have a .gitversion file
         # Yes, .parent because if frozen we're inside library.zip
-        with open(pathlib.Path(sys.path[0]).parent / GITVERSION_FILE, 'r', encoding='utf-8') as gitv:
+        with open(pathlib.Path(sys.path[0]).parent / GITVERSION_FILE, encoding='utf-8') as gitv:
             shorthash = gitv.read()
 
     else:
@@ -157,23 +157,15 @@ def appversion_nobuild() -> semantic_version.Version:
     :return: App version without any build meta data.
     """
     return appversion().truncate('prerelease')
-###########################################################################
 
 
 class AbstractConfig(abc.ABC):
     """Abstract root class of all platform specific Config implementations."""
 
     OUT_EDDN_SEND_STATION_DATA = 1
-    # OUT_MKT_BPC = 2	# No longer supported
     OUT_MKT_TD = 4
     OUT_MKT_CSV = 8
     OUT_SHIP = 16
-    # OUT_SHIP_EDS = 16	# Replaced by OUT_SHIP
-    # OUT_SYS_FILE = 32	# No longer supported
-    # OUT_STAT = 64	# No longer available
-    # OUT_SHIP_CORIOLIS = 128	# Replaced by OUT_SHIP
-    # OUT_SYS_EDSM = 256  # Now a plugin
-    # OUT_SYS_AUTO = 512  # Now always automatic
     OUT_MKT_MANUAL = 1024
     OUT_EDDN_SEND_NON_STATION = 2048
     OUT_EDDN_DELAY = 4096
@@ -185,7 +177,6 @@ class AbstractConfig(abc.ABC):
     respath_path: pathlib.Path
     home_path: pathlib.Path
     default_journal_dir_path: pathlib.Path
-
     identifier: str
 
     __in_shutdown = False  # Is the application currently shutting down ?
@@ -294,7 +285,7 @@ class AbstractConfig(abc.ABC):
 
     @staticmethod
     def _suppress_call(
-        func: Callable[..., _T], exceptions: Type[BaseException] | list[Type[BaseException]] = Exception,
+        func: Callable[..., _T], exceptions: Union[Type[BaseException], List[Type[BaseException]]] = Exception,
         *args: Any, **kwargs: Any
     ) -> Optional[_T]:
         if exceptions is None:
@@ -303,15 +294,15 @@ class AbstractConfig(abc.ABC):
         if not isinstance(exceptions, list):
             exceptions = [exceptions]
 
-        with contextlib.suppress(*exceptions):  # type: ignore # it works fine, mypy
+        with contextlib.suppress(*exceptions):
             return func(*args, **kwargs)
 
         return None
 
     def get(
         self, key: str,
-        default: list | str | bool | int | None = None
-    ) -> list | str | bool | int | None:
+        default: Union[list, str, bool, int, None] = None
+    ) -> Union[list, str, bool, int, None]:
         """
         Return the data for the requested key, or a default.
 
@@ -326,19 +317,19 @@ class AbstractConfig(abc.ABC):
         if (a_list := self._suppress_call(self.get_list, ValueError, key, default=None)) is not None:
             return a_list
 
-        elif (a_str := self._suppress_call(self.get_str, ValueError, key, default=None)) is not None:
+        if (a_str := self._suppress_call(self.get_str, ValueError, key, default=None)) is not None:
             return a_str
 
-        elif (a_bool := self._suppress_call(self.get_bool, ValueError, key, default=None)) is not None:
+        if (a_bool := self._suppress_call(self.get_bool, ValueError, key, default=None)) is not None:
             return a_bool
 
-        elif (an_int := self._suppress_call(self.get_int, ValueError, key, default=None)) is not None:
+        if (an_int := self._suppress_call(self.get_int, ValueError, key, default=None)) is not None:
             return an_int
 
-        return default  # type: ignore
+        return default
 
     @abstractmethod
-    def get_list(self, key: str, *, default: list | None = None) -> list:
+    def get_list(self, key: str, *, default: Optional[list] = None) -> list:
         """
         Return the list referred to by the given key if it exists, or the default.
 
@@ -347,7 +338,7 @@ class AbstractConfig(abc.ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_str(self, key: str, *, default: str | None = None) -> str:
+    def get_str(self, key: str, *, default: Optional[str] = None) -> str:
         """
         Return the string referred to by the given key if it exists, or the default.
 
@@ -360,7 +351,7 @@ class AbstractConfig(abc.ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_bool(self, key: str, *, default: bool | None = None) -> bool:
+    def get_bool(self, key: str, *, default: Optional[bool] = None) -> bool:
         """
         Return the bool referred to by the given key if it exists, or the default.
 
@@ -400,7 +391,7 @@ class AbstractConfig(abc.ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def set(self, key: str, val: int | str | list[str] | bool) -> None:
+    def set(self, key: str, val: Union[int, str, List[str], bool]) -> None:
         """
         Set the given key's data to the given value.
 
@@ -462,16 +453,15 @@ def get_config(*args, **kwargs) -> AbstractConfig:
         from .darwin import MacConfig
         return MacConfig(*args, **kwargs)
 
-    elif sys.platform == "win32":  # pragma: sys-platform-win32
+    if sys.platform == "win32":  # pragma: sys-platform-win32
         from .windows import WinConfig
         return WinConfig(*args, **kwargs)
 
-    elif sys.platform == "linux":  # pragma: sys-platform-linux
+    if sys.platform == "linux":  # pragma: sys-platform-linux
         from .linux import LinuxConfig
         return LinuxConfig(*args, **kwargs)
 
-    else:  # pragma: sys-platform-not-known
-        raise ValueError(f'Unknown platform: {sys.platform=}')
+    raise ValueError(f'Unknown platform: {sys.platform=}')
 
 
 config = get_config()
