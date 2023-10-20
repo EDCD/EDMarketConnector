@@ -1,4 +1,4 @@
-# type: ignore
+"""Old Configuration Test File."""
 import numbers
 import sys
 import warnings
@@ -6,7 +6,6 @@ from configparser import NoOptionError
 from os import getenv, makedirs, mkdir, pardir
 from os.path import dirname, expanduser, isdir, join, normpath
 from typing import TYPE_CHECKING, Optional, Union
-
 from config import applongname, appname, update_interval
 from EDMCLogging import get_main_logger
 
@@ -95,7 +94,7 @@ elif sys.platform == 'linux':
     from configparser import RawConfigParser
 
 
-class OldConfig():
+class OldConfig:
     """Object that holds all configuration data."""
 
     OUT_EDDN_SEND_STATION_DATA = 1
@@ -139,7 +138,7 @@ class OldConfig():
                 self.identifier = f'uk.org.marginal.{appname.lower()}'
                 NSBundle.mainBundle().infoDictionary()['CFBundleIdentifier'] = self.identifier
 
-            self.default_journal_dir: str | None = join(
+            self.default_journal_dir: Optional[str] = join(
                 NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, True)[0],
                 'Frontier Developments',
                 'Elite Dangerous'
@@ -159,14 +158,13 @@ class OldConfig():
             if val is None:
                 return default
 
-            elif isinstance(val, str):
+            if isinstance(val, str):
                 return str(val)
 
-            elif isinstance(val, list):
+            if isinstance(val, list):
                 return list(val)  # make writeable
 
-            else:
-                return default
+            return default
 
         def getint(self, key: str, default: int = 0) -> int:
             """Look up an integer configuration value."""
@@ -202,7 +200,7 @@ class OldConfig():
     elif sys.platform == 'win32':
 
         def __init__(self):
-            self.app_dir = join(known_folder_path(FOLDERID_LocalAppData), appname)  # type: ignore # Not going to change
+            self.app_dir = join(known_folder_path(FOLDERID_LocalAppData), appname)  # type: ignore
             if not isdir(self.app_dir):
                 mkdir(self.app_dir)
 
@@ -223,13 +221,13 @@ class OldConfig():
 
             journaldir = known_folder_path(FOLDERID_SavedGames)
             if journaldir:
-                self.default_journal_dir: str | None = join(journaldir, 'Frontier Developments', 'Elite Dangerous')
+                self.default_journal_dir: Optional[str] = join(journaldir, 'Frontier Developments', 'Elite Dangerous')
 
             else:
                 self.default_journal_dir = None
 
             self.identifier = applongname
-            self.hkey: ctypes.c_void_p | None = HKEY()
+            self.hkey: Optional[ctypes.c_void_p] = HKEY()
             disposition = DWORD()
             if RegCreateKeyEx(
                     HKEY_CURRENT_USER,
@@ -279,7 +277,7 @@ class OldConfig():
                 RegSetValueEx(sparklekey, 'UpdateInterval', 0, 1, buf, len(buf) * 2)
                 RegCloseKey(sparklekey)
 
-            if not self.get('outdir') or not isdir(self.get('outdir')):  # type: ignore # Not going to change
+            if not self.get('outdir') or not isdir(self.get('outdir')):  # type: ignore
                 self.set('outdir', known_folder_path(FOLDERID_Documents) or self.home)
 
         def get(self, key: str, default: Union[None, list, str] = None) -> Union[None, list, str]:
@@ -304,11 +302,10 @@ class OldConfig():
             if RegQueryValueEx(self.hkey, key, 0, ctypes.byref(key_type), buf, ctypes.byref(key_size)):
                 return default
 
-            elif key_type.value == REG_MULTI_SZ:
+            if key_type.value == REG_MULTI_SZ:
                 return list(ctypes.wstring_at(buf, len(buf)-2).split('\x00'))
 
-            else:
-                return str(buf.value)
+            return str(buf.value)
 
         def getint(self, key: str, default: int = 0) -> int:
             """Look up an integer configuration value."""
@@ -328,8 +325,7 @@ class OldConfig():
             ):
                 return default
 
-            else:
-                return key_val.value
+            return key_val.value
 
         def set(self, key: str, val: Union[int, str, list]) -> None:
             """Set value on the specified configuration key."""
@@ -377,7 +373,7 @@ class OldConfig():
                 mkdir(self.plugin_dir)
 
             self.internal_plugin_dir = join(dirname(__file__), 'plugins')
-            self.default_journal_dir: str | None = None
+            self.default_journal_dir: Optional[str] = None
             self.home = expanduser('~')
             self.respath = dirname(__file__)
             self.identifier = f'uk.org.marginal.{appname.lower()}'
@@ -388,7 +384,7 @@ class OldConfig():
 
             self.config = RawConfigParser(comment_prefixes=('#',))
             try:
-                with codecs.open(self.filename, 'r') as h:
+                with codecs.open(self.filename) as h:
                     self.config.read_file(h)
 
             except Exception as e:
@@ -407,8 +403,7 @@ class OldConfig():
                     # so we add a spurious ';' entry in set() and remove it here
                     assert val.split('\n')[-1] == ';', val.split('\n')
                     return [self._unescape(x) for x in val.split('\n')[:-1]]
-                else:
-                    return self._unescape(val)
+                return self._unescape(val)
 
             except NoOptionError:
                 logger.debug(f'attempted to get key {key} that does not exist')
@@ -437,10 +432,10 @@ class OldConfig():
         def set(self, key: str, val: Union[int, str, list]) -> None:
             """Set value on the specified configuration key."""
             if isinstance(val, bool):
-                self.config.set(self.SECTION, key, val and '1' or '0')  # type: ignore # Not going to change
+                self.config.set(self.SECTION, key, val and '1' or '0')
 
-            elif isinstance(val, str) or isinstance(val, numbers.Integral):
-                self.config.set(self.SECTION, key, self._escape(val))  # type: ignore # Not going to change
+            elif isinstance(val, (numbers.Integral, str)):
+                self.config.set(self.SECTION, key, self._escape(val))
 
             elif isinstance(val, list):
                 self.config.set(self.SECTION, key, '\n'.join([self._escape(x) for x in val] + [';']))
@@ -460,7 +455,7 @@ class OldConfig():
         def close(self) -> None:
             """Close the configuration."""
             self.save()
-            self.config = None
+            self.config = None  # type: ignore
 
         def _escape(self, val: str) -> str:
             """Escape a string for storage."""

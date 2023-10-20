@@ -1,6 +1,6 @@
 """Tests of killswitch behaviour."""
 import copy
-from typing import Optional
+from typing import Optional, List
 
 import pytest
 import semantic_version
@@ -85,7 +85,7 @@ def test_operator_precedence(
     ]
 )
 def test_check_multiple(
-    names: list[str], input: killswitch.UPDATABLE_DATA, result: killswitch.UPDATABLE_DATA, expected_return: bool
+    names: List[str], input: killswitch.UPDATABLE_DATA, result: killswitch.UPDATABLE_DATA, expected_return: bool
 ) -> None:
     """Check that order is correct when checking multiple killswitches."""
     should_return, data = TEST_SET.check_multiple_killswitches(input, *names, version='1.0.0')

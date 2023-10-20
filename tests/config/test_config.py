@@ -7,8 +7,6 @@ key deletions. Said modifications are to keys that are generated internally.
 Most of these tests are parity tests with the "old" config, and likely one day can be
 entirely removed.
 """
-from __future__ import annotations
-
 import contextlib
 import itertools
 import pathlib
@@ -81,7 +79,7 @@ def _build_test_list(static_data, random_data, random_id_name='random_test_{i}')
 
 
 class TestNewConfig:
-    """Test the new config with an array of hand picked and random data."""
+    """Test the new config with an array of hand-picked and random data."""
 
     def __update_linuxconfig(self) -> None:
         """On linux config uses ConfigParser, which doesn't update from disk changes. Force the update here."""

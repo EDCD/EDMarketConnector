@@ -33,11 +33,11 @@ def test_apply(source: UPDATABLE_DATA, key: str, action: str, to_set: Any, resul
 def test_apply_errors() -> None:
     """_apply should fail when passed something that isn't a Sequence or MutableMapping."""
     with pytest.raises(ValueError, match=r'Dont know how to'):
-        killswitch._apply(set(), '0', None, False)  # type: ignore # Its intentional that its broken
-        killswitch._apply(None, '', None)  # type: ignore # Its intentional that its broken
+        killswitch._apply(set(), '0')  # type: ignore # Its intentional that its broken
+        killswitch._apply(None, '')  # type: ignore # Its intentional that its broken
 
     with pytest.raises(ValueError, match=r'Cannot use string'):
-        killswitch._apply([], 'test', None, False)
+        killswitch._apply([], 'test')
 
 
 def test_apply_no_error() -> None:
