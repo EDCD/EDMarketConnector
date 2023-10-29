@@ -1,8 +1,14 @@
 /* Language name */
 "!Language" = "Italiano";
 
+/* companion.py: Frontier CAPI didn't respond; In files: companion.py:226; */
+"Error: Frontier CAPI didn't respond" = "Errore: Frontier CAPI non ha risposto"
+
 /* companion.py: Frontier CAPI data doesn't agree with latest Journal game location; In files: companion.py:245; */
 "Error: Frontier server is lagging" = "Errore: il server Frontier sta laggando";
+
+/* companion.py: Commander is docked at an EDO settlement, got out and back in, we forgot the station; In files: companion.py:261; */
+"Docked but unknown station: EDO Settlement?" = "Stazione attraccata ma sconosciuta: insediamento EDO?";
 
 /* companion.py: Generic "something went wrong with Frontier Auth" error; In files: companion.py:271; */
 "Error: Invalid Credentials" = "Errore: Credenziali non valide";
@@ -13,6 +19,21 @@
 /* companion.py: Generic error prefix - following text is from Frontier auth service; In files: companion.py:432; companion.py:517; */
 "Error" = "Errore";
 
+/* companion.py: Frontier auth, no 'usr' section in returned data; companion.py: Frontier auth, no 'customer_id' in 'usr' section in returned data; In files: companion.py:475; companion.py:480; */
+"Error: Couldn't check token customer_id" = "Errore: Impossibile controllare il token customer_id";
+
+/* companion.py: Frontier auth customer_id doesn't match game session FID; In files: companion.py:486; */
+"Error: customer_id doesn't match!" = "Errore: Customer_id non corrisponde!";
+
+/* companion.py: Failed to get Access Token from Frontier Auth service; In files: companion.py:508; */
+"Error: unable to get token" = "Errore: impossibile ottenere il token";
+
+/* companion.py: Frontier CAPI returned 418, meaning down for maintenance; In files: companion.py:844; */
+"Frontier CAPI down for maintenance" = "CAPI di Frontier inattivo per manutenzione";
+
+/* companion.py: Frontier CAPI data retrieval failed; In files: companion.py:856; */
+"Frontier CAPI query failure" = "Errore nella query CAPI di Frontier";
+
 /* EDMarketConnector.py: Main UI Update button; EDMarketConnector.py: Update button in main window; In files: EDMarketConnector.py:601; EDMarketConnector.py:919; EDMarketConnector.py:1748; */
 "Update" = "Recupera";
 
@@ -20,7 +41,10 @@
 "Always on top" = "Sempre in primo piano";
 
 /* EDMarketConnector.py: Unknown suit; In files: EDMarketConnector.py:837; */
-"Unknown" = "Sconosciuto";
+"Unknown" = "Sconosciuta";
+
+/* EDMarketConnector.py: ED Journal file location appears to be in error; In files: EDMarketConnector.py:906; */
+"Error: Check E:D journal file location" = "Errore: Controllare la posizione del file journal E:D";
 
 /* EDMarketConnector.py: Label for commander name in main window; edsm.py: Game Commander name label in EDSM settings; stats.py: Cmdr stats; theme.py: Label for commander name in main window; In files: EDMarketConnector.py:913; edsm.py:332; stats.py:57; theme.py:290; */
 "Cmdr" = "Cmdr";
@@ -70,6 +94,9 @@
 /* EDMarketConnector.py: Help > Documentation; In files: EDMarketConnector.py:933; EDMarketConnector.py:953; */
 "Documentation" = "Documentazione";
 
+/* EDMarketConnector.py: Help > Troubleshooting; In files: EDMarketConnector.py:934; EDMarketConnector.py:954; */
+"Troubleshooting" = "Risoluzione dei problemi";
+
 /* EDMarketConnector.py: Help > Privacy Policy; In files: EDMarketConnector.py:936; EDMarketConnector.py:956; */
 "Privacy Policy" = "Informativa sulla privacy";
 
@@ -84,6 +111,9 @@
 
 /* EDMarketConnector.py: Label for 'Copy' as in 'Copy and Paste'; ttkHyperlinkLabel.py: Label for 'Copy' as in 'Copy and Paste'; In files: EDMarketConnector.py:962; ttkHyperlinkLabel.py:53; */
 "Copy" = "Copia";
+
+/* EDMarketConnector.py: CAPI auth aborted because of killswitch; EDMarketConnector.py: CAPI auth query aborted because of killswitch; In files: EDMarketConnector.py:973; EDMarketConnector.py:1067; */
+"CAPI auth disabled by killswitch" = "Autenticazione CAPI disabilitata dal killswitch";
 
 /* EDMarketConnector.py: Status - Attempting to get a Frontier Auth Access Token; In files: EDMarketConnector.py:978; */
 "Logging in..." = "Mi sto loggando...";
@@ -100,8 +130,35 @@
 /* EDMarketConnector.py: Status - No station market data from Frontier CAPI; In files: EDMarketConnector.py:1038; */
 "Station doesn't have a market!" = "La Stazione non ha un Market !";
 
+/* EDMarketConnector.py: CAPI queries aborted because Cmdr name is unknown; EDMarketConnector.py: CAPI fleetcarrier query aborted because Cmdr name is unknown; In files: EDMarketConnector.py:1077; EDMarketConnector.py:1164; */
+"CAPI query aborted: Cmdr name unknown" = "Query CAPI interrotta: nome comando sconosciuto";
+
+/* EDMarketConnector.py: CAPI queries aborted because game mode unknown; In files: EDMarketConnector.py:1083; */
+"CAPI query aborted: Game mode unknown" = "Query CAPI interrotta: Modalità di gioco sconosciuta";
+
+/* EDMarketConnector.py: CAPI queries aborted because GameVersion unknown; EDMarketConnector.py: CAPI fleetcarrier query aborted because GameVersion unknown; In files: EDMarketConnector.py:1089; EDMarketConnector.py:1170; */
+"CAPI query aborted: GameVersion unknown" = "Query CAPI interrotta: Versione del gioco sconosciuta";
+
+/* EDMarketConnector.py: CAPI queries aborted because current star system name unknown; In files: EDMarketConnector.py:1095; */
+"CAPI query aborted: Current system unknown" = "Query CAPI interrotta: Sistema attuale sconosciuto";
+
+/* EDMarketConnector.py: CAPI queries aborted because player is in multi-crew on other Cmdr's ship; In files: EDMarketConnector.py:1101; */
+"CAPI query aborted: In other-ship multi-crew" = "Query CAPI interrotta: In multi-crew di un'altra nave";
+
+/* EDMarketConnector.py: CAPI queries aborted because player is in CQC (Arena); In files: EDMarketConnector.py:1107; */
+"CAPI query aborted: CQC (Arena) detected" = "Query CAPI interrotta: CQC (Arena) rilevato";
+
 /* EDMarketConnector.py: Status - Attempting to retrieve data from Frontier CAPI; In files: EDMarketConnector.py:1128; EDMarketConnector.py:1179; */
 "Fetching data..." = "Sto raccogliendo i dati...";
+
+/* EDMarketConnector.py: CAPI fleetcarrier query aborted because of killswitch; In files: EDMarketConnector.py:1157; */
+"CAPI fleetcarrier disabled by killswitch" = "Fleetcarrier CAPI disabilitato dal killswitch";
+
+/* EDMarketConnector.py: No data was returned for the fleetcarrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
+"CAPI: No fleetcarrier data returned" = "CAPI: Nessun dato della fleetcarrier ricevuto";
+
+/* EDMarketConnector.py: We didn't have the fleetcarrier callsign when we should have; In files: EDMarketConnector.py:1223; */
+"CAPI: Fleetcarrier data incomplete" = "CAPI: Dati della Fleetcarrier incompleti";
 
 /* EDMarketConnector.py: No data was returned for the commander from the Frontier CAPI; In files: EDMarketConnector.py:1242; */
 "CAPI: No commander data returned" = "CAPI: Nessun dato sul commandante";
@@ -117,6 +174,9 @@
 
 /* EDMarketConnector.py: Frontier CAPI server error when fetching data; In files: EDMarketConnector.py:1384; */
 "Frontier CAPI server error" = "Errore nel server Frontier CAPI";
+
+/* EDMarketConnector.py: Frontier CAPI Access Token expired, trying to get a new one; In files: EDMarketConnector.py:1390; */
+"CAPI: Refreshing access token..." = "CAPI: Aggiornamento del token di accesso in corso...";
 
 /* EDMarketConnector.py: Time when we last obtained Frontier CAPI data; In files: EDMarketConnector.py:1434; */
 "Last updated at %H:%M:%S" = "Ultimo aggiornamento alle %H:%M:%S";
@@ -140,7 +200,7 @@
 "Shutting down..." = "Spegnimento...";
 
 /* EDMarketConnector.py: Popup-text about 'active' plugins without Python 3.x support; In files: EDMarketConnector.py:2253:2259; */
-"One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "Uno o più dei tuoi plugin non ha ancora il supporto per Python 3.x. Per favore guarda la lista '{PLUGINS}' nella tab a '{FILE}' > '{SETTINGS}'. Dovresti controllare se ci sono aggiornamenti, altrimenti avvisa gli sviluppatori che devono aggiornare il codice a Python 3.x.\n\nPuoi disabilitare il plugin rinominando la cartella aggiungendo '{DISABLED}' alla fine del nome.";
+"One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "Uno o più dei tuoi plugin non ha ancora il supporto per Python 3.x.\r\n\r\nPer favore guarda la lista '{PLUGINS}' nella tab a '{FILE}' > '{SETTINGS}'. Dovresti controllare se ci sono aggiornamenti, altrimenti avvisa gli sviluppatori che devono aggiornare il codice a Python 3.x.\n\nPuoi disabilitare il plugin rinominando la cartella aggiungendo '{DISABLED}' alla fine del nome.";
 
 /* EDMarketConnector.py: Settings > Plugins tab; prefs.py: Label on Settings > Plugins tab; In files: EDMarketConnector.py:2263; prefs.py:986; */
 "Plugins" = "Plugins";
@@ -172,11 +232,14 @@
 /* coriolis.py: 'Beta' label for Coriolis site override selection; coriolis.py: Coriolis normal/beta selection - beta; In files: coriolis.py:76; coriolis.py:122; coriolis.py:138; */
 "Beta" = "Beta";
 
+/* coriolis.py: Settings>Coriolis: Help/hint for changing coriolis URLs; In files: coriolis.py:91:93; */
+"Set the URL to use with coriolis.io ship loadouts. Note that this MUST end with '/import?data='" = "Imposta l'URL da utilizzare con gli equipaggiamenti delle navi coriolis.io. Tieni presente che DEVE terminare con '/import?data='";
+
 /* coriolis.py: Settings>Coriolis: Label for 'NOT alpha/beta game version' URL; In files: coriolis.py:97; */
 "Normal URL" = "URL normale";
 
 /* coriolis.py: Generic 'Reset' button label; In files: coriolis.py:100; coriolis.py:109; */
-"Reset" = "Reimposta";
+"Reset" = "Reset";
 
 /* coriolis.py: Settings>Coriolis: Label for 'alpha/beta game version' URL; In files: coriolis.py:106; */
 "Beta URL" = "URL Beta";
