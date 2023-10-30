@@ -289,8 +289,11 @@
 /* edsm.py: EDSM Commander name label in EDSM settings; In files: edsm.py:341; */
 "Commander Name" = "Nome Commandante";
 
-/* edsm.py: EDSM API key label; inara.py: Inara API key label; In files: edsm.py:350; inara.py:278; */
-"API Key" = "API Key";
+/* edsm.py: EDSM API key label; inara.py: Inara API key label; In files: edsm.py:344; inara.py:285; */
+"API Key" = "Chiave API";
+
+/* edsm.py: EDSM show API key; inara.py: Inara show API key; In files: edsm.py:355; inara.py:295; */
+"Show API Key" = "Mostra chiave API";
 
 /* edsm.py: We have no data on the current commander; prefs.py: No hotkey/shortcut set; stats.py: No rank; In files: edsm.py:394; prefs.py:527; prefs.py:1157; prefs.py:1190; stats.py:154; stats.py:173; stats.py:192; stats.py:209; */
 "None" = "Nessuna";
@@ -307,19 +310,19 @@
 /* edsm.py: EDSM Plugin - Error connecting to EDSM API; In files: edsm.py:953; edsm.py:1043; */
 "Error: Can't connect to EDSM" = "Errore: Non riesco a connettermi a EDSM";
 
-/* inara.py: Checkbox to enable INARA API Usage; In files: inara.py:257; */
+/* inara.py: Checkbox to enable INARA API Usage; In files: inara.py:264; */
 "Send flight log and Cmdr status to Inara" = "Manda il flight log e lo stato Cmdr a Inara";
 
-/* inara.py: Text for INARA API keys link ( goes to https://inara.cz/settings-api ); In files: inara.py:269; */
+/* inara.py: Text for INARA API keys link ( goes to https://inara.cz/settings-api ); In files: inara.py:276; */
 "Inara credentials" = "Credenziali per Inara";
 
-/* inara.py: The Inara API only accepts Live galaxy data, not Legacy galaxy data; inara.py: Inara - Only Live data; In files: inara.py:384; inara.py:386; */
+/* inara.py: The Inara API only accepts Live galaxy data, not Legacy galaxy data; inara.py: Inara - Only Live data; In files: inara.py:384; inara.py:428; */
 "Inara only accepts Live galaxy data" = "Inara accetta solo dati Galaxy Live";
 
-/* inara.py: INARA support disabled via killswitch; In files: inara.py:395; */
+/* inara.py: INARA support disabled via killswitch; In files: inara.py:401; */
 "Inara disabled. See Log." = "Inara disabilitato. Vedi il Log.";
 
-/* inara.py: INARA API returned some kind of error (error message will be contained in {MSG}); In files: inara.py:1650; inara.py:1663; */
+/* inara.py: INARA API returned some kind of error (error message will be contained in {MSG}); In files: inara.py:1604; inara.py:1636; */
 "Error: Inara {MSG}" = "Errore: Inara {MSG}";
 
 /* prefs.py: File > Preferences menu entry for macOS; In files: prefs.py:237; */
