@@ -2,7 +2,7 @@
 "!Language" = "Italiano";
 
 /* companion.py: Frontier CAPI didn't respond; In files: companion.py:226; */
-"Error: Frontier CAPI didn't respond" = "Errore: Frontier CAPI non ha risposto"
+"Error: Frontier CAPI didn't respond" = "Errore: Frontier CAPI non ha risposto";
 
 /* companion.py: Frontier CAPI data doesn't agree with latest Journal game location; In files: companion.py:245; */
 "Error: Frontier server is lagging" = "Errore: il server Frontier sta laggando";
@@ -247,8 +247,23 @@
 /* coriolis.py: Settings>Coriolis: Label for selection of using Normal, Beta or 'auto' Coriolis URL; In files: coriolis.py:116; */
 "Override Beta/Normal Selection" = "Sovrascrivi selezione Beta/Normale";
 
+/* coriolis.py: Settings>Coriolis - invalid override mode found; In files: coriolis.py:156; */
+"Invalid Coriolis override mode!" = "Modalità override Coriolis non valida!";
+
+/* eddb.py: Journal Processing disabled due to an active killswitch; In files: eddb.py:179; */
+"EDDB Journal processing disabled. See Log." = "Elaborazione di EDDB Journal disabilitata. Vedi il Log.";
+
 /* eddn.py: Error while trying to send data to EDDN; In files: eddn.py:458; eddn.py:2413; eddn.py:2451; eddn.py:2519; */
 "Error: Can't connect to EDDN" = "Errore: Non riesco a connettermi a EDDN";
+
+/* eddn.py: EDDN has banned this version of our client; In files: eddn.py:576; */
+"EDDN Error: EDMC is too old for EDDN. Please update." = "Errore EDDN: EDMC è troppo vecchio per EDDN. Per favore aggiornalo.";
+
+/* eddn.py: EDDN returned an error that indicates something about what we sent it was wrong; In files: eddn.py:582; */
+"EDDN Error: Validation Failed (EDMC Too Old?). See Log" = "Errore EDDN: Convalida fallita (EDMC è troppo vecchio?). Vedi il Log";
+
+/* eddn.py: EDDN returned some sort of HTTP error, one we didn't expect. {STATUS} contains a number; In files: eddn.py:587; */
+"EDDN Error: Returned {STATUS} status code" = "Errore EDDN: Restituito codice di stato {STATUS}";
 
 /* eddn.py: Enable EDDN support for station data checkbox label; In files: eddn.py:2041; */
 "Send station data to the Elite Dangerous Data Network" = "Manda i dati della stazione a Elite Dangerous Data Network";
@@ -258,6 +273,9 @@
 
 /* eddn.py: EDDN delay sending until docked option is on, this message notes that a send was skipped due to this; In files: eddn.py:2063; */
 "Delay sending until docked" = "Ritarda l'invio fino a che si è ormeggiati";
+
+/* eddn.py: Killswitch disabled EDDN; In files: eddn.py:2178; */
+"EDDN journal handler disabled. See Log." = "Gestore journal EDDN disabilitato. Vedi il Log.";
 
 /* eddn.py: Status text shown while attempting to send data; In files: eddn.py:2507; */
 "Sending data to EDDN..." = "Sto inviando i dati a EDDN...";
@@ -277,6 +295,12 @@
 /* edsm.py: We have no data on the current commander; prefs.py: No hotkey/shortcut set; stats.py: No rank; In files: edsm.py:394; prefs.py:527; prefs.py:1157; prefs.py:1190; stats.py:154; stats.py:173; stats.py:192; stats.py:209; */
 "None" = "Nessuna";
 
+/* edsm.py: EDSM plugin - Journal handling disabled by killswitch; In files: edsm.py:516; */
+"EDSM Handler disabled. See Log." = "Gestore EDSM disattivato. Vedi il Log.";
+
+/* edsm.py: EDSM - Only Live data; In files: edsm.py:632; */
+"EDSM only accepts Live galaxy data" = "EDSM accetta solo dati Galaxy Live";
+
 /* edsm.py: EDSM Plugin - Error message from EDSM API; In files: edsm.py:916; edsm.py:1048; */
 "Error: EDSM {MSG}" = "Errore: EDSM {MSG}";
 
@@ -288,6 +312,9 @@
 
 /* inara.py: Text for INARA API keys link ( goes to https://inara.cz/settings-api ); In files: inara.py:269; */
 "Inara credentials" = "Credenziali per Inara";
+
+/* inara.py: The Inara API only accepts Live galaxy data, not Legacy galaxy data; inara.py: Inara - Only Live data; In files: inara.py:384; inara.py:386; */
+"Inara only accepts Live galaxy data" = "Inara accetta solo dati Galaxy Live";
 
 /* inara.py: INARA support disabled via killswitch; In files: inara.py:395; */
 "Inara disabled. See Log." = "Inara disabilitato. Vedi il Log.";
@@ -328,6 +355,12 @@
 /* prefs.py: Settings > Configuration - Label for Journal files location; In files: prefs.py:431; prefs.py:446; */
 "E:D journal file location" = "locazione del file E:D journal";
 
+/* prefs.py: Settings > Configuration - Label for CAPI section; In files: prefs.py:469; */
+"CAPI Settings" = "Impostazioni CAPI";
+
+/* prefs.py: Configuration - Enable or disable the Fleet Carrier CAPI calls; In files: prefs.py:475; */
+"Enable Fleetcarrier CAPI Queries" = "Abilita le query CAPI della Fleetcarrier";
+
 /* prefs.py: Hotkey/Shortcut settings prompt on OSX; In files: prefs.py:490; */
 "Keyboard shortcut" = "Scorciatoia di tastiera";
 
@@ -356,10 +389,10 @@
 "Preferred websites" = "Sito web preferito";
 
 /* prefs.py: Label for Shipyard provider selection; In files: prefs.py:588; */
-"Shipyard" = "Spazioporto";
+"Shipyard" = "Aviorimessa";
 
 /* prefs.py: Label for checkbox to utilise alternative Coriolis URL method; In files: prefs.py:600; */
-"Use alternate URL method" = "Usare metodo URL alternativo";
+"Use alternate URL method" = "Usa metodo URL alternativo";
 
 /* prefs.py: Configuration - Label for selection of Log Level; In files: prefs.py:653; */
 "Log Level" = "Livello di Log";
@@ -367,8 +400,17 @@
 /* prefs.py: Label for 'Configuration' tab in Settings; In files: prefs.py:681; */
 "Configuration" = "Configurazione";
 
+/* prefs.py: UI elements privacy section header in privacy tab of preferences; In files: prefs.py:690; */
+"Main UI privacy options" = "Opzioni privacy dell'interfaccia utente";
+
+/* prefs.py: Hide private group owner name from UI checkbox; In files: prefs.py:695; */
+"Hide private group name in UI" = "Nascondi il nome del private group nell'interfaccia";
+
+/* prefs.py: Hide multicrew captain name from main UI checkbox; In files: prefs.py:699; */
+"Hide multi-crew captain name" = "Nascondi il nome del capitano in multi-crew.";
+
 /* prefs.py: Preferences privacy tab title; In files: prefs.py:703; */
-"Privacy" = "Dati personali";
+"Privacy" = "Privacy";
 
 /* prefs.py: Label for Settings > Appeareance > selection of 'normal' text colour; In files: prefs.py:716; */
 "Normal text" = "Testo normale";
@@ -410,7 +452,7 @@
 "Plugins folder" = "Cartella dei plugins";
 
 /* prefs.py: Label on button used to open a filesystem folder; In files: prefs.py:915; */
-"Open" = "Apri";
+"Open" = "Sfoglia";
 
 /* prefs.py: Tip/label about how to disable plugins; In files: prefs.py:923; */
 "Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "Suggerimento: è possibile disabilitare un plugin {CR}aggiungendo '{EXT}' nel nome della sua cartella";
@@ -436,6 +478,21 @@
 /* stats.py: Top rank; In files: stats.py:63; */
 "Elite" = "Elite";
 
+/* stats.py: Top rank +1; In files: stats.py:64; */
+"Elite I" = "Elite I";
+
+/* stats.py: Top rank +2; In files: stats.py:65; */
+"Elite II" = "Elite II";
+
+/* stats.py: Top rank +3; In files: stats.py:66; */
+"Elite III" = "Elite III";
+
+/* stats.py: Top rank +4; In files: stats.py:67; */
+"Elite IV" = "Elite IV";
+
+/* stats.py: Top rank +5; In files: stats.py:68; */
+"Elite V" = "Elite V";
+
 /* stats.py: Ranking; In files: stats.py:74; */
 "Combat" = "Combat";
 
@@ -444,6 +501,12 @@
 
 /* stats.py: Ranking; In files: stats.py:76; */
 "Explorer" = "Explorer";
+
+/* stats.py: Ranking; In files: stats.py:77; */
+"Mercenary" = "Mercenary";
+
+/* stats.py: Ranking; In files: stats.py:78; */
+"Exobiologist" = "Exobiologist";
 
 /* stats.py: Ranking; In files: stats.py:79; */
 "CQC" = "CQC";
@@ -528,6 +591,51 @@
 
 /* stats.py: Explorer rank; In files: stats.py:118; */
 "Pioneer" = "Pioneer";
+
+/*stats.py: Mercenary rank; In files: stats.py:122; */
+"Defenceless" = "Defenceless";
+
+/* stats.py: Mercenary rank; In files: stats.py:123; */
+"Mostly Defenceless" = "Mostly Defenceless";
+
+/* stats.py: Mercenary rank; In files: stats.py:124; */
+"Rookie" = "Rookie";
+
+/* stats.py: Mercenary rank; In files: stats.py:125; */
+"Soldier" = "Soldier";
+
+/* stats.py: Mercenary rank; In files: stats.py:126; stats.py:128; */
+"Gunslinger" = "Gunslinger";
+
+/* stats.py: Mercenary rank; In files: stats.py:127; */
+"Warrior" = "Warrior";
+
+/* stats.py: Mercenary rank; In files: stats.py:129; */
+"Deadeye" = "Deadeye";
+
+/* stats.py: Exobiologist rank; In files: stats.py:132; */
+"Directionless" = "Directionless";
+
+/* stats.py: Exobiologist rank; In files: stats.py:133; */
+"Mostly Directionless" = "Mostly Directionless";
+
+/* stats.py: Exobiologist rank; In files: stats.py:134; */
+"Compiler" = "Compiler";
+
+/* stats.py: Exobiologist rank; In files: stats.py:135; */
+"Collector" = "Collector";
+
+/* stats.py: Exobiologist rank; In files: stats.py:136; */
+"Cataloguer" = "Cataloguer";
+
+/* stats.py: Exobiologist rank; In files: stats.py:137; */
+"Taxonomist" = "Taxonomist";
+
+/* stats.py: Exobiologist rank; In files: stats.py:138; */
+"Ecologist" = "Ecologist";
+
+/* stats.py: Exobiologist rank; In files: stats.py:139; */
+"Geneticist" = "Geneticist";
 
 /* stats.py: CQC rank; In files: stats.py:142; */
 "Helpless" = "Helpless";
@@ -648,6 +756,12 @@
 
 /* stats.py: Power rank; In files: stats.py:197; */
 "Rating 5" = "Rating 5";
+
+/* stats.py: Current commander unknown when trying to use 'File' > 'Status'; In files: stats.py:315; */
+"Status: Don't yet know your Commander name" = "Stato: Non conosco ancora il nome del tuo comandante";
+
+/* stats.py: No Frontier CAPI data yet when trying to use 'File' > 'Status'; In files: stats.py:323; */
+"Status: No CAPI data yet" = "Stato: Ancora nessun dato CAPI";
 
 /* stats.py: Status dialog subtitle - CR value of ship; In files: stats.py:409; */
 "Value" = "Valore";
