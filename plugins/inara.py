@@ -18,6 +18,7 @@ referenced in this file (or only in any other core plugin), and if so...
     `build.py` TO ENSURE THE FILES ARE ACTUALLY PRESENT
     IN AN END-USER INSTALLATION ON WINDOWS.
 """
+from __future__ import annotations
 
 import json
 import threading
@@ -29,9 +30,8 @@ from datetime import datetime, timedelta, timezone
 from operator import itemgetter
 from threading import Lock, Thread
 from tkinter import ttk
-from typing import TYPE_CHECKING, Any, Callable, Deque, Dict, List, Mapping, NamedTuple, Optional
+from typing import TYPE_CHECKING, Any, Callable, Deque, Mapping, NamedTuple, Sequence, cast, Union
 from typing import OrderedDict as OrderedDictT
-from typing import Sequence, Union, cast
 import requests
 import edmc_data
 import killswitch
@@ -63,8 +63,8 @@ CREDITS_DELTA_MIN_ABSOLUTE = 10_000_000  # Absolute difference threshold
 class Credentials(NamedTuple):
     """Credentials holds the set of credentials required to identify an inara API payload to inara."""
 
-    cmdr: Optional[str]
-    fid: Optional[str]
+    cmdr: str | None
+    fid: str | None
     api_key: str
 
 
@@ -89,25 +89,25 @@ class This:
         self.parent: tk.Tk
 
         # Handle only sending Live galaxy data
-        self.legacy_galaxy_last_notified: Optional[datetime] = None
+        self.legacy_galaxy_last_notified: datetime | None = None
 
         self.lastlocation = None  # eventData from the last Commander's Flight Log event
         self.lastship = None  # eventData from the last addCommanderShip or setCommanderShip event
 
         # Cached Cmdr state
-        self.cmdr: Optional[str] = None
-        self.FID: Optional[str] = None  # Frontier ID
+        self.cmdr: str | None = None
+        self.FID: str | None = None  # Frontier ID
         self.multicrew: bool = False  # don't send captain's ship info to Inara while on a crew
         self.newuser: bool = False  # just entered API Key - send state immediately
         self.newsession: bool = True  # starting a new session - wait for Cargo event
         self.undocked: bool = False  # just undocked
         self.suppress_docked = False  # Skip initial Docked event if started docked
-        self.cargo: Optional[List[OrderedDictT[str, Any]]] = None
-        self.materials: Optional[List[OrderedDictT[str, Any]]] = None
+        self.cargo: list[OrderedDictT[str, Any]] | None = None
+        self.materials: list[OrderedDictT[str, Any]] | None = None
         self.last_credits: int = 0  # Send credit update soon after Startup / new game
-        self.storedmodules: Optional[List[OrderedDictT[str, Any]]] = None
-        self.loadout: Optional[OrderedDictT[str, Any]] = None
-        self.fleet: Optional[List[OrderedDictT[str, Any]]] = None
+        self.storedmodules: list[OrderedDictT[str, Any]] | None = None
+        self.loadout: OrderedDictT[str, Any] | None = None
+        self.fleet: list[OrderedDictT[str, Any]] | None = None
         self.shipswap: bool = False  # just swapped ship
         self.on_foot = False
 
@@ -115,9 +115,9 @@ class This:
 
         # Main window clicks
         self.system_link: tk.Widget = None  # type: ignore
-        self.system_name: Optional[str] = None  # type: ignore
-        self.system_address: Optional[str] = None  # type: ignore
-        self.system_population: Optional[int] = None
+        self.system_name: str | None = None  # type: ignore
+        self.system_address: str | None = None  # type: ignore
+        self.system_population: int | None = None
         self.station_link: tk.Widget = None  # type: ignore
         self.station = None
         self.station_marketid = None
@@ -129,7 +129,7 @@ class This:
         self.apikey: nb.Entry
         self.apikey_label: tk.Label
 
-        self.events: Dict[Credentials, Deque[Event]] = defaultdict(deque)
+        self.events: dict[Credentials, Deque[Event]] = defaultdict(deque)
         self.event_lock: Lock = threading.Lock()  # protects events, for use when rewriting events
 
     def filter_events(self, key: Credentials, predicate: Callable[[Event], bool]) -> None:
@@ -361,7 +361,7 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
             )
 
 
-def credentials(cmdr: Optional[str]) -> Optional[str]:
+def credentials(cmdr: str | None) -> str | None:
     """
     Get the credentials for the current commander.
 
@@ -383,7 +383,7 @@ def credentials(cmdr: Optional[str]) -> Optional[str]:
 
 
 def journal_entry(  # noqa: C901, CCR001
-    cmdr: str, is_beta: bool, system: str, station: str, entry: Dict[str, Any], state: Dict[str, Any]
+    cmdr: str, is_beta: bool, system: str, station: str, entry: dict[str, Any], state: dict[str, Any]
 ) -> str:
     """
     Journal entry hook.
@@ -394,7 +394,7 @@ def journal_entry(  # noqa: C901, CCR001
     # causing users to spam Inara with 'URL provider' queries, and we want to
     # stop that.
     should_return: bool
-    new_entry: Dict[str, Any] = {}
+    new_entry: dict[str, Any] = {}
 
     should_return, new_entry = killswitch.check_killswitch('plugins.inara.journal', entry, logger)
     if should_return:
@@ -813,7 +813,7 @@ def journal_entry(  # noqa: C901, CCR001
 
         # Fleet
         if event_name == 'StoredShips':
-            fleet: List[OrderedDictT[str, Any]] = sorted(
+            fleet: list[OrderedDictT[str, Any]] = sorted(
                 [OrderedDict({
                     'shipType': x['ShipType'],
                     'shipGameID': x['ShipID'],
@@ -860,7 +860,7 @@ def journal_entry(  # noqa: C901, CCR001
         # Stored modules
         if event_name == 'StoredModules':
             items = {mod['StorageSlot']: mod for mod in entry['Items']}  # Impose an order
-            modules: List[OrderedDictT[str, Any]] = []
+            modules: list[OrderedDictT[str, Any]] = []
             for slot in sorted(items):
                 item = items[slot]
                 module: OrderedDictT[str, Any] = OrderedDict([
@@ -1088,7 +1088,7 @@ def journal_entry(  # noqa: C901, CCR001
             #
             # So we're going to do a lot of checking here and bail out if we dont like the look of ANYTHING here
 
-            to_send_data: Optional[Dict[str, Any]] = {}  # This is a glorified sentinel until lower down.
+            to_send_data: dict[str, Any] | None = {}  # This is a glorified sentinel until lower down.
             # On Horizons, neither of these exist on TouchDown
             star_system_name = entry.get('StarSystem', this.system_name)
             body_name = entry.get('Body', state['Body'] if state['BodyType'] == 'Planet' else None)
@@ -1370,7 +1370,7 @@ def cmdr_data(data: CAPIData, is_beta):  # noqa: CCR001, reanalyze me later
         pass
 
 
-def make_loadout(state: Dict[str, Any]) -> OrderedDictT[str, Any]:  # noqa: CCR001
+def make_loadout(state: dict[str, Any]) -> OrderedDictT[str, Any]:  # noqa: CCR001
     """
     Construct an inara loadout from an event.
 
@@ -1440,8 +1440,8 @@ def new_add_event(
     name: str,
     timestamp: str,
     data: EVENT_DATA,
-    cmdr: Optional[str] = None,
-    fid: Optional[str] = None
+    cmdr: str | None = None,
+    fid: str | None = None
 ):
     """
     Add a journal event to the queue, to be sent to inara at the next opportunity.
@@ -1470,11 +1470,11 @@ def new_add_event(
         this.events[key].append(Event(name, timestamp, data))
 
 
-def clean_event_list(event_list: List[Event]) -> List[Event]:
+def clean_event_list(event_list: list[Event]) -> list[Event]:
     """
     Check for killswitched events and remove or modify them as requested.
 
-    :param event_list: List of events to clean
+    :param event_list: list of events to clean
     :return: Cleaned list of events
     """
     cleaned_events = []
@@ -1533,14 +1533,14 @@ def new_worker():
     logger.debug('Done.')
 
 
-def get_events(clear: bool = True) -> Dict[Credentials, List[Event]]:
+def get_events(clear: bool = True) -> dict[Credentials, list[Event]]:
     """
     Fetch a copy of all events from the current queue.
 
     :param clear: whether to clear the queues as we go, defaults to True
     :return: a copy of the event dictionary
     """
-    events_copy: Dict[Credentials, List[Event]] = {}
+    events_copy: dict[Credentials, list[Event]] = {}
 
     with this.event_lock:
         for key, events in this.events.items():
@@ -1590,7 +1590,7 @@ def send_data(url: str, data: Mapping[str, Any]) -> bool:
     return True  # Regardless of errors above, we DID manage to send it, therefore inform our caller as such
 
 
-def handle_api_error(data: Mapping[str, Any], status: int, reply: Dict[str, Any]) -> None:
+def handle_api_error(data: Mapping[str, Any], status: int, reply: dict[str, Any]) -> None:
     """
     Handle API error response.
 
@@ -1604,7 +1604,7 @@ def handle_api_error(data: Mapping[str, Any], status: int, reply: Dict[str, Any]
     plug.show_error(_('Error: Inara {MSG}').format(MSG=error_message))
 
 
-def handle_success_reply(data: Mapping[str, Any], reply: Dict[str, Any]) -> None:
+def handle_success_reply(data: Mapping[str, Any], reply: dict[str, Any]) -> None:
     """
     Handle successful API response.
 
@@ -1619,7 +1619,7 @@ def handle_success_reply(data: Mapping[str, Any], reply: Dict[str, Any]) -> None
         handle_special_events(data_event, reply_event)
 
 
-def handle_individual_error(data_event: Dict[str, Any], reply_status: int, reply_text: str) -> None:
+def handle_individual_error(data_event: dict[str, Any], reply_status: int, reply_text: str) -> None:
     """
     Handle individual API error.
 
@@ -1638,7 +1638,7 @@ def handle_individual_error(data_event: Dict[str, Any], reply_status: int, reply
         ))
 
 
-def handle_special_events(data_event: Dict[str, Any], reply_event: Dict[str, Any]) -> None:
+def handle_special_events(data_event: dict[str, Any], reply_event: dict[str, Any]) -> None:
     """
     Handle special events in the API response.
 
