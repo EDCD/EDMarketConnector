@@ -927,7 +927,9 @@ class PreferencesDialog(tk.Toplevel):
 
         # Section heading in settings
         # LANG: Label for location of third-party plugins folder
-        nb.Label(plugins_frame, text=_('Plugins folder') + ':').grid(padx=self.PADX, pady=(0, self.PADY), sticky=tk.W, row=row.get())
+        nb.Label(plugins_frame, text=_('Plugins folder') + ':').grid(
+            padx=self.PADX, pady=(0, self.PADY), sticky=tk.W, row=row.get()
+        )
 
         plugdirentry = nb.Entry(plugins_frame, justify=tk.LEFT)
         self.displaypath(plugdir, plugdirentry)
