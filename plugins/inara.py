@@ -250,13 +250,15 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str, is_beta: bool) -> tk.Frame:
     x_padding = 10
     x_button_padding = 12  # indent Checkbuttons and Radiobuttons
     y_padding = 2		# close spacing
+    cur_row = 0
 
     frame = nb.Frame(parent)
     frame.columnconfigure(1, weight=1)
 
     HyperlinkLabel(
         frame, text='Inara', background=nb.Label().cget('background'), url='https://inara.cz/', underline=True
-    ).grid(columnspan=2, padx=x_padding, sticky=tk.W)  # Don't translate
+    ).grid(row=cur_row, columnspan=2, padx=x_padding, sticky=tk.W)  # Don't translate
+    cur_row += 1
 
     this.log = tk.IntVar(value=config.get_int('inara_out') and 1)
     this.log_button = nb.Checkbutton(
@@ -266,9 +268,11 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str, is_beta: bool) -> tk.Frame:
         command=prefsvarchanged
     )
 
-    this.log_button.grid(columnspan=2, padx=x_button_padding, pady=(5, 0), sticky=tk.W)
+    this.log_button.grid(row=cur_row, columnspan=2, padx=x_button_padding, pady=(5, 0), sticky=tk.W)
+    cur_row += 1
 
-    nb.Label(frame).grid(sticky=tk.W)  # big spacer
+    nb.Label(frame).grid(row=cur_row, sticky=tk.W)  # big spacer
+    cur_row += 1
 
     # Section heading in settings
     this.label = HyperlinkLabel(
@@ -279,13 +283,15 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str, is_beta: bool) -> tk.Frame:
         underline=True
     )
 
-    this.label.grid(columnspan=2, padx=x_padding, sticky=tk.W)
+    this.label.grid(row=cur_row, columnspan=2, padx=x_padding, sticky=tk.W)
+    cur_row += 1
 
     # LANG: Inara API key label
     this.apikey_label = nb.Label(frame, text=_('API Key'))  # Inara setting
-    this.apikey_label.grid(row=12, padx=x_padding, sticky=tk.W)
+    this.apikey_label.grid(row=cur_row, padx=x_padding, sticky=tk.W)
     this.apikey = nb.Entry(frame, show="*", width=50)
-    this.apikey.grid(row=12, column=1, padx=x_padding, pady=y_padding, sticky=tk.EW)
+    this.apikey.grid(row=cur_row, column=1, padx=x_padding, pady=y_padding, sticky=tk.EW)
+    cur_row += 1
 
     prefs_cmdr_changed(cmdr, is_beta)
 
@@ -296,7 +302,7 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str, is_beta: bool) -> tk.Frame:
         variable=show_password_var,
         command=toggle_password_visibility,
     )
-    show_password_checkbox.grid(columnspan=2, padx=x_padding, pady=(5, 0), sticky=tk.W)
+    show_password_checkbox.grid(row=cur_row, columnspan=2, padx=x_padding, pady=(5, 0), sticky=tk.W)
 
     return frame
 

@@ -347,7 +347,7 @@ class PreferencesDialog(tk.Toplevel):
         else:
             output = config.get_int('output')
 
-        row = AutoInc(start=1)
+        row = AutoInc(start=0)
 
         # LANG: Settings > Output - choosing what data to save to files
         self.out_label = nb.Label(output_frame, text=_('Please choose what data to save'))
@@ -396,7 +396,7 @@ class PreferencesDialog(tk.Toplevel):
         # LANG: Settings > Output - Label for "where files are located"
         self.outdir_label = nb.Label(output_frame, text=_('File location')+':')  # Section heading in settings
         # Type ignored due to incorrect type annotation. a 2 tuple does padding for each side
-        self.outdir_label.grid(padx=self.PADX, pady=(5, 0), sticky=tk.W, row=row.get())  # type: ignore
+        self.outdir_label.grid(padx=self.PADX, pady=(0, self.PADY), sticky=tk.W, row=row.get())  # type: ignore
 
         self.outdir_entry = nb.Entry(output_frame, takefocus=False)
         self.outdir_entry.grid(columnspan=2, padx=self.PADX, pady=(0, self.PADY), sticky=tk.EW, row=row.get())
@@ -415,7 +415,7 @@ class PreferencesDialog(tk.Toplevel):
             # LANG: Settings > Output - Label for "where files are located"
             command=lambda: self.filebrowse(_('File location'), self.outdir)
         )
-        self.outbutton.grid(column=1, padx=self.PADX, pady=self.PADY, sticky=tk.NSEW, row=row.get())
+        self.outbutton.grid(column=1, padx=self.PADX, pady=self.PADY, sticky=tk.EW, row=row.get())
 
         nb.Frame(output_frame).grid(row=row.get())  # bottom spacer # TODO: does nothing?
 
@@ -431,7 +431,7 @@ class PreferencesDialog(tk.Toplevel):
     def __setup_config_tab(self, notebook: ttk.Notebook) -> None:  # noqa: CCR001
         config_frame = nb.Frame(notebook)
         config_frame.columnconfigure(1, weight=1)
-        row = AutoInc(start=1)
+        row = AutoInc(start=0)
 
         self.logdir = tk.StringVar()
         default = config.default_journal_dir if config.default_journal_dir_path is not None else ''
@@ -709,21 +709,21 @@ class PreferencesDialog(tk.Toplevel):
         frame = nb.Frame(notebook)
         self.hide_multicrew_captain = tk.BooleanVar(value=config.get_bool('hide_multicrew_captain', default=False))
         self.hide_private_group = tk.BooleanVar(value=config.get_bool('hide_private_group', default=False))
-        row = AutoInc()
+        row = AutoInc(start=0)
 
         # LANG: UI elements privacy section header in privacy tab of preferences
         nb.Label(frame, text=_('Main UI privacy options')).grid(
-            row=row.get(), column=0, sticky=tk.W, padx=self.PADX, pady=self.PADY
+            row=row.get(), column=0, sticky=tk.W, padx=self.PADX
         )
 
         nb.Checkbutton(
             frame, text=_('Hide private group name in UI'),  # LANG: Hide private group owner name from UI checkbox
             variable=self.hide_private_group
-        ).grid(row=row.get(), column=0, padx=self.PADX, pady=self.PADY)
+        ).grid(row=row.get(), column=0, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W)
         nb.Checkbutton(
             frame, text=_('Hide multi-crew captain name'),  # LANG: Hide multicrew captain name from main UI checkbox
             variable=self.hide_multicrew_captain
-        ).grid(row=row.get(), column=0, padx=self.PADX, pady=self.PADY)
+        ).grid(row=row.get(), column=0, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W)
 
         notebook.add(frame, text=_('Privacy'))  # LANG: Preferences privacy tab title
 
@@ -743,7 +743,7 @@ class PreferencesDialog(tk.Toplevel):
             _('Highlighted text'),  # Dark theme color setting
         ]
 
-        row = AutoInc(start=1)
+        row = AutoInc(start=0)
 
         appearance_frame = nb.Frame(notebook)
         appearance_frame.columnconfigure(2, weight=1)
@@ -923,30 +923,29 @@ class PreferencesDialog(tk.Toplevel):
         plugins_frame.columnconfigure(0, weight=1)
         plugdir = tk.StringVar()
         plugdir.set(config.plugin_dir)
-        row = AutoInc(1)
+        row = AutoInc(start=0)
+
+        # Section heading in settings
+        # LANG: Label for location of third-party plugins folder
+        nb.Label(plugins_frame, text=_('Plugins folder') + ':').grid(padx=self.PADX, pady=(0, self.PADY), sticky=tk.W, row=row.get())
 
         plugdirentry = nb.Entry(plugins_frame, justify=tk.LEFT)
         self.displaypath(plugdir, plugdirentry)
-        with row as cur_row:
-            # Section heading in settings
-            # LANG: Label for location of third-party plugins folder
-            nb.Label(plugins_frame, text=_('Plugins folder') + ':').grid(padx=self.PADX, sticky=tk.W, row=cur_row)
+        plugdirentry.grid(columnspan=2, padx=self.PADX, pady=(0, self.PADY), sticky=tk.EW, row=row.get())
 
-            plugdirentry.grid(padx=self.PADX, sticky=tk.EW, row=cur_row)
-
-            nb.Button(
-                plugins_frame,
-                # LANG: Label on button used to open a filesystem folder
-                text=_('Open'),  # Button that opens a folder in Explorer/Finder
-                command=lambda: webbrowser.open(f'file:///{config.plugin_dir_path}')
-            ).grid(column=1, padx=(0, self.PADX), sticky=tk.NSEW, row=cur_row)
+        nb.Button(
+            plugins_frame,
+            # LANG: Label on button used to open a filesystem folder
+            text=_('Open'),  # Button that opens a folder in Explorer/Finder
+            command=lambda: webbrowser.open(f'file:///{config.plugin_dir_path}')
+        ).grid(column=1, padx=self.PADX, pady=self.PADY, sticky=tk.EW, row=row.get())
 
         nb.Label(
             plugins_frame,
             # Help text in settings
             # LANG: Tip/label about how to disable plugins
             text=_("Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name").format(EXT='.disabled')
-        ).grid(columnspan=2, padx=self.PADX, pady=10, sticky=tk.NSEW, row=row.get())
+        ).grid(columnspan=2, padx=self.PADX, pady=10, sticky=tk.EW, row=row.get())
 
         enabled_plugins = list(filter(lambda x: x.folder and x.module, plug.PLUGINS))
         if len(enabled_plugins):
