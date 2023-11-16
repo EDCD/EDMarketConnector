@@ -309,7 +309,7 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> tk.Fr
     this.log = tk.IntVar(value=config.get_int('edsm_out') and 1)
     this.log_button = nb.Checkbutton(
         frame,
-        text=_('Send flight log and Cmdr status to EDSM'),
+        text=_('Send flight log and CMDR status to EDSM'),  # LANG: Send flight log and CMDR Status to EDSM
         variable=this.log,
         command=prefsvarchanged
     )
@@ -320,7 +320,7 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> tk.Fr
 
     this.label = HyperlinkLabel(
         frame,
-        text=_('Elite Dangerous Star Map credentials'),
+        text=_('Elite Dangerous Star Map credentials'),  # LANG: Elite Dangerous Star Map credentials
         background=nb.Label().cget('background'),
         url='https://www.edsm.net/settings/api',
         underline=True
