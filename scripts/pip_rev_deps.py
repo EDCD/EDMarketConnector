@@ -1,11 +1,10 @@
-#!/usr/bin/env python
-"""Find the reverse dependencies of a package according to pip."""
+"""Search for dependencies given a package."""
 import sys
 
 import pkg_resources
 
 
-def find_reverse_deps(package_name: str):
+def find_reverse_deps(package_name: str) -> list[str]:
     """
     Find the packages that depend on the named one.
 
@@ -19,4 +18,16 @@ def find_reverse_deps(package_name: str):
 
 
 if __name__ == '__main__':
-    print(find_reverse_deps(sys.argv[1]))
+    if len(sys.argv) != 2:
+        print("Usage: python reverse_deps.py <package_name>")
+        sys.exit(1)
+
+    package_name = sys.argv[1]
+    reverse_deps = find_reverse_deps(package_name)
+
+    if reverse_deps:
+        print(f"Reverse dependencies of '{package_name}':")
+        for dep in reverse_deps:
+            print(dep)
+    else:
+        print(f"No reverse dependencies found for '{package_name}'.")
