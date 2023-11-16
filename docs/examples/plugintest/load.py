@@ -44,7 +44,7 @@ class This:
 this = This()
 
 
-class PluginTest(object):
+class PluginTest:
     """Class that performs actual tests on bundled modules."""
 
     def __init__(self, directory: str):
@@ -83,7 +83,6 @@ class PluginTest(object):
         logger.debug(f'timestamp = "{timestamp}", cmdr = "{cmdrname}", system = "{system}", station = "{station}", event = "{event}"')  # noqa: E501
         self.sqlc.execute('INSERT INTO entries VALUES(?, ?, ?, ?, ?)', (timestamp, cmdrname, system, station, event))
         self.sqlconn.commit()
-        return None
 
 
 def plugin_start3(plugin_dir: str) -> str:
