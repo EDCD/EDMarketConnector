@@ -1,6 +1,8 @@
 """Test the apply functions used by killswitch to modify data."""
+from __future__ import annotations
+
 import copy
-from typing import Any, Optional
+from typing import Any
 
 import pytest
 
@@ -61,7 +63,7 @@ def test_apply_no_error() -> None:
         (False, 0), (str((1 << 63)-1), (1 << 63)-1), (True, 1), (str(1 << 1337), 1 << 1337)
     ]
 )
-def test_get_int(input: str, expected: Optional[int]) -> None:
+def test_get_int(input: str, expected: int | None) -> None:
     """Check that _get_int doesn't throw when handed bad data."""
     assert expected == killswitch._get_int(input)
 

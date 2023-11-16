@@ -1,7 +1,7 @@
 """Tests of killswitch behaviour."""
-import copy
-from typing import Optional, List
+from __future__ import annotations
 
+import copy
 import pytest
 import semantic_version
 
@@ -34,7 +34,7 @@ TEST_SET = killswitch.KillSwitchSet([
     ],
 )
 def test_killswitch(
-    input: killswitch.UPDATABLE_DATA, kill: str, should_pass: bool, result: Optional[killswitch.UPDATABLE_DATA],
+    input: killswitch.UPDATABLE_DATA, kill: str, should_pass: bool, result: killswitch.UPDATABLE_DATA | None,
     version: str
 ) -> None:
     """Simple killswitch tests."""
@@ -85,7 +85,7 @@ def test_operator_precedence(
     ]
 )
 def test_check_multiple(
-    names: List[str], input: killswitch.UPDATABLE_DATA, result: killswitch.UPDATABLE_DATA, expected_return: bool
+    names: list[str], input: killswitch.UPDATABLE_DATA, result: killswitch.UPDATABLE_DATA, expected_return: bool
 ) -> None:
     """Check that order is correct when checking multiple killswitches."""
     should_return, data = TEST_SET.check_multiple_killswitches(input, *names, version='1.0.0')
