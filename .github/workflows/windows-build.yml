@@ -103,18 +103,11 @@ jobs:
           pip install wheel
           pip install -r requirements-dev.txt
 
-      - name: Download latest WinSparkle release
+      - name: Download winsparkle
         run: |
-          $url = "https://api.github.com/repos/vslavik/winsparkle/releases/latest"
-          $response = Invoke-RestMethod -Uri $url
-          $latestAsset = $response.assets | Where-Object { $_.name -match "WinSparkle.*\.zip" -and $_.name -notmatch "-src" }
-
-          $downloadUrl = $latestAsset.browser_download_url
-          Invoke-WebRequest -Uri $downloadUrl -OutFile WinSparkle-Latest.zip
-
-          Expand-Archive -Path WinSparkle-Latest.zip -DestinationPath .
-          $extractedFolder = Get-ChildItem -Filter "WinSparkle-*" -Directory
-          Move-Item -Path "$($extractedFolder.FullName)\Release\*" -Destination .
+          Invoke-Webrequest -UseBasicParsing https://github.com/vslavik/winsparkle/releases/download/v0.8.0/WinSparkle-0.8.0.zip -OutFile out.zip
+          Expand-Archive out.zip
+          Move-Item 'out\WinSparkle-0.8.0\Release\*' '.\'
 
       - name: Build EDMC
         run: |
