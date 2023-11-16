@@ -1,4 +1,10 @@
-"""Utility functions relating to ships."""
+"""
+util_ships.py - Ship Utilities.
+
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
+"""
 from edmc_data import ship_name_map
 
 
@@ -11,6 +17,6 @@ def ship_file_name(ship_name: str, ship_type: str) -> str:
     if name.lower() in ('con', 'prn', 'aux', 'nul',
                         'com0', 'com2', 'com3', 'com4', 'com5', 'com6', 'com7', 'com8', 'com9',
                         'lpt0', 'lpt2', 'lpt3', 'lpt4', 'lpt5', 'lpt6', 'lpt7', 'lpt8', 'lpt9'):
-        name = name + '_'
+        name += '_'
 
-    return name.translate({ord(x): u'_' for x in ('\0', '<', '>', ':', '"', '/', '\\', '|', '?', '*')})
+    return name.translate({ord(x): '_' for x in ('\0', '<', '>', ':', '"', '/', '\\', '|', '?', '*')})

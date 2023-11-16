@@ -1,4 +1,10 @@
-"""Utilities for dealing with text (and byte representations thereof)."""
+"""
+text.py - Dealing with Text and Bytes.
+
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
+"""
 from __future__ import annotations
 
 from gzip import compress
