@@ -18,6 +18,8 @@ referenced in this file (or only in any other core plugin), and if so...
     `build.py` TO ENSURE THE FILES ARE ACTUALLY PRESENT
     IN AN END-USER INSTALLATION ON WINDOWS.
 """
+from __future__ import annotations
+
 import http
 import itertools
 import json
@@ -37,9 +39,6 @@ from typing import (
     Iterator,
     Mapping,
     MutableMapping,
-    Optional,
-    Dict,
-    List,
 )
 from typing import OrderedDict as OrderedDictT
 from typing import Tuple, Union
@@ -86,27 +85,27 @@ class This:
         self.odyssey = False
 
         # Track location to add to Journal events
-        self.system_address: Optional[str] = None
-        self.system_name: Optional[str] = None
-        self.coordinates: Optional[Tuple] = None
-        self.body_name: Optional[str] = None
-        self.body_id: Optional[int] = None
-        self.body_type: Optional[int] = None
-        self.station_name: Optional[str] = None
-        self.station_type: Optional[str] = None
-        self.station_marketid: Optional[str] = None
+        self.system_address: str | None = None
+        self.system_name: str | None = None
+        self.coordinates: tuple | None = None
+        self.body_name: str | None = None
+        self.body_id: int | None = None
+        self.body_type: int | None = None
+        self.station_name: str | None = None
+        self.station_type: str | None = None
+        self.station_marketid: str | None = None
         # Track Status.json data
-        self.status_body_name: Optional[str] = None
+        self.status_body_name: str | None = None
 
         # Avoid duplicates
-        self.marketId: Optional[str] = None
-        self.commodities: Optional[List[OrderedDictT[str, Any]]] = None
-        self.outfitting: Optional[Tuple[bool, List[str]]] = None
-        self.shipyard: Optional[Tuple[bool, List[Mapping[str, Any]]]] = None
+        self.marketId: str | None = None
+        self.commodities: list[OrderedDictT[str, Any]] | None = None
+        self.outfitting: Tuple[bool, list[str]] | None = None
+        self.shipyard: Tuple[bool, list[Mapping[str, Any]]] | None = None
         self.fcmaterials_marketid: int = 0
-        self.fcmaterials: Optional[List[OrderedDictT[str, Any]]] = None
+        self.fcmaterials: list[OrderedDictT[str, Any]] | None = None
         self.fcmaterials_capi_marketid: int = 0
-        self.fcmaterials_capi: Optional[List[OrderedDictT[str, Any]]] = None
+        self.fcmaterials_capi: list[OrderedDictT[str, Any]] | None = None
 
         # For the tkinter parent window, so we can call update_idletasks()
         self.parent: tk.Tk
@@ -395,7 +394,7 @@ class EDDNSender:
         """
         logger.trace_if("plugin.eddn.send", "Sending message")
         should_return: bool
-        new_data: Dict[str, Any]
+        new_data: dict[str, Any]
 
         should_return, new_data = killswitch.check_killswitch('plugins.eddn.send', json.loads(msg))
         if should_return:
@@ -404,7 +403,7 @@ class EDDNSender:
 
         # Even the smallest possible message compresses somewhat, so always compress
         encoded, compressed = text.gzip(json.dumps(new_data, separators=(',', ':')), max_size=0)
-        headers: Optional[Dict[str, str]] = None
+        headers: dict[str, str] | None = None
         if compressed:
             headers = {'Content-Encoding': 'gzip'}
 
@@ -612,7 +611,7 @@ class EDDN:
 
         self.sender = EDDNSender(self, self.eddn_url)
 
-        self.fss_signals: List[Mapping[str, Any]] = []
+        self.fss_signals: list[Mapping[str, Any]] = []
 
     def close(self):
         """Close down the EDDN class instance."""
@@ -636,7 +635,7 @@ class EDDN:
         :param is_beta: whether or not we're currently in beta mode
         """
         should_return: bool
-        new_data: Dict[str, Any]
+        new_data: dict[str, Any]
         should_return, new_data = killswitch.check_killswitch('capi.request./market', {})
         if should_return:
             logger.warning("capi.request./market has been disabled by killswitch.  Returning.")
@@ -653,7 +652,7 @@ class EDDN:
             modules,
             ships
         )
-        commodities: List[OrderedDictT[str, Any]] = []
+        commodities: list[OrderedDictT[str, Any]] = []
         for commodity in data['lastStarport'].get('commodities') or []:
             # Check 'marketable' and 'not prohibited'
             if (category_map.get(commodity['categoryname'], True)
@@ -726,7 +725,7 @@ class EDDN:
         :param data: The raw CAPI data.
         :return: Sanity-checked data.
         """
-        modules: Dict[str, Any] = data['lastStarport'].get('modules')
+        modules: dict[str, Any] = data['lastStarport'].get('modules')
         if modules is None or not isinstance(modules, dict):
             if modules is None:
                 logger.debug('modules was None.  FC or Damaged Station?')
@@ -743,13 +742,13 @@ class EDDN:
             # Set a safe value
             modules = {}
 
-        ships: Dict[str, Any] = data['lastStarport'].get('ships')
+        ships: dict[str, Any] = data['lastStarport'].get('ships')
         if ships is None or not isinstance(ships, dict):
             if ships is None:
                 logger.debug('ships was None')
 
             else:
-                logger.error(f'ships was neither None nor a Dict! Type = {type(ships)}')
+                logger.error(f'ships was neither None nor a dict! Type = {type(ships)}')
             # Set a safe value
             ships = {'shipyard_list': {}, 'unavailable_list': []}
 
@@ -769,7 +768,7 @@ class EDDN:
         :param is_beta: whether or not we're currently in beta mode
         """
         should_return: bool
-        new_data: Dict[str, Any]
+        new_data: dict[str, Any]
         should_return, new_data = killswitch.check_killswitch('capi.request./shipyard', {})
         if should_return:
             logger.warning("capi.request./shipyard has been disabled by killswitch.  Returning.")
@@ -796,7 +795,7 @@ class EDDN:
             modules.values()
         )
 
-        outfitting: List[str] = sorted(
+        outfitting: list[str] = sorted(
             self.MODULE_RE.sub(lambda match: match.group(0).capitalize(), mod['name'].lower()) for mod in to_search
         )
 
@@ -837,7 +836,7 @@ class EDDN:
         :param is_beta: whether or not we are in beta mode
         """
         should_return: bool
-        new_data: Dict[str, Any]
+        new_data: dict[str, Any]
         should_return, new_data = killswitch.check_killswitch('capi.request./shipyard', {})
         if should_return:
             logger.warning("capi.request./shipyard has been disabled by killswitch.  Returning.")
@@ -856,7 +855,7 @@ class EDDN:
             ships
         )
 
-        shipyard: List[Mapping[str, Any]] = sorted(
+        shipyard: list[Mapping[str, Any]] = sorted(
             itertools.chain(
                 (ship['name'].lower() for ship in (ships['shipyard_list'] or {}).values()),
                 (ship['name'].lower() for ship in ships['unavailable_list'] or {}),
@@ -899,8 +898,8 @@ class EDDN:
         :param is_beta: whether or not we're in beta mode
         :param entry: the journal entry containing the commodities data
         """
-        items: List[Mapping[str, Any]] = entry.get('Items') or []
-        commodities: List[OrderedDictT[str, Any]] = sorted((OrderedDict([
+        items: list[Mapping[str, Any]] = entry.get('Items') or []
+        commodities: list[OrderedDictT[str, Any]] = sorted((OrderedDict([
             ('name',          self.canonicalise(commodity['Name'])),
             ('meanPrice',     commodity['MeanPrice']),
             ('buyPrice',      commodity['BuyPrice']),
@@ -947,11 +946,11 @@ class EDDN:
         :param is_beta: Whether or not we're in beta mode
         :param entry: The relevant journal entry
         """
-        modules: List[Mapping[str, Any]] = entry.get('Items', [])
+        modules: list[Mapping[str, Any]] = entry.get('Items', [])
         horizons: bool = entry.get('Horizons', False)
         # outfitting = sorted([self.MODULE_RE.sub(lambda m: m.group(0).capitalize(), module['Name'])
         # for module in modules if module['Name'] != 'int_planetapproachsuite'])
-        outfitting: List[str] = sorted(
+        outfitting: list[str] = sorted(
             self.MODULE_RE.sub(lambda m: m.group(0).capitalize(), mod['Name']) for mod in
             filter(lambda m: m['Name'] != 'int_planetapproachsuite', modules)
         )
@@ -986,7 +985,7 @@ class EDDN:
         :param is_beta: Whether or not we're in beta mode
         :param entry: the relevant journal entry
         """
-        ships: List[Mapping[str, Any]] = entry.get('PriceList') or []
+        ships: list[Mapping[str, Any]] = entry.get('Pricelist') or []
         horizons: bool = entry.get('Horizons', False)
         shipyard = sorted(ship['ShipType'] for ship in ships)
         # Don't send empty ships list - shipyard data is only guaranteed present if user has visited the shipyard.
@@ -1042,7 +1041,7 @@ class EDDN:
                 self.sender.send_message_by_id(msg_id)
 
     def standard_header(
-        self, game_version: Optional[str] = None, game_build: Optional[str] = None
+        self, game_version: str | None = None, game_build: str | None = None
     ) -> MutableMapping[str, Any]:
         """
         Return the standard header for an EDDN message, given tracked state.
@@ -1134,7 +1133,7 @@ class EDDN:
 
     def export_journal_fssdiscoveryscan(
             self, cmdr: str, system_name: str, system_starpos: list, is_beta: bool, entry: Mapping[str, Any]
-    ) -> Optional[str]:
+    ) -> str | None:
         """
         Send an FSSDiscoveryScan to EDDN on the correct schema.
 
@@ -1176,7 +1175,7 @@ class EDDN:
 
     def export_journal_navbeaconscan(
             self, cmdr: str, system_name: str, system_starpos: list, is_beta: bool, entry: Mapping[str, Any]
-    ) -> Optional[str]:
+    ) -> str | None:
         """
         Send an NavBeaconScan to EDDN on the correct schema.
 
@@ -1218,7 +1217,7 @@ class EDDN:
 
     def export_journal_codexentry(  # noqa: CCR001
             self, cmdr: str, system_starpos: list, is_beta: bool, entry: MutableMapping[str, Any]
-    ) -> Optional[str]:
+    ) -> str | None:
         """
         Send a CodexEntry to EDDN on the correct schema.
 
@@ -1320,7 +1319,7 @@ class EDDN:
 
     def export_journal_scanbarycentre(
             self, cmdr: str, system_starpos: list, is_beta: bool, entry: Mapping[str, Any]
-    ) -> Optional[str]:
+    ) -> str | None:
         """
         Send a ScanBaryCentre to EDDN on the correct schema.
 
@@ -1374,7 +1373,7 @@ class EDDN:
 
     def export_journal_navroute(
             self, cmdr: str, is_beta: bool, entry: MutableMapping[str, Any]
-    ) -> Optional[str]:
+    ) -> str | None:
         """
         Send a NavRoute to EDDN on the correct schema.
 
@@ -1447,7 +1446,7 @@ class EDDN:
 
     def export_journal_fcmaterials(
         self, cmdr: str, is_beta: bool, entry: MutableMapping[str, Any]
-    ) -> Optional[str]:
+    ) -> str | None:
         """
         Send an FCMaterials message to EDDN on the correct schema.
 
@@ -1531,7 +1530,7 @@ class EDDN:
 
     def export_capi_fcmaterials(
         self, data: CAPIData, is_beta: bool, horizons: bool
-    ) -> Optional[str]:
+    ) -> str | None:
         """
         Send CAPI-sourced 'onfootmicroresources' data on `fcmaterials/1` schema.
 
@@ -1594,7 +1593,7 @@ class EDDN:
 
     def export_journal_approachsettlement(
         self, cmdr: str, system_name: str, system_starpos: list, is_beta: bool, entry: MutableMapping[str, Any]
-    ) -> Optional[str]:
+    ) -> str | None:
         """
         Send an ApproachSettlement to EDDN on the correct schema.
 
@@ -1669,7 +1668,7 @@ class EDDN:
 
     def export_journal_fssallbodiesfound(
         self, cmdr: str, system_name: str, system_starpos: list, is_beta: bool, entry: MutableMapping[str, Any]
-    ) -> Optional[str]:
+    ) -> str | None:
         """
         Send an FSSAllBodiesFound message to EDDN on the correct schema.
 
@@ -1719,7 +1718,7 @@ class EDDN:
 
     def export_journal_fssbodysignals(
         self, cmdr: str, system_name: str, system_starpos: list, is_beta: bool, entry: MutableMapping[str, Any]
-    ) -> Optional[str]:
+    ) -> str | None:
         """
         Send an FSSBodySignals message to EDDN on the correct schema.
 
@@ -1789,7 +1788,7 @@ class EDDN:
 
     def export_journal_fsssignaldiscovered(
         self, cmdr: str, system_name: str, system_starpos: list, is_beta: bool, entry: MutableMapping[str, Any]
-    ) -> Optional[str]:
+    ) -> str | None:
         """
         Send an FSSSignalDiscovered message to EDDN on the correct schema.
 
@@ -1892,7 +1891,7 @@ class EDDN:
         match = self.CANONICALISE_RE.match(item)
         return match and match.group(1) or item
 
-    def capi_gameversion_from_host_endpoint(self, capi_host: Optional[str], capi_endpoint: str) -> str:
+    def capi_gameversion_from_host_endpoint(self, capi_host: str | None, capi_endpoint: str) -> str:
         """
         Return the correct CAPI gameversion string for the given host/endpoint.
 
@@ -1910,7 +1909,7 @@ class EDDN:
             gv = 'CAPI-Legacy-'
 
         else:
-            # Technically incorrect, but it will inform Listeners
+            # Technically incorrect, but it will inform listeners
             logger.error(f"{capi_host=} lead to bad gameversion")
             gv = 'CAPI-UNKNOWN-'
         #######################################################################
@@ -1924,7 +1923,7 @@ class EDDN:
             gv += 'shipyard'
 
         else:
-            # Technically incorrect, but it will inform Listeners
+            # Technically incorrect, but it will inform listeners
             logger.error(f"{capi_endpoint=} lead to bad gameversion")
             gv += 'UNKNOWN'
         #######################################################################
@@ -1943,7 +1942,7 @@ def plugin_start3(plugin_dir: str) -> str:
     return 'EDDN'
 
 
-def plugin_app(parent: tk.Tk) -> Optional[tk.Frame]:
+def plugin_app(parent: tk.Tk) -> tk.Frame | None:
     """
     Set up any plugin-specific UI.
 
@@ -2183,7 +2182,7 @@ def filter_localised(d: Mapping[str, Any]) -> OrderedDictT[str, Any]:
     """
     Recursively remove any dict keys with names ending `_Localised` from a dict.
 
-    :param d: Dict to filter keys of.
+    :param d: dict to filter keys of.
     :return: The filtered dict.
     """
     filtered: OrderedDictT[str, Any] = OrderedDict()
@@ -2207,7 +2206,7 @@ def capi_filter_localised(d: Mapping[str, Any]) -> OrderedDictT[str, Any]:
     """
     Recursively remove any dict keys for known CAPI 'localised' names.
 
-    :param d: Dict to filter keys of.
+    :param d: dict to filter keys of.
     :return: The filtered dict.
     """
     filtered: OrderedDictT[str, Any] = OrderedDict()
@@ -2234,7 +2233,7 @@ def journal_entry(  # noqa: C901, CCR001
         station: str,
         entry: MutableMapping[str, Any],
         state: Mapping[str, Any]
-) -> Optional[str]:
+) -> str | None:
     """
     Process a new Journal entry.
 
@@ -2491,7 +2490,7 @@ def journal_entry(  # noqa: C901, CCR001
     return None
 
 
-def cmdr_data_legacy(data: CAPIData, is_beta: bool) -> Optional[str]:
+def cmdr_data_legacy(data: CAPIData, is_beta: bool) -> str | None:
     """
     Process new CAPI data for Legacy galaxy.
 
@@ -2510,7 +2509,7 @@ def cmdr_data_legacy(data: CAPIData, is_beta: bool) -> Optional[str]:
     return cmdr_data(data, is_beta)
 
 
-def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:  # noqa: CCR001
+def cmdr_data(data: CAPIData, is_beta: bool) -> str | None:  # noqa: CCR001
     """
     Process new CAPI data for not-Legacy galaxy (might be beta).
 
@@ -2611,7 +2610,7 @@ def capi_is_horizons(economies: MAP_STR_ANY, modules: MAP_STR_ANY, ships: MAP_ST
     return economies_colony or modules_horizons or ship_horizons
 
 
-def dashboard_entry(cmdr: str, is_beta: bool, entry: Dict[str, Any]) -> None:
+def dashboard_entry(cmdr: str, is_beta: bool, entry: dict[str, Any]) -> None:
     """
     Process Status.json data to track things like current Body.
 

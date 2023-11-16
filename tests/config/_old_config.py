@@ -1,11 +1,13 @@
 """Old Configuration Test File."""
+from __future__ import annotations
+
 import numbers
 import sys
 import warnings
 from configparser import NoOptionError
 from os import getenv, makedirs, mkdir, pardir
 from os.path import dirname, expanduser, isdir, join, normpath
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING
 from config import applongname, appname, update_interval
 from EDMCLogging import get_main_logger
 
@@ -80,7 +82,7 @@ elif sys.platform == 'win32':
     RegDeleteValue.restype = LONG
     RegDeleteValue.argtypes = [HKEY, LPCWSTR]
 
-    def known_folder_path(guid: uuid.UUID) -> Optional[str]:
+    def known_folder_path(guid: uuid.UUID) -> str | None:
         """Look up a Windows GUID to actual folder path name."""
         buf = ctypes.c_wchar_p()
         if SHGetKnownFolderPath(ctypes.create_string_buffer(guid.bytes_le), 0, 0, ctypes.byref(buf)):
@@ -138,7 +140,7 @@ class OldConfig:
                 self.identifier = f'uk.org.marginal.{appname.lower()}'
                 NSBundle.mainBundle().infoDictionary()['CFBundleIdentifier'] = self.identifier
 
-            self.default_journal_dir: Optional[str] = join(
+            self.default_journal_dir: str | None = join(
                 NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, True)[0],
                 'Frontier Developments',
                 'Elite Dangerous'
@@ -152,7 +154,7 @@ class OldConfig:
             if not self.get('outdir') or not isdir(str(self.get('outdir'))):
                 self.set('outdir', NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, True)[0])
 
-        def get(self, key: str, default: Union[None, list, str] = None) -> Union[None, list, str]:
+        def get(self, key: str, default: None | list | str = None) -> None | list | str:
             """Look up a string configuration value."""
             val = self.settings.get(key)
             if val is None:
@@ -179,7 +181,7 @@ class OldConfig:
                 logger.debug('The exception type is ...', exc_info=e)
                 return default
 
-        def set(self, key: str, val: Union[int, str, list]) -> None:
+        def set(self, key: str, val: int | str | list) -> None:
             """Set value on the specified configuration key."""
             self.settings[key] = val
 
@@ -221,13 +223,13 @@ class OldConfig:
 
             journaldir = known_folder_path(FOLDERID_SavedGames)
             if journaldir:
-                self.default_journal_dir: Optional[str] = join(journaldir, 'Frontier Developments', 'Elite Dangerous')
+                self.default_journal_dir: str | None = join(journaldir, 'Frontier Developments', 'Elite Dangerous')
 
             else:
                 self.default_journal_dir = None
 
             self.identifier = applongname
-            self.hkey: Optional[ctypes.c_void_p] = HKEY()
+            self.hkey: ctypes.c_void_p | None = HKEY()
             disposition = DWORD()
             if RegCreateKeyEx(
                     HKEY_CURRENT_USER,
@@ -280,7 +282,7 @@ class OldConfig:
             if not self.get('outdir') or not isdir(self.get('outdir')):  # type: ignore
                 self.set('outdir', known_folder_path(FOLDERID_Documents) or self.home)
 
-        def get(self, key: str, default: Union[None, list, str] = None) -> Union[None, list, str]:
+        def get(self, key: str, default: None | list | str = None) -> None | list | str:
             """Look up a string configuration value."""
             key_type = DWORD()
             key_size = DWORD()
@@ -327,7 +329,7 @@ class OldConfig:
 
             return key_val.value
 
-        def set(self, key: str, val: Union[int, str, list]) -> None:
+        def set(self, key: str, val: int | str | list) -> None:
             """Set value on the specified configuration key."""
             if isinstance(val, str):
                 buf = ctypes.create_unicode_buffer(val)
@@ -373,7 +375,7 @@ class OldConfig:
                 mkdir(self.plugin_dir)
 
             self.internal_plugin_dir = join(dirname(__file__), 'plugins')
-            self.default_journal_dir: Optional[str] = None
+            self.default_journal_dir: str | None = None
             self.home = expanduser('~')
             self.respath = dirname(__file__)
             self.identifier = f'uk.org.marginal.{appname.lower()}'
@@ -394,7 +396,7 @@ class OldConfig:
             if not self.get('outdir') or not isdir(self.get('outdir')):  # type: ignore # Not going to change
                 self.set('outdir', expanduser('~'))
 
-        def get(self, key: str, default: Union[None, list, str] = None) -> Union[None, list, str]:
+        def get(self, key: str, default: None | list | str = None) -> None | list | str:
             """Look up a string configuration value."""
             try:
                 val = self.config.get(self.SECTION, key)
@@ -429,7 +431,7 @@ class OldConfig:
 
             return default
 
-        def set(self, key: str, val: Union[int, str, list]) -> None:
+        def set(self, key: str, val: int | str | list) -> None:
             """Set value on the specified configuration key."""
             if isinstance(val, bool):
                 self.config.set(self.SECTION, key, val and '1' or '0')

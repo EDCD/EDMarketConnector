@@ -41,6 +41,7 @@ EDMarketConnector.VisualElementsManifest.xml
 # Ignore virtual environments
 .venv/
 venv/
+venv2
 
 # Ignore workspace file for Visual Studio Code
 *.code-workspace

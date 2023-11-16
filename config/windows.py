@@ -5,6 +5,8 @@ Copyright (c) EDCD, All Rights Reserved
 Licensed under the GNU General Public License.
 See LICENSE file.
 """
+from __future__ import annotations
+
 import ctypes
 import functools
 import pathlib
@@ -12,7 +14,7 @@ import sys
 import uuid
 import winreg
 from ctypes.wintypes import DWORD, HANDLE
-from typing import List, Literal, Optional, Union
+from typing import Literal
 from config import AbstractConfig, applongname, appname, logger, update_interval
 
 assert sys.platform == 'win32'
@@ -32,7 +34,7 @@ CoTaskMemFree = ctypes.windll.ole32.CoTaskMemFree
 CoTaskMemFree.argtypes = [ctypes.c_void_p]
 
 
-def known_folder_path(guid: uuid.UUID) -> Optional[str]:
+def known_folder_path(guid: uuid.UUID) -> str | None:
     """Look up a Windows GUID to actual folder path name."""
     buf = ctypes.c_wchar_p()
     if SHGetKnownFolderPath(ctypes.create_string_buffer(guid.bytes_le), 0, 0, ctypes.byref(buf)):
@@ -117,7 +119,7 @@ class WinConfig(AbstractConfig):
             logger.exception('Could not open WinSparkle handle')
             raise
 
-    def __get_regentry(self, key: str) -> Union[None, list, str, int]:
+    def __get_regentry(self, key: str) -> None | list | str | int:
         """Access the Registry for the raw entry."""
         try:
             value, _type = winreg.QueryValueEx(self.__reg_handle, key)
@@ -138,7 +140,7 @@ class WinConfig(AbstractConfig):
         logger.warning(f'Registry key {key=} returned unknown type {_type=} {value=}')
         return None
 
-    def get_str(self, key: str, *, default: Optional[str] = None) -> str:
+    def get_str(self, key: str, *, default: str | None = None) -> str:
         """
         Return the string referred to by the given key if it exists, or the default.
 
@@ -153,7 +155,7 @@ class WinConfig(AbstractConfig):
 
         return res
 
-    def get_list(self, key: str, *, default: Optional[list] = None) -> list:
+    def get_list(self, key: str, *, default: list | None = None) -> list:
         """
         Return the list referred to by the given key if it exists, or the default.
 
@@ -183,7 +185,7 @@ class WinConfig(AbstractConfig):
 
         return res
 
-    def get_bool(self, key: str, *, default: Optional[bool] = None) -> bool:
+    def get_bool(self, key: str, *, default: bool | None = None) -> bool:
         """
         Return the bool referred to by the given key if it exists, or the default.
 
@@ -195,14 +197,14 @@ class WinConfig(AbstractConfig):
 
         return bool(res)
 
-    def set(self, key: str, val: Union[int, str, List[str], bool]) -> None:
+    def set(self, key: str, val: int | str | list[str] | bool) -> None:
         """
         Set the given key's data to the given value.
 
         Implements :meth:`AbstractConfig.set`.
         """
         # These are the types that winreg.REG_* below resolve to.
-        reg_type: Union[Literal[1], Literal[4], Literal[7]]
+        reg_type: Literal[1] | Literal[4] | Literal[7]
         if isinstance(val, str):
             reg_type = winreg.REG_SZ
 
