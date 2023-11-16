@@ -18,11 +18,13 @@ referenced in this file (or only in any other core plugin), and if so...
     `build.py` TO ENSURE THE FILES ARE ACTUALLY PRESENT
     IN AN END-USER INSTALLATION ON WINDOWS.
 """
+from __future__ import annotations
+
 import base64
 import gzip
 import io
 import json
-from typing import Any, Mapping, Union
+from typing import Any, Mapping
 
 
 def plugin_start3(plugin_dir: str) -> str:
@@ -36,7 +38,7 @@ def plugin_start3(plugin_dir: str) -> str:
 
 
 # Return a URL for the current ship
-def shipyard_url(loadout: Mapping[str, Any], is_beta: bool) -> Union[bool, str]:
+def shipyard_url(loadout: Mapping[str, Any], is_beta: bool) -> bool | str:
     """
     Construct a URL for ship loadout.
 

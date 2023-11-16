@@ -1,6 +1,8 @@
 """Test the apply functions used by killswitch to modify data."""
+from __future__ import annotations
+
 import copy
-from typing import Any, Optional
+from typing import Any
 
 import pytest
 
@@ -33,11 +35,11 @@ def test_apply(source: UPDATABLE_DATA, key: str, action: str, to_set: Any, resul
 def test_apply_errors() -> None:
     """_apply should fail when passed something that isn't a Sequence or MutableMapping."""
     with pytest.raises(ValueError, match=r'Dont know how to'):
-        killswitch._apply(set(), '0', None, False)  # type: ignore # Its intentional that its broken
-        killswitch._apply(None, '', None)  # type: ignore # Its intentional that its broken
+        killswitch._apply(set(), '0')  # type: ignore # Its intentional that its broken
+        killswitch._apply(None, '')  # type: ignore # Its intentional that its broken
 
     with pytest.raises(ValueError, match=r'Cannot use string'):
-        killswitch._apply([], 'test', None, False)
+        killswitch._apply([], 'test')
 
 
 def test_apply_no_error() -> None:
@@ -61,7 +63,7 @@ def test_apply_no_error() -> None:
         (False, 0), (str((1 << 63)-1), (1 << 63)-1), (True, 1), (str(1 << 1337), 1 << 1337)
     ]
 )
-def test_get_int(input: str, expected: Optional[int]) -> None:
+def test_get_int(input: str, expected: int | None) -> None:
     """Check that _get_int doesn't throw when handed bad data."""
     assert expected == killswitch._get_int(input)
 

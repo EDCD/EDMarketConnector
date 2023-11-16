@@ -19,6 +19,7 @@ referenced in this file (or only in any other core plugin), and if so...
     `build.py` TO ENSURE THE FILES ARE ACTUALLY PRESENT
     IN AN END-USER INSTALLATION ON WINDOWS.
 """
+from __future__ import annotations
 
 import base64
 import gzip
@@ -26,7 +27,7 @@ import io
 import json
 import tkinter as tk
 from tkinter import ttk
-from typing import TYPE_CHECKING, Union, Optional
+from typing import TYPE_CHECKING
 import myNotebook as nb  # noqa: N813 # its not my fault.
 from EDMCLogging import get_main_logger
 from plug import show_error
@@ -80,7 +81,7 @@ def plugin_start3(path: str) -> str:
     return 'Coriolis'
 
 
-def plugin_prefs(parent: ttk.Notebook, cmdr: Optional[str], is_beta: bool) -> tk.Frame:
+def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> tk.Frame:
     """Set up plugin preferences."""
     PADX = 10  # noqa: N806
 
@@ -130,7 +131,7 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: Optional[str], is_beta: bool) -> tk
     return conf_frame
 
 
-def prefs_changed(cmdr: Optional[str], is_beta: bool) -> None:
+def prefs_changed(cmdr: str | None, is_beta: bool) -> None:
     """
     Update URLs and override mode based on user preferences.
 
@@ -175,7 +176,7 @@ def _get_target_url(is_beta: bool) -> str:
     return coriolis_config.normal_url
 
 
-def shipyard_url(loadout, is_beta) -> Union[str, bool]:
+def shipyard_url(loadout, is_beta) -> str | bool:
     """Return a URL for the current ship."""
     # most compact representation
     string = json.dumps(loadout, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode('utf-8')

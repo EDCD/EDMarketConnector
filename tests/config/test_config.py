@@ -7,15 +7,13 @@ key deletions. Said modifications are to keys that are generated internally.
 Most of these tests are parity tests with the "old" config, and likely one day can be
 entirely removed.
 """
-from __future__ import annotations
-
 import contextlib
 import itertools
 import pathlib
 import random
 import string
 import sys
-from typing import Any, Iterable, List, cast
+from typing import Any, Iterable, cast
 
 import pytest
 from pytest import mark
@@ -30,12 +28,12 @@ from _old_config import old_config  # noqa: E402
 from config import config  # noqa: E402
 
 
-def _fuzz_list(length: int) -> List[str]:
+def _fuzz_list(length: int) -> list[str]:
     out = []
     for _ in range(length):
         out.append(_fuzz_generators[str](random.randint(0, 1337)))
 
-    return cast(List[str], out)
+    return cast(list[str], out)
 
 
 _fuzz_generators = {  # Type annotating this would be a nightmare.
@@ -72,7 +70,7 @@ bool_tests = [True, False]
 big_int = int(0xFFFFFFFF)  # 32 bit int
 
 
-def _make_params(args: List[Any], id_name: str = 'random_test_{i}') -> list:
+def _make_params(args: list[Any], id_name: str = 'random_test_{i}') -> list:
     return [pytest.param(x, id=id_name.format(i=i)) for i, x in enumerate(args)]
 
 
@@ -81,7 +79,7 @@ def _build_test_list(static_data, random_data, random_id_name='random_test_{i}')
 
 
 class TestNewConfig:
-    """Test the new config with an array of hand picked and random data."""
+    """Test the new config with an array of hand-picked and random data."""
 
     def __update_linuxconfig(self) -> None:
         """On linux config uses ConfigParser, which doesn't update from disk changes. Force the update here."""
@@ -117,7 +115,7 @@ class TestNewConfig:
         config.delete(name)
 
     @mark.parametrize("lst", _build_test_list(list_tests, _get_fuzz(list)))
-    def test_list(self, lst: List[str]) -> None:
+    def test_list(self, lst: list[str]) -> None:
         """Save a list and then ask for it back."""
         name = f'list_test_{ hash("".join(lst)) }'
         config.set(name, lst)
@@ -216,7 +214,7 @@ class TestOldNewConfig:
             assert res == string
 
     @mark.parametrize("lst", _build_test_list(list_tests, _get_fuzz(list)))
-    def test_list(self, lst: List[str]) -> None:
+    def test_list(self, lst: list[str]) -> None:
         """Save a list though the old config, recall it using the new config."""
         lst = [x.replace("\r", "") for x in lst]  # OldConfig on linux fails to store these correctly
         if sys.platform == 'win32':

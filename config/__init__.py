@@ -1,11 +1,15 @@
 """
-Code dealing with the configuration of the program.
+__init__.py - Code dealing with the configuration of the program.
+
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
 
 Windows uses the Registry to store values in a flat manner.
 Linux uses a file, but for commonality it's still a flat data structure.
 macOS uses a 'defaults' object.
 """
-
+from __future__ import annotations
 
 __all__ = [
     # defined in the order they appear in the file
@@ -40,10 +44,8 @@ import sys
 import traceback
 import warnings
 from abc import abstractmethod
-from typing import Any, Callable, Optional, Type, TypeVar
-
+from typing import Any, Callable, Type, TypeVar
 import semantic_version
-
 from constants import GITVERSION_FILE, applongname, appname
 
 # Any of these may be imported by plugins
@@ -52,9 +54,9 @@ appcmdname = 'EDMC'
 # <https://semver.org/#semantic-versioning-specification-semver>
 # Major.Minor.Patch(-prerelease)(+buildmetadata)
 # NB: Do *not* import this, use the functions appversion() and appversion_nobuild()
-_static_appversion = '5.9.5'
+_static_appversion = '5.10.0-alpha0'
 
-_cached_version: Optional[semantic_version.Version] = None
+_cached_version: semantic_version.Version | None = None
 copyright = '© 2015-2019 Jonathan Harris, 2020-2023 EDCD'
 
 update_feed = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml'
@@ -66,7 +68,7 @@ debug_senders: list[str] = []
 trace_on: list[str] = []
 
 capi_pretend_down: bool = False
-capi_debug_access_token: Optional[str] = None
+capi_debug_access_token: str | None = None
 # This must be done here in order to avoid an import cycle with EDMCLogging.
 # Other code should use EDMCLogging.get_main_logger
 if os.getenv("EDMC_NO_UI"):
@@ -79,7 +81,6 @@ else:
 _T = TypeVar('_T')
 
 
-###########################################################################
 def git_shorthash_from_head() -> str:
     """
     Determine short hash for current git HEAD.
@@ -91,13 +92,14 @@ def git_shorthash_from_head() -> str:
     shorthash: str = None  # type: ignore
 
     try:
-        git_cmd = subprocess.Popen('git rev-parse --short HEAD'.split(),
-                                   stdout=subprocess.PIPE,
-                                   stderr=subprocess.STDOUT
-                                   )
+        git_cmd = subprocess.Popen(
+            "git rev-parse --short HEAD".split(),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+        )
         out, err = git_cmd.communicate()
 
-    except Exception as e:
+    except subprocess.CalledProcessError as e:
         logger.info(f"Couldn't run git command for short hash: {e!r}")
 
     else:
@@ -131,7 +133,7 @@ def appversion() -> semantic_version.Version:
     if getattr(sys, 'frozen', False):
         # Running frozen, so we should have a .gitversion file
         # Yes, .parent because if frozen we're inside library.zip
-        with open(pathlib.Path(sys.path[0]).parent / GITVERSION_FILE, 'r', encoding='utf-8') as gitv:
+        with open(pathlib.Path(sys.path[0]).parent / GITVERSION_FILE, encoding='utf-8') as gitv:
             shorthash = gitv.read()
 
     else:
@@ -157,11 +159,14 @@ def appversion_nobuild() -> semantic_version.Version:
     :return: App version without any build meta data.
     """
     return appversion().truncate('prerelease')
-###########################################################################
 
 
 class AbstractConfig(abc.ABC):
-    """Abstract root class of all platform specific Config implementations."""
+    """
+    Abstract root class of all platform specific Config implementations.
+
+    Commented lines are no longer supported or replaced.
+    """
 
     OUT_EDDN_SEND_STATION_DATA = 1
     # OUT_MKT_BPC = 2	# No longer supported
@@ -185,7 +190,6 @@ class AbstractConfig(abc.ABC):
     respath_path: pathlib.Path
     home_path: pathlib.Path
     default_journal_dir_path: pathlib.Path
-
     identifier: str
 
     __in_shutdown = False  # Is the application currently shutting down ?
@@ -241,7 +245,7 @@ class AbstractConfig(abc.ABC):
         self.__eddn_url = eddn_url
 
     @property
-    def eddn_url(self) -> Optional[str]:
+    def eddn_url(self) -> str | None:
         """
         Provide the custom EDDN URL.
 
@@ -296,14 +300,14 @@ class AbstractConfig(abc.ABC):
     def _suppress_call(
         func: Callable[..., _T], exceptions: Type[BaseException] | list[Type[BaseException]] = Exception,
         *args: Any, **kwargs: Any
-    ) -> Optional[_T]:
+    ) -> _T | None:
         if exceptions is None:
             exceptions = [Exception]
 
         if not isinstance(exceptions, list):
             exceptions = [exceptions]
 
-        with contextlib.suppress(*exceptions):  # type: ignore # it works fine, mypy
+        with contextlib.suppress(*exceptions):
             return func(*args, **kwargs)
 
         return None
@@ -326,16 +330,16 @@ class AbstractConfig(abc.ABC):
         if (a_list := self._suppress_call(self.get_list, ValueError, key, default=None)) is not None:
             return a_list
 
-        elif (a_str := self._suppress_call(self.get_str, ValueError, key, default=None)) is not None:
+        if (a_str := self._suppress_call(self.get_str, ValueError, key, default=None)) is not None:
             return a_str
 
-        elif (a_bool := self._suppress_call(self.get_bool, ValueError, key, default=None)) is not None:
+        if (a_bool := self._suppress_call(self.get_bool, ValueError, key, default=None)) is not None:
             return a_bool
 
-        elif (an_int := self._suppress_call(self.get_int, ValueError, key, default=None)) is not None:
+        if (an_int := self._suppress_call(self.get_int, ValueError, key, default=None)) is not None:
             return an_int
 
-        return default  # type: ignore
+        return default
 
     @abstractmethod
     def get_list(self, key: str, *, default: list | None = None) -> list:
@@ -462,16 +466,15 @@ def get_config(*args, **kwargs) -> AbstractConfig:
         from .darwin import MacConfig
         return MacConfig(*args, **kwargs)
 
-    elif sys.platform == "win32":  # pragma: sys-platform-win32
+    if sys.platform == "win32":  # pragma: sys-platform-win32
         from .windows import WinConfig
         return WinConfig(*args, **kwargs)
 
-    elif sys.platform == "linux":  # pragma: sys-platform-linux
+    if sys.platform == "linux":  # pragma: sys-platform-linux
         from .linux import LinuxConfig
         return LinuxConfig(*args, **kwargs)
 
-    else:  # pragma: sys-platform-not-known
-        raise ValueError(f'Unknown platform: {sys.platform=}')
+    raise ValueError(f'Unknown platform: {sys.platform=}')
 
 
 config = get_config()

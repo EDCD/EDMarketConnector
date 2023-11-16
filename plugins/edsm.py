@@ -18,6 +18,8 @@ referenced in this file (or only in any other core plugin), and if so...
     `build.py` TO ENSURE THE FILES ARE ACTUALLY PRESENT
     IN AN END-USER INSTALLATION ON WINDOWS.
 """
+from __future__ import annotations
+
 import json
 import threading
 import tkinter as tk
@@ -26,7 +28,7 @@ from queue import Queue
 from threading import Thread
 from time import sleep
 from tkinter import ttk
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Mapping, MutableMapping, Optional, Set, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, Literal, Mapping, MutableMapping, cast
 import requests
 import killswitch
 import monitor
@@ -72,27 +74,27 @@ class This:
         self.game_build = ""
 
         # Handle only sending Live galaxy data
-        self.legacy_galaxy_last_notified: Optional[datetime] = None
+        self.legacy_galaxy_last_notified: datetime | None = None
 
         self.session: requests.Session = requests.Session()
         self.session.headers['User-Agent'] = user_agent
         self.queue: Queue = Queue()		# Items to be sent to EDSM by worker thread
-        self.discarded_events: Set[str] = set()  # List discarded events from EDSM
-        self.lastlookup: Dict[str, Any]  # Result of last system lookup
+        self.discarded_events: set[str] = set()  # List discarded events from EDSM
+        self.lastlookup: dict[str, Any]  # Result of last system lookup
 
         # Game state
         self.multicrew: bool = False  # don't send captain's ship info to EDSM while on a crew
-        self.coordinates: Optional[Tuple[int, int, int]] = None
+        self.coordinates: tuple[int, int, int] | None = None
         self.newgame: bool = False  # starting up - batch initial burst of events
         self.newgame_docked: bool = False  # starting up while docked
         self.navbeaconscan: int = 0		# batch up burst of Scan events after NavBeaconScan
-        self.system_link: Optional[tk.Widget] = None
-        self.system_name: Optional[tk.Tk] = None
-        self.system_address: Optional[int] = None  # Frontier SystemAddress
-        self.system_population: Optional[int] = None
-        self.station_link: Optional[tk.Widget] = None
-        self.station_name: Optional[str] = None
-        self.station_marketid: Optional[int] = None  # Frontier MarketID
+        self.system_link: tk.Widget | None = None
+        self.system_name: tk.Tk | None = None
+        self.system_address: int | None = None  # Frontier SystemAddress
+        self.system_population: int | None = None
+        self.station_link: tk.Widget | None = None
+        self.station_name: str | None = None
+        self.station_marketid: int | None = None  # Frontier MarketID
         self.on_foot = False
 
         self._IMG_KNOWN = None
@@ -100,21 +102,21 @@ class This:
         self._IMG_NEW = None
         self._IMG_ERROR = None
 
-        self.thread: Optional[threading.Thread] = None
+        self.thread: threading.Thread | None = None
 
-        self.log: Optional[tk.IntVar] = None
-        self.log_button: Optional[ttk.Checkbutton] = None
+        self.log: tk.IntVar | None = None
+        self.log_button: ttk.Checkbutton | None = None
 
-        self.label: Optional[tk.Widget] = None
+        self.label: tk.Widget | None = None
 
-        self.cmdr_label: Optional[nb.Label] = None
-        self.cmdr_text: Optional[nb.Label] = None
+        self.cmdr_label: nb.Label | None = None
+        self.cmdr_text: nb.Label | None = None
 
-        self.user_label: Optional[nb.Label] = None
-        self.user: Optional[nb.Entry] = None
+        self.user_label: nb.Label | None = None
+        self.user: nb.Entry | None = None
 
-        self.apikey_label: Optional[nb.Label] = None
-        self.apikey: Optional[nb.Entry] = None
+        self.apikey_label: nb.Label | None = None
+        self.apikey: nb.Entry | None = None
 
 
 this = This()
@@ -277,7 +279,7 @@ def toggle_password_visibility():
         this.apikey.config(show="*")  # type: ignore
 
 
-def plugin_prefs(parent: ttk.Notebook, cmdr: Optional[str], is_beta: bool) -> tk.Frame:
+def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> tk.Frame:
     """
     Plugin preferences setup hook.
 
@@ -361,7 +363,7 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: Optional[str], is_beta: bool) -> tk
     return frame
 
 
-def prefs_cmdr_changed(cmdr: Optional[str], is_beta: bool) -> None:  # noqa: CCR001
+def prefs_cmdr_changed(cmdr: str | None, is_beta: bool) -> None:  # noqa: CCR001
     """
     Handle the Commander name changing whilst Settings was open.
 
@@ -390,7 +392,7 @@ def prefs_cmdr_changed(cmdr: Optional[str], is_beta: bool) -> None:  # noqa: CCR
             # LANG: We have no data on the current commander
             this.cmdr_text['text'] = _('None')
 
-    to_set: Union[Literal['normal'], Literal['disabled']] = tk.DISABLED
+    to_set: Literal['normal'] | Literal['disabled'] = tk.DISABLED
     if cmdr and not is_beta and this.log and this.log.get():
         to_set = tk.NORMAL
 
@@ -440,9 +442,9 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
         config.set('edsm_out', this.log.get())
 
     if cmdr and not is_beta:
-        cmdrs: List[str] = config.get_list('edsm_cmdrs', default=[])
-        usernames: List[str] = config.get_list('edsm_usernames', default=[])
-        apikeys: List[str] = config.get_list('edsm_apikeys', default=[])
+        cmdrs: list[str] = config.get_list('edsm_cmdrs', default=[])
+        usernames: list[str] = config.get_list('edsm_usernames', default=[])
+        apikeys: list[str] = config.get_list('edsm_apikeys', default=[])
 
         if this.user and this.apikey:
             if cmdr in cmdrs:
@@ -460,7 +462,7 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
         config.set('edsm_apikeys', apikeys)
 
 
-def credentials(cmdr: str) -> Optional[Tuple[str, str]]:
+def credentials(cmdr: str) -> tuple[str, str] | None:
     """
     Get credentials for the given commander, if they exist.
 
@@ -635,7 +637,7 @@ Queueing: {entry!r}'''
 
 
 # Update system data
-def cmdr_data(data: CAPIData, is_beta: bool) -> Optional[str]:  # noqa: CCR001
+def cmdr_data(data: CAPIData, is_beta: bool) -> str | None:  # noqa: CCR001
     """
     Process new CAPI data.
 
@@ -722,7 +724,7 @@ def worker() -> None:  # noqa: CCR001 C901
     :return: None
     """
     logger.debug('Starting...')
-    pending: List[Mapping[str, Any]] = []  # Unsent events
+    pending: list[Mapping[str, Any]] = []  # Unsent events
     closing = False
     cmdr: str = ""
     last_game_version = ""
@@ -744,7 +746,7 @@ def worker() -> None:  # noqa: CCR001 C901
             logger.debug(f'{this.shutting_down=}, so setting closing = True')
             closing = True
 
-        item: Optional[Tuple[str, str, str, Mapping[str, Any]]] = this.queue.get()
+        item: tuple[str, str, str, Mapping[str, Any]] | None = this.queue.get()
         if item:
             (cmdr, game_version, game_build, entry) = item
             logger.trace_if(CMDR_EVENTS, f'De-queued ({cmdr=}, {game_version=}, {game_build=}, {entry["event"]=})')
@@ -756,7 +758,7 @@ def worker() -> None:  # noqa: CCR001 C901
         retrying = 0
         while retrying < 3:
             if item is None:
-                item = cast(Tuple[str, str, str, Mapping[str, Any]], ("", {}))
+                item = cast(tuple[str, str, str, Mapping[str, Any]], ("", {}))
             should_skip, new_item = killswitch.check_killswitch(
                 'plugins.edsm.worker',
                 item,
@@ -909,7 +911,7 @@ def worker() -> None:  # noqa: CCR001 C901
         last_game_build = game_build
 
 
-def should_send(entries: List[Mapping[str, Any]], event: str) -> bool:  # noqa: CCR001
+def should_send(entries: list[Mapping[str, Any]], event: str) -> bool:  # noqa: CCR001
     """
     Whether or not any of the given entries should be sent to EDSM.
 
