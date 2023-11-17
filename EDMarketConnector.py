@@ -1166,19 +1166,22 @@ class AppWindow:
             self.status['text'] = _('CAPI query aborted: GameVersion unknown')
             return
 
-        if not companion.session.retrying and time() >= self.capi_fleetcarrier_query_holdoff_time:
+        if not companion.session.retrying:
+            if time() < self.capi_fleetcarrier_query_holdoff_time:  # Was invoked while in cooldown
+                logger.debug('CAPI fleetcarrier query aborted, too soon since last request')
+                return
 
             # LANG: Status - Attempting to retrieve data from Frontier CAPI
             self.status['text'] = _('Fetching data...')
             self.w.update_idletasks()
 
-            query_time = int(time())
-            logger.trace_if('capi.worker', 'Requesting fleetcarrier data')
-            config.set('fleetcarrierquerytime', query_time)
-            logger.trace_if('capi.worker', 'Calling companion.session.fleetcarrier')
-            companion.session.fleetcarrier(
-                query_time=query_time, tk_response_event=self._CAPI_RESPONSE_TK_EVENT_NAME
-            )
+        query_time = int(time())
+        logger.trace_if('capi.worker', 'Requesting fleetcarrier data')
+        config.set('fleetcarrierquerytime', query_time)
+        logger.trace_if('capi.worker', 'Calling companion.session.fleetcarrier')
+        companion.session.fleetcarrier(
+            query_time=query_time, tk_response_event=self._CAPI_RESPONSE_TK_EVENT_NAME
+        )
 
     def capi_handle_response(self, event=None):  # noqa: C901, CCR001
         """
@@ -1274,7 +1277,7 @@ class AppWindow:
                                f"{monitor.state['SystemName']!r}")
                 raise companion.ServerLagging()
 
-            if capi_response.capi_data['lastStarport']['name'] != monitor.state['StationName']:
+            elif capi_response.capi_data['lastStarport']['name'] != monitor.state['StationName']:
                 if monitor.state['OnFoot'] and monitor.state['StationName']:
                     logger.warning(f"({capi_response.capi_data['lastStarport']['name']!r} != "
                                    f"{monitor.state['StationName']!r}) AND "
