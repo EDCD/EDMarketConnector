@@ -1108,28 +1108,31 @@ class AppWindow:
             self.login()
             return
 
-        if not companion.session.retrying and time() >= self.capi_query_holdoff_time:
-            if play_sound:
-                if time() < self.capi_query_holdoff_time:  # Was invoked by key while in cooldown
-                    if (self.capi_query_holdoff_time - time()) < companion.capi_query_cooldown * 0.75:
-                        self.status['text'] = ''
-                        hotkeymgr.play_bad()  # Don't play sound in first few seconds to prevent repeats
-                else:
-                    hotkeymgr.play_good()
+        if not companion.session.retrying:
+            if time() < self.capi_query_holdoff_time:
+                # Invoked by key while in cooldown
+                time_remaining = self.capi_query_holdoff_time - time()
+                if play_sound and time_remaining < companion.capi_query_cooldown * 0.75:
+                    self.status['text'] = ''
+                    hotkeymgr.play_bad()
+                    return
+            elif play_sound:
+                hotkeymgr.play_good()
 
-                # LANG: Status - Attempting to retrieve data from Frontier CAPI
-                self.status['text'] = _('Fetching data...')
-                self.button['state'] = self.theme_button['state'] = tk.DISABLED
-                self.w.update_idletasks()
+            # LANG: Status - Attempting to retrieve data from Frontier CAPI
+            self.status['text'] = _('Fetching data...')
+            self.button['state'] = self.theme_button['state'] = tk.DISABLED
+            self.w.update_idletasks()
 
-                query_time = int(time())
-                logger.trace_if('capi.worker', 'Requesting full station data')
-                config.set('querytime', query_time)
-                logger.trace_if('capi.worker', 'Calling companion.session.station')
-                companion.session.station(
-                    query_time=query_time, tk_response_event=self._CAPI_RESPONSE_TK_EVENT_NAME,
-                    play_sound=play_sound
-                )
+        query_time = int(time())
+        logger.trace_if('capi.worker', 'Requesting full station data')
+        config.set('querytime', query_time)
+        logger.trace_if('capi.worker', 'Calling companion.session.station')
+
+        companion.session.station(
+            query_time=query_time, tk_response_event=self._CAPI_RESPONSE_TK_EVENT_NAME,
+            play_sound=play_sound
+        )
 
     def capi_request_fleetcarrier_data(self, event=None) -> None:
         """
