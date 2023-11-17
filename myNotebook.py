@@ -10,10 +10,11 @@ OSX and Windows.
 
 Entire file may be imported by plugins.
 """
+from __future__ import annotations
+
 import sys
 import tkinter as tk
 from tkinter import ttk
-from typing import Optional
 
 # Can't do this with styles on OSX - http://www.tkdocs.com/tutorial/styles.html#whydifficult
 if sys.platform == 'darwin':
@@ -29,7 +30,7 @@ elif sys.platform == 'win32':
 class Notebook(ttk.Notebook):
     """Custom ttk.Notebook class to fix some display issues."""
 
-    def __init__(self, master: Optional[ttk.Frame] = None, **kw):
+    def __init__(self, master: ttk.Frame | None = None, **kw):
 
         ttk.Notebook.__init__(self, master, **kw)
         style = ttk.Style()
@@ -75,9 +76,9 @@ class Frame(sys.platform == 'darwin' and tk.Frame or ttk.Frame):  # type: ignore
 class Label(tk.Label):
     """Custom tk.Label class to fix some display issues."""
 
-    def __init__(self, master: Optional[ttk.Frame] = None, **kw):
+    def __init__(self, master: ttk.Frame | None = None, **kw):
         # This format chosen over `sys.platform in (...)` as mypy and friends dont understand that
-        if sys.platform == 'darwin' or sys.platform == 'win32':
+        if sys.platform in ('darwin', 'win32'):
             kw['foreground'] = kw.pop('foreground', PAGEFG)
             kw['background'] = kw.pop('background', PAGEBG)
         else:
@@ -89,7 +90,7 @@ class Label(tk.Label):
 class Entry(sys.platform == 'darwin' and tk.Entry or ttk.Entry):  # type: ignore
     """Custom t(t)k.Entry class to fix some display issues."""
 
-    def __init__(self, master: Optional[ttk.Frame] = None, **kw):
+    def __init__(self, master: ttk.Frame | None = None, **kw):
         if sys.platform == 'darwin':
             kw['highlightbackground'] = kw.pop('highlightbackground', PAGEBG)
             tk.Entry.__init__(self, master, **kw)
@@ -100,7 +101,7 @@ class Entry(sys.platform == 'darwin' and tk.Entry or ttk.Entry):  # type: ignore
 class Button(sys.platform == 'darwin' and tk.Button or ttk.Button):  # type: ignore
     """Custom t(t)k.Button class to fix some display issues."""
 
-    def __init__(self, master: Optional[ttk.Frame] = None, **kw):
+    def __init__(self, master: ttk.Frame | None = None, **kw):
         if sys.platform == 'darwin':
             kw['highlightbackground'] = kw.pop('highlightbackground', PAGEBG)
             tk.Button.__init__(self, master, **kw)
@@ -113,7 +114,7 @@ class Button(sys.platform == 'darwin' and tk.Button or ttk.Button):  # type: ign
 class ColoredButton(sys.platform == 'darwin' and tk.Label or tk.Button):  # type: ignore
     """Custom t(t)k.ColoredButton class to fix some display issues."""
 
-    def __init__(self, master: Optional[ttk.Frame] = None, **kw):
+    def __init__(self, master: ttk.Frame | None = None, **kw):
         if sys.platform == 'darwin':
             # Can't set Button background on OSX, so use a Label instead
             kw['relief'] = kw.pop('relief', tk.RAISED)
@@ -131,7 +132,7 @@ class ColoredButton(sys.platform == 'darwin' and tk.Label or tk.Button):  # type
 class Checkbutton(sys.platform == 'darwin' and tk.Checkbutton or ttk.Checkbutton):  # type: ignore
     """Custom t(t)k.Checkbutton class to fix some display issues."""
 
-    def __init__(self, master: Optional[ttk.Frame] = None, **kw):
+    def __init__(self, master: ttk.Frame | None = None, **kw):
         if sys.platform == 'darwin':
             kw['foreground'] = kw.pop('foreground', PAGEFG)
             kw['background'] = kw.pop('background', PAGEBG)
@@ -145,7 +146,7 @@ class Checkbutton(sys.platform == 'darwin' and tk.Checkbutton or ttk.Checkbutton
 class Radiobutton(sys.platform == 'darwin' and tk.Radiobutton or ttk.Radiobutton):  # type: ignore
     """Custom t(t)k.Radiobutton class to fix some display issues."""
 
-    def __init__(self, master: Optional[ttk.Frame] = None, **kw):
+    def __init__(self, master: ttk.Frame | None = None, **kw):
         if sys.platform == 'darwin':
             kw['foreground'] = kw.pop('foreground', PAGEFG)
             kw['background'] = kw.pop('background', PAGEBG)
