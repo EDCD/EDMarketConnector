@@ -259,7 +259,8 @@ def main():  # noqa: C901, CCR001
                     for idx, cmdr in enumerate(cmdrs):
                         if cmdr.lower() == args.p.lower():
                             break
-                    raise companion.CredentialsError()
+                    else:
+                        raise companion.CredentialsError()
                 companion.session.login(cmdrs[idx], monitor.is_beta)
 
             else:
