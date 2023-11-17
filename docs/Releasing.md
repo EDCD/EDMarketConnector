@@ -156,7 +156,7 @@ Before you create a new install each time you should:
    1. `cd coriolis-data`
    2. `git pull`
    3. `npm install` - to check it's worked.
-3. Run `coriolis-update-files.py` to update `modules.p` and `ships.p`. **NB:
+3. Run `coriolis-update-files.py` to update `modules.json` and `ships.json`. **NB:
     The submodule might have been updated by a GitHub workflow/PR/merge, so
     be sure to perform this step for every build.**
 4. XXX: Test ?
