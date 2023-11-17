@@ -428,13 +428,13 @@ class EDDNSender:
             r.raise_for_status()
 
         except requests.exceptions.HTTPError as e:
-            if unknown_schema := self.UNKNOWN_SCHEMA_RE.match(e.response.text):
+            if unknown_schema := self.UNKNOWN_SCHEMA_RE.match(e.response.text):  # type: ignore
                 logger.debug(f"EDDN doesn't (yet?) know about schema: {unknown_schema['schema_name']}"
                              f"/{unknown_schema['schema_version']}")
                 # This dropping is to cater for the time period when EDDN doesn't *yet* support a new schema.
                 return True
 
-            if e.response.status_code == http.HTTPStatus.BAD_REQUEST:
+            if e.response.status_code == http.HTTPStatus.BAD_REQUEST:  # type: ignore
                 # EDDN straight up says no, so drop the message
                 logger.debug(f"EDDN responded '400 Bad Request' to the message, dropping:\n{msg!r}")
                 return True
