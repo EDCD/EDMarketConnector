@@ -199,13 +199,13 @@ def plugin_start3(plugin_dir: str) -> str:
     """
     Start the plugin.
 
-    :param plugin_dir: NAme of directory this was loaded from.
+    :param plugin_dir: Name of directory this was loaded from.
     :return: Identifier string for this plugin.
     """
     # Can't be earlier since can only call PhotoImage after window is created
     this._IMG_KNOWN = tk.PhotoImage(data=IMG_KNOWN_B64)  # green circle
     this._IMG_UNKNOWN = tk.PhotoImage(data=IMG_UNKNOWN_B64)  # red circle
-    this._IMG_NEW = tk.PhotoImage(data=IMG_NEW_B64)
+    this._IMG_NEW = tk.PhotoImage(data=IMG_NEW_B64)  # yellow star
     this._IMG_ERROR = tk.PhotoImage(data=IMG_ERR_B64)  # BBC Mode 5 '?'
 
     # Migrate old settings
