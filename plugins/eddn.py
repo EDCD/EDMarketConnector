@@ -2089,6 +2089,7 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:
     """
     PADX = 10  # noqa: N806
     BUTTONX = 12  # noqa: N806 # indent Checkbuttons and Radiobuttons
+    PADY = 2
 
     if prefsVersion.shouldSetDefaults('0.0.0.0', not bool(config.get_int('output'))):
         output: int = config.OUT_EDDN_SEND_STATION_DATA | config.OUT_EDDN_SEND_NON_STATION  # default settings
@@ -2116,7 +2117,7 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:
         variable=this.eddn_station,
         command=prefsvarchanged
     )  # Output setting
-    this.eddn_station_button.grid(row=cur_row, padx=BUTTONX, pady=(5, 0), sticky=tk.W)
+    this.eddn_station_button.grid(row=cur_row, padx=BUTTONX, pady=PADY, sticky=tk.W)
     cur_row += 1
 
     this.eddn_system = tk.IntVar(value=(output & config.OUT_EDDN_SEND_NON_STATION) and 1)
@@ -2128,7 +2129,7 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:
         variable=this.eddn_system,
         command=prefsvarchanged
     )
-    this.eddn_system_button.grid(row=cur_row, padx=BUTTONX, pady=(5, 0), sticky=tk.W)
+    this.eddn_system_button.grid(row=cur_row, padx=BUTTONX, pady=PADY, sticky=tk.W)
     cur_row += 1
 
     this.eddn_delay = tk.IntVar(value=(output & config.OUT_EDDN_DELAY) and 1)
@@ -2139,7 +2140,7 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:
         text=_('Delay sending until docked'),
         variable=this.eddn_delay
     )
-    this.eddn_delay_button.grid(row=cur_row, padx=BUTTONX, sticky=tk.W)
+    this.eddn_delay_button.grid(row=cur_row, padx=BUTTONX, pady=PADY, sticky=tk.W)
 
     return eddnframe
 

@@ -294,6 +294,7 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> tk.Fr
     PADX = 10  # noqa: N806
     BUTTONX = 12  # noqa: N806
     PADY = 2  # noqa: N806
+    SEPY = 10 # noqa: N806
 
     frame = nb.Frame(parent)
     frame.columnconfigure(1, weight=1)
@@ -319,7 +320,9 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> tk.Fr
         this.log_button.grid(row=cur_row, columnspan=2, padx=BUTTONX, pady=(5, 0), sticky=tk.W)
         cur_row += 1
 
-    nb.Label(frame).grid(row=cur_row, sticky=tk.W)  # big spacer
+    ttk.Separator(frame, orient=tk.HORIZONTAL).grid(
+        columnspan=2, padx=PADX, pady=SEPY, sticky=tk.EW, row=cur_row
+    )
     cur_row += 1
 
     this.label = HyperlinkLabel(

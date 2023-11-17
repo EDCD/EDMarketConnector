@@ -91,7 +91,7 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> tk.Fr
     # LANG: Settings>Coriolis: Help/hint for changing coriolis URLs
     nb.Label(conf_frame, text=_(
         "Set the URL to use with coriolis.io ship loadouts. Note that this MUST end with '/import?data='"
-    )).grid(sticky=tk.EW, row=cur_row, column=0, columnspan=3)
+    )).grid(sticky=tk.EW, row=cur_row, column=0, padx=PADX, columnspan=3)
     cur_row += 1
 
     # LANG: Settings>Coriolis: Label for 'NOT alpha/beta game version' URL
