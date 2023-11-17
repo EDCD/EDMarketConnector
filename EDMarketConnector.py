@@ -1007,19 +1007,24 @@ class AppWindow:
         commodities_flag = config.OUT_MKT_CSV | config.OUT_MKT_TD
 
         if output_flags & config.OUT_STATION_ANY:
-            if not is_docked and not monitor.state['OnFoot']:
+            if not is_docked and not monitor.state['OnFoot'] and not self.status['text']:
                 # Signal as error because the user might actually be docked
                 # but the server hosting the Companion API hasn't caught up
+                # LANG: Player is not docked at a station, when we expect them to be
                 self._handle_status(_("You're not docked at a station!"))
                 return False
 
-            if output_flags & config.OUT_EDDN_SEND_STATION_DATA and not (has_commodities or has_modules):
+            # Ignore possibly missing shipyard info
+            if output_flags & config.OUT_EDDN_SEND_STATION_DATA and not (has_commodities or has_modules) and not self.status['text']:
+                # LANG: Status - Either no market or no modules data for station from Frontier CAPI
                 self._handle_status(_("Station doesn't have anything!"))
 
-            elif not has_commodities:
+            elif not has_commodities and not self.status['text']:
+                # LANG: Status - No station market data from Frontier CAPI
                 self._handle_status(_("Station doesn't have a market!"))
 
             elif output_flags & commodities_flag:
+                # Fixup anomalies in the comodity data
                 fixed = companion.fixup(data)
                 if output_flags & config.OUT_MKT_CSV:
                     commodity.export(fixed, COMMODITY_CSV)
