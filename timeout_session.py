@@ -1,7 +1,15 @@
-"""A requests.session with a TimeoutAdapter."""
-import requests
-from requests.adapters import HTTPAdapter
+"""
+timeout_session.py - requests session with timeout adapter.
 
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
+"""
+from __future__ import annotations
+
+import requests
+from requests import Session
+from requests.adapters import HTTPAdapter
 from config import user_agent
 
 REQUEST_TIMEOUT = 10  # reasonable timeout that all HTTP requests should use
@@ -35,11 +43,9 @@ def new_session(
     :param session: the Session object to attach the Adapter to, defaults to a new session
     :return: The created Session
     """
-    if session is None:
-        session = requests.Session()
+    with Session() as session:
         session.headers['User-Agent'] = user_agent
-
-    adapter = TimeoutAdapter(timeout)
-    session.mount("http://", adapter)
-    session.mount("https://", adapter)
-    return session
+        adapter = TimeoutAdapter(timeout)
+        session.mount("http://", adapter)
+        session.mount("https://", adapter)
+        return session

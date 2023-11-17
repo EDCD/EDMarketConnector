@@ -1,25 +1,32 @@
-"""Checking for updates to this application."""
+"""
+update.py - Checking for Program Updates.
+
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
+"""
+from __future__ import annotations
+
 import os
 import sys
 import threading
 from os.path import dirname, join
 from traceback import print_exc
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 from xml.etree import ElementTree
-
 import requests
 import semantic_version
+from config import appname, appversion_nobuild, config, update_feed
+from EDMCLogging import get_main_logger
 
 if TYPE_CHECKING:
     import tkinter as tk
 
-from config import appname, appversion_nobuild, config, update_feed
-from EDMCLogging import get_main_logger
 
 logger = get_main_logger()
 
 
-class EDMCVersion(object):
+class EDMCVersion:
     """
     Hold all the information about an EDMC version.
 
@@ -39,7 +46,7 @@ class EDMCVersion(object):
         self.sv: semantic_version.base.Version = sv
 
 
-class Updater(object):
+class Updater:
     """
     Handle checking for updates.
 
@@ -63,16 +70,16 @@ class Updater(object):
 
         return False
 
-    def __init__(self, tkroot: Optional['tk.Tk'] = None, provider: str = 'internal'):
+    def __init__(self, tkroot: tk.Tk | None = None, provider: str = 'internal'):
         """
         Initialise an Updater instance.
 
         :param tkroot: reference to the root window of the GUI
         :param provider: 'internal' or other string if not
         """
-        self.root: Optional['tk.Tk'] = tkroot
+        self.root: tk.Tk | None = tkroot
         self.provider: str = provider
-        self.thread: Optional[threading.Thread] = None
+        self.thread: threading.Thread | None = None
 
         if self.use_internal():
             return
@@ -81,7 +88,7 @@ class Updater(object):
             import ctypes
 
             try:
-                self.updater: Optional[ctypes.CDLL] = ctypes.cdll.WinSparkle
+                self.updater: ctypes.CDLL | None = ctypes.cdll.WinSparkle
 
                 # Set the appcast URL
                 self.updater.win_sparkle_set_appcast_url(update_feed.encode())
@@ -150,7 +157,7 @@ class Updater(object):
         elif sys.platform == 'darwin' and self.updater:
             self.updater.checkForUpdates_(None)
 
-    def check_appcast(self) -> Optional[EDMCVersion]:
+    def check_appcast(self) -> EDMCVersion | None:
         """
         Manually (no Sparkle or WinSparkle) check the update_feed appcast file.
 
@@ -161,7 +168,7 @@ class Updater(object):
         newversion = None
         items = {}
         try:
-            r = requests.get(update_feed, timeout=10)
+            request = requests.get(update_feed, timeout=10)
 
         except requests.RequestException as ex:
             logger.exception(f'Error retrieving update_feed file: {ex}')
@@ -169,7 +176,7 @@ class Updater(object):
             return None
 
         try:
-            feed = ElementTree.fromstring(r.text)
+            feed = ElementTree.fromstring(request.text)
 
         except SyntaxError as ex:
             logger.exception(f'Syntax error in update_feed file: {ex}')
@@ -196,12 +203,12 @@ class Updater(object):
                 continue
 
             # This will change A.B.C.D to A.B.C+D
-            sv = semantic_version.Version.coerce(ver)
+            semver = semantic_version.Version.coerce(ver)
 
-            items[sv] = EDMCVersion(
+            items[semver] = EDMCVersion(
                 version=str(ver),  # sv might have mangled version
                 title=item.find('title').text,  # type: ignore
-                sv=sv
+                sv=semver
             )
 
         # Look for any remaining version greater than appversion
