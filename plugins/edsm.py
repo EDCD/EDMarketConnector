@@ -199,7 +199,7 @@ def plugin_start3(plugin_dir: str) -> str:
     """
     Start the plugin.
 
-    :param plugin_dir: NAme of directory this was loaded from.
+    :param plugin_dir: Name of directory this was loaded from.
     :return: Identifier string for this plugin.
     """
     # Can't be earlier since can only call PhotoImage after window is created

@@ -37,8 +37,8 @@ class This:
         self.parent: tk.Tk
         self.shutting_down = False  # Plugin is shutting down.
         self.system_link: tk.Widget = None  # type: ignore
-        self.system_name: str | None = None  # type: ignore
-        self.system_address: str | None = None  # type: ignore
+        self.system_name: str | None = None
+        self.system_address: str | None = None
         self.system_population: int | None = None
         self.station_link: tk.Widget = None  # type: ignore
         self.station_name = None
@@ -54,7 +54,7 @@ def plugin_start3(plugin_dir: str) -> str:
     """
     Start the plugin.
 
-    :param plugin_dir: NAme of directory this was loaded from.
+    :param plugin_dir: Name of directory this was loaded from.
     :return: Identifier string for this plugin.
     """
     return 'spansh'
