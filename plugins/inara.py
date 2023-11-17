@@ -249,16 +249,17 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str, is_beta: bool) -> tk.Frame:
     """Plugin Preferences UI hook."""
     PADX = 10  # noqa: N806
     BUTTONX = 12  # noqa: N806  # indent Checkbuttons and Radiobuttons
-    PADY = 2  # noqa: N806  # close spacing
+    PADY = 1  # noqa: N806  # close spacing
+    BOXY = 2  # noqa: N806  # box spacing
     SEPY = 10  # noqa: N806  # seperator line spacing
-    cur_row = 0  # noqa: N806
+    cur_row = 0
 
     frame = nb.Frame(parent)
     frame.columnconfigure(1, weight=1)
 
     HyperlinkLabel(
         frame, text='Inara', background=nb.Label().cget('background'), url='https://inara.cz/', underline=True
-    ).grid(row=cur_row, columnspan=2, padx=PADX, sticky=tk.W)  # Don't translate
+    ).grid(row=cur_row, columnspan=2, padx=PADX, pady=PADY, sticky=tk.W)  # Don't translate
     cur_row += 1
 
     this.log = tk.IntVar(value=config.get_int('inara_out') and 1)
@@ -269,7 +270,7 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str, is_beta: bool) -> tk.Frame:
         command=prefsvarchanged
     )
 
-    this.log_button.grid(row=cur_row, columnspan=2, padx=BUTTONX, pady=(5, 0), sticky=tk.W)
+    this.log_button.grid(row=cur_row, columnspan=2, padx=BUTTONX, pady=PADY, sticky=tk.W)
     cur_row += 1
 
     ttk.Separator(frame, orient=tk.HORIZONTAL).grid(
@@ -286,14 +287,14 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str, is_beta: bool) -> tk.Frame:
         underline=True
     )
 
-    this.label.grid(row=cur_row, columnspan=2, padx=PADX, sticky=tk.W)
+    this.label.grid(row=cur_row, columnspan=2, padx=PADX, pady=PADY, sticky=tk.W)
     cur_row += 1
 
     # LANG: Inara API key label
     this.apikey_label = nb.Label(frame, text=_('API Key'))  # Inara setting
-    this.apikey_label.grid(row=cur_row, padx=PADX, sticky=tk.W)
+    this.apikey_label.grid(row=cur_row, padx=PADX, pady=PADY, sticky=tk.W)
     this.apikey = nb.Entry(frame, show="*", width=50)
-    this.apikey.grid(row=cur_row, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
+    this.apikey.grid(row=cur_row, column=1, padx=PADX, pady=BOXY, sticky=tk.EW)
     cur_row += 1
 
     prefs_cmdr_changed(cmdr, is_beta)
@@ -305,7 +306,7 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str, is_beta: bool) -> tk.Frame:
         variable=show_password_var,
         command=toggle_password_visibility,
     )
-    show_password_checkbox.grid(row=cur_row, columnspan=2, padx=BUTTONX, pady=(5, 0), sticky=tk.W)
+    show_password_checkbox.grid(row=cur_row, columnspan=2, padx=BUTTONX, pady=PADY, sticky=tk.W)
 
     return frame
 
