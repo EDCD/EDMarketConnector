@@ -293,18 +293,22 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> tk.Fr
     """
     PADX = 10  # noqa: N806
     BUTTONX = 12  # noqa: N806
-    PADY = 2  # noqa: N806
+    PADY = 1  # noqa: N806
+    BOXY = 2  # noqa: N806
+    SEPY = 10  # noqa: N806
 
     frame = nb.Frame(parent)
     frame.columnconfigure(1, weight=1)
 
+    cur_row = 0
     HyperlinkLabel(
         frame,
         text='Elite Dangerous Star Map',
         background=nb.Label().cget('background'),
         url='https://www.edsm.net/',
         underline=True
-    ).grid(columnspan=2, padx=PADX, sticky=tk.W)
+    ).grid(row=cur_row, columnspan=2, padx=PADX, pady=PADY, sticky=tk.W)
+    cur_row += 1
 
     this.log = tk.IntVar(value=config.get_int('edsm_out') and 1)
     this.log_button = nb.Checkbutton(
@@ -314,9 +318,13 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> tk.Fr
         command=prefsvarchanged
     )
     if this.log_button:
-        this.log_button.grid(columnspan=2, padx=BUTTONX, pady=(5, 0), sticky=tk.W)
+        this.log_button.grid(row=cur_row, columnspan=2, padx=BUTTONX, pady=PADY, sticky=tk.W)
+        cur_row += 1
 
-    nb.Label(frame).grid(sticky=tk.W)  # big spacer
+    ttk.Separator(frame, orient=tk.HORIZONTAL).grid(
+        columnspan=2, padx=PADX, pady=SEPY, sticky=tk.EW, row=cur_row
+    )
+    cur_row += 1
 
     this.label = HyperlinkLabel(
         frame,
@@ -325,28 +333,29 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> tk.Fr
         url='https://www.edsm.net/settings/api',
         underline=True
     )
-    cur_row = 10
     if this.label:
-        this.label.grid(columnspan=2, padx=PADX, sticky=tk.W)
+        this.label.grid(row=cur_row, columnspan=2, padx=PADX, pady=PADY, sticky=tk.W)
     # LANG: Game Commander name label in EDSM settings
+    cur_row += 1
     this.cmdr_label = nb.Label(frame, text=_('Cmdr'))
-    this.cmdr_label.grid(row=cur_row, padx=PADX, sticky=tk.W)
+    this.cmdr_label.grid(row=cur_row, padx=PADX, pady=PADY, sticky=tk.W)
     this.cmdr_text = nb.Label(frame)
-    this.cmdr_text.grid(row=cur_row, column=1, padx=PADX, pady=PADY, sticky=tk.W)
+    this.cmdr_text.grid(row=cur_row, column=1, padx=PADX, pady=BOXY, sticky=tk.W)
 
     cur_row += 1
     # LANG: EDSM Commander name label in EDSM settings
     this.user_label = nb.Label(frame, text=_('Commander Name'))
-    this.user_label.grid(row=cur_row, padx=PADX, sticky=tk.W)
+    this.user_label.grid(row=cur_row, padx=PADX, pady=PADY, sticky=tk.W)
     this.user = nb.Entry(frame)
-    this.user.grid(row=cur_row, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
+    this.user.grid(row=cur_row, column=1, padx=PADX, pady=BOXY, sticky=tk.EW)
 
     cur_row += 1
     # LANG: EDSM API key label
     this.apikey_label = nb.Label(frame, text=_('API Key'))
-    this.apikey_label.grid(row=cur_row, padx=PADX, sticky=tk.W)
+    this.apikey_label.grid(row=cur_row, padx=PADX, pady=PADY, sticky=tk.W)
     this.apikey = nb.Entry(frame, show="*", width=50)
-    this.apikey.grid(row=cur_row, column=1, padx=PADX, pady=PADY, sticky=tk.EW)
+    this.apikey.grid(row=cur_row, column=1, padx=PADX, pady=BOXY, sticky=tk.EW)
+    cur_row += 1
 
     prefs_cmdr_changed(cmdr, is_beta)
 
@@ -358,7 +367,7 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> tk.Fr
         variable=show_password_var,
         command=toggle_password_visibility
     )
-    show_password_checkbox.grid(columnspan=2, padx=BUTTONX, pady=(5, 0), sticky=tk.W)
+    show_password_checkbox.grid(row=cur_row, columnspan=2, padx=BUTTONX, pady=PADY, sticky=tk.W)
 
     return frame
 
