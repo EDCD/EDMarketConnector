@@ -65,8 +65,7 @@ class JournalLock:
         self.journal_dir_lockfile_name = self.journal_dir_path / 'edmc-journal-lock.txt'  # type: ignore
         logger.trace_if('journal-lock', f'journal_dir_lockfile_name = {self.journal_dir_lockfile_name!r}')
         try:
-            with open(self.journal_dir_lockfile_name, mode='w+', encoding='utf-8') as lockfile:
-                self.journal_dir_lockfile = lockfile
+            self.journal_dir_lockfile = open(self.journal_dir_lockfile_name, mode='w+', encoding='utf-8')
 
         # Linux CIFS read-only mount throws: OSError(30, 'Read-only file system')
         # Linux no-write-perm directory throws: PermissionError(13, 'Permission denied')
