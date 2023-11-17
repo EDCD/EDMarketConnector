@@ -2089,7 +2089,7 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:
     """
     PADX = 10  # noqa: N806
     BUTTONX = 12  # noqa: N806 # indent Checkbuttons and Radiobuttons
-    PADY = 2
+    PADY = 2  # noqa: N806
 
     if prefsVersion.shouldSetDefaults('0.0.0.0', not bool(config.get_int('output'))):
         output: int = config.OUT_EDDN_SEND_STATION_DATA | config.OUT_EDDN_SEND_NON_STATION  # default settings

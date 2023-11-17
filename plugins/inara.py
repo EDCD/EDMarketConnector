@@ -247,11 +247,11 @@ def toggle_password_visibility():
 
 def plugin_prefs(parent: ttk.Notebook, cmdr: str, is_beta: bool) -> tk.Frame:
     """Plugin Preferences UI hook."""
-    PADX = 10
-    BUTTONX = 12  # indent Checkbuttons and Radiobuttons
-    PADY = 2  # close spacing
-    SEPY = 10  # seperator line spacing
-    cur_row = 0
+    PADX = 10  # noqa: N806
+    BUTTONX = 12  # noqa: N806  # indent Checkbuttons and Radiobuttons
+    PADY = 2  # noqa: N806  # close spacing
+    SEPY = 10  # noqa: N806  # seperator line spacing
+    cur_row = 0  # noqa: N806
 
     frame = nb.Frame(parent)
     frame.columnconfigure(1, weight=1)
