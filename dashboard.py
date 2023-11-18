@@ -11,6 +11,7 @@ import json
 import sys
 import time
 import tkinter as tk
+from calendar import timegm
 from os.path import getsize, isdir, isfile, join
 from typing import Any, cast
 from watchdog.observers.api import BaseObserver
@@ -182,7 +183,7 @@ class Dashboard(FileSystemEventHandler):
                 if data:  # Can be empty if polling while the file is being re-written
                     entry = json.loads(data)
                     # Status file is shared between beta and live. Filter out status not in this game session.
-                    entry_timestamp = time.mktime(time.strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
+                    entry_timestamp = timegm(time.strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
                     if entry_timestamp >= self.session_start and self.status != entry:
                         self.status = entry
                         self.root.event_generate('<<DashboardEvent>>', when="tail")

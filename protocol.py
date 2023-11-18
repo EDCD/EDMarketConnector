@@ -1,12 +1,17 @@
-"""protocol handler for cAPI authorisation."""
-# spell-checker: words ntdll GURL alloc wfile instantiatable pyright
+"""
+protocol.py - Protocol Handler for cAPI Auth.
+
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
+"""
+from __future__ import annotations
+
 import os
 import sys
 import threading
-import urllib.error
-import urllib.parse
-import urllib.request
-from typing import TYPE_CHECKING, Optional, Type
+from urllib import parse
+from typing import TYPE_CHECKING, Type
 
 from config import config
 from constants import appname, protocolhandler_redirect
@@ -34,7 +39,7 @@ class GenericProtocolHandler:
     def __init__(self) -> None:
         self.redirect = protocolhandler_redirect  # Base redirection URL
         self.master: 'tkinter.Tk' = None  # type: ignore
-        self.lastpayload: Optional[str] = None
+        self.lastpayload: str | None = None
 
     def start(self, master: 'tkinter.Tk') -> None:
         """Start Protocol Handler."""
@@ -42,7 +47,6 @@ class GenericProtocolHandler:
 
     def close(self) -> None:
         """Stop / Close Protocol Handler."""
-        pass
 
     def event(self, url: str) -> None:
         """Generate an auth event."""
@@ -75,7 +79,7 @@ if sys.platform == 'darwin' and getattr(sys, 'frozen', False):  # noqa: C901 # i
         def start(self, master: 'tkinter.Tk') -> None:
             """Start Protocol Handler."""
             GenericProtocolHandler.start(self, master)
-            self.lasturl: Optional[str] = None
+            self.lasturl: str | None = None
             self.eventhandler = EventHandler.alloc().init()
 
         def poll(self) -> None:
@@ -106,12 +110,11 @@ if sys.platform == 'darwin' and getattr(sys, 'frozen', False):  # noqa: C901 # i
 
         def handleEvent_withReplyEvent_(self, event, replyEvent) -> None:  # noqa: N802 N803 # Required to override
             """Actual event handling from NSAppleEventManager."""
-            protocolhandler.lasturl = urllib.parse.unquote(  # noqa: F821: type: ignore # It's going to be a DPH in
-                # this code
+            protocolhandler.lasturl = parse.unquote(
                 event.paramDescriptorForKeyword_(keyDirectObject).stringValue()
             ).strip()
 
-            protocolhandler.master.after(DarwinProtocolHandler.POLL, protocolhandler.poll)  # noqa: F821 # type: ignore
+            protocolhandler.master.after(DarwinProtocolHandler.POLL, protocolhandler.poll)
 
 
 elif (config.auth_force_edmc_protocol
@@ -124,9 +127,8 @@ elif (config.auth_force_edmc_protocol
     # This could be false if you use auth_force_edmc_protocol, but then you get to keep the pieces
     assert sys.platform == 'win32'
     # spell-checker: words HBRUSH HICON WPARAM wstring WNDCLASS HMENU HGLOBAL
-    from ctypes import windll  # type: ignore
     from ctypes import (  # type: ignore
-        POINTER, WINFUNCTYPE, Structure, byref, c_long, c_void_p, create_unicode_buffer, wstring_at
+        windll, POINTER, WINFUNCTYPE, Structure, byref, c_long, c_void_p, create_unicode_buffer, wstring_at
     )
     from ctypes.wintypes import (
         ATOM, BOOL, DWORD, HBRUSH, HGLOBAL, HICON, HINSTANCE, HMENU, HWND, INT, LPARAM, LPCWSTR, LPMSG, LPVOID, LPWSTR,
@@ -271,7 +273,7 @@ elif (config.auth_force_edmc_protocol
 
         def __init__(self) -> None:
             super().__init__()
-            self.thread: Optional[threading.Thread] = None
+            self.thread: threading.Thread | None = None
 
         def start(self, master: 'tkinter.Tk') -> None:
             """Start the DDE thread."""
@@ -342,7 +344,7 @@ elif (config.auth_force_edmc_protocol
 
                     if args.lower().startswith('open("') and args.endswith('")'):
                         logger.trace_if('frontier-auth.windows', f'args are: {args}')
-                        url = urllib.parse.unquote(args[6:-2]).strip()
+                        url = parse.unquote(args[6:-2]).strip()
                         if url.startswith(self.redirect):
                             logger.debug(f'Message starts with {self.redirect}')
                             self.event(url)
@@ -381,7 +383,7 @@ else:  # Linux / Run from source
             if not os.getenv("EDMC_NO_UI"):
                 logger.info(f'Web server listening on {self.redirect}')
 
-            self.thread: Optional[threading.Thread] = None
+            self.thread: threading.Thread | None = None
 
         def start(self, master: 'tkinter.Tk') -> None:
             """Start the HTTP server thread."""
@@ -420,15 +422,14 @@ else:  # Linux / Run from source
         def parse(self) -> bool:
             """Parse a request."""
             logger.trace_if('frontier-auth.http', f'Got message on path: {self.path}')
-            url = urllib.parse.unquote(self.path)
+            url = parse.unquote(self.path)
             if url.startswith('/auth'):
                 logger.debug('Request starts with /auth, sending to protocolhandler.event()')
-                protocolhandler.event(url)  # noqa: F821
+                protocolhandler.event(url)
                 self.send_response(200)
                 return True
-            else:
-                self.send_response(404)  # Not found
-                return False
+            self.send_response(404)  # Not found
+            return False
 
         def do_HEAD(self) -> None:  # noqa: N802 # Required to override
             """Handle HEAD Request."""
@@ -440,14 +441,37 @@ else:  # Linux / Run from source
             if self.parse():
                 self.send_header('Content-Type', 'text/html')
                 self.end_headers()
-                self.wfile.write('<html><head><title>Authentication successful</title></head>'.encode('utf-8'))
-                self.wfile.write('<body><p>Authentication successful</p></body>'.encode('utf-8'))
+                self.wfile.write(self._generate_auth_response().encode('utf-8'))
             else:
+                self.send_response(404)
                 self.end_headers()
 
         def log_request(self, code: int | str = '-', size: int | str = '-') -> None:
             """Override to prevent logging."""
-            pass
+
+        def _generate_auth_response(self) -> str:
+            """
+            Generate the authentication response HTML.
+
+            :return: The HTML content of the authentication response.
+            """
+            return (
+                '<html>'
+                '<head>'
+                '<title>Authentication successful - Elite: Dangerous</title>'
+                '<style>'
+                'body { background-color: #000; color: #fff; font-family: "Helvetica Neue", Arial, sans-serif; }'
+                'h1 { text-align: center; margin-top: 100px; }'
+                'p { text-align: center; }'
+                '</style>'
+                '</head>'
+                '<body>'
+                '<h1>Authentication successful</h1>'
+                '<p>Thank you for authenticating.</p>'
+                '<p>Please close this browser tab now.</p>'
+                '</body>'
+                '</html>'
+            )
 
 
 def get_handler_impl() -> Type[GenericProtocolHandler]:
@@ -459,14 +483,13 @@ def get_handler_impl() -> Type[GenericProtocolHandler]:
     if sys.platform == 'darwin' and getattr(sys, 'frozen', False):
         return DarwinProtocolHandler  # pyright: reportUnboundVariable=false
 
-    elif (
+    if (
         (sys.platform == 'win32' and config.auth_force_edmc_protocol)
         or (getattr(sys, 'frozen', False) and not is_wine and not config.auth_force_localserver)
     ):
         return WindowsProtocolHandler
 
-    else:
-        return LinuxProtocolHandler
+    return LinuxProtocolHandler
 
 
 # *late init* singleton
