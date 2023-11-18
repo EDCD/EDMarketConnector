@@ -50,8 +50,7 @@ if __name__ == '__main__':
 
         # unbuffered not allowed for text in python3, so use `1 for line buffering
         log_file_path = path.join(tempfile.gettempdir(), f'{appname}.log')
-        with open(log_file_path, mode='wt', buffering=1) as log_file:
-            sys.stdout = sys.stderr = log_file
+        sys.stdout = sys.stderr = open(log_file_path, mode='wt', buffering=1)  # Do NOT use WITH here.
     # TODO: Test: Make *sure* this redirect is working, else py2exe is going to cause an exit popup
 
 
