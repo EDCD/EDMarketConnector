@@ -1742,6 +1742,7 @@ class AppWindow:
         if time() < self.capi_query_holdoff_time:
             # Update button in main window
             cooldown_time = int(self.capi_query_holdoff_time - time())
+            # LANG: Cooldown on 'Update' button
             self.button['text'] = self.theme_button['text'] = _('cooldown {SS}s').format(SS=cooldown_time)
             self.w.after(1000, self.cooldown)
         else:
