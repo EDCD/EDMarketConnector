@@ -1,5 +1,9 @@
 """
-A clickable ttk label for HTTP links.
+ttkHyperlinkLabel.py - Clickable ttk labels.
+
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
 
 In addition to standard ttk.Label arguments, takes the following arguments:
   url: The URL as a string that the user will be sent to on clicking on
@@ -14,6 +18,8 @@ In addition to standard ttk.Label arguments, takes the following arguments:
 
 May be imported by plugins
 """
+from __future__ import annotations
+
 import sys
 import tkinter as tk
 import webbrowser
@@ -26,14 +32,22 @@ if TYPE_CHECKING:
 
 
 # FIXME: Split this into multi-file module to separate the platforms
-class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label, object):  # type: ignore
+class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label):  # type: ignore
     """Clickable label for HTTP links."""
 
     def __init__(self, master: tk.Frame | None = None, **kw: Any) -> None:
-        self.url = 'url' in kw and kw.pop('url') or None
+        """
+        Initialize the HyperlinkLabel.
+
+        :param master: The master widget.
+        :param kw: Additional keyword arguments.
+        """
+        self.font_u: tk_font.Font
+        self.font_n = None
+        self.url = kw.pop('url', None)
         self.popup_copy = kw.pop('popup_copy', False)
         self.underline = kw.pop('underline', None)  # override ttk.Label's underline
-        self.foreground = kw.get('foreground') or 'blue'
+        self.foreground = kw.get('foreground', 'blue')
         self.disabledforeground = kw.pop('disabledforeground', ttk.Style().lookup(
             'TLabel', 'foreground', ('disabled',)))  # ttk.Label doesn't support disabledforeground option
 
@@ -44,11 +58,11 @@ class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label, object)
             tk.Label.__init__(self, master, **kw)
 
         else:
-            ttk.Label.__init__(self, master, **kw)  # type: ignore
+            ttk.Label.__init__(self, master, **kw)
 
         self.bind('<Button-1>', self._click)
 
-        self.menu = tk.Menu(None, tearoff=tk.FALSE)
+        self.menu = tk.Menu(tearoff=tk.FALSE)
         # LANG: Label for 'Copy' as in 'Copy and Paste'
         self.menu.add_command(label=_('Copy'), command=self.copy)  # As in Copy and Paste
         self.bind(sys.platform == 'darwin' and '<Button-2>' or '<Button-3>', self._contextmenu)
@@ -74,29 +88,30 @@ class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label, object)
                 setattr(self, thing, kw[thing])
 
         # Emulate disabledforeground option for ttk.Label
-        if kw.get('state') == tk.DISABLED:
-            if 'foreground' not in kw:
+        if 'state' in kw:
+            state = kw['state']
+            if state == tk.DISABLED and 'foreground' not in kw:
                 kw['foreground'] = self.disabledforeground
-        elif 'state' in kw:
-            if 'foreground' not in kw:
+            elif state != tk.DISABLED and 'foreground' not in kw:
                 kw['foreground'] = self.foreground
 
         if 'font' in kw:
             self.font_n = kw['font']
             self.font_u = tk_font.Font(font=self.font_n)
             self.font_u.configure(underline=True)
-            kw['font'] = self.underline is True and self.font_u or self.font_n
+            kw['font'] = self.font_u if self.underline is True else self.font_n
 
         if 'cursor' not in kw:
-            if (kw['state'] if 'state' in kw else str(self['state'])) == tk.DISABLED:
+            state = kw.get('state', str(self['state']))
+            if state == tk.DISABLED:
                 kw['cursor'] = 'arrow'  # System default
             elif self.url and (kw['text'] if 'text' in kw else self['text']):
-                kw['cursor'] = sys.platform == 'darwin' and 'pointinghand' or 'hand2'
+                kw['cursor'] = 'pointinghand' if sys.platform == 'darwin' else 'hand2'
             else:
-                kw['cursor'] = (sys.platform == 'darwin' and 'notallowed') or (
-                    sys.platform == 'win32' and 'no') or 'circle'
+                kw['cursor'] = 'notallowed' if sys.platform == 'darwin' else (
+                    'no' if sys.platform == 'win32' else 'circle')
 
-        return super(HyperlinkLabel, self).configure(cnf, **kw)
+        return super().configure(cnf, **kw)
 
     def __setitem__(self, key: str, value: Any) -> None:
         """
@@ -105,15 +120,15 @@ class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label, object)
         :param key: option name
         :param value: option value
         """
-        self.configure(None, **{key: value})
+        self.configure(**{key: value})
 
     def _enter(self, event: tk.Event) -> None:
         if self.url and self.underline is not False and str(self['state']) != tk.DISABLED:
-            super(HyperlinkLabel, self).configure(font=self.font_u)
+            super().configure(font=self.font_u)
 
     def _leave(self, event: tk.Event) -> None:
         if not self.underline:
-            super(HyperlinkLabel, self).configure(font=self.font_n)
+            super().configure(font=self.font_n)
 
     def _click(self, event: tk.Event) -> None:
         if self.url and self['text'] and str(self['state']) != tk.DISABLED:
