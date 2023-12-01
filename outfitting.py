@@ -10,7 +10,6 @@ from __future__ import annotations
 import json
 from collections import OrderedDict
 from typing import OrderedDict as OrderedDictT
-
 from config import config
 from edmc_data import (
     outfitting_armour_map as armour_map,

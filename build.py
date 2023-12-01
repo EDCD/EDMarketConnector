@@ -9,7 +9,6 @@ import os
 import shutil
 import sys
 import pathlib
-from typing import List, Tuple
 from string import Template
 from os.path import join, isdir
 import py2exe
@@ -57,8 +56,8 @@ def system_check(dist_dir: str) -> str:
 
 
 def generate_data_files(
-    app_name: str, gitversion_file: str, plugins: List[str]
-) -> List[Tuple[str, List[str]]]:
+    app_name: str, gitversion_file: str, plugins: list[str]
+) -> list[tuple[str, list[str]]]:
     """Create the required datafiles to build."""
     l10n_dir = "L10n"
     fdevids_dir = "FDevIDs"
@@ -106,7 +105,7 @@ def build() -> None:
     gitversion_filename: str = system_check(dist_dir)
 
     # Constants
-    plugins: List[str] = [
+    plugins: list[str] = [
         "plugins/coriolis.py",
         "plugins/eddn.py",
         "plugins/edsm.py",
@@ -141,7 +140,7 @@ def build() -> None:
     }
 
     # Function to generate DATA_FILES list
-    data_files: List[Tuple[str, List[str]]] = generate_data_files(
+    data_files: list[tuple[str, list[str]]] = generate_data_files(
         appname, gitversion_filename, plugins
     )
 

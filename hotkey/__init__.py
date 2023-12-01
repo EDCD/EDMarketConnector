@@ -1,10 +1,11 @@
 """Handle keyboard input for manual update triggering."""
+from __future__ import annotations
+
 # -*- coding: utf-8 -*-
 
 import abc
 import sys
 from abc import abstractmethod
-from typing import Optional, Tuple, Union
 
 
 class AbstractHotkeyMgr(abc.ABC):
@@ -31,7 +32,7 @@ class AbstractHotkeyMgr(abc.ABC):
         pass
 
     @abstractmethod
-    def fromevent(self, event) -> Optional[Union[bool, Tuple]]:
+    def fromevent(self, event) -> bool | tuple | None:
         """
         Return configuration (keycode, modifiers) or None=clear or False=retain previous.
 
