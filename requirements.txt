@@ -1,4 +1,4 @@
-certifi==2023.7.22
+certifi==2023.11.17
 requests==2.31.0
 # requests depends on this now ?
 charset-normalizer==2.1.1
