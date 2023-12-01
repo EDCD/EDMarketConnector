@@ -1,10 +1,15 @@
 """
-Handle use of Frontier's Companion API (CAPI) service.
+companion.py - Handle use of Frontier's Companion API (CAPI) service.
+
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
 
 Deals with initiating authentication for, and use of, CAPI.
 Some associated code is in protocol.py which creates and handles the edmc://
 protocol used for the callback.
 """
+from __future__ import annotations
 
 import base64
 import collections
@@ -21,13 +26,10 @@ import time
 import tkinter as tk
 import urllib.parse
 import webbrowser
-from builtins import object, range, str
 from email.utils import parsedate
 from queue import Queue
-from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, OrderedDict, TypeVar, Union
-
+from typing import TYPE_CHECKING, Any, Mapping, OrderedDict, TypeVar
 import requests
-
 import config as conf_module
 import killswitch
 import protocol
@@ -43,7 +45,7 @@ if TYPE_CHECKING:
 
     UserDict = collections.UserDict[str, Any]  # indicate to our type checkers what this generic class holds normally
 else:
-    UserDict = collections.UserDict  # type: ignore # Otherwise simply use the actual class
+    UserDict = collections.UserDict  # Otherwise simply use the actual class
 
 
 capi_query_cooldown = 60  # Minimum time between (sets of) CAPI queries
@@ -59,7 +61,7 @@ SERVER_LIVE = 'https://companion.orerve.net'
 SERVER_LEGACY = 'https://legacy-companion.orerve.net'
 SERVER_BETA = 'https://pts-companion.orerve.net'
 
-commodity_map: Dict = {}
+commodity_map: dict = {}
 
 
 class CAPIData(UserDict):
@@ -67,10 +69,10 @@ class CAPIData(UserDict):
 
     def __init__(
             self,
-            data: Union[str, Dict[str, Any], 'CAPIData', None] = None,
-            source_host: Optional[str] = None,
-            source_endpoint: Optional[str] = None,
-            request_cmdr: Optional[str] = None
+            data: str | dict[str, Any] | 'CAPIData' | None = None,
+            source_host: str | None = None,
+            source_endpoint: str | None = None,
+            request_cmdr: str | None = None
     ) -> None:
         if data is None:
             super().__init__()
@@ -102,13 +104,13 @@ class CAPIData(UserDict):
         This has side-effects of fixing `data` to be as expected in terms of
         types of those elements.
         """
-        modules: Dict[str, Any] = self.data['lastStarport'].get('modules')
+        modules: dict[str, Any] = self.data['lastStarport'].get('modules')
         if modules is None or not isinstance(modules, dict):
             if modules is None:
                 logger.debug('modules was None.  FC or Damaged Station?')
 
             elif isinstance(modules, list):
-                if len(modules) == 0:
+                if not modules:
                     logger.debug('modules is empty list. Damaged Station?')
 
                 else:
@@ -120,13 +122,13 @@ class CAPIData(UserDict):
             # Set a safe value
             self.data['lastStarport']['modules'] = modules = {}
 
-        ships: Dict[str, Any] = self.data['lastStarport'].get('ships')
+        ships: dict[str, Any] = self.data['lastStarport'].get('ships')
         if ships is None or not isinstance(ships, dict):
             if ships is None:
                 logger.debug('ships was None')
 
             else:
-                logger.error(f'ships was neither None nor a Dict! type: {type(ships)}, content: {ships}')
+                logger.error(f'ships was neither None nor a dict! type: {type(ships)}, content: {ships}')
 
             # Set a safe value
             self.data['lastStarport']['ships'] = {'shipyard_list': {}, 'unavailable_list': []}
@@ -152,7 +154,7 @@ class CAPIDataRawEndpoint:
 class CAPIDataRaw:
     """The last obtained raw CAPI response for each endpoint."""
 
-    raw_data: Dict[str, CAPIDataRawEndpoint] = {}
+    raw_data: dict[str, CAPIDataRawEndpoint] = {}
 
     def record_endpoint(
             self, endpoint: str,
@@ -176,14 +178,14 @@ class CAPIDataRaw:
 
     def __iter__(self):
         """Make this iterable on its raw_data dict."""
-        yield from self.raw_data
+        yield from self.raw_data.keys()
 
     def __getitem__(self, item):
         """Make the raw_data dict's items get'able."""
-        return self.raw_data.__getitem__(item)
+        return self.raw_data[item]
 
 
-def listify(thing: Union[List, Dict]) -> List:
+def listify(thing: list | dict) -> list:
     """
     Convert actual JSON array or int-indexed dict into a Python list.
 
@@ -196,11 +198,11 @@ def listify(thing: Union[List, Dict]) -> List:
     if thing is None:
         return []  # data is not present
 
-    elif isinstance(thing, list):
+    if isinstance(thing, list):
         return list(thing)  # array is not sparse
 
-    elif isinstance(thing, dict):
-        retval: List[Any] = []
+    if isinstance(thing, dict):
+        retval: list[Any] = []
         for k, v in thing.items():
             idx = int(k)
 
@@ -211,9 +213,7 @@ def listify(thing: Union[List, Dict]) -> List:
                 retval[idx] = v
 
         return retval
-
-    else:
-        raise ValueError(f"expected an array or sparse array, got {thing!r}")
+    raise ValueError(f"expected an array or sparse array, got {thing!r}")
 
 
 class ServerError(Exception):
@@ -297,7 +297,7 @@ class CmdrError(Exception):
             self.args = (_('Error: Wrong Cmdr'),)
 
 
-class Auth(object):
+class Auth:
     """Handles authentication with the Frontier CAPI service via oAuth2."""
 
     # Currently the "Elite Dangerous Market Connector (EDCD/Athanasius)" one in
@@ -313,15 +313,15 @@ class Auth(object):
         self.cmdr: str = cmdr
         self.requests_session = requests.Session()
         self.requests_session.headers['User-Agent'] = user_agent
-        self.verifier: Union[bytes, None] = None
-        self.state: Union[str, None] = None
+        self.verifier: bytes | None = None
+        self.state: str | None = None
 
     def __del__(self) -> None:
         """Ensure our Session is closed if we're being deleted."""
         if self.requests_session:
             self.requests_session.close()
 
-    def refresh(self) -> Optional[str]:
+    def refresh(self) -> str | None:
         """
         Attempt use of Refresh Token to get a valid Access Token.
 
@@ -347,7 +347,7 @@ class Auth(object):
         logger.debug(f'idx = {idx}')
 
         tokens = config.get_list('fdev_apikeys', default=[])
-        tokens = tokens + [''] * (len(cmdrs) - len(tokens))
+        tokens += [''] * (len(cmdrs) - len(tokens))
         if tokens[idx]:
             logger.debug('We have a refresh token for that idx')
             data = {
@@ -358,7 +358,7 @@ class Auth(object):
 
             logger.debug('Attempting refresh with Frontier...')
             try:
-                r: Optional[requests.Response] = None
+                r: requests.Response | None = None
                 r = self.requests_session.post(
                     FRONTIER_AUTH_SERVER + self.FRONTIER_AUTH_PATH_TOKEN,
                     data=data,
@@ -372,11 +372,10 @@ class Auth(object):
 
                     return data.get('access_token')
 
-                else:
-                    logger.error(f"Frontier CAPI Auth: Can't refresh token for \"{self.cmdr}\"")
-                    self.dump(r)
+                logger.error(f"Frontier CAPI Auth: Can't refresh token for \"{self.cmdr}\"")
+                self.dump(r)
 
-            except (ValueError, requests.RequestException, ) as e:
+            except (ValueError, requests.RequestException) as e:
                 logger.exception(f"Frontier CAPI Auth: Can't refresh token for \"{self.cmdr}\"\n{e!r}")
                 if r is not None:
                     self.dump(r)
@@ -490,7 +489,7 @@ class Auth(object):
                 cmdrs = config.get_list('cmdrs', default=[])
                 idx = cmdrs.index(self.cmdr)
                 tokens = config.get_list('fdev_apikeys', default=[])
-                tokens = tokens + [''] * (len(cmdrs) - len(tokens))
+                tokens += [''] * (len(cmdrs) - len(tokens))
                 tokens[idx] = data_token.get('refresh_token', '')
                 config.set('fdev_apikeys', tokens)
                 config.save()  # Save settings now for use by command-line app
@@ -518,9 +517,9 @@ class Auth(object):
         raise CredentialsError(f'{_("Error")}: {error!r}')
 
     @staticmethod
-    def invalidate(cmdr: Optional[str]) -> None:
+    def invalidate(cmdr: str | None) -> None:
         """Invalidate Refresh Token for specified Commander."""
-        to_set: Optional[list] = None
+        to_set: list | None = None
         if cmdr is None:
             logger.info('Frontier CAPI Auth: Invalidating ALL tokens!')
             cmdrs = config.get_list('cmdrs', default=[])
@@ -531,7 +530,7 @@ class Auth(object):
             cmdrs = config.get_list('cmdrs', default=[])
             idx = cmdrs.index(cmdr)
             to_set = config.get_list('fdev_apikeys', default=[])
-            to_set = to_set + [''] * (len(cmdrs) - len(to_set))  # type: ignore
+            to_set += [''] * (len(cmdrs) - len(to_set))
             to_set[idx] = ''
 
         if to_set is None:
@@ -560,7 +559,7 @@ class EDMCCAPIReturn:
     """Base class for Request, Failure or Response."""
 
     def __init__(
-        self, query_time: int, tk_response_event: Optional[str] = None,
+        self, query_time: int, tk_response_event: str | None = None,
         play_sound: bool = False, auto_update: bool = False
     ):
         self.tk_response_event = tk_response_event  # Name of tk event to generate when response queued.
@@ -577,7 +576,7 @@ class EDMCCAPIRequest(EDMCCAPIReturn):
     def __init__(
         self, capi_host: str, endpoint: str,
         query_time: int,
-        tk_response_event: Optional[str] = None,
+        tk_response_event: str | None = None,
         play_sound: bool = False, auto_update: bool = False
     ):
         super().__init__(
@@ -612,7 +611,7 @@ class EDMCCAPIFailedRequest(EDMCCAPIReturn):
         self.exception: Exception = exception  # Exception that recipient should raise.
 
 
-class Session(object):
+class Session:
     """Methods for handling Frontier Auth and CAPI queries."""
 
     STATE_INIT, STATE_AUTH, STATE_OK = list(range(3))
@@ -628,11 +627,11 @@ class Session(object):
 
     def __init__(self) -> None:
         self.state = Session.STATE_INIT
-        self.credentials: Optional[Dict[str, Any]] = None
+        self.credentials: dict[str, Any] | None = None
         self.requests_session = requests.Session()
-        self.auth: Optional[Auth] = None
+        self.auth: Auth | None = None
         self.retrying = False  # Avoid infinite loop when successful auth / unsuccessful query
-        self.tk_master: Optional[tk.Tk] = None
+        self.tk_master: tk.Tk | None = None
 
         self.capi_raw_data = CAPIDataRaw()  # Cache of raw replies from CAPI service
         # Queue that holds requests for CAPI queries, the items should always
@@ -642,7 +641,7 @@ class Session(object):
         # queries back to the requesting code (technically anything checking
         # this queue, but it should be either EDMarketConnector.AppWindow or
         # EDMC.py).  Items may be EDMCCAPIResponse or EDMCCAPIFailedRequest.
-        self.capi_response_queue: Queue[Union[EDMCCAPIResponse, EDMCCAPIFailedRequest]] = Queue()
+        self.capi_response_queue: Queue[EDMCCAPIResponse | EDMCCAPIFailedRequest] = Queue()
         logger.debug('Starting CAPI queries thread...')
         self.capi_query_thread = threading.Thread(
             target=self.capi_query_worker,
@@ -667,7 +666,7 @@ class Session(object):
 
         self.state = Session.STATE_OK
 
-    def login(self, cmdr: Optional[str] = None, is_beta: Optional[bool] = None) -> bool:
+    def login(self, cmdr: str | None = None, is_beta: bool | None = None) -> bool:
         """
         Attempt oAuth2 login.
 
@@ -694,7 +693,7 @@ class Session(object):
                 logger.error('self.credentials is None')
                 raise CredentialsError('Missing credentials')  # Shouldn't happen
 
-            elif self.state == Session.STATE_OK:
+            if self.state == Session.STATE_OK:
                 logger.debug('already logged in (state == STATE_OK)')
                 return True  # already logged in
 
@@ -704,10 +703,9 @@ class Session(object):
                 logger.debug(f'already logged in (is_beta = {is_beta})')
                 return True  # already logged in
 
-            else:
-                logger.debug('changed account or retrying login during auth')
-                self.reinit_session()
-                self.credentials = credentials
+            logger.debug('changed account or retrying login during auth')
+            self.reinit_session()
+            self.credentials = credentials
 
         self.state = Session.STATE_INIT
         self.auth = Auth(self.credentials['cmdr'])
@@ -719,11 +717,10 @@ class Session(object):
             self.start_frontier_auth(access_token)
             return True
 
-        else:
-            logger.debug('We do NOT have an access_token')
-            self.state = Session.STATE_AUTH
-            return False
-            # Wait for callback
+        logger.debug('We do NOT have an access_token')
+        self.state = Session.STATE_AUTH
+        return False
+        # Wait for callback
 
     # Callback from protocol handler
     def auth_callback(self) -> None:
@@ -745,7 +742,7 @@ class Session(object):
             self.auth = None
             raise  # Bad thing happened
         if getattr(sys, 'frozen', False):
-            tk.messagebox.showinfo(title="Authentication Successful",
+            tk.messagebox.showinfo(title="Authentication Successful",  # type: ignore
                                    message="Authentication with cAPI Successful.\n"
                                            "You may now close the Frontier login tab if it is still open.")
 
@@ -812,11 +809,11 @@ class Session(object):
                     raise ServerConnectionError(f'Pretending CAPI down: {capi_endpoint}')
 
                 if conf_module.capi_debug_access_token is not None:
-                    self.requests_session.headers['Authorization'] = f'Bearer {conf_module.capi_debug_access_token}'  # type: ignore # noqa: E501
+                    self.requests_session.headers['Authorization'] = f'Bearer {conf_module.capi_debug_access_token}'
                     # This is one-shot
                     conf_module.capi_debug_access_token = None
 
-                r = self.requests_session.get(capi_host + capi_endpoint, timeout=timeout)  # type: ignore
+                r = self.requests_session.get(capi_host + capi_endpoint, timeout=timeout)
 
                 logger.trace_if('capi.worker', '... got result...')
                 r.raise_for_status()  # Typically 403 "Forbidden" on token expiry
@@ -835,21 +832,7 @@ class Session(object):
                 raise ServerConnectionError(f'Unable to connect to endpoint: {capi_endpoint}') from e
 
             except requests.HTTPError as e:  # In response to raise_for_status()
-                logger.exception(f'Frontier CAPI Auth: GET {capi_endpoint}')
-                self.dump(r)
-
-                if r.status_code == 401:  # CAPI doesn't think we're Auth'd
-                    # TODO: This needs to try a REFRESH, not a full re-auth
-                    # No need for translation, we'll go straight into trying new Auth
-                    # and thus any message would be overwritten.
-                    raise CredentialsRequireRefresh('Frontier CAPI said "unauthorized"') from e
-
-                if r.status_code == 418:  # "I'm a teapot" - used to signal maintenance
-                    # LANG: Frontier CAPI returned 418, meaning down for maintenance
-                    raise ServerError(_("Frontier CAPI down for maintenance")) from e
-
-                logger.exception('Frontier CAPI: Misc. Error')
-                raise ServerError('Frontier CAPI: Misc. Error') from e
+                handle_http_error(e.response, capi_endpoint)  # type: ignore # Handle various HTTP errors
 
             except ValueError as e:
                 logger.exception(f'decoding CAPI response content:\n{r.content.decode(encoding="utf-8")}\n')
@@ -869,6 +852,28 @@ class Session(object):
                 )
 
             return capi_data
+
+        def handle_http_error(response: requests.Response, endpoint: str):
+            """
+            Handle different types of HTTP errors raised during CAPI requests.
+
+            :param response: The HTTP response object.
+            :param endpoint: The CAPI endpoint that was queried.
+            :raises: Various exceptions based on the error scenarios.
+            """
+            logger.exception(f'Frontier CAPI Auth: GET {endpoint}')
+            self.dump(response)
+
+            if response.status_code == 401:
+                # CAPI doesn't think we're Auth'd
+                raise CredentialsRequireRefresh('Frontier CAPI said "unauthorized"')
+
+            if response.status_code == 418:
+                # "I'm a teapot" - used to signal maintenance
+                raise ServerError(_("Frontier CAPI down for maintenance"))
+
+            logger.exception('Frontier CAPI: Misc. Error')
+            raise ServerError('Frontier CAPI: Misc. Error')
 
         def capi_station_queries(  # noqa: CCR001
             capi_host: str, timeout: int = capi_default_requests_timeout
@@ -939,9 +944,8 @@ class Session(object):
                     logger.warning(f"{last_starport_id!r} != {int(market_data['id'])!r}")
                     raise ServerLagging()
 
-                else:
-                    market_data['name'] = last_starport_name
-                    station_data['lastStarport'].update(market_data)
+                market_data['name'] = last_starport_name
+                station_data['lastStarport'].update(market_data)
 
             if services.get('outfitting') or services.get('shipyard'):
                 shipyard_data = capi_single_query(capi_host, self.FRONTIER_CAPI_PATH_SHIPYARD, timeout=timeout)
@@ -953,9 +957,8 @@ class Session(object):
                     logger.warning(f"{last_starport_id!r} != {int(shipyard_data['id'])!r}")
                     raise ServerLagging()
 
-                else:
-                    shipyard_data['name'] = last_starport_name
-                    station_data['lastStarport'].update(shipyard_data)
+                shipyard_data['name'] = last_starport_name
+                station_data['lastStarport'].update(shipyard_data)
             # WORKAROUND END
 
             return station_data
@@ -1024,7 +1027,7 @@ class Session(object):
         )
 
     def station(
-            self, query_time: int, tk_response_event: Optional[str] = None,
+            self, query_time: int, tk_response_event: str | None = None,
             play_sound: bool = False, auto_update: bool = False
     ) -> None:
         """
@@ -1178,11 +1181,9 @@ class Session(object):
             logger.debug(f"Using {SERVER_LIVE} because monitor.is_live_galaxy() was True")
             return SERVER_LIVE
 
-        else:
-            logger.debug(f"Using {SERVER_LEGACY} because monitor.is_live_galaxy() was False")
-            return SERVER_LEGACY
+        logger.debug(f"Using {SERVER_LEGACY} because monitor.is_live_galaxy() was False")
+        return SERVER_LEGACY
 
-        return ''
     ######################################################################
 
 
@@ -1300,11 +1301,11 @@ def ship(data: CAPIData) -> CAPIData:
 V = TypeVar('V')
 
 
-def index_possibly_sparse_list(data: Union[Mapping[str, V], List[V]], key: int) -> V:
+def index_possibly_sparse_list(data: Mapping[str, V] | list[V], key: int) -> V:
     """
     Index into a "list" that may or may not be sparseified into a dict.
 
-    :param data: List or Dict to index
+    :param data: list or dict to index
     :param key: Key to use to index
     :raises ValueError: When data is of an unexpected type
     :return: The value at the key
@@ -1320,11 +1321,10 @@ def index_possibly_sparse_list(data: Union[Mapping[str, V], List[V]], key: int) 
     if isinstance(data, list):
         return data[key]
 
-    elif isinstance(data, (dict, OrderedDict)):
+    if isinstance(data, (dict, OrderedDict)):
         return data[str(key)]
 
-    else:
-        raise ValueError(f'Unexpected data type {type(data)}')
+    raise ValueError(f'Unexpected data type {type(data)}')
 ######################################################################
 
 

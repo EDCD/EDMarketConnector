@@ -79,16 +79,15 @@ def get_hotkeymgr() -> AbstractHotkeyMgr:
         from hotkey.darwin import MacHotkeyMgr
         return MacHotkeyMgr()
 
-    elif sys.platform == 'win32':
+    if sys.platform == 'win32':
         from hotkey.windows import WindowsHotkeyMgr
         return WindowsHotkeyMgr()
 
-    elif sys.platform == 'linux':
+    if sys.platform == 'linux':
         from hotkey.linux import LinuxHotKeyMgr
         return LinuxHotKeyMgr()
 
-    else:
-        raise ValueError(f'Unknown platform: {sys.platform}')
+    raise ValueError(f'Unknown platform: {sys.platform}')
 
 
 # singleton
