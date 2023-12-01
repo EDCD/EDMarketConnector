@@ -865,11 +865,15 @@ class Session:
             self.dump(response)
 
             if response.status_code == 401:
+                # TODO: This needs to try a REFRESH, not a full re-auth
+                # No need for translation, we'll go straight into trying new Auth
+                # and thus any message would be overwritten.
                 # CAPI doesn't think we're Auth'd
                 raise CredentialsRequireRefresh('Frontier CAPI said "unauthorized"')
 
             if response.status_code == 418:
                 # "I'm a teapot" - used to signal maintenance
+                # LANG: Frontier CAPI returned 418, meaning down for maintenance
                 raise ServerError(_("Frontier CAPI down for maintenance"))
 
             logger.exception('Frontier CAPI: Misc. Error')

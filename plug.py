@@ -84,7 +84,7 @@ class Plugin:
         else:
             logger.info(f'plugin {name} disabled')
 
-    def _get_func(self, funcname: str):  # Removing Unhelpful Type Hint
+    def _get_func(self, funcname: str):
         """
         Get a function from a plugin.
 
