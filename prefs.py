@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """EDMC preferences library."""
+from __future__ import annotations
 
 import contextlib
 import logging
@@ -13,7 +14,7 @@ from os.path import expanduser, expandvars, join, normpath
 from tkinter import colorchooser as tkColorChooser  # type: ignore # noqa: N812
 from tkinter import ttk
 from types import TracebackType
-from typing import TYPE_CHECKING, Any, Callable, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, Callable, Optional, Type
 
 import myNotebook as nb  # noqa: N813
 import plug
@@ -276,7 +277,7 @@ class PreferencesDialog(tk.Toplevel):
 
         self.resizable(tk.FALSE, tk.FALSE)
 
-        self.cmdr: Union[str, bool, None] = False  # Note if Cmdr changes in the Journal
+        self.cmdr: str | bool | None = False  # Note if Cmdr changes in the Journal
         self.is_beta: bool = False  # Note if Beta status changes in the Journal
         self.cmdrchanged_alarm: Optional[str] = None  # This stores an ID that can be used to cancel a scheduled call
 

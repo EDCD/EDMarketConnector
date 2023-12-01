@@ -1,6 +1,7 @@
 """Linux implementation of hotkey.AbstractHotkeyMgr."""
-import sys
+from __future__ import annotations
 
+import sys
 from EDMCLogging import get_main_logger
 from hotkey import AbstractHotkeyMgr
 

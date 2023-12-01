@@ -41,7 +41,6 @@ from typing import (
     MutableMapping,
 )
 from typing import OrderedDict as OrderedDictT
-from typing import Tuple, Union
 import requests
 import companion
 import edmc_data
@@ -100,8 +99,8 @@ class This:
         # Avoid duplicates
         self.marketId: str | None = None
         self.commodities: list[OrderedDictT[str, Any]] | None = None
-        self.outfitting: Tuple[bool, list[str]] | None = None
-        self.shipyard: Tuple[bool, list[Mapping[str, Any]]] | None = None
+        self.outfitting: tuple[bool, list[str]] | None = None
+        self.shipyard: tuple[bool, list[Mapping[str, Any]]] | None = None
         self.fcmaterials_marketid: int = 0
         self.fcmaterials: list[OrderedDictT[str, Any]] | None = None
         self.fcmaterials_capi_marketid: int = 0
@@ -714,7 +713,7 @@ class EDDN:
         # Send any FCMaterials.json-equivalent 'orders' as well
         self.export_capi_fcmaterials(data, is_beta, horizons)
 
-    def safe_modules_and_ships(self, data: Mapping[str, Any]) -> Tuple[dict, dict]:
+    def safe_modules_and_ships(self, data: Mapping[str, Any]) -> tuple[dict, dict]:
         """
         Produce a sanity-checked version of ships and modules from CAPI data.
 
@@ -1091,7 +1090,7 @@ class EDDN:
             entry: MutableMapping[str, Any],
             system_name: str,
             system_coordinates: list
-    ) -> Union[str, MutableMapping[str, Any]]:
+    ) -> str | MutableMapping[str, Any]:
         """
         Augment a journal entry with necessary system data.
 

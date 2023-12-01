@@ -3,11 +3,10 @@ Example EDMC plugin.
 
 It adds a single button to the EDMC interface that displays the number of times it has been clicked.
 """
+from __future__ import annotations
 
 import logging
 import tkinter as tk
-from typing import Optional
-
 import myNotebook as nb  # noqa: N813
 from config import appname, config
 
@@ -48,7 +47,7 @@ class ClickCounter:
         """
         self.on_preferences_closed("", False)  # Save our prefs
 
-    def setup_preferences(self, parent: nb.Notebook, cmdr: str, is_beta: bool) -> Optional[tk.Frame]:
+    def setup_preferences(self, parent: nb.Notebook, cmdr: str, is_beta: bool) -> tk.Frame | None:
         """
         setup_preferences is called by plugin_prefs below.
 
@@ -127,7 +126,7 @@ def plugin_stop() -> None:
     return cc.on_unload()
 
 
-def plugin_prefs(parent: nb.Notebook, cmdr: str, is_beta: bool) -> Optional[tk.Frame]:
+def plugin_prefs(parent: nb.Notebook, cmdr: str, is_beta: bool) -> tk.Frame | None:
     """
     Handle preferences tab for the plugin.
 
@@ -145,7 +144,7 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
     return cc.on_preferences_closed(cmdr, is_beta)
 
 
-def plugin_app(parent: tk.Frame) -> Optional[tk.Frame]:
+def plugin_app(parent: tk.Frame) -> tk.Frame | None:
     """
     Set up the UI of the plugin.
 
