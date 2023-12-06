@@ -292,7 +292,7 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str, is_beta: bool) -> tk.Frame:
     show_password_var.set(False)  # Password is initially masked
     show_password_checkbox = nb.Checkbutton(
         frame,
-        text=_('Show API Key'), # LANG: Text Inara Show API key
+        text=_('Show API Key'),  # LANG: Text Inara Show API key
         variable=show_password_var,
         command=toggle_password_visibility,
     )
