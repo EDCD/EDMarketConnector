@@ -363,7 +363,7 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> tk.Fr
 
     show_password_checkbox = nb.Checkbutton(
         frame,
-        text="Show API Key",
+        text=_('Show API Key'),  # LANG: Text EDSM Show API Key
         variable=show_password_var,
         command=toggle_password_visibility
     )
