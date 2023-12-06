@@ -313,7 +313,7 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> tk.Fr
     this.log = tk.IntVar(value=config.get_int('edsm_out') and 1)
     this.log_button = nb.Checkbutton(
         frame,
-        text=_('Send flight log and CMDR status to EDSM'),  # LANG: Send flight log and CMDR Status to EDSM
+        text=_('Send flight log and CMDR status to EDSM'),  # LANG: Settings>EDSM - Label on checkbox for 'send data'
         variable=this.log,
         command=prefsvarchanged
     )
@@ -335,9 +335,8 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> tk.Fr
     )
     if this.label:
         this.label.grid(row=cur_row, columnspan=2, padx=PADX, pady=PADY, sticky=tk.W)
-    # LANG: Game Commander name label in EDSM settings
     cur_row += 1
-    this.cmdr_label = nb.Label(frame, text=_('Cmdr'))
+    this.cmdr_label = nb.Label(frame, text=_('Cmdr'))  # LANG: Game Commander name label in EDSM settings
     this.cmdr_label.grid(row=cur_row, padx=PADX, pady=PADY, sticky=tk.W)
     this.cmdr_text = nb.Label(frame)
     this.cmdr_text.grid(row=cur_row, column=1, padx=PADX, pady=BOXY, sticky=tk.W)

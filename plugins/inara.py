@@ -1611,6 +1611,7 @@ def handle_api_error(data: Mapping[str, Any], status: int, reply: dict[str, Any]
     error_message = reply['header'].get('eventStatusText', "")
     logger.warning(f'Inara\t{status} {error_message}')
     logger.debug(f'JSON data:\n{json.dumps(data, indent=2, separators = (",", ": "))}')
+    # LANG: INARA API returned some kind of error (error message will be contained in {MSG})
     plug.show_error(_('Error: Inara {MSG}').format(MSG=error_message))
 
 
@@ -1643,6 +1644,7 @@ def handle_individual_error(data_event: dict[str, Any], reply_status: int, reply
         logger.debug(f'JSON data:\n{json.dumps(data_event)}')
 
     if reply_status // 100 != 2:
+        # LANG: INARA API returned some kind of error (error message will be contained in {MSG})
         plug.show_error(_('Error: Inara {MSG}').format(
             MSG=f'{data_event["eventName"]}, {reply_text}'
         ))
