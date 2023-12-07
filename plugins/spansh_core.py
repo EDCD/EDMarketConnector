@@ -57,7 +57,7 @@ def plugin_start3(plugin_dir: str) -> str:
     :param plugin_dir: Name of directory this was loaded from.
     :return: Identifier string for this plugin.
     """
-    return 'spansh'
+    return 'Spansh'
 
 
 def plugin_app(parent: tk.Tk) -> None:
