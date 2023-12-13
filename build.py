@@ -19,12 +19,16 @@ from config import (
     copyright,
     git_shorthash_from_head,
     _static_appversion,
+    update_interval
 )
 
 
 def iss_build(template_path: str, output_file: str) -> None:
     """Build the .iss file needed for building the installer EXE."""
-    sub_vals = {"appver": _static_appversion}
+    sub_vals = {
+        "appver": _static_appversion,
+        "update_time": str(update_interval),
+        }
     with open(template_path, encoding="UTF8") as template_file:
         src = Template(template_file.read())
         newfile = src.substitute(sub_vals)

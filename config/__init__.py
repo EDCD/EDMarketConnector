@@ -60,7 +60,7 @@ _cached_version: semantic_version.Version | None = None
 copyright = '© 2015-2019 Jonathan Harris, 2020-2023 EDCD'
 
 update_feed = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml'
-update_interval = 8*60*60
+update_interval = 8*60*60  # 8 Hours
 # Providers marked to be in debug mode. Generally this is expected to switch to sending data to a log file
 debug_senders: list[str] = []
 # TRACE logging code that should actually be used.  Means not spamming it
