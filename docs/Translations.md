@@ -34,6 +34,8 @@ _('stuff')
 
 #### Edit `L10n/en.template` to add the phrase
 
+##### Hint: It is strongly recommended to use the find_localized_strings.py script to help automate this process!
+
 	/* <use of this phrase> [<file it was first added in>] */
 	"<text as it appears in the code>" = "<English version of the text>";
 e.g.
