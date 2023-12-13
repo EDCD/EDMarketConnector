@@ -395,7 +395,7 @@ class Auth:
         webbrowser.open(
             f'{FRONTIER_AUTH_SERVER}{self.FRONTIER_AUTH_PATH_AUTH}?response_type=code'
             f'&audience=frontier,steam,epic'
-            f'&scope=auth capi'
+            f'&scope=auth%20capi'
             f'&client_id={self.CLIENT_ID}'
             f'&code_challenge={challenge}'
             f'&code_challenge_method=S256'
