@@ -151,9 +151,9 @@
 /* eddn.py: Status text shown while attempting to send data; In files: eddn.py:2507; */
 "Sending data to EDDN..." = "Envoi des données à EDDN...";
 
+
 /* edsm.py: Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:308; */
 "Send flight log and Cmdr status to EDSM" = "Envoyer le journal de vol et le statut Cmdr à EDSM";
-
 /* edsm.py: Settings>EDSM - Label on header/URL to EDSM API key page; In files: edsm.py:319; */
 "Elite Dangerous Star Map credentials" = "Informations d'identification pour Elite Dangerous Star Map";
 
@@ -516,3 +516,4 @@
 
 /* stats.py: Status dialog title; In files: stats.py:418; */
 "Ships" = "Vaisseaux";
+

@@ -184,9 +184,9 @@
 /* eddn.py: Status text shown while attempting to send data; In files: eddn.py:2507; */
 "Sending data to EDDN..." = "Відправка даних до EDDN...";
 
+
 /* edsm.py: Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:308; */
 "Send flight log and Cmdr status to EDSM" = "Відправляти дані бортового журналу до EDSM";
-
 /* edsm.py: Settings>EDSM - Label on header/URL to EDSM API key page; In files: edsm.py:319; */
 "Elite Dangerous Star Map credentials" = "Дані Elite Dangerous Star Map";
 
@@ -337,9 +337,9 @@
 /* prefs.py: Label on list of enabled plugins; In files: prefs.py:934; */
 "Enabled Plugins" = "Увімкнені плагіни";
 
+
 /* prefs.py: Plugins - Label for list of 'enabled' plugins that don't work with Python 3.x; In files: prefs.py:954; */
 "Plugins Without Python 3.x Support:" = "Плагіни без підтримки Python 3.x:";
-
 /* prefs.py: Plugins - Label on URL to documentation about migrating plugins from Python 2.7; In files: prefs.py:962; */
 "Information on migrating plugins" = "Інформація про міграцію плагінів";
 
@@ -573,3 +573,4 @@
 
 /* stats.py: Status dialog title; In files: stats.py:418; */
 "Ships" = "Кораблі";
+

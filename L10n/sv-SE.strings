@@ -148,9 +148,9 @@
 /* eddn.py: Status text shown while attempting to send data; In files: eddn.py:2507; */
 "Sending data to EDDN..." = "Skickar data till EDDN...";
 
+
 /* edsm.py: Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:308; */
 "Send flight log and Cmdr status to EDSM" = "Skicka flight log-data och Cmdr-status till EDSM";
-
 /* edsm.py: Settings>EDSM - Label on header/URL to EDSM API key page; In files: edsm.py:319; */
 "Elite Dangerous Star Map credentials" = "Elite Dangerous Star Map användaruppgifter";
 
@@ -510,3 +510,4 @@
 
 /* stats.py: Status dialog title; In files: stats.py:418; */
 "Ships" = "Skepp";
+

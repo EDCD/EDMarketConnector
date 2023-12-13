@@ -1,8 +1,14 @@
 /* Language name */
 "!Language" = "Italiano";
 
+/* companion.py: Frontier CAPI didn't respond; In files: companion.py:226; */
+"Error: Frontier CAPI didn't respond" = "Errore: Frontier CAPI non ha risposto";
+
 /* companion.py: Frontier CAPI data doesn't agree with latest Journal game location; In files: companion.py:245; */
 "Error: Frontier server is lagging" = "Errore: il server Frontier sta laggando";
+
+/* companion.py: Commander is docked at an EDO settlement, got out and back in, we forgot the station; In files: companion.py:261; */
+"Docked but unknown station: EDO Settlement?" = "Stazione attraccata ma sconosciuta: insediamento EDO?";
 
 /* companion.py: Generic "something went wrong with Frontier Auth" error; In files: companion.py:271; */
 "Error: Invalid Credentials" = "Errore: Credenziali non valide";
@@ -13,6 +19,21 @@
 /* companion.py: Generic error prefix - following text is from Frontier auth service; In files: companion.py:432; companion.py:517; */
 "Error" = "Errore";
 
+/* companion.py: Frontier auth, no 'usr' section in returned data; companion.py: Frontier auth, no 'customer_id' in 'usr' section in returned data; In files: companion.py:475; companion.py:480; */
+"Error: Couldn't check token customer_id" = "Errore: Impossibile controllare il token customer_id";
+
+/* companion.py: Frontier auth customer_id doesn't match game session FID; In files: companion.py:486; */
+"Error: customer_id doesn't match!" = "Errore: Customer_id non corrisponde!";
+
+/* companion.py: Failed to get Access Token from Frontier Auth service; In files: companion.py:508; */
+"Error: unable to get token" = "Errore: impossibile ottenere il token";
+
+/* companion.py: Frontier CAPI returned 418, meaning down for maintenance; In files: companion.py:844; */
+"Frontier CAPI down for maintenance" = "CAPI di Frontier inattivo per manutenzione";
+
+/* companion.py: Frontier CAPI data retrieval failed; In files: companion.py:856; */
+"Frontier CAPI query failure" = "Errore nella query CAPI di Frontier";
+
 /* EDMarketConnector.py: Main UI Update button; EDMarketConnector.py: Update button in main window; In files: EDMarketConnector.py:601; EDMarketConnector.py:919; EDMarketConnector.py:1748; */
 "Update" = "Recupera";
 
@@ -20,7 +41,10 @@
 "Always on top" = "Sempre in primo piano";
 
 /* EDMarketConnector.py: Unknown suit; In files: EDMarketConnector.py:837; */
-"Unknown" = "Sconosciuto";
+"Unknown" = "Sconosciuta";
+
+/* EDMarketConnector.py: ED Journal file location appears to be in error; In files: EDMarketConnector.py:906; */
+"Error: Check E:D journal file location" = "Errore: Controllare la posizione del file journal E:D";
 
 /* EDMarketConnector.py: Label for commander name in main window; edsm.py: Game Commander name label in EDSM settings; stats.py: Cmdr stats; theme.py: Label for commander name in main window; In files: EDMarketConnector.py:913; edsm.py:332; stats.py:57; theme.py:290; */
 "Cmdr" = "Cmdr";
@@ -70,6 +94,12 @@
 /* EDMarketConnector.py: Help > Documentation; In files: EDMarketConnector.py:933; EDMarketConnector.py:953; */
 "Documentation" = "Documentazione";
 
+/* EDMarketConnector.py: Help > Troubleshooting; In files: EDMarketConnector.py:934; EDMarketConnector.py:954; */
+"Troubleshooting" = "Risoluzione dei problemi";
+
+/* EDMarketConnector.py: Help > Report A Bug; In files: EDMarketConnector.py:935; EDMarketConnector.py:955; */
+"Report A Bug" = "Segnalare un bug";
+
 /* EDMarketConnector.py: Help > Privacy Policy; In files: EDMarketConnector.py:936; EDMarketConnector.py:956; */
 "Privacy Policy" = "Informativa sulla privacy";
 
@@ -84,6 +114,9 @@
 
 /* EDMarketConnector.py: Label for 'Copy' as in 'Copy and Paste'; ttkHyperlinkLabel.py: Label for 'Copy' as in 'Copy and Paste'; In files: EDMarketConnector.py:962; ttkHyperlinkLabel.py:53; */
 "Copy" = "Copia";
+
+/* EDMarketConnector.py: CAPI auth aborted because of killswitch; EDMarketConnector.py: CAPI auth query aborted because of killswitch; In files: EDMarketConnector.py:973; EDMarketConnector.py:1067; */
+"CAPI auth disabled by killswitch" = "Autenticazione CAPI disabilitata dal killswitch";
 
 /* EDMarketConnector.py: Status - Attempting to get a Frontier Auth Access Token; In files: EDMarketConnector.py:978; */
 "Logging in..." = "Mi sto loggando...";
@@ -100,8 +133,35 @@
 /* EDMarketConnector.py: Status - No station market data from Frontier CAPI; In files: EDMarketConnector.py:1038; */
 "Station doesn't have a market!" = "La Stazione non ha un Market !";
 
+/* EDMarketConnector.py: CAPI queries aborted because Cmdr name is unknown; EDMarketConnector.py: CAPI fleetcarrier query aborted because Cmdr name is unknown; In files: EDMarketConnector.py:1077; EDMarketConnector.py:1164; */
+"CAPI query aborted: Cmdr name unknown" = "Query CAPI interrotta: nome comando sconosciuto";
+
+/* EDMarketConnector.py: CAPI queries aborted because game mode unknown; In files: EDMarketConnector.py:1083; */
+"CAPI query aborted: Game mode unknown" = "Query CAPI interrotta: Modalità di gioco sconosciuta";
+
+/* EDMarketConnector.py: CAPI queries aborted because GameVersion unknown; EDMarketConnector.py: CAPI fleetcarrier query aborted because GameVersion unknown; In files: EDMarketConnector.py:1089; EDMarketConnector.py:1170; */
+"CAPI query aborted: GameVersion unknown" = "Query CAPI interrotta: Versione del gioco sconosciuta";
+
+/* EDMarketConnector.py: CAPI queries aborted because current star system name unknown; In files: EDMarketConnector.py:1095; */
+"CAPI query aborted: Current system unknown" = "Query CAPI interrotta: Sistema attuale sconosciuto";
+
+/* EDMarketConnector.py: CAPI queries aborted because player is in multi-crew on other Cmdr's ship; In files: EDMarketConnector.py:1101; */
+"CAPI query aborted: In other-ship multi-crew" = "Query CAPI interrotta: In multi-crew di un'altra nave";
+
+/* EDMarketConnector.py: CAPI queries aborted because player is in CQC (Arena); In files: EDMarketConnector.py:1107; */
+"CAPI query aborted: CQC (Arena) detected" = "Query CAPI interrotta: CQC (Arena) rilevato";
+
 /* EDMarketConnector.py: Status - Attempting to retrieve data from Frontier CAPI; In files: EDMarketConnector.py:1128; EDMarketConnector.py:1179; */
 "Fetching data..." = "Sto raccogliendo i dati...";
+
+/* EDMarketConnector.py: CAPI fleetcarrier query aborted because of killswitch; In files: EDMarketConnector.py:1157; */
+"CAPI fleetcarrier disabled by killswitch" = "Fleetcarrier CAPI disabilitato dal killswitch";
+
+/* EDMarketConnector.py: No data was returned for the fleetcarrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
+"CAPI: No fleetcarrier data returned" = "CAPI: Nessun dato della fleetcarrier ricevuto";
+
+/* EDMarketConnector.py: We didn't have the fleetcarrier callsign when we should have; In files: EDMarketConnector.py:1223; */
+"CAPI: Fleetcarrier data incomplete" = "CAPI: Dati della Fleetcarrier incompleti";
 
 /* EDMarketConnector.py: No data was returned for the commander from the Frontier CAPI; In files: EDMarketConnector.py:1242; */
 "CAPI: No commander data returned" = "CAPI: Nessun dato sul commandante";
@@ -117,6 +177,9 @@
 
 /* EDMarketConnector.py: Frontier CAPI server error when fetching data; In files: EDMarketConnector.py:1384; */
 "Frontier CAPI server error" = "Errore nel server Frontier CAPI";
+
+/* EDMarketConnector.py: Frontier CAPI Access Token expired, trying to get a new one; In files: EDMarketConnector.py:1390; */
+"CAPI: Refreshing access token..." = "CAPI: Aggiornamento del token di accesso in corso...";
 
 /* EDMarketConnector.py: Time when we last obtained Frontier CAPI data; In files: EDMarketConnector.py:1434; */
 "Last updated at %H:%M:%S" = "Ultimo aggiornamento alle %H:%M:%S";
@@ -172,11 +235,14 @@
 /* coriolis.py: 'Beta' label for Coriolis site override selection; coriolis.py: Coriolis normal/beta selection - beta; In files: coriolis.py:76; coriolis.py:122; coriolis.py:138; */
 "Beta" = "Beta";
 
+/* coriolis.py: Settings>Coriolis: Help/hint for changing coriolis URLs; In files: coriolis.py:91:93; */
+"Set the URL to use with coriolis.io ship loadouts. Note that this MUST end with '/import?data='" = "Imposta l'URL da utilizzare con gli equipaggiamenti delle navi coriolis.io. Tieni presente che DEVE terminare con '/import?data='";
+
 /* coriolis.py: Settings>Coriolis: Label for 'NOT alpha/beta game version' URL; In files: coriolis.py:97; */
 "Normal URL" = "URL normale";
 
 /* coriolis.py: Generic 'Reset' button label; In files: coriolis.py:100; coriolis.py:109; */
-"Reset" = "Reimposta";
+"Reset" = "Reset";
 
 /* coriolis.py: Settings>Coriolis: Label for 'alpha/beta game version' URL; In files: coriolis.py:106; */
 "Beta URL" = "URL Beta";
@@ -184,8 +250,23 @@
 /* coriolis.py: Settings>Coriolis: Label for selection of using Normal, Beta or 'auto' Coriolis URL; In files: coriolis.py:116; */
 "Override Beta/Normal Selection" = "Sovrascrivi selezione Beta/Normale";
 
+/* coriolis.py: Settings>Coriolis - invalid override mode found; In files: coriolis.py:156; */
+"Invalid Coriolis override mode!" = "Modalità override Coriolis non valida!";
+
+
+/* eddb.py: Journal Processing disabled due to an active killswitch; In files: eddb.py:179; */
+"EDDB Journal processing disabled. See Log." = "Elaborazione di EDDB Journal disabilitata. Vedi il Log.";
 /* eddn.py: Error while trying to send data to EDDN; In files: eddn.py:458; eddn.py:2413; eddn.py:2451; eddn.py:2519; */
 "Error: Can't connect to EDDN" = "Errore: Non riesco a connettermi a EDDN";
+
+/* eddn.py: EDDN has banned this version of our client; In files: eddn.py:576; */
+"EDDN Error: EDMC is too old for EDDN. Please update." = "Errore EDDN: EDMC è troppo vecchio per EDDN. Per favore aggiornalo.";
+
+/* eddn.py: EDDN returned an error that indicates something about what we sent it was wrong; In files: eddn.py:582; */
+"EDDN Error: Validation Failed (EDMC Too Old?). See Log" = "Errore EDDN: Convalida fallita (EDMC è troppo vecchio?). Vedi il Log";
+
+/* eddn.py: EDDN returned some sort of HTTP error, one we didn't expect. {STATUS} contains a number; In files: eddn.py:587; */
+"EDDN Error: Returned {STATUS} status code" = "Errore EDDN: Restituito codice di stato {STATUS}";
 
 /* eddn.py: Enable EDDN support for station data checkbox label; In files: eddn.py:2041; */
 "Send station data to the Elite Dangerous Data Network" = "Manda i dati della stazione a Elite Dangerous Data Network";
@@ -196,12 +277,15 @@
 /* eddn.py: EDDN delay sending until docked option is on, this message notes that a send was skipped due to this; In files: eddn.py:2063; */
 "Delay sending until docked" = "Ritarda l'invio fino a che si è ormeggiati";
 
+/* eddn.py: Killswitch disabled EDDN; In files: eddn.py:2178; */
+"EDDN journal handler disabled. See Log." = "Gestore journal EDDN disabilitato. Vedi il Log.";
+
 /* eddn.py: Status text shown while attempting to send data; In files: eddn.py:2507; */
 "Sending data to EDDN..." = "Sto inviando i dati a EDDN...";
 
+
 /* edsm.py: Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:308; */
 "Send flight log and Cmdr status to EDSM" = "Manda il flight log e lo stato Cmdr a EDSM";
-
 /* edsm.py: Settings>EDSM - Label on header/URL to EDSM API key page; In files: edsm.py:319; */
 "Elite Dangerous Star Map credentials" = "Credenziali per Elite Dangerous Star Map";
 
@@ -214,6 +298,12 @@
 /* edsm.py: We have no data on the current commander; prefs.py: No hotkey/shortcut set; stats.py: No rank; In files: edsm.py:394; prefs.py:527; prefs.py:1157; prefs.py:1190; stats.py:154; stats.py:173; stats.py:192; stats.py:209; */
 "None" = "Nessuna";
 
+/* edsm.py: EDSM plugin - Journal handling disabled by killswitch; In files: edsm.py:516; */
+"EDSM Handler disabled. See Log." = "Gestore EDSM disattivato. Vedi il Log.";
+
+/* edsm.py: EDSM - Only Live data; In files: edsm.py:632; */
+"EDSM only accepts Live galaxy data" = "EDSM accetta solo dati Galaxy Live";
+
 /* edsm.py: EDSM Plugin - Error message from EDSM API; In files: edsm.py:916; edsm.py:1048; */
 "Error: EDSM {MSG}" = "Errore: EDSM {MSG}";
 
@@ -225,6 +315,9 @@
 
 /* inara.py: Text for INARA API keys link ( goes to https://inara.cz/settings-api ); In files: inara.py:269; */
 "Inara credentials" = "Credenziali per Inara";
+
+/* inara.py: The Inara API only accepts Live galaxy data, not Legacy galaxy data; inara.py: Inara - Only Live data; In files: inara.py:384; inara.py:386; */
+"Inara only accepts Live galaxy data" = "Inara accetta solo dati Galaxy Live";
 
 /* inara.py: INARA support disabled via killswitch; In files: inara.py:395; */
 "Inara disabled. See Log." = "Inara disabilitato. Vedi il Log.";
@@ -265,6 +358,12 @@
 /* prefs.py: Settings > Configuration - Label for Journal files location; In files: prefs.py:431; prefs.py:446; */
 "E:D journal file location" = "locazione del file E:D journal";
 
+/* prefs.py: Settings > Configuration - Label for CAPI section; In files: prefs.py:469; */
+"CAPI Settings" = "Impostazioni CAPI";
+
+/* prefs.py: Configuration - Enable or disable the Fleet Carrier CAPI calls; In files: prefs.py:475; */
+"Enable Fleetcarrier CAPI Queries" = "Abilita le query CAPI della Fleetcarrier";
+
 /* prefs.py: Hotkey/Shortcut settings prompt on OSX; In files: prefs.py:490; */
 "Keyboard shortcut" = "Scorciatoia di tastiera";
 
@@ -293,16 +392,25 @@
 "Preferred websites" = "Sito web preferito";
 
 /* prefs.py: Label for Shipyard provider selection; In files: prefs.py:588; */
-"Shipyard" = "Spazioporto";
+"Shipyard" = "Shipyard";
 
 /* prefs.py: Label for checkbox to utilise alternative Coriolis URL method; In files: prefs.py:600; */
-"Use alternate URL method" = "Usare metodo URL alternativo";
+"Use alternate URL method" = "Usa metodo URL alternativo";
 
 /* prefs.py: Configuration - Label for selection of Log Level; In files: prefs.py:653; */
 "Log Level" = "Livello di Log";
 
 /* prefs.py: Label for 'Configuration' tab in Settings; In files: prefs.py:681; */
 "Configuration" = "Configurazione";
+
+/* prefs.py: UI elements privacy section header in privacy tab of preferences; In files: prefs.py:690; */
+"Main UI privacy options" = "Opzioni privacy dell'interfaccia utente";
+
+/* prefs.py: Hide private group owner name from UI checkbox; In files: prefs.py:695; */
+"Hide private group name in UI" = "Nascondi il nome del private group nell'interfaccia";
+
+/* prefs.py: Hide multicrew captain name from main UI checkbox; In files: prefs.py:699; */
+"Hide multi-crew captain name" = "Nascondi il nome del capitano in multi-crew.";
 
 /* prefs.py: Preferences privacy tab title; In files: prefs.py:703; */
 "Privacy" = "Dati personali";
@@ -347,7 +455,7 @@
 "Plugins folder" = "Cartella dei plugins";
 
 /* prefs.py: Label on button used to open a filesystem folder; In files: prefs.py:915; */
-"Open" = "Apri";
+"Open" = "Sfoglia";
 
 /* prefs.py: Tip/label about how to disable plugins; In files: prefs.py:923; */
 "Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "Suggerimento: è possibile disabilitare un plugin {CR}aggiungendo '{EXT}' nel nome della sua cartella";
@@ -355,9 +463,9 @@
 /* prefs.py: Label on list of enabled plugins; In files: prefs.py:934; */
 "Enabled Plugins" = "Plugin abilitati";
 
+
 /* prefs.py: Plugins - Label for list of 'enabled' plugins that don't work with Python 3.x; In files: prefs.py:954; */
 "Plugins Without Python 3.x Support:" = "Plugin senza il supporto a Python 3.x :";
-
 /* prefs.py: Plugins - Label on URL to documentation about migrating plugins from Python 2.7; In files: prefs.py:962; */
 "Information on migrating plugins" = "Informazioni sulla migrazione dei plugins";
 
@@ -373,6 +481,21 @@
 /* stats.py: Top rank; In files: stats.py:63; */
 "Elite" = "Elite";
 
+/* stats.py: Top rank +1; In files: stats.py:64; */
+"Elite I" = "Elite I";
+
+/* stats.py: Top rank +2; In files: stats.py:65; */
+"Elite II" = "Elite II";
+
+/* stats.py: Top rank +3; In files: stats.py:66; */
+"Elite III" = "Elite III";
+
+/* stats.py: Top rank +4; In files: stats.py:67; */
+"Elite IV" = "Elite IV";
+
+/* stats.py: Top rank +5; In files: stats.py:68; */
+"Elite V" = "Elite V";
+
 /* stats.py: Ranking; In files: stats.py:74; */
 "Combat" = "Combat";
 
@@ -381,6 +504,12 @@
 
 /* stats.py: Ranking; In files: stats.py:76; */
 "Explorer" = "Explorer";
+
+/* stats.py: Ranking; In files: stats.py:77; */
+"Mercenary" = "Mercenary";
+
+/* stats.py: Ranking; In files: stats.py:78; */
+"Exobiologist" = "Exobiologist";
 
 /* stats.py: Ranking; In files: stats.py:79; */
 "CQC" = "CQC";
@@ -465,6 +594,51 @@
 
 /* stats.py: Explorer rank; In files: stats.py:118; */
 "Pioneer" = "Pioneer";
+
+/* stats.py: Mercenary rank; In files: stats.py:122; */
+"Defenceless" = "Defenceless";
+
+/* stats.py: Mercenary rank; In files: stats.py:123; */
+"Mostly Defenceless" = "Mostly Defenceless";
+
+/* stats.py: Mercenary rank; In files: stats.py:124; */
+"Rookie" = "Rookie";
+
+/* stats.py: Mercenary rank; In files: stats.py:125; */
+"Soldier" = "Soldier";
+
+/* stats.py: Mercenary rank; In files: stats.py:126; stats.py:128; */
+"Gunslinger" = "Gunslinger";
+
+/* stats.py: Mercenary rank; In files: stats.py:127; */
+"Warrior" = "Warrior";
+
+/* stats.py: Mercenary rank; In files: stats.py:129; */
+"Deadeye" = "Deadeye";
+
+/* stats.py: Exobiologist rank; In files: stats.py:132; */
+"Directionless" = "Directionless";
+
+/* stats.py: Exobiologist rank; In files: stats.py:133; */
+"Mostly Directionless" = "Mostly Directionless";
+
+/* stats.py: Exobiologist rank; In files: stats.py:134; */
+"Compiler" = "Compiler";
+
+/* stats.py: Exobiologist rank; In files: stats.py:135; */
+"Collector" = "Collector";
+
+/* stats.py: Exobiologist rank; In files: stats.py:136; */
+"Cataloguer" = "Cataloguer";
+
+/* stats.py: Exobiologist rank; In files: stats.py:137; */
+"Taxonomist" = "Taxonomist";
+
+/* stats.py: Exobiologist rank; In files: stats.py:138; */
+"Ecologist" = "Ecologist";
+
+/* stats.py: Exobiologist rank; In files: stats.py:139; */
+"Geneticist" = "Geneticist";
 
 /* stats.py: CQC rank; In files: stats.py:142; */
 "Helpless" = "Helpless";
@@ -586,8 +760,15 @@
 /* stats.py: Power rank; In files: stats.py:197; */
 "Rating 5" = "Rating 5";
 
+/* stats.py: Current commander unknown when trying to use 'File' > 'Status'; In files: stats.py:315; */
+"Status: Don't yet know your Commander name" = "Stato: Non conosco ancora il nome del tuo comandante";
+
+/* stats.py: No Frontier CAPI data yet when trying to use 'File' > 'Status'; In files: stats.py:323; */
+"Status: No CAPI data yet" = "Stato: Ancora nessun dato CAPI";
+
 /* stats.py: Status dialog subtitle - CR value of ship; In files: stats.py:409; */
 "Value" = "Valore";
 
 /* stats.py: Status dialog title; In files: stats.py:418; */
 "Ships" = "Navi";
+

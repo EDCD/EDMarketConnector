@@ -1,3 +1,11 @@
+/* edsm.py:Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:316; */
+"Send flight log and CMDR status to EDSM" = "Send flight log and CMDR status to EDSM";
+
+/* prefs.py:Label on button used to open a filesystem folder; In files: prefs.py:706; */
+"Open Log Folder" = "Open Log Folder";
+
+/* inara.py:Text Inara Show API key; In files: inara.py:305; */
+"Show API Key" = "Show API Key";
 /* Language name */
 "!Language" = "English";
 
@@ -253,6 +261,9 @@
 /* coriolis.py: Settings>Coriolis - invalid override mode found; In files: coriolis.py:156; */
 "Invalid Coriolis override mode!" = "Invalid Coriolis override mode!";
 
+
+/* eddb.py: Journal Processing disabled due to an active killswitch; In files: eddb.py:179; */
+"EDDB Journal processing disabled. See Log." = "EDDB Journal processing disabled. See Log.";
 /* eddn.py: Error while trying to send data to EDDN; In files: eddn.py:458; eddn.py:2413; eddn.py:2451; eddn.py:2519; */
 "Error: Can't connect to EDDN" = "Error: Can't connect to EDDN";
 
@@ -280,9 +291,9 @@
 /* eddn.py: Status text shown while attempting to send data; In files: eddn.py:2507; */
 "Sending data to EDDN..." = "Sending data to EDDN...";
 
-/* edsm.py:Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:316; */
-"Send flight log and CMDR status to EDSM" = "Send flight log and CMDR status to EDSM";
 
+/* edsm.py: Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:308; */
+"Send flight log and Cmdr status to EDSM" = "Send flight log and Cmdr status to EDSM";
 /* edsm.py: Settings>EDSM - Label on header/URL to EDSM API key page; In files: edsm.py:319; */
 "Elite Dangerous Star Map credentials" = "Elite Dangerous Star Map credentials";
 
@@ -460,9 +471,9 @@
 /* prefs.py: Label on list of enabled plugins; In files: prefs.py:934; */
 "Enabled Plugins" = "Enabled Plugins";
 
-/* prefs.py: Plugins - Label for list of 'enabled' plugins that don't work with Python 3.x; In files: prefs.py:954; */
-"Plugins Without Python 3.x Support" = "Plugins Without Python 3.x Support:";
 
+/* prefs.py: Plugins - Label for list of 'enabled' plugins that don't work with Python 3.x; In files: prefs.py:954; */
+"Plugins Without Python 3.x Support:" = "Plugins Without Python 3.x Support:";
 /* prefs.py: Plugins - Label on URL to documentation about migrating plugins from Python 2.7; In files: prefs.py:962; */
 "Information on migrating plugins" = "Information on migrating plugins";
 
@@ -769,8 +780,3 @@
 /* stats.py: Status dialog title; In files: stats.py:418; */
 "Ships" = "Ships";
 
-/* prefs.py:Label on button used to open a filesystem folder; In files: prefs.py:706; */
-"Open Log Folder" = "Open Log Folder";
-
-/* inara.py:Text Inara Show API key; In files: inara.py:305; */
-"Show API Key" = "Show API Key";

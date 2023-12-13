@@ -232,6 +232,9 @@
 /* coriolis.py: Settings>Coriolis - invalid override mode found; In files: coriolis.py:156; */
 "Invalid Coriolis override mode!" = "Niewłaściwy tryb nadpisania Coriolis!";
 
+
+/* eddb.py: Journal Processing disabled due to an active killswitch; In files: eddb.py:179; */
+"EDDB Journal processing disabled. See Log." = "Wyłączone przetwarzanie dziennika EDDB. Sprawdź logi.";
 /* eddn.py: Error while trying to send data to EDDN; In files: eddn.py:458; eddn.py:2413; eddn.py:2451; eddn.py:2519; */
 "Error: Can't connect to EDDN" = "Błąd: Brak połączenia z EDDN";
 
@@ -254,14 +257,14 @@
 "Delay sending until docked" = "Czekaj z wysłaniem na zadokowanie";
 
 /* eddn.py: Killswitch disabled EDDN; In files: eddn.py:2178; */
-"EDDN journal handler disabled. See Log." = "Wyłączona obsługa dziennika EDDN. Sprawdź logi.";
+"EDDN journal handler disabled. See Log." = "Wyłączona obsługa dziennika EDDB. Sprawdź logi.";
 
 /* eddn.py: Status text shown while attempting to send data; In files: eddn.py:2507; */
 "Sending data to EDDN..." = "Wysłanie danych do EDDN...";
 
+
 /* edsm.py: Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:308; */
 "Send flight log and Cmdr status to EDSM" = "Wyślij zapis lotu i status pilota do EDSM";
-
 /* edsm.py: Settings>EDSM - Label on header/URL to EDSM API key page; In files: edsm.py:319; */
 "Elite Dangerous Star Map credentials" = "Dane uwierzytelniające Elite Dangerous Star Map";
 
@@ -275,7 +278,7 @@
 "None" = "Brak";
 
 /* edsm.py: EDSM plugin - Journal handling disabled by killswitch; In files: edsm.py:516; */
-"EDSM Handler disabled. See Log." = "Wyłączona obsługa EDSM. Sprawdź logi.";
+"EDSM Handler disabled. See Log." = "Wyłączona obsługa EDDB. Sprawdź logi.";
 
 /* edsm.py: EDSM Plugin - Error message from EDSM API; In files: edsm.py:916; edsm.py:1048; */
 "Error: EDSM {MSG}" = "Błąd: EDSM {MSG}";
@@ -427,9 +430,9 @@
 /* prefs.py: Label on list of enabled plugins; In files: prefs.py:934; */
 "Enabled Plugins" = "Włączone pluginy";
 
+
 /* prefs.py: Plugins - Label for list of 'enabled' plugins that don't work with Python 3.x; In files: prefs.py:954; */
 "Plugins Without Python 3.x Support:" = "Pluginy nie obsługiwane przez Python 3.x:";
-
 /* prefs.py: Plugins - Label on URL to documentation about migrating plugins from Python 2.7; In files: prefs.py:962; */
 "Information on migrating plugins" = "Informacja o migracji pluginów";
 
@@ -735,3 +738,4 @@
 
 /* stats.py: Status dialog title; In files: stats.py:418; */
 "Ships" = "Statki";
+
