@@ -1029,6 +1029,23 @@ class PreferencesDialog(tk.Toplevel):
                 nb.Label(plugins_frame, text=plugin.name).grid(
                     columnspan=2, padx=self.LISTX, pady=self.PADY, sticky=tk.W, row=row.get()
                 )
+        ############################################################
+        # Show plugins that failed to load
+        ############################################################
+        if len(plug.PLUGINS_broken):
+            ttk.Separator(plugins_frame, orient=tk.HORIZONTAL).grid(
+                columnspan=3, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=row.get()
+            )
+            # LANG: Plugins - Label for list of 'broken' plugins that failed to load
+            nb.Label(plugins_frame, text=_('Broken Plugins')+':').grid(
+                padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get()
+            )
+
+            for plugin in plug.PLUGINS_broken:
+                if plugin.folder:  # 'system' ones have this set to None to suppress listing in Plugins prefs tab
+                    nb.Label(plugins_frame, text=plugin.name).grid(
+                        columnspan=2, padx=self.LISTX, pady=self.PADY, sticky=tk.W, row=row.get()
+                    )
 
         # LANG: Label on Settings > Plugins tab
         notebook.add(plugins_frame, text=_('Plugins'))		# Tab heading in settings
