@@ -2325,6 +2325,7 @@ sys.path: {sys.path}'''
 
     root.wm_attributes('-alpha', ui_transparency / 100)
     # Display message box about plugins without Python 3.x support
+    # Display message box about plugins that failed to load
     root.after(0, messagebox_broken_plugins)
     # Display message box about plugins without Python 3.x support
     root.after(1, messagebox_not_py3)
