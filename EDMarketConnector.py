@@ -2262,11 +2262,11 @@ sys.path: {sys.path}'''
     def messagebox_broken_plugins():
         """Display message about plugins not updated for Python 3.x."""
         if plug.PLUGINS_broken:
-            # LANG: Popup-text about 'broken' plugins that failoed to load
+            # LANG: Popup-text about 'broken' plugins that failed to load
             popup_text = _(
                 "One or more of your enabled plugins failed to load. Please see the list on the '{PLUGINS}' "
                 "tab of '{FILE}' > '{SETTINGS}'. This could be caused by a wrong folder structure. The load.py "
-                "file should be located under plugins/PLUGIN_NAME/load.py.\r\n\r\nYou can disable a plugin by "
+                r"file should be located under plugins/PLUGIN_NAME/load.py.\r\n\r\nYou can disable a plugin by "
                 "renaming its folder to have '{DISABLED}' on the end of the name."
             )
 
@@ -2282,7 +2282,7 @@ sys.path: {sys.path}'''
             popup_text = popup_text.replace('\\r', '\r')
 
             tk.messagebox.showinfo(
-                # LANG: Popup window title for list of 'broken' plugins that failoed to load
+                # LANG: Popup window title for list of 'broken' plugins that failed to load
                 _('EDMC: Broken Plugins'),
                 popup_text
             )
