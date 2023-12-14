@@ -15,7 +15,7 @@ import uuid
 import winreg
 from ctypes.wintypes import DWORD, HANDLE
 from typing import Literal
-from config import AbstractConfig, applongname, appname, logger, update_interval
+from config import AbstractConfig, applongname, appname, logger
 
 assert sys.platform == 'win32'
 
@@ -47,7 +47,7 @@ def known_folder_path(guid: uuid.UUID) -> str | None:
 class WinConfig(AbstractConfig):
     """Implementation of AbstractConfig for Windows."""
 
-    def __init__(self, do_winsparkle=True) -> None:
+    def __init__(self) -> None:
         super().__init__()
         self.app_dir_path = pathlib.Path(known_folder_path(FOLDERID_LocalAppData)) / appname  # type: ignore
         self.app_dir_path.mkdir(exist_ok=True)
@@ -77,8 +77,6 @@ class WinConfig(AbstractConfig):
 
         try:
             self.__reg_handle: winreg.HKEYType = create_key_defaults(sub_key=REGISTRY_SUBKEY)
-            if do_winsparkle:
-                self.__setup_winsparkle()
 
         except OSError:
             logger.exception('Could not create required registry keys')
@@ -88,36 +86,6 @@ class WinConfig(AbstractConfig):
         if (outdir_str := self.get_str('outdir')) is None or not pathlib.Path(outdir_str).is_dir():
             docs = known_folder_path(FOLDERID_Documents)
             self.set("outdir", docs if docs is not None else self.home)
-
-    def __setup_winsparkle(self):
-        """Ensure the necessary Registry keys for WinSparkle are present."""
-        create_key_defaults = functools.partial(
-            winreg.CreateKeyEx,
-            key=winreg.HKEY_CURRENT_USER,
-            access=winreg.KEY_ALL_ACCESS | winreg.KEY_WOW64_64KEY,
-        )
-
-        try:
-            with create_key_defaults(sub_key=r'Software\EDCD\EDMarketConnector') as edcd_handle:
-                with winreg.CreateKeyEx(edcd_handle, sub_key='WinSparkle',
-                                        access=winreg.KEY_ALL_ACCESS | winreg.KEY_WOW64_64KEY) as winsparkle_reg:
-                    # Set WinSparkle defaults - https://github.com/vslavik/winsparkle/wiki/Registry-Settings
-                    UPDATE_INTERVAL_NAME = 'UpdateInterval'  # noqa: N806
-                    CHECK_FOR_UPDATES_NAME = 'CheckForUpdates'  # noqa: N806
-                    REG_SZ = winreg.REG_SZ  # noqa: N806
-
-                    winreg.SetValueEx(winsparkle_reg, UPDATE_INTERVAL_NAME, REG_RESERVED_ALWAYS_ZERO, REG_SZ,
-                                      str(update_interval))
-
-                    try:
-                        winreg.QueryValueEx(winsparkle_reg, CHECK_FOR_UPDATES_NAME)
-                    except FileNotFoundError:
-                        # Key doesn't exist, set it to a default
-                        winreg.SetValueEx(winsparkle_reg, CHECK_FOR_UPDATES_NAME, REG_RESERVED_ALWAYS_ZERO, REG_SZ,
-                                          '1')
-        except OSError:
-            logger.exception('Could not open WinSparkle handle')
-            raise
 
     def __get_regentry(self, key: str) -> None | list | str | int:
         """Access the Registry for the raw entry."""
