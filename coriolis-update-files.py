@@ -31,9 +31,9 @@ if __name__ == "__main__":
     try:
         # Regenerate coriolis-data distribution
         subprocess.check_call('npm install', cwd='coriolis-data', shell=True, stdout=sys.stdout, stderr=sys.stderr)
-    except NotADirectoryError as err:
+    except NotADirectoryError:
         sys.exit("Coriolis-Data Directory not found! Have you set up your submodules? \n"
-                 "https://github.com/EDCD/EDMarketConnector/wiki/Running-from-source#obtain-a-copy-of-the-application-source")
+                 "https://github.com/EDCD/EDMarketConnector/wiki/Running-from-source#obtain-a-copy-of-the-application-source")  # noqa: E501
 
     file_path = 'coriolis-data/dist/index.json'
     with open(file_path) as file:
