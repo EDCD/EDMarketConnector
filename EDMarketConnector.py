@@ -2319,11 +2319,11 @@ sys.path: {sys.path}'''
             config.set('plugins_not_py3_last', int(time()))
 
     def check_fdev_ids():
-        """Display message about missing FDEVID files"""
+        """Display message about missing FDEVID files."""
         fdev_files = {'commodity.csv', 'rare_commodity.csv'}
         for file in fdev_files:
-            file = pathlib.Path(config.respath_path / 'FDevIDs' / file)
-            if file.is_file():
+            fdevid_file = pathlib.Path(config.respath_path / 'FDevIDs' / file)
+            if fdevid_file.is_file():
                 continue
             # LANG: Popup-text about missing FDEVID Files
             popup_text = _(
