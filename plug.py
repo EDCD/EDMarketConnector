@@ -27,6 +27,7 @@ logger = get_main_logger()
 # List of loaded Plugins
 PLUGINS = []
 PLUGINS_not_py3 = []
+PLUGINS_broken = []
 
 
 # For asynchronous error display
@@ -198,6 +199,7 @@ def _load_found_plugins():
                 plugin_logger = EDMCLogging.get_plugin_logger(name)
                 found.append(Plugin(name, os.path.join(config.plugin_dir_path, name, 'load.py'), plugin_logger))
             except Exception:
+                PLUGINS_broken.append(Plugin(name, None, logger))
                 logger.exception(f'Failure loading found Plugin "{name}"')
                 pass
     return found

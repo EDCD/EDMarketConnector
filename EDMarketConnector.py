@@ -2259,6 +2259,34 @@ sys.path: {sys.path}'''
 
     app = AppWindow(root)
 
+    def messagebox_broken_plugins():
+        """Display message about plugins not updated for Python 3.x."""
+        if plug.PLUGINS_broken:
+            # LANG: Popup-text about 'broken' plugins that failed to load
+            popup_text = _(
+                "One or more of your enabled plugins failed to load. Please see the list on the '{PLUGINS}' "
+                "tab of '{FILE}' > '{SETTINGS}'. This could be caused by a wrong folder structure. The load.py "
+                r"file should be located under plugins/PLUGIN_NAME/load.py.\r\n\r\nYou can disable a plugin by "
+                "renaming its folder to have '{DISABLED}' on the end of the name."
+            )
+
+            # Substitute in the other words.
+            popup_text = popup_text.format(
+                PLUGINS=_('Plugins'),  # LANG: Settings > Plugins tab
+                FILE=_('File'),  # LANG: 'File' menu
+                SETTINGS=_('Settings'),  # LANG: File > Settings
+                DISABLED='.disabled'
+            )
+            # And now we do need these to be actual \r\n
+            popup_text = popup_text.replace('\\n', '\n')
+            popup_text = popup_text.replace('\\r', '\r')
+
+            tk.messagebox.showinfo(
+                # LANG: Popup window title for list of 'broken' plugins that failed to load
+                _('EDMC: Broken Plugins'),
+                popup_text
+            )
+
     def messagebox_not_py3():
         """Display message about plugins not updated for Python 3.x."""
         plugins_not_py3_last = config.get_int('plugins_not_py3_last', default=0)
@@ -2297,9 +2325,12 @@ sys.path: {sys.path}'''
 
     root.wm_attributes('-alpha', ui_transparency / 100)
     # Display message box about plugins without Python 3.x support
-    root.after(0, messagebox_not_py3)
+    # Display message box about plugins that failed to load
+    root.after(0, messagebox_broken_plugins)
+    # Display message box about plugins without Python 3.x support
+    root.after(1, messagebox_not_py3)
     # Show warning popup for killswitches matching current version
-    root.after(1, show_killswitch_poppup, root)
+    root.after(2, show_killswitch_poppup, root)
     # Start the main event loop
     root.mainloop()
 
