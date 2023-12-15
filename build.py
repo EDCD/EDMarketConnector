@@ -177,13 +177,20 @@ def build() -> None:
         ],
     }
 
-    py2exe.freeze(
-        version_info=version_info,
-        windows=[windows_config],
-        console=[console_config],
-        data_files=data_files,
-        options=options,
-    )
+    try:
+        py2exe.freeze(
+            version_info=version_info,
+            windows=[windows_config],
+            console=[console_config],
+            data_files=data_files,
+            options=options,
+        )
+    except FileNotFoundError:
+        sys.exit(
+            "Build Failed due to Missing Files! Have you set up your submodules? \n"
+            "https://github.com/EDCD/EDMarketConnector/wiki/Running-from-source"
+            "#obtain-a-copy-of-the-application-source"
+            )
 
     iss_template_path: str = "./resources/EDMC_Installer_Config_template.txt"
     iss_file_path: str = "./EDMC_Installer_Config.iss"
