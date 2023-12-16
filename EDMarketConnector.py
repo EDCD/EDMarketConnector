@@ -2260,7 +2260,7 @@ sys.path: {sys.path}'''
     app = AppWindow(root)
 
     def messagebox_broken_plugins():
-        """Display message about plugins not updated for Python 3.x."""
+        """Display message about 'broken' plugins that failed to load."""
         if plug.PLUGINS_broken:
             # LANG: Popup-text about 'broken' plugins that failed to load
             popup_text = _(
