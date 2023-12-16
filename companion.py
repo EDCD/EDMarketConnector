@@ -1204,6 +1204,9 @@ def fixup(data: CAPIData) -> CAPIData:  # noqa: C901, CCR001 # Can't be usefully
     if not commodity_map:
         # Lazily populate
         for f in ('commodity.csv', 'rare_commodity.csv'):
+            if not os.path.isfile(config.respath_path / 'FDevIDs/' / f):
+                logger.warning(f'FDevID file {f} not found! Generating output without these commodity name rewrites.')
+                continue
             with open(config.respath_path / 'FDevIDs' / f, 'r') as csvfile:
                 reader = csv.DictReader(csvfile)
 
