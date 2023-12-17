@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 EDMC.py - Command-line interface. Requires prior setup through the GUI.
 

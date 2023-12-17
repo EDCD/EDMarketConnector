@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Search for dependencies given a package."""
 import sys
 

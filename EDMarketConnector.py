@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 EDMarketConnector.py - Entry point for the GUI.
 

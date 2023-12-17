@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 l10n.py - Localize using OSX-Style Strings.
 

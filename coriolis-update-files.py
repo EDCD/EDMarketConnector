@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 coriolis-update-files.py - Build ship and module databases from https://github.com/EDCD/coriolis-data/.
 
