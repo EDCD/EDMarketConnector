@@ -33,6 +33,54 @@ produce the Windows executables and installer.
   currently used version in a given branch.
 
 ---
+Release 5.10.0
+===
+This release contains a number of under-the-hood changes to EDMC designed to improve performance, code
+maintainability, and stability of the EDMC application, while providing new features and quality-of-life fixes.
+
+Note to plugin developers: modules.p and ships.p are deprecated, and slated
+for removal in the next major release! Please look for that change coming soon. 
+
+**Changes and Enhancements**
+* Added new `modules.json` and `ships.json` files to improve security and readability
+* Added a core Spanch URL provider plugin
+* Added a new auth response page for successful FDEV authentication
+* Added a new Open Log Folder option to the Help menu
+* Added a new `--start_min` command flag to force the application to start minimized
+* Added a new pop-up if plugins fail to load or are not supported
+* Updated commodities and module files to the latest versions
+* Updated core EDMC and core Plugin menus to a standardized layout
+* Updates the Inara URL formats to the new endpoints
+
+**Bug Fixes**
+* Fixed an issue where indentation of text strings in certain settings windows under various languages 
+would be unevenly indented
+* Fixed an issue where the Plugins Folder label in the Plugins settings window would cut off the 
+selection box for the plugin storage location
+
+**Code Clean Up**
+* Added future annotation imports to help with code compatibility
+* Added a few conditional checks on input processing
+* Simplified some RegEx expressions, complex functions, logic flows, and Import statements
+* Simplified the WinSparkle GitHub Build Action
+* Began to change single-character variables to more descriptive names
+* Moved a number of global variables into their requisite classes 
+* Updated a number of dependencies to the latest versions
+* Updated GitHub Actions to the latest versions
+* Updated a number of resource-allocating functions to use more efficient closing logic
+* Updated some calls to arrays to be more efficient
+* Removed a number of old-style typing hints in favor of PEP 585 style hints
+* Removed a number of redundant `if - return - else` or `raise - else` statements for code readability
+* Removed some default parameter assignments
+* Removed some obsolete calls to Object
+
+**Plugin Developers**
+* `modules.p` and `ships.p` have been deprecated, and will be removed in 6.0. 
+If you are using these files, please update to use the new `modules.json` and `ships.json` files instead. 
+* A new method of standardizing the paddings used in settings panels has been applied to the core settings panels.
+We strongly encourage you to follow these style hints! A proper guide will be added to the wiki.
+
+
 Release 5.9.5
 ===
 This release fixes an uncommon problem with the uninstaller logic if upgrading from a version prior
@@ -73,7 +121,7 @@ Windows registry to allow for protocol handling. All users are **strongly** enco
 - Fixes a critical bug with the installer on new installs not creating registry keys (#2046)
 - Re-enables automatic submodule updates (#1443)
 - Help -> About Version String can now be copied to clipboard (#1936)
-- EDSM Task Manager Printout now is less useless (#2045)
+- EDMC Task Manager Printout now is less useless (#2045)
 - Deprecated load_module() is now retired (#1462)
 - API Keys are masked in Settings (#2047)
 - Installer will now refuse to install on Win7 and Earlier (#1122)
