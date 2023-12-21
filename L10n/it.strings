@@ -253,9 +253,6 @@
 /* coriolis.py: Settings>Coriolis - invalid override mode found; In files: coriolis.py:156; */
 "Invalid Coriolis override mode!" = "Modalità override Coriolis non valida!";
 
-
-/* eddb.py: Journal Processing disabled due to an active killswitch; In files: eddb.py:179; */
-"EDDB Journal processing disabled. See Log." = "Elaborazione di EDDB Journal disabilitata. Vedi il Log.";
 /* eddn.py: Error while trying to send data to EDDN; In files: eddn.py:458; eddn.py:2413; eddn.py:2451; eddn.py:2519; */
 "Error: Can't connect to EDDN" = "Errore: Non riesco a connettermi a EDDN";
 
@@ -283,9 +280,6 @@
 /* eddn.py: Status text shown while attempting to send data; In files: eddn.py:2507; */
 "Sending data to EDDN..." = "Sto inviando i dati a EDDN...";
 
-
-/* edsm.py: Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:308; */
-"Send flight log and Cmdr status to EDSM" = "Manda il flight log e lo stato Cmdr a EDSM";
 /* edsm.py: Settings>EDSM - Label on header/URL to EDSM API key page; In files: edsm.py:319; */
 "Elite Dangerous Star Map credentials" = "Credenziali per Elite Dangerous Star Map";
 
@@ -413,7 +407,7 @@
 "Hide multi-crew captain name" = "Nascondi il nome del capitano in multi-crew.";
 
 /* prefs.py: Preferences privacy tab title; In files: prefs.py:703; */
-"Privacy" = "Dati personali";
+"Privacy" = "Privacy";
 
 /* prefs.py: Label for Settings > Appeareance > selection of 'normal' text colour; In files: prefs.py:716; */
 "Normal text" = "Testo normale";
@@ -463,9 +457,9 @@
 /* prefs.py: Label on list of enabled plugins; In files: prefs.py:934; */
 "Enabled Plugins" = "Plugin abilitati";
 
-
 /* prefs.py: Plugins - Label for list of 'enabled' plugins that don't work with Python 3.x; In files: prefs.py:954; */
-"Plugins Without Python 3.x Support:" = "Plugin senza il supporto a Python 3.x :";
+"Plugins Without Python 3.x Support" = "Plugins senza Supporto Python 3.x";
+
 /* prefs.py: Plugins - Label on URL to documentation about migrating plugins from Python 2.7; In files: prefs.py:962; */
 "Information on migrating plugins" = "Informazioni sulla migrazione dei plugins";
 

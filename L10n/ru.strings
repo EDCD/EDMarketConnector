@@ -261,9 +261,6 @@
 /* coriolis.py: Settings>Coriolis - invalid override mode found; In files: coriolis.py:156; */
 "Invalid Coriolis override mode!" = "Некорректный режим переопределения URL для coriolis.io";
 
-
-/* eddb.py: Journal Processing disabled due to an active killswitch; In files: eddb.py:179; */
-"EDDB Journal processing disabled. See Log." = "Обработка журнала EDDB отключена. См. логи.";
 /* eddn.py: Error while trying to send data to EDDN; In files: eddn.py:458; eddn.py:2413; eddn.py:2451; eddn.py:2519; */
 "Error: Can't connect to EDDN" = "Ошибка: не удается подключиться к EDDN";
 
@@ -291,9 +288,6 @@
 /* eddn.py: Status text shown while attempting to send data; In files: eddn.py:2507; */
 "Sending data to EDDN..." = "Отправка данных на EDDN...";
 
-
-/* edsm.py: Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:308; */
-"Send flight log and Cmdr status to EDSM" = "Отправлять данные журнала полёта и информацию статусе командира в EDSM";
 /* edsm.py: Settings>EDSM - Label on header/URL to EDSM API key page; In files: edsm.py:319; */
 "Elite Dangerous Star Map credentials" = "Учётные данные Elite Dangerous Star Map";
 
@@ -471,9 +465,9 @@
 /* prefs.py: Label on list of enabled plugins; In files: prefs.py:934; */
 "Enabled Plugins" = "Включённые плагины";
 
-
 /* prefs.py: Plugins - Label for list of 'enabled' plugins that don't work with Python 3.x; In files: prefs.py:954; */
-"Plugins Without Python 3.x Support:" = "Плагины без поддержки Python 3.x";
+"Plugins Without Python 3.x Support" = "Плагины без поддержки Python 3.x";
+
 /* prefs.py: Plugins - Label on URL to documentation about migrating plugins from Python 2.7; In files: prefs.py:962; */
 "Information on migrating plugins" = "Информация о мигрирующих плагинах";
 
