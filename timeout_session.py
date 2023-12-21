@@ -1,7 +1,14 @@
-"""A requests.session with a TimeoutAdapter."""
-import requests
-from requests.adapters import HTTPAdapter
+"""
+timeout_session.py - requests session with timeout adapter.
 
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
+"""
+from __future__ import annotations
+
+from requests import Session, Response
+from requests.adapters import HTTPAdapter
 from config import user_agent
 
 REQUEST_TIMEOUT = 10  # reasonable timeout that all HTTP requests should use
@@ -17,7 +24,7 @@ class TimeoutAdapter(HTTPAdapter):
 
         super().__init__(*args, **kwargs)
 
-    def send(self, *args, **kwargs) -> requests.Response:
+    def send(self, *args, **kwargs) -> Response:
         """Send, but with a timeout always set."""
         if kwargs["timeout"] is None:
             kwargs["timeout"] = self.default_timeout
@@ -25,9 +32,7 @@ class TimeoutAdapter(HTTPAdapter):
         return super().send(*args, **kwargs)
 
 
-def new_session(
-    timeout: int = REQUEST_TIMEOUT, session: requests.Session | None = None
-) -> requests.Session:
+def new_session(timeout: int = REQUEST_TIMEOUT, session: Session | None = None) -> Session:
     """
     Create a new requests.Session and override the default HTTPAdapter with a TimeoutAdapter.
 
@@ -35,11 +40,11 @@ def new_session(
     :param session: the Session object to attach the Adapter to, defaults to a new session
     :return: The created Session
     """
-    if session is None:
-        session = requests.Session()
-        session.headers['User-Agent'] = user_agent
+    session = session or Session()
+    session.headers.setdefault("User-Agent", user_agent)
 
     adapter = TimeoutAdapter(timeout)
-    session.mount("http://", adapter)
-    session.mount("https://", adapter)
+    for prefix in ("http://", "https://"):
+        session.mount(prefix, adapter)
+
     return session

@@ -1,18 +1,28 @@
 #!/usr/bin/env python3
-"""Localization with gettext is a pain on non-Unix systems. Use OSX-style strings files instead."""
+"""
+l10n.py - Localize using OSX-Style Strings.
+
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
+
+Localization with gettext is a pain on non-Unix systems.
+"""
+from __future__ import annotations
 
 import builtins
 import locale
 import numbers
-import os
-import pathlib
 import re
 import sys
 import warnings
 from collections import OrderedDict
 from contextlib import suppress
-from os.path import basename, dirname, isdir, isfile, join
-from typing import TYPE_CHECKING, Dict, Iterable, Optional, Set, TextIO, Union, cast
+from os import pardir, listdir, sep, makedirs
+from os.path import basename, dirname, isdir, isfile, join, abspath, exists
+from typing import TYPE_CHECKING, Iterable, TextIO, cast
+from config import config
+from EDMCLogging import get_main_logger
 
 if TYPE_CHECKING:
     def _(x: str) -> str: ...
@@ -20,21 +30,15 @@ if TYPE_CHECKING:
 # Note that this is also done in EDMarketConnector.py, and thus removing this here may not have a desired effect
 try:
     locale.setlocale(locale.LC_ALL, '')
-
 except Exception:
     # Locale env variables incorrect or locale package not installed/configured on Linux, mysterious reasons on Windows
     print("Can't set locale!")
 
-from config import config
-from EDMCLogging import get_main_logger
-
 logger = get_main_logger()
-
 
 # Language name
 LANGUAGE_ID = '!Language'
 LOCALISATION_DIR = 'L10n'
-
 
 if sys.platform == 'darwin':
     from Foundation import (  # type: ignore # exists on Darwin
@@ -68,11 +72,11 @@ class _Translations:
     FALLBACK = 'en'  # strings in this code are in English
     FALLBACK_NAME = 'English'
 
-    TRANS_RE = re.compile(r'\s*"((?:[^"]|(?:\"))+)"\s*=\s*"((?:[^"]|(?:\"))+)"\s*;\s*$')
+    TRANS_RE = re.compile(r'\s*"((?:[^"]|\")+)"\s*=\s*"((?:[^"]|\")+)"\s*;\s*$')
     COMMENT_RE = re.compile(r'\s*/\*.*\*/\s*$')
 
     def __init__(self) -> None:
-        self.translations: Dict[Optional[str], Dict[str, str]] = {None: {}}
+        self.translations: dict[str | None, dict[str, str]] = {None: {}}
 
     def install_dummy(self) -> None:
         """
@@ -112,7 +116,7 @@ class _Translations:
             return
 
         self.translations = {None: self.contents(cast(str, lang))}
-        for plugin in os.listdir(config.plugin_dir_path):
+        for plugin in listdir(config.plugin_dir_path):
             plugin_path = join(config.plugin_dir_path, plugin, LOCALISATION_DIR)
             if isdir(plugin_path):
                 try:
@@ -126,7 +130,7 @@ class _Translations:
 
         builtins.__dict__['_'] = self.translate
 
-    def contents(self, lang: str, plugin_path: Optional[str] = None) -> Dict[str, str]:
+    def contents(self, lang: str, plugin_path: str | None = None) -> dict[str, str]:
         """Load all the translations from a translation file."""
         assert lang in self.available()
         translations = {}
@@ -151,7 +155,7 @@ class _Translations:
 
         return translations
 
-    def translate(self, x: str, context: Optional[str] = None) -> str:
+    def translate(self, x: str, context: str | None = None) -> str:
         """
         Translate the given string to the current lang.
 
@@ -161,7 +165,7 @@ class _Translations:
         """
         if context:
             # TODO: There is probably a better way to go about this now.
-            context = context[len(config.plugin_dir)+1:].split(os.sep)[0]
+            context = context[len(config.plugin_dir)+1:].split(sep)[0]
             if self.translations[None] and context not in self.translations:
                 logger.debug(f'No translations for {context!r}')
 
@@ -172,23 +176,23 @@ class _Translations:
 
         return self.translations[None].get(x) or str(x).replace(r'\"', '"').replace('{CR}', '\n')
 
-    def available(self) -> Set[str]:
+    def available(self) -> set[str]:
         """Return a list of available language codes."""
         path = self.respath()
         if getattr(sys, 'frozen', False) and sys.platform == 'darwin':
             available = {
-                x[:-len('.lproj')] for x in os.listdir(path)
+                x[:-len('.lproj')] for x in listdir(path)
                 if x.endswith('.lproj') and isfile(join(x, 'Localizable.strings'))
             }
 
         else:
-            available = {x[:-len('.strings')] for x in os.listdir(path) if x.endswith('.strings')}
+            available = {x[:-len('.strings')] for x in listdir(path) if x.endswith('.strings')}
 
         return available
 
-    def available_names(self) -> Dict[Optional[str], str]:
+    def available_names(self) -> dict[str | None, str]:
         """Available language names by code."""
-        names: Dict[Optional[str], str] = OrderedDict([
+        names: dict[str | None, str] = OrderedDict([
             # LANG: The system default language choice in Settings > Appearance
             (None, _('Default')),  # Appearance theme and language setting
         ])
@@ -200,20 +204,20 @@ class _Translations:
 
         return names
 
-    def respath(self) -> pathlib.Path:
+    def respath(self) -> str:
         """Path to localisation files."""
         if getattr(sys, 'frozen', False):
             if sys.platform == 'darwin':
-                return (pathlib.Path(sys.executable).parents[0] / os.pardir / 'Resources').resolve()
+                return abspath(join(dirname(sys.executable), pardir, 'Resources'))
 
-            return pathlib.Path(dirname(sys.executable)) / LOCALISATION_DIR
+            return abspath(join(dirname(sys.executable), LOCALISATION_DIR))
 
-        elif __file__:
-            return pathlib.Path(__file__).parents[0] / LOCALISATION_DIR
+        if __file__:
+            return abspath(join(dirname(__file__), LOCALISATION_DIR))
 
-        return pathlib.Path(LOCALISATION_DIR)
+        return abspath(LOCALISATION_DIR)
 
-    def file(self, lang: str, plugin_path: Optional[str] = None) -> Optional[TextIO]:
+    def file(self, lang: str, plugin_path: str | None = None) -> TextIO | None:
         """
         Open the given lang file for reading.
 
@@ -222,20 +226,21 @@ class _Translations:
         :return: the opened file (Note: This should be closed when done)
         """
         if plugin_path:
-            f = pathlib.Path(plugin_path) / f'{lang}.strings'
-            if not f.exists():
+            file_path = join(plugin_path, f'{lang}.strings')
+            if not exists(file_path):
                 return None
 
             try:
-                return f.open('r', encoding='utf-8')
-
+                return open(file_path, encoding='utf-8')
             except OSError:
-                logger.exception(f'could not open {f}')
+                logger.exception(f'could not open {file_path}')
 
         elif getattr(sys, 'frozen', False) and sys.platform == 'darwin':
-            return (self.respath() / f'{lang}.lproj' / 'Localizable.strings').open('r', encoding='utf-16')
+            res_path = join(self.respath(), f'{lang}.lproj', 'Localizable.strings')
+            return open(res_path, encoding='utf-16')
 
-        return (self.respath() / f'{lang}.strings').open('r', encoding='utf-8')
+        res_path = join(self.respath(), f'{lang}.strings')
+        return open(res_path, encoding='utf-8')
 
 
 class _Locale:
@@ -250,11 +255,11 @@ class _Locale:
             self.float_formatter.setMinimumFractionDigits_(5)
             self.float_formatter.setMaximumFractionDigits_(5)
 
-    def stringFromNumber(self, number: Union[float, int], decimals: int | None = None) -> str:  # noqa: N802
+    def stringFromNumber(self, number: float | int, decimals: int | None = None) -> str:  # noqa: N802
         warnings.warn(DeprecationWarning('use _Locale.string_from_number instead.'))
         return self.string_from_number(number, decimals)  # type: ignore
 
-    def numberFromString(self, string: str) -> Union[int, float, None]:  # noqa: N802
+    def numberFromString(self, string: str) -> int | float | None:  # noqa: N802
         warnings.warn(DeprecationWarning('use _Locale.number_from_string instead.'))
         return self.number_from_string(string)
 
@@ -262,7 +267,7 @@ class _Locale:
         warnings.warn(DeprecationWarning('use _Locale.preferred_languages instead.'))
         return self.preferred_languages()
 
-    def string_from_number(self, number: Union[float, int], decimals: int = 5) -> str:
+    def string_from_number(self, number: float | int, decimals: int = 5) -> str:
         """
         Convert a number to a string.
 
@@ -285,11 +290,9 @@ class _Locale:
 
         if not decimals and isinstance(number, numbers.Integral):
             return locale.format_string('%d', number, True)
+        return locale.format_string('%.*f', (decimals, number), True)
 
-        else:
-            return locale.format_string('%.*f', (decimals, number), True)
-
-    def number_from_string(self, string: str) -> Union[int, float, None]:
+    def number_from_string(self, string: str) -> int | float | None:
         """
         Convert a string to a number using the system locale.
 
@@ -308,7 +311,17 @@ class _Locale:
 
         return None
 
-    def preferred_languages(self) -> Iterable[str]:  # noqa: CCR001
+    def wszarray_to_list(self, array):
+        offset = 0
+        while offset < len(array):
+            sz = ctypes.wstring_at(ctypes.addressof(array) + offset * 2)  # type: ignore
+            if sz:
+                yield sz
+                offset += len(sz) + 1
+            else:
+                break
+
+    def preferred_languages(self) -> Iterable[str]:
         """
         Return a list of preferred language codes.
 
@@ -326,32 +339,21 @@ class _Locale:
         elif sys.platform != 'win32':
             # POSIX
             lang = locale.getlocale()[0]
-            languages = lang and [lang.replace('_', '-')] or []
+            languages = [lang.replace('_', '-')] if lang else []
 
         else:
-            def wszarray_to_list(array):
-                offset = 0
-                while offset < len(array):
-                    sz = ctypes.wstring_at(ctypes.addressof(array) + offset*2)
-                    if sz:
-                        yield sz
-                        offset += len(sz)+1
-
-                    else:
-                        break
-
             num = ctypes.c_ulong()
             size = ctypes.c_ulong(0)
             languages = []
             if GetUserPreferredUILanguages(
-                    MUI_LANGUAGE_NAME, ctypes.byref(num), None, ctypes.byref(size)
+                MUI_LANGUAGE_NAME, ctypes.byref(num), None, ctypes.byref(size)
             ) and size.value:
                 buf = ctypes.create_unicode_buffer(size.value)
 
                 if GetUserPreferredUILanguages(
-                        MUI_LANGUAGE_NAME, ctypes.byref(num), ctypes.byref(buf), ctypes.byref(size)
+                    MUI_LANGUAGE_NAME, ctypes.byref(num), ctypes.byref(buf), ctypes.byref(size)
                 ):
-                    languages = wszarray_to_list(buf)
+                    languages = self.wszarray_to_list(buf)
 
         # HACK: <n/a> | 2021-12-11: OneSky calls "Chinese Simplified" "zh-Hans"
         #    in the name of the file, but that will be zh-CN in terms of
@@ -369,14 +371,13 @@ Translations = _Translations()
 # generate template strings file - like xgettext
 # parsing is limited - only single ' or " delimited strings, and only one string per line
 if __name__ == "__main__":
-    import re
     regexp = re.compile(r'''_\([ur]?(['"])(((?<!\\)\\\1|.)+?)\1\)[^#]*(#.+)?''')  # match a single line python literal
-    seen: Dict[str, str] = {}
+    seen: dict[str, str] = {}
     for f in (
-        sorted(x for x in os.listdir('.') if x.endswith('.py')) +
-        sorted(join('plugins', x) for x in (os.listdir('plugins') if isdir('plugins') else []) if x.endswith('.py'))
+        sorted(x for x in listdir('.') if x.endswith('.py')) +
+        sorted(join('plugins', x) for x in (listdir('plugins') if isdir('plugins') else []) if x.endswith('.py'))
     ):
-        with open(f, 'r', encoding='utf-8') as h:
+        with open(f, encoding='utf-8') as h:
             lineno = 0
             for line in h:
                 lineno += 1
@@ -386,9 +387,9 @@ if __name__ == "__main__":
                         (match.group(4) and (match.group(4)[1:].strip()) + '. ' or '') + f'[{basename(f)}]'
                     )
     if seen:
-        target_path = pathlib.Path(LOCALISATION_DIR) / 'en.template.new'
-        target_path.parent.mkdir(exist_ok=True)
-        with target_path.open('w', encoding='utf-8') as target_file:
+        target_path = join(LOCALISATION_DIR, 'en.template.new')
+        makedirs(dirname(target_path), exist_ok=True)
+        with open(target_path, 'w', encoding='utf-8') as target_file:
             target_file.write(f'/* Language name */\n"{LANGUAGE_ID}" = "English";\n\n')
             for thing in sorted(seen, key=str.lower):
                 if seen[thing]:

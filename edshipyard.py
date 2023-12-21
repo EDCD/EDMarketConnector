@@ -1,12 +1,13 @@
 """Export ship loadout in ED Shipyard plain text format."""
+from __future__ import annotations
 
+import json
 import os
 import pathlib
-import pickle
 import re
 import time
 from collections import defaultdict
-from typing import Dict, List, Union
+from typing import Union
 
 import outfitting
 import util_ships
@@ -17,14 +18,15 @@ from EDMCLogging import get_main_logger
 
 logger = get_main_logger()
 
-__Module = Dict[str, Union[str, List[str]]]
+__Module = dict[str, Union[str, list[str]]]  # Have to keep old-style here for compatibility
 
 # Map API ship names to ED Shipyard names
 ship_map = ship_name_map.copy()
 
 # Ship masses
-# TODO: prefer something other than pickle for this storage (dev readability, security)
-ships = pickle.load(open(pathlib.Path(config.respath_path) / 'ships.p', 'rb'))
+ships_file = config.respath_path / "resources" / "ships.json"
+with open(ships_file, encoding="utf-8") as ships_file_handle:
+    ships = json.load(ships_file_handle)
 
 
 def export(data, filename=None) -> None:  # noqa: C901, CCR001
@@ -75,7 +77,6 @@ def export(data, filename=None) -> None:  # noqa: C901, CCR001
     jumpboost = 0
 
     for slot in sorted(data['ship']['modules']):
-
         v = data['ship']['modules'][slot]
         try:
             if not v:
@@ -116,15 +117,14 @@ def export(data, filename=None) -> None:  # noqa: C901, CCR001
 
             jumpboost += module.get('jumpboost', 0)  # type: ignore
 
-            for s in slot_map:
-                if slot.lower().startswith(s):
-                    loadout[slot_map[s]].append(cr + name)
+            for slot_prefix, index in slot_map.items():
+                if slot.lower().startswith(slot_prefix):
+                    loadout[index].append(cr + name)
                     break
 
             else:
                 if slot.lower().startswith('slot'):
                     loadout[slot[-1]].append(cr + name)
-
                 elif not slot.lower().startswith('planetaryapproachsuite'):
                     logger.debug(f'EDShipyard: Unknown slot {slot}')
 
@@ -138,7 +138,6 @@ def export(data, filename=None) -> None:  # noqa: C901, CCR001
 
     # Construct description
     ship = ship_map.get(data['ship']['name'].lower(), data['ship']['name'])
-
     if data['ship'].get('shipName') is not None:
         _ships = f'{ship}, {data["ship"]["shipName"]}'
 
@@ -185,7 +184,6 @@ def export(data, filename=None) -> None:  # noqa: C901, CCR001
     if filename:
         with open(filename, 'wt') as h:
             h.write(string)
-
         return
 
     # Look for last ship of this type
@@ -193,7 +191,7 @@ def export(data, filename=None) -> None:  # noqa: C901, CCR001
     regexp = re.compile(re.escape(ship) + r'\.\d{4}-\d\d-\d\dT\d\d\.\d\d\.\d\d\.txt')
     oldfiles = sorted([x for x in os.listdir(config.get_str('outdir')) if regexp.match(x)])
     if oldfiles:
-        with (pathlib.Path(config.get_str('outdir')) / oldfiles[-1]).open('r') as h:
+        with (pathlib.Path(config.get_str('outdir')) / oldfiles[-1]).open() as h:
             if h.read() == string:
                 return  # same as last time - don't write
 

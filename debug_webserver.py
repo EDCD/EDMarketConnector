@@ -1,4 +1,6 @@
 """Simple HTTP listener to be used with debugging various EDMC sends."""
+from __future__ import annotations
+
 import gzip
 import json
 import pathlib
@@ -6,7 +8,7 @@ import tempfile
 import threading
 import zlib
 from http import server
-from typing import Any, Callable, Literal, Tuple, Union
+from typing import Any, Callable, Literal
 from urllib.parse import parse_qs
 
 from config import appname
@@ -21,9 +23,6 @@ SAFE_TRANSLATE = str.maketrans({x: '_' for x in "!@#$%^&*()./\\\r\n[]-+='\";:?<>
 
 class LoggingHandler(server.BaseHTTPRequestHandler):
     """HTTP Handler implementation that logs to EDMCs logger and writes data to files on disk."""
-
-    def __init__(self, request, client_address: Tuple[str, int], server) -> None:
-        super().__init__(request, client_address, server)
 
     def log_message(self, format: str, *args: Any) -> None:
         """Override default handler logger with EDMC logger."""
@@ -45,7 +44,7 @@ class LoggingHandler(server.BaseHTTPRequestHandler):
         elif len(target_path) == 1 and target_path[0] == '/':
             target_path = 'WEB_ROOT'
 
-        response: Union[Callable[[str], str], str, None] = DEFAULT_RESPONSES.get(target_path)
+        response: Callable[[str], str] | str | None = DEFAULT_RESPONSES.get(target_path)
         if callable(response):
             response = response(to_save)
 
@@ -69,11 +68,11 @@ class LoggingHandler(server.BaseHTTPRequestHandler):
         target_file = output_data_path / (safe_file_name(target_path) + '.log')
         if target_file.parent != output_data_path:
             logger.warning(f"REFUSING TO WRITE FILE THAT ISN'T IN THE RIGHT PLACE! {target_file=}")
-            logger.warning(f'DATA FOLLOWS\n{data}')  # type: ignore # mypy thinks data is a byte string here
+            logger.warning(f'DATA FOLLOWS\n{data}')
             return
 
-        with output_lock, target_file.open('a') as f:
-            f.write(to_save + "\n\n")
+        with output_lock, target_file.open('a') as file:
+            file.write(to_save + "\n\n")
 
     @staticmethod
     def get_printable(data: bytes, compression: Literal['deflate'] | Literal['gzip'] | str | None = None) -> str:

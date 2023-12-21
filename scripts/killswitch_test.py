@@ -116,9 +116,14 @@ if __name__ == '__main__':
     if file_name == '-':
         file = sys.stdin
     else:
-        file = open(file_name)
-
-    res = json.load(file)
-    file.close()
+        try:
+            with open(file_name) as file:
+                res = json.load(file)
+        except FileNotFoundError:
+            print(f"File '{file_name}' not found.")
+            sys.exit(1)
+        except json.JSONDecodeError:
+            print(f"Error decoding JSON in '{file_name}'.")
+            sys.exit(1)
 
     show_killswitch_set_info(KillSwitchSet(parse_kill_switches(res)))

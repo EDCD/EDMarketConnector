@@ -1,8 +1,18 @@
+# Ignore version file
 .gitversion
+
+# Ignore macOS DS_Store files
 .DS_Store
+
+# Ignore build artifacts
 build
-ChangeLog.html
+dist.win32/
 dist.*
+
+# Ignore generated ChangeLog.html file
+ChangeLog.html
+
+# Ignore files
 dump
 *.bak
 *.pyc
@@ -11,20 +21,37 @@ dump
 *.pdb
 *.msi
 *.wixobj
+*.zip
+
+# Ignore Update Things
 EDMarketConnector_Installer_*.exe
 appcast_win_*.xml
 appcast_mac_*.xml
-EDMarketConnector.VisualElementsManifest.xml
-*.zip
 EDMC_Installer_Config.iss
+EDMarketConnector.wxs
+wix/components.wxs
 
+# Ignore Visual Elements Manifest file for Windows
+EDMarketConnector.VisualElementsManifest.xml
+
+# Ignore IDE and editor configuration files
 .idea
 .vscode
+
+# Ignore virtual environments
 .venv/
 venv/
+venv2
+
+# Ignore workspace file for Visual Studio Code
 *.code-workspace
+
+# Ignore coverage reports
 htmlcov/
 .ignored
 .coverage
-EDMarketConnector.wxs
-wix/components.wxs
+pylintrc
+pylint.txt
+
+# Ignore Submodule data directory
+coriolis-data/

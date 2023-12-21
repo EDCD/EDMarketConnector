@@ -1,13 +1,17 @@
-"""Export ship loadout in Companion API json format."""
+"""
+loadout.py - Export ship loadout in Companion API json format.
+
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
+"""
+from __future__ import annotations
 
 import json
-import os
-import pathlib
 import re
 import time
+from os import listdir
 from os.path import join
-from typing import Optional
-
 import companion
 import util_ships
 from config import config
@@ -16,7 +20,7 @@ from EDMCLogging import get_main_logger
 logger = get_main_logger()
 
 
-def export(data: companion.CAPIData, requested_filename: Optional[str] = None) -> None:
+def export(data: companion.CAPIData, requested_filename: str | None = None) -> None:
     """
     Write Ship Loadout in Companion API JSON format.
 
@@ -32,15 +36,14 @@ def export(data: companion.CAPIData, requested_filename: Optional[str] = None) -
         with open(requested_filename, 'wt') as h:
             h.write(string)
         return
-
-    elif not requested_filename:
+    if not requested_filename:
         logger.error(f"{requested_filename=} is not valid")
         return
 
     # Look for last ship of this type
     ship = util_ships.ship_file_name(data['ship'].get('shipName'), data['ship']['name'])
-    regexp = re.compile(re.escape(ship) + r'\.\d\d\d\d\-\d\d\-\d\dT\d\d\.\d\d\.\d\d\.txt')
-    oldfiles = sorted([x for x in os.listdir(config.get_str('outdir')) if regexp.match(x)])
+    regexp = re.compile(re.escape(ship) + r'\.\d\d\d\d-\d\d-\d\dT\d\d\.\d\d\.\d\d\.txt')
+    oldfiles = sorted([x for x in listdir(config.get_str('outdir')) if regexp.match(x)])
     if oldfiles:
         with open(join(config.get_str('outdir'), oldfiles[-1]), 'rU') as h:
             if h.read() == string:
@@ -50,10 +53,9 @@ def export(data: companion.CAPIData, requested_filename: Optional[str] = None) -
 
     # Write
 
-    with open(
-        pathlib.Path(config.get_str('outdir')) / pathlib.Path(
-            ship + '.' + time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(query_time)) + '.txt'
-        ),
-        'wt'
-    ) as h:
+    output_directory = config.get_str('outdir')
+    ship_time = time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(query_time))
+    file_path = join(output_directory, f"{ship}.{ship_time}.txt")
+
+    with open(file_path, 'wt') as h:
         h.write(string)

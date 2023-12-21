@@ -1,9 +1,14 @@
 """
-Theme support.
+theme.py - Theme support.
+
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
 
 Because of various ttk limitations this app is an unholy mix of Tk and ttk widgets.
 So can't use ttk's theme support. So have to change colors manually.
 """
+from __future__ import annotations
 
 import os
 import sys
@@ -11,7 +16,7 @@ import tkinter as tk
 from os.path import join
 from tkinter import font as tk_font
 from tkinter import ttk
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Set, Tuple
+from typing import TYPE_CHECKING, Callable
 
 from config import config
 from EDMCLogging import get_main_logger
@@ -36,7 +41,7 @@ if sys.platform == 'win32':
     AddFontResourceEx.restypes = [LPCWSTR, DWORD, LPCVOID]  # type: ignore
     FR_PRIVATE = 0x10
     FR_NOT_ENUM = 0x20
-    AddFontResourceEx(join(config.respath, u'EUROCAPS.TTF'), FR_PRIVATE, 0)
+    AddFontResourceEx(join(config.respath, 'EUROCAPS.TTF'), FR_PRIVATE, 0)
 
 elif sys.platform == 'linux':
     # pyright: reportUnboundVariable=false
@@ -121,7 +126,7 @@ elif sys.platform == 'linux':
             dpy = None
 
 
-class _Theme(object):
+class _Theme:
 
     # Enum ?  Remember these are, probably, based on 'value' of a tk
     # RadioButton set.  Looking in prefs.py, they *appear* to be hard-coded
@@ -132,18 +137,18 @@ class _Theme(object):
 
     def __init__(self) -> None:
         self.active: int | None = None  # Starts out with no theme
-        self.minwidth: Optional[int] = None
-        self.widgets: Dict[tk.Widget | tk.BitmapImage, Set] = {}
-        self.widgets_pair: List = []
-        self.defaults: Dict = {}
-        self.current: Dict = {}
+        self.minwidth: int | None = None
+        self.widgets: dict[tk.Widget | tk.BitmapImage, set] = {}
+        self.widgets_pair: list = []
+        self.defaults: dict = {}
+        self.current: dict = {}
         self.default_ui_scale: float | None = None  # None == not yet known
         self.startup_ui_scale: int | None = None
 
     def register(self, widget: tk.Widget | tk.BitmapImage) -> None:  # noqa: CCR001, C901
         # Note widget and children for later application of a theme. Note if
         # the widget has explicit fg or bg attributes.
-        assert isinstance(widget, tk.Widget) or isinstance(widget, tk.BitmapImage), widget
+        assert isinstance(widget, (tk.BitmapImage, tk.Widget)), widget
         if not self.defaults:
             # Can't initialise this til window is created       # Windows, MacOS
             self.defaults = {
@@ -169,14 +174,14 @@ class _Theme(object):
                     attribs.add('fg')
                 if widget['background'] not in ['', self.defaults['bitmapbg']]:
                     attribs.add('bg')
-            elif isinstance(widget, tk.Entry) or isinstance(widget, ttk.Entry):
+            elif isinstance(widget, (tk.Entry, ttk.Entry)):
                 if widget['foreground'] not in ['', self.defaults['entryfg']]:
                     attribs.add('fg')
                 if widget['background'] not in ['', self.defaults['entrybg']]:
                     attribs.add('bg')
                 if 'font' in widget.keys() and str(widget['font']) not in ['', self.defaults['entryfont']]:
                     attribs.add('font')
-            elif isinstance(widget, tk.Frame) or isinstance(widget, ttk.Frame) or isinstance(widget, tk.Canvas):
+            elif isinstance(widget, (tk.Canvas, tk.Frame, ttk.Frame)):
                 if (
                     ('background' in widget.keys() or isinstance(widget, tk.Canvas))
                     and widget['background'] not in ['', self.defaults['frame']]
@@ -200,21 +205,21 @@ class _Theme(object):
                     attribs.add('font')
             self.widgets[widget] = attribs
 
-        if isinstance(widget, tk.Frame) or isinstance(widget, ttk.Frame):
+        if isinstance(widget, (tk.Frame, ttk.Frame)):
             for child in widget.winfo_children():
                 self.register(child)
 
-    def register_alternate(self, pair: Tuple, gridopts: Dict) -> None:
+    def register_alternate(self, pair: tuple, gridopts: dict) -> None:
         self.widgets_pair.append((pair, gridopts))
 
     def button_bind(
-        self, widget: tk.Widget, command: Callable, image: Optional[tk.BitmapImage] = None
+        self, widget: tk.Widget, command: Callable, image: tk.BitmapImage | None = None
     ) -> None:
         widget.bind('<Button-1>', command)
         widget.bind('<Enter>', lambda e: self._enter(e, image))
         widget.bind('<Leave>', lambda e: self._leave(e, image))
 
-    def _enter(self, event: tk.Event, image: Optional[tk.BitmapImage]) -> None:
+    def _enter(self, event: tk.Event, image: tk.BitmapImage | None) -> None:
         widget = event.widget
         if widget and widget['state'] != tk.DISABLED:
             try:
@@ -231,7 +236,7 @@ class _Theme(object):
                 except Exception:
                     logger.exception(f'Failure configuring image: {image=}')
 
-    def _leave(self, event: tk.Event, image: Optional[tk.BitmapImage]) -> None:
+    def _leave(self, event: tk.Event, image: tk.BitmapImage | None) -> None:
         widget = event.widget
         if widget and widget['state'] != tk.DISABLED:
             try:
@@ -299,13 +304,13 @@ class _Theme(object):
         Also, register it for future updates.
         :param widget: Target widget.
         """
-        assert isinstance(widget, tk.Widget) or isinstance(widget, tk.BitmapImage), widget
+        assert isinstance(widget, (tk.BitmapImage, tk.Widget)), widget
         if not self.current:
             return  # No need to call this for widgets created in plugin_app()
 
         self.register(widget)
         self._update_widget(widget)
-        if isinstance(widget, tk.Frame) or isinstance(widget, ttk.Frame):
+        if isinstance(widget, (tk.Frame, ttk.Frame)):
             for child in widget.winfo_children():
                 self._update_widget(child)
 
@@ -314,7 +319,7 @@ class _Theme(object):
         if widget not in self.widgets:
             if isinstance(widget, tk.Widget):
                 w_class = widget.winfo_class()
-                w_keys: List[str] = widget.keys()
+                w_keys: list[str] = widget.keys()
 
             else:
                 # There is no tk.BitmapImage.winfo_class()
@@ -325,7 +330,7 @@ class _Theme(object):
             assert_str = f'{w_class} {widget} "{"text" in w_keys and widget["text"]}"'
             raise AssertionError(assert_str)
 
-        attribs: Set = self.widgets.get(widget, set())
+        attribs: set = self.widgets.get(widget, set())
 
         try:
             if isinstance(widget, tk.BitmapImage):
@@ -355,7 +360,7 @@ class _Theme(object):
                 # e.g. tk.Button, tk.Label, tk.Menu
                 if 'fg' not in attribs:
                     widget['foreground'] = self.current['foreground']
-                    widget['activeforeground'] = self.current['activeforeground'],
+                    widget['activeforeground'] = self.current['activeforeground']
                     widget['disabledforeground'] = self.current['disabledforeground']
 
                 if 'bg' not in attribs:
@@ -419,9 +424,7 @@ class _Theme(object):
 
         if self.active == theme:
             return  # Don't need to mess with the window manager
-
-        else:
-            self.active = theme
+        self.active = theme
 
         if sys.platform == 'darwin':
             from AppKit import NSAppearance, NSApplication, NSMiniaturizableWindowMask, NSResizableWindowMask

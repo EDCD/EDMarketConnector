@@ -1,8 +1,10 @@
 """darwin/macOS implementation of hotkey.AbstractHotkeyMgr."""
+from __future__ import annotations
+
 import pathlib
 import sys
 import tkinter as tk
-from typing import Callable, Optional, Tuple, Union
+from typing import Callable
 assert sys.platform == 'darwin'
 
 import objc
@@ -107,7 +109,7 @@ class MacHotkeyMgr(AbstractHotkeyMgr):
                 # suppress the event by not chaining the old function
                 return the_event
 
-            elif the_event.type() in (NSKeyDown, NSKeyUp):
+            if the_event.type() in (NSKeyDown, NSKeyUp):
                 c = the_event.charactersIgnoringModifiers()
                 self.acquire_key = (c and ord(c[0]) or 0) | \
                                    (the_event.modifierFlags() & NSDeviceIndependentModifierFlagsMask)
@@ -192,7 +194,7 @@ class MacHotkeyMgr(AbstractHotkeyMgr):
                 self.acquire_state = MacHotkeyMgr.ACQUIRE_ACTIVE
             self.root.after(50, self._acquire_poll)
 
-    def fromevent(self, event) -> Optional[Union[bool, Tuple]]:
+    def fromevent(self, event) -> bool | tuple | None:
         """
         Return configuration (keycode, modifiers) or None=clear or False=retain previous.
 
@@ -209,17 +211,17 @@ class MacHotkeyMgr(AbstractHotkeyMgr):
                 return False
 
             # BkSp, Del, Clear = clear hotkey
-            elif keycode in [0x7f, ord(NSDeleteFunctionKey), ord(NSClearLineFunctionKey)]:
+            if keycode in [0x7f, ord(NSDeleteFunctionKey), ord(NSClearLineFunctionKey)]:
                 self.acquire_state = MacHotkeyMgr.ACQUIRE_INACTIVE
                 return None
 
             # don't allow keys needed for typing in System Map
-            elif keycode in [0x13, 0x20, 0x2d] or 0x61 <= keycode <= 0x7a:
+            if keycode in [0x13, 0x20, 0x2d] or 0x61 <= keycode <= 0x7a:
                 NSBeep()
                 self.acquire_state = MacHotkeyMgr.ACQUIRE_INACTIVE
                 return None
 
-        return (keycode, modifiers)
+        return keycode, modifiers
 
     def display(self, keycode, modifiers) -> str:
         """

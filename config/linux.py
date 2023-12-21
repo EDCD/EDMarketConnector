@@ -1,9 +1,14 @@
-"""Linux config implementation."""
+"""
+linux.py - Linux config implementation.
+
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
+"""
 import os
 import pathlib
 import sys
 from configparser import ConfigParser
-
 from config import AbstractConfig, appname, logger
 
 assert sys.platform == 'linux'

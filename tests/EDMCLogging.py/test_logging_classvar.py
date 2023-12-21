@@ -37,7 +37,7 @@ def test_class_logger(caplog: 'LogCaptureFixture') -> None:
     ClassVarLogger.set_logger(logger)
     ClassVarLogger.logger.debug('test')  # type: ignore # its there
     ClassVarLogger.logger.info('test2')  # type: ignore # its there
-    log_stuff('test3')  # type: ignore # its there
+    log_stuff('test3')
 
     # Dont move these, it relies on the line numbres.
     assert 'EDMarketConnector.EDMCLogging.py:test_logging_classvar.py:38 test' in caplog.text

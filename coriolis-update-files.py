@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
 """
-Build ship and module databases from https://github.com/EDCD/coriolis-data/ .
+coriolis-update-files.py - Build ship and module databases from https://github.com/EDCD/coriolis-data/.
 
-This script also utilise the file outfitting.csv.   Due to how collate.py
-both reads and writes to this file a local copy is used, in the root of the
-project structure, is used for this purpose.  If you want to utilise the
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
+
+This script also utilizes the file outfitting.csv. Due to how collate.py
+both reads and writes to this file, a local copy in the root of the
+project structure is used for this purpose. If you want to utilize the
 FDevIDs/ version of the file, copy it over the local one.
 """
 
 
 import json
-import pickle
 import subprocess
 import sys
 from collections import OrderedDict
@@ -26,10 +29,16 @@ if __name__ == "__main__":
         assert name not in modules, name
         modules[name] = attributes
 
-    # Regenerate coriolis-data distribution
-    subprocess.check_call('npm install', cwd='coriolis-data', shell=True, stdout=sys.stdout, stderr=sys.stderr)
+    try:
+        # Regenerate coriolis-data distribution
+        subprocess.check_call('npm install', cwd='coriolis-data', shell=True, stdout=sys.stdout, stderr=sys.stderr)
+    except NotADirectoryError:
+        sys.exit("Coriolis-Data Directory not found! Have you set up your submodules? \n"
+                 "https://github.com/EDCD/EDMarketConnector/wiki/Running-from-source#obtain-a-copy-of-the-application-source")  # noqa: E501
 
-    data = json.load(open('coriolis-data/dist/index.json'))
+    file_path = 'coriolis-data/dist/index.json'
+    with open(file_path) as file:
+        data = json.load(file)
 
     # Symbolic name from in-game name
     reverse_ship_map = {v: k for k, v in list(ship_name_map.items())}
@@ -44,11 +53,12 @@ if __name__ == "__main__":
         name = coriolis_ship_map.get(m['properties']['name'], str(m['properties']['name']))
         assert name in reverse_ship_map, name
         ships[name] = {'hullMass': m['properties']['hullMass']}
-        for i in range(len(bulkheads)):
-            modules['_'.join([reverse_ship_map[name], 'armour', bulkheads[i]])] = {'mass': m['bulkheads'][i]['mass']}
+        for i, bulkhead in enumerate(bulkheads):
+            modules['_'.join([reverse_ship_map[name], 'armour', bulkhead])] = {'mass': m['bulkheads'][i]['mass']}
 
     ships = OrderedDict([(k, ships[k]) for k in sorted(ships)])  # sort for easier diffing
-    pickle.dump(ships, open('ships.p', 'wb'))
+    with open("resources/ships.json", "w") as ships_file:
+        json.dump(ships, ships_file, indent=4)
 
     # Module masses
     for cat in list(data['Modules'].values()):
@@ -82,4 +92,5 @@ if __name__ == "__main__":
     add(modules, 'hpt_multicannon_fixed_medium_advanced',         {'mass': 4})
 
     modules = OrderedDict([(k, modules[k]) for k in sorted(modules)])  # sort for easier diffing
-    pickle.dump(modules, open('modules.p', 'wb'))
+    with open("resources/modules.json", "w") as modules_file:
+        json.dump(modules, modules_file, indent=4)

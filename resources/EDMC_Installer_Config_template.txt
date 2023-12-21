@@ -1,6 +1,7 @@
 #define MyAppName "EDMarketConnector"
 #define MyAppLongName "Elite Dangerous Market Connector"
 #define MyAppVersion "$appver"
+#define MyAppUpdateTime "$update_time"
 #define MyAppPublisher "EDCD"
 #define MyAppURL "https://edcd.github.io/"
 #define SuppURL "https://github.com/EDCD/EDMarketConnector/"
@@ -34,6 +35,7 @@ AlwaysShowDirOnReadyPage=yes
 UninstallDisplayIcon={app}\{#MyAppExeName}
 MinVersion=6.2
 ChangesAssociations = yes
+UsedUserAreasWarning = no
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -113,6 +115,11 @@ Root: HKCR; Subkey: "edmc\shell\open"; Flags: uninsdeletekey
 Root: HKCR; Subkey: "edmc\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\EDMarketConnector.exe"" ""%1"""; Flags: uninsdeletekey
 ; Create the "ddeexec" subkey under the "open" subkey
 Root: HKCR; Subkey: "edmc\shell\open\ddeexec"; ValueType: string; ValueName: ""; ValueData: "Open(""%1"")"; Flags: uninsdeletekey
+; Create WinSparkle related keys for update values
+Root: HKCU; Subkey: "Software\EDCD\EDMarketConnector"; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\EDCD\EDMarketConnector\WinSparkle"; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\EDCD\EDMarketConnector\WinSparkle"; ValueType: string; ValueName: "UpdateInterval"; ValueData: "{#MyAppUpdateTime}"; Flags: createvalueifdoesntexist
+Root: HKCU; Subkey: "Software\EDCD\EDMarketConnector\WinSparkle"; ValueType: string; ValueName: "CheckForUpdates"; ValueData: "1"; Flags: createvalueifdoesntexist
 
 [InstallDelete]
 Type: filesandordirs; Name: "{app}"

@@ -34,6 +34,7 @@ To utilise logging in a 'found' (third-party) plugin, include this:
     # See, plug.py:load_plugins()
     logger = logging.getLogger(f'{appname}.{plugin_name}')
 """
+from __future__ import annotations
 
 import inspect
 import logging
@@ -48,7 +49,7 @@ from sys import _getframe as getframe
 from threading import get_native_id as thread_native_id
 from time import gmtime
 from traceback import print_exc
-from typing import TYPE_CHECKING, Tuple, cast
+from typing import TYPE_CHECKING, cast
 
 import config as config_mod
 from config import appcmdname, appname, config
@@ -122,7 +123,6 @@ if TYPE_CHECKING:
 
         def trace(self, message, *args, **kwargs) -> None:
             """See implementation above."""
-            ...
 
         def trace_if(self, condition: str, message, *args, **kwargs) -> None:
             """
@@ -130,7 +130,6 @@ if TYPE_CHECKING:
 
             See implementation above.
             """
-            ...
 
 
 class Logger:
@@ -183,18 +182,12 @@ class Logger:
         # rotated versions.
         # This is {logger_name} so that EDMC.py logs to a different file.
         logfile_rotating = pathlib.Path(tempfile.gettempdir())
-        logfile_rotating = logfile_rotating / f'{appname}'
+        logfile_rotating /= f'{appname}'
         logfile_rotating.mkdir(exist_ok=True)
-        logfile_rotating = logfile_rotating / f'{logger_name}-debug.log'
+        logfile_rotating /= f'{logger_name}-debug.log'
 
-        self.logger_channel_rotating = logging.handlers.RotatingFileHandler(
-            logfile_rotating,
-            mode='a',
-            maxBytes=1024 * 1024,  # 1MiB
-            backupCount=10,
-            encoding='utf-8',
-            delay=False
-        )
+        self.logger_channel_rotating = logging.handlers.RotatingFileHandler(logfile_rotating, maxBytes=1024 * 1024,
+                                                                            backupCount=10, encoding='utf-8')
         # Yes, we always want these rotated files to be at TRACE level
         self.logger_channel_rotating.setLevel(logging.TRACE)  # type: ignore
         self.logger_channel_rotating.setFormatter(self.logger_formatter)
@@ -325,7 +318,7 @@ class EDMCContextFilter(logging.Filter):
         return True
 
     @classmethod
-    def caller_attributes(cls, module_name: str = '') -> Tuple[str, str, str]:  # noqa: CCR001, E501, C901 # this is as refactored as is sensible
+    def caller_attributes(cls, module_name: str = '') -> tuple[str, str, str]:  # noqa: CCR001, E501, C901 # this is as refactored as is sensible
         """
         Determine extra or changed fields for the caller.
 
@@ -535,9 +528,8 @@ def get_main_logger(sublogger_name: str = '') -> 'LoggerMixin':
     if not os.getenv("EDMC_NO_UI"):
         # GUI app being run
         return cast('LoggerMixin', logging.getLogger(appname))
-    else:
-        # Must be the CLI
-        return cast('LoggerMixin', logging.getLogger(appcmdname))
+    # Must be the CLI
+    return cast('LoggerMixin', logging.getLogger(appcmdname))
 
 
 # Singleton
