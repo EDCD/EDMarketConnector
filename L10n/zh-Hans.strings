@@ -94,6 +94,12 @@
 /* EDMarketConnector.py: Help > Documentation; In files: EDMarketConnector.py:933; EDMarketConnector.py:953; */
 "Documentation" = "帮助文档";
 
+/* EDMarketConnector.py: Help > Troubleshooting; In files: EDMarketConnector.py:934; EDMarketConnector.py:954; */
+"Troubleshooting" = "故障排除";
+
+/* EDMarketConnector.py: Help > Report A Bug; In files: EDMarketConnector.py:935; EDMarketConnector.py:955; */
+"Report A Bug" = "Bug 反馈";
+
 /* EDMarketConnector.py: Help > Privacy Policy; In files: EDMarketConnector.py:936; EDMarketConnector.py:956; */
 "Privacy Policy" = "隐私政策";
 
@@ -108,6 +114,9 @@
 
 /* EDMarketConnector.py: Label for 'Copy' as in 'Copy and Paste'; ttkHyperlinkLabel.py: Label for 'Copy' as in 'Copy and Paste'; In files: EDMarketConnector.py:962; ttkHyperlinkLabel.py:53; */
 "Copy" = "复制";
+
+/* EDMarketConnector.py: CAPI auth aborted because of killswitch; EDMarketConnector.py: CAPI auth query aborted because of killswitch; In files: EDMarketConnector.py:973; EDMarketConnector.py:1067; */
+"CAPI auth disabled by killswitch" = "CAPI 验证被 killswitch 禁用";
 
 /* EDMarketConnector.py: Status - Attempting to get a Frontier Auth Access Token; In files: EDMarketConnector.py:978; */
 "Logging in..." = "登录中…";
@@ -130,6 +139,9 @@
 /* EDMarketConnector.py: CAPI queries aborted because game mode unknown; In files: EDMarketConnector.py:1083; */
 "CAPI query aborted: Game mode unknown" = "CAPI 访问中止：游戏模式未知";
 
+/* EDMarketConnector.py: CAPI queries aborted because GameVersion unknown; EDMarketConnector.py: CAPI fleetcarrier query aborted because GameVersion unknown; In files: EDMarketConnector.py:1089; EDMarketConnector.py:1170; */
+"CAPI query aborted: GameVersion unknown" = "CAPI 访问中止：未知的游戏版本";
+
 /* EDMarketConnector.py: CAPI queries aborted because current star system name unknown; In files: EDMarketConnector.py:1095; */
 "CAPI query aborted: Current system unknown" = "CAPI 访问中止：现星系名称未知";
 
@@ -141,6 +153,15 @@
 
 /* EDMarketConnector.py: Status - Attempting to retrieve data from Frontier CAPI; In files: EDMarketConnector.py:1128; EDMarketConnector.py:1179; */
 "Fetching data..." = "取得数据…";
+
+/* EDMarketConnector.py: CAPI fleetcarrier query aborted because of killswitch; In files: EDMarketConnector.py:1157; */
+"CAPI fleetcarrier disabled by killswitch" = "CAPI 舰队母舰 (fleet carrier) 被 killswitch 禁用";
+
+/* EDMarketConnector.py: No data was returned for the fleetcarrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
+"CAPI: No fleetcarrier data returned" = "CAPI：无舰队母舰 (fleet carrier) 数据";
+
+/* EDMarketConnector.py: We didn't have the fleetcarrier callsign when we should have; In files: EDMarketConnector.py:1223; */
+"CAPI: Fleetcarrier data incomplete" = "CAPI：舰队母舰 (fleet carrier) 数据不完整";
 
 /* EDMarketConnector.py: No data was returned for the commander from the Frontier CAPI; In files: EDMarketConnector.py:1242; */
 "CAPI: No commander data returned" = "CAPI：没有指挥官数据";
@@ -259,9 +280,6 @@
 /* eddn.py: Status text shown while attempting to send data; In files: eddn.py:2507; */
 "Sending data to EDDN..." = "正在向 EDDN 发送数据…";
 
-/* edsm.py: Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:308; */
-"Send flight log and Cmdr status to EDSM" = "发送航行日志和指挥官状态到 EDSM";
-
 /* edsm.py: Settings>EDSM - Label on header/URL to EDSM API key page; In files: edsm.py:319; */
 "Elite Dangerous Star Map credentials" = "Elite Dangerous Star Map 授权凭证";
 
@@ -277,6 +295,9 @@
 /* edsm.py: EDSM plugin - Journal handling disabled by killswitch; In files: edsm.py:516; */
 "EDSM Handler disabled. See Log." = "EDSM Handler 已禁用。请查看诊断日志。";
 
+/* edsm.py: EDSM - Only Live data; In files: edsm.py:632; */
+"EDSM only accepts Live galaxy data" = "EDSM 只接受 Live 模式下的星系数据";
+
 /* edsm.py: EDSM Plugin - Error message from EDSM API; In files: edsm.py:916; edsm.py:1048; */
 "Error: EDSM {MSG}" = "错误：EDSM {MSG}";
 
@@ -288,6 +309,9 @@
 
 /* inara.py: Text for INARA API keys link ( goes to https://inara.cz/settings-api ); In files: inara.py:269; */
 "Inara credentials" = "Inara 授权凭证";
+
+/* inara.py: The Inara API only accepts Live galaxy data, not Legacy galaxy data; inara.py: Inara - Only Live data; In files: inara.py:384; inara.py:386; */
+"Inara only accepts Live galaxy data" = "Inara 只接受 Live 模式下的星系数据";
 
 /* inara.py: INARA support disabled via killswitch; In files: inara.py:395; */
 "Inara disabled. See Log." = "Inara 已禁用。请查看诊断日志。";
@@ -327,6 +351,12 @@
 
 /* prefs.py: Settings > Configuration - Label for Journal files location; In files: prefs.py:431; prefs.py:446; */
 "E:D journal file location" = "E:D 日志文件位置";
+
+/* prefs.py: Settings > Configuration - Label for CAPI section; In files: prefs.py:469; */
+"CAPI Settings" = "CAPI 设置";
+
+/* prefs.py: Configuration - Enable or disable the Fleet Carrier CAPI calls; In files: prefs.py:475; */
+"Enable Fleetcarrier CAPI Queries" = "开启舰队母舰 (fleet carrier) CAPI 访问";
 
 /* prefs.py: Hotkey/Shortcut settings prompt on OSX; In files: prefs.py:490; */
 "Keyboard shortcut" = "键盘快捷键";
@@ -428,7 +458,7 @@
 "Enabled Plugins" = "已启用插件";
 
 /* prefs.py: Plugins - Label for list of 'enabled' plugins that don't work with Python 3.x; In files: prefs.py:954; */
-"Plugins Without Python 3.x Support:" = "不支持 Python 3.x 的插件：";
+"Plugins Without Python 3.x Support" = "不支持 Python 3.x 的插件";
 
 /* prefs.py: Plugins - Label on URL to documentation about migrating plugins from Python 2.7; In files: prefs.py:962; */
 "Information on migrating plugins" = "关于插件迁移";
@@ -735,3 +765,4 @@
 
 /* stats.py: Status dialog title; In files: stats.py:418; */
 "Ships" = "所有飞船";
+

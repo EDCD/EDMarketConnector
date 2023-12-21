@@ -1,32 +1,32 @@
-"""Handle the game Status.json file."""
+"""
+dashboard.py - Handle the game Status.json file.
+
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
+"""
+from __future__ import annotations
 
 import json
-import pathlib
 import sys
 import time
 import tkinter as tk
 from calendar import timegm
-from os.path import getsize, isdir, isfile
-from typing import Any, Dict, Optional, cast
-
+from os.path import getsize, isdir, isfile, join
+from typing import Any, cast
 from watchdog.observers.api import BaseObserver
-
 from config import config
 from EDMCLogging import get_main_logger
 
 logger = get_main_logger()
 
-if sys.platform == 'darwin':
+if sys.platform in ('darwin', 'win32'):
     from watchdog.events import FileSystemEventHandler
     from watchdog.observers import Observer
-
-elif sys.platform == 'win32':
-    from watchdog.events import FileSystemEventHandler
-    from watchdog.observers import Observer
-
 else:
     # Linux's inotify doesn't work over CIFS or NFS, so poll
-    FileSystemEventHandler = object  # dummy
+    class FileSystemEventHandler:  # type: ignore
+        """Dummy class to represent a file system event handler on platforms other than macOS and Windows."""
 
 
 class Dashboard(FileSystemEventHandler):
@@ -39,9 +39,9 @@ class Dashboard(FileSystemEventHandler):
         self.session_start: int = int(time.time())
         self.root: tk.Tk = None  # type: ignore
         self.currentdir: str = None                 # type: ignore # The actual logdir that we're monitoring
-        self.observer: Optional[Observer] = None  # type: ignore
+        self.observer: Observer | None = None  # type: ignore
         self.observed = None                   # a watchdog ObservedWatch, or None if polling
-        self.status: Dict[str, Any] = {}       # Current status for communicating status back to main thread
+        self.status: dict[str, Any] = {}       # Current status for communicating status back to main thread
 
     def start(self, root: tk.Tk, started: int) -> bool:
         """
@@ -56,10 +56,8 @@ class Dashboard(FileSystemEventHandler):
         self.session_start = started
 
         logdir = config.get_str('journaldir', default=config.default_journal_dir)
-        if logdir == '':
-            logdir = config.default_journal_dir
-
-        if not logdir or not isdir(logdir):
+        logdir = logdir or config.default_journal_dir
+        if not isdir(logdir):
             logger.info(f"No logdir, or it isn't a directory: {logdir=}")
             self.stop()
             return False
@@ -74,7 +72,7 @@ class Dashboard(FileSystemEventHandler):
         # File system events are unreliable/non-existent over network drives on Linux.
         # We can't easily tell whether a path points to a network drive, so assume
         # any non-standard logdir might be on a network drive and poll instead.
-        if not (sys.platform != 'win32') and not self.observer:
+        if sys.platform == 'win32' and not self.observer:
             logger.debug('Setting up observer...')
             self.observer = Observer()
             self.observer.daemon = True
@@ -87,7 +85,7 @@ class Dashboard(FileSystemEventHandler):
             self.observer = None  # type: ignore
             logger.debug('Done')
 
-        if not self.observed and not (sys.platform != 'win32'):
+        if not self.observed and sys.platform == 'win32':
             logger.debug('Starting observer...')
             self.observed = cast(BaseObserver, self.observer).schedule(self, self.currentdir)
             logger.debug('Done')
@@ -178,22 +176,17 @@ class Dashboard(FileSystemEventHandler):
         """
         if config.shutting_down:
             return
-
         try:
-            with (pathlib.Path(self.currentdir) / 'Status.json').open('rb') as h:
+            status_json_path = join(self.currentdir, 'Status.json')
+            with open(status_json_path, 'rb') as h:
                 data = h.read().strip()
-
                 if data:  # Can be empty if polling while the file is being re-written
                     entry = json.loads(data)
-
-                    # Status file is shared between beta and live. So filter out status not in this game session.
-                    if (
-                            timegm(time.strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ')) >= self.session_start
-                            and self.status != entry
-                    ):
+                    # Status file is shared between beta and live. Filter out status not in this game session.
+                    entry_timestamp = timegm(time.strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
+                    if entry_timestamp >= self.session_start and self.status != entry:
                         self.status = entry
                         self.root.event_generate('<<DashboardEvent>>', when="tail")
-
         except Exception:
             logger.exception('Processing Status.json')
 

@@ -1,7 +1,7 @@
 """Tests of killswitch behaviour."""
-import copy
-from typing import Optional
+from __future__ import annotations
 
+import copy
 import pytest
 import semantic_version
 
@@ -34,7 +34,7 @@ TEST_SET = killswitch.KillSwitchSet([
     ],
 )
 def test_killswitch(
-    input: killswitch.UPDATABLE_DATA, kill: str, should_pass: bool, result: Optional[killswitch.UPDATABLE_DATA],
+    input: killswitch.UPDATABLE_DATA, kill: str, should_pass: bool, result: killswitch.UPDATABLE_DATA | None,
     version: str
 ) -> None:
     """Simple killswitch tests."""

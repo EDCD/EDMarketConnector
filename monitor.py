@@ -1,7 +1,11 @@
-"""Monitor for new Journal files and contents of latest."""
-#                                                                             v [sic]
-# spell-checker: words onfoot unforseen relog fsdjump suitloadoutid slotid suitid loadoutid fauto Intimidator
-# spell-checker: words joinacrew quitacrew sellshiponrebuy newbal navroute npccrewpaidwage sauto
+"""
+monitor.py - Monitor for new Journal files and contents of latest.
+
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
+"""
+from __future__ import annotations
 
 import json
 import pathlib
@@ -14,19 +18,16 @@ from collections import OrderedDict, defaultdict
 from os import SEEK_END, SEEK_SET, listdir
 from os.path import basename, expanduser, getctime, isdir, join
 from time import gmtime, localtime, mktime, sleep, strftime, strptime, time
-from typing import TYPE_CHECKING, Any, BinaryIO, MutableMapping, Tuple
-
-if TYPE_CHECKING:
-    import tkinter
-
+from typing import TYPE_CHECKING, Any, BinaryIO, MutableMapping
 import semantic_version
-
 import util_ships
 from config import config
 from edmc_data import edmc_suit_shortnames, edmc_suit_symbol_localised
 from EDMCLogging import get_main_logger
 
-# spell-checker: words navroute
+if TYPE_CHECKING:
+    import tkinter
+
 
 logger = get_main_logger()
 STARTUP = 'journal.startup'
@@ -76,11 +77,10 @@ else:
 
 
 # Journal handler
-class EDLogs(FileSystemEventHandler):  # type: ignore # See below
+class EDLogs(FileSystemEventHandler):
     """Monitoring of Journal files."""
 
     # Magic with FileSystemEventHandler can confuse type checkers when they do not have access to every import
-
     _POLL = 1		# Polling is cheap, so do it often
     _RE_CANONICALISE = re.compile(r'\$(.+)_name;')
     _RE_CATEGORY = re.compile(r'\$MICRORESOURCE_CATEGORY_(.+);')
@@ -207,7 +207,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         :return: bool - False if we couldn't access/find latest Journal file.
         """
         logger.debug('Begin...')
-        self.root = root  # type: ignore
+        self.root = root
         journal_dir = config.get_str('journaldir')
 
         if journal_dir == '' or journal_dir is None:
@@ -515,8 +515,6 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             else:
                 self.game_was_running = self.game_running()
 
-        logger.debug('Done.')
-
     def synthesize_startup_event(self) -> dict[str, Any]:
         """
         Synthesize a 'StartUp' event to notify plugins of initial state.
@@ -570,7 +568,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
         try:
             # Preserve property order because why not?
             entry: MutableMapping[str, Any] = json.loads(line, object_pairs_hook=OrderedDict)
-            entry['timestamp']  # we expect this to exist # TODO: replace with assert? or an if key in check
+            assert 'timestamp' in entry, "Timestamp does not exist in the entry"
 
             self.__navroute_retry()
 
@@ -933,7 +931,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 ###############################################################
                 if 'StarPos' in entry:
                     # Plugins need this as well, so copy in state
-                    self.state['StarPos'] = tuple(entry['StarPos'])  # type: ignore
+                    self.state['StarPos'] = tuple(entry['StarPos'])
 
                 else:
                     logger.warning(f"'{event_type}' event without 'StarPos' !!!:\n{entry}\n")
@@ -1109,7 +1107,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 while attempts < shiplocker_max_attempts:
                     attempts += 1
                     try:
-                        with open(shiplocker_filename, 'rb') as h:  # type: ignore
+                        with open(shiplocker_filename, 'rb') as h:
                             entry = json.load(h, object_pairs_hook=OrderedDict)
                             self.state['ShipLockerJSON'] = entry
                             break
@@ -1551,7 +1549,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                         entry = json.load(mf)
 
                     except json.JSONDecodeError:
-                        logger.exception('Failed decoding ModulesInfo.json', exc_info=True)
+                        logger.exception('Failed decoding ModulesInfo.json')
 
                     else:
                         self.state['ModuleInfo'] = entry
@@ -1812,7 +1810,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                 self.state['Credits'] -= entry.get('Price', 0)
 
             elif event_type == 'carrierbanktransfer':
-                if (newbal := entry.get('PlayerBalance')):
+                if newbal := entry.get('PlayerBalance'):
                     self.state['Credits'] = newbal
 
             elif event_type == 'carrierdecommission':
@@ -1911,7 +1909,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         return name
 
-    def suitloadout_store_from_event(self, entry) -> Tuple[int, int]:
+    def suitloadout_store_from_event(self, entry) -> tuple[int, int]:
         """
         Store Suit and SuitLoadout data from a journal event.
 
@@ -1990,64 +1988,64 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
     # TODO: *This* will need refactoring and a proper validation infrastructure
     #       designed for this in the future.  This is a bandaid for a known issue.
-    def event_valid_engineerprogress(self, entry) -> bool:  # noqa: CCR001 C901
+    def event_valid_engineerprogress(self, entry) -> bool:  # noqa: CCR001
         """
         Check an `EngineerProgress` Journal event for validity.
 
         :param entry: Journal event dict
         :return: True if passes validation, else False.
         """
-        # The event should have at least one of these
-        if 'Engineers' not in entry and 'Progress' not in entry:
+        engineers_present = 'Engineers' in entry
+        progress_present = 'Progress' in entry
+
+        if not (engineers_present or progress_present):
             logger.warning(f"EngineerProgress has neither 'Engineers' nor 'Progress': {entry=}")
             return False
 
-        # But not both of them
-        if 'Engineers' in entry and 'Progress' in entry:
+        if engineers_present and progress_present:
             logger.warning(f"EngineerProgress has BOTH 'Engineers' and 'Progress': {entry=}")
             return False
 
-        if 'Engineers' in entry:
+        if engineers_present:
+            engineers = entry['Engineers']
             # 'Engineers' version should have a list as value
-            if not isinstance(entry['Engineers'], list):
+            if not isinstance(engineers, list):
                 logger.warning(f"EngineerProgress 'Engineers' is not a list: {entry=}")
                 return False
 
             # It should have at least one entry?  This might still be valid ?
-            if len(entry['Engineers']) < 1:
+            if len(engineers) < 1:
                 logger.warning(f"EngineerProgress 'Engineers' list is empty ?: {entry=}")
                 # TODO: As this might be valid, we might want to only log
                 return False
 
             # And that list should have all of these keys
-            for e in entry['Engineers']:
-                for f in ('Engineer', 'EngineerID', 'Rank', 'Progress', 'RankProgress'):
-                    if f not in e:
-                        # For some Progress there's no Rank/RankProgress yet
-                        if f in ('Rank', 'RankProgress'):
-                            if (progress := e.get('Progress', None)) is not None:
-                                if progress in ('Invited', 'Known'):
-                                    continue
+            # For some Progress there's no Rank/RankProgress yet
+            required_keys = ('Engineer', 'EngineerID', 'Rank', 'Progress', 'RankProgress')
+            for e in engineers:
+                missing_keys = [key for key in required_keys if key not in e]
+                if any(key in ('Rank', 'RankProgress') and e.get('Progress') in ('Invited', 'Known') for key in
+                       missing_keys):
+                    continue
 
-                        logger.warning(f"Engineer entry without '{f}' key: {e=} in {entry=}")
-                        return False
+                if missing_keys:
+                    logger.warning(f"Engineer entry without '{missing_keys[0]}' key: {e=} in {entry=}")
+                    return False
 
-        if 'Progress' in entry:
+        if progress_present:
             # Progress is only a single Engineer, so it's not an array
             # { "timestamp":"2021-05-24T17:57:52Z",
             #   "event":"EngineerProgress",
             #   "Engineer":"Felicity Farseer",
             #   "EngineerID":300100,
             #   "Progress":"Invited" }
-            for f in ('Engineer', 'EngineerID', 'Rank', 'Progress', 'RankProgress'):
-                if f not in entry:
-                    # For some Progress there's no Rank/RankProgress yet
-                    if f in ('Rank', 'RankProgress'):
-                        if (progress := entry.get('Progress', None)) is not None:
-                            if progress in ('Invited', 'Known'):
-                                continue
-
-                    logger.warning(f"Progress event without '{f}' key: {entry=}")
+            # For some Progress there's no Rank/RankProgress yet
+            required_keys = ('Engineer', 'EngineerID', 'Rank', 'Progress', 'RankProgress')
+            missing_keys = [key for key in required_keys if key not in entry]
+            if any(key in ('Rank', 'RankProgress') and entry.get('Progress') in ('Invited', 'Known') for key in
+                   missing_keys):
+                if missing_keys:
+                    logger.warning(f"Progress event without '{missing_keys[0]}' key: {entry=}")
                     return False
 
         return True
@@ -2152,7 +2150,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
                     return True
 
         elif sys.platform == 'win32':
-            def WindowTitle(h):  # noqa: N802 # type: ignore
+            def WindowTitle(h):  # noqa: N802
                 if h:
                     length = GetWindowTextLength(h) + 1
                     buf = ctypes.create_unicode_buffer(length)
@@ -2261,18 +2259,18 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             return
 
         ship = util_ships.ship_file_name(self.state['ShipName'], self.state['ShipType'])
-        regexp = re.compile(re.escape(ship) + r'\.\d{4}\-\d\d\-\d\dT\d\d\.\d\d\.\d\d\.txt')
-        oldfiles = sorted((x for x in listdir(config.get_str('outdir')) if regexp.match(x)))  # type: ignore
+        regexp = re.compile(re.escape(ship) + r'\.\d{4}-\d\d-\d\dT\d\d\.\d\d\.\d\d\.txt')
+        oldfiles = sorted((x for x in listdir(config.get_str('outdir')) if regexp.match(x)))
         if oldfiles:
             try:
-                with open(join(config.get_str('outdir'), oldfiles[-1]), 'r', encoding='utf-8') as h:  # type: ignore
+                with open(join(config.get_str('outdir'), oldfiles[-1]), encoding='utf-8') as h:
                     if h.read() == string:
                         return  # same as last time - don't write
 
             except UnicodeError:
                 logger.exception("UnicodeError reading old ship loadout with utf-8 encoding, trying without...")
                 try:
-                    with open(join(config.get_str('outdir'), oldfiles[-1]), 'r') as h:  # type: ignore
+                    with open(join(config.get_str('outdir'), oldfiles[-1])) as h:
                         if h.read() == string:
                             return  # same as last time - don't write
 
@@ -2291,9 +2289,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         # Write
         ts = strftime('%Y-%m-%dT%H.%M.%S', localtime(time()))
-        filename = join(  # type: ignore
-            config.get_str('outdir'), f'{ship}.{ts}.txt'
-        )
+        filename = join(config.get_str('outdir'), f'{ship}.{ts}.txt')
 
         try:
             with open(filename, 'wt', encoding='utf-8') as h:
@@ -2380,7 +2376,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         try:
 
-            with open(join(self.currentdir, 'NavRoute.json'), 'r') as f:
+            with open(join(self.currentdir, 'NavRoute.json')) as f:
                 raw = f.read()
 
         except Exception as e:
@@ -2391,7 +2387,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             data = json.loads(raw)
 
         except json.JSONDecodeError:
-            logger.exception('Failed to decode NavRoute.json', exc_info=True)
+            logger.exception('Failed to decode NavRoute.json')
             return None
 
         if 'timestamp' not in data:  # quick sanity check
@@ -2406,7 +2402,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
 
         try:
 
-            with open(join(self.currentdir, 'FCMaterials.json'), 'r') as f:
+            with open(join(self.currentdir, 'FCMaterials.json')) as f:
                 raw = f.read()
 
         except Exception as e:
@@ -2417,7 +2413,7 @@ class EDLogs(FileSystemEventHandler):  # type: ignore # See below
             data = json.loads(raw)
 
         except json.JSONDecodeError:
-            logger.exception('Failed to decode FCMaterials.json', exc_info=True)
+            logger.exception('Failed to decode FCMaterials.json')
             return None
 
         if 'timestamp' not in data:  # quick sanity check

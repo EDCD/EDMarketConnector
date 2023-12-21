@@ -1,13 +1,19 @@
-"""Darwin/macOS implementation of AbstractConfig."""
+"""
+darwin.py - Darwin/macOS implementation of AbstractConfig.
+
+Copyright (c) EDCD, All Rights Reserved
+Licensed under the GNU General Public License.
+See LICENSE file.
+"""
+from __future__ import annotations
+
 import pathlib
 import sys
-from typing import Any, Dict, List, Union
-
+from typing import Any
 from Foundation import (  # type: ignore
     NSApplicationSupportDirectory, NSBundle, NSDocumentDirectory, NSSearchPathForDirectoriesInDomains, NSUserDefaults,
     NSUserDomainMask
 )
-
 from config import AbstractConfig, appname, logger
 
 assert sys.platform == 'darwin'
@@ -48,14 +54,14 @@ class MacConfig(AbstractConfig):
 
         self.default_journal_dir_path = support_path / 'Frontier Developments' / 'Elite Dangerous'
         self._defaults: Any = NSUserDefaults.standardUserDefaults()
-        self._settings: Dict[str, Union[int, str, list]] = dict(
+        self._settings: dict[str, int | str | list] = dict(
             self._defaults.persistentDomainForName_(self.identifier) or {}
         )  # make writeable
 
         if (out_dir := self.get_str('out_dir')) is None or not pathlib.Path(out_dir).exists():
             self.set('outdir', NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, True)[0])
 
-    def __raw_get(self, key: str) -> Union[None, list, str, int]:
+    def __raw_get(self, key: str) -> None | list | str | int:
         """
         Retrieve the raw data for the given key.
 
@@ -82,7 +88,7 @@ class MacConfig(AbstractConfig):
         """
         res = self.__raw_get(key)
         if res is None:
-            return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
+            return default  # Yes it could be None, but we're _assuming_ that people gave us a default
 
         if not isinstance(res, str):
             raise ValueError(f'unexpected data returned from __raw_get: {type(res)=} {res}')
@@ -97,9 +103,9 @@ class MacConfig(AbstractConfig):
         """
         res = self.__raw_get(key)
         if res is None:
-            return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
+            return default  # Yes it could be None, but we're _assuming_ that people gave us a default
 
-        elif not isinstance(res, list):
+        if not isinstance(res, list):
             raise ValueError(f'__raw_get returned unexpected type {type(res)=} {res!r}')
 
         return res
@@ -114,7 +120,7 @@ class MacConfig(AbstractConfig):
         if res is None:
             return default
 
-        elif not isinstance(res, (str, int)):
+        if not isinstance(res, (str, int)):
             raise ValueError(f'__raw_get returned unexpected type {type(res)=} {res!r}')
 
         try:
@@ -122,7 +128,7 @@ class MacConfig(AbstractConfig):
 
         except ValueError as e:
             logger.error(f'__raw_get returned {res!r} which cannot be parsed to an int: {e}')
-            return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
+            return default  # Yes it could be None, but we're _assuming_ that people gave us a default
 
     def get_bool(self, key: str, *, default: bool = None) -> bool:
         """
@@ -132,14 +138,14 @@ class MacConfig(AbstractConfig):
         """
         res = self.__raw_get(key)
         if res is None:
-            return default  # type: ignore # Yes it could be None, but we're _assuming_ that people gave us a default
+            return default  # Yes it could be None, but we're _assuming_ that people gave us a default
 
-        elif not isinstance(res, bool):
+        if not isinstance(res, bool):
             raise ValueError(f'__raw_get returned unexpected type {type(res)=} {res!r}')
 
         return res
 
-    def set(self, key: str, val: Union[int, str, List[str], bool]) -> None:
+    def set(self, key: str, val: int | str | list[str] | bool) -> None:
         """
         Set the given key's data to the given value.
 

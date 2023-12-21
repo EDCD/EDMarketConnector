@@ -190,11 +190,11 @@
 /* eddn.py: EDDN delay sending until docked option is on, this message notes that a send was skipped due to this; In files: eddn.py:2063; */
 "Delay sending until docked" = "Lähetä tiedot vasta telakoitumisen jälkeen";
 
+/* eddn.py: Killswitch disabled EDDN; In files: eddn.py:2178; */
+"EDDN journal handler disabled. See Log." = "EDDB lokikirjan käsittelijä ei käytössä. Katso lokitiedot.";
+
 /* eddn.py: Status text shown while attempting to send data; In files: eddn.py:2507; */
 "Sending data to EDDN..." = "Lähetetään tietoja EDDN:ään...";
-
-/* edsm.py: Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:308; */
-"Send flight log and Cmdr status to EDSM" = "Lähetä lentoloki ja komentajatiedot EDSM:ään";
 
 /* edsm.py: Settings>EDSM - Label on header/URL to EDSM API key page; In files: edsm.py:319; */
 "Elite Dangerous Star Map credentials" = "Elite Dangerous Star Map -kirjautuminen";
@@ -353,7 +353,7 @@
 "Enabled Plugins" = "Käytössä olevat liitännäiset";
 
 /* prefs.py: Plugins - Label for list of 'enabled' plugins that don't work with Python 3.x; In files: prefs.py:954; */
-"Plugins Without Python 3.x Support:" = "Lisäosat, joissa ei ole Python 3.x -tukea:";
+"Plugins Without Python 3.x Support" = "Lisäosat ilman Python 3.x -tukea";
 
 /* prefs.py: Plugins - Label on URL to documentation about migrating plugins from Python 2.7; In files: prefs.py:962; */
 "Information on migrating plugins" = "Tietoja lisäosien siirrosta";
@@ -588,3 +588,4 @@
 
 /* stats.py: Status dialog title; In files: stats.py:418; */
 "Ships" = "Alukset";
+

@@ -1,13 +1,13 @@
 """Tests for journal_lock.py code."""
+from __future__ import annotations
+
 import multiprocessing as mp
 import os
 import pathlib
 import sys
 from typing import Generator
-
 import pytest
 from pytest import MonkeyPatch, TempdirFactory, TempPathFactory
-
 from config import config
 from journal_lock import JournalLock, JournalLockResult
 
@@ -142,7 +142,7 @@ class TestJournalLock:
         def get_str(key: str, *, default: str | None = None) -> str:
             """Mock config.*Config get_str to provide fake journaldir."""
             if key == 'journaldir':
-                return tmp_path_factory.mktemp("changing")
+                return tmp_path_factory.mktemp("changing")  # type: ignore
 
             print('Other key, calling up ...')
             return config.get_str(key)  # Call the non-mocked
@@ -301,7 +301,7 @@ class TestJournalLock:
         # Need to release any handles on the lockfile else the sub-process
         # might not be able to clean up properly, and that will impact
         # on later tests.
-        jlock.journal_dir_lockfile.close()
+        jlock.journal_dir_lockfile.close()  # type: ignore
 
         print('Telling sub-process to quit...')
         exit_q.put('quit')

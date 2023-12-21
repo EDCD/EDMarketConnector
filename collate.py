@@ -79,7 +79,7 @@ def addcommodities(data) -> None:  # noqa: CCR001
 
         commodities[key] = new
 
-    if not len(commodities) > size_pre:
+    if len(commodities) <= size_pre:
         return
 
     if isfile(commodityfile):
@@ -227,7 +227,7 @@ if __name__ == "__main__":
             print('Not docked!')
             continue
 
-        elif not data.get('lastStarport'):
+        if not data.get('lastStarport'):
             print('No starport!')
             continue
 

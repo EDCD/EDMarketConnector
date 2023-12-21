@@ -9,7 +9,6 @@ import os
 import shutil
 import sys
 import pathlib
-from typing import List, Tuple
 from string import Template
 from os.path import join, isdir
 import py2exe
@@ -20,12 +19,16 @@ from config import (
     copyright,
     git_shorthash_from_head,
     _static_appversion,
+    update_interval
 )
 
 
 def iss_build(template_path: str, output_file: str) -> None:
     """Build the .iss file needed for building the installer EXE."""
-    sub_vals = {"appver": _static_appversion}
+    sub_vals = {
+        "appver": _static_appversion,
+        "update_time": str(update_interval),
+        }
     with open(template_path, encoding="UTF8") as template_file:
         src = Template(template_file.read())
         newfile = src.substitute(sub_vals)
@@ -57,8 +60,8 @@ def system_check(dist_dir: str) -> str:
 
 
 def generate_data_files(
-    app_name: str, gitversion_file: str, plugins: List[str]
-) -> List[Tuple[str, List[str]]]:
+    app_name: str, gitversion_file: str, plugins: list[str]
+) -> list[tuple[str, list[str]]]:
     """Create the required datafiles to build."""
     l10n_dir = "L10n"
     fdevids_dir = "FDevIDs"
@@ -73,8 +76,10 @@ def generate_data_files(
                 "ChangeLog.md",
                 "snd_good.wav",
                 "snd_bad.wav",
-                "modules.p",
-                "ships.p",
+                "modules.p",  # TODO: Remove in 6.0
+                "resources/modules.json",
+                "resources/ships.json",
+                "ships.p",  # TODO: Remove in 6.0
                 f"{app_name}.VisualElementsManifest.xml",
                 f"{app_name}.ico",
                 "EDMarketConnector - TRACE.bat",
@@ -104,12 +109,13 @@ def build() -> None:
     gitversion_filename: str = system_check(dist_dir)
 
     # Constants
-    plugins: List[str] = [
+    plugins: list[str] = [
         "plugins/coriolis.py",
         "plugins/eddn.py",
         "plugins/edsm.py",
         "plugins/edsy.py",
         "plugins/inara.py",
+        "plugins/spansh_core.py",
     ]
     options: dict = {
         "py2exe": {
@@ -138,7 +144,7 @@ def build() -> None:
     }
 
     # Function to generate DATA_FILES list
-    data_files: List[Tuple[str, List[str]]] = generate_data_files(
+    data_files: list[tuple[str, list[str]]] = generate_data_files(
         appname, gitversion_filename, plugins
     )
 
@@ -171,13 +177,20 @@ def build() -> None:
         ],
     }
 
-    py2exe.freeze(
-        version_info=version_info,
-        windows=[windows_config],
-        console=[console_config],
-        data_files=data_files,
-        options=options,
-    )
+    try:
+        py2exe.freeze(
+            version_info=version_info,
+            windows=[windows_config],
+            console=[console_config],
+            data_files=data_files,
+            options=options,
+        )
+    except FileNotFoundError:
+        sys.exit(
+            "Build Failed due to Missing Files! Have you set up your submodules? \n"
+            "https://github.com/EDCD/EDMarketConnector/wiki/Running-from-source"
+            "#obtain-a-copy-of-the-application-source"
+            )
 
     iss_template_path: str = "./resources/EDMC_Installer_Config_template.txt"
     iss_file_path: str = "./EDMC_Installer_Config.iss"

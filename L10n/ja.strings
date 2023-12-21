@@ -1,3 +1,11 @@
+/* edsm.py:Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:316; */
+"Send flight log and CMDR status to EDSM" = "フライトログとCMDRステータスをEDSMへ送信する";
+
+/* prefs.py:Label on button used to open a filesystem folder; In files: prefs.py:706; */
+"Open Log Folder" = "ログフォルダを開く";
+
+/* inara.py:Text Inara Show API key; In files: inara.py:305; */
+"Show API Key" = "APIキーを表示";
 /* Language name */
 "!Language" = "日本語";
 
@@ -205,11 +213,23 @@
 /* EDMarketConnector.py: Popup-text about 'active' plugins without Python 3.x support; In files: EDMarketConnector.py:2253:2259; */
 "One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "有効にしている1つ以上のプラグインがPython 3.xをサポートしていません。'{FILE}' > '{SETTINGS}'\nメニューで表示される設定ダイアログの'{PLUGINS}' タブの一覧を確認してください。更新済みのバージョンがあるかを確認し、なければ開発者にPython 3.xに対応するように開発者に連絡してください。\n\nプラグインを無効にするにはフォルダ名の最後に'{DISABLED}'を追加してください。";
 
+/* EDMarketConnector.py: Popup-text about missing FDEVID Files; In files: EDMarketConnector.py:2329; */
+"FDevID Files not found! Some functionality regarding commodities may be disabled.\r\n\r\n Do you want to open the Wiki page on how to set up submodules?" = "FDevIDファイルが見つかりません！商品に関するいくつかの機能が無効になるかもしれません。\n\nサブモジュールの設定方法についてのWikiページを開きますか？";
+
+/* EDMarketConnector.py: Popup window title for missing FDEVID files; In files: EDMarketConnector.py:2340; */
+"FDevIDs: Missing Commodity Files" = "FDevIDs: 商品ファイルが見つかりません";
+
 /* EDMarketConnector.py: Settings > Plugins tab; prefs.py: Label on Settings > Plugins tab; In files: EDMarketConnector.py:2263; prefs.py:986; */
 "Plugins" = "プラグイン";
 
 /* EDMarketConnector.py: Popup window title for list of 'enabled' plugins that don't work with Python 3.x; In files: EDMarketConnector.py:2274; */
 "EDMC: Plugins Without Python 3.x Support" = "EDMC: プラグインがPython 3.xをサポートしていません";
+
+/* EDMarketConnector.py: Popup window title for list of 'broken' plugins that failed to load; In files: EDMarketConnector.py:2285; */
+"EDMC: Broken Plugins" = "EDMC: プラグインが壊れています";
+
+/* EDMarketConnector.py: Popup-text about 'broken' plugins that failed to load; In files: EDMarketConnector.py:2266; */
+"One or more of your enabled plugins failed to load. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. This could be caused by a wrong folder structure. The load.py file should be located under plugins/PLUGIN_NAME/load.py.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "有効にしている1つ以上のプラグインがロードに失敗しました。'{FILE}' > '{SETTINGS}' メニューで表示される設定ダイアログの'{PLUGINS}' タブの一覧を確認してください。この問題は誤ったフォルダ構造によって引き起こされます。load.pyファイルはplugins/プラグイン名/plug-in.pyとして配置される必要があります。\n\nプラグインを無効にするにはフォルダ名の最後に'{DISABLED}'を追加してください。";
 
 /* journal_lock.py: Title text on popup when Journal directory already locked; In files: journal_lock.py:208; */
 "Journal directory already locked" = "ジャーナルディレクトリは既にロックされています";
@@ -279,9 +299,6 @@
 
 /* eddn.py: Status text shown while attempting to send data; In files: eddn.py:2507; */
 "Sending data to EDDN..." = "EDDNにデータ送信中...";
-
-/* edsm.py: Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:308; */
-"Send flight log and Cmdr status to EDSM" = "フライトログとCMDRステータスをEDSMへ送信する";
 
 /* edsm.py: Settings>EDSM - Label on header/URL to EDSM API key page; In files: edsm.py:319; */
 "Elite Dangerous Star Map credentials" = "Elite Dangerous Star Mapの認証情報";
@@ -461,10 +478,13 @@
 "Enabled Plugins" = "有効なプラグイン";
 
 /* prefs.py: Plugins - Label for list of 'enabled' plugins that don't work with Python 3.x; In files: prefs.py:954; */
-"Plugins Without Python 3.x Support:" = "Python 3.xサポートのないプラグイン:";
+"Plugins Without Python 3.x Support" = "Python 3.xをサポートしていないプラグイン";
 
 /* prefs.py: Plugins - Label on URL to documentation about migrating plugins from Python 2.7; In files: prefs.py:962; */
 "Information on migrating plugins" = "プラグインの移行に関する情報";
+
+/* prefs.py: Plugins - Label for list of 'broken' plugins that failed to load; In files: prefs.py:1039; */
+"Broken Plugins" = "壊れたプラグイン";
 
 /* prefs.py: Lable on list of user-disabled plugins; In files: prefs.py:977; */
 "Disabled Plugins" = "無効なプラグイン";
@@ -768,3 +788,4 @@
 
 /* stats.py: Status dialog title; In files: stats.py:418; */
 "Ships" = "所有船";
+

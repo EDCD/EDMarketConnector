@@ -142,9 +142,6 @@
 /* eddn.py: Status text shown while attempting to send data; In files: eddn.py:2507; */
 "Sending data to EDDN..." = "Adatok küldése az EDDN-nek...";
 
-/* edsm.py: Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:308; */
-"Send flight log and Cmdr status to EDSM" = "Repülési napló és Parancsnok státusz küldése az EDSM-nek";
-
 /* edsm.py: Settings>EDSM - Label on header/URL to EDSM API key page; In files: edsm.py:319; */
 "Elite Dangerous Star Map credentials" = "Elite Dangerous Csillag térkép hitelesítése";
 
@@ -501,3 +498,4 @@
 
 /* stats.py: Status dialog title; In files: stats.py:418; */
 "Ships" = "Hajók";
+

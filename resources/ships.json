@@ -1,0 +1,116 @@
+{
+    "Adder": {
+        "hullMass": 35
+    },
+    "Alliance Challenger": {
+        "hullMass": 450
+    },
+    "Alliance Chieftain": {
+        "hullMass": 400
+    },
+    "Alliance Crusader": {
+        "hullMass": 500
+    },
+    "Anaconda": {
+        "hullMass": 400
+    },
+    "Asp Explorer": {
+        "hullMass": 280
+    },
+    "Asp Scout": {
+        "hullMass": 150
+    },
+    "Beluga Liner": {
+        "hullMass": 950
+    },
+    "Cobra MkIII": {
+        "hullMass": 180
+    },
+    "Cobra MkIV": {
+        "hullMass": 210
+    },
+    "Diamondback Explorer": {
+        "hullMass": 260
+    },
+    "Diamondback Scout": {
+        "hullMass": 170
+    },
+    "Dolphin": {
+        "hullMass": 140
+    },
+    "Eagle": {
+        "hullMass": 50
+    },
+    "Federal Assault Ship": {
+        "hullMass": 480
+    },
+    "Federal Corvette": {
+        "hullMass": 900
+    },
+    "Federal Dropship": {
+        "hullMass": 580
+    },
+    "Federal Gunship": {
+        "hullMass": 580
+    },
+    "Fer-de-Lance": {
+        "hullMass": 250
+    },
+    "Hauler": {
+        "hullMass": 14
+    },
+    "Imperial Clipper": {
+        "hullMass": 400
+    },
+    "Imperial Courier": {
+        "hullMass": 35
+    },
+    "Imperial Cutter": {
+        "hullMass": 1100
+    },
+    "Imperial Eagle": {
+        "hullMass": 50
+    },
+    "Keelback": {
+        "hullMass": 180
+    },
+    "Krait MkII": {
+        "hullMass": 320
+    },
+    "Krait Phantom": {
+        "hullMass": 270
+    },
+    "Mamba": {
+        "hullMass": 250
+    },
+    "Orca": {
+        "hullMass": 290
+    },
+    "Python": {
+        "hullMass": 350
+    },
+    "Sidewinder": {
+        "hullMass": 25
+    },
+    "Type-10 Defender": {
+        "hullMass": 1200
+    },
+    "Type-6 Transporter": {
+        "hullMass": 155
+    },
+    "Type-7 Transporter": {
+        "hullMass": 350
+    },
+    "Type-9 Heavy": {
+        "hullMass": 850
+    },
+    "Viper MkIII": {
+        "hullMass": 50
+    },
+    "Viper MkIV": {
+        "hullMass": 190
+    },
+    "Vulture": {
+        "hullMass": 230
+    }
+}
