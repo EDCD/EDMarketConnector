@@ -2105,7 +2105,7 @@ about this:
 <a href="https://issues.frontierstore.net/issue-detail/28638" rel="nofollow">PTS CAPI saying Commander is Docked after jumping to new system</a>.</p>
 </li>
 </ul>]]></description>
-         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F5.9.5/EDMarketConnector_Installer_5.9.5.exe" sparkle:os="windows" sparkle:version="5.9.5" length="0" type="application/x-ms-dos-executable" />
+         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F5.10.0/EDMarketConnector_Installer_5.10.0.exe" sparkle:os="windows" sparkle:version="5.10.0" length="0" type="application/x-ms-dos-executable" />
       </item>
    </channel>
 </rss>
