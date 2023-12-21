@@ -1,10 +1,16 @@
 name: Submodule Updates
 
 on:
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'
+        required: true
+        default: 'warning'
   push:
     branches: [develop]
   schedule:
-    - cron: '0 12 * * *'
+  - cron: '0 12 * * *'
 
 jobs:
   check_submodules:
@@ -47,40 +53,21 @@ jobs:
       - name: Create or Update submodules changes branch
         if: steps.check_for_changes.outputs.changes == 'true'
         run: |
-          git fetch origin "submodule-change/$GITHUB_RUN_ID" || git checkout -b "submodule-change/$GITHUB_RUN_ID" $CHECKOUT_BRANCH
+          git checkout -b "submodule-change/$GITHUB_RUN_ID" $CHECKOUT_BRANCH
           git commit -am "updating submodules"
           git push --set-upstream origin "submodule-change/$GITHUB_RUN_ID"
 
-      - name: Create or Update pull request against target branch
+      - name: Create pull request against target branch
         if: steps.check_for_changes.outputs.changes == 'true'
         uses: actions/github-script@v7
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
           script: |
-            const { data: pulls } = await github.rest.pulls.list({
+            await github.rest.pulls.create({
               owner: '${{ github.repository_owner }}',
               repo: '${{ github.repository }}'.split('/')[1].trim(),
               head: 'submodule-change/${{ github.run_id }}',
               base: '${{ env.PR_AGAINST_BRANCH }}',
-              state: 'open',
+              title: `[Auto-generated] Submodule Updates ${process.env.GITHUB_RUN_ID}`,
+              body: '${{ steps.check_for_changes.outputs.changes_text }}',
             });
-            if (pulls.length > 0) {
-              // If an open pull request exists, update it
-              const pull_number = pulls[0].number;
-              await github.rest.pulls.update({
-                owner: '${{ github.repository_owner }}',
-                repo: '${{ github.repository }}'.split('/')[1].trim(),
-                pull_number,
-                body: '${{ steps.check_for_changes.outputs.changes_text }}',
-              });
-            } else {
-              // If no open pull request exists, create a new one
-              await github.rest.pulls.create({
-                owner: '${{ github.repository_owner }}',
-                repo: '${{ github.repository }}'.split('/')[1].trim(),
-                head: 'submodule-change/${{ github.run_id }}',
-                base: '${{ env.PR_AGAINST_BRANCH }}',
-                title: `[Auto-generated] Submodule Updates ${process.env.GITHUB_RUN_ID}`,
-                body: '${{ steps.check_for_changes.outputs.changes_text }}',
-              });
-            }
