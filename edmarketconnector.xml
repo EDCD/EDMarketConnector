@@ -22,11 +22,59 @@
       </item>
       <!-- Windows -->
       <item>
-         <title>Release 5.9.5</title>
+         <title>Release 5.10.0</title>
          <description><![CDATA[<style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
 
 <p>We now test against, and package with, Python 3.11.1.</p>
 <p><strong>As a consequence of this we no longer support Windows 7.</strong><br>
+
+<h2>Release 5.10.0</h2>
+<p>This release contains a number of under-the-hood changes to EDMC designed to improve performance, code maintainability, and stability of the EDMC application, while providing new features and quality-of-life fixes.</p>
+<em>Note to plugin developers: modules.p and ships.p are deprecated, and slated for removal in the next major release! Please look for that change coming soon. </em>
+
+<p><strong>Changes and Enhancements</strong></p>
+<ul>
+<li>Added new <code>modules.json</code> and <code>ships.json</code> files to improve security and readability</li>
+<li>Added a core Spanch URL provider plugin</li>
+<li>Added a new auth response page for successful FDEV authentication</li>
+<li>Added a new Open Log Folder option to the Help menu</li>
+<li>Added a new <code>--start_min</code> command flag to force the application to start minimized</li>
+<li>Added a new pop-up if plugins fail to load or are not supported</li>
+<li>Updated commodities and module files to the latest versions</li>
+<li>Updated core EDMC and core Plugin menus to a standardized layout</li>
+<li>Updates the Inara URL formats to the new endpoints</li>
+</ul>
+<p><strong>Bug Fixes</strong></p>
+<ul>
+<li>Fixed an issue where indentation of text strings in certain settings windows under various languages
+would be unevenly indented</li>
+<li>Fixed an issue where the Plugins Folder label in the Plugins settings window would cut off the
+selection box for the plugin storage location</li>
+</ul>
+<p><strong>Code Clean Up</strong></p>
+<ul>
+<li>Added future annotation imports to help with code compatibility</li>
+<li>Added a few conditional checks on input processing</li>
+<li>Simplified some RegEx expressions, complex functions, logic flows, and Import statements</li>
+<li>Simplified the WinSparkle GitHub Build Action</li>
+<li>Began to change single-character variables to more descriptive names</li>
+<li>Moved a number of global variables into their requisite classes </li>
+<li>Updated a number of dependencies to the latest versions</li>
+<li>Updated GitHub Actions to the latest versions</li>
+<li>Updated a number of resource-allocating functions to use more efficient closing logic</li>
+<li>Updated some calls to arrays to be more efficient</li>
+<li>Removed a number of old-style typing hints in favor of PEP 585 style hints</li>
+<li>Removed a number of redundant <code>if - return - else</code> or <code>raise - else</code> statements for code readability</li>
+<li>Removed some default parameter assignments</li>
+<li>Removed some obsolete calls to Object</li>
+</ul>
+<p><strong>Plugin Developers</strong></p>
+<ul>
+<li><code>modules.p</code> and <code>ships.p</code> have been deprecated, and will be removed in 6.0.
+If you are using these files, please update to use the new <code>modules.json</code> and <code>ships.json</code> files instead. </li>
+<li>A new method of standardizing the paddings used in settings panels has been applied to the core settings panels.
+We strongly encourage you to follow these style hints! A proper guide will be added to the wiki.</li>
+</ul><hr>
 
 <h2>Release 5.9.5</h2>
 <p>This release fixes an uncommon problem with the uninstaller logic if upgrading from a version prior to 5.9.0 to improve consistancy across versions.</p>
