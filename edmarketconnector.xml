@@ -35,7 +35,7 @@
 <p><strong>Changes and Enhancements</strong></p>
 <ul>
 <li>Added new <code>modules.json</code> and <code>ships.json</code> files to improve security and readability</li>
-<li>Added a core Spanch URL provider plugin</li>
+<li>Added a core Spansh URL provider plugin</li>
 <li>Added a new auth response page for successful FDEV authentication</li>
 <li>Added a new Open Log Folder option to the Help menu</li>
 <li>Added a new <code>--start_min</code> command flag to force the application to start minimized</li>

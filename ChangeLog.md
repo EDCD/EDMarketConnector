@@ -43,7 +43,7 @@ for removal in the next major release! Please look for that change coming soon.
 
 **Changes and Enhancements**
 * Added new `modules.json` and `ships.json` files to improve security and readability
-* Added a core Spanch URL provider plugin
+* Added a core Spansh URL provider plugin
 * Added a new auth response page for successful FDEV authentication
 * Added a new Open Log Folder option to the Help menu
 * Added a new `--start_min` command flag to force the application to start minimized
