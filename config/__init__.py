@@ -141,7 +141,7 @@ def appversion() -> semantic_version.Version:
         # If so, use it. This is also required for the Flatpak
         if pathlib.Path("./" + GITVERSION_FILE).is_file:
             with open(pathlib.Path("./" + GITVERSION_FILE)) as gitv:
-              shorthash = gitv.read()
+                shorthash = gitv.read()
         else:
             shorthash = git_shorthash_from_head()
             if shorthash is None:
