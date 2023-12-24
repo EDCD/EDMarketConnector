@@ -336,6 +336,8 @@ if __name__ == '__main__':  # noqa: C901
 
     def already_running_popup():
         """Create the "already running" popup."""
+        import tkinter as tk
+        from tkinter import ttk
         # Check for CL arg that suppresses this popup.
         if args.suppress_dupe_process_popup:
             sys.exit(0)
