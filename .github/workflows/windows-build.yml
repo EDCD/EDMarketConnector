@@ -32,7 +32,7 @@ jobs:
           submodules: true
       - name: Create .gitversion
         run: |
-          echo "${{ needs.variables.outputs.short_sha }}" > ../.gitversion
+          echo "${{ needs.variables.outputs.short_sha }}" > .gitversion
 
       - name: Make tar archive
         run: |
@@ -44,10 +44,11 @@ jobs:
               --exclude=EDMarketConnector-release-*.* \
               --exclude=.editorconfig \
               --exclude=.flake8 \
-              --exclude=.gitattribues \
+              --exclude=.gitattributes \
               --exclude=.gitignore \
               --exclude=.gitmodules \
               --exclude=.git \
+              --exclude=.github \
               --exclude=.mypy.ini \
               --exclude=.pre-commit-config.yaml \
               --exclude=build.py \
