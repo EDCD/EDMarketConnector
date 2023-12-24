@@ -140,11 +140,9 @@ def appversion() -> semantic_version.Version:
         # Running from source. For Linux, check to see if .gitversion file exists
         # If so, use it. This is also required for the Flatpak
         if pathlib.Path(sys.path[0] + "/" + GITVERSION_FILE).exists():
-            print("Found .gitversion")
             with open(pathlib.Path(sys.path[0] + "/" + GITVERSION_FILE), encoding='utf-8') as gitv:
                 shorthash = gitv.read()
         else:
-            print("Did not find .gitversion in " + sys.path[0] + "/" + GITVERSION_FILE)
             shorthash = git_shorthash_from_head()
             if shorthash is None:
                 shorthash = 'UNKNOWN'
