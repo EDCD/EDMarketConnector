@@ -20,7 +20,7 @@ jobs:
         with:
           script: |
             core.setOutput('sem_ver', '${{ github.ref_name }}'.replaceAll('Release\/', ''))
-            core.setOutput('short_sha', '${{ github.sha }}'.substring(0, 7))
+            core.setOutput('short_sha', '${{ github.sha }}'.substring(0, 8))
 
   linux_build:
     needs: [variables]
