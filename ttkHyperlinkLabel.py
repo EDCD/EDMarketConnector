@@ -22,20 +22,21 @@ from __future__ import annotations
 
 import sys
 import tkinter as tk
+import warnings
 import webbrowser
 from tkinter import font as tk_font
 from tkinter import ttk
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    def _(x: str) -> str: ...
+    def _(x: str) -> str: return x
 
 
 # FIXME: Split this into multi-file module to separate the platforms
 class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label):  # type: ignore
     """Clickable label for HTTP links."""
 
-    def __init__(self, master: tk.Frame | None = None, **kw: Any) -> None:
+    def __init__(self, master: ttk.Frame | None = None, **kw: Any) -> None:
         """
         Initialize the HyperlinkLabel.
 
@@ -135,7 +136,7 @@ class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label):  # typ
             url = self.url(self['text']) if callable(self.url) else self.url
             if url:
                 self._leave(event)  # Remove underline before we change window to browser
-                openurl(url)
+                webbrowser.open(url)
 
     def _contextmenu(self, event: tk.Event) -> None:
         if self['text'] and (self.popup_copy(self['text']) if callable(self.popup_copy) else self.popup_copy):
@@ -183,4 +184,6 @@ def openurl(url: str) -> None:
     ended up using `webbrowser.open()` *anyway*.
     :param url: URL to open.
     """
+    warnings.warn("This function is deprecated. "
+                  "Please use `webbrowser.open() instead.", DeprecationWarning, stacklevel=2)
     webbrowser.open(url)
