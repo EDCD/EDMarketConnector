@@ -137,14 +137,15 @@ def appversion() -> semantic_version.Version:
             shorthash = gitv.read()
 
     else:
-        # Running from source. For Linux, check to see if .gitversion file exists
-        # If so, use it. This is also required for the Flatpak
-        if pathlib.Path(sys.path[0] + "/" + GITVERSION_FILE).exists():
-            with open(pathlib.Path(sys.path[0] + "/" + GITVERSION_FILE), encoding='utf-8') as gitv:
-                shorthash = gitv.read()
-        else:
-            shorthash = git_shorthash_from_head()
-            if shorthash is None:
+        # Running from source. Use git rev-parse --short HEAD
+        # or fall back to .gitversion file if it exists.
+        # This is also required for the Flatpak
+        shorthash = git_shorthash_from_head()
+        if shorthash is None:
+            if pathlib.Path(sys.path[0] + "/" + GITVERSION_FILE).exists():
+                with open(pathlib.Path(sys.path[0] + "/" + GITVERSION_FILE), encoding='utf-8') as gitv:
+                    shorthash = gitv.read()
+            else:
                 shorthash = 'UNKNOWN'
 
     _cached_version = semantic_version.Version(f'{_static_appversion}+{shorthash}')
