@@ -1,5 +1,5 @@
 # vim: tabstop=2 shiftwidth=2
-name: Build EDMC for Windows
+name: Build EDMC
 
 on:
   push:
@@ -11,7 +11,7 @@ jobs:
   variables:
     outputs:
       sem_ver: ${{ steps.var.outputs.sem_ver }}
-      archive_exclusions: ${{ steps.var.outputs.archive_exclusions }}
+      short_sha: ${{ steps.var.outputs.short_sha }}
     runs-on: "ubuntu-latest"
     steps:
       - name: Setting global variables
@@ -20,6 +20,7 @@ jobs:
         with:
           script: |
             core.setOutput('sem_ver', '${{ github.ref_name }}'.replaceAll('Release\/', ''))
+            core.setOutput('short_sha', '${{ github.sha }}'.substring(0, 8))
 
   linux_build:
     needs: [variables]
@@ -29,6 +30,9 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: true
+      - name: Create .gitversion
+        run: |
+          echo "${{ needs.variables.outputs.short_sha }}" > .gitversion
 
       - name: Make tar archive
         run: |
@@ -40,7 +44,11 @@ jobs:
               --exclude=EDMarketConnector-release-*.* \
               --exclude=.editorconfig \
               --exclude=.flake8 \
-              --exclude=.git* \
+              --exclude=.gitattributes \
+              --exclude=.gitignore \
+              --exclude=.gitmodules \
+              --exclude=.git \
+              --exclude=.github \
               --exclude=.mypy.ini \
               --exclude=.pre-commit-config.yaml \
               --exclude=build.py \
