@@ -28,7 +28,7 @@ from queue import Queue
 from threading import Thread
 from time import sleep
 from tkinter import ttk
-from typing import TYPE_CHECKING, Any, Literal, Mapping, MutableMapping, cast
+from typing import TYPE_CHECKING, Any, Literal, Mapping, MutableMapping, cast, Sequence
 import requests
 import killswitch
 import monitor
@@ -722,6 +722,87 @@ def get_discarded_events_list() -> None:
         logger.warning('Exception while trying to set this.discarded_events:', exc_info=e)
 
 
+def process_discarded_events() -> None:
+    """Process discarded events until the discarded events list is retrieved or the shutdown signal is received."""
+    while not this.discarded_events:
+        if this.shutting_down:
+            logger.debug(f'returning from discarded_events loop due to {this.shutting_down=}')
+            return
+        get_discarded_events_list()
+        if this.discarded_events:
+            break
+        sleep(DISCARDED_EVENTS_SLEEP)
+
+    logger.debug('Got "events to discard" list, commencing queue consumption...')
+
+
+def send_to_edsm(  # noqa: CCR001
+    data: dict[str, Sequence[object]], pending: list[Mapping[str, Any]], closing: bool
+) -> list[Mapping[str, Any]]:
+    """Send data to the EDSM API endpoint and handle the API response."""
+    response = this.session.post(TARGET_URL, data=data, timeout=_TIMEOUT)
+    logger.trace_if('plugin.edsm.api', f'API response content: {response.content!r}')
+
+    # Check for rate limit headers
+    rate_limit_remaining = response.headers.get('X-Rate-Limit-Remaining')
+    rate_limit_reset = response.headers.get('X-Rate-Limit-Reset')
+
+    # Convert headers to integers if they exist
+    try:
+        remaining = int(rate_limit_remaining) if rate_limit_remaining else None
+        reset = int(rate_limit_reset) if rate_limit_reset else None
+    except ValueError:
+        remaining = reset = None
+
+    if remaining is not None and reset is not None:
+        # Respect rate limits if they exist
+        if remaining == 0:
+            # Calculate sleep time until the rate limit reset time
+            reset_time = datetime.utcfromtimestamp(reset)
+            current_time = datetime.utcnow()
+
+            sleep_time = (reset_time - current_time).total_seconds()
+
+            if sleep_time > 0:
+                sleep(sleep_time)
+
+    response.raise_for_status()
+    reply = response.json()
+    msg_num = reply['msgnum']
+    msg = reply['msg']
+    # 1xx = OK
+    # 2xx = fatal error
+    # 3&4xx not generated at top-level
+    # 5xx = error but events saved for later processing
+
+    if msg_num // 100 == 2:
+        logger.warning(f'EDSM\t{msg_num} {msg}\t{json.dumps(pending, separators=(",", ": "))}')
+        # LANG: EDSM Plugin - Error message from EDSM API
+        plug.show_error(_('Error: EDSM {MSG}').format(MSG=msg))
+    else:
+        if msg_num // 100 == 1:
+            logger.trace_if('plugin.edsm.api', 'Overall OK')
+            pass
+        elif msg_num // 100 == 5:
+            logger.trace_if('plugin.edsm.api', 'Event(s) not currently processed, but saved for later')
+            pass
+        else:
+            logger.warning(f'EDSM API call status not 1XX, 2XX or 5XX: {msg.num}')
+
+        for e, r in zip(pending, reply['events']):
+            if not closing and e['event'] in ('StartUp', 'Location', 'FSDJump', 'CarrierJump'):
+                # Update main window's system status
+                this.lastlookup = r
+                # calls update_status in main thread
+                if not config.shutting_down and this.system_link is not None:
+                    this.system_link.event_generate('<<EDSMStatus>>', when="tail")
+            if r['msgnum'] // 100 != 1:
+                logger.warning(f'EDSM event with not-1xx status:\n{r["msgnum"]}\n'
+                               f'{r["msg"]}\n{json.dumps(e, separators=(",", ": "))}')
+        pending = []
+    return pending
+
+
 def worker() -> None:  # noqa: CCR001 C901
     """
     Handle uploading events to EDSM API.
@@ -738,17 +819,9 @@ def worker() -> None:  # noqa: CCR001 C901
     last_game_version = ""
     last_game_build = ""
 
-    while not this.discarded_events:
-        if this.shutting_down:
-            logger.debug(f'returning from discarded_events loop due to {this.shutting_down=}')
-            return
-        get_discarded_events_list()
-        if this.discarded_events:
-            break
+    # Process the Discard Queue
+    process_discarded_events()
 
-        sleep(DISCARDED_EVENTS_SLEEP)
-
-    logger.debug('Got "events to discard" list, commencing queue consumption...')
     while True:
         if this.shutting_down:
             logger.debug(f'{this.shutting_down=}, so setting closing = True')
@@ -861,43 +934,8 @@ def worker() -> None:  # noqa: CCR001 C901
                             'journal.locations', f'Overall POST data (elided) is:\n{json.dumps(data_elided, indent=2)}'
                         )
 
-                    response = this.session.post(TARGET_URL, data=data, timeout=_TIMEOUT)
-                    logger.trace_if('plugin.edsm.api', f'API response content: {response.content!r}')
-                    response.raise_for_status()
+                    pending = send_to_edsm(data, pending, closing)
 
-                    reply = response.json()
-                    msg_num = reply['msgnum']
-                    msg = reply['msg']
-                    # 1xx = OK
-                    # 2xx = fatal error
-                    # 3&4xx not generated at top-level
-                    # 5xx = error but events saved for later processing
-
-                    if msg_num // 100 == 2:
-                        logger.warning(f'EDSM\t{msg_num} {msg}\t{json.dumps(pending, separators=(",", ": "))}')
-                        # LANG: EDSM Plugin - Error message from EDSM API
-                        plug.show_error(_('Error: EDSM {MSG}').format(MSG=msg))
-                    else:
-                        if msg_num // 100 == 1:
-                            logger.trace_if('plugin.edsm.api', 'Overall OK')
-                            pass
-                        elif msg_num // 100 == 5:
-                            logger.trace_if('plugin.edsm.api', 'Event(s) not currently processed, but saved for later')
-                            pass
-                        else:
-                            logger.warning(f'EDSM API call status not 1XX, 2XX or 5XX: {msg.num}')
-
-                        for e, r in zip(pending, reply['events']):
-                            if not closing and e['event'] in ('StartUp', 'Location', 'FSDJump', 'CarrierJump'):
-                                # Update main window's system status
-                                this.lastlookup = r
-                                # calls update_status in main thread
-                                if not config.shutting_down and this.system_link is not None:
-                                    this.system_link.event_generate('<<EDSMStatus>>', when="tail")
-                            if r['msgnum'] // 100 != 1:
-                                logger.warning(f'EDSM event with not-1xx status:\n{r["msgnum"]}\n'
-                                               f'{r["msg"]}\n{json.dumps(e, separators = (",", ": "))}')
-                        pending = []
                 break  # No exception, so assume success
 
             except Exception as e:
