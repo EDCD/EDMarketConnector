@@ -80,10 +80,10 @@ class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label):  # typ
     ) -> dict[str, tuple[str, str, str, Any, Any]] | None:
         """Change cursor and appearance depending on state and text."""
         # This class' state
-        for thing in ['url', 'popup_copy', 'underline']:
+        for thing in ('url', 'popup_copy', 'underline'):
             if thing in kw:
                 setattr(self, thing, kw.pop(thing))
-        for thing in ['foreground', 'disabledforeground']:
+        for thing in ('foreground', 'disabledforeground'):
             if thing in kw:
                 setattr(self, thing, kw[thing])
 
