@@ -99,7 +99,7 @@ def git_shorthash_from_head() -> str:
         )
         out, err = git_cmd.communicate()
 
-    except subprocess.CalledProcessError as e:
+    except (subprocess.CalledProcessError, FileNotFoundError) as e:
         logger.info(f"Couldn't run git command for short hash: {e!r}")
 
     else:
