@@ -53,7 +53,7 @@ jobs:
     # Get Python set up
     ####################################################################
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version-file: '.python-version'
     - name: Install dependencies
