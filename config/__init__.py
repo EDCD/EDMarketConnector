@@ -81,15 +81,15 @@ else:
 _T = TypeVar('_T')
 
 
-def git_shorthash_from_head() -> str:
+def git_shorthash_from_head() -> str | None:
     """
     Determine short hash for current git HEAD.
 
     Includes `.DIRTY` if any changes have been made from HEAD
 
-    :return: str - None if we couldn't determine the short hash.
+    :return: str | None: None if we couldn't determine the short hash.
     """
-    shorthash: str = None  # type: ignore
+    shorthash: str | None = None
 
     try:
         git_cmd = subprocess.Popen(
@@ -99,14 +99,14 @@ def git_shorthash_from_head() -> str:
         )
         out, err = git_cmd.communicate()
 
-    except subprocess.CalledProcessError as e:
+    except (subprocess.CalledProcessError, FileNotFoundError) as e:
         logger.info(f"Couldn't run git command for short hash: {e!r}")
 
     else:
         shorthash = out.decode().rstrip('\n')
         if re.match(r'^[0-9a-f]{7,}$', shorthash) is None:
             logger.error(f"'{shorthash}' doesn't look like a valid git short hash, forcing to None")
-            shorthash = None  # type: ignore
+            shorthash = None
 
     if shorthash is not None:
         with contextlib.suppress(Exception):
@@ -134,7 +134,7 @@ def appversion() -> semantic_version.Version:
         # Running frozen, so we should have a .gitversion file
         # Yes, .parent because if frozen we're inside library.zip
         with open(pathlib.Path(sys.path[0]).parent / GITVERSION_FILE, encoding='utf-8') as gitv:
-            shorthash = gitv.read()
+            shorthash: str | None = gitv.read()
 
     else:
         # Running from source. Use git rev-parse --short HEAD
