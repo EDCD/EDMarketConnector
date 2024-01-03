@@ -77,8 +77,8 @@ def generate_data_files(
                 "snd_good.wav",
                 "snd_bad.wav",
                 "modules.p",  # TODO: Remove in 6.0
-                "resources/modules.json",
-                "resources/ships.json",
+                "modules.json",
+                "ships.json",
                 "ships.p",  # TODO: Remove in 6.0
                 f"{app_name}.VisualElementsManifest.xml",
                 f"{app_name}.ico",

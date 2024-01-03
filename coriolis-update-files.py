@@ -57,7 +57,7 @@ if __name__ == "__main__":
             modules['_'.join([reverse_ship_map[name], 'armour', bulkhead])] = {'mass': m['bulkheads'][i]['mass']}
 
     ships = OrderedDict([(k, ships[k]) for k in sorted(ships)])  # sort for easier diffing
-    with open("resources/ships.json", "w") as ships_file:
+    with open("ships.json", "w") as ships_file:
         json.dump(ships, ships_file, indent=4)
 
     # Module masses
@@ -92,5 +92,5 @@ if __name__ == "__main__":
     add(modules, 'hpt_multicannon_fixed_medium_advanced',         {'mass': 4})
 
     modules = OrderedDict([(k, modules[k]) for k in sorted(modules)])  # sort for easier diffing
-    with open("resources/modules.json", "w") as modules_file:
+    with open("modules.json", "w") as modules_file:
         json.dump(modules, modules_file, indent=4)
