@@ -165,7 +165,7 @@ def load_plugins(master: tk.Tk) -> None:
 def _load_internal_plugins():
     internal = []
     for name in sorted(os.listdir(config.internal_plugin_dir_path)):
-        if name.endswith('.py') and name[0] not in ['.', '_']:
+        if name.endswith('.py') and name[0] not in ('.', '_'):
             try:
                 plugin = Plugin(name[:-3], os.path.join(config.internal_plugin_dir_path, name), logger)
                 plugin.folder = None
@@ -184,7 +184,7 @@ def _load_found_plugins():
 
     for name in sorted(os.listdir(config.plugin_dir_path), key=lambda n: (
             not os.path.isfile(os.path.join(config.plugin_dir_path, n, '__init__.py')), n.lower())):
-        if not os.path.isdir(os.path.join(config.plugin_dir_path, name)) or name[0] in ['.', '_']:
+        if not os.path.isdir(os.path.join(config.plugin_dir_path, name)) or name[0] in ('.', '_'):
             pass
         elif name.endswith('.disabled'):
             name, discard = name.rsplit('.', 1)

@@ -918,7 +918,7 @@ def journal_entry(  # noqa: C901, CCR001
             ])
 
             # optional mission-specific properties
-            for (iprop, prop) in [
+            for (iprop, prop) in (
                     ('missionExpiry', 'Expiry'),  # Listed as optional in the docs, but always seems to be present
                     ('starsystemNameTarget', 'DestinationSystem'),
                     ('stationNameTarget', 'DestinationStation'),
@@ -932,7 +932,7 @@ def journal_entry(  # noqa: C901, CCR001
                     ('passengerCount', 'PassengerCount'),
                     ('passengerIsVIP', 'PassengerVIPs'),
                     ('passengerIsWanted', 'PassengerWanted'),
-            ]:
+            ):
 
                 if prop in entry:
                     data[iprop] = entry[prop]
@@ -1295,7 +1295,7 @@ def journal_entry(  # noqa: C901, CCR001
 
         # Friends
         if event_name == 'Friends':
-            if entry['Status'] in ['Added', 'Online']:
+            if entry['Status'] in ('Added', 'Online'):
                 new_add_event(
                     'addCommanderFriend',
                     entry['timestamp'],
@@ -1305,7 +1305,7 @@ def journal_entry(  # noqa: C901, CCR001
                     }
                 )
 
-            elif entry['Status'] in ['Declined', 'Lost']:
+            elif entry['Status'] in ('Declined', 'Lost'):
                 new_add_event(
                     'delCommanderFriend',
                     entry['timestamp'],
@@ -1666,7 +1666,7 @@ def handle_special_events(data_event: dict[str, Any], reply_event: dict[str, Any
         this.lastlocation = reply_event.get('eventData', {})
         if not config.shutting_down:
             this.system_link.event_generate('<<InaraLocation>>', when="tail")
-    elif data_event['eventName'] in ['addCommanderShip', 'setCommanderShip']:
+    elif data_event['eventName'] in ('addCommanderShip', 'setCommanderShip'):
         this.lastship = reply_event.get('eventData', {})
         if not config.shutting_down:
             this.system_link.event_generate('<<InaraShip>>', when="tail")
