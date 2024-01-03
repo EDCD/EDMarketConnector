@@ -36,7 +36,7 @@ if TYPE_CHECKING:
 class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label):  # type: ignore
     """Clickable label for HTTP links."""
 
-    def __init__(self, master: ttk.Frame | None = None, **kw: Any) -> None:
+    def __init__(self, master: ttk.Frame | tk.Frame | None = None, **kw: Any) -> None:
         """
         Initialize the HyperlinkLabel.
 
