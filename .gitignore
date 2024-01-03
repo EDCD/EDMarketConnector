@@ -52,6 +52,7 @@ htmlcov/
 .coverage
 pylintrc
 pylint.txt
+.pylintrc
 
 # Ignore Submodule data directory
 coriolis-data/
