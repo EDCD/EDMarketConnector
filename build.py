@@ -164,15 +164,16 @@ def build() -> None:
         "script": "EDMarketConnector.py",
         "icon_resources": [(0, f"{appname}.ico")],
         "other_resources": [
-            (24, 1, pathlib.Path(f"{appname}.manifest").read_text(encoding="UTF8"))
+            (24, 1, pathlib.Path(f"resources/{appname}.manifest").read_text(encoding="UTF8"))
         ],
     }
 
     console_config: dict = {
         "dest_base": appcmdname,
         "script": "EDMC.py",
+        "icon_resources": [(0, f"{appname}.ico")],
         "other_resources": [
-            (24, 1, pathlib.Path(f"{appcmdname}.manifest").read_text(encoding="UTF8"))
+            (24, 1, pathlib.Path(f"resources/{appcmdname}.manifest").read_text(encoding="UTF8"))
         ],
     }
 
