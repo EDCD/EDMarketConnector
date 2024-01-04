@@ -29,7 +29,6 @@ import re
 import sqlite3
 import sys
 import tkinter as tk
-from collections import OrderedDict
 from platform import system
 from textwrap import dedent
 from threading import Lock
@@ -40,7 +39,6 @@ from typing import (
     Mapping,
     MutableMapping,
 )
-from typing import OrderedDict as OrderedDictT
 import requests
 import companion
 import edmc_data
@@ -98,13 +96,13 @@ class This:
 
         # Avoid duplicates
         self.marketId: str | None = None
-        self.commodities: list[OrderedDictT[str, Any]] | None = None
+        self.commodities: list[dict[str, Any]] | None = None
         self.outfitting: tuple[bool, list[str]] | None = None
         self.shipyard: tuple[bool, list[Mapping[str, Any]]] | None = None
         self.fcmaterials_marketid: int = 0
-        self.fcmaterials: list[OrderedDictT[str, Any]] | None = None
+        self.fcmaterials: list[dict[str, Any]] | None = None
         self.fcmaterials_capi_marketid: int = 0
-        self.fcmaterials_capi: list[OrderedDictT[str, Any]] | None = None
+        self.fcmaterials_capi: list[dict[str, Any]] | None = None
 
         # For the tkinter parent window, so we can call update_idletasks()
         self.parent: tk.Tk
@@ -651,21 +649,21 @@ class EDDN:
             modules,
             ships
         )
-        commodities: list[OrderedDictT[str, Any]] = []
+        commodities: list[dict[str, Any]] = []
         for commodity in data['lastStarport'].get('commodities') or []:
             # Check 'marketable' and 'not prohibited'
             if (category_map.get(commodity['categoryname'], True)
                     and not commodity.get('legality')):
-                commodities.append(OrderedDict([
-                    ('name',          commodity['name'].lower()),
-                    ('meanPrice',     int(commodity['meanPrice'])),
-                    ('buyPrice',      int(commodity['buyPrice'])),
-                    ('stock',         int(commodity['stock'])),
-                    ('stockBracket',  commodity['stockBracket']),
-                    ('sellPrice',     int(commodity['sellPrice'])),
-                    ('demand',        int(commodity['demand'])),
-                    ('demandBracket', commodity['demandBracket']),
-                ]))
+                commodities.append({
+                    'name': commodity['name'].lower(),
+                    'meanPrice': int(commodity['meanPrice']),
+                    'buyPrice': int(commodity['buyPrice']),
+                    'stock': int(commodity['stock']),
+                    'stockBracket': commodity['stockBracket'],
+                    'sellPrice': int(commodity['sellPrice']),
+                    'demand': int(commodity['demand']),
+                    'demandBracket': commodity['demandBracket'],
+                })
 
                 if commodity['statusFlags']:
                     commodities[-1]['statusFlags'] = commodity['statusFlags']
@@ -679,15 +677,15 @@ class EDDN:
         # none and that really does need to be recorded over EDDN so that
         # tools can update in a timely manner.
         if this.commodities != commodities:
-            message: OrderedDictT[str, Any] = OrderedDict([
-                ('timestamp',   data['timestamp']),
-                ('systemName',  data['lastSystem']['name']),
-                ('stationName', data['lastStarport']['name']),
-                ('marketId',    data['lastStarport']['id']),
-                ('commodities', commodities),
-                ('horizons',    horizons),
-                ('odyssey',     this.odyssey),
-            ])
+            message: dict[str, Any] = {
+                'timestamp': data['timestamp'],
+                'systemName': data['lastSystem']['name'],
+                'stationName': data['lastStarport']['name'],
+                'marketId': data['lastStarport']['id'],
+                'commodities': commodities,
+                'horizons': horizons,
+                'odyssey': this.odyssey,
+            }
 
             if 'economies' in data['lastStarport']:
                 message['economies'] = sorted(
@@ -802,7 +800,7 @@ class EDDN:
         if outfitting and this.outfitting != (horizons, outfitting):
             self.send_message(data['commander']['name'], {
                 '$schemaRef': f'https://eddn.edcd.io/schemas/outfitting/2{"/test" if is_beta else ""}',
-                'message': OrderedDict([
+                'message': {
                     ('timestamp',   data['timestamp']),
                     ('systemName',  data['lastSystem']['name']),
                     ('stationName', data['lastStarport']['name']),
@@ -810,7 +808,7 @@ class EDDN:
                     ('horizons',    horizons),
                     ('modules',     outfitting),
                     ('odyssey',     this.odyssey),
-                ]),
+                },
                 'header':     self.standard_header(
                     game_version=self.capi_gameversion_from_host_endpoint(
                         data.source_host, companion.Session.FRONTIER_CAPI_PATH_SHIPYARD
@@ -864,7 +862,7 @@ class EDDN:
         if shipyard and this.shipyard != (horizons, shipyard):
             self.send_message(data['commander']['name'], {
                 '$schemaRef': f'https://eddn.edcd.io/schemas/shipyard/2{"/test" if is_beta else ""}',
-                'message': OrderedDict([
+                'message': {
                     ('timestamp',   data['timestamp']),
                     ('systemName',  data['lastSystem']['name']),
                     ('stationName', data['lastStarport']['name']),
@@ -872,7 +870,7 @@ class EDDN:
                     ('horizons',    horizons),
                     ('ships',       shipyard),
                     ('odyssey',     this.odyssey),
-                ]),
+                },
                 'header': self.standard_header(
                     game_version=self.capi_gameversion_from_host_endpoint(
                         data.source_host, companion.Session.FRONTIER_CAPI_PATH_SHIPYARD
@@ -898,16 +896,22 @@ class EDDN:
         :param entry: the journal entry containing the commodities data
         """
         items: list[Mapping[str, Any]] = entry.get('Items') or []
-        commodities: list[OrderedDictT[str, Any]] = sorted((OrderedDict([
-            ('name',          self.canonicalise(commodity['Name'])),
-            ('meanPrice',     commodity['MeanPrice']),
-            ('buyPrice',      commodity['BuyPrice']),
-            ('stock',         commodity['Stock']),
-            ('stockBracket',  commodity['StockBracket']),
-            ('sellPrice',     commodity['SellPrice']),
-            ('demand',        commodity['Demand']),
-            ('demandBracket', commodity['DemandBracket']),
-        ]) for commodity in items), key=lambda c: c['name'])
+        commodities: list[dict[str, Any]] = sorted(
+            (
+                {
+                    'name': self.canonicalise(commodity['Name']),
+                    'meanPrice': commodity['MeanPrice'],
+                    'buyPrice': commodity['BuyPrice'],
+                    'stock': commodity['Stock'],
+                    'stockBracket': commodity['StockBracket'],
+                    'sellPrice': commodity['SellPrice'],
+                    'demand': commodity['Demand'],
+                    'demandBracket': commodity['DemandBracket'],
+                }
+                for commodity in items
+            ),
+            key=lambda c: c['name']
+        )
 
         # This used to have a check `commodities and ` at the start so as to
         # not send an empty commodities list, as the EDDN Schema doesn't allow
@@ -918,7 +922,7 @@ class EDDN:
         if this.commodities != commodities:
             self.send_message(cmdr, {
                 '$schemaRef': f'https://eddn.edcd.io/schemas/commodity/3{"/test" if is_beta else ""}',
-                'message': OrderedDict([
+                'message': {
                     ('timestamp',   entry['timestamp']),
                     ('systemName',  entry['StarSystem']),
                     ('stationName', entry['StationName']),
@@ -926,7 +930,7 @@ class EDDN:
                     ('commodities', commodities),
                     ('horizons',    this.horizons),
                     ('odyssey',     this.odyssey),
-                ]),
+                },
             })
 
         this.commodities = commodities
@@ -957,7 +961,7 @@ class EDDN:
         if outfitting and this.outfitting != (horizons, outfitting):
             self.send_message(cmdr, {
                 '$schemaRef': f'https://eddn.edcd.io/schemas/outfitting/2{"/test" if is_beta else ""}',
-                'message': OrderedDict([
+                'message': {
                     ('timestamp',   entry['timestamp']),
                     ('systemName',  entry['StarSystem']),
                     ('stationName', entry['StationName']),
@@ -965,7 +969,7 @@ class EDDN:
                     ('horizons',    horizons),
                     ('modules',     outfitting),
                     ('odyssey',     entry['odyssey'])
-                ]),
+                },
             })
 
         this.outfitting = (horizons, outfitting)
@@ -991,7 +995,7 @@ class EDDN:
         if shipyard and this.shipyard != (horizons, shipyard):
             self.send_message(cmdr, {
                 '$schemaRef': f'https://eddn.edcd.io/schemas/shipyard/2{"/test" if is_beta else ""}',
-                'message': OrderedDict([
+                'message': {
                     ('timestamp',   entry['timestamp']),
                     ('systemName',  entry['StarSystem']),
                     ('stationName', entry['StationName']),
@@ -999,7 +1003,7 @@ class EDDN:
                     ('horizons',    horizons),
                     ('ships',       shipyard),
                     ('odyssey',     entry['odyssey'])
-                ]),
+                },
             })
 
         # this.shipyard = (horizons, shipyard)
@@ -2182,14 +2186,14 @@ def plugin_stop() -> None:
     logger.debug('Done.')
 
 
-def filter_localised(d: Mapping[str, Any]) -> OrderedDictT[str, Any]:
+def filter_localised(d: Mapping[str, Any]) -> dict[str, Any]:
     """
     Recursively remove any dict keys with names ending `_Localised` from a dict.
 
     :param d: dict to filter keys of.
     :return: The filtered dict.
     """
-    filtered: OrderedDictT[str, Any] = OrderedDict()
+    filtered: dict[str, Any] = {}
     for k, v in d.items():
         if k.endswith('_Localised'):
             pass
@@ -2206,14 +2210,14 @@ def filter_localised(d: Mapping[str, Any]) -> OrderedDictT[str, Any]:
     return filtered
 
 
-def capi_filter_localised(d: Mapping[str, Any]) -> OrderedDictT[str, Any]:
+def capi_filter_localised(d: Mapping[str, Any]) -> dict[str, Any]:
     """
     Recursively remove any dict keys for known CAPI 'localised' names.
 
     :param d: dict to filter keys of.
     :return: The filtered dict.
     """
-    filtered: OrderedDictT[str, Any] = OrderedDict()
+    filtered: dict[str, Any] = {}
     for k, v in d.items():
         if EDDN.CAPI_LOCALISATION_RE.search(k):
             pass

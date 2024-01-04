@@ -8,8 +8,6 @@ See LICENSE file.
 from __future__ import annotations
 
 import json
-from collections import OrderedDict
-from typing import OrderedDict as OrderedDictT
 from config import config
 from edmc_data import (
     outfitting_armour_map as armour_map,
@@ -36,7 +34,7 @@ from EDMCLogging import get_main_logger
 logger = get_main_logger()
 
 # Module mass, FSD data etc
-moduledata: OrderedDictT = OrderedDict()
+moduledata: dict = {}
 
 
 def lookup(module, ship_map, entitled=False) -> dict | None:  # noqa: C901, CCR001

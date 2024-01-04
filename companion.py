@@ -28,7 +28,7 @@ import urllib.parse
 import webbrowser
 from email.utils import parsedate
 from queue import Queue
-from typing import TYPE_CHECKING, Any, Mapping, OrderedDict, TypeVar
+from typing import TYPE_CHECKING, Any, Mapping, TypeVar
 import requests
 import config as conf_module
 import killswitch
@@ -1328,7 +1328,7 @@ def index_possibly_sparse_list(data: Mapping[str, V] | list[V], key: int) -> V:
     if isinstance(data, list):
         return data[key]
 
-    if isinstance(data, (dict, OrderedDict)):
+    if isinstance(data, (dict, dict)):
         return data[str(key)]
 
     raise ValueError(f'Unexpected data type {type(data)}')

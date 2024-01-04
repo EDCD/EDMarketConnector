@@ -16,7 +16,6 @@ import numbers
 import re
 import sys
 import warnings
-from collections import OrderedDict
 from contextlib import suppress
 from os import pardir, listdir, sep, makedirs
 from os.path import basename, dirname, isdir, isfile, join, abspath, exists
@@ -192,10 +191,10 @@ class _Translations:
 
     def available_names(self) -> dict[str | None, str]:
         """Available language names by code."""
-        names: dict[str | None, str] = OrderedDict([
+        names: dict[str | None, str] = {
             # LANG: The system default language choice in Settings > Appearance
-            (None, _('Default')),  # Appearance theme and language setting
-        ])
+            None: _('Default'),  # Appearance theme and language setting
+        }
         names.update(sorted(
             [(lang, self.contents(lang).get(LANGUAGE_ID, lang)) for lang in self.available()] +
             [(_Translations.FALLBACK, _Translations.FALLBACK_NAME)],

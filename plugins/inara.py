@@ -24,14 +24,13 @@ import json
 import threading
 import time
 import tkinter as tk
-from collections import OrderedDict, defaultdict, deque
+from collections import defaultdict, deque
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from operator import itemgetter
 from threading import Lock, Thread
 from tkinter import ttk
 from typing import TYPE_CHECKING, Any, Callable, Deque, Mapping, NamedTuple, Sequence, cast, Union
-from typing import OrderedDict as OrderedDictT
 import requests
 import edmc_data
 import killswitch
@@ -102,12 +101,12 @@ class This:
         self.newsession: bool = True  # starting a new session - wait for Cargo event
         self.undocked: bool = False  # just undocked
         self.suppress_docked = False  # Skip initial Docked event if started docked
-        self.cargo: list[OrderedDictT[str, Any]] | None = None
-        self.materials: list[OrderedDictT[str, Any]] | None = None
+        self.cargo: list[dict[str, Any]] | None = None
+        self.materials: list[dict[str, Any]] | None = None
         self.last_credits: int = 0  # Send credit update soon after Startup / new game
-        self.storedmodules: list[OrderedDictT[str, Any]] | None = None
-        self.loadout: OrderedDictT[str, Any] | None = None
-        self.fleet: list[OrderedDictT[str, Any]] | None = None
+        self.storedmodules: list[dict[str, Any]] | None = None
+        self.loadout: dict[str, Any] | None = None
+        self.fleet: list[dict[str, Any]] | None = None
         self.shipswap: bool = False  # just swapped ship
         self.on_foot = False
 
@@ -721,13 +720,13 @@ def journal_entry(  # noqa: C901, CCR001
                 this.suppress_docked = True
 
             # Send cargo and materials if changed
-            cargo = [OrderedDict({'itemName': k, 'itemCount': state['Cargo'][k]}) for k in sorted(state['Cargo'])]
+            cargo = [{'itemName': k, 'itemCount': state['Cargo'][k]} for k in sorted(state['Cargo'])]
             if this.cargo != cargo:
                 new_add_event('setCommanderInventoryCargo', entry['timestamp'], cargo)
                 this.cargo = cargo
 
             materials = [
-                OrderedDict([('itemName', k), ('itemCount', state[category][k])])
+                {'itemName': k, 'itemCount': state[category][k]}
                 for category in ('Raw', 'Manufactured', 'Encoded')
                 for k in sorted(state[category])
             ]
@@ -823,24 +822,30 @@ def journal_entry(  # noqa: C901, CCR001
 
         # Fleet
         if event_name == 'StoredShips':
-            fleet: list[OrderedDictT[str, Any]] = sorted(
-                [OrderedDict({
-                    'shipType': x['ShipType'],
-                    'shipGameID': x['ShipID'],
-                    'shipName': x.get('Name'),
-                    'isHot': x['Hot'],
-                    'starsystemName': entry['StarSystem'],
-                    'stationName': entry['StationName'],
-                    'marketID': entry['MarketID'],
-                }) for x in entry['ShipsHere']] +
-                [OrderedDict({
-                    'shipType': x['ShipType'],
-                    'shipGameID': x['ShipID'],
-                    'shipName': x.get('Name'),
-                    'isHot': x['Hot'],
-                    'starsystemName': x.get('StarSystem'),  # Not present for ships in transit
-                    'marketID': x.get('ShipMarketID'),  # "
-                }) for x in entry['ShipsRemote']],
+            fleet = sorted(
+                [
+                    {
+                        'shipType': x['ShipType'],
+                        'shipGameID': x['ShipID'],
+                        'shipName': x.get('Name'),
+                        'isHot': x['Hot'],
+                        'starsystemName': entry['StarSystem'],
+                        'stationName': entry['StationName'],
+                        'marketID': entry['MarketID'],
+                    }
+                    for x in entry['ShipsHere']
+                ] +
+                [
+                    {
+                        'shipType': x['ShipType'],
+                        'shipGameID': x['ShipID'],
+                        'shipName': x.get('Name'),
+                        'isHot': x['Hot'],
+                        'starsystemName': x.get('StarSystem'),  # Not present for ships in transit
+                        'marketID': x.get('ShipMarketID'),  # "
+                    }
+                    for x in entry['ShipsRemote']
+                ],
                 key=itemgetter('shipGameID')
             )
 
@@ -851,7 +856,6 @@ def journal_entry(  # noqa: C901, CCR001
                 # this.events = [x for x in this.events if x['eventName'] != 'setCommanderShip']  # Remove any unsent
                 for ship in this.fleet:
                     new_add_event('setCommanderShip', entry['timestamp'], ship)
-
         # Loadout
         if event_name == 'Loadout' and not this.newsession:
             loadout = make_loadout(state)
@@ -870,14 +874,14 @@ def journal_entry(  # noqa: C901, CCR001
         # Stored modules
         if event_name == 'StoredModules':
             items = {mod['StorageSlot']: mod for mod in entry['Items']}  # Impose an order
-            modules: list[OrderedDictT[str, Any]] = []
+            modules: list[dict[str, Any]] = []
             for slot in sorted(items):
                 item = items[slot]
-                module: OrderedDictT[str, Any] = OrderedDict([
-                    ('itemName', item['Name']),
-                    ('itemValue', item['BuyPrice']),
-                    ('isHot', item['Hot']),
-                ])
+                module: dict[str, Any] = {
+                    'itemName': item['Name'],
+                    'itemValue': item['BuyPrice'],
+                    'isHot': item['Hot'],
+                }
 
                 # Location can be absent if in transit
                 if 'StarSystem' in item:
@@ -887,7 +891,7 @@ def journal_entry(  # noqa: C901, CCR001
                     module['marketID'] = item['MarketID']
 
                 if 'EngineerModifications' in item:
-                    module['engineering'] = OrderedDict([('blueprintName', item['EngineerModifications'])])
+                    module['engineering'] = {'blueprintName': item['EngineerModifications']}
                     if 'Level' in item:
                         module['engineering']['blueprintLevel'] = item['Level']
 
@@ -907,15 +911,15 @@ def journal_entry(  # noqa: C901, CCR001
 
         # Missions
         if event_name == 'MissionAccepted':
-            data: OrderedDictT[str, Any] = OrderedDict([
-                ('missionName', entry['Name']),
-                ('missionGameID', entry['MissionID']),
-                ('influenceGain', entry['Influence']),
-                ('reputationGain', entry['Reputation']),
-                ('starsystemNameOrigin', system),
-                ('stationNameOrigin', station),
-                ('minorfactionNameOrigin', entry['Faction']),
-            ])
+            data: dict[str, Any] = {
+                'missionName': entry['Name'],
+                'missionGameID': entry['MissionID'],
+                'influenceGain': entry['Influence'],
+                'reputationGain': entry['Reputation'],
+                'starsystemNameOrigin': system,
+                'stationNameOrigin': station,
+                'minorfactionNameOrigin': entry['Faction'],
+            }
 
             # optional mission-specific properties
             for (iprop, prop) in (
@@ -946,7 +950,7 @@ def journal_entry(  # noqa: C901, CCR001
             for x in entry.get('PermitsAwarded', []):
                 new_add_event('addCommanderPermit', entry['timestamp'], {'starsystemName': x})
 
-            data = OrderedDict([('missionGameID', entry['MissionID'])])
+            data = {'missionGameID': entry['MissionID']}
             if 'Donation' in entry:
                 data['donationCredits'] = entry['Donation']
 
@@ -966,7 +970,7 @@ def journal_entry(  # noqa: C901, CCR001
 
             factioneffects = []
             for faction in entry.get('FactionEffects', []):
-                effect: OrderedDictT[str, Any] = OrderedDict([('minorfactionName', faction['Faction'])])
+                effect: dict[str, Any] = {'minorfactionName': faction['Faction']}
                 for influence in faction.get('Influence', []):
                     if 'Influence' in influence:
                         highest_gain = influence['Influence']
@@ -990,7 +994,7 @@ def journal_entry(  # noqa: C901, CCR001
 
         # Combat
         if event_name == 'Died':
-            data = OrderedDict([('starsystemName', system)])
+            data = {'starsystemName': system}
             if 'Killers' in entry:
                 data['wingOpponentNames'] = [x['Name'] for x in entry['Killers']]
 
@@ -1000,10 +1004,11 @@ def journal_entry(  # noqa: C901, CCR001
             new_add_event('addCommanderCombatDeath', entry['timestamp'], data)
 
         elif event_name == 'Interdicted':
-            data = OrderedDict([('starsystemName', system),
-                                ('isPlayer', entry['IsPlayer']),
-                                ('isSubmit', entry['Submitted']),
-                                ])
+            data = {
+                'starsystemName': system,
+                'isPlayer': entry['IsPlayer'],
+                'isSubmit': entry['Submitted']
+            }
 
             if 'Interdictor' in entry:
                 data['opponentName'] = entry['Interdictor']
@@ -1022,11 +1027,11 @@ def journal_entry(  # noqa: C901, CCR001
                 new_add_event('addCommanderCombatInterdicted', entry['timestamp'], data)
 
         elif event_name == 'Interdiction':
-            data = OrderedDict([
-                ('starsystemName', system),
-                ('isPlayer', entry['IsPlayer']),
-                ('isSuccess', entry['Success']),
-            ])
+            data = {
+                'starsystemName': system,
+                'isPlayer': entry['IsPlayer'],
+                'isSuccess': entry['Success'],
+            }
 
             if 'Interdicted' in entry:
                 data['opponentName'] = entry['Interdicted']
@@ -1256,16 +1261,16 @@ def journal_entry(  # noqa: C901, CCR001
             # ))
 
             for goal in entry['CurrentGoals']:
-                data = OrderedDict([
-                    ('communitygoalGameID', goal['CGID']),
-                    ('communitygoalName', goal['Title']),
-                    ('starsystemName', goal['SystemName']),
-                    ('stationName', goal['MarketName']),
-                    ('goalExpiry', goal['Expiry']),
-                    ('isCompleted', goal['IsComplete']),
-                    ('contributorsNum', goal['NumContributors']),
-                    ('contributionsTotal', goal['CurrentTotal']),
-                ])
+                data = {
+                    'communitygoalGameID': goal['CGID'],
+                    'communitygoalName': goal['Title'],
+                    'starsystemName': goal['SystemName'],
+                    'stationName': goal['MarketName'],
+                    'goalExpiry': goal['Expiry'],
+                    'isCompleted': goal['IsComplete'],
+                    'contributorsNum': goal['NumContributors'],
+                    'contributionsTotal': goal['CurrentTotal'],
+                }
 
                 if 'TierReached' in goal:
                     data['tierReached'] = int(goal['TierReached'].split()[-1])
@@ -1279,11 +1284,11 @@ def journal_entry(  # noqa: C901, CCR001
 
                 new_add_event('setCommunityGoal', entry['timestamp'], data)
 
-                data = OrderedDict([
-                    ('communitygoalGameID', goal['CGID']),
-                    ('contribution', goal['PlayerContribution']),
-                    ('percentileBand', goal['PlayerPercentileBand']),
-                ])
+                data = {
+                    'communitygoalGameID': goal['CGID'],
+                    'contribution': goal['PlayerContribution'],
+                    'percentileBand': goal['PlayerPercentileBand'],
+                }
 
                 if 'Bonus' in goal:
                     data['percentileBandReward'] = goal['Bonus']
@@ -1380,7 +1385,7 @@ def cmdr_data(data: CAPIData, is_beta):  # noqa: CCR001, reanalyze me later
         pass
 
 
-def make_loadout(state: dict[str, Any]) -> OrderedDictT[str, Any]:  # noqa: CCR001
+def make_loadout(state: dict[str, Any]) -> dict[str, Any]:  # noqa: CCR001
     """
     Construct an inara loadout from an event.
 
@@ -1389,13 +1394,13 @@ def make_loadout(state: dict[str, Any]) -> OrderedDictT[str, Any]:  # noqa: CCR0
     """
     modules = []
     for m in state['Modules'].values():
-        module: OrderedDictT[str, Any] = OrderedDict([
-            ('slotName', m['Slot']),
-            ('itemName', m['Item']),
-            ('itemHealth', m['Health']),
-            ('isOn', m['On']),
-            ('itemPriority', m['Priority']),
-        ])
+        module: dict[str, Any] = {
+            'slotName': m['Slot'],
+            'itemName': m['Item'],
+            'itemHealth': m['Health'],
+            'isOn': m['On'],
+            'itemPriority': m['Priority'],
+        }
 
         if 'AmmoInClip' in m:
             module['itemAmmoClip'] = m['AmmoInClip']
@@ -1410,20 +1415,20 @@ def make_loadout(state: dict[str, Any]) -> OrderedDictT[str, Any]:  # noqa: CCR0
             module['isHot'] = m['Hot']
 
         if 'Engineering' in m:
-            engineering: OrderedDictT[str, Any] = OrderedDict([
-                ('blueprintName', m['Engineering']['BlueprintName']),
-                ('blueprintLevel', m['Engineering']['Level']),
-                ('blueprintQuality', m['Engineering']['Quality']),
-            ])
+            engineering: dict[str, Any] = {
+                'blueprintName': m['Engineering']['BlueprintName'],
+                'blueprintLevel': m['Engineering']['Level'],
+                'blueprintQuality': m['Engineering']['Quality'],
+            }
 
             if 'ExperimentalEffect' in m['Engineering']:
                 engineering['experimentalEffect'] = m['Engineering']['ExperimentalEffect']
 
             engineering['modifiers'] = []
             for mod in m['Engineering']['Modifiers']:
-                modifier: OrderedDictT[str, Any] = OrderedDict([
-                    ('name', mod['Label']),
-                ])
+                modifier: dict[str, Any] = {
+                    'name': mod['Label'],
+                }
 
                 if 'OriginalValue' in mod:
                     modifier['value'] = mod['Value']
@@ -1439,11 +1444,11 @@ def make_loadout(state: dict[str, Any]) -> OrderedDictT[str, Any]:  # noqa: CCR0
 
         modules.append(module)
 
-    return OrderedDict([
-        ('shipType', state['ShipType']),
-        ('shipGameID', state['ShipID']),
-        ('shipLoadout', modules),
-    ])
+    return {
+        'shipType': state['ShipType'],
+        'shipGameID': state['ShipID'],
+        'shipLoadout': modules,
+    }
 
 
 def new_add_event(
