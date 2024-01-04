@@ -1073,7 +1073,7 @@ class EDLogs(FileSystemEventHandler):
                 # From 3.3 full Cargo event (after the first one) is written to a separate file
                 if 'Inventory' not in entry:
                     with open(join(self.currentdir, 'Cargo.json'), 'rb') as h:  # type: ignore
-                        entry = json.load(h)  # Preserve property order because why not?
+                        entry = json.load(h)
                         self.state['CargoJSON'] = entry
 
                 clean = self.coalesce_cargo(entry['Inventory'])
