@@ -62,7 +62,7 @@ jobs:
             mv ../EDMarketConnector-release-${{ needs.variables.outputs.sem_ver }}.tar.gz .
 
       - name: Upload build files
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: Built files
           path: |
@@ -127,7 +127,7 @@ jobs:
             filepath: './EDMC_Installer_Config.iss'
 
       - name: Upload build files
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: Built files
           path: |
