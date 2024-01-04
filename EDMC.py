@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# flake8: noqa TAE001
 """
 EDMC.py - Command-line interface. Requires prior setup through the GUI.
 
@@ -26,6 +27,7 @@ from EDMCLogging import edmclogger, logger, logging
 
 if TYPE_CHECKING:
     from logging import TRACE  # type: ignore # noqa: F401 # needed to make mypy happy
+    def _(x): return x
 
 edmclogger.set_channels_loglevel(logging.INFO)
 
@@ -162,7 +164,9 @@ def main():  # noqa: C901, CCR001
             updater = Updater()
             newversion: EDMCVersion | None = updater.check_appcast()
             if newversion:
-                print(f'{appversion()} ({newversion.title!r} is available)')
+                # LANG: Update Available Text
+                newverstr: str = _("{NEWVER} is available").format(NEWVER=newversion.title)
+                print(f'{appversion()} ({newverstr})')
             else:
                 print(appversion())
             return
