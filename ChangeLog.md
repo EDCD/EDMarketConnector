@@ -9,7 +9,7 @@ produce the Windows executables and installer.
 
 ---
 
-* We now test against, and package with, Python 3.11.1, 32-bit.
+* We now test against, and package with, Python 3.11.7, 32-bit.
 
   **As a consequence of this we no longer support Windows 7.  
   This is due to
@@ -33,6 +33,35 @@ produce the Windows executables and installer.
   currently used version in a given branch.
 
 ---
+Release 5.10.1
+===
+This release contains a number of bugfixes, minor performance enhancements,
+workflow and dependency updates, and a function deprecation. 
+
+Note to plugin developers: modules.p and ships.p are deprecated, and slated
+for removal in the next major release! Please look for that change coming soon. 
+
+Note to plugin developers: The `openurl()` function in ttkHyperlinkLabel has been deprecated,
+and slated for removal in the next major release! Please migrate to `webbrowser.open()`.
+
+**Changes and Enhancements**
+* Deprecated `openurl()`. Please migrate to `webbrowser.open()`
+* Updated a number of list comparisons to use more efficient tuple comparisons
+* Updated a few type hints
+* Updated a few binary comparitors to be more efficient
+* Moved `resources.json` and `modules.json` back to the top level for all users
+* Updated several dependencies
+* Updated Python version to 3.11.7
+
+**Bug Fixes**
+* Fixed an issue where resources files could be in different locations for different users.
+  * These files are now in the same location (top level) for all users on all distributions.
+* Fixed an issue where CMDRs without the Git application installed would crash on start if running from Source.
+  * Thanks to the Flatpak team for pointing this one out!
+* Fixed a bug where CMDRs running from source would have their git hash version displayed as UNKNOWN.
+  * We're now more failure tolerant and use the bundled .gitversion if no true git hash is provided.
+* Fixed a bug where starting two copies of EDMC with a valid install would not generate a duplicate warning.
+
 Release 5.10.0
 ===
 This release contains a number of under-the-hood changes to EDMC designed to improve performance, code

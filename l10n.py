@@ -25,7 +25,7 @@ from config import config
 from EDMCLogging import get_main_logger
 
 if TYPE_CHECKING:
-    def _(x: str) -> str: ...
+    def _(x: str) -> str: return x
 
 # Note that this is also done in EDMarketConnector.py, and thus removing this here may not have a desired effect
 try:

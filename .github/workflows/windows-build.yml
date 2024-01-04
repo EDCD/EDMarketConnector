@@ -1,5 +1,5 @@
 # vim: tabstop=2 shiftwidth=2
-name: Build EDMC for Windows
+name: Build EDMC
 
 on:
   push:
@@ -11,7 +11,7 @@ jobs:
   variables:
     outputs:
       sem_ver: ${{ steps.var.outputs.sem_ver }}
-      archive_exclusions: ${{ steps.var.outputs.archive_exclusions }}
+      short_sha: ${{ steps.var.outputs.short_sha }}
     runs-on: "ubuntu-latest"
     steps:
       - name: Setting global variables
@@ -20,6 +20,7 @@ jobs:
         with:
           script: |
             core.setOutput('sem_ver', '${{ github.ref_name }}'.replaceAll('Release\/', ''))
+            core.setOutput('short_sha', '${{ github.sha }}'.substring(0, 8))
 
   linux_build:
     needs: [variables]
@@ -29,6 +30,9 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: true
+      - name: Create .gitversion
+        run: |
+          echo "${{ needs.variables.outputs.short_sha }}" > .gitversion
 
       - name: Make tar archive
         run: |
@@ -40,7 +44,11 @@ jobs:
               --exclude=EDMarketConnector-release-*.* \
               --exclude=.editorconfig \
               --exclude=.flake8 \
-              --exclude=.git* \
+              --exclude=.gitattributes \
+              --exclude=.gitignore \
+              --exclude=.gitmodules \
+              --exclude=.git \
+              --exclude=.github \
               --exclude=.mypy.ini \
               --exclude=.pre-commit-config.yaml \
               --exclude=build.py \
@@ -93,7 +101,7 @@ jobs:
           #   presumably due to a Windows CL length limit.
           exclusions: 'EDMarketConnector/EDMarketConnector-release-*.* EDMarketConnector/.editorconfig EDMarketConnector/.flake8 EDMarketConnector/.git* EDMarketConnector/.mypy.ini EDMarketConnector/.pre-commit-config.yaml EDMarketConnector/build.py EDMarketConnector/*.manifest EDMarketConnector/coriolis-data/ EDMarketConnector/img/ EDMarketConnector/pyproject.toml EDMarketConnector/scripts/ EDMarketConnector/tests/'
 
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version-file: '.python-version'
           architecture: "x86"
@@ -105,9 +113,9 @@ jobs:
 
       - name: Download winsparkle
         run: |
-          Invoke-Webrequest -UseBasicParsing https://github.com/vslavik/winsparkle/releases/download/v0.8.0/WinSparkle-0.8.0.zip -OutFile out.zip
+          Invoke-Webrequest -UseBasicParsing https://github.com/vslavik/winsparkle/releases/download/v0.8.1/WinSparkle-0.8.1.zip -OutFile out.zip
           Expand-Archive out.zip
-          Move-Item 'out\WinSparkle-0.8.0\Release\*' '.\'
+          Move-Item 'out\WinSparkle-0.8.1\Release\*' '.\'
 
       - name: Build EDMC
         run: |

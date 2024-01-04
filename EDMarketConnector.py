@@ -336,6 +336,8 @@ if __name__ == '__main__':  # noqa: C901
 
     def already_running_popup():
         """Create the "already running" popup."""
+        import tkinter as tk
+        from tkinter import ttk
         # Check for CL arg that suppresses this popup.
         if args.suppress_dupe_process_popup:
             sys.exit(0)
@@ -1547,7 +1549,7 @@ class AppWindow:
             self.w.update_idletasks()
 
             # Companion login
-            if entry['event'] in [None, 'StartUp', 'NewCommander', 'LoadGame'] and monitor.cmdr:
+            if entry['event'] in (None, 'StartUp', 'NewCommander', 'LoadGame') and monitor.cmdr:
                 if not config.get_list('cmdrs') or monitor.cmdr not in config.get_list('cmdrs'):
                     config.set('cmdrs', config.get_list('cmdrs', default=[]) + [monitor.cmdr])
                 self.login()
@@ -1565,7 +1567,7 @@ class AppWindow:
                 logger.trace_if('journal.queue', 'Startup, returning')
                 return  # Startup
 
-            if entry['event'] in ['StartUp', 'LoadGame'] and monitor.started:
+            if entry['event'] in ('StartUp', 'LoadGame') and monitor.started:
                 logger.info('StartUp or LoadGame event')
 
                 # Disable WinSparkle automatic update checks, IFF configured to do so when in-game
