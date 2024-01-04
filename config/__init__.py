@@ -57,7 +57,7 @@ appcmdname = 'EDMC'
 _static_appversion = '5.10.1'
 
 _cached_version: semantic_version.Version | None = None
-copyright = '© 2015-2019 Jonathan Harris, 2020-2023 EDCD'
+copyright = '© 2015-2019 Jonathan Harris, 2020-2024 EDCD'
 
 update_feed = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml'
 update_interval = 8*60*60  # 8 Hours
