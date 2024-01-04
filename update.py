@@ -226,7 +226,7 @@ class Updater:
 
         if newversion and self.root:
             status = self.root.nametowidget(f'.{appname.lower()}.status')
-            # LANG: Updater Available Text
+            # LANG: Update Available Text
             status['text'] = _("{NEWVER} is available").format(NEWVER=newversion.title)
             self.root.update_idletasks()
 

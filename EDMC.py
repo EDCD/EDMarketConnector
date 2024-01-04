@@ -163,7 +163,7 @@ def main():  # noqa: C901, CCR001
             updater = Updater()
             newversion: EDMCVersion | None = updater.check_appcast()
             if newversion:
-                # LANG: Updater Available Text
+                # LANG: Update Available Text
                 newverstr = _("{NEWVER} is available").format(NEWVER=newversion.title)
                 print(f'{appversion()} ({newverstr})')
             else:
