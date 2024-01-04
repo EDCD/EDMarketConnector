@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# flake8: noqa TAE001
 """
 EDMC.py - Command-line interface. Requires prior setup through the GUI.
 
@@ -164,7 +165,7 @@ def main():  # noqa: C901, CCR001
             newversion: EDMCVersion | None = updater.check_appcast()
             if newversion:
                 # LANG: Update Available Text
-                newverstr = _("{NEWVER} is available").format(NEWVER=newversion.title)
+                newverstr: str = _("{NEWVER} is available").format(NEWVER=newversion.title)
                 print(f'{appversion()} ({newverstr})')
             else:
                 print(appversion())
