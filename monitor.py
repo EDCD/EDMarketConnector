@@ -14,7 +14,7 @@ import re
 import sys
 import threading
 from calendar import timegm
-from collections import OrderedDict, defaultdict
+from collections import defaultdict
 from os import SEEK_END, SEEK_SET, listdir
 from os.path import basename, expanduser, getctime, isdir, join
 from time import gmtime, localtime, mktime, sleep, strftime, strptime, time
@@ -567,7 +567,7 @@ class EDLogs(FileSystemEventHandler):
 
         try:
             # Preserve property order because why not?
-            entry: MutableMapping[str, Any] = json.loads(line, object_pairs_hook=OrderedDict)
+            entry: MutableMapping[str, Any] = json.loads(line)
             assert 'timestamp' in entry, "Timestamp does not exist in the entry"
 
             self.__navroute_retry()
@@ -1042,7 +1042,7 @@ class EDLogs(FileSystemEventHandler):
                         rank[k] = (rank[k][0], min(v, 100))
 
             elif event_type in ('reputation', 'statistics'):
-                payload = OrderedDict(entry)
+                payload = dict(entry)
                 payload.pop('event')
                 payload.pop('timestamp')
                 # NB: We need the original casing for these keys
@@ -1073,7 +1073,7 @@ class EDLogs(FileSystemEventHandler):
                 # From 3.3 full Cargo event (after the first one) is written to a separate file
                 if 'Inventory' not in entry:
                     with open(join(self.currentdir, 'Cargo.json'), 'rb') as h:  # type: ignore
-                        entry = json.load(h, object_pairs_hook=OrderedDict)  # Preserve property order because why not?
+                        entry = json.load(h)  # Preserve property order because why not?
                         self.state['CargoJSON'] = entry
 
                 clean = self.coalesce_cargo(entry['Inventory'])
@@ -1108,7 +1108,7 @@ class EDLogs(FileSystemEventHandler):
                     attempts += 1
                     try:
                         with open(shiplocker_filename, 'rb') as h:
-                            entry = json.load(h, object_pairs_hook=OrderedDict)
+                            entry = json.load(h)
                             self.state['ShipLockerJSON'] = entry
                             break
 
@@ -2189,7 +2189,7 @@ class EDLogs(FileSystemEventHandler):
             'PowerDistributor', 'Radar', 'FuelTank'
         )
 
-        d: MutableMapping[str, Any] = OrderedDict()
+        d: MutableMapping[str, Any] = {}
         if timestamped:
             d['timestamp'] = strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())
 

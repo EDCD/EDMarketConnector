@@ -16,7 +16,6 @@ FDevIDs/ version of the file, copy it over the local one.
 import json
 import subprocess
 import sys
-from collections import OrderedDict
 
 import outfitting
 from edmc_data import coriolis_ship_map, ship_name_map
@@ -56,7 +55,7 @@ if __name__ == "__main__":
         for i, bulkhead in enumerate(bulkheads):
             modules['_'.join([reverse_ship_map[name], 'armour', bulkhead])] = {'mass': m['bulkheads'][i]['mass']}
 
-    ships = OrderedDict([(k, ships[k]) for k in sorted(ships)])  # sort for easier diffing
+    ships = {k: ships[k] for k in sorted(ships)}
     with open("ships.json", "w") as ships_file:
         json.dump(ships, ships_file, indent=4)
 
@@ -91,6 +90,6 @@ if __name__ == "__main__":
     add(modules, 'hpt_multicannon_fixed_small_advanced',          {'mass': 2})
     add(modules, 'hpt_multicannon_fixed_medium_advanced',         {'mass': 4})
 
-    modules = OrderedDict([(k, modules[k]) for k in sorted(modules)])  # sort for easier diffing
+    modules = {k: modules[k] for k in sorted(modules)}
     with open("modules.json", "w") as modules_file:
         json.dump(modules, modules_file, indent=4)
