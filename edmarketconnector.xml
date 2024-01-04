@@ -22,11 +22,44 @@
       </item>
       <!-- Windows -->
       <item>
-         <title>Release 5.10.0</title>
+         <title>Release 5.10.1</title>
          <description><![CDATA[<style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
 
-<p>We now test against, and package with, Python 3.11.1.</p>
+<p>We now test against, and package with, Python 3.11.7.</p>
 <p><strong>As a consequence of this we no longer support Windows 7.</strong><br>
+
+<h2>Release 5.10.1</h2>
+<p>This release contains a number of bugfixes, minor performance enhancements, workflow and dependency updates, and a function deprecation.</p>
+<em>Note to plugin developers: modules.p and ships.p are deprecated, and slated for removal in the next major release! Please look for that change coming soon. </em>
+<em>Note to plugin developers: The openurl() function in ttkHyperlinkLabel has been deprecated, and slated for removal in the next major release! Please migrate to webbrowser.open().</em>
+
+<p><strong>Changes and Enhancements</strong></p>
+<ul>
+<li>Deprecated `openurl()`. Please migrate to `webbrowser.open()`</li>
+<li>Updated a number of list comparisons to use more efficient tuple comparisons</li>
+<li>Updated a few type hints</li>
+<li>Updated a few binary comparitors to be more efficient</li>
+<li>Moved `resources.json` and `modules.json` back to the top level for all users</li>
+<li>Updated several dependencies</li>
+<li>Updated Python version to 3.11.7</li>
+</ul>
+<p><strong>Bug Fixes</strong></p>
+<ul>
+<li>Fixed an issue where resources files could be in different locations for different users.<ul>
+<li>These files are now in the same location (top level) for all users on all distributions.</li>
+</ul>
+</li>
+<li>Fixed an issue where CMDRs without the Git application installed would crash on start if running from Source.<ul>
+<li>Thanks to the Flatpak team for pointing this one out!</li>
+</ul>
+</li>
+<li>Fixed a bug where CMDRs running from source would have their git hash version displayed as UNKNOWN.<ul>
+<li>We're now more failure tolerant and use the bundled .gitversion if no true git hash is provided.</li>
+</ul>
+</li>
+<li>Fixed a bug where starting two copies of EDMC with a valid install would not generate a duplicate warning.</li>
+</ul>
+<hr>
 
 <h2>Release 5.10.0</h2>
 <p>This release contains a number of under-the-hood changes to EDMC designed to improve performance, code maintainability, and stability of the EDMC application, while providing new features and quality-of-life fixes.</p>
@@ -2105,7 +2138,7 @@ about this:
 <a href="https://issues.frontierstore.net/issue-detail/28638" rel="nofollow">PTS CAPI saying Commander is Docked after jumping to new system</a>.</p>
 </li>
 </ul>]]></description>
-         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F5.10.0/EDMarketConnector_Installer_5.10.0.exe" sparkle:os="windows" sparkle:version="5.10.0" length="0" type="application/x-ms-dos-executable" />
+         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F5.10.1/EDMarketConnector_Installer_5.10.1.exe" sparkle:os="windows" sparkle:version="5.10.1" length="0" type="application/x-ms-dos-executable" />
       </item>
    </channel>
 </rss>
