@@ -21,6 +21,7 @@ from EDMCLogging import get_main_logger
 
 if TYPE_CHECKING:
     import tkinter as tk
+    def _(x): return x
 
 
 logger = get_main_logger()
@@ -225,7 +226,8 @@ class Updater:
 
         if newversion and self.root:
             status = self.root.nametowidget(f'.{appname.lower()}.status')
-            status['text'] = newversion.title + ' is available'
+            # LANG: Updater Available Text
+            status['text'] = _("{NEWVER} is available").format(NEWVER=newversion.title)
             self.root.update_idletasks()
 
         else:
