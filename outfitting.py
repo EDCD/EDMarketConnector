@@ -57,7 +57,7 @@ def lookup(module, ship_map, entitled=False) -> dict | None:  # noqa: C901, CCR0
     """
     # Lazily populate
     if not moduledata:
-        modules_path = config.respath_path / "resources" / "modules.json"
+        modules_path = config.respath_path / "modules.json"
         moduledata.update(json.loads(modules_path.read_text()))
 
     if not module.get('name'):
