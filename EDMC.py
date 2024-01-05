@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# flake8: noqa TAE001
 """
 EDMC.py - Command-line interface. Requires prior setup through the GUI.
 
@@ -27,7 +26,7 @@ from EDMCLogging import edmclogger, logger, logging
 
 if TYPE_CHECKING:
     from logging import TRACE  # type: ignore # noqa: F401 # needed to make mypy happy
-    def _(x): return x
+    def _(x: str): return x
 
 edmclogger.set_channels_loglevel(logging.INFO)
 
