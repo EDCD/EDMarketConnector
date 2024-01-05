@@ -21,7 +21,7 @@ from EDMCLogging import get_main_logger
 
 if TYPE_CHECKING:
     import tkinter as tk
-    def _(x): return x
+    def _(x: str): return x
 
 
 logger = get_main_logger()
