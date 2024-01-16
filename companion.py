@@ -41,7 +41,7 @@ from monitor import monitor
 logger = get_main_logger()
 
 if TYPE_CHECKING:
-    def _(x): return x
+    def _(x: str): return x
 
     UserDict = collections.UserDict[str, Any]  # indicate to our type checkers what this generic class holds normally
 else:
