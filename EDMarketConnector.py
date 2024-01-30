@@ -2365,6 +2365,9 @@ sys.path: {sys.path}'''
     # Check for FDEV IDs
     root.after(3, check_fdev_ids)
     # Start the main event loop
-    root.mainloop()
-
+    try:
+        root.mainloop()
+    except KeyboardInterrupt:
+        logger.info("Ctrl+C Detected, Attempting Clean Shutdown")
+        app.onexit()
     logger.info('Exiting')
