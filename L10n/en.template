@@ -231,6 +231,15 @@
 /* EDMarketConnector.py: Popup-text about 'broken' plugins that failed to load; In files: EDMarketConnector.py:2266; */
 "One or more of your enabled plugins failed to load. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. This could be caused by a wrong folder structure. The load.py file should be located under plugins/PLUGIN_NAME/load.py.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "One or more of your enabled plugins failed to load. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. This could be caused by a wrong folder structure. The load.py file should be located under plugins/PLUGIN_NAME/load.py.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name.";
 
+/* EDMarketConnector.py: Popup-text about Reset Providers; In files: EDMarketConnector.py:2146; */
+"One or more of your URL Providers were invalid, and have been reset:\r\n\r\n" = "One or more of your URL Providers were invalid, and have been reset:\r\n\r\n";
+
+/* EDMarketConnector.py: Text About What Provider Was Reset; In files: EDMarketConnector.py:2148; */
+"{PROVIDER} was set to {OLDPROV}, and has been reset to {NEWPROV}\r\n" = "{PROVIDER} was set to {OLDPROV}, and has been reset to {NEWPROV}\r\n";
+
+/* EDMarketConnector.py: Popup window title for Reset Providers; In files: EDMarketConnector.py:2161; */
+"EDMC: Default Providers Reset" = "EDMC: Default Providers Reset";
+
 /* journal_lock.py: Title text on popup when Journal directory already locked; In files: journal_lock.py:208; */
 "Journal directory already locked" = "Journal directory already locked";
 
