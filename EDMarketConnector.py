@@ -2162,6 +2162,7 @@ def validate_providers():
         popup_text
     )
 
+
 # Run the app
 if __name__ == "__main__":  # noqa: C901
     logger.info(f'Startup v{appversion()} : Running on Python v{sys.version}')
