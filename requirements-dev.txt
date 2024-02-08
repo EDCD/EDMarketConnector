@@ -8,7 +8,7 @@ wheel
 setuptools==69.0.3
 
 # Static analysis tools
-flake8==6.1.0
+flake8==7.0.0
 flake8-annotations-coverage==0.0.6
 flake8-cognitive-complexity==0.1.0
 flake8-comprehensions==3.14.0
