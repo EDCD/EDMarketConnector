@@ -360,7 +360,6 @@ if __name__ == '__main__':  # noqa: C901
             sys.exit()
         logger.info('Exiting')
 
-
     journal_lock = JournalLock()
     locked = journal_lock.obtain_lock()
 
