@@ -353,7 +353,13 @@ if __name__ == '__main__':  # noqa: C901
         button = ttk.Button(frame, text='OK', command=lambda: sys.exit(0))
         button.grid(row=2, column=0, sticky=tk.S)
 
-        root.mainloop()
+        try:
+            root.mainloop()
+        except KeyboardInterrupt:
+            logger.info("Ctrl+C Detected, Attempting Clean Shutdown")
+            sys.exit()
+        logger.info('Exiting')
+
 
     journal_lock = JournalLock()
     locked = journal_lock.obtain_lock()
