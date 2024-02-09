@@ -291,7 +291,7 @@ if __name__ == '__main__':
                     print(f'NEW! {file}:{c.lineno}: {arg!r}')
 
         for old in set(template) ^ seen:
-            print(f'No longer used: {old}')
+            print(f'No longer used: {old!r}')
 
     elif args.json:
         to_print_data = [
