@@ -920,18 +920,24 @@ class EDDN:
         # none and that really does need to be recorded over EDDN so that
         # tools can update in a timely manner.
         if this.commodities != commodities:
-            self.send_message(cmdr, {
+            message: dict[str, Any] = {  # Yes, this is a broad type hint.
                 '$schemaRef': f'https://eddn.edcd.io/schemas/commodity/3{"/test" if is_beta else ""}',
                 'message': {
-                    ('timestamp',   entry['timestamp']),
-                    ('systemName',  entry['StarSystem']),
-                    ('stationName', entry['StationName']),
-                    ('marketId',    entry['MarketID']),
-                    ('commodities', commodities),
-                    ('horizons',    this.horizons),
-                    ('odyssey',     this.odyssey),
-                },
-            })
+                    'timestamp': entry['timestamp'],
+                    'systemName': entry['StarSystem'],
+                    'stationName': entry['StationName'],
+                    'marketId': entry['MarketID'],
+                    'commodities': commodities,
+                    'horizons': this.horizons,
+                    'odyssey': this.odyssey,
+                    'stationType': entry['StationType'],
+                }
+            }
+
+            if entry.get('CarrierDockingAccess'):
+                message['message']['carrierDockingAccess'] = entry['CarrierDockingAccess']
+
+            self.send_message(cmdr, message)
 
         this.commodities = commodities
 
