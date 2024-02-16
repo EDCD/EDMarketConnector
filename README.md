@@ -67,6 +67,6 @@ Please see the [Acknowledgements](https://github.com/EDCD/EDMarketConnector/wiki
 
 License
 -------
-Copyright © 2015-2019 Jonathan Harris, 2020-2021 EDCD
+Copyright © 2015-2019 Jonathan Harris, 2020-2024 EDCD
 
 Licensed under the [GNU Public License (GPL)](http://www.gnu.org/licenses/gpl-2.0.html) version 2 or later.
