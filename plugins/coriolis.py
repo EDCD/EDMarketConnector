@@ -45,6 +45,9 @@ class CoriolisConfig:
         self.normal_url = ''
         self.beta_url = ''
         self.override_mode = ''
+        self.override_text_old_auto = _('Auto')  # LANG: Coriolis normal/beta selection - auto
+        self.override_text_old_normal = _('Normal')  # LANG: Coriolis normal/beta selection - normal
+        self.override_text_old_beta = _('Beta')  # LANG: Coriolis normal/beta selection - beta
 
         self.normal_textvar = tk.StringVar()
         self.beta_textvar = tk.StringVar()
@@ -87,6 +90,11 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> tk.Fr
     PADY = 1  # noqa: N806
     BOXY = 2  # noqa: N806  # box spacing
 
+    # Save the old text values for the override mode, so we can update them if the language is changed
+    coriolis_config.override_text_old_auto = _('Auto')  # LANG: Coriolis normal/beta selection - auto
+    coriolis_config.override_text_old_normal = _('Normal')  # LANG: Coriolis normal/beta selection - normal
+    coriolis_config.override_text_old_beta = _('Beta')  # LANG: Coriolis normal/beta selection - beta
+    
     conf_frame = nb.Frame(parent)
     conf_frame.columnconfigure(index=1, weight=1)
     cur_row = 0
@@ -157,6 +165,24 @@ def prefs_changed(cmdr: str | None, is_beta: bool) -> None:
         _('Auto'): 'auto',      # LANG: Coriolis normal/beta selection - auto
     }.get(coriolis_config.override_mode, coriolis_config.override_mode)
 
+    # Check if the language was changed and the override_mode was valid before the change
+    if coriolis_config.override_mode not in ('beta', 'normal', 'auto'):
+        coriolis_config.override_mode = {
+            coriolis_config.override_text_old_normal: 'normal',
+            coriolis_config.override_text_old_beta: 'beta',
+            coriolis_config.override_text_old_auto: 'auto',
+        }.get(coriolis_config.override_mode, coriolis_config.override_mode)
+        # Language was seemingly changed, so we need to update the textvars
+        if coriolis_config.override_mode in ('beta', 'normal', 'auto'):
+            coriolis_config.override_textvar.set(
+                value={
+                    'auto': _('Auto'),  # LANG: 'Auto' label for Coriolis site override selection
+                    'normal': _('Normal'),  # LANG: 'Normal' label for Coriolis site override selection
+                    'beta': _('Beta')  # LANG: 'Beta' label for Coriolis site override selection
+                }.get(coriolis_config.override_mode)
+            )
+    
+    # If the override mode is still invalid, default to auto
     if coriolis_config.override_mode not in ('beta', 'normal', 'auto'):
         logger.warning(f'Unexpected value {coriolis_config.override_mode=!r}. Defaulting to "auto"')
         coriolis_config.override_mode = 'auto'
