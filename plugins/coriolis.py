@@ -179,7 +179,7 @@ def prefs_changed(cmdr: str | None, is_beta: bool) -> None:
                     'auto': _('Auto'),  # LANG: 'Auto' label for Coriolis site override selection
                     'normal': _('Normal'),  # LANG: 'Normal' label for Coriolis site override selection
                     'beta': _('Beta')  # LANG: 'Beta' label for Coriolis site override selection
-                # LANG: 'Auto' label for Coriolis site override selection
+                    # LANG: 'Auto' label for Coriolis site override selection
                 }.get(coriolis_config.override_mode, _('Auto'))
             )
 
