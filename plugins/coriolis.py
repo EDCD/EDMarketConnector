@@ -94,7 +94,7 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> tk.Fr
     coriolis_config.override_text_old_auto = _('Auto')  # LANG: Coriolis normal/beta selection - auto
     coriolis_config.override_text_old_normal = _('Normal')  # LANG: Coriolis normal/beta selection - normal
     coriolis_config.override_text_old_beta = _('Beta')  # LANG: Coriolis normal/beta selection - beta
-    
+
     conf_frame = nb.Frame(parent)
     conf_frame.columnconfigure(index=1, weight=1)
     cur_row = 0
@@ -179,9 +179,9 @@ def prefs_changed(cmdr: str | None, is_beta: bool) -> None:
                     'auto': _('Auto'),  # LANG: 'Auto' label for Coriolis site override selection
                     'normal': _('Normal'),  # LANG: 'Normal' label for Coriolis site override selection
                     'beta': _('Beta')  # LANG: 'Beta' label for Coriolis site override selection
-                }.get(coriolis_config.override_mode)
+                }.get(coriolis_config.override_mode, _('Auto'))  # LANG: 'Auto' label for Coriolis site override selection
             )
-    
+
     # If the override mode is still invalid, default to auto
     if coriolis_config.override_mode not in ('beta', 'normal', 'auto'):
         logger.warning(f'Unexpected value {coriolis_config.override_mode=!r}. Defaulting to "auto"')
