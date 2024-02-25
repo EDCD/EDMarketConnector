@@ -1019,8 +1019,11 @@ def journal_entry(  # noqa: C901, CCR001
             elif 'Power' in entry:
                 data['opponentName'] = entry['Power']
 
+            elif 'IsThargoid' in entry and entry['IsThargoid']:
+                data['opponentName'] = 'Thargoid'
+
             # Paranoia in case of e.g. Thargoid activity not having complete data
-            if data['opponentName'] == "":
+            if 'opponentName' not in data or data['opponentName'] == "":
                 logger.warning('Dropping addCommanderCombatInterdicted message because opponentName came out as ""')
 
             else:
@@ -1042,8 +1045,13 @@ def journal_entry(  # noqa: C901, CCR001
             elif 'Power' in entry:
                 data['opponentName'] = entry['Power']
 
+            # Shouldn't be needed here as Interdiction events can't target Thargoids (yet)
+            # but done just in case of future changes or so
+            elif 'IsThargoid' in entry and entry['IsThargoid']:
+                data['opponentName'] = 'Thargoid'
+
             # Paranoia in case of e.g. Thargoid activity not having complete data
-            if data['opponentName'] == "":
+            if 'opponentName' not in data or data['opponentName'] == "":
                 logger.warning('Dropping addCommanderCombatInterdiction message because opponentName came out as ""')
 
             else:
