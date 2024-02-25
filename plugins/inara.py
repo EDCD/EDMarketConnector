@@ -1001,7 +1001,17 @@ def journal_entry(  # noqa: C901, CCR001
             elif 'KillerName' in entry:
                 data['opponentName'] = entry['KillerName']
 
-            new_add_event('addCommanderCombatDeath', entry['timestamp'], data)
+            elif 'KillerShip' in entry:
+                data['opponentName'] = entry['KillerShip']
+
+            # Paranoia in case of e.g. Thargoid activity not having complete data
+            opponent_name_issue = 'opponentName' not in data or data['opponentName'] == ""
+            wing_opponent_names_issue = 'wingOpponentNames' not in data or data['wingOpponentNames'] == []
+            if opponent_name_issue and wing_opponent_names_issue:
+                logger.warning('Dropping addCommanderCombatDeath message because opponentName and wingOpponentNames came out as ""')
+
+            else:
+                new_add_event('addCommanderCombatDeath', entry['timestamp'], data)
 
         elif event_name == 'Interdicted':
             data = {
