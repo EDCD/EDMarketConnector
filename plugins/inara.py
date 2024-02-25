@@ -1058,23 +1058,23 @@ def journal_entry(  # noqa: C901, CCR001
                 new_add_event('addCommanderCombatInterdiction', entry['timestamp'], data)
 
         elif event_name == 'EscapeInterdiction':
+            data = {
+                'starsystemName': system,
+                'isPlayer': entry['IsPlayer'],
+            }
+
+            if 'Interdictor' in entry:
+                data['opponentName'] = entry['Interdictor']
+
+            elif 'isThargoid' in entry and entry['isThargoid']:
+                data['opponentName'] = 'Thargoid'
+
             # Paranoia in case of e.g. Thargoid activity not having complete data
-            if entry.get('Interdictor') is None or entry['Interdictor'] == "":
-                logger.warning(
-                    'Dropping addCommanderCombatInterdictionEscape message'
-                    'because opponentName came out as ""'
-                )
+            if 'opponentName' not in data or data['opponentName'] == "":
+                logger.warning('Dropping addCommanderCombatInterdiction message because opponentName came out as ""')
 
             else:
-                new_add_event(
-                    'addCommanderCombatInterdictionEscape',
-                    entry['timestamp'],
-                    {
-                        'starsystemName': system,
-                        'opponentName': entry['Interdictor'],
-                        'isPlayer': entry['IsPlayer'],
-                    }
-                )
+                new_add_event('addCommanderCombatInterdictionEscape', entry['timestamp'], data)
 
         elif event_name == 'PVPKill':
             new_add_event(
