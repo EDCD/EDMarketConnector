@@ -1066,6 +1066,12 @@ def journal_entry(  # noqa: C901, CCR001
             if 'Interdictor' in entry:
                 data['opponentName'] = entry['Interdictor']
 
+            elif 'Faction' in entry:
+                data['opponentName'] = entry['Faction']
+
+            elif 'Power' in entry:
+                data['opponentName'] = entry['Power']
+
             elif 'isThargoid' in entry and entry['isThargoid']:
                 data['opponentName'] = 'Thargoid'
 
