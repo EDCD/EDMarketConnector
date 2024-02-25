@@ -1008,7 +1008,8 @@ def journal_entry(  # noqa: C901, CCR001
             opponent_name_issue = 'opponentName' not in data or data['opponentName'] == ""
             wing_opponent_names_issue = 'wingOpponentNames' not in data or data['wingOpponentNames'] == []
             if opponent_name_issue and wing_opponent_names_issue:
-                logger.warning('Dropping addCommanderCombatDeath message because opponentName and wingOpponentNames came out as ""')
+                logger.warning('Dropping addCommanderCombatDeath message'
+                               'because opponentName and wingOpponentNames came out as ""')
 
             else:
                 new_add_event('addCommanderCombatDeath', entry['timestamp'], data)
