@@ -801,15 +801,15 @@ class EDDN:
             self.send_message(data['commander']['name'], {
                 '$schemaRef': f'https://eddn.edcd.io/schemas/outfitting/2{"/test" if is_beta else ""}',
                 'message': {
-                    ('timestamp',   data['timestamp']),
-                    ('systemName',  data['lastSystem']['name']),
-                    ('stationName', data['lastStarport']['name']),
-                    ('marketId',    data['lastStarport']['id']),
-                    ('horizons',    horizons),
-                    ('modules',     outfitting),
-                    ('odyssey',     this.odyssey),
+                    'timestamp': data['timestamp'],
+                    'systemName': data['lastSystem']['name'],
+                    'stationName': data['lastStarport']['name'],
+                    'marketId': data['lastStarport']['id'],
+                    'horizons': horizons,
+                    'modules': outfitting,
+                    'odyssey': this.odyssey,
                 },
-                'header':     self.standard_header(
+                'header': self.standard_header(
                     game_version=self.capi_gameversion_from_host_endpoint(
                         data.source_host, companion.Session.FRONTIER_CAPI_PATH_SHIPYARD
                     ),
@@ -863,13 +863,13 @@ class EDDN:
             self.send_message(data['commander']['name'], {
                 '$schemaRef': f'https://eddn.edcd.io/schemas/shipyard/2{"/test" if is_beta else ""}',
                 'message': {
-                    ('timestamp',   data['timestamp']),
-                    ('systemName',  data['lastSystem']['name']),
-                    ('stationName', data['lastStarport']['name']),
-                    ('marketId',    data['lastStarport']['id']),
-                    ('horizons',    horizons),
-                    ('ships',       shipyard),
-                    ('odyssey',     this.odyssey),
+                    'timestamp': data['timestamp'],
+                    'systemName': data['lastSystem']['name'],
+                    'stationName': data['lastStarport']['name'],
+                    'marketId': data['lastStarport']['id'],
+                    'horizons': horizons,
+                    'ships': shipyard,
+                    'odyssey': this.odyssey,
                 },
                 'header': self.standard_header(
                     game_version=self.capi_gameversion_from_host_endpoint(
