@@ -126,6 +126,10 @@ jobs:
         with:
             filepath: './EDMC_Installer_Config.iss'
 
+      - name: Rename Installer
+        run: |
+            Get-ChildItem -Path . -Filter "EDMarketConnector_Installer_*.exe" | Rename-Item -NewName {"EDMarketConnector_Installer_Unsigned_$($_.Name -replace '^EDMarketConnector_Installer_', '')"}
+
       - name: Upload build files
         uses: actions/upload-artifact@v3
         with:

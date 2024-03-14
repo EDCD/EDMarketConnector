@@ -1,38 +1,42 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
-
-Copyrights
+* We currently test against, and package with, Python 3.11.7, 32-bit.
+  * As a result, we do not support Windows 7, 8, or 8.1.
+  * Developers can check the contents of the `.python-version` file
+      in the source (not distributed with the Windows installer) for the
+      currently used version.
+---
+Release 5.10.2
 ===
-Please see the [docs/Licenses](docs/Licenses/) directory for copies of any
-licenses for software we use with EDMarketConnector, either at runtime, or to
-produce the Windows executables and installer.
+This release contains updated dependencies, a few minor enhancements to some supporting files, 
+and some resorted resources as well as a new image for some of the built EXEs.
 
----
+We now sign our code! This does mean that built EXEs are now slightly modified on our developer's machines.
+For information on what this means, and opt-out options, please visit https://github.com/EDCD/EDMarketConnector/wiki/Code-Signing-and-EDMC
 
-* We now test against, and package with, Python 3.11.7, 32-bit.
+Note to plugin developers: modules.p and ships.p are deprecated, and slated
+for removal in the next major release! Please look for that change coming soon. 
 
-  **As a consequence of this we no longer support Windows 7.  
-  This is due to
-  [Python 3.10.x and later not supporting Windows 7](https://www.python.org/downloads/windows/).
-  The application (both EDMarketConnector.exe and EDMC.exe) will crash on
-  startup due to a missing DLL.**
+Note to plugin developers: The `openurl()` function in ttkHyperlinkLabel has been deprecated,
+and slated for removal in the next major release! Please migrate to `webbrowser.open()`.
 
-  As [Windows 8.1 is now End-Of-Life](https://learn.microsoft.com/en-us/lifecycle/faq/windows#windows-8-1)
-  we no longer explicitly support it, but for the time being it will likely
-  continue to work.  This is dependent on future Python releases not dropping
-  support for Windows 8.1 in a manner that prevents it working.  Any bug report
-  made against Windows 8.1 use may be ignored unless reproduced on a supported
-  OS.
+**Changes and Enhancements**
+* Updated several dependencies
+* Updated FDEV ID's
+* Moved a few unused files to the resources folder. These files have no references in the code
+* Updated relevant copyright dates
+* Added additional logging to the build system
 
-  This should have no other impact on users or plugin developers, other
-  than the latter now being free to use features that were introduced since the
-  Python 3.7 series.
+**Bug Fixes**
+* Fixed a printing issue for the localization system for unused strings
 
-  Developers can check the contents of the `.python-version` file
-  in the source (it's not distributed with the Windows installer) for the
-  currently used version in a given branch.
+**Removed Files**
+* Removed two unused manifest and MacOS icon files which are no longer in use.
 
----
+**Known Issues**
+* Some users of TCE have reported issues with EDMC 5.10.1 and 5.9.5 with TCE. 
+  * We have been unable to replicate this issue. If you are able to assist, please 
+  add your information here: https://github.com/EDCD/EDMarketConnector/issues/2176
 Release 5.10.1
 ===
 This release contains a number of bugfixes, minor performance enhancements,
