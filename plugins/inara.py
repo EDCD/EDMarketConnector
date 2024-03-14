@@ -1064,10 +1064,10 @@ def journal_entry(  # noqa: C901, CCR001
                 new_add_event('addCommanderCombatInterdiction', entry['timestamp'], data)
 
         elif event_name == 'EscapeInterdiction':
-            data = {
-                'starsystemName': system,
-                'isPlayer': entry['IsPlayer'],
-            }
+            data = OrderedDict([
+                ('starsystemName', system),
+                ('isPlayer', entry['IsPlayer']),
+            ])
 
             if 'Interdictor' in entry:
                 data['opponentName'] = entry['Interdictor']
