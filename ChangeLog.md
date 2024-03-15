@@ -8,35 +8,44 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
 ---
 Release 5.10.2
 ===
-This release contains updated dependencies, a few minor enhancements to some supporting files, 
+This release contains updated dependencies, some bug fixes, a few minor enhancements to some supporting files, 
 and some resorted resources as well as a new image for some of the built EXEs.
 
 We now sign our code! This does mean that built EXEs are now slightly modified on our developer's machines.
 For information on what this means, and opt-out options, please visit https://github.com/EDCD/EDMarketConnector/wiki/Code-Signing-and-EDMC
 
-Note to plugin developers: modules.p and ships.p are deprecated, and slated
-for removal in the next major release! Please look for that change coming soon. 
-
-Note to plugin developers: The `openurl()` function in ttkHyperlinkLabel has been deprecated,
-and slated for removal in the next major release! Please migrate to `webbrowser.open()`.
-
 **Changes and Enhancements**
-* Updated several dependencies
-* Updated FDEV ID's
-* Moved a few unused files to the resources folder. These files have no references in the code
-* Updated relevant copyright dates
+* Added additional logging to the Python build string in the case of missing files
+* Added a new icon to EDMC's Command-Line EXE
 * Added additional logging to the build system
+* Updated several dependencies
+* Updated FDEV IDs
+* Updated relevant copyright dates
+* Updated automatic build script to support code signing workflow
+* Updated translations to the latest versions
+* Moved a few unused files to the resources folder. These files have no references in the code
 
 **Bug Fixes**
+* Fixed a bug that could cause EDMC to handle SIGINT signals improperly
+* Fixed a bug that could result in URL providers to be set to invalid values
+* Fixed a bug that could result in Coriolis URL providers to revert back to "Auto" on language translations
+* Fixed a bug where Inara didn't understand being blown up by a Thargoid, and blew itself up instead
 * Fixed a printing issue for the localization system for unused strings
 
 **Removed Files**
 * Removed two unused manifest and MacOS icon files which are no longer in use.
 
 **Known Issues**
-* Some users of TCE have reported issues with EDMC 5.10.1 and 5.9.5 with TCE. 
+* Some users of TCE have reported issues with newer versions of EDMC with TCE. 
   * We have been unable to replicate this issue. If you are able to assist, please 
   add your information here: https://github.com/EDCD/EDMarketConnector/issues/2176
+
+**Plugin Developers**
+* modules.p and ships.p are deprecated, and slated
+for removal in the next major release! Please look for that change coming soon. 
+* Note to plugin developers: The `openurl()` function in ttkHyperlinkLabel has been deprecated,
+and slated for removal in the next major release! Please migrate to `webbrowser.open()`.
+
 Release 5.10.1
 ===
 This release contains a number of bugfixes, minor performance enhancements,
