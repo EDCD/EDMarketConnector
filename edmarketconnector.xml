@@ -22,11 +22,58 @@
       </item>
       <!-- Windows -->
       <item>
-         <title>Release 5.10.1</title>
+         <title>Release 5.10.2</title>
          <description><![CDATA[<style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
-
 <p>We now test against, and package with, Python 3.11.7.</p>
-<p><strong>As a consequence of this we no longer support Windows 7.</strong><br>
+<p><strong>As a result, we do not support Windows 7, 8, or 8.1.</strong><br>
+
+<h2>Release 5.10.2</h2>
+<p>This release contains updated dependencies, some bug fixes, a few minor enhancements to some supporting files,
+and some resorted resources as well as a new image for some of the built EXEs.</p>
+
+<em>We now sign our code! This does mean that built EXEs are now slightly modified on our developer's machines.
+For information on what this means, and opt-out options, please visit <a href="https://github.com/EDCD/EDMarketConnector/wiki/Code-Signing-and-EDMC">https://github.com/EDCD/EDMarketConnector/wiki/Code-Signing-and-EDMC</a></em>
+<p><strong>Changes and Enhancements</strong></p>
+<ul>
+<li>Added additional logging to the Python build string in the case of missing files</li>
+<li>Added a new icon to EDMC's Command-Line EXE</li>
+<li>Added additional logging to the build system</li>
+<li>Updated several dependencies</li>
+<li>Updated FDEV IDs</li>
+<li>Updated relevant copyright dates</li>
+<li>Updated automatic build script to support code signing workflow</li>
+<li>Updated translations to the latest versions</li>
+<li>Moved a few unused files to the resources folder. These files have no references in the code</li>
+</ul>
+<p><strong>Bug Fixes</strong></p>
+<ul>
+<li>Fixed a bug that could cause EDMC to handle SIGINT signals improperly</li>
+<li>Fixed a bug that could result in URL providers to be set to invalid values</li>
+<li>Fixed a bug that could result in Coriolis URL providers to revert back to &quot;Auto&quot; on language translations</li>
+<li>Fixed a bug where Inara didn&#39;t understand being blown up by a Thargoid, and blew itself up instead</li>
+<li>Fixed a printing issue for the localization system for unused strings</li>
+</ul>
+<p><strong>Removed Files</strong></p>
+<ul>
+<li>Removed two unused manifest and MacOS icon files which are no longer in use.</li>
+</ul>
+<p><strong>Known Issues</strong></p>
+<ul>
+<li>Some users of TCE have reported issues with newer versions of EDMC with TCE. <ul>
+<li>We have been unable to replicate this issue. If you are able to assist, please
+add your information here: <a href="https://github.com/EDCD/EDMarketConnector/issues/2176">https://github.com/EDCD/EDMarketConnector/issues/2176</a></li>
+</ul>
+</li>
+</ul>
+<p><strong>Plugin Developers</strong></p>
+<ul>
+<li>modules.p and ships.p are deprecated, and slated
+for removal in the next major release! Please look for that change coming soon. </li>
+<li>Note to plugin developers: The <code>openurl()</code> function in ttkHyperlinkLabel has been deprecated,
+and slated for removal in the next major release! Please migrate to <code>webbrowser.open()</code>.</li>
+</ul>
+
+<hr>
 
 <h2>Release 5.10.1</h2>
 <p>This release contains a number of bugfixes, minor performance enhancements, workflow and dependency updates, and a function deprecation.</p>
@@ -2138,7 +2185,7 @@ about this:
 <a href="https://issues.frontierstore.net/issue-detail/28638" rel="nofollow">PTS CAPI saying Commander is Docked after jumping to new system</a>.</p>
 </li>
 </ul>]]></description>
-         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F5.10.1/EDMarketConnector_Installer_5.10.1.exe" sparkle:os="windows" sparkle:version="5.10.1" length="0" type="application/x-ms-dos-executable" />
+         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F5.10.2/EDMarketConnector_Installer_5.10.2.exe" sparkle:os="windows" sparkle:version="5.10.2" length="0" type="application/x-ms-dos-executable" />
       </item>
    </channel>
 </rss>
