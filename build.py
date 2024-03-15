@@ -80,8 +80,8 @@ def generate_data_files(
                 "modules.json",
                 "ships.json",
                 "ships.p",  # TODO: Remove in 6.0
-                f"{app_name}.VisualElementsManifest.xml",
                 f"{app_name}.ico",
+                f"resources/{appcmdname}.ico",
                 "EDMarketConnector - TRACE.bat",
                 "EDMarketConnector - localserver-auth.bat",
                 "EDMarketConnector - reset-ui.bat",
@@ -165,15 +165,16 @@ def build() -> None:
         "script": "EDMarketConnector.py",
         "icon_resources": [(0, f"{appname}.ico")],
         "other_resources": [
-            (24, 1, pathlib.Path(f"{appname}.manifest").read_text(encoding="UTF8"))
+            (24, 1, pathlib.Path(f"resources/{appname}.manifest").read_text(encoding="UTF8"))
         ],
     }
 
     console_config: dict = {
         "dest_base": appcmdname,
         "script": "EDMC.py",
+        "icon_resources": [(0, f"resources/{appcmdname}.ico")],
         "other_resources": [
-            (24, 1, pathlib.Path(f"{appcmdname}.manifest").read_text(encoding="UTF8"))
+            (24, 1, pathlib.Path(f"resources/{appcmdname}.manifest").read_text(encoding="UTF8"))
         ],
     }
 
@@ -185,7 +186,8 @@ def build() -> None:
             data_files=data_files,
             options=options,
         )
-    except FileNotFoundError:
+    except FileNotFoundError as err:
+        print(err)
         sys.exit(
             "Build Failed due to Missing Files! Have you set up your submodules? \n"
             "https://github.com/EDCD/EDMarketConnector/wiki/Running-from-source"

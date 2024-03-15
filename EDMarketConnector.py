@@ -353,7 +353,12 @@ if __name__ == '__main__':  # noqa: C901
         button = ttk.Button(frame, text='OK', command=lambda: sys.exit(0))
         button.grid(row=2, column=0, sticky=tk.S)
 
-        root.mainloop()
+        try:
+            root.mainloop()
+        except KeyboardInterrupt:
+            logger.info("Ctrl+C Detected, Attempting Clean Shutdown")
+            sys.exit()
+        logger.info('Exiting')
 
     journal_lock = JournalLock()
     locked = journal_lock.obtain_lock()
@@ -801,6 +806,9 @@ class AppWindow:
         self.w.bind_all('<<PluginError>>', self.plugin_error)  # Statusbar
         self.w.bind_all('<<CompanionAuthEvent>>', self.auth)  # cAPI auth
         self.w.bind_all('<<Quit>>', self.onexit)  # Updater
+
+        # Check for Valid Providers
+        validate_providers()
 
         # Start a protocol handler to handle cAPI registration. Requires main loop to be running.
         self.w.after_idle(lambda: protocol.protocolhandler.start(self.w))
@@ -2110,6 +2118,51 @@ def show_killswitch_poppup(root=None):
     ok_button.grid(columnspan=2, sticky=tk.EW)
 
 
+def validate_providers():
+    """Check if Config has an invalid provider set, and reset to default if we do."""
+    reset_providers = {}
+    station_provider: str = config.get_str("station_provider")
+    if station_provider not in plug.provides('station_url'):
+        logger.error("Station Provider Not Valid. Setting to Default.")
+        config.set('station_provider', 'EDSM')
+        reset_providers["Station"] = (station_provider, "EDSM")
+
+    shipyard_provider: str = config.get_str("shipyard_provider")
+    if shipyard_provider not in plug.provides('shipyard_url'):
+        logger.error("Shipyard Provider Not Valid. Setting to Default.")
+        config.set('shipyard_provider', 'EDSY')
+        reset_providers["Shipyard"] = (shipyard_provider, "EDSY")
+
+    system_provider: str = config.get_str("system_provider")
+    if system_provider not in plug.provides('system_url'):
+        logger.error("System Provider Not Valid. Setting to Default.")
+        config.set('system_provider', 'EDSM')
+        reset_providers["System"] = (system_provider, "EDSM")
+
+    if not reset_providers:
+        return
+
+    # LANG: Popup-text about Reset Providers
+    popup_text = _(r'One or more of your URL Providers were invalid, and have been reset:\r\n\r\n')
+    for provider in reset_providers:
+        # LANG: Text About What Provider Was Reset
+        popup_text += _(r'{PROVIDER} was set to {OLDPROV}, and has been reset to {NEWPROV}\r\n')
+        popup_text = popup_text.format(
+            PROVIDER=provider,
+            OLDPROV=reset_providers[provider][0],
+            NEWPROV=reset_providers[provider][1]
+        )
+    # And now we do need these to be actual \r\n
+    popup_text = popup_text.replace('\\n', '\n')
+    popup_text = popup_text.replace('\\r', '\r')
+
+    tk.messagebox.showinfo(
+        # LANG: Popup window title for Reset Providers
+        _('EDMC: Default Providers Reset'),
+        popup_text
+    )
+
+
 # Run the app
 if __name__ == "__main__":  # noqa: C901
     logger.info(f'Startup v{appversion()} : Running on Python v{sys.version}')
@@ -2365,6 +2418,9 @@ sys.path: {sys.path}'''
     # Check for FDEV IDs
     root.after(3, check_fdev_ids)
     # Start the main event loop
-    root.mainloop()
-
+    try:
+        root.mainloop()
+    except KeyboardInterrupt:
+        logger.info("Ctrl+C Detected, Attempting Clean Shutdown")
+        app.onexit()
     logger.info('Exiting')
