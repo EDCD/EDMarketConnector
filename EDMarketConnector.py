@@ -809,6 +809,8 @@ class AppWindow:
 
         # Check for Valid Providers
         validate_providers()
+        if monitor.cmdr is None:
+            self.status['text'] = _("Awaiting Full CMDR Login")
 
         # Start a protocol handler to handle cAPI registration. Requires main loop to be running.
         self.w.after_idle(lambda: protocol.protocolhandler.start(self.w))
