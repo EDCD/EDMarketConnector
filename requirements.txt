@@ -3,7 +3,7 @@ requests==2.31.0
 # requests depends on this now ?
 charset-normalizer==2.1.1
 
-watchdog==3.0.0
+watchdog==4.0.0
 # Commented out because this doesn't package well with py2exe
 infi.systray==0.1.12; sys_platform == 'win32'
 # argh==0.26.2 watchdog dep
