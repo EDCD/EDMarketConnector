@@ -90,7 +90,7 @@ class Label(tk.Label):
 class EntryMenu(ttk.Entry):
     """Extended entry widget that includes a context menu with Copy, Cut-and-Paste commands."""
 
-    def __init__(self, *args: ttk.Frame | None, **kwargs) -> None:
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
         self.menu = tk.Menu(self, tearoff=False)
