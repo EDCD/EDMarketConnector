@@ -6,6 +6,25 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
       in the source (not distributed with the Windows installer) for the
       currently used version.
 ---
+Release 5.10.3
+===
+This release contains a bugfix for the shipyard outfitting parsing system and an update to the French translations. 
+
+We now sign our code! This does mean that built EXEs are now slightly modified on our developer's machines.
+For information on what this means, and opt-out options, please visit https://github.com/EDCD/EDMarketConnector/wiki/Code-Signing-and-EDMC
+
+**Changes and Enhancements**
+* Updated French Translations
+
+**Bug Fixes**
+* Fixed a bug that crashed the outfitting system when encountering armor. (Thanks TCE team for identifying this one!)
+
+**Plugin Developers**
+* modules.p and ships.p are deprecated, and slated
+for removal in the next major release! Please look for that change coming soon. 
+* Note to plugin developers: The `openurl()` function in ttkHyperlinkLabel has been deprecated,
+and slated for removal in the next major release! Please migrate to `webbrowser.open()`.
+
 Release 5.10.2
 ===
 This release contains updated dependencies, some bug fixes, a few minor enhancements to some supporting files, 
