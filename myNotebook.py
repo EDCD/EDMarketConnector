@@ -77,7 +77,7 @@ class Label(tk.Label):
     """Custom tk.Label class to fix some display issues."""
 
     def __init__(self, master: ttk.Frame | None = None, **kw):
-        # This format chosen over `sys.platform in (...)` as mypy and friends dont understand that
+        # This format chosen over `sys.platform in (...)` as mypy and friends don't understand that
         if sys.platform in ('darwin', 'win32'):
             kw['foreground'] = kw.pop('foreground', PAGEFG)
             kw['background'] = kw.pop('background', PAGEBG)
@@ -87,7 +87,55 @@ class Label(tk.Label):
         tk.Label.__init__(self, master, **kw)  # Just use tk.Label on all platforms
 
 
-class Entry(sys.platform == 'darwin' and tk.Entry or ttk.Entry):  # type: ignore
+class EntryMenu(ttk.Entry):
+    """Extended entry widget that includes a context menu with Copy, Cut-and-Paste commands."""
+
+    def __init__(self, *args: ttk.Frame | None, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+
+        self.menu = tk.Menu(self, tearoff=False)
+        self.menu.add_command(label="Copy", command=self.copy)
+        self.menu.add_command(label="Cut", command=self.cut)
+        self.menu.add_separator()
+        self.menu.add_command(label="Paste", command=self.paste)
+        self.menu.add_separator()
+        self.menu.add_command(label="Select All", command=self.select_all)
+
+        self.bind("<Button-3>", self.display_popup)
+
+    def display_popup(self, event: tk.Event) -> None:
+        """Display the menu popup."""
+        self.menu.post(event.x_root, event.y_root)
+
+    def select_all(self) -> None:
+        """Select all the text within the Entry."""
+        self.selection_range(0, tk.END)
+        self.focus_set()
+
+    def copy(self) -> None:
+        """Copy the selected Entry text."""
+        if self.selection_present():
+            self.clipboard_clear()
+            self.clipboard_append(self.selection_get())
+
+    def cut(self) -> None:
+        """Cut the selected Entry text."""
+        if self.selection_present():
+            self.copy()
+            self.delete(tk.SEL_FIRST, tk.SEL_LAST)
+
+    def paste(self) -> None:
+        """Paste the selected Entry text."""
+        if self.selection_present():
+            self.delete(tk.SEL_FIRST, tk.SEL_LAST)
+        try:
+            text = self.clipboard_get()
+            self.insert(tk.INSERT, text)
+        except tk.TclError:
+            pass  # No text in clipboard or clipboard is not text
+
+
+class Entry(sys.platform == 'darwin' and tk.Entry or EntryMenu or ttk.Entry):  # type: ignore
     """Custom t(t)k.Entry class to fix some display issues."""
 
     def __init__(self, master: ttk.Frame | None = None, **kw):
@@ -95,7 +143,7 @@ class Entry(sys.platform == 'darwin' and tk.Entry or ttk.Entry):  # type: ignore
             kw['highlightbackground'] = kw.pop('highlightbackground', PAGEBG)
             tk.Entry.__init__(self, master, **kw)
         else:
-            ttk.Entry.__init__(self, master, **kw)
+            EntryMenu.__init__(self, master, **kw)
 
 
 class Button(sys.platform == 'darwin' and tk.Button or ttk.Button):  # type: ignore

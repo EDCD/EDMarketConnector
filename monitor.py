@@ -63,6 +63,8 @@ elif sys.platform == 'win32':
     GetWindowText = ctypes.windll.user32.GetWindowTextW
     GetWindowText.argtypes = [HWND, LPWSTR, ctypes.c_int]
     GetWindowTextLength = ctypes.windll.user32.GetWindowTextLengthW
+    GetWindowTextLength.argtypes = [ctypes.wintypes.HWND]
+    GetWindowTextLength.restype = ctypes.c_int
 
     GetProcessHandleFromHwnd = ctypes.windll.oleacc.GetProcessHandleFromHwnd
 
