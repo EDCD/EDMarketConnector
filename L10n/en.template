@@ -240,6 +240,9 @@
 /* EDMarketConnector.py: Popup window title for Reset Providers; In files: EDMarketConnector.py:2161; */
 "EDMC: Default Providers Reset" = "EDMC: Default Providers Reset";
 
+/* EDMarketConnector.py: Await Full CMDR Login to Game; In files: EDMarketConnector.py:813; */
+"Awaiting Full CMDR Login" = "Awaiting Full CMDR Login";
+
 /* journal_lock.py: Title text on popup when Journal directory already locked; In files: journal_lock.py:208; */
 "Journal directory already locked" = "Journal directory already locked";
 
