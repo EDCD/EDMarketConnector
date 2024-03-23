@@ -69,7 +69,7 @@ def lookup(module, ship_map, entitled=False) -> dict | None:  # noqa: C901, CCR0
     # Armour - e.g. Federation_Dropship_Armour_Grade2
     if name[-2] == 'armour':
         # Armour is ship-specific, and ship names can have underscores
-        ship_name, armour_grade = module["name"].lower().rsplit("_", 2)[0:2]
+        ship_name, armour, armour_grade = module["name"].lower().rsplit("_", 2)[0:3]
         if ship_name not in ship_map:
             raise AssertionError(f"Unknown ship: {ship_name}")
         new['category'] = 'standard'
