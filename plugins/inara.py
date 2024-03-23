@@ -509,6 +509,10 @@ def journal_entry(  # noqa: C901, CCR001
                         cur_ship['shipHullValue'] = state['HullValue']
                     if state['ModulesValue']:
                         cur_ship['shipModulesValue'] = state['ModulesValue']
+                    if state['MaxJumpRange']:
+                        cur_ship['shipMaxJumpRange'] = state['MaxJumpRange']
+                    if state['CargoCapacity']:
+                        cur_ship['shipCargoCapacity'] = state['CargoCapacity']
                     cur_ship['shipRebuyCost'] = state['Rebuy']
                     new_add_event('setCommanderShip', entry['timestamp'], cur_ship)
                     this.loadout = make_loadout(state)
