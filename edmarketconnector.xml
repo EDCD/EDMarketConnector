@@ -22,10 +22,32 @@
       </item>
       <!-- Windows -->
       <item>
-         <title>Release 5.10.2</title>
+         <title>Release 5.10.3</title>
          <description><![CDATA[<style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
 <p>We now test against, and package with, Python 3.11.7.</p>
 <p><strong>As a result, we do not support Windows 7, 8, or 8.1.</strong><br>
+
+<h2>Release 5.10.3</h2>
+<p>This release contains a bugfix for the shipyard outfitting parsing system and an update to the French translations. </p>
+<em>We now sign our code! This does mean that built EXEs are now slightly modified on our developer's machines.
+For information on what this means, and opt-out options, please visit <a href="https://github.com/EDCD/EDMarketConnector/wiki/Code-Signing-and-EDMC">https://github.com/EDCD/EDMarketConnector/wiki/Code-Signing-and-EDMC</a></em>
+<p><strong>Changes and Enhancements</strong></p>
+<ul>
+<li>Updated French Translations</li>
+</ul>
+<p><strong>Bug Fixes</strong></p>
+<ul>
+<li>Fixed a bug that crashed the outfitting system when encountering armor. (Thanks TCE team for identifying this one!)</li>
+</ul>
+<p><strong>Plugin Developers</strong></p>
+<ul>
+<li>modules.p and ships.p are deprecated, and slated
+for removal in the next major release! Please look for that change coming soon. </li>
+<li>Note to plugin developers: The <code>openurl()</code> function in ttkHyperlinkLabel has been deprecated,
+and slated for removal in the next major release! Please migrate to <code>webbrowser.open()</code>.</li>
+</ul>
+
+<hr>
 
 <h2>Release 5.10.2</h2>
 <p>This release contains updated dependencies, some bug fixes, a few minor enhancements to some supporting files,
@@ -2185,7 +2207,7 @@ about this:
 <a href="https://issues.frontierstore.net/issue-detail/28638" rel="nofollow">PTS CAPI saying Commander is Docked after jumping to new system</a>.</p>
 </li>
 </ul>]]></description>
-         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F5.10.2/EDMarketConnector_Installer_5.10.2.exe" sparkle:os="windows" sparkle:version="5.10.2" length="0" type="application/x-ms-dos-executable" />
+         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F5.10.3/EDMarketConnector_Installer_5.10.3.exe" sparkle:os="windows" sparkle:version="5.10.3" length="0" type="application/x-ms-dos-executable" />
       </item>
    </channel>
 </rss>
