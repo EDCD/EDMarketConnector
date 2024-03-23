@@ -1,8 +1,22 @@
+/* edsm.py:Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:316; */
+"Send flight log and CMDR status to EDSM" = "Envoyer les données de vol et le status de CMDR à EDSM";
+
+/* prefs.py:Label on button used to open a filesystem folder; In files: prefs.py:706; */
+"Open Log Folder" = "Ouvrir le dossier de log";
+
+/* inara.py:Text Inara Show API key; In files: inara.py:305; */
+"Show API Key" = "Afficher la clé API";
 /* Language name */
 "!Language" = "Français";
 
+/* companion.py: Frontier CAPI didn't respond; In files: companion.py:226; */
+"Error: Frontier CAPI didn't respond" = "L'API Compagnon de Frontier ne répond pas";
+
 /* companion.py: Frontier CAPI data doesn't agree with latest Journal game location; In files: companion.py:245; */
 "Error: Frontier server is lagging" = "Erreur : Le serveur Frontier ne répond pas";
+
+/* companion.py: Commander is docked at an EDO settlement, got out and back in, we forgot the station; In files: companion.py:261; */
+"Docked but unknown station: EDO Settlement?" = "Amarré, mais station inconnue : colonie EDO ?";
 
 /* companion.py: Generic "something went wrong with Frontier Auth" error; In files: companion.py:271; */
 "Error: Invalid Credentials" = "Erreur : Identifiants invalides";
@@ -10,11 +24,35 @@
 /* companion.py: Frontier CAPI authorisation not for currently game-active commander; In files: companion.py:296; */
 "Error: Wrong Cmdr" = "Erreur : Cmdr incorrect";
 
+/* companion.py: Generic error prefix - following text is from Frontier auth service; In files: companion.py:432; companion.py:517; */
+"Error" = "Erreur";
+
+/* companion.py: Frontier auth, no 'usr' section in returned data; companion.py: Frontier auth, no 'customer_id' in 'usr' section in returned data; In files: companion.py:475; companion.py:480; */
+"Error: Couldn't check token customer_id" = "Erreur : Impossible de vérifier le jeton customer_id";
+
+/* companion.py: Frontier auth customer_id doesn't match game session FID; In files: companion.py:486; */
+"Error: customer_id doesn't match!" = "Erreur : customer_id ne correspond pas !";
+
+/* companion.py: Failed to get Access Token from Frontier Auth service; In files: companion.py:508; */
+"Error: unable to get token" = "Erreur : impossible d'obtenir le jeton";
+
+/* companion.py: Frontier CAPI returned 418, meaning down for maintenance; In files: companion.py:844; */
+"Frontier CAPI down for maintenance" = "L'API Compagnon de Frontier est en panne pour maintenance";
+
+/* companion.py: Frontier CAPI data retrieval failed; In files: companion.py:856; */
+"Frontier CAPI query failure" = "Échec de la requête à l'API Compagnon Frontier";
+
 /* EDMarketConnector.py: Main UI Update button; EDMarketConnector.py: Update button in main window; In files: EDMarketConnector.py:601; EDMarketConnector.py:919; EDMarketConnector.py:1748; */
 "Update" = "Mettre à jour";
 
 /* EDMarketConnector.py: Appearance - Label for checkbox to select if application always on top; prefs.py: Appearance - Label for checkbox to select if application always on top; In files: EDMarketConnector.py:710; prefs.py:875; */
 "Always on top" = "Toujours visible";
+
+/* EDMarketConnector.py: Unknown suit; In files: EDMarketConnector.py:837; */
+"Unknown" = "Inconnue";
+
+/* EDMarketConnector.py: ED Journal file location appears to be in error; In files: EDMarketConnector.py:906; */
+"Error: Check E:D journal file location" = "Erreur : Vérifier l'emplacement du fichier de journal Elite : Dangerous";
 
 /* EDMarketConnector.py: Label for commander name in main window; edsm.py: Game Commander name label in EDSM settings; stats.py: Cmdr stats; theme.py: Label for commander name in main window; In files: EDMarketConnector.py:913; edsm.py:332; stats.py:57; theme.py:290; */
 "Cmdr" = "Cmd";
@@ -63,6 +101,12 @@
 
 /* EDMarketConnector.py: Help > Documentation; In files: EDMarketConnector.py:933; EDMarketConnector.py:953; */
 "Documentation" = "Documentation";
+
+/* EDMarketConnector.py: Help > Troubleshooting; In files: EDMarketConnector.py:934; EDMarketConnector.py:954; */
+"Troubleshooting" = "Résolution de problème";
+
+/* EDMarketConnector.py: Help > Report A Bug; In files: EDMarketConnector.py:935; EDMarketConnector.py:955; */
+"Report A Bug" = "Signaler un bug";
 
 /* EDMarketConnector.py: Help > Privacy Policy; In files: EDMarketConnector.py:936; EDMarketConnector.py:956; */
 "Privacy Policy" = "Politique de Confidentialité";
