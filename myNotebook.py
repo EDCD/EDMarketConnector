@@ -78,7 +78,7 @@ class Label(tk.Label):
 
     def __init__(self, master: ttk.Frame | None = None, **kw):
         # This format chosen over `sys.platform in (...)` as mypy and friends dont understand that
-        if sys.platform in ('darwin', 'win32'):
+        if sys.platform == 'win32':
             kw['foreground'] = kw.pop('foreground', PAGEFG)
             kw['background'] = kw.pop('background', PAGEBG)
         else:

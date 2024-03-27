@@ -20,7 +20,7 @@ from EDMCLogging import get_main_logger
 
 logger = get_main_logger()
 
-if sys.platform in ('darwin', 'win32'):
+if sys.platform == 'win32':
     from watchdog.events import FileSystemEventHandler
     from watchdog.observers import Observer
 else:

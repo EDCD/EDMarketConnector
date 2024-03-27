@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING, Any, Callable, Optional, Type
 
 import myNotebook as nb  # noqa: N813
 import plug
-from config import applongname, appversion_nobuild, config
+from config import appversion_nobuild, config
 from EDMCLogging import edmclogger, get_main_logger
 from constants import appname
 from hotkey import hotkeymgr
@@ -49,9 +49,6 @@ def help_open_log_folder() -> None:
     if sys.platform.startswith('win'):
         # On Windows, use the "start" command to open the folder
         system(f'start "" "{logfile_loc}"')
-    elif sys.platform.startswith('darwin'):
-        # On macOS, use the "open" command to open the folder
-        system(f'open "{logfile_loc}"')
     elif sys.platform.startswith('linux'):
         # On Linux, use the "xdg-open" command to open the folder
         system(f'xdg-open "{logfile_loc}"')
@@ -172,32 +169,7 @@ class AutoInc(contextlib.AbstractContextManager):
         return None
 
 
-if sys.platform == 'darwin':
-    import objc  # type: ignore
-    from Foundation import NSFileManager  # type: ignore
-    try:
-        from ApplicationServices import (  # type: ignore
-            AXIsProcessTrusted, AXIsProcessTrustedWithOptions, kAXTrustedCheckOptionPrompt
-        )
-
-    except ImportError:
-        HIServices = objc.loadBundle(
-            'HIServices',
-            globals(),
-            '/System/Library/Frameworks/ApplicationServices.framework/Frameworks/HIServices.framework'
-        )
-
-        objc.loadBundleFunctions(
-            HIServices,
-            globals(),
-            [('AXIsProcessTrusted', 'B'), ('AXIsProcessTrustedWithOptions', 'B@')]
-        )
-
-        objc.loadBundleVariables(HIServices, globals(), [('kAXTrustedCheckOptionPrompt', '@^{__CFString=}')])
-
-    was_accessible_at_launch = AXIsProcessTrusted()  # type: ignore
-
-elif sys.platform == 'win32':
+if sys.platform == 'win32':
     import ctypes
     import winreg
     from ctypes.wintypes import HINSTANCE, HWND, LPCWSTR, LPWSTR, MAX_PATH, POINT, RECT, SIZE, UINT
@@ -251,29 +223,20 @@ class PreferencesDialog(tk.Toplevel):
 
         self.parent = parent
         self.callback = callback
-        if sys.platform == 'darwin':
-            # LANG: File > Preferences menu entry for macOS
-            self.title(_('Preferences'))
-
-        else:
-            # LANG: File > Settings (macOS)
-            self.title(_('Settings'))
+        # LANG: File > Settings (macOS)
+        self.title(_('Settings'))
 
         if parent.winfo_viewable():
             self.transient(parent)
 
         # position over parent
-        if sys.platform != 'darwin' or parent.winfo_rooty() > 0:  # http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
+        if parent.winfo_rooty() > 0:  # http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
             # TODO this is fixed supposedly.
             self.geometry(f'+{parent.winfo_rootx()}+{parent.winfo_rooty()}')
 
         # remove decoration
         if sys.platform == 'win32':
             self.attributes('-toolwindow', tk.TRUE)
-
-        elif sys.platform == 'darwin':
-            # http://wiki.tcl.tk/13428
-            parent.call('tk::unsupported::MacWindowStyle', 'style', self, 'utility')
 
         self.resizable(tk.FALSE, tk.FALSE)
 
@@ -302,19 +265,15 @@ class PreferencesDialog(tk.Toplevel):
         self.__setup_appearance_tab(notebook)
         self.__setup_plugin_tab(notebook)
 
-        if sys.platform == 'darwin':
-            self.protocol("WM_DELETE_WINDOW", self.apply)  # close button applies changes
-
-        else:
-            buttonframe = ttk.Frame(frame)
-            buttonframe.grid(padx=self.PADX, pady=self.PADX, sticky=tk.NSEW)
-            buttonframe.columnconfigure(0, weight=1)
-            ttk.Label(buttonframe).grid(row=0, column=0)  # spacer
-            # LANG: 'OK' button on Settings/Preferences window
-            button = ttk.Button(buttonframe, text=_('OK'), command=self.apply)
-            button.grid(row=0, column=1, sticky=tk.E)
-            button.bind("<Return>", lambda event: self.apply())
-            self.protocol("WM_DELETE_WINDOW", self._destroy)
+        buttonframe = ttk.Frame(frame)
+        buttonframe.grid(padx=self.PADX, pady=self.PADX, sticky=tk.NSEW)
+        buttonframe.columnconfigure(0, weight=1)
+        ttk.Label(buttonframe).grid(row=0, column=0)  # spacer
+        # LANG: 'OK' button on Settings/Preferences window
+        button = ttk.Button(buttonframe, text=_('OK'), command=self.apply)
+        button.grid(row=0, column=1, sticky=tk.E)
+        button.bind("<Return>", lambda event: self.apply())
+        self.protocol("WM_DELETE_WINDOW", self._destroy)
 
         # FIXME: Why are these being called when *creating* the Settings window?
         # Selectively disable buttons depending on output settings
@@ -405,11 +364,7 @@ class PreferencesDialog(tk.Toplevel):
         self.outdir_entry = nb.Entry(output_frame, takefocus=False)
         self.outdir_entry.grid(columnspan=2, padx=self.PADX, pady=self.BOXY, sticky=tk.EW, row=row.get())
 
-        if sys.platform == 'darwin':
-            text = (_('Change...'))  # LANG: macOS Preferences - files location selection button
-
-        else:
-            text = (_('Browse...'))  # LANG: NOT-macOS Settings - files location selection button
+        text = (_('Browse...'))  # LANG: NOT-macOS Settings - files location selection button
 
         self.outbutton = nb.Button(
             output_frame,
@@ -455,11 +410,7 @@ class PreferencesDialog(tk.Toplevel):
 
         self.logdir_entry.grid(columnspan=4, padx=self.PADX, pady=self.BOXY, sticky=tk.EW, row=row.get())
 
-        if sys.platform == 'darwin':
-            text = (_('Change...'))  # LANG: macOS Preferences - files location selection button
-
-        else:
-            text = (_('Browse...'))  # LANG: NOT-macOS Setting - files location selection button
+        text = (_('Browse...'))  # LANG: NOT-macOS Setting - files location selection button
 
         with row as cur_row:
             self.logbutton = nb.Button(
@@ -499,7 +450,7 @@ class PreferencesDialog(tk.Toplevel):
                 variable=self.capi_fleetcarrier
             ).grid(columnspan=4, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=row.get())
 
-        if sys.platform in ('darwin', 'win32'):
+        if sys.platform == 'win32':
             ttk.Separator(config_frame, orient=tk.HORIZONTAL).grid(
                 columnspan=4, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=row.get()
             )
@@ -511,49 +462,21 @@ class PreferencesDialog(tk.Toplevel):
             with row as cur_row:
                 nb.Label(
                     config_frame,
-                    text=_('Keyboard shortcut') if  # LANG: Hotkey/Shortcut settings prompt on OSX
-                    sys.platform == 'darwin' else
-                    _('Hotkey')  # LANG: Hotkey/Shortcut settings prompt on Windows
+                    text=_('Hotkey')  # LANG: Hotkey/Shortcut settings prompt on Windows
                 ).grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=cur_row)
 
-                if sys.platform == 'darwin' and not was_accessible_at_launch:
-                    if AXIsProcessTrusted():
-                        # Shortcut settings prompt on OSX
-                        nb.Label(
-                            config_frame,
-                            # LANG: macOS Preferences > Configuration - restart the app message
-                            text=_('Re-start {APP} to use shortcuts').format(APP=applongname),
-                            foreground='firebrick'
-                        ).grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=cur_row)
+                self.hotkey_text = nb.Entry(config_frame, width=30, justify=tk.CENTER)
+                self.hotkey_text.insert(
+                    0,
+                    # No hotkey/shortcut currently defined
+                    # TODO: display Only shows up on windows
+                    # LANG: No hotkey/shortcut set
+                    hotkeymgr.display(self.hotkey_code, self.hotkey_mods) if self.hotkey_code else _('None')
+                )
 
-                    else:
-                        # Shortcut settings prompt on OSX
-                        nb.Label(
-                            config_frame,
-                            # LANG: macOS - Configuration - need to grant the app permission for keyboard shortcuts
-                            text=_('{APP} needs permission to use shortcuts').format(APP=applongname),
-                            foreground='firebrick'
-                        ).grid(columnspan=4, padx=self.PADX, pady=self.PADY, sticky=tk.W, row=cur_row)
-
-                        # LANG: Shortcut settings button on OSX
-                        nb.Button(config_frame, text=_('Open System Preferences'), command=self.enableshortcuts).grid(
-                            padx=self.PADX, pady=self.BOXY, sticky=tk.E, row=cur_row
-                        )
-
-                else:
-                    self.hotkey_text = nb.Entry(config_frame, width=(
-                        20 if sys.platform == 'darwin' else 30), justify=tk.CENTER)
-                    self.hotkey_text.insert(
-                        0,
-                        # No hotkey/shortcut currently defined
-                        # TODO: display Only shows up on darwin or windows
-                        # LANG: No hotkey/shortcut set
-                        hotkeymgr.display(self.hotkey_code, self.hotkey_mods) if self.hotkey_code else _('None')
-                    )
-
-                    self.hotkey_text.bind('<FocusIn>', self.hotkeystart)
-                    self.hotkey_text.bind('<FocusOut>', self.hotkeyend)
-                    self.hotkey_text.grid(column=1, columnspan=2, pady=self.BOXY, sticky=tk.W, row=cur_row)
+                self.hotkey_text.bind('<FocusIn>', self.hotkeystart)
+                self.hotkey_text.bind('<FocusOut>', self.hotkeyend)
+                self.hotkey_text.grid(column=1, columnspan=2, pady=self.BOXY, sticky=tk.W, row=cur_row)
 
                 # Hotkey/Shortcut setting
                 self.hotkey_only_btn = nb.Checkbutton(
@@ -1070,14 +993,6 @@ class PreferencesDialog(tk.Toplevel):
     def tabchanged(self, event: tk.Event) -> None:
         """Handle preferences active tab changing."""
         self.outvarchanged()
-        if sys.platform == 'darwin':
-            # Hack to recompute size so that buttons show up under Mojave
-            notebook = event.widget
-            frame = self.nametowidget(notebook.winfo_parent())
-            temp = nb.Label(frame)
-            temp.grid()
-            temp.update_idletasks()
-            temp.destroy()
 
     def outvarchanged(self, event: Optional[tk.Event] = None) -> None:
         """Handle Output tab variable changes."""
@@ -1139,16 +1054,6 @@ class PreferencesDialog(tk.Toplevel):
             entryfield.insert(0, '\\'.join(display))
 
         #                                                   None if path doesn't exist
-        elif sys.platform == 'darwin' and NSFileManager.defaultManager().componentsToDisplayForPath_(pathvar.get()):
-            if pathvar.get().startswith(config.home):
-                display = ['~'] + NSFileManager.defaultManager().componentsToDisplayForPath_(pathvar.get())[
-                    len(NSFileManager.defaultManager().componentsToDisplayForPath_(config.home)):
-                ]
-
-            else:
-                display = NSFileManager.defaultManager().componentsToDisplayForPath_(pathvar.get())
-
-            entryfield.insert(0, '/'.join(display))
         else:
             if pathvar.get().startswith(config.home):
                 entryfield.insert(0, '~' + pathvar.get()[len(config.home):])
@@ -1288,7 +1193,7 @@ class PreferencesDialog(tk.Toplevel):
 
         config.set('capi_fleetcarrier', self.capi_fleetcarrier.get())
 
-        if sys.platform in ('darwin', 'win32'):
+        if sys.platform == 'win32':
             config.set('hotkey_code', self.hotkey_code)
             config.set('hotkey_mods', self.hotkey_mods)
             config.set('hotkey_always', int(not self.hotkey_only.get()))
@@ -1333,25 +1238,3 @@ class PreferencesDialog(tk.Toplevel):
 
         self.parent.wm_attributes('-topmost', 1 if config.get_int('always_ontop') else 0)
         self.destroy()
-
-    if sys.platform == 'darwin':
-        def enableshortcuts(self) -> None:
-            """Set up macOS preferences shortcut."""
-            self.apply()
-            # popup System Preferences dialog
-            try:
-                # http://stackoverflow.com/questions/6652598/cocoa-button-opens-a-system-preference-page/6658201
-                from ScriptingBridge import SBApplication  # type: ignore
-                sysprefs = 'com.apple.systempreferences'
-                prefs = SBApplication.applicationWithBundleIdentifier_(sysprefs)
-                pane = [x for x in prefs.panes() if x.id() == 'com.apple.preference.security'][0]
-                prefs.setCurrentPane_(pane)
-                anchor = [x for x in pane.anchors() if x.name() == 'Privacy_Accessibility'][0]
-                anchor.reveal()
-                prefs.activate()
-
-            except Exception:
-                AXIsProcessTrustedWithOptions({kAXTrustedCheckOptionPrompt: True})
-
-            if not config.shutting_down:
-                self.parent.event_generate('<<Quit>>', when="tail")
