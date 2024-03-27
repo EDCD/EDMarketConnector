@@ -38,16 +38,7 @@ if TYPE_CHECKING:
     def _(x: str) -> str:
         return x
 
-if sys.platform == 'darwin':
-    from fcntl import fcntl
-
-    from AppKit import NSWorkspace
-    from watchdog.events import FileSystemEventHandler
-    from watchdog.observers import Observer
-    from watchdog.observers.api import BaseObserver
-    F_GLOBAL_NOCACHE = 55
-
-elif sys.platform == 'win32':
+if sys.platform == 'win32':
     import ctypes
     from ctypes.wintypes import BOOL, HWND, LPARAM, LPWSTR
 
@@ -382,8 +373,6 @@ class EDLogs(FileSystemEventHandler):
         logfile = self.logfile
         if logfile:
             loghandle: BinaryIO = open(logfile, 'rb', 0)  # unbuffered
-            if sys.platform == 'darwin':
-                fcntl(loghandle, F_GLOBAL_NOCACHE, -1)  # required to avoid corruption on macOS over SMB
 
             self.catching_up = True
             for line in loghandle:
@@ -483,9 +472,6 @@ class EDLogs(FileSystemEventHandler):
 
                 if logfile:
                     loghandle = open(logfile, 'rb', 0)  # unbuffered
-                    if sys.platform == 'darwin':
-                        fcntl(loghandle, F_GLOBAL_NOCACHE, -1)  # required to avoid corruption on macOS over SMB
-
                     log_pos = 0
 
             sleep(self._POLL)
@@ -2144,12 +2130,7 @@ class EDLogs(FileSystemEventHandler):
 
         :return: bool - True if the game is running.
         """
-        if sys.platform == 'darwin':
-            for app in NSWorkspace.sharedWorkspace().runningApplications():
-                if app.bundleIdentifier() == 'uk.co.frontier.EliteDangerous':
-                    return True
-
-        elif sys.platform == 'win32':
+        if sys.platform == 'win32':
             def WindowTitle(h):  # noqa: N802
                 if h:
                     length = GetWindowTextLength(h) + 1
