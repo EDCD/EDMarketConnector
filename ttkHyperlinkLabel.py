@@ -22,7 +22,6 @@ from __future__ import annotations
 
 import sys
 import tkinter as tk
-import warnings
 import webbrowser
 from tkinter import font as tk_font
 from tkinter import ttk
