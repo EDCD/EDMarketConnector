@@ -13,13 +13,7 @@ from EDMCLogging import get_main_logger
 
 logger = get_main_logger()
 
-if sys.platform == 'darwin':
-    from Foundation import (  # type: ignore
-        NSApplicationSupportDirectory, NSBundle, NSDocumentDirectory, NSSearchPathForDirectoriesInDomains,
-        NSUserDefaults, NSUserDomainMask
-    )
-
-elif sys.platform == 'win32':
+if sys.platform == 'win32':
     import ctypes
     import uuid
     from ctypes.wintypes import DWORD, HANDLE, HKEY, LONG, LPCVOID, LPCWSTR
@@ -115,91 +109,7 @@ class OldConfig:
     OUT_EDDN_DELAY = 4096
     OUT_STATION_ANY = OUT_EDDN_SEND_STATION_DATA | OUT_MKT_TD | OUT_MKT_CSV
 
-    if sys.platform == 'darwin':  # noqa: C901 # It's gating *all* the functions
-
-        def __init__(self):
-            self.app_dir = join(
-                NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, True)[0], appname
-            )
-            if not isdir(self.app_dir):
-                mkdir(self.app_dir)
-
-            self.plugin_dir = join(self.app_dir, 'plugins')
-            if not isdir(self.plugin_dir):
-                mkdir(self.plugin_dir)
-
-            if getattr(sys, 'frozen', False):
-                self.internal_plugin_dir = normpath(join(dirname(sys.executable), pardir, 'Library', 'plugins'))
-                self.respath = normpath(join(dirname(sys.executable), pardir, 'Resources'))
-                self.identifier = NSBundle.mainBundle().bundleIdentifier()
-
-            else:
-                self.internal_plugin_dir = join(dirname(__file__), 'plugins')
-                self.respath = dirname(__file__)
-                # Don't use Python's settings if interactive
-                self.identifier = f'uk.org.marginal.{appname.lower()}'
-                NSBundle.mainBundle().infoDictionary()['CFBundleIdentifier'] = self.identifier
-
-            self.default_journal_dir: str | None = join(
-                NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, True)[0],
-                'Frontier Developments',
-                'Elite Dangerous'
-            )
-            self.home = expanduser('~')
-
-            self.defaults = NSUserDefaults.standardUserDefaults()
-            self.settings = dict(self.defaults.persistentDomainForName_(self.identifier) or {})  # make writeable
-
-            # Check out_dir exists
-            if not self.get('outdir') or not isdir(str(self.get('outdir'))):
-                self.set('outdir', NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, True)[0])
-
-        def get(self, key: str, default: None | list | str = None) -> None | list | str:
-            """Look up a string configuration value."""
-            val = self.settings.get(key)
-            if val is None:
-                return default
-
-            if isinstance(val, str):
-                return str(val)
-
-            if isinstance(val, list):
-                return list(val)  # make writeable
-
-            return default
-
-        def getint(self, key: str, default: int = 0) -> int:
-            """Look up an integer configuration value."""
-            try:
-                return int(self.settings.get(key, default))  # should already be int, but check by casting
-
-            except ValueError as e:
-                logger.error(f"Failed to int({key=})", exc_info=e)
-                return default
-
-            except Exception as e:
-                logger.debug('The exception type is ...', exc_info=e)
-                return default
-
-        def set(self, key: str, val: int | str | list) -> None:
-            """Set value on the specified configuration key."""
-            self.settings[key] = val
-
-        def delete(self, key: str) -> None:
-            """Delete the specified configuration key."""
-            self.settings.pop(key, None)
-
-        def save(self) -> None:
-            """Save current configuration to disk."""
-            self.defaults.setPersistentDomain_forName_(self.settings, self.identifier)
-            self.defaults.synchronize()
-
-        def close(self) -> None:
-            """Close the configuration."""
-            self.save()
-            self.defaults = None
-
-    elif sys.platform == 'win32':
+    if sys.platform == 'win32':
 
         def __init__(self):
             self.app_dir = join(known_folder_path(FOLDERID_LocalAppData), appname)  # type: ignore

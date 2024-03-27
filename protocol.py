@@ -58,66 +58,7 @@ class GenericProtocolHandler:
             self.master.event_generate('<<CompanionAuthEvent>>', when="tail")
 
 
-if sys.platform == 'darwin' and getattr(sys, 'frozen', False):  # noqa: C901 # its guarding ALL macos stuff.
-    import struct
-
-    import objc  # type: ignore
-    from AppKit import NSAppleEventManager, NSObject  # type: ignore
-
-    kInternetEventClass = kAEGetURL = struct.unpack('>l', b'GURL')[0]  # noqa: N816 # API names
-    keyDirectObject = struct.unpack('>l', b'----')[0]  # noqa: N816 # API names
-
-    class DarwinProtocolHandler(GenericProtocolHandler):
-        """
-        MacOS protocol handler implementation.
-
-        Uses macOS event stuff.
-        """
-
-        POLL = 100  # ms
-
-        def start(self, master: 'tkinter.Tk') -> None:
-            """Start Protocol Handler."""
-            GenericProtocolHandler.start(self, master)
-            self.lasturl: str | None = None
-            self.eventhandler = EventHandler.alloc().init()
-
-        def poll(self) -> None:
-            """Poll event until URL is updated."""
-            # No way of signalling to Tkinter from within the callback handler block that doesn't cause Python to crash,
-            # so poll. TODO: Resolved?
-            if self.lasturl and self.lasturl.startswith(self.redirect):
-                self.event(self.lasturl)
-                self.lasturl = None
-
-    class EventHandler(NSObject):
-        """Handle NSAppleEventManager IPC stuff."""
-
-        def init(self) -> None:
-            """
-            Init method for handler.
-
-            (I'd assume this is related to the subclassing of NSObject for why its not __init__)
-            """
-            self = objc.super(EventHandler, self).init()
-            NSAppleEventManager.sharedAppleEventManager().setEventHandler_andSelector_forEventClass_andEventID_(
-                self,
-                'handleEvent:withReplyEvent:',
-                kInternetEventClass,
-                kAEGetURL
-            )
-            return self
-
-        def handleEvent_withReplyEvent_(self, event, replyEvent) -> None:  # noqa: N802 N803 # Required to override
-            """Actual event handling from NSAppleEventManager."""
-            protocolhandler.lasturl = parse.unquote(
-                event.paramDescriptorForKeyword_(keyDirectObject).stringValue()
-            ).strip()
-
-            protocolhandler.master.after(DarwinProtocolHandler.POLL, protocolhandler.poll)
-
-
-elif (config.auth_force_edmc_protocol
+if (config.auth_force_edmc_protocol
       or (
           sys.platform == 'win32'
           and getattr(sys, 'frozen', False)
@@ -480,8 +421,6 @@ def get_handler_impl() -> Type[GenericProtocolHandler]:
 
     :return: An instantiatable GenericProtocolHandler
     """
-    if sys.platform == 'darwin' and getattr(sys, 'frozen', False):
-        return DarwinProtocolHandler  # pyright: reportUnboundVariable=false
 
     if (
         (sys.platform == 'win32' and config.auth_force_edmc_protocol)
