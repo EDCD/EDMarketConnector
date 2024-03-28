@@ -374,17 +374,13 @@ class StatsResults(tk.Toplevel):
             self.transient(parent)
 
         # position over parent
-        if sys.platform != 'darwin' or parent.winfo_rooty() > 0:  # http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
+        if parent.winfo_rooty() > 0:  # http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
             self.geometry(f"+{parent.winfo_rootx()}+{parent.winfo_rooty()}")
 
         # remove decoration
         self.resizable(tk.FALSE, tk.FALSE)
         if sys.platform == 'win32':
             self.attributes('-toolwindow', tk.TRUE)
-
-        elif sys.platform == 'darwin':
-            # http://wiki.tcl.tk/13428
-            parent.call('tk::unsupported::MacWindowStyle', 'style', self, 'utility')
 
         frame = ttk.Frame(self)
         frame.grid(sticky=tk.NSEW)
@@ -422,13 +418,6 @@ class StatsResults(tk.Toplevel):
 
         ttk.Frame(page).grid(pady=5)         # bottom spacer
         notebook.add(page, text=_('Ships'))  # LANG: Status dialog title
-
-        if sys.platform != 'darwin':
-            buttonframe = ttk.Frame(frame)
-            buttonframe.grid(padx=10, pady=(0, 10), sticky=tk.NSEW)  # type: ignore # the tuple is supported
-            buttonframe.columnconfigure(0, weight=1)
-            ttk.Label(buttonframe).grid(row=0, column=0)  # spacer
-            ttk.Button(buttonframe, text='OK', command=self.destroy).grid(row=0, column=1, sticky=tk.E)
 
         # wait for window to appear on screen before calling grab_set
         self.wait_visibility()

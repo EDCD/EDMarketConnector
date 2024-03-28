@@ -17,8 +17,8 @@ import re
 import sys
 import warnings
 from contextlib import suppress
-from os import pardir, listdir, sep, makedirs
-from os.path import basename, dirname, isdir, isfile, join, abspath, exists
+from os import listdir, sep, makedirs
+from os.path import basename, dirname, isdir, join, abspath, exists
 from typing import TYPE_CHECKING, Iterable, TextIO, cast
 from config import config
 from EDMCLogging import get_main_logger
@@ -39,12 +39,7 @@ logger = get_main_logger()
 LANGUAGE_ID = '!Language'
 LOCALISATION_DIR = 'L10n'
 
-if sys.platform == 'darwin':
-    from Foundation import (  # type: ignore # exists on Darwin
-        NSLocale, NSNumberFormatter, NSNumberFormatterDecimalStyle
-    )
-
-elif sys.platform == 'win32':
+if sys.platform == 'win32':
     import ctypes
     from ctypes.wintypes import BOOL, DWORD, LPCVOID, LPCWSTR, LPWSTR
     if TYPE_CHECKING:
@@ -178,14 +173,8 @@ class _Translations:
     def available(self) -> set[str]:
         """Return a list of available language codes."""
         path = self.respath()
-        if getattr(sys, 'frozen', False) and sys.platform == 'darwin':
-            available = {
-                x[:-len('.lproj')] for x in listdir(path)
-                if x.endswith('.lproj') and isfile(join(x, 'Localizable.strings'))
-            }
 
-        else:
-            available = {x[:-len('.strings')] for x in listdir(path) if x.endswith('.strings')}
+        available = {x[:-len('.strings')] for x in listdir(path) if x.endswith('.strings')}
 
         return available
 
@@ -206,9 +195,6 @@ class _Translations:
     def respath(self) -> str:
         """Path to localisation files."""
         if getattr(sys, 'frozen', False):
-            if sys.platform == 'darwin':
-                return abspath(join(dirname(sys.executable), pardir, 'Resources'))
-
             return abspath(join(dirname(sys.executable), LOCALISATION_DIR))
 
         if __file__:
@@ -234,25 +220,12 @@ class _Translations:
             except OSError:
                 logger.exception(f'could not open {file_path}')
 
-        elif getattr(sys, 'frozen', False) and sys.platform == 'darwin':
-            res_path = join(self.respath(), f'{lang}.lproj', 'Localizable.strings')
-            return open(res_path, encoding='utf-16')
-
         res_path = join(self.respath(), f'{lang}.strings')
         return open(res_path, encoding='utf-8')
 
 
 class _Locale:
     """Locale holds a few utility methods to convert data to and from localized versions."""
-
-    def __init__(self) -> None:
-        if sys.platform == 'darwin':
-            self.int_formatter = NSNumberFormatter.alloc().init()
-            self.int_formatter.setNumberStyle_(NSNumberFormatterDecimalStyle)
-            self.float_formatter = NSNumberFormatter.alloc().init()
-            self.float_formatter.setNumberStyle_(NSNumberFormatterDecimalStyle)
-            self.float_formatter.setMinimumFractionDigits_(5)
-            self.float_formatter.setMaximumFractionDigits_(5)
 
     def stringFromNumber(self, number: float | int, decimals: int | None = None) -> str:  # noqa: N802
         warnings.warn(DeprecationWarning('use _Locale.string_from_number instead.'))
@@ -279,14 +252,6 @@ class _Locale:
         if decimals == 0 and not isinstance(number, numbers.Integral):
             number = int(round(number))
 
-        if sys.platform == 'darwin':
-            if not decimals and isinstance(number, numbers.Integral):
-                return self.int_formatter.stringFromNumber_(number)
-
-            self.float_formatter.setMinimumFractionDigits_(decimals)
-            self.float_formatter.setMaximumFractionDigits_(decimals)
-            return self.float_formatter.stringFromNumber_(number)
-
         if not decimals and isinstance(number, numbers.Integral):
             return locale.format_string('%d', number, True)
         return locale.format_string('%.*f', (decimals, number), True)
@@ -299,9 +264,6 @@ class _Locale:
         :param string: The string to convert
         :return: None if the string cannot be parsed, otherwise an int or float dependant on input data.
         """
-        if sys.platform == 'darwin':
-            return self.float_formatter.numberFromString_(string)
-
         with suppress(ValueError):
             return locale.atoi(string)
 
@@ -332,10 +294,8 @@ class _Locale:
         :return: The preferred language list
         """
         languages: Iterable[str]
-        if sys.platform == 'darwin':
-            languages = NSLocale.preferredLanguages()
 
-        elif sys.platform != 'win32':
+        if sys.platform != 'win32':
             # POSIX
             lang = locale.getlocale()[0]
             languages = [lang.replace('_', '-')] if lang else []

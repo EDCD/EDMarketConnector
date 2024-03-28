@@ -20,13 +20,13 @@ from EDMCLogging import get_main_logger
 
 logger = get_main_logger()
 
-if sys.platform in ('darwin', 'win32'):
+if sys.platform == 'win32':
     from watchdog.events import FileSystemEventHandler
     from watchdog.observers import Observer
 else:
     # Linux's inotify doesn't work over CIFS or NFS, so poll
     class FileSystemEventHandler:  # type: ignore
-        """Dummy class to represent a file system event handler on platforms other than macOS and Windows."""
+        """Dummy class to represent a file system event handler on platforms other than Windows."""
 
 
 class Dashboard(FileSystemEventHandler):
@@ -160,7 +160,7 @@ class Dashboard(FileSystemEventHandler):
 
     def on_modified(self, event) -> None:
         """
-        Watchdog callback - DirModifiedEvent on macOS, FileModifiedEvent on Windows.
+        Watchdog callback - FileModifiedEvent on Windows.
 
         :param event: Watchdog event.
         """
