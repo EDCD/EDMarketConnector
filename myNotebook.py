@@ -57,7 +57,7 @@ class Label(tk.Label):
         super().__init__(master, **kw)
 
 
-class Entry(ttk.Entry):  # type: ignore
+class Entry(ttk.Entry):
     """Custom t(t)k.Entry class to fix some display issues."""
 
     # DEPRECATED: Migrate to ttk.Entry. Will remove in 5.12 or later.

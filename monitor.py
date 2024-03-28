@@ -439,7 +439,7 @@ class EDLogs(FileSystemEventHandler):
                     new_journal_file = None
 
             if logfile:
-                loghandle.seek(0, SEEK_END)  # required to make macOS notice log change over SMB. # TODO: Do we need this?
+                loghandle.seek(0, SEEK_END)  # required for macOS to notice log change over SMB. TODO: Do we need this?
                 loghandle.seek(log_pos, SEEK_SET)  # reset EOF flag # TODO: log_pos reported as possibly unbound
                 for line in loghandle:
                     # Paranoia check to see if we're shutting down
