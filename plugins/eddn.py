@@ -1880,6 +1880,74 @@ class EDDN:
 
         return None
 
+    def export_journal_dockingdenied(
+            self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]
+    ) -> str | None:
+        """
+        Send a DockingDenied to EDDN on the correct schema.
+
+        :param cmdr: the commander under which this upload is made
+        :param is_beta: whether or not we are in beta mode
+        :param entry: the journal entry to send
+
+        Example:
+        {
+            "timestamp":"2022-06-10T10:09:41Z",
+            "event":"DockingDenied",
+            "Reason":"RestrictedAccess",
+            "MarketID":3706117376,
+            "StationName":"V7G-T1G",
+            "StationType":"FleetCarrier"
+        }
+        """
+        #######################################################################
+        # Elisions
+        #######################################################################
+        # In case Frontier ever add any
+        entry = filter_localised(entry)
+
+        msg = {
+            '$schemaRef': f'https://eddn.edcd.io/schemas/dockingdenied/1{"/test" if is_beta else ""}',
+            'message': entry
+        }
+
+        this.eddn.send_message(cmdr, msg)
+        return None
+
+    def export_journal_dockinggranted(
+            self, cmdr: str, is_beta: bool, entry: Mapping[str, Any]
+    ) -> str | None:
+        """
+        Send a DockingDenied to EDDN on the correct schema.
+
+        :param cmdr: the commander under which this upload is made
+        :param is_beta: whether or not we are in beta mode
+        :param entry: the journal entry to send
+
+        Example:
+        {
+            "timestamp":"2023-10-01T14:56:34Z",
+            "event":"DockingGranted",
+            "LandingPad":41,
+            "MarketID":3227312896,
+            "StationName":"Evans Horizons",
+            "StationType":"Coriolis"
+        }
+        """
+        #######################################################################
+        # Elisions
+        #######################################################################
+        # In case Frontier ever add any
+        entry = filter_localised(entry)
+
+        msg = {
+            '$schemaRef': f'https://eddn.edcd.io/schemas/dockinggranted/1{"/test" if is_beta else ""}',
+            'message': entry
+        }
+
+        this.eddn.send_message(cmdr, msg)
+        return None
+
     def canonicalise(self, item: str) -> str:
         """
         Canonicalise the given commodity name.
@@ -2326,6 +2394,12 @@ def journal_entry(  # noqa: C901, CCR001
 
         if event_name == 'fcmaterials':
             return this.eddn.export_journal_fcmaterials(cmdr, is_beta, entry)
+
+        if event_name == "dockingdenied":
+            return this.eddn.export_journal_dockingdenied(cmdr, is_beta, entry)
+
+        if event_name == "dockinggranted":
+            return this.eddn.export_journal_dockinggranted(cmdr, is_beta, entry)
 
         if event_name == 'approachsettlement':
             # An `ApproachSettlement` can appear *before* `Location` if you
