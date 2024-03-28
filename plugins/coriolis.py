@@ -106,12 +106,12 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> tk.Fr
 
     # LANG: Settings>Coriolis: Label for 'NOT alpha/beta game version' URL
     nb.Label(conf_frame, text=_('Normal URL')).grid(sticky=tk.W, row=cur_row, column=0, padx=PADX, pady=PADY)
-    nb.Entry(conf_frame,
+    ttk.Entry(conf_frame,
              textvariable=coriolis_config.normal_textvar).grid(
                 sticky=tk.EW, row=cur_row, column=1, padx=PADX, pady=BOXY
             )
     # LANG: Generic 'Reset' button label
-    nb.Button(conf_frame, text=_("Reset"),
+    ttk.Button(conf_frame, text=_("Reset"),
               command=lambda: coriolis_config.normal_textvar.set(value=DEFAULT_NORMAL_URL)).grid(
         sticky=tk.W, row=cur_row, column=2, padx=PADX, pady=0
     )
@@ -119,11 +119,11 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> tk.Fr
 
     # LANG: Settings>Coriolis: Label for 'alpha/beta game version' URL
     nb.Label(conf_frame, text=_('Beta URL')).grid(sticky=tk.W, row=cur_row, column=0, padx=PADX, pady=PADY)
-    nb.Entry(conf_frame, textvariable=coriolis_config.beta_textvar).grid(
+    ttk.Entry(conf_frame, textvariable=coriolis_config.beta_textvar).grid(
         sticky=tk.EW, row=cur_row, column=1, padx=PADX, pady=BOXY
     )
     # LANG: Generic 'Reset' button label
-    nb.Button(conf_frame, text=_('Reset'),
+    ttk.Button(conf_frame, text=_('Reset'),
               command=lambda: coriolis_config.beta_textvar.set(value=DEFAULT_BETA_URL)).grid(
         sticky=tk.W, row=cur_row, column=2, padx=PADX, pady=0
     )

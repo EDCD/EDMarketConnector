@@ -361,12 +361,12 @@ class PreferencesDialog(tk.Toplevel):
         # Type ignored due to incorrect type annotation. a 2 tuple does padding for each side
         self.outdir_label.grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get())  # type: ignore
 
-        self.outdir_entry = nb.Entry(output_frame, takefocus=False)
+        self.outdir_entry = ttk.Entry(output_frame, takefocus=False)
         self.outdir_entry.grid(columnspan=2, padx=self.PADX, pady=self.BOXY, sticky=tk.EW, row=row.get())
 
         text = (_('Browse...'))  # LANG: NOT-macOS Settings - files location selection button
 
-        self.outbutton = nb.Button(
+        self.outbutton = ttk.Button(
             output_frame,
             text=text,
             # Technically this is different from the label in Settings > Output, as *this* is used
@@ -399,7 +399,7 @@ class PreferencesDialog(tk.Toplevel):
             logdir = default
 
         self.logdir.set(logdir)
-        self.logdir_entry = nb.Entry(config_frame, takefocus=False)
+        self.logdir_entry = ttk.Entry(config_frame, takefocus=False)
 
         # Location of the Journal files
         nb.Label(
@@ -413,7 +413,7 @@ class PreferencesDialog(tk.Toplevel):
         text = (_('Browse...'))  # LANG: NOT-macOS Setting - files location selection button
 
         with row as cur_row:
-            self.logbutton = nb.Button(
+            self.logbutton = ttk.Button(
                 config_frame,
                 text=text,
                 # LANG: Settings > Configuration - Label for Journal files location
@@ -423,7 +423,7 @@ class PreferencesDialog(tk.Toplevel):
 
             if config.default_journal_dir_path:
                 # Appearance theme and language setting
-                nb.Button(
+                ttk.Button(
                     config_frame,
                     # LANG: Settings > Configuration - Label on 'reset journal files location to default' button
                     text=_('Default'),
@@ -465,7 +465,7 @@ class PreferencesDialog(tk.Toplevel):
                     text=_('Hotkey')  # LANG: Hotkey/Shortcut settings prompt on Windows
                 ).grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=cur_row)
 
-                self.hotkey_text = nb.Entry(config_frame, width=30, justify=tk.CENTER)
+                self.hotkey_text = ttk.Entry(config_frame, width=30, justify=tk.CENTER)
                 self.hotkey_text.insert(
                     0,
                     # No hotkey/shortcut currently defined
@@ -623,7 +623,7 @@ class PreferencesDialog(tk.Toplevel):
             self.loglevel_dropdown.configure(width=15)
             self.loglevel_dropdown.grid(column=1, pady=self.BOXY, sticky=tk.W, row=cur_row)
 
-            nb.Button(
+            ttk.Button(
                 config_frame,
                 # LANG: Label on button used to open a filesystem folder
                 text=_('Open Log Folder'),  # Button that opens a folder in Explorer/Finder
@@ -726,7 +726,7 @@ class PreferencesDialog(tk.Toplevel):
             self.theme_label_0.grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=cur_row)
 
             # Main window
-            self.theme_button_0 = nb.ColoredButton(
+            self.theme_button_0 = tk.Button(
                 appearance_frame,
                 # LANG: Appearance - Example 'Normal' text
                 text=_('Station'),
@@ -739,7 +739,7 @@ class PreferencesDialog(tk.Toplevel):
         with row as cur_row:
             self.theme_label_1 = nb.Label(appearance_frame, text=self.theme_prompts[1])
             self.theme_label_1.grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=cur_row)
-            self.theme_button_1 = nb.ColoredButton(
+            self.theme_button_1 = tk.Button(
                 appearance_frame,
                 text='  Hutton Orbital  ',  # Do not translate
                 background='grey4',
@@ -870,7 +870,7 @@ class PreferencesDialog(tk.Toplevel):
             padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get()
         )
 
-        plugdirentry = nb.Entry(plugins_frame, justify=tk.LEFT)
+        plugdirentry = ttk.Entry(plugins_frame, justify=tk.LEFT)
         self.displaypath(plugdir, plugdirentry)
         plugdirentry.grid(columnspan=2, padx=self.PADX, pady=self.BOXY, sticky=tk.EW, row=row.get())
 
@@ -882,7 +882,7 @@ class PreferencesDialog(tk.Toplevel):
                 text=_("Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name").format(EXT='.disabled')
             ).grid(columnspan=2, padx=self.PADX, pady=self.PADY, sticky=tk.EW, row=cur_row)
 
-            nb.Button(
+            ttk.Button(
                 plugins_frame,
                 # LANG: Label on button used to open a filesystem folder
                 text=_('Open'),  # Button that opens a folder in Explorer/Finder
