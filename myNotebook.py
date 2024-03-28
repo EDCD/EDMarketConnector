@@ -14,7 +14,12 @@ from __future__ import annotations
 
 import sys
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
+from typing import TYPE_CHECKING
+from PIL import ImageGrab
+
+if TYPE_CHECKING:
+    def _(x: str) -> str: return x
 
 # Can't do this with styles on OSX - http://www.tkdocs.com/tutorial/styles.html#whydifficult
 if sys.platform == 'darwin':
@@ -126,13 +131,22 @@ class EntryMenu(ttk.Entry):
 
     def paste(self) -> None:
         """Paste the selected Entry text."""
-        if self.selection_present():
-            self.delete(tk.SEL_FIRST, tk.SEL_LAST)
         try:
+            # Attempt to grab an image from the clipboard (apprently also works for files)
+            img = ImageGrab.grabclipboard()
+            if img:
+                # Hijack existing translation, yes it doesn't exactly match here.
+                # LANG: Generic error prefix - following text is from Frontier auth service;
+                messagebox.showwarning(_('Error'),
+                                       _('Cannot paste non-text content.'))  # LANG: Can't Paste Images or Files in Text
+                return
             text = self.clipboard_get()
+            if self.selection_present() and text:
+                self.delete(tk.SEL_FIRST, tk.SEL_LAST)
             self.insert(tk.INSERT, text)
         except tk.TclError:
-            pass  # No text in clipboard or clipboard is not text
+            # No text in clipboard or clipboard is not text
+            pass
 
 
 class Entry(sys.platform == 'darwin' and tk.Entry or EntryMenu or ttk.Entry):  # type: ignore
