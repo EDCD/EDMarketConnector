@@ -27,7 +27,6 @@ import os
 import pathlib
 import re
 import sqlite3
-import sys
 import tkinter as tk
 from platform import system
 from textwrap import dedent

@@ -5,8 +5,8 @@ import numbers
 import sys
 import warnings
 from configparser import NoOptionError
-from os import getenv, makedirs, mkdir, pardir
-from os.path import dirname, expanduser, isdir, join, normpath
+from os import getenv, makedirs, mkdir
+from os.path import dirname, expanduser, isdir, join
 from typing import TYPE_CHECKING
 from config import applongname, appname, update_interval
 from EDMCLogging import get_main_logger
@@ -109,7 +109,7 @@ class OldConfig:
     OUT_EDDN_DELAY = 4096
     OUT_STATION_ANY = OUT_EDDN_SEND_STATION_DATA | OUT_MKT_TD | OUT_MKT_CSV
 
-    if sys.platform == 'win32':
+    if sys.platform == 'win32':  # noqa: C901
 
         def __init__(self):
             self.app_dir = join(known_folder_path(FOLDERID_LocalAppData), appname)  # type: ignore

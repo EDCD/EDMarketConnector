@@ -26,6 +26,7 @@ is_wine = False
 
 if sys.platform == 'win32':
     from ctypes import windll  # type: ignore
+
     try:
         if windll.ntdll.wine_get_version:
             is_wine = True
@@ -58,13 +59,13 @@ class GenericProtocolHandler:
             self.master.event_generate('<<CompanionAuthEvent>>', when="tail")
 
 
-if (config.auth_force_edmc_protocol
-      or (
-          sys.platform == 'win32'
-          and getattr(sys, 'frozen', False)
-          and not is_wine
-          and not config.auth_force_localserver
-      )):
+if (config.auth_force_edmc_protocol  # noqa: C901
+        or (
+                sys.platform == 'win32'
+                and getattr(sys, 'frozen', False)
+                and not is_wine
+                and not config.auth_force_localserver
+        )):
     # This could be false if you use auth_force_edmc_protocol, but then you get to keep the pieces
     assert sys.platform == 'win32'
     # spell-checker: words HBRUSH HICON WPARAM wstring WNDCLASS HMENU HGLOBAL
@@ -186,11 +187,11 @@ if (config.auth_force_edmc_protocol
         # which we can read out as shown below, and then compare.
 
         target_is_valid = lparam_low == 0 or (
-            GlobalGetAtomNameW(lparam_low, service, 256) and service.value == appname
+                GlobalGetAtomNameW(lparam_low, service, 256) and service.value == appname
         )
 
         topic_is_valid = lparam_high == 0 or (
-            GlobalGetAtomNameW(lparam_high, topic, 256) and topic.value.lower() == 'system'
+                GlobalGetAtomNameW(lparam_high, topic, 256) and topic.value.lower() == 'system'
         )
 
         if target_is_valid and topic_is_valid:
@@ -251,15 +252,15 @@ if (config.auth_force_edmc_protocol
 
             # https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-createwindowexw
             hwnd = CreateWindowExW(
-                0,                       # dwExStyle
+                0,  # dwExStyle
                 wndclass.lpszClassName,  # lpClassName
-                "DDE Server",            # lpWindowName
-                0,                       # dwStyle
+                "DDE Server",  # lpWindowName
+                0,  # dwStyle
                 CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,  # X, Y, nWidth, nHeight
                 self.master.winfo_id(),  # hWndParent # Don't use HWND_MESSAGE since the window won't get DDE broadcasts
-                None,                    # hMenu
-                wndclass.hInstance,      # hInstance
-                None                     # lpParam
+                None,  # hMenu
+                wndclass.hInstance,  # hInstance
+                None  # lpParam
             )
 
             msg = MSG()
@@ -421,10 +422,9 @@ def get_handler_impl() -> Type[GenericProtocolHandler]:
 
     :return: An instantiatable GenericProtocolHandler
     """
-
     if (
-        (sys.platform == 'win32' and config.auth_force_edmc_protocol)
-        or (getattr(sys, 'frozen', False) and not is_wine and not config.auth_force_localserver)
+            (sys.platform == 'win32' and config.auth_force_edmc_protocol)
+            or (getattr(sys, 'frozen', False) and not is_wine and not config.auth_force_localserver)
     ):
         return WindowsProtocolHandler
 
