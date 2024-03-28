@@ -7,10 +7,8 @@ See LICENSE file.
 """
 from __future__ import annotations
 
-import os
 import sys
 import threading
-from os.path import dirname, join
 from traceback import print_exc
 from typing import TYPE_CHECKING
 from xml.etree import ElementTree
@@ -163,10 +161,9 @@ class Updater:
 
             return None
 
-        else:
-            # For *these* purposes anything else is the same as 'windows', as
-            # non-win32 would be running from source.
-            sparkle_platform = 'windows'
+        # For *these* purposes anything else is the same as 'windows', as
+        # non-win32 would be running from source.
+        sparkle_platform = 'windows'
 
         for item in feed.findall('channel/item'):
             # xml is a pain with types, hence these ignores

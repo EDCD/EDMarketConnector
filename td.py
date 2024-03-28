@@ -1,7 +1,6 @@
 """Export data for Trade Dangerous."""
 
 import pathlib
-import sys
 import time
 from collections import defaultdict
 from operator import itemgetter

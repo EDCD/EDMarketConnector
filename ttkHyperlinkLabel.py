@@ -31,7 +31,6 @@ if TYPE_CHECKING:
     def _(x: str) -> str: return x
 
 
-# FIXME: Split this into multi-file module to separate the platforms
 class HyperlinkLabel(tk.Label or ttk.Label):  # type: ignore
     """Clickable label for HTTP links."""
 

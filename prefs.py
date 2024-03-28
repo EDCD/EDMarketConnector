@@ -364,7 +364,7 @@ class PreferencesDialog(tk.Toplevel):
         self.outdir_entry = ttk.Entry(output_frame, takefocus=False)
         self.outdir_entry.grid(columnspan=2, padx=self.PADX, pady=self.BOXY, sticky=tk.EW, row=row.get())
 
-        text = (_('Browse...'))  # LANG: NOT-macOS Settings - files location selection button
+        text = _('Browse...')  # LANG: NOT-macOS Settings - files location selection button
 
         self.outbutton = ttk.Button(
             output_frame,
@@ -410,7 +410,7 @@ class PreferencesDialog(tk.Toplevel):
 
         self.logdir_entry.grid(columnspan=4, padx=self.PADX, pady=self.BOXY, sticky=tk.EW, row=row.get())
 
-        text = (_('Browse...'))  # LANG: NOT-macOS Setting - files location selection button
+        text = _('Browse...')  # LANG: NOT-macOS Setting - files location selection button
 
         with row as cur_row:
             self.logbutton = ttk.Button(
