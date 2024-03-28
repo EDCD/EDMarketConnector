@@ -150,7 +150,7 @@ class _Theme:
         # the widget has explicit fg or bg attributes.
         assert isinstance(widget, (tk.BitmapImage, tk.Widget)), widget
         if not self.defaults:
-            # Can't initialise this til window is created       # Windows, MacOS
+            # Can't initialise this til window is created       # Windows
             self.defaults = {
                 'fg': tk.Label()['foreground'],         # SystemButtonText, systemButtonText
                 'bg': tk.Label()['background'],         # SystemButtonFace, White

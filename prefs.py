@@ -285,7 +285,7 @@ class PreferencesDialog(tk.Toplevel):
 
         # wait for window to appear on screen before calling grab_set
         self.parent.update_idletasks()
-        self.parent.wm_attributes('-topmost', 0)  # needed for dialog to appear ontop of parent on OSX & Linux
+        self.parent.wm_attributes('-topmost', 0)  # needed for dialog to appear ontop of parent on Linux
         self.wait_visibility()
         self.grab_set()
 

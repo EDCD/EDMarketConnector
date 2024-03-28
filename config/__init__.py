@@ -7,7 +7,6 @@ See LICENSE file.
 
 Windows uses the Registry to store values in a flat manner.
 Linux uses a file, but for commonality it's still a flat data structure.
-macOS uses a 'defaults' object.
 """
 from __future__ import annotations
 
