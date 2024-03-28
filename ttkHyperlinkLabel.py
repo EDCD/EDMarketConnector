@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 
 
 # FIXME: Split this into multi-file module to separate the platforms
-class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label):  # type: ignore
+class HyperlinkLabel(tk.Label or ttk.Label):  # type: ignore
     """Clickable label for HTTP links."""
 
     def __init__(self, master: ttk.Frame | tk.Frame | None = None, **kw: Any) -> None:
@@ -50,22 +50,14 @@ class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label):  # typ
         self.foreground = kw.get('foreground', 'blue')
         self.disabledforeground = kw.pop('disabledforeground', ttk.Style().lookup(
             'TLabel', 'foreground', ('disabled',)))  # ttk.Label doesn't support disabledforeground option
-
-        if sys.platform == 'darwin':
-            # Use tk.Label 'cos can't set ttk.Label background - http://www.tkdocs.com/tutorial/styles.html#whydifficult
-            kw['background'] = kw.pop('background', 'systemDialogBackgroundActive')
-            kw['anchor'] = kw.pop('anchor', tk.W)  # like ttk.Label
-            tk.Label.__init__(self, master, **kw)
-
-        else:
-            ttk.Label.__init__(self, master, **kw)
+        ttk.Label.__init__(self, master, **kw)
 
         self.bind('<Button-1>', self._click)
 
         self.menu = tk.Menu(tearoff=tk.FALSE)
         # LANG: Label for 'Copy' as in 'Copy and Paste'
         self.menu.add_command(label=_('Copy'), command=self.copy)  # As in Copy and Paste
-        self.bind(sys.platform == 'darwin' and '<Button-2>' or '<Button-3>', self._contextmenu)
+        self.bind('<Button-3>', self._contextmenu)
 
         self.bind('<Enter>', self._enter)
         self.bind('<Leave>', self._leave)
@@ -106,10 +98,9 @@ class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label):  # typ
             if state == tk.DISABLED:
                 kw['cursor'] = 'arrow'  # System default
             elif self.url and (kw['text'] if 'text' in kw else self['text']):
-                kw['cursor'] = 'pointinghand' if sys.platform == 'darwin' else 'hand2'
+                kw['cursor'] = 'hand2'
             else:
-                kw['cursor'] = 'notallowed' if sys.platform == 'darwin' else (
-                    'no' if sys.platform == 'win32' else 'circle')
+                kw['cursor'] = ('no' if sys.platform == 'win32' else 'circle')
 
         return super().configure(cnf, **kw)
 
@@ -139,7 +130,7 @@ class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label):  # typ
 
     def _contextmenu(self, event: tk.Event) -> None:
         if self['text'] and (self.popup_copy(self['text']) if callable(self.popup_copy) else self.popup_copy):
-            self.menu.post(sys.platform == 'darwin' and event.x_root + 1 or event.x_root, event.y_root)
+            self.menu.post(event.x_root, event.y_root)
 
     def copy(self) -> None:
         """Copy the current text to the clipboard."""
