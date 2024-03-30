@@ -5,6 +5,8 @@ Copyright (c) EDCD, All Rights Reserved
 Licensed under the GNU General Public License.
 See LICENSE file.
 """
+from __future__ import annotations
+
 import os
 import pathlib
 import sys
