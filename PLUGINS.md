@@ -31,7 +31,7 @@ then you'll need to be using an appropriate version of Python.  The current
 version is listed in the
 [Environment section of Releasing.md](https://github.com/EDCD/EDMarketConnector/blob/main/docs/Releasing.md#environment).
 If you're developing your plugin simply against an install of EDMarketConnector
-then you'll be relying on the bundled version of Python (it's baked 
+then you'll be relying on the bundled version of Python (it's baked
 into the .exe via the py2exe build process).
 
 Please be sure to read the [Avoiding potential pitfalls](#avoiding-potential-pitfalls)
@@ -40,21 +40,21 @@ EDMarketConnector code including whole application crashes.
 
 ## Being aware of core application changes
 
-It is highly advisable to ensure you are aware of all EDMarketConnector 
-releases, including the pre-releases.  The -beta and -rc changelogs will 
+It is highly advisable to ensure you are aware of all EDMarketConnector
+releases, including the pre-releases.  The -beta and -rc changelogs will
 contain valuable information about any forthcoming changes that affect plugins.
 The easiest way is:
 
  1. Login to [GitHub](https://github.com).
  2. Navigate to [EDMarketConnector](https://github.com/EDCD/EDMarketConnector).
- 3. Click the 'Watch' (or 'Unwatch' if you previously set up any watches on 
- us).  It's currently (2021-05-13) the left-most button of 3 near the 
+ 3. Click the 'Watch' (or 'Unwatch' if you previously set up any watches on
+ us).  It's currently (2021-05-13) the left-most button of 3 near the
  top-right of the page.
  4. Click 'Custom'.
  5. Ensure 'Releases' is selected.
  6. Click 'Apply'.
 
-And, of course, either ensure you check your GitHub messages regularly, or 
+And, of course, either ensure you check your GitHub messages regularly, or
 have it set up to email you such notifications.
 
 You should also keep an eye on [our GitHub Discussions](https://github.com/EDCD/EDMarketConnector/discussions)
@@ -113,13 +113,13 @@ from the original files unless specified as allowed in this section.
 Use `monitor.game_running()` as follows in case a plugin needs to know if we
 think the game is running.  *NB: This is a function, and should be called as
 such.  Using the bare word `game_running` will always be `True`.*
- 
+
 ```
 from monitor import monitor
 ...
 if monitor.game_running():
   ...
-``` 
+```
 
 Use `monitor.is_live_galaxy()` to determine if the player is playing in the
 Live galaxy.  Note the implementation details of this.  At time of writing it
@@ -135,7 +135,7 @@ append a string to call out your plugin if you wish).
 `from ttkHyperlinkLabel import HyperlinkLabel` and `import myNotebook as nb` -
 For creating UI elements.
 
-In addition to the above we also explicitly package the following python 
+In addition to the above we also explicitly package the following python
 modules for plugin use:
 
 - shutil
@@ -252,7 +252,7 @@ include variables, and even the returns of functions, in the output.
 
 ## Checking core EDMC version
 
-If you have code that needs to act differently under different versions of 
+If you have code that needs to act differently under different versions of
 this application then you can check utilise `config.appversion`.
 
 Prior to version 5.0.0 this was a simple string.  From 5.0.0 onwards it is,
@@ -313,7 +313,7 @@ Mac, and `$TMP/EDMarketConnector.log` on Linux.
 
 ## Avoiding potential pitfalls
 
-There are a number of things that your code should either do or avoiding 
+There are a number of things that your code should either do or avoiding
 doing so as to play nicely with the core EDMarketConnector code and not risk
 causing application crashes or hangs.
 
@@ -324,12 +324,12 @@ See the section on [packaging extra modules](#your-plugin-directory-name-must-be
 
 ### Use a thread for long-running code
 
-By default, your plugin code will be running in the main thread.  So, if you 
-perform some operation that takes significant time (more than a second) you 
-will be blocking both the core code from continuing *and* any other plugins 
+By default, your plugin code will be running in the main thread.  So, if you
+perform some operation that takes significant time (more than a second) you
+will be blocking both the core code from continuing *and* any other plugins
 from running their main-thread code.
 
-This includes any connections to remote services, such as a website or 
+This includes any connections to remote services, such as a website or
 remote database.  So please place such code within its own thread.
 
 See the [EDSM plugin](https://github.com/EDCD/EDMarketConnector/blob/main/plugins/edsm.py)
@@ -338,20 +338,20 @@ with a queue to send data, and telling the sub-thread to stop during shutdown.
 
 ### All tkinter calls in main thread
 
-The only tkinter calls that should ever be made from a sub-thread are 
+The only tkinter calls that should ever be made from a sub-thread are
 `event_generate()` calls to send data back to the main thread.
 
-Any attempt to manipulate tkinter UI elements directly from a sub-thread 
+Any attempt to manipulate tkinter UI elements directly from a sub-thread
 will most likely crash the whole program.
 
 See the [EDSM plugin](https://github.com/EDCD/EDMarketConnector/blob/main/plugins/edsm.py)
-code for an example of using `event_generate()` to cause the plugin main 
-thread code to update a UI element.  Start from the `plugin_app()` 
+code for an example of using `event_generate()` to cause the plugin main
+thread code to update a UI element.  Start from the `plugin_app()`
 implementation.
 
 ### Do not call tkinter `event_generate` during shutdown.
 
-However, you must **not** make *any* tkinter `event_generate()` call whilst 
+However, you must **not** make *any* tkinter `event_generate()` call whilst
 the application is shutting down.
 
 The application shutdown sequence is itself triggered from the `<<Quit>>` event
@@ -359,8 +359,8 @@ handler, and generating another event from any code in, or called from,
 there causes the application to hang somewhere in the tk libraries.
 
 You can detect if the application is shutting down with the boolean
-`config.shutting_down`.  Note that although this is technically a function 
-its implementation is of a property on `config.AbstractConfig` and thus you 
+`config.shutting_down`.  Note that although this is technically a function
+its implementation is of a property on `config.AbstractConfig` and thus you
 should treat it as a variable.
 
 **Do NOT use**:
@@ -372,7 +372,7 @@ should treat it as a variable.
        # During shutdown
 ```
 
-as this will cause the 'During shutdown' branch to *always* be taken, as in 
+as this will cause the 'During shutdown' branch to *always* be taken, as in
 this context you're testing if the function exists, and that is always True.
 
 So instead use:
@@ -417,8 +417,8 @@ your plugin's settings in a platform-independent way. Previously this was done
 with a single set and two get methods, the new methods provide better type
 safety.
 
-If you want to maintain compatibility with pre-5.0.0 versions of this 
-application (please encourage plugin users to update!) then you'll need to 
+If you want to maintain compatibility with pre-5.0.0 versions of this
+application (please encourage plugin users to update!) then you'll need to
 include this code in at least once in your plugin (no harm in putting it in
 all modules/files):
 
@@ -699,8 +699,8 @@ cause `state['NavRoute'] = None`, but if you open the galaxy map in-game and
 cause an automatic re-plot of last route, then a new `NavRoute` event will
 also be generated and passed to plugins.
 
-[2] - Some data from the CAPI is sometimes returned as a `list` (when all 
-members are present) and other times as an integer-keyed `dict` (when at 
+[2] - Some data from the CAPI is sometimes returned as a `list` (when all
+members are present) and other times as an integer-keyed `dict` (when at
 least one member is missing, so the indices are not contiguous).  We choose to
 always convert to the integer-keyed `dict` form so that code utilising the data
 is simpler.
@@ -751,7 +751,7 @@ Journal `ModuleInfo` event.
 `OnFoot` is an indication as to if the player is on-foot, rather than in a
 vehicle.
 
-`Component`, `Item`, `Consumable` & `Data` are `dict`s tracking your 
+`Component`, `Item`, `Consumable` & `Data` are `dict`s tracking your
 Odyssey MicroResources in your Ship Locker.  `BacKPack` contains `dict`s for
 the same when you're on-foot.
 
@@ -760,10 +760,10 @@ relating to suits and their loadouts.
 
 New in version 5.0.1:
 
-`Odyssey` boolean based on the presence of such a flag in the `LoadGame` 
+`Odyssey` boolean based on the presence of such a flag in the `LoadGame`
 event.  Defaults to `False`, i.e. if no such key in the event.
 
-The previously undocumented `Horizons` boolean is similarly from `LoadGame`, 
+The previously undocumented `Horizons` boolean is similarly from `LoadGame`,
 but blindly retrieves the value rather than having a strict default.  There'd
 be an exception if it wasn't there, and the value would be `None`.  Note that
 this is **NOT** the same as the return from
@@ -821,7 +821,7 @@ if that's what was in the file.
 
 New in version 5.8.0:
 
-`StarPos`, `SystemAddress`, `SystemName` and `SystemPopulation` have been 
+`StarPos`, `SystemAddress`, `SystemName` and `SystemPopulation` have been
 added to the `state` dictionary.  Best efforts data pertaining to the star
 system the player is in.
 
@@ -853,8 +853,8 @@ react to either in your plugin code then either compare in a case insensitive
 manner or check for both.  The difference in case allows you to differentiate
 between the two scenarios.
 
-**NB: Any of these events are passing to `journal_entry_cqc` rather than to 
-`journal_entry` if player has loaded into Arena (CQC).** 
+**NB: Any of these events are passing to `journal_entry_cqc` rather than to
+`journal_entry` if player has loaded into Arena (CQC).**
 
 This event is not sent when EDMarketConnector is running on a different
 machine so you should not *rely* on receiving this event.
@@ -871,15 +871,15 @@ Examples of this are:
 
 1. Every `NavRoute` event contains the full `Route` array as loaded from
     `NavRoute.json`.
-   
+
     *NB: There is no indication available when a player cancels a route.*  The
     game itself does not provide any such, not in a Journal event, not in a
    `Status.json` flag.
-   
+
     The Journal documentation v28 is incorrect about the event
     and file being `Route(.json)` the word is `NavRoute`.  Also the format of
     the data is, e.g.
-   
+
     ```json
    { "timestamp":"2021-03-10T11:31:37Z",
       "event":"NavRoute",
@@ -893,9 +893,9 @@ Examples of this are:
     ```
 
 1. Every `ModuleInfo` event contains the full data as loaded from the
-  `ModulesInfo.json` file.  Note that we use the singular form here to 
+  `ModulesInfo.json` file.  Note that we use the singular form here to
    stay consistent with the Journal event name.
-   
+
 ---
 
 ### Journal entry in CQC
@@ -955,7 +955,7 @@ def dashboard_entry(cmdr: str, is_beta: bool, entry: Dict[str, Any]):
     sys.stderr.write("Hardpoints {}\n".format(is_deployed and "deployed" or "stowed"))
 ```
 
-`dashboard_entry()` is called with the latest data from the `Status.json` 
+`dashboard_entry()` is called with the latest data from the `Status.json`
 file when an update to that file is detected.
 
 This will be when something on the player's cockpit display changes -
@@ -1208,6 +1208,15 @@ Wrap each string that needs translating with the `_()` function, e.g.:
     somewidget["text"] = _("Happy!")
 ```
 
+If you wish to override EDMCs current language when translating,
+`l10n.Translations.translate()` takes an optional `lang` parameter which can
+be passed a language identifier. For example to override all translations
+to German:
+
+```python
+_ = functools.partial(l10n.Translations.translate, context=__file__, lang="de")
+```
+
 If you display localized strings in EDMarketConnector's main window you should
 refresh them in your `prefs_changed` function in case the user has changed
 their preferred language.
@@ -1262,11 +1271,11 @@ Any modules the core application code uses will naturally be packaged, and
 we explicitly include a small number of additional modules for the use of
 plugins.
 
-Whilst we would like to make all of the `stdlib` of Python available it is 
-not automatically packaged into our releases by py2exe.  We hope to address 
-this in the 5.3 release series.  In the meantime, if there's anything 
-missing that you'd like to use, please ask.  Yes, this very much means you 
-need to test your plugins against a Windows installation of the application 
+Whilst we would like to make all of the `stdlib` of Python available it is
+not automatically packaged into our releases by py2exe.  We hope to address
+this in the 5.3 release series.  In the meantime, if there's anything
+missing that you'd like to use, please ask.  Yes, this very much means you
+need to test your plugins against a Windows installation of the application
 to be sure it will work.
 
 See
@@ -1416,7 +1425,7 @@ versions of EDMarketConnector:
  [2to3](https://docs.python.org/3/library/2to3.html)
  tool can automate much of this work.
 
-We advise *against* making any attempt to have a plugin's code work under 
-both Python 2.7 and 3.x.  We no longer maintain the Python 2.7-based 
-versions of this application, and you shouldn't support use of them with 
+We advise *against* making any attempt to have a plugin's code work under
+both Python 2.7 and 3.x.  We no longer maintain the Python 2.7-based
+versions of this application, and you shouldn't support use of them with
 your plugin.

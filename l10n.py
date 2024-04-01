@@ -17,9 +17,10 @@ import re
 import sys
 import warnings
 from contextlib import suppress
-from os import pardir, listdir, sep, makedirs
-from os.path import basename, dirname, isdir, isfile, join, abspath, exists
+from os import listdir, makedirs, pardir, sep
+from os.path import abspath, basename, dirname, exists, isdir, isfile, join
 from typing import TYPE_CHECKING, Iterable, TextIO, cast
+
 from config import config
 from EDMCLogging import get_main_logger
 
@@ -154,21 +155,41 @@ class _Translations:
 
         return translations
 
-    def translate(self, x: str, context: str | None = None) -> str:
+    def translate(self, x: str, context: str | None = None, lang: str | None = None) -> str:  # noqa: CCR001
         """
-        Translate the given string to the current lang.
+        Translate the given string to the current lang or an overriden lang.
 
         :param x: The string to translate
-        :param context: Whether or not to search the given directory for translation files, defaults to None
+        :param context: Contains the full path to the file being localised, from which the plugin name is parsed and
+        used to locate the plugin translation files, defaults to None
+        :param lang: Contains a language code to override the EDMC language for this translation, defaults to None
         :return: The translated string
         """
+        plugin_name: str | None = None
+        plugin_path: str | None = None
+
         if context:
             # TODO: There is probably a better way to go about this now.
-            context = context[len(config.plugin_dir)+1:].split(sep)[0]
-            if self.translations[None] and context not in self.translations:
-                logger.debug(f'No translations for {context!r}')
+            plugin_name = context[len(config.plugin_dir)+1:].split(sep)[0]
+            plugin_path = join(config.plugin_dir_path, plugin_name, LOCALISATION_DIR)
 
-            return self.translations.get(context, {}).get(x) or self.translate(x)
+        if lang:
+            contents: dict[str, str] = self.contents(lang=lang, plugin_path=plugin_path)
+
+            if not contents or type(contents) is not dict:
+                logger.debug(f'Failure loading translations for overridden language {lang!r}')
+                return self.translate(x)
+            elif x not in contents.keys():
+                logger.debug(f'Missing translation: {x!r} for overridden language {lang!r}')
+                return self.translate(x)
+            else:
+                return contents.get(x) or self.translate(x)
+
+        if plugin_name:
+            if self.translations[None] and plugin_name not in self.translations:
+                logger.debug(f'No translations for {plugin_name!r}')
+
+            return self.translations.get(plugin_name, {}).get(x) or self.translate(x)
 
         if self.translations[None] and x not in self.translations[None]:
             logger.debug(f'Missing translation: {x!r}')
