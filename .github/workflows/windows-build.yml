@@ -155,7 +155,7 @@ jobs:
         run: sha256sum EDMarketConnector_Installer_*.exe EDMarketConnector-release-*.{zip,tar.gz} > ./hashes.sum
 
       - name: Create Draft Release
-        uses: "softprops/action-gh-release@v1"
+        uses: "softprops/action-gh-release@v2"
         with:
           token: "${{secrets.GITHUB_TOKEN}}"
           draft: true
