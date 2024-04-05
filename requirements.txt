@@ -1,5 +1,6 @@
-certifi==2023.11.17
+certifi==2024.2.2
 requests==2.31.0
+pillow==10.2.0
 # requests depends on this now ?
 charset-normalizer==2.1.1
 

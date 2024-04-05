@@ -131,7 +131,6 @@ def build() -> None:
                 "distutils",
                 "_markerlib",
                 "optparse",
-                "PIL",
                 "simplejson",
                 "unittest",
                 "doctest",

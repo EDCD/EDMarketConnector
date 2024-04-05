@@ -11,7 +11,12 @@ from __future__ import annotations
 
 import sys
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
+from typing import TYPE_CHECKING
+from PIL import ImageGrab
+
+if TYPE_CHECKING:
+    def _(x: str) -> str: return x
 
 if sys.platform == 'win32':
     PAGEFG = 'SystemWindowText'
