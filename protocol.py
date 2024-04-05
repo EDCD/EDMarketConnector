@@ -254,12 +254,12 @@ if (config.auth_force_edmc_protocol  # noqa: C901
             hwnd = CreateWindowExW(
                 0,  # dwExStyle
                 wndclass.lpszClassName,  # lpClassName
-                "DDE Server",  # lpWindowName
-                0,  # dwStyle
+                "DDE Server",            # lpWindowName
+                0,                       # dwStyle
                 CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,  # X, Y, nWidth, nHeight
                 self.master.winfo_id(),  # hWndParent # Don't use HWND_MESSAGE since the window won't get DDE broadcasts
-                None,  # hMenu
-                wndclass.hInstance,  # hInstance
+                None,                    # hMenu
+                wndclass.hInstance,      # hInstance
                 None  # lpParam
             )
 
