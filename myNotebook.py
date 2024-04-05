@@ -30,15 +30,16 @@ class Notebook(ttk.Notebook):
 
         super().__init__(master, **kw)
         style = ttk.Style()
-        style.configure('nb.TFrame',                          background=PAGEBG)
-        style.configure('nb.TButton',                         background=PAGEBG)
-        style.configure('nb.TCheckbutton', foreground=PAGEFG, background=PAGEBG)
-        style.configure('nb.TMenubutton',  foreground=PAGEFG, background=PAGEBG)
-        style.configure('nb.TRadiobutton', foreground=PAGEFG, background=PAGEBG)
+        if sys.platform == 'win32':
+            style.configure('nb.TFrame',                          background=PAGEBG)
+            style.configure('nb.TButton',                         background=PAGEBG)
+            style.configure('nb.TCheckbutton', foreground=PAGEFG, background=PAGEBG)
+            style.configure('nb.TMenubutton',  foreground=PAGEFG, background=PAGEBG)
+            style.configure('nb.TRadiobutton', foreground=PAGEFG, background=PAGEBG)
         self.grid(padx=10, pady=10, sticky=tk.NSEW)
 
 
-class Frame(tk.Frame or ttk.Frame):  # type: ignore
+class Frame(ttk.Frame):
     """Custom t(t)k.Frame class to fix some display issues."""
 
     def __init__(self, master: ttk.Notebook | None = None, **kw):
@@ -127,7 +128,7 @@ class Entry(ttk.Entry or EntryMenu):
         EntryMenu.__init__(self, master, **kw)
 
 
-class Button(tk.Button or ttk.Button):  # type: ignore
+class Button(ttk.Button):  # type: ignore
     """Custom t(t)k.Button class to fix some display issues."""
 
     # DEPRECATED: Migrate to ttk.Button. Will remove in 5.12 or later.
@@ -138,7 +139,7 @@ class Button(tk.Button or ttk.Button):  # type: ignore
             ttk.Button.__init__(self, master, **kw)
 
 
-class ColoredButton(tk.Label or tk.Button):  # type: ignore
+class ColoredButton(tk.Button):  # type: ignore
     """Custom t(t)k.ColoredButton class to fix some display issues."""
 
     # DEPRECATED: Migrate to tk.Button. Will remove in 5.12 or later.
@@ -166,11 +167,14 @@ class OptionMenu(ttk.OptionMenu):
     """Custom ttk.OptionMenu class to fix some display issues."""
 
     def __init__(self, master, variable, default=None, *values, **kw):
-        style = 'nb.TMenubutton' if sys.platform == 'win32' else ttk.Style().lookup('TMenu', 'background')
-        menu_background = PAGEBG if sys.platform == 'win32' else ttk.Style().lookup('TMenu', 'background')
+        if sys.platform == 'win32':
+            # OptionMenu derives from Menubutton at the Python level, so uses Menubutton's style
+            ttk.OptionMenu.__init__(self, master, variable, default, *values, style='nb.TMenubutton', **kw)
+            self['menu'].configure(background=PAGEBG)
+        else:
+            ttk.OptionMenu.__init__(self, master, variable, default, *values, **kw)
+            self['menu'].configure(background=ttk.Style().lookup('TMenu', 'background'))
 
-        super().__init__(master, variable, default, *values, style=style, **kw)
-        self['menu'].configure(background=menu_background)
-
-        for i in range(self['menu'].index('end') + 1):
+        # Workaround for https://bugs.python.org/issue25684
+        for i in range(0, self['menu'].index('end') + 1):
             self['menu'].entryconfig(i, variable=variable)
