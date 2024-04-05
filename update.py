@@ -161,7 +161,7 @@ class Updater:
 
             return None
 
-        # For *these* purposes anything else is the same as 'windows', as
+        # For *these* purposes all systems are the same as 'windows', as
         # non-win32 would be running from source.
         sparkle_platform = 'windows'
 
