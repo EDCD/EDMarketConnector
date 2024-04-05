@@ -230,9 +230,9 @@ class PreferencesDialog(tk.Toplevel):
             self.transient(parent)
 
         # position over parent
-        if parent.winfo_rooty() > 0:  # http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
-            # TODO this is fixed supposedly.
-            self.geometry(f'+{parent.winfo_rootx()}+{parent.winfo_rooty()}')
+        # http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
+        # TODO this is fixed supposedly.
+        self.geometry(f'+{parent.winfo_rootx()}+{parent.winfo_rooty()}')
 
         # remove decoration
         if sys.platform == 'win32':

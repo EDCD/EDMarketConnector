@@ -1750,8 +1750,7 @@ class AppWindow:
 
             # position over parent
             # http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
-            if parent.winfo_rooty() > 0:
-                self.geometry(f'+{parent.winfo_rootx():d}+{parent.winfo_rooty():d}')
+            self.geometry(f'+{parent.winfo_rootx():d}+{parent.winfo_rooty():d}')
 
             # remove decoration
             if sys.platform == 'win32':
@@ -1870,9 +1869,8 @@ class AppWindow:
         config.set_shutdown()  # Signal we're in shutdown now.
 
         # http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
-        if self.w.winfo_rooty() > 0:
-            x, y = self.w.geometry().split('+')[1:3]  # e.g. '212x170+2881+1267'
-            config.set('geometry', f'+{x}+{y}')
+        x, y = self.w.geometry().split('+')[1:3]  # e.g. '212x170+2881+1267'
+        config.set('geometry', f'+{x}+{y}')
 
         # Let the user know we're shutting down.
         # LANG: The application is shutting down
