@@ -57,12 +57,69 @@ class Label(tk.Label):
         super().__init__(master, **kw)
 
 
-class Entry(ttk.Entry):
+class EntryMenu(ttk.Entry):
+    """Extended entry widget that includes a context menu with Copy, Cut-and-Paste commands."""
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+
+        self.menu = tk.Menu(self, tearoff=False)
+        self.menu.add_command(label="Copy", command=self.copy)
+        self.menu.add_command(label="Cut", command=self.cut)
+        self.menu.add_separator()
+        self.menu.add_command(label="Paste", command=self.paste)
+        self.menu.add_separator()
+        self.menu.add_command(label="Select All", command=self.select_all)
+
+        self.bind("<Button-3>", self.display_popup)
+
+    def display_popup(self, event: tk.Event) -> None:
+        """Display the menu popup."""
+        self.menu.post(event.x_root, event.y_root)
+
+    def select_all(self) -> None:
+        """Select all the text within the Entry."""
+        self.selection_range(0, tk.END)
+        self.focus_set()
+
+    def copy(self) -> None:
+        """Copy the selected Entry text."""
+        if self.selection_present():
+            self.clipboard_clear()
+            self.clipboard_append(self.selection_get())
+
+    def cut(self) -> None:
+        """Cut the selected Entry text."""
+        if self.selection_present():
+            self.copy()
+            self.delete(tk.SEL_FIRST, tk.SEL_LAST)
+
+    def paste(self) -> None:
+        """Paste the selected Entry text."""
+        try:
+            # Attempt to grab an image from the clipboard (apprently also works for files)
+            img = ImageGrab.grabclipboard()
+            if img:
+                # Hijack existing translation, yes it doesn't exactly match here.
+                # LANG: Generic error prefix - following text is from Frontier auth service;
+                messagebox.showwarning(_('Error'),
+                                       _('Cannot paste non-text content.'))  # LANG: Can't Paste Images or Files in Text
+                return
+            text = self.clipboard_get()
+            if self.selection_present() and text:
+                self.delete(tk.SEL_FIRST, tk.SEL_LAST)
+            self.insert(tk.INSERT, text)
+        except tk.TclError:
+            # No text in clipboard or clipboard is not text
+            pass
+
+
+class Entry(ttk.Entry or EntryMenu):
     """Custom t(t)k.Entry class to fix some display issues."""
 
-    # DEPRECATED: Migrate to ttk.Entry. Will remove in 5.12 or later.
+    # DEPRECATED: Migrate to ttk.Entry or EntryMenu. Will remove in 5.12 or later.
     def __init__(self, master: ttk.Frame | None = None, **kw):
-        super().__init__(master, **kw)
+        EntryMenu.__init__(self, master, **kw)
 
 
 class Button(tk.Button or ttk.Button):  # type: ignore
