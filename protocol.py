@@ -252,7 +252,7 @@ if (config.auth_force_edmc_protocol  # noqa: C901
 
             # https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-createwindowexw
             hwnd = CreateWindowExW(
-                0,  # dwExStyle
+                0,                       # dwExStyle
                 wndclass.lpszClassName,  # lpClassName
                 "DDE Server",            # lpWindowName
                 0,                       # dwStyle
@@ -260,7 +260,7 @@ if (config.auth_force_edmc_protocol  # noqa: C901
                 self.master.winfo_id(),  # hWndParent # Don't use HWND_MESSAGE since the window won't get DDE broadcasts
                 None,                    # hMenu
                 wndclass.hInstance,      # hInstance
-                None  # lpParam
+                None                     # lpParam
             )
 
             msg = MSG()
