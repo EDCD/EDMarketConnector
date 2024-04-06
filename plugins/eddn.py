@@ -27,7 +27,6 @@ import os
 import pathlib
 import re
 import sqlite3
-import sys
 import tkinter as tk
 from platform import system
 from textwrap import dedent
@@ -282,7 +281,7 @@ class EDDNSender:
             msg['header'] = {
                 # We have to lie and say it's *this* version, but denote that
                 # it might not actually be this version.
-                'softwareName': f'{applongname} [{system() if sys.platform != "darwin" else "Mac OS"}]'
+                'softwareName': f'{applongname} [{system()}]'
                                 ' (legacy replay)',
                 'softwareVersion': str(appversion_nobuild()),
                 'uploaderID': cmdr,
@@ -1074,7 +1073,7 @@ class EDDN:
             gb = this.game_build
 
         return {
-            'softwareName':    f'{applongname} [{system() if sys.platform != "darwin" else "Mac OS"}]',
+            'softwareName':    f'{applongname} [{system()}]',
             'softwareVersion': str(appversion_nobuild()),
             'uploaderID':      this.cmdr_name,
             'gameversion':     gv,

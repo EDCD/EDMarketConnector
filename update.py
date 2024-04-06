@@ -7,10 +7,8 @@ See LICENSE file.
 """
 from __future__ import annotations
 
-import os
 import sys
 import threading
-from os.path import dirname, join
 from traceback import print_exc
 from typing import TYPE_CHECKING
 from xml.etree import ElementTree
@@ -115,21 +113,6 @@ class Updater:
 
             return
 
-        if sys.platform == 'darwin':
-            import objc
-
-            try:
-                objc.loadBundle(
-                    'Sparkle', globals(), join(dirname(sys.executable), os.pardir, 'Frameworks', 'Sparkle.framework')
-                )
-                # loadBundle presumably supplies `SUUpdater`
-                self.updater = SUUpdater.sharedUpdater()  # noqa: F821
-
-            except Exception:
-                # can't load framework - not frozen or not included in app bundle?
-                print_exc()
-                self.updater = None
-
     def set_automatic_updates_check(self, onoroff: bool) -> None:
         """
         Set (Win)Sparkle to perform automatic update checks, or not.
@@ -142,9 +125,6 @@ class Updater:
         if sys.platform == 'win32' and self.updater:
             self.updater.win_sparkle_set_automatic_check_for_updates(onoroff)
 
-        if sys.platform == 'darwin' and self.updater:
-            self.updater.SUEnableAutomaticChecks(onoroff)
-
     def check_for_updates(self) -> None:
         """Trigger the requisite method to check for an update."""
         if self.use_internal():
@@ -154,9 +134,6 @@ class Updater:
 
         elif sys.platform == 'win32' and self.updater:
             self.updater.win_sparkle_check_update_with_ui()
-
-        elif sys.platform == 'darwin' and self.updater:
-            self.updater.checkForUpdates_(None)
 
     def check_appcast(self) -> EDMCVersion | None:
         """
@@ -184,13 +161,9 @@ class Updater:
 
             return None
 
-        if sys.platform == 'darwin':
-            sparkle_platform = 'macos'
-
-        else:
-            # For *these* purposes anything else is the same as 'windows', as
-            # non-win32 would be running from source.
-            sparkle_platform = 'windows'
+        # For *these* purposes all systems are the same as 'windows', as
+        # non-win32 would be running from source.
+        sparkle_platform = 'windows'
 
         for item in feed.findall('channel/item'):
             # xml is a pain with types, hence these ignores

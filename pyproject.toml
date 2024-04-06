@@ -23,6 +23,3 @@ sys-platform-not-darwin = "sys_platform == 'darwin'"
 sys-platform-linux = "sys_platform != 'linux'"
 sys-platform-not-linux = "sys_platform == 'linux'"
 sys-platform-not-known = "sys_platform in ('darwin', 'linux', 'win32')"
-
-[tool.pyright]
-# pythonPlatform = 'Darwin'

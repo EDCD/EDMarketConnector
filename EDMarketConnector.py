@@ -496,21 +496,20 @@ class AppWindow:
 
         plug.load_plugins(master)
 
-        if sys.platform != 'darwin':
-            if sys.platform == 'win32':
-                self.w.wm_iconbitmap(default='EDMarketConnector.ico')
+        if sys.platform == 'win32':
+            self.w.wm_iconbitmap(default='EDMarketConnector.ico')
 
-            else:
-                self.w.tk.call('wm', 'iconphoto', self.w, '-default',
-                               tk.PhotoImage(file=path.join(config.respath_path, 'io.edcd.EDMarketConnector.png')))
+        else:
+            self.w.tk.call('wm', 'iconphoto', self.w, '-default',
+                           tk.PhotoImage(file=path.join(config.respath_path, 'io.edcd.EDMarketConnector.png')))
 
-            # TODO: Export to files and merge from them in future ?
-            self.theme_icon = tk.PhotoImage(
-                data='R0lGODlhFAAQAMZQAAoKCQoKCgsKCQwKCQsLCgwLCg4LCQ4LCg0MCg8MCRAMCRANChINCREOChIOChQPChgQChgRCxwTCyYVCSoXCS0YCTkdCTseCT0fCTsjDU0jB0EnDU8lB1ElB1MnCFIoCFMoCEkrDlkqCFwrCGEuCWIuCGQvCFs0D1w1D2wyCG0yCF82D182EHE0CHM0CHQ1CGQ5EHU2CHc3CHs4CH45CIA6CIE7CJdECIdLEolMEohQE5BQE41SFJBTE5lUE5pVE5RXFKNaFKVbFLVjFbZkFrxnFr9oFsNqFsVrF8RsFshtF89xF9NzGNh1GNl2GP+KG////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////yH5BAEKAH8ALAAAAAAUABAAAAeegAGCgiGDhoeIRDiIjIZGKzmNiAQBQxkRTU6am0tPCJSGShuSAUcLoIIbRYMFra4FAUgQAQCGJz6CDQ67vAFJJBi0hjBBD0w9PMnJOkAiJhaIKEI7HRoc19ceNAolwbWDLD8uAQnl5ga1I9CHEjEBAvDxAoMtFIYCBy+kFDKHAgM3ZtgYSLAGgwkp3pEyBOJCC2ELB31QATGioAoVAwEAOw==')  # noqa: E501
-            self.theme_minimize = tk.BitmapImage(
-                data='#define im_width 16\n#define im_height 16\nstatic unsigned char im_bits[] = {\n   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,\n   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfc, 0x3f,\n   0xfc, 0x3f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };\n')  # noqa: E501
-            self.theme_close = tk.BitmapImage(
-                data='#define im_width 16\n#define im_height 16\nstatic unsigned char im_bits[] = {\n   0x00, 0x00, 0x00, 0x00, 0x0c, 0x30, 0x1c, 0x38, 0x38, 0x1c, 0x70, 0x0e,\n   0xe0, 0x07, 0xc0, 0x03, 0xc0, 0x03, 0xe0, 0x07, 0x70, 0x0e, 0x38, 0x1c,\n   0x1c, 0x38, 0x0c, 0x30, 0x00, 0x00, 0x00, 0x00 };\n')  # noqa: E501
+        # TODO: Export to files and merge from them in future ?
+        self.theme_icon = tk.PhotoImage(
+            data='R0lGODlhFAAQAMZQAAoKCQoKCgsKCQwKCQsLCgwLCg4LCQ4LCg0MCg8MCRAMCRANChINCREOChIOChQPChgQChgRCxwTCyYVCSoXCS0YCTkdCTseCT0fCTsjDU0jB0EnDU8lB1ElB1MnCFIoCFMoCEkrDlkqCFwrCGEuCWIuCGQvCFs0D1w1D2wyCG0yCF82D182EHE0CHM0CHQ1CGQ5EHU2CHc3CHs4CH45CIA6CIE7CJdECIdLEolMEohQE5BQE41SFJBTE5lUE5pVE5RXFKNaFKVbFLVjFbZkFrxnFr9oFsNqFsVrF8RsFshtF89xF9NzGNh1GNl2GP+KG////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////yH5BAEKAH8ALAAAAAAUABAAAAeegAGCgiGDhoeIRDiIjIZGKzmNiAQBQxkRTU6am0tPCJSGShuSAUcLoIIbRYMFra4FAUgQAQCGJz6CDQ67vAFJJBi0hjBBD0w9PMnJOkAiJhaIKEI7HRoc19ceNAolwbWDLD8uAQnl5ga1I9CHEjEBAvDxAoMtFIYCBy+kFDKHAgM3ZtgYSLAGgwkp3pEyBOJCC2ELB31QATGioAoVAwEAOw==')  # noqa: E501
+        self.theme_minimize = tk.BitmapImage(
+            data='#define im_width 16\n#define im_height 16\nstatic unsigned char im_bits[] = {\n   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,\n   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfc, 0x3f,\n   0xfc, 0x3f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };\n')  # noqa: E501
+        self.theme_close = tk.BitmapImage(
+            data='#define im_width 16\n#define im_height 16\nstatic unsigned char im_bits[] = {\n   0x00, 0x00, 0x00, 0x00, 0x0c, 0x30, 0x1c, 0x38, 0x38, 0x1c, 0x70, 0x0e,\n   0xe0, 0x07, 0xc0, 0x03, 0xc0, 0x03, 0xe0, 0x07, 0x70, 0x0e, 0x38, 0x1c,\n   0x1c, 0x38, 0x0c, 0x30, 0x00, 0x00, 0x00, 0x00 };\n')  # noqa: E501
 
         frame = tk.Frame(self.w, name=appname.lower())
         frame.grid(sticky=tk.NSEW)
@@ -599,7 +598,7 @@ class AppWindow:
         self.theme_button = tk.Label(
             frame,
             name='themed_update_button',
-            width=32 if sys.platform == 'darwin' else 28,
+            width=28,
             state=tk.DISABLED
         )
 
@@ -633,148 +632,104 @@ class AppWindow:
             self.updater = update.Updater(tkroot=self.w)
             self.updater.check_for_updates()  # Sparkle / WinSparkle does this automatically for packaged apps
 
-        if sys.platform == 'darwin':
-            # Can't handle (de)iconify if topmost is set, so suppress iconify button
-            # http://wiki.tcl.tk/13428 and p15 of
-            # https://developer.apple.com/legacy/library/documentation/Carbon/Conceptual/HandlingWindowsControls/windowscontrols.pdf
-            root.call('tk::unsupported::MacWindowStyle', 'style', root, 'document', 'closeBox resizable')
+        self.file_menu = self.view_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)
+        self.file_menu.add_command(command=lambda: stats.StatsDialog(self.w, self.status))
+        self.file_menu.add_command(command=self.save_raw)
+        self.file_menu.add_command(command=lambda: prefs.PreferencesDialog(self.w, self.postprefs))
+        self.file_menu.add_separator()
+        self.file_menu.add_command(command=self.onexit)
+        self.menubar.add_cascade(menu=self.file_menu)
+        self.edit_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)
+        self.edit_menu.add_command(accelerator='Ctrl+C', state=tk.DISABLED, command=self.copy)
+        self.menubar.add_cascade(menu=self.edit_menu)
+        self.help_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)  # type: ignore
+        self.help_menu.add_command(command=self.help_general)  # Documentation
+        self.help_menu.add_command(command=self.help_troubleshooting)  # Troubleshooting
+        self.help_menu.add_command(command=self.help_report_a_bug)  # Report A Bug
+        self.help_menu.add_command(command=self.help_privacy)  # Privacy Policy
+        self.help_menu.add_command(command=self.help_releases)  # Release Notes
+        self.help_menu.add_command(command=lambda: self.updater.check_for_updates())  # Check for Updates...
+        # About E:D Market Connector
+        self.help_menu.add_command(command=lambda: not self.HelpAbout.showing and self.HelpAbout(self.w))
+        self.help_menu.add_command(command=prefs.help_open_log_folder)  # Open Log Folder
 
-            # https://www.tcl.tk/man/tcl/TkCmd/menu.htm
-            self.system_menu = tk.Menu(self.menubar, name='apple')
-            self.system_menu.add_command(command=lambda: self.w.call('tk::mac::standardAboutPanel'))
-            self.system_menu.add_command(command=lambda: self.updater.check_for_updates())
+        self.menubar.add_cascade(menu=self.help_menu)
+        if sys.platform == 'win32':
+            # Must be added after at least one "real" menu entry
+            self.always_ontop = tk.BooleanVar(value=bool(config.get_int('always_ontop')))
+            self.system_menu = tk.Menu(self.menubar, name='system', tearoff=tk.FALSE)
+            self.system_menu.add_separator()
+            # LANG: Appearance - Label for checkbox to select if application always on top
+            self.system_menu.add_checkbutton(label=_('Always on top'),
+                                             variable=self.always_ontop,
+                                             command=self.ontop_changed)  # Appearance setting
             self.menubar.add_cascade(menu=self.system_menu)
-            self.file_menu = tk.Menu(self.menubar, name='file')
-            self.file_menu.add_command(command=self.save_raw)
-            self.menubar.add_cascade(menu=self.file_menu)
-            self.edit_menu = tk.Menu(self.menubar, name='edit')
-            self.edit_menu.add_command(accelerator='Command-c', state=tk.DISABLED, command=self.copy)
-            self.menubar.add_cascade(menu=self.edit_menu)
-            self.w.bind('<Command-c>', self.copy)
-            self.view_menu = tk.Menu(self.menubar, name='view')
-            self.view_menu.add_command(command=lambda: stats.StatsDialog(self.w, self.status))
-            self.menubar.add_cascade(menu=self.view_menu)
-            window_menu = tk.Menu(self.menubar, name='window')
-            self.menubar.add_cascade(menu=window_menu)
-            self.help_menu = tk.Menu(self.menubar, name='help')
-            self.w.createcommand("::tk::mac::ShowHelp", self.help_general)
-            self.help_menu.add_command(command=self.help_troubleshooting)
-            self.help_menu.add_command(command=self.help_report_a_bug)
-            self.help_menu.add_command(command=self.help_privacy)
-            self.help_menu.add_command(command=self.help_releases)
-            self.menubar.add_cascade(menu=self.help_menu)
-            self.w['menu'] = self.menubar
-            # https://www.tcl.tk/man/tcl/TkCmd/tk_mac.htm
-            self.w.call('set', 'tk::mac::useCompatibilityMetrics', '0')
-            self.w.createcommand('tkAboutDialog', lambda: self.w.call('tk::mac::standardAboutPanel'))
-            self.w.createcommand("::tk::mac::Quit", self.onexit)
-            self.w.createcommand("::tk::mac::ShowPreferences", lambda: prefs.PreferencesDialog(self.w, self.postprefs))
-            self.w.createcommand("::tk::mac::ReopenApplication", self.w.deiconify)  # click on app in dock = restore
-            self.w.protocol("WM_DELETE_WINDOW", self.w.withdraw)  # close button shouldn't quit app
-            self.w.resizable(tk.FALSE, tk.FALSE)  # Can't be only resizable on one axis
-        else:
-            self.file_menu = self.view_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)
-            self.file_menu.add_command(command=lambda: stats.StatsDialog(self.w, self.status))
-            self.file_menu.add_command(command=self.save_raw)
-            self.file_menu.add_command(command=lambda: prefs.PreferencesDialog(self.w, self.postprefs))
-            self.file_menu.add_separator()
-            self.file_menu.add_command(command=self.onexit)
-            self.menubar.add_cascade(menu=self.file_menu)
-            self.edit_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)
-            self.edit_menu.add_command(accelerator='Ctrl+C', state=tk.DISABLED, command=self.copy)
-            self.menubar.add_cascade(menu=self.edit_menu)
-            self.help_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)  # type: ignore
-            self.help_menu.add_command(command=self.help_general)  # Documentation
-            self.help_menu.add_command(command=self.help_troubleshooting)  # Troubleshooting
-            self.help_menu.add_command(command=self.help_report_a_bug)  # Report A Bug
-            self.help_menu.add_command(command=self.help_privacy)  # Privacy Policy
-            self.help_menu.add_command(command=self.help_releases)  # Release Notes
-            self.help_menu.add_command(command=lambda: self.updater.check_for_updates())  # Check for Updates...
-            # About E:D Market Connector
-            self.help_menu.add_command(command=lambda: not self.HelpAbout.showing and self.HelpAbout(self.w))
-            self.help_menu.add_command(command=prefs.help_open_log_folder)  # Open Log Folder
+        self.w.bind('<Control-c>', self.copy)
 
-            self.menubar.add_cascade(menu=self.help_menu)
-            if sys.platform == 'win32':
-                # Must be added after at least one "real" menu entry
-                self.always_ontop = tk.BooleanVar(value=bool(config.get_int('always_ontop')))
-                self.system_menu = tk.Menu(self.menubar, name='system', tearoff=tk.FALSE)
-                self.system_menu.add_separator()
-                # LANG: Appearance - Label for checkbox to select if application always on top
-                self.system_menu.add_checkbutton(label=_('Always on top'),
-                                                 variable=self.always_ontop,
-                                                 command=self.ontop_changed)  # Appearance setting
-                self.menubar.add_cascade(menu=self.system_menu)
-            self.w.bind('<Control-c>', self.copy)
+        # Bind to the Default theme minimise button
+        self.w.bind("<Unmap>", self.default_iconify)
 
-            # Bind to the Default theme minimise button
-            self.w.bind("<Unmap>", self.default_iconify)
+        self.w.protocol("WM_DELETE_WINDOW", self.onexit)
+        theme.register(self.menubar)  # menus and children aren't automatically registered
+        theme.register(self.file_menu)
+        theme.register(self.edit_menu)
+        theme.register(self.help_menu)
 
-            self.w.protocol("WM_DELETE_WINDOW", self.onexit)
-            theme.register(self.menubar)  # menus and children aren't automatically registered
-            theme.register(self.file_menu)
-            theme.register(self.edit_menu)
-            theme.register(self.help_menu)
-
-            # Alternate title bar and menu for dark theme
-            self.theme_menubar = tk.Frame(frame, name="alternate_menubar")
-            self.theme_menubar.columnconfigure(2, weight=1)
-            theme_titlebar = tk.Label(
-                self.theme_menubar,
-                name="alternate_titlebar",
-                text=applongname,
-                image=self.theme_icon, cursor='fleur',
-                anchor=tk.W, compound=tk.LEFT
-            )
-            theme_titlebar.grid(columnspan=3, padx=2, sticky=tk.NSEW)
-            self.drag_offset: tuple[int | None, int | None] = (None, None)
-            theme_titlebar.bind('<Button-1>', self.drag_start)
-            theme_titlebar.bind('<B1-Motion>', self.drag_continue)
-            theme_titlebar.bind('<ButtonRelease-1>', self.drag_end)
-            theme_minimize = tk.Label(self.theme_menubar, image=self.theme_minimize)
-            theme_minimize.grid(row=0, column=3, padx=2)
-            theme.button_bind(theme_minimize, self.oniconify, image=self.theme_minimize)
-            theme_close = tk.Label(self.theme_menubar, image=self.theme_close)
-            theme_close.grid(row=0, column=4, padx=2)
-            theme.button_bind(theme_close, self.onexit, image=self.theme_close)
-            self.theme_file_menu = tk.Label(self.theme_menubar, anchor=tk.W)
-            self.theme_file_menu.grid(row=1, column=0, padx=self.PADX, sticky=tk.W)
-            theme.button_bind(self.theme_file_menu,
-                              lambda e: self.file_menu.tk_popup(e.widget.winfo_rootx(),
-                                                                e.widget.winfo_rooty()
-                                                                + e.widget.winfo_height()))
-            self.theme_edit_menu = tk.Label(self.theme_menubar, anchor=tk.W)
-            self.theme_edit_menu.grid(row=1, column=1, sticky=tk.W)
-            theme.button_bind(self.theme_edit_menu,
-                              lambda e: self.edit_menu.tk_popup(e.widget.winfo_rootx(),
-                                                                e.widget.winfo_rooty()
-                                                                + e.widget.winfo_height()))
-            self.theme_help_menu = tk.Label(self.theme_menubar, anchor=tk.W)
-            self.theme_help_menu.grid(row=1, column=2, sticky=tk.W)
-            theme.button_bind(self.theme_help_menu,
-                              lambda e: self.help_menu.tk_popup(e.widget.winfo_rootx(),
-                                                                e.widget.winfo_rooty()
-                                                                + e.widget.winfo_height()))
-            tk.Frame(self.theme_menubar, highlightthickness=1).grid(columnspan=5, padx=self.PADX, sticky=tk.EW)
-            theme.register(self.theme_minimize)  # images aren't automatically registered
-            theme.register(self.theme_close)
-            self.blank_menubar = tk.Frame(frame, name="blank_menubar")
-            tk.Label(self.blank_menubar).grid()
-            tk.Label(self.blank_menubar).grid()
-            tk.Frame(self.blank_menubar, height=2).grid()
-            theme.register_alternate((self.menubar, self.theme_menubar, self.blank_menubar),
-                                     {'row': 0, 'columnspan': 2, 'sticky': tk.NSEW})
-            self.w.resizable(tk.TRUE, tk.FALSE)
+        # Alternate title bar and menu for dark theme
+        self.theme_menubar = tk.Frame(frame, name="alternate_menubar")
+        self.theme_menubar.columnconfigure(2, weight=1)
+        theme_titlebar = tk.Label(
+            self.theme_menubar,
+            name="alternate_titlebar",
+            text=applongname,
+            image=self.theme_icon, cursor='fleur',
+            anchor=tk.W, compound=tk.LEFT
+        )
+        theme_titlebar.grid(columnspan=3, padx=2, sticky=tk.NSEW)
+        self.drag_offset: tuple[int | None, int | None] = (None, None)
+        theme_titlebar.bind('<Button-1>', self.drag_start)
+        theme_titlebar.bind('<B1-Motion>', self.drag_continue)
+        theme_titlebar.bind('<ButtonRelease-1>', self.drag_end)
+        theme_minimize = tk.Label(self.theme_menubar, image=self.theme_minimize)
+        theme_minimize.grid(row=0, column=3, padx=2)
+        theme.button_bind(theme_minimize, self.oniconify, image=self.theme_minimize)
+        theme_close = tk.Label(self.theme_menubar, image=self.theme_close)
+        theme_close.grid(row=0, column=4, padx=2)
+        theme.button_bind(theme_close, self.onexit, image=self.theme_close)
+        self.theme_file_menu = tk.Label(self.theme_menubar, anchor=tk.W)
+        self.theme_file_menu.grid(row=1, column=0, padx=self.PADX, sticky=tk.W)
+        theme.button_bind(self.theme_file_menu,
+                          lambda e: self.file_menu.tk_popup(e.widget.winfo_rootx(),
+                                                            e.widget.winfo_rooty()
+                                                            + e.widget.winfo_height()))
+        self.theme_edit_menu = tk.Label(self.theme_menubar, anchor=tk.W)
+        self.theme_edit_menu.grid(row=1, column=1, sticky=tk.W)
+        theme.button_bind(self.theme_edit_menu,
+                          lambda e: self.edit_menu.tk_popup(e.widget.winfo_rootx(),
+                                                            e.widget.winfo_rooty()
+                                                            + e.widget.winfo_height()))
+        self.theme_help_menu = tk.Label(self.theme_menubar, anchor=tk.W)
+        self.theme_help_menu.grid(row=1, column=2, sticky=tk.W)
+        theme.button_bind(self.theme_help_menu,
+                          lambda e: self.help_menu.tk_popup(e.widget.winfo_rootx(),
+                                                            e.widget.winfo_rooty()
+                                                            + e.widget.winfo_height()))
+        tk.Frame(self.theme_menubar, highlightthickness=1).grid(columnspan=5, padx=self.PADX, sticky=tk.EW)
+        theme.register(self.theme_minimize)  # images aren't automatically registered
+        theme.register(self.theme_close)
+        self.blank_menubar = tk.Frame(frame, name="blank_menubar")
+        tk.Label(self.blank_menubar).grid()
+        tk.Label(self.blank_menubar).grid()
+        tk.Frame(self.blank_menubar, height=2).grid()
+        theme.register_alternate((self.menubar, self.theme_menubar, self.blank_menubar),
+                                 {'row': 0, 'columnspan': 2, 'sticky': tk.NSEW})
+        self.w.resizable(tk.TRUE, tk.FALSE)
 
         # update geometry
         if config.get_str('geometry'):
             match = re.match(r'\+([\-\d]+)\+([\-\d]+)', config.get_str('geometry'))
             if match:
-                if sys.platform == 'darwin':
-                    # http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
-                    if int(match.group(2)) >= 0:
-                        self.w.geometry(config.get_str('geometry'))
-                elif sys.platform == 'win32':
+                if sys.platform == 'win32':
                     # Check that the titlebar will be at least partly on screen
                     import ctypes
                     from ctypes.wintypes import POINT
@@ -910,49 +865,28 @@ class AppWindow:
         self.system_label['text'] = _('System') + ':'  # LANG: Label for 'System' line in main UI
         self.station_label['text'] = _('Station') + ':'  # LANG: Label for 'Station' line in main UI
         self.button['text'] = self.theme_button['text'] = _('Update')  # LANG: Update button in main window
-        if sys.platform == 'darwin':
-            self.menubar.entryconfigure(1, label=_('File'))  # LANG: 'File' menu title on OSX
-            self.menubar.entryconfigure(2, label=_('Edit'))  # LANG: 'Edit' menu title on OSX
-            self.menubar.entryconfigure(3, label=_('View'))  # LANG: 'View' menu title on OSX
-            self.menubar.entryconfigure(4, label=_('Window'))  # LANG: 'Window' menu title on OSX
-            self.menubar.entryconfigure(5, label=_('Help'))  # LANG: Help' menu title on OSX
-            self.system_menu.entryconfigure(
-                0,
-                label=_("About {APP}").format(APP=applongname)  # LANG: App menu entry on OSX
-            )
-            self.system_menu.entryconfigure(1, label=_("Check for Updates..."))  # LANG: Help > Check for Updates...
-            self.file_menu.entryconfigure(0, label=_('Save Raw Data...'))  # LANG: File > Save Raw Data...
-            self.view_menu.entryconfigure(0, label=_('Status'))  # LANG: File > Status
-            self.help_menu.entryconfigure(1, label=_('Documentation'))  # LANG: Help > Documentation
-            self.help_menu.entryconfigure(2, label=_('Troubleshooting'))  # LANG: Help > Troubleshooting
-            self.help_menu.entryconfigure(3, label=_('Report A Bug'))  # LANG: Help > Report A Bug
-            self.help_menu.entryconfigure(4, label=_('Privacy Policy'))  # LANG: Help > Privacy Policy
-            self.help_menu.entryconfigure(5, label=_('Release Notes'))  # LANG: Help > Release Notes
-            self.help_menu.entryconfigure(6, label=_('Open Log Folder'))  # LANG: Help > Open Log Folder
+        self.menubar.entryconfigure(1, label=_('File'))  # LANG: 'File' menu title
+        self.menubar.entryconfigure(2, label=_('Edit'))  # LANG: 'Edit' menu title
+        self.menubar.entryconfigure(3, label=_('Help'))  # LANG: 'Help' menu title
+        self.theme_file_menu['text'] = _('File')  # LANG: 'File' menu title
+        self.theme_edit_menu['text'] = _('Edit')  # LANG: 'Edit' menu title
+        self.theme_help_menu['text'] = _('Help')  # LANG: 'Help' menu title
 
-        else:
-            self.menubar.entryconfigure(1, label=_('File'))  # LANG: 'File' menu title
-            self.menubar.entryconfigure(2, label=_('Edit'))  # LANG: 'Edit' menu title
-            self.menubar.entryconfigure(3, label=_('Help'))  # LANG: 'Help' menu title
-            self.theme_file_menu['text'] = _('File')  # LANG: 'File' menu title
-            self.theme_edit_menu['text'] = _('Edit')  # LANG: 'Edit' menu title
-            self.theme_help_menu['text'] = _('Help')  # LANG: 'Help' menu title
+        # File menu
+        self.file_menu.entryconfigure(0, label=_('Status'))  # LANG: File > Status
+        self.file_menu.entryconfigure(1, label=_('Save Raw Data...'))  # LANG: File > Save Raw Data...
+        self.file_menu.entryconfigure(2, label=_('Settings'))  # LANG: File > Settings
+        self.file_menu.entryconfigure(4, label=_('Exit'))  # LANG: File > Exit
 
-            # File menu
-            self.file_menu.entryconfigure(0, label=_('Status'))  # LANG: File > Status
-            self.file_menu.entryconfigure(1, label=_('Save Raw Data...'))  # LANG: File > Save Raw Data...
-            self.file_menu.entryconfigure(2, label=_('Settings'))  # LANG: File > Settings
-            self.file_menu.entryconfigure(4, label=_('Exit'))  # LANG: File > Exit
-
-            # Help menu
-            self.help_menu.entryconfigure(0, label=_('Documentation'))  # LANG: Help > Documentation
-            self.help_menu.entryconfigure(1, label=_('Troubleshooting'))  # LANG: Help > Troubleshooting
-            self.help_menu.entryconfigure(2, label=_('Report A Bug'))  # LANG: Help > Report A Bug
-            self.help_menu.entryconfigure(3, label=_('Privacy Policy'))  # LANG: Help > Privacy Policy
-            self.help_menu.entryconfigure(4, label=_('Release Notes'))  # LANG: Help > Release Notes
-            self.help_menu.entryconfigure(5, label=_('Check for Updates...'))  # LANG: Help > Check for Updates...
-            self.help_menu.entryconfigure(6, label=_("About {APP}").format(APP=applongname))  # LANG: Help > About App
-            self.help_menu.entryconfigure(7, label=_('Open Log Folder'))  # LANG: Help > Open Log Folder
+        # Help menu
+        self.help_menu.entryconfigure(0, label=_('Documentation'))  # LANG: Help > Documentation
+        self.help_menu.entryconfigure(1, label=_('Troubleshooting'))  # LANG: Help > Troubleshooting
+        self.help_menu.entryconfigure(2, label=_('Report A Bug'))  # LANG: Help > Report A Bug
+        self.help_menu.entryconfigure(3, label=_('Privacy Policy'))  # LANG: Help > Privacy Policy
+        self.help_menu.entryconfigure(4, label=_('Release Notes'))  # LANG: Help > Release Notes
+        self.help_menu.entryconfigure(5, label=_('Check for Updates...'))  # LANG: Help > Check for Updates...
+        self.help_menu.entryconfigure(6, label=_("About {APP}").format(APP=applongname))  # LANG: Help > About App
+        self.help_menu.entryconfigure(7, label=_('Open Log Folder'))  # LANG: Help > Open Log Folder
 
         # Edit menu
         self.edit_menu.entryconfigure(0, label=_('Copy'))  # LANG: Label for 'Copy' as in 'Copy and Paste'
@@ -975,13 +909,8 @@ class AppWindow:
 
         self.button['state'] = self.theme_button['state'] = tk.DISABLED
 
-        if sys.platform == 'darwin':
-            self.view_menu.entryconfigure(0, state=tk.DISABLED)  # Status
-            self.file_menu.entryconfigure(0, state=tk.DISABLED)  # Save Raw Data
-
-        else:
-            self.file_menu.entryconfigure(0, state=tk.DISABLED)  # Status
-            self.file_menu.entryconfigure(1, state=tk.DISABLED)  # Save Raw Data
+        self.file_menu.entryconfigure(0, state=tk.DISABLED)  # Status
+        self.file_menu.entryconfigure(1, state=tk.DISABLED)  # Save Raw Data
 
         self.w.update_idletasks()
         try:
@@ -989,13 +918,8 @@ class AppWindow:
                 # LANG: Successfully authenticated with the Frontier website
                 self.status['text'] = _('Authentication successful')
 
-                if sys.platform == 'darwin':
-                    self.view_menu.entryconfigure(0, state=tk.NORMAL)  # Status
-                    self.file_menu.entryconfigure(0, state=tk.NORMAL)  # Save Raw Data
-
-                else:
-                    self.file_menu.entryconfigure(0, state=tk.NORMAL)  # Status
-                    self.file_menu.entryconfigure(1, state=tk.NORMAL)  # Save Raw Data
+                self.file_menu.entryconfigure(0, state=tk.NORMAL)  # Status
+                self.file_menu.entryconfigure(1, state=tk.NORMAL)  # Save Raw Data
 
         except (companion.CredentialsError, companion.ServerError, companion.ServerLagging) as e:
             self.status['text'] = str(e)
@@ -1666,13 +1590,8 @@ class AppWindow:
             companion.session.auth_callback()
             # LANG: Successfully authenticated with the Frontier website
             self.status['text'] = _('Authentication successful')
-            if sys.platform == 'darwin':
-                self.view_menu.entryconfigure(0, state=tk.NORMAL)  # Status
-                self.file_menu.entryconfigure(0, state=tk.NORMAL)  # Save Raw Data
-
-            else:
-                self.file_menu.entryconfigure(0, state=tk.NORMAL)  # Status
-                self.file_menu.entryconfigure(1, state=tk.NORMAL)  # Save Raw Data
+            self.file_menu.entryconfigure(0, state=tk.NORMAL)  # Status
+            self.file_menu.entryconfigure(1, state=tk.NORMAL)  # Save Raw Data
 
         except companion.ServerError as e:
             self.status['text'] = str(e)
@@ -1831,8 +1750,7 @@ class AppWindow:
 
             # position over parent
             # http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
-            if sys.platform != 'darwin' or parent.winfo_rooty() > 0:
-                self.geometry(f'+{parent.winfo_rootx():d}+{parent.winfo_rooty():d}')
+            self.geometry(f'+{parent.winfo_rootx():d}+{parent.winfo_rooty():d}')
 
             # remove decoration
             if sys.platform == 'win32':
@@ -1916,9 +1834,6 @@ class AppWindow:
         """
         default_extension: str = ''
 
-        if sys.platform == 'darwin':
-            default_extension = '.json'
-
         timestamp: str = strftime('%Y-%m-%dT%H.%M.%S', localtime())
         f = tkinter.filedialog.asksaveasfilename(
             parent=self.w,
@@ -1954,9 +1869,8 @@ class AppWindow:
         config.set_shutdown()  # Signal we're in shutdown now.
 
         # http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
-        if sys.platform != 'darwin' or self.w.winfo_rooty() > 0:
-            x, y = self.w.geometry().split('+')[1:3]  # e.g. '212x170+2881+1267'
-            config.set('geometry', f'+{x}+{y}')
+        x, y = self.w.geometry().split('+')[1:3]  # e.g. '212x170+2881+1267'
+        config.set('geometry', f'+{x}+{y}')
 
         # Let the user know we're shutting down.
         # LANG: The application is shutting down
