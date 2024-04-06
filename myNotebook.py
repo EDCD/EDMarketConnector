@@ -120,7 +120,7 @@ class EntryMenu(ttk.Entry):
             pass
 
 
-class Entry(ttk.Entry or EntryMenu):
+class Entry(ttk.Entry or EntryMenu):  # type: ignore
     """Custom t(t)k.Entry class to fix some display issues."""
 
     # DEPRECATED: Migrate to ttk.Entry or EntryMenu. Will remove in 5.12 or later.

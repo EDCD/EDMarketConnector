@@ -279,7 +279,7 @@ def toggle_password_visibility():
         this.apikey.config(show="*")  # type: ignore
 
 
-def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> tk.Frame:
+def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> nb.Frame:
     """
     Plugin preferences setup hook.
 

@@ -84,7 +84,7 @@ def plugin_start3(path: str) -> str:
     return 'Coriolis'
 
 
-def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> tk.Frame:
+def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> nb.Frame:
     """Set up plugin preferences."""
     PADX = 10  # noqa: N806
     PADY = 1  # noqa: N806

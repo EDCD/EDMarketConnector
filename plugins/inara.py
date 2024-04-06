@@ -244,7 +244,7 @@ def toggle_password_visibility():
         this.apikey.config(show="*")
 
 
-def plugin_prefs(parent: ttk.Notebook, cmdr: str, is_beta: bool) -> tk.Frame:
+def plugin_prefs(parent: ttk.Notebook, cmdr: str, is_beta: bool) -> nb.Frame:
     """Plugin Preferences UI hook."""
     PADX = 10  # noqa: N806
     BUTTONX = 12  # noqa: N806  # indent Checkbuttons and Radiobuttons

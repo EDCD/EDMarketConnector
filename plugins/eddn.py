@@ -1898,7 +1898,7 @@ class EDDN:
         :param cmdr: the commander under which this upload is made
         :param is_beta: whether or not we are in beta mode
         :param entry: the journal entry to send
-
+        ___
         Example:
         {
             "timestamp":"2022-06-10T10:09:41Z",
@@ -1932,7 +1932,7 @@ class EDDN:
         :param cmdr: the commander under which this upload is made
         :param is_beta: whether or not we are in beta mode
         :param entry: the journal entry to send
-
+        ___
         Example:
         {
             "timestamp":"2023-10-01T14:56:34Z",

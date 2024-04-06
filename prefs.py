@@ -376,7 +376,7 @@ class PreferencesDialog(tk.Toplevel):
         )
         self.outbutton.grid(column=1, padx=self.PADX, pady=self.PADY, sticky=tk.EW, row=row.get())
 
-        nb.Frame(output_frame).grid(row=row.get())  # bottom spacer # TODO: does nothing?
+        nb.Frame(output_frame).grid(row=row.get())  # type: ignore # bottom spacer # TODO: does nothing?
 
         # LANG: Label for 'Output' Settings/Preferences tab
         root_notebook.add(output_frame, text=_('Output'))  # Tab heading in settings
