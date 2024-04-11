@@ -922,7 +922,7 @@ def journal_entry(  # noqa: C901, CCR001
             ])
 
             # optional mission-specific properties
-            for (iprop, prop) in [
+            for (iprop, prop) in (
                     ('missionExpiry', 'Expiry'),  # Listed as optional in the docs, but always seems to be present
                     ('starsystemNameTarget', 'DestinationSystem'),
                     ('stationNameTarget', 'DestinationStation'),
@@ -936,7 +936,7 @@ def journal_entry(  # noqa: C901, CCR001
                     ('passengerCount', 'PassengerCount'),
                     ('passengerIsVIP', 'PassengerVIPs'),
                     ('passengerIsWanted', 'PassengerWanted'),
-            ]:
+            ):
 
                 if prop in entry:
                     data[iprop] = entry[prop]
@@ -1001,7 +1001,18 @@ def journal_entry(  # noqa: C901, CCR001
             elif 'KillerName' in entry:
                 data['opponentName'] = entry['KillerName']
 
-            new_add_event('addCommanderCombatDeath', entry['timestamp'], data)
+            elif 'KillerShip' in entry:
+                data['opponentName'] = entry['KillerShip']
+
+            # Paranoia in case of e.g. Thargoid activity not having complete data
+            opponent_name_issue = 'opponentName' not in data or data['opponentName'] == ""
+            wing_opponent_names_issue = 'wingOpponentNames' not in data or data['wingOpponentNames'] == []
+            if opponent_name_issue and wing_opponent_names_issue:
+                logger.warning('Dropping addCommanderCombatDeath message'
+                               'because opponentName and wingOpponentNames came out as ""')
+
+            else:
+                new_add_event('addCommanderCombatDeath', entry['timestamp'], data)
 
         elif event_name == 'Interdicted':
             data = OrderedDict([('starsystemName', system),
@@ -1018,8 +1029,11 @@ def journal_entry(  # noqa: C901, CCR001
             elif 'Power' in entry:
                 data['opponentName'] = entry['Power']
 
+            elif 'IsThargoid' in entry and entry['IsThargoid']:
+                data['opponentName'] = 'Thargoid'
+
             # Paranoia in case of e.g. Thargoid activity not having complete data
-            if data['opponentName'] == "":
+            if 'opponentName' not in data or data['opponentName'] == "":
                 logger.warning('Dropping addCommanderCombatInterdicted message because opponentName came out as ""')
 
             else:
@@ -1041,31 +1055,42 @@ def journal_entry(  # noqa: C901, CCR001
             elif 'Power' in entry:
                 data['opponentName'] = entry['Power']
 
+            # Shouldn't be needed here as Interdiction events can't target Thargoids (yet)
+            # but done just in case of future changes or so
+            elif 'IsThargoid' in entry and entry['IsThargoid']:
+                data['opponentName'] = 'Thargoid'
+
             # Paranoia in case of e.g. Thargoid activity not having complete data
-            if data['opponentName'] == "":
+            if 'opponentName' not in data or data['opponentName'] == "":
                 logger.warning('Dropping addCommanderCombatInterdiction message because opponentName came out as ""')
 
             else:
                 new_add_event('addCommanderCombatInterdiction', entry['timestamp'], data)
 
         elif event_name == 'EscapeInterdiction':
+            data = OrderedDict([
+                ('starsystemName', system),
+                ('isPlayer', entry['IsPlayer']),
+            ])
+
+            if 'Interdictor' in entry:
+                data['opponentName'] = entry['Interdictor']
+
+            elif 'Faction' in entry:
+                data['opponentName'] = entry['Faction']
+
+            elif 'Power' in entry:
+                data['opponentName'] = entry['Power']
+
+            elif 'isThargoid' in entry and entry['isThargoid']:
+                data['opponentName'] = 'Thargoid'
+
             # Paranoia in case of e.g. Thargoid activity not having complete data
-            if entry.get('Interdictor') is None or entry['Interdictor'] == "":
-                logger.warning(
-                    'Dropping addCommanderCombatInterdictionEscape message'
-                    'because opponentName came out as ""'
-                )
+            if 'opponentName' not in data or data['opponentName'] == "":
+                logger.warning('Dropping addCommanderCombatInterdiction message because opponentName came out as ""')
 
             else:
-                new_add_event(
-                    'addCommanderCombatInterdictionEscape',
-                    entry['timestamp'],
-                    {
-                        'starsystemName': system,
-                        'opponentName': entry['Interdictor'],
-                        'isPlayer': entry['IsPlayer'],
-                    }
-                )
+                new_add_event('addCommanderCombatInterdictionEscape', entry['timestamp'], data)
 
         elif event_name == 'PVPKill':
             new_add_event(
@@ -1299,7 +1324,7 @@ def journal_entry(  # noqa: C901, CCR001
 
         # Friends
         if event_name == 'Friends':
-            if entry['Status'] in ['Added', 'Online']:
+            if entry['Status'] in ('Added', 'Online'):
                 new_add_event(
                     'addCommanderFriend',
                     entry['timestamp'],
@@ -1309,7 +1334,7 @@ def journal_entry(  # noqa: C901, CCR001
                     }
                 )
 
-            elif entry['Status'] in ['Declined', 'Lost']:
+            elif entry['Status'] in ('Declined', 'Lost'):
                 new_add_event(
                     'delCommanderFriend',
                     entry['timestamp'],
@@ -1670,7 +1695,7 @@ def handle_special_events(data_event: dict[str, Any], reply_event: dict[str, Any
         this.lastlocation = reply_event.get('eventData', {})
         if not config.shutting_down:
             this.system_link.event_generate('<<InaraLocation>>', when="tail")
-    elif data_event['eventName'] in ['addCommanderShip', 'setCommanderShip']:
+    elif data_event['eventName'] in ('addCommanderShip', 'setCommanderShip'):
         this.lastship = reply_event.get('eventData', {})
         if not config.shutting_down:
             this.system_link.event_generate('<<InaraShip>>', when="tail")

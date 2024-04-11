@@ -57,7 +57,7 @@ def lookup(module, ship_map, entitled=False) -> dict | None:  # noqa: C901, CCR0
     """
     # Lazily populate
     if not moduledata:
-        modules_path = config.respath_path / "resources" / "modules.json"
+        modules_path = config.respath_path / "modules.json"
         moduledata.update(json.loads(modules_path.read_text()))
 
     if not module.get('name'):
@@ -69,7 +69,7 @@ def lookup(module, ship_map, entitled=False) -> dict | None:  # noqa: C901, CCR0
     # Armour - e.g. Federation_Dropship_Armour_Grade2
     if name[-2] == 'armour':
         # Armour is ship-specific, and ship names can have underscores
-        ship_name, armour_grade = module["name"].lower().rsplit("_", 2)[0:2]
+        ship_name, armour, armour_grade = module["name"].lower().rsplit("_", 2)[0:3]
         if ship_name not in ship_map:
             raise AssertionError(f"Unknown ship: {ship_name}")
         new['category'] = 'standard'
@@ -79,7 +79,7 @@ def lookup(module, ship_map, entitled=False) -> dict | None:  # noqa: C901, CCR0
         new['rating'] = 'I'
 
     # Skip uninteresting stuff - some no longer present in ED 3.1 cAPI data
-    elif (name[0] in [
+    elif (name[0] in (
                       'bobble',
                       'decal',
                       'nameplate',
@@ -87,7 +87,7 @@ def lookup(module, ship_map, entitled=False) -> dict | None:  # noqa: C901, CCR0
                       'enginecustomisation',
                       'voicepack',
                       'weaponcustomisation'
-                     ]
+                     )
             or name[1].startswith('shipkit')):
         return None
 
@@ -205,10 +205,10 @@ def lookup(module, ship_map, entitled=False) -> dict | None:  # noqa: C901, CCR0
         elif len(name) < 4 and name[1] == 'resourcesiphon':  # Hack! 128066402 has no size or class.
             (new['class'], new['rating']) = ('1', 'I')
 
-        elif len(name) < 4 and name[1] in ['guardianpowerdistributor', 'guardianpowerplant']:  # Hack! No class.
+        elif len(name) < 4 and name[1] in ('guardianpowerdistributor', 'guardianpowerplant'):  # Hack! No class.
             (new['class'], new['rating']) = (str(name[2][4:]), 'A')
 
-        elif len(name) < 4 and name[1] in ['guardianfsdbooster']:  # Hack! No class.
+        elif len(name) < 4 and name[1] == 'guardianfsdbooster':  # Hack! No class.
             (new['class'], new['rating']) = (str(name[2][4:]), 'H')
 
         else:

@@ -32,7 +32,7 @@ def export(data: CAPIData) -> None:
     with open(data_path / data_filename, 'wb') as h:
         # Format described here: https://github.com/eyeonus/Trade-Dangerous/wiki/Price-Data
         h.write('#! trade.py import -\n'.encode('utf-8'))
-        this_platform = sys.platform == 'darwin' and "Mac OS" or system()
+        this_platform = "Mac OS" if sys.platform == 'darwin' else system()
         cmdr_name = data['commander']['name'].strip()
         h.write(
             f'# Created by {applongname} {appversion()} on {this_platform} for Cmdr {cmdr_name}.\n'.encode('utf-8')

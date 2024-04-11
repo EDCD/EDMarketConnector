@@ -284,23 +284,23 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
             | ((GetKeyState(VK_RWIN) & 0x8000) and MOD_WIN)
         keycode = event.keycode
 
-        if keycode in [VK_SHIFT, VK_CONTROL, VK_MENU, VK_LWIN, VK_RWIN]:
+        if keycode in (VK_SHIFT, VK_CONTROL, VK_MENU, VK_LWIN, VK_RWIN):
             return 0, modifiers
 
         if not modifiers:
             if keycode == VK_ESCAPE:  # Esc = retain previous
                 return False
 
-            if keycode in [VK_BACK, VK_DELETE, VK_CLEAR, VK_OEM_CLEAR]:  # BkSp, Del, Clear = clear hotkey
+            if keycode in (VK_BACK, VK_DELETE, VK_CLEAR, VK_OEM_CLEAR):  # BkSp, Del, Clear = clear hotkey
                 return None
 
             if (
-                keycode in [VK_RETURN, VK_SPACE, VK_OEM_MINUS] or ord('A') <= keycode <= ord('Z')
+                keycode in (VK_RETURN, VK_SPACE, VK_OEM_MINUS) or ord('A') <= keycode <= ord('Z')
             ):  # don't allow keys needed for typing in System Map
                 winsound.MessageBeep()
                 return None
 
-            if (keycode in [VK_NUMLOCK, VK_SCROLL, VK_PROCESSKEY]
+            if (keycode in (VK_NUMLOCK, VK_SCROLL, VK_PROCESSKEY)
                     or VK_CAPITAL <= keycode <= VK_MODECHANGE):  # ignore unmodified mode switch keys
                 return 0, modifiers
 

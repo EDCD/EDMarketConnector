@@ -1,38 +1,99 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
-
-Copyrights
+* We currently test against, and package with, Python 3.11.7, 32-bit.
+  * As a result, we do not support Windows 7, 8, or 8.1.
+  * Developers can check the contents of the `.python-version` file
+      in the source (not distributed with the Windows installer) for the
+      currently used version.
+---
+Release 5.10.3
 ===
-Please see the [docs/Licenses](docs/Licenses/) directory for copies of any
-licenses for software we use with EDMarketConnector, either at runtime, or to
-produce the Windows executables and installer.
+This release contains a bugfix for the shipyard outfitting parsing system and an update to the French translations. 
 
----
+We now sign our code! This does mean that built EXEs are now slightly modified on our developer's machines.
+For information on what this means, and opt-out options, please visit https://github.com/EDCD/EDMarketConnector/wiki/Code-Signing-and-EDMC
 
-* We now test against, and package with, Python 3.11.1, 32-bit.
+**Changes and Enhancements**
+* Updated French Translations
 
-  **As a consequence of this we no longer support Windows 7.  
-  This is due to
-  [Python 3.10.x and later not supporting Windows 7](https://www.python.org/downloads/windows/).
-  The application (both EDMarketConnector.exe and EDMC.exe) will crash on
-  startup due to a missing DLL.**
+**Bug Fixes**
+* Fixed a bug that crashed the outfitting system when encountering armor. (Thanks TCE team for identifying this one!)
 
-  As [Windows 8.1 is now End-Of-Life](https://learn.microsoft.com/en-us/lifecycle/faq/windows#windows-8-1)
-  we no longer explicitly support it, but for the time being it will likely
-  continue to work.  This is dependent on future Python releases not dropping
-  support for Windows 8.1 in a manner that prevents it working.  Any bug report
-  made against Windows 8.1 use may be ignored unless reproduced on a supported
-  OS.
+**Plugin Developers**
+* modules.p and ships.p are deprecated, and slated
+for removal in the next major release! Please look for that change coming soon. 
+* Note to plugin developers: The `openurl()` function in ttkHyperlinkLabel has been deprecated,
+and slated for removal in the next major release! Please migrate to `webbrowser.open()`.
 
-  This should have no other impact on users or plugin developers, other
-  than the latter now being free to use features that were introduced since the
-  Python 3.7 series.
+Release 5.10.2
+===
+This release contains updated dependencies, some bug fixes, a few minor enhancements to some supporting files, 
+and some resorted resources as well as a new image for some of the built EXEs.
 
-  Developers can check the contents of the `.python-version` file
-  in the source (it's not distributed with the Windows installer) for the
-  currently used version in a given branch.
+We now sign our code! This does mean that built EXEs are now slightly modified on our developer's machines.
+For information on what this means, and opt-out options, please visit https://github.com/EDCD/EDMarketConnector/wiki/Code-Signing-and-EDMC
 
----
+**Changes and Enhancements**
+* Added additional logging to the Python build string in the case of missing files
+* Added a new icon to EDMC's Command-Line EXE
+* Added additional logging to the build system
+* Updated several dependencies
+* Updated FDEV IDs
+* Updated relevant copyright dates
+* Updated automatic build script to support code signing workflow
+* Updated translations to the latest versions
+* Moved a few unused files to the resources folder. These files have no references in the code
+
+**Bug Fixes**
+* Fixed a bug that could cause EDMC to handle SIGINT signals improperly
+* Fixed a bug that could result in URL providers to be set to invalid values
+* Fixed a bug that could result in Coriolis URL providers to revert back to "Auto" on language translations
+* Fixed a bug where Inara didn't understand being blown up by a Thargoid, and blew itself up instead
+* Fixed a printing issue for the localization system for unused strings
+
+**Removed Files**
+* Removed two unused manifest and MacOS icon files which are no longer in use.
+
+**Known Issues**
+* Some users of TCE have reported issues with newer versions of EDMC with TCE. 
+  * We have been unable to replicate this issue. If you are able to assist, please 
+  add your information here: https://github.com/EDCD/EDMarketConnector/issues/2176
+
+**Plugin Developers**
+* modules.p and ships.p are deprecated, and slated
+for removal in the next major release! Please look for that change coming soon. 
+* Note to plugin developers: The `openurl()` function in ttkHyperlinkLabel has been deprecated,
+and slated for removal in the next major release! Please migrate to `webbrowser.open()`.
+
+Release 5.10.1
+===
+This release contains a number of bugfixes, minor performance enhancements,
+workflow and dependency updates, and a function deprecation. 
+
+Note to plugin developers: modules.p and ships.p are deprecated, and slated
+for removal in the next major release! Please look for that change coming soon. 
+
+Note to plugin developers: The `openurl()` function in ttkHyperlinkLabel has been deprecated,
+and slated for removal in the next major release! Please migrate to `webbrowser.open()`.
+
+**Changes and Enhancements**
+* Deprecated `openurl()`. Please migrate to `webbrowser.open()`
+* Updated a number of list comparisons to use more efficient tuple comparisons
+* Updated a few type hints
+* Updated a few binary comparitors to be more efficient
+* Moved `resources.json` and `modules.json` back to the top level for all users
+* Updated several dependencies
+* Updated Python version to 3.11.7
+
+**Bug Fixes**
+* Fixed an issue where resources files could be in different locations for different users.
+  * These files are now in the same location (top level) for all users on all distributions.
+* Fixed an issue where CMDRs without the Git application installed would crash on start if running from Source.
+  * Thanks to the Flatpak team for pointing this one out!
+* Fixed a bug where CMDRs running from source would have their git hash version displayed as UNKNOWN.
+  * We're now more failure tolerant and use the bundled .gitversion if no true git hash is provided.
+* Fixed a bug where starting two copies of EDMC with a valid install would not generate a duplicate warning.
+
 Release 5.10.0
 ===
 This release contains a number of under-the-hood changes to EDMC designed to improve performance, code

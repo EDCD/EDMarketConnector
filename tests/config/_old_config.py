@@ -296,7 +296,7 @@ class OldConfig:
                         None,
                         ctypes.byref(key_size)
                     )
-                    or key_type.value not in [REG_SZ, REG_MULTI_SZ]
+                    or key_type.value not in (REG_SZ, REG_MULTI_SZ)
             ):
                 return default
 

@@ -54,10 +54,10 @@ appcmdname = 'EDMC'
 # <https://semver.org/#semantic-versioning-specification-semver>
 # Major.Minor.Patch(-prerelease)(+buildmetadata)
 # NB: Do *not* import this, use the functions appversion() and appversion_nobuild()
-_static_appversion = '5.10.0'
+_static_appversion = '5.10.3'
 
 _cached_version: semantic_version.Version | None = None
-copyright = '© 2015-2019 Jonathan Harris, 2020-2023 EDCD'
+copyright = '© 2015-2019 Jonathan Harris, 2020-2024 EDCD'
 
 update_feed = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml'
 update_interval = 8*60*60  # 8 Hours
@@ -81,15 +81,15 @@ else:
 _T = TypeVar('_T')
 
 
-def git_shorthash_from_head() -> str:
+def git_shorthash_from_head() -> str | None:
     """
     Determine short hash for current git HEAD.
 
     Includes `.DIRTY` if any changes have been made from HEAD
 
-    :return: str - None if we couldn't determine the short hash.
+    :return: str | None: None if we couldn't determine the short hash.
     """
-    shorthash: str = None  # type: ignore
+    shorthash: str | None = None
 
     try:
         git_cmd = subprocess.Popen(
@@ -99,14 +99,14 @@ def git_shorthash_from_head() -> str:
         )
         out, err = git_cmd.communicate()
 
-    except subprocess.CalledProcessError as e:
+    except (subprocess.CalledProcessError, FileNotFoundError) as e:
         logger.info(f"Couldn't run git command for short hash: {e!r}")
 
     else:
         shorthash = out.decode().rstrip('\n')
         if re.match(r'^[0-9a-f]{7,}$', shorthash) is None:
             logger.error(f"'{shorthash}' doesn't look like a valid git short hash, forcing to None")
-            shorthash = None  # type: ignore
+            shorthash = None
 
     if shorthash is not None:
         with contextlib.suppress(Exception):
@@ -134,13 +134,19 @@ def appversion() -> semantic_version.Version:
         # Running frozen, so we should have a .gitversion file
         # Yes, .parent because if frozen we're inside library.zip
         with open(pathlib.Path(sys.path[0]).parent / GITVERSION_FILE, encoding='utf-8') as gitv:
-            shorthash = gitv.read()
+            shorthash: str | None = gitv.read()
 
     else:
-        # Running from source
+        # Running from source. Use git rev-parse --short HEAD
+        # or fall back to .gitversion file if it exists.
+        # This is also required for the Flatpak
         shorthash = git_shorthash_from_head()
         if shorthash is None:
-            shorthash = 'UNKNOWN'
+            if pathlib.Path(sys.path[0] + "/" + GITVERSION_FILE).exists():
+                with open(pathlib.Path(sys.path[0] + "/" + GITVERSION_FILE), encoding='utf-8') as gitv:
+                    shorthash = gitv.read()
+            else:
+                shorthash = 'UNKNOWN'
 
     _cached_version = semantic_version.Version(f'{_static_appversion}+{shorthash}')
     return _cached_version

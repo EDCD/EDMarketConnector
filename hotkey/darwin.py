@@ -211,12 +211,12 @@ class MacHotkeyMgr(AbstractHotkeyMgr):
                 return False
 
             # BkSp, Del, Clear = clear hotkey
-            if keycode in [0x7f, ord(NSDeleteFunctionKey), ord(NSClearLineFunctionKey)]:
+            if keycode in (0x7f, ord(NSDeleteFunctionKey), ord(NSClearLineFunctionKey)):
                 self.acquire_state = MacHotkeyMgr.ACQUIRE_INACTIVE
                 return None
 
             # don't allow keys needed for typing in System Map
-            if keycode in [0x13, 0x20, 0x2d] or 0x61 <= keycode <= 0x7a:
+            if keycode in (0x13, 0x20, 0x2d) or 0x61 <= keycode <= 0x7a:
                 NSBeep()
                 self.acquire_state = MacHotkeyMgr.ACQUIRE_INACTIVE
                 return None

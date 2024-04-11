@@ -5,6 +5,8 @@ Copyright (c) EDCD, All Rights Reserved
 Licensed under the GNU General Public License.
 See LICENSE file.
 """
+from __future__ import annotations
+
 import csv
 import json
 import sys
@@ -22,7 +24,7 @@ from monitor import monitor
 logger = EDMCLogging.get_main_logger()
 
 if TYPE_CHECKING:
-    def _(x: str) -> str: ...
+    def _(x: str) -> str: return x
 
 if sys.platform == 'win32':
     import ctypes
