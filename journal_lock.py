@@ -218,10 +218,6 @@ class JournalLock:
             if sys.platform == 'win32':
                 self.attributes('-toolwindow', tk.TRUE)
 
-            elif sys.platform == 'darwin':
-                # http://wiki.tcl.tk/13428
-                parent.call('tk::unsupported::MacWindowStyle', 'style', self, 'utility')
-
             self.resizable(tk.FALSE, tk.FALSE)
 
             frame = ttk.Frame(self)

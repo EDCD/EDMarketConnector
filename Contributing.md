@@ -679,7 +679,7 @@ the following does not work:
 
 ```py
 from sys import platform
-if platform == 'darwin':
+if platform == 'win32':
   ...
 ```
 
