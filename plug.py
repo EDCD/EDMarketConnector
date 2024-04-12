@@ -126,7 +126,7 @@ class Plugin:
 
         return None
 
-    def get_prefs(self, parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> tk.Frame | None:
+    def get_prefs(self, parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> nb.Frame | None:
         """
         If the plugin provides a prefs frame, create and return it.
 

@@ -47,7 +47,7 @@ class ClickCounter:
         """
         self.on_preferences_closed("", False)  # Save our prefs
 
-    def setup_preferences(self, parent: nb.Notebook, cmdr: str, is_beta: bool) -> tk.Frame | None:
+    def setup_preferences(self, parent: nb.Notebook, cmdr: str, is_beta: bool) -> nb.Frame | None:
         """
         setup_preferences is called by plugin_prefs below.
 
@@ -63,7 +63,7 @@ class ClickCounter:
 
         # setup our config in a "Click Count: number"
         nb.Label(frame, text='Click Count').grid(row=current_row)
-        nb.Entry(frame, textvariable=self.click_count).grid(row=current_row, column=1)
+        nb.EntryMenu(frame, textvariable=self.click_count).grid(row=current_row, column=1)
         current_row += 1  # Always increment our row counter, makes for far easier tkinter design.
         return frame
 
@@ -126,7 +126,7 @@ def plugin_stop() -> None:
     return cc.on_unload()
 
 
-def plugin_prefs(parent: nb.Notebook, cmdr: str, is_beta: bool) -> tk.Frame | None:
+def plugin_prefs(parent: nb.Notebook, cmdr: str, is_beta: bool) -> nb.Frame | None:
     """
     Handle preferences tab for the plugin.
 
