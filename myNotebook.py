@@ -30,7 +30,6 @@ class Notebook(ttk.Notebook):
 
         super().__init__(master, **kw)
         style = ttk.Style()
-
         if sys.platform == 'win32':
             style.configure('nb.TFrame',                          background=PAGEBG)
             style.configure('nb.TButton',                         background=PAGEBG)
@@ -41,7 +40,7 @@ class Notebook(ttk.Notebook):
 
 
 class Frame(ttk.Frame):
-    """Custom t(t)k.Frame class to fix some display issues."""
+    """Custom ttk.Frame class to fix some display issues."""
 
     def __init__(self, master: ttk.Notebook | None = None, **kw):
         if sys.platform == 'win32':
@@ -122,7 +121,7 @@ class EntryMenu(ttk.Entry):
 
 
 class Entry(EntryMenu or ttk.Entry):  # type: ignore
-    """Custom t(t)k.Entry class to fix some display issues."""
+    """Custom ttk.Entry class to fix some display issues."""
 
     # DEPRECATED: Migrate to EntryMenu. Will remove in 5.12 or later.
     def __init__(self, master: ttk.Frame | None = None, **kw):
@@ -130,7 +129,7 @@ class Entry(EntryMenu or ttk.Entry):  # type: ignore
 
 
 class Button(ttk.Button):
-    """Custom t(t)k.Button class to fix some display issues."""
+    """Custom ttk.Button class to fix some display issues."""
 
     def __init__(self, master: ttk.Frame | None = None, **kw):
         if sys.platform == 'win32':
@@ -140,7 +139,7 @@ class Button(ttk.Button):
 
 
 class ColoredButton(tk.Button):
-    """Custom t(t)k.ColoredButton class to fix some display issues."""
+    """Custom tk.Button class to fix some display issues."""
 
     # DEPRECATED: Migrate to tk.Button. Will remove in 5.12 or later.
     def __init__(self, master: ttk.Frame | None = None, **kw):
@@ -148,7 +147,7 @@ class ColoredButton(tk.Button):
 
 
 class Checkbutton(ttk.Checkbutton):
-    """Custom t(t)k.Checkbutton class to fix some display issues."""
+    """Custom ttk.Checkbutton class to fix some display issues."""
 
     def __init__(self, master: ttk.Frame | None = None, **kw):
         style = 'nb.TCheckbutton' if sys.platform == 'win32' else None
@@ -156,7 +155,7 @@ class Checkbutton(ttk.Checkbutton):
 
 
 class Radiobutton(ttk.Radiobutton):
-    """Custom t(t)k.Radiobutton class to fix some display issues."""
+    """Custom ttk.Radiobutton class to fix some display issues."""
 
     def __init__(self, master: ttk.Frame | None = None, **kw):
         style = 'nb.TRadiobutton' if sys.platform == 'win32' else None
@@ -164,7 +163,7 @@ class Radiobutton(ttk.Radiobutton):
 
 
 class OptionMenu(ttk.OptionMenu):
-    """Custom t(t)k.OptionMenu class to fix some display issues."""
+    """Custom ttk.OptionMenu class to fix some display issues."""
 
     def __init__(self, master, variable, default=None, *values, **kw):
         if sys.platform == 'win32':
