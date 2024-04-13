@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import logging
 import tkinter as tk
-from tkinter import ttk
 
 import myNotebook as nb  # noqa: N813
 from config import appname, config
@@ -65,7 +64,7 @@ class ClickCounter:
 
         # setup our config in a "Click Count: number"
         nb.Label(frame, text='Click Count').grid(row=current_row)
-        ttk.Entry(frame, textvariable=self.click_count).grid(row=current_row, column=1)
+        nb.EntryMenu(frame, textvariable=self.click_count).grid(row=current_row, column=1)
         current_row += 1  # Always increment our row counter, makes for far easier tkinter design.
         return frame
 

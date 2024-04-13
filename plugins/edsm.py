@@ -113,10 +113,10 @@ class This:
         self.cmdr_text: nb.Label | None = None
 
         self.user_label: nb.Label | None = None
-        self.user: ttk.Entry | None = None
+        self.user: nb.EntryMenu | None = None
 
         self.apikey_label: nb.Label | None = None
-        self.apikey: ttk.Entry | None = None
+        self.apikey: nb.EntryMenu | None = None
 
 
 this = This()
@@ -345,14 +345,14 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> nb.Fr
     # LANG: EDSM Commander name label in EDSM settings
     this.user_label = nb.Label(frame, text=_('Commander Name'))
     this.user_label.grid(row=cur_row, padx=PADX, pady=PADY, sticky=tk.W)
-    this.user = ttk.Entry(frame)
+    this.user = nb.EntryMenu(frame)
     this.user.grid(row=cur_row, column=1, padx=PADX, pady=BOXY, sticky=tk.EW)
 
     cur_row += 1
     # LANG: EDSM API key label
     this.apikey_label = nb.Label(frame, text=_('API Key'))
     this.apikey_label.grid(row=cur_row, padx=PADX, pady=PADY, sticky=tk.W)
-    this.apikey = ttk.Entry(frame, show="*", width=50)
+    this.apikey = nb.EntryMenu(frame, show="*", width=50)
     this.apikey.grid(row=cur_row, column=1, padx=PADX, pady=BOXY, sticky=tk.EW)
     cur_row += 1
 
