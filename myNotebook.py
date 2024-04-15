@@ -63,7 +63,7 @@ class Label(tk.Label):
         super().__init__(master, **kw)
 
 
-class EntryMenu:
+class EntryMenu(ttk.Entry):
     """Extended entry widget that includes a context menu with Copy, Cut-and-Paste commands."""
 
     def __init__(self, *args, **kwargs) -> None:
@@ -120,7 +120,7 @@ class EntryMenu:
             pass
 
 
-class Entry(ttk.Entry, EntryMenu):
+class Entry(EntryMenu):
     """Custom t(t)k.Entry class to fix some display issues."""
 
     # DEPRECATED: Migrate to ttk.Entry or EntryMenu. Will remove in 5.12 or later.
