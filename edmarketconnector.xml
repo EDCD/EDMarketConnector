@@ -22,11 +22,35 @@
       </item>
       <!-- Windows -->
       <item>
-         <title>Release 5.10.3</title>
+         <title>Release 5.10.4</title>
          <description><![CDATA[<style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
 <p>We now test against, and package with, Python 3.11.7.</p>
 <p><strong>As a result, we do not support Windows 7, 8, or 8.1.</strong><br>
-
+<h2>Release 5.10.4</h2>
+<p>This release contains updated dependencies, modules files, translations, and adds two new EDDN schemas. It also
+adds Turkish translations to EDMC!</p>
+<p>We now sign our code! This does mean that built EXEs are now slightly modified on our developer&#39;s machines.
+For information on what this means, and opt-out options, please visit <a href="https://github.com/EDCD/EDMarketConnector/wiki/Code-Signing-and-EDMC">https://github.com/EDCD/EDMarketConnector/wiki/Code-Signing-and-EDMC</a></p>
+<p><strong>Changes and Enhancements</strong></p>
+<ul>
+<li>Adds Turkish Translations to EDMC</li>
+<li>Adds DockingDenied and DockingGranted EDDN Schemas</li>
+<li>Updated FDevIDs Dependency</li>
+<li>Updated Translations</li>
+<li>Updated modules files to process several missing module types used for bug squishing or going fast</li>
+<li>Updated Python Dependencies</li>
+</ul>
+<p><strong>Bug Fixes</strong></p>
+<ul>
+<li>Fixed a bug on older Python versions which couldn&#39;t import updated type annotations</li>
+</ul>
+<p><strong>Plugin Developers</strong></p>
+<ul>
+<li>modules.p and ships.p are deprecated, and slated for removal in 5.11+!</li>
+<li>The <code>openurl()</code> function in ttkHyperlinkLabel has been deprecated,
+and slated for removal in 5.11+! Please migrate to <code>webbrowser.open()</code>.</li>
+</ul>
+<hr>
 <h2>Release 5.10.3</h2>
 <p>This release contains a bugfix for the shipyard outfitting parsing system and an update to the French translations. </p>
 <em>We now sign our code! This does mean that built EXEs are now slightly modified on our developer's machines.
@@ -2207,7 +2231,7 @@ about this:
 <a href="https://issues.frontierstore.net/issue-detail/28638" rel="nofollow">PTS CAPI saying Commander is Docked after jumping to new system</a>.</p>
 </li>
 </ul>]]></description>
-         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F5.10.3/EDMarketConnector_Installer_5.10.3.exe" sparkle:os="windows" sparkle:version="5.10.3" length="0" type="application/x-ms-dos-executable" />
+         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F5.10.4/EDMarketConnector_Installer_5.10.4.exe" sparkle:os="windows" sparkle:version="5.10.4" length="0" type="application/x-ms-dos-executable" />
       </item>
    </channel>
 </rss>
