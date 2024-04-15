@@ -100,6 +100,12 @@ def lookup(module, ship_map, entitled=False) -> dict | None:  # noqa: C901, CCR0
     elif not entitled and name[1] == 'planetapproachsuite':
         return None
 
+    # V2 Shutdown Field Neutralizer - Hpt_AntiUnknownShutdown_Tiny_V2
+    elif name[0] == 'hpt' and name[1] in countermeasure_map and len(name) == 4 and name[3] == 'v2':
+        new['category'] = 'utility'
+        new['name'], new['rating'] = countermeasure_map[name[1]]
+        new['class'] = weaponclass_map[name[-2]]
+
     # Countermeasures - e.g. Hpt_PlasmaPointDefence_Turret_Tiny
     elif name[0] == 'hpt' and name[1] in countermeasure_map:
         new['category'] = 'utility'
@@ -181,12 +187,18 @@ def lookup(module, ship_map, entitled=False) -> dict | None:  # noqa: C901, CCR0
         if name[1] == 'dronecontrol':  # e.g. Int_DroneControl_Collection_Size1_Class1
             name.pop(0)
 
+        elif name[1] == 'multidronecontrol':  # e.g. Int_MultiDroneControl_Rescue_Size3_Class3
+            name.pop(0)
+
         elif name[-1] == 'free':  # Starter Sidewinder or Freagle modules - just treat them like vanilla modules
             name.pop()
 
         if name[1] in standard_map:  # e.g. Int_Engine_Size2_Class1, Int_ShieldGenerator_Size8_Class5_Strong
             new['category'] = 'standard'
-            new['name'] = standard_map[len(name) > 4 and (name[1], name[4]) or name[1]]
+            if name[2] == 'overcharge':
+                new['name'] = standard_map[(name[1], name[2])]
+            else:
+                new['name'] = standard_map[len(name) > 4 and (name[1], name[4]) or name[1]]
 
         elif name[1] in internal_map:  # e.g. Int_CargoRack_Size8_Class1
             new['category'] = 'internal'
@@ -210,6 +222,9 @@ def lookup(module, ship_map, entitled=False) -> dict | None:  # noqa: C901, CCR0
 
         elif len(name) < 4 and name[1] == 'guardianfsdbooster':  # Hack! No class.
             (new['class'], new['rating']) = (str(name[2][4:]), 'H')
+
+        elif len(name) > 4 and name[1] == 'hyperdrive':  # e.g. Int_Hyperdrive_Overcharge_Size6_Class3
+            (new['class'], new['rating']) = (str(name[4][-1:]), 'C')
 
         else:
             if len(name) < 3:
