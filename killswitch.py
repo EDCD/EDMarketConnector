@@ -361,8 +361,8 @@ def fetch_kill_switches(target=DEFAULT_KILLSWITCH_URL) -> KillSwitchJSONFile | N
         logger.warning(f"Failed to get kill switches, data was invalid: {e}")
         return None
 
-    except (requests.exceptions.BaseHTTPError, requests.exceptions.ConnectionError) as e:  # type: ignore
-        logger.warning(f"unable to connect to {target!r}: {e}")
+    except requests.exceptions.RequestException as requ_err:
+        logger.warning(f"unable to connect to {target!r}: {requ_err}")
         return None
 
     return data

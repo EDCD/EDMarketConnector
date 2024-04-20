@@ -67,7 +67,7 @@ class EntryMenu(ttk.Entry):
     """Extended entry widget that includes a context menu with Copy, Cut-and-Paste commands."""
 
     def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+        ttk.Entry.__init__(self, *args, **kwargs)
 
         self.menu = tk.Menu(self, tearoff=False)
         self.menu.add_command(label="Copy", command=self.copy)
@@ -120,7 +120,7 @@ class EntryMenu(ttk.Entry):
             pass
 
 
-class Entry(ttk.Entry or EntryMenu):  # type: ignore
+class Entry(EntryMenu):
     """Custom t(t)k.Entry class to fix some display issues."""
 
     # DEPRECATED: Migrate to ttk.Entry or EntryMenu. Will remove in 5.12 or later.
