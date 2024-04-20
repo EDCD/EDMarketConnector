@@ -125,7 +125,7 @@ class This:
         self.log: 'tk.IntVar'
         self.log_button: nb.Checkbutton
         self.label: HyperlinkLabel
-        self.apikey: ttk.Entry
+        self.apikey: nb.EntryMenu
         self.apikey_label: tk.Label
 
         self.events: dict[Credentials, Deque[Event]] = defaultdict(deque)
@@ -292,7 +292,7 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str, is_beta: bool) -> nb.Frame:
     # LANG: Inara API key label
     this.apikey_label = nb.Label(frame, text=_('API Key'))  # Inara setting
     this.apikey_label.grid(row=cur_row, padx=PADX, pady=PADY, sticky=tk.W)
-    this.apikey = ttk.Entry(frame, show="*", width=50)
+    this.apikey = nb.EntryMenu(frame, show="*", width=50)
     this.apikey.grid(row=cur_row, column=1, padx=PADX, pady=BOXY, sticky=tk.EW)
     cur_row += 1
 
