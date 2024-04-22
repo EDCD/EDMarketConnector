@@ -351,7 +351,8 @@ class _Translations(Translations):
         super().__init__()
 
 
-Translations = translations  # Yes, I know this is awful renaming garbage. But we need it for compat.
+# Yes, I know this is awful renaming garbage. But we need it for compat.
+Translations: Translations = translations  # type: ignore
 # End Deprecation Zone
 
 # generate template strings file - like xgettext
