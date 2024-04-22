@@ -12,11 +12,8 @@ from __future__ import annotations
 import sys
 import tkinter as tk
 from tkinter import ttk, messagebox
-from typing import TYPE_CHECKING
 from PIL import ImageGrab
-
-if TYPE_CHECKING:
-    def _(x: str) -> str: return x
+from l10n import translations as tr
 
 if sys.platform == 'win32':
     PAGEFG = 'SystemWindowText'
@@ -108,8 +105,8 @@ class EntryMenu(ttk.Entry):
             if img:
                 # Hijack existing translation, yes it doesn't exactly match here.
                 # LANG: Generic error prefix - following text is from Frontier auth service;
-                messagebox.showwarning(_('Error'),
-                                       _('Cannot paste non-text content.'))  # LANG: Can't Paste Images or Files in Text
+                messagebox.showwarning(tr.tl('Error'),
+                                       tr.tl('Cannot paste non-text content.'))  # LANG: Can't Paste Images or Files in Text
                 return
             text = self.clipboard_get()
             if self.selection_present() and text:
