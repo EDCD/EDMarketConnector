@@ -104,9 +104,10 @@ class EntryMenu(ttk.Entry):
             img = ImageGrab.grabclipboard()
             if img:
                 # Hijack existing translation, yes it doesn't exactly match here.
-                # LANG: Generic error prefix - following text is from Frontier auth service;
-                messagebox.showwarning(tr.tl('Error'),
-                                       tr.tl('Cannot paste non-text content.'))  # LANG: Can't Paste Images or Files in Text
+                messagebox.showwarning(
+                    tr.tl('Error'),  # LANG: Generic error prefix - following text is from Frontier auth service;
+                    tr.tl('Cannot paste non-text content.')  # LANG: Can't Paste Images or Files in Text
+                )
                 return
             text = self.clipboard_get()
             if self.selection_present() and text:
