@@ -86,7 +86,7 @@ class Translations:
         """
         self.translations = {None: {}}
         # WARNING: '_' is Deprecated. Will be removed in 6.0 or later.
-        # Migrate to calling Translations.translate directly.
+        # Migrate to calling translations.translate or tr.tl directly.
         builtins.__dict__['_'] = lambda x: str(x).replace(r'\"', '"').replace('{CR}', '\n')
 
     def install(self, lang: str | None = None) -> None:  # noqa: CCR001
@@ -131,7 +131,7 @@ class Translations:
                     logger.exception(f'Exception occurred while parsing {lang}.strings in plugin {plugin}')
 
         # WARNING: '_' is Deprecated. Will be removed in 6.0 or later.
-        # Migrate to calling Translations.translate directly.
+        # Migrate to calling translations.translate or tr.tl directly.
         builtins.__dict__['_'] = self.translate
 
     def contents(self, lang: str, plugin_path: str | None = None) -> dict[str, str]:
@@ -351,7 +351,7 @@ class _Translations(Translations):
         super().__init__()
 
 
-Translations: Translations = _Translations()  # type: ignore # Yes, I know this is awful. But we need it for compat.
+Translations = translations  # Yes, I know this is awful renaming garbage. But we need it for compat.
 # End Deprecation Zone
 
 # generate template strings file - like xgettext

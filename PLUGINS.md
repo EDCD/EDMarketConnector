@@ -1193,18 +1193,26 @@ widget if you need to display routine status information.
 ## Localisation
 
 You can localise your plugin to one of the languages that EDMarketConnector
-itself supports. Add the following import near the top of each source
+itself supports. Add the following boilerplate near the top of the source
 file that contains strings that needs translating:
 
 ```python
-from l10n import translations as tr
+import l10n
+import functools
+plugin_tl = functools.partial(l10n.translations.tl, context=__file__)
+
 ```
 
-Wrap each string that needs translating with the `tr.tl()` function, e.g.:
+Wrap each string that needs translating with the `plugin_tl()` function, e.g.:
 
 ```python
-    somewidget["text"] = tr.tl("Happy!")
+    somewidget["text"] = plugin_tl("Happy!")
 ```
+
+Note that you can name the "plugin_tl" function whatever you want - just make sure to stay consistent! 
+Many plugins use `_` as the singleton name. We discourage that in versions 5.11 onward, but it should still work.
+If your plugin has multiple files that need translations, simply import the `plugin_tl` function to that location.
+You should only need to add the boilerplate once.
 
 If you display localized strings in EDMarketConnector's main window you should
 refresh them in your `prefs_changed` function in case the user has changed
