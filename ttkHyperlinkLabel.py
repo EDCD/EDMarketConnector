@@ -19,14 +19,17 @@ In addition to standard ttk.Label arguments, takes the following arguments:
 May be imported by plugins
 """
 from __future__ import annotations
-
+from functools import partial
 import sys
 import tkinter as tk
 import webbrowser
 from tkinter import font as tk_font
 from tkinter import ttk
 from typing import Any
+import plug
+from config import config, logger
 from l10n import translations as tr
+from monitor import monitor
 
 
 class HyperlinkLabel(tk.Label or ttk.Label):  # type: ignore
@@ -63,6 +66,57 @@ class HyperlinkLabel(tk.Label or ttk.Label):  # type: ignore
         self.configure(state=kw.get('state', tk.NORMAL),
                        text=kw.get('text'),
                        font=kw.get('font', ttk.Style().lookup('TLabel', 'font')))
+
+        # Add Menu Options
+        self.plug_options = kw.pop('plug_options', None)
+        self.name = kw.get('name', None)
+        if self.name == 'ship' and not bool(config.get_int("use_alt_shipyard_open")):
+            self.menu.add_separator()
+            for url in plug.provides('shipyard_url'):
+                self.menu.add_command(
+                    label=tr.tl("Open in {URL}").format(URL=url),  # LANG: Open Element In Selected Provider
+                    command=partial(self.open_shipyard, url)
+                )
+
+        if self.name == 'station':
+            self.menu.add_separator()
+            for url in plug.provides('station_url'):
+                self.menu.add_command(
+                    label=tr.tl("Open in {URL}").format(URL=url),  # LANG: Open Element In Selected Provider
+                    command=partial(self.open_station, url)
+                )
+
+        if self.name == 'system':
+            self.menu.add_separator()
+            for url in plug.provides('system_url'):
+                self.menu.add_command(
+                    label=tr.tl("Open in {URL}").format(URL=url),  # LANG: Open Element In Selected Provider
+                    command=partial(self.open_system, url)
+                )
+
+    def open_shipyard(self, url: str):
+        """Open the Current Ship Loadout in the Selected Provider."""
+        if loadout := monitor.ship():
+            opener = plug.invoke(url, 'EDSY', 'shipyard_url', loadout, monitor.is_beta)
+            if opener:
+                return webbrowser.open(opener)
+        logger.warning('No ship loadout, aborting.')
+        return ''
+
+    def open_system(self, url: str):
+        """Open the Current System in the Selected Provider."""
+        opener = plug.invoke(url, 'EDSM', 'system_url', monitor.state['SystemName'])
+        if opener:
+            return webbrowser.open(opener)
+
+    def open_station(self, url: str):
+        """Open the Current Station in the Selected Provider."""
+        opener = plug.invoke(
+            url, 'EDSM', 'station_url',
+            monitor.state['SystemName'], monitor.state['StationName']
+        )
+        if opener:
+            return webbrowser.open(opener)
 
     def configure(  # noqa: CCR001
         self, cnf: dict[str, Any] | None = None, **kw: Any
