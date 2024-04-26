@@ -338,29 +338,14 @@ if __name__ == '__main__':  # noqa: C901
 
     def already_running_popup():
         """Create the "already running" popup."""
-        import tkinter as tk
-        from tkinter import ttk
+        from tkinter import messagebox
         # Check for CL arg that suppresses this popup.
         if args.suppress_dupe_process_popup:
             sys.exit(0)
 
-        root = tk.Tk(className=appname.lower())
-
-        frame = tk.Frame(root)
-        frame.grid(row=1, column=0, sticky=tk.NSEW)
-
-        label = tk.Label(frame, text='An EDMarketConnector.exe process was already running, exiting.')
-        label.grid(row=1, column=0, sticky=tk.NSEW)
-
-        button = ttk.Button(frame, text='OK', command=lambda: sys.exit(0))
-        button.grid(row=2, column=0, sticky=tk.S)
-
-        try:
-            root.mainloop()
-        except KeyboardInterrupt:
-            logger.info("Ctrl+C Detected, Attempting Clean Shutdown")
-            sys.exit()
-        logger.info('Exiting')
+        already_running_msg = "An EDMarketConnector process was already running, exiting."
+        messagebox.showerror(title=appname, message=already_running_msg)
+        sys.exit(0)
 
     journal_lock = JournalLock()
     locked = journal_lock.obtain_lock()
