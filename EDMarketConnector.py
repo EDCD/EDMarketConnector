@@ -343,8 +343,7 @@ if __name__ == '__main__':  # noqa: C901
         if args.suppress_dupe_process_popup:
             sys.exit(0)
 
-        already_running_msg = "An EDMarketConnector process was already running, exiting."
-        messagebox.showerror(title=appname, message=already_running_msg)
+        messagebox.showerror(title=appname, message="An EDMarketConnector process was already running, exiting.")
         sys.exit(0)
 
     journal_lock = JournalLock()
