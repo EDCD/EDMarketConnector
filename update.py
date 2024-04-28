@@ -7,6 +7,7 @@ See LICENSE file.
 """
 from __future__ import annotations
 
+import pathlib
 import sys
 import threading
 from traceback import print_exc
@@ -23,6 +24,37 @@ if TYPE_CHECKING:
 
 
 logger = get_main_logger()
+
+
+def check_for_fdev_updates(silent: bool = False) -> None:  # noqa: CCR001
+    """Check for and download FDEV ID file updates."""
+    files_urls = [
+        ('commodity.csv', 'https://raw.githubusercontent.com/EDCD/FDevIDs/master/commodity.csv'),
+        ('rare_commodity.csv', 'https://raw.githubusercontent.com/EDCD/FDevIDs/master/rare_commodity.csv')
+    ]
+
+    for file, url in files_urls:
+        fdevid_file = pathlib.Path(config.respath_path / 'FDevIDs' / file)
+        try:
+            with open(fdevid_file, newline='', encoding='utf-8') as f:
+                local_content = f.read()
+        except FileNotFoundError:
+            local_content = None
+
+        response = requests.get(url)
+        if response.status_code != 200:
+            if not silent:
+                logger.error(f'Failed to download {file}! Unable to continue.')
+            continue
+
+        if local_content == response.text:
+            if not silent:
+                logger.info(f'FDEV ID file {file} already up to date.')
+        else:
+            if not silent:
+                logger.info(f'FDEV ID file {file} not up to date. Downloading...')
+            with open(fdevid_file, 'w', newline='', encoding='utf-8') as csvfile:
+                csvfile.write(response.text)
 
 
 class EDMCVersion:
@@ -134,6 +166,8 @@ class Updater:
 
         elif sys.platform == 'win32' and self.updater:
             self.updater.win_sparkle_check_update_with_ui()
+
+        check_for_fdev_updates()
 
     def check_appcast(self) -> EDMCVersion | None:
         """

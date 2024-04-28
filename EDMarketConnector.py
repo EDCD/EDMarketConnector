@@ -2290,35 +2290,6 @@ sys.path: {sys.path}'''
             )
             config.set('plugins_not_py3_last', int(time()))
 
-    def check_fdev_ids():
-        """Display message about missing FDEVID files."""
-        fdev_files = {'commodity.csv', 'rare_commodity.csv'}
-        for file in fdev_files:
-            fdevid_file = pathlib.Path(config.respath_path / 'FDevIDs' / file)
-            if fdevid_file.is_file():
-                continue
-            # LANG: Popup-text about missing FDEVID Files
-            popup_text = _(
-                "FDevID Files not found! Some functionality regarding commodities "
-                r"may be disabled.\r\n\r\n Do you want to open the Wiki page on "
-                "how to set up submodules?"
-            )
-            # And now we do need these to be actual \r\n
-            popup_text = popup_text.replace('\\n', '\n')
-            popup_text = popup_text.replace('\\r', '\r')
-
-            openwikipage = tk.messagebox.askquestion(
-                # LANG: Popup window title for missing FDEVID files
-                _('FDevIDs: Missing Commodity Files'),
-                popup_text
-            )
-            if openwikipage == "yes":
-                webbrowser.open(
-                    "https://github.com/EDCD/EDMarketConnector/wiki/Running-from-source"
-                    "#obtain-a-copy-of-the-application-source"
-                )
-            break
-
     # UI Transparency
     ui_transparency = config.get_int('ui_transparency')
     if ui_transparency == 0:
@@ -2331,8 +2302,6 @@ sys.path: {sys.path}'''
     root.after(1, messagebox_not_py3)
     # Show warning popup for killswitches matching current version
     root.after(2, show_killswitch_poppup, root)
-    # Check for FDEV IDs
-    root.after(3, check_fdev_ids)
     # Start the main event loop
     try:
         root.mainloop()
