@@ -76,10 +76,8 @@ def generate_data_files(
                 "ChangeLog.md",
                 "snd_good.wav",
                 "snd_bad.wav",
-                "modules.p",  # TODO: Remove in 6.0
                 "modules.json",
                 "ships.json",
-                "ships.p",  # TODO: Remove in 6.0
                 f"{app_name}.ico",
                 f"resources/{appcmdname}.ico",
                 "EDMarketConnector - TRACE.bat",
@@ -133,7 +131,6 @@ def build() -> None:
                 "distutils",
                 "_markerlib",
                 "optparse",
-                "PIL",
                 "simplejson",
                 "unittest",
                 "doctest",

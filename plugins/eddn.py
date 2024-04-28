@@ -27,7 +27,6 @@ import os
 import pathlib
 import re
 import sqlite3
-import sys
 import tkinter as tk
 from platform import system
 from textwrap import dedent
@@ -282,7 +281,7 @@ class EDDNSender:
             msg['header'] = {
                 # We have to lie and say it's *this* version, but denote that
                 # it might not actually be this version.
-                'softwareName': f'{applongname} [{system() if sys.platform != "darwin" else "Mac OS"}]'
+                'softwareName': f'{applongname} [{system()}]'
                                 ' (legacy replay)',
                 'softwareVersion': str(appversion_nobuild()),
                 'uploaderID': cmdr,
@@ -1074,7 +1073,7 @@ class EDDN:
             gb = this.game_build
 
         return {
-            'softwareName':    f'{applongname} [{system() if sys.platform != "darwin" else "Mac OS"}]',
+            'softwareName':    f'{applongname} [{system()}]',
             'softwareVersion': str(appversion_nobuild()),
             'uploaderID':      this.cmdr_name,
             'gameversion':     gv,
@@ -1899,7 +1898,7 @@ class EDDN:
         :param cmdr: the commander under which this upload is made
         :param is_beta: whether or not we are in beta mode
         :param entry: the journal entry to send
-
+        ___
         Example:
         {
             "timestamp":"2022-06-10T10:09:41Z",
@@ -1933,7 +1932,7 @@ class EDDN:
         :param cmdr: the commander under which this upload is made
         :param is_beta: whether or not we are in beta mode
         :param entry: the journal entry to send
-
+        ___
         Example:
         {
             "timestamp":"2023-10-01T14:56:34Z",

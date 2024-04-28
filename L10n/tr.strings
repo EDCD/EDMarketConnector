@@ -1,476 +1,511 @@
+/* edsm.py:Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:316; */
+"Send flight log and CMDR status to EDSM" = "Uçuş günlüğünü ve CMDR durumunu EDSM'e gönder";
+
+/* prefs.py:Label on button used to open a filesystem folder; In files: prefs.py:706; */
+"Open Log Folder" = "Günlük Klasörünü Aç";
+
+/* inara.py:Text Inara Show API key; In files: inara.py:305; */
+"Show API Key" = "API Anahtarını Göster";
 /* Language name */
-"!Language" = "简体中文";
+"!Language" = "Türkçe";
 
 /* companion.py: Frontier CAPI didn't respond; In files: companion.py:226; */
-"Error: Frontier CAPI didn't respond" = "错误：Frontier CAPI 无响应";
+"Error: Frontier CAPI didn't respond" = "Hata: Frontier CAPI yanıt vermedi";
 
 /* companion.py: Frontier CAPI data doesn't agree with latest Journal game location; In files: companion.py:245; */
-"Error: Frontier server is lagging" = "错误：Frontier 服务器繁忙";
+"Error: Frontier server is lagging" = "Hata: Frontier sunucusu gecikmesi";
 
 /* companion.py: Commander is docked at an EDO settlement, got out and back in, we forgot the station; In files: companion.py:261; */
-"Docked but unknown station: EDO Settlement?" = "已靠站但站点未知：可能是 ED: Odyssey 的地面设施？";
+"Docked but unknown station: EDO Settlement?" = "Kenetlendi ancak bilinmeyen istasyon: EDO yerleşimi?";
 
 /* companion.py: Generic "something went wrong with Frontier Auth" error; In files: companion.py:271; */
-"Error: Invalid Credentials" = "错误：无效的登录凭证";
+"Error: Invalid Credentials" = "Hata: Geçersiz Kimlik";
 
 /* companion.py: Frontier CAPI authorisation not for currently game-active commander; In files: companion.py:296; */
-"Error: Wrong Cmdr" = "错误：指挥官不一致";
+"Error: Wrong Cmdr" = "Hata: Yanlış CMDR";
 
 /* companion.py: Generic error prefix - following text is from Frontier auth service; In files: companion.py:432; companion.py:517; */
-"Error" = "错误";
+"Error" = "Hata";
 
 /* companion.py: Frontier auth, no 'usr' section in returned data; companion.py: Frontier auth, no 'customer_id' in 'usr' section in returned data; In files: companion.py:475; companion.py:480; */
-"Error: Couldn't check token customer_id" = "错误：无法检查 customer_id 令牌";
+"Error: Couldn't check token customer_id" = "Hata: token kontrol edilemedi customer_id";
 
 /* companion.py: Frontier auth customer_id doesn't match game session FID; In files: companion.py:486; */
-"Error: customer_id doesn't match!" = "错误：customer_id 不匹配！";
+"Error: customer_id doesn't match!" = "Hata: customer_id uyuşmuyor!";
 
 /* companion.py: Failed to get Access Token from Frontier Auth service; In files: companion.py:508; */
-"Error: unable to get token" = "错误：无法获取令牌";
+"Error: unable to get token" = "Hata: token erişilemedi";
 
 /* companion.py: Frontier CAPI returned 418, meaning down for maintenance; In files: companion.py:844; */
-"Frontier CAPI down for maintenance" = "Frontier CAPI 下线维护";
+"Frontier CAPI down for maintenance" = "Frontier CAPI bakım için kapalı durumda";
 
 /* companion.py: Frontier CAPI data retrieval failed; In files: companion.py:856; */
-"Frontier CAPI query failure" = "无法访问 Frontier CAPI";
+"Frontier CAPI query failure" = "Frontier CAPI sorgulama hatası";
 
 /* EDMarketConnector.py: Main UI Update button; EDMarketConnector.py: Update button in main window; In files: EDMarketConnector.py:601; EDMarketConnector.py:919; EDMarketConnector.py:1748; */
-"Update" = "更新";
+"Update" = "Güncelle";
 
 /* EDMarketConnector.py: Appearance - Label for checkbox to select if application always on top; prefs.py: Appearance - Label for checkbox to select if application always on top; In files: EDMarketConnector.py:710; prefs.py:875; */
-"Always on top" = "永远在最前";
+"Always on top" = "Her zaman üstte";
 
 /* EDMarketConnector.py: Unknown suit; In files: EDMarketConnector.py:837; */
-"Unknown" = "未知";
+"Unknown" = "Bilinmeyen";
 
 /* EDMarketConnector.py: ED Journal file location appears to be in error; In files: EDMarketConnector.py:906; */
-"Error: Check E:D journal file location" = "错误：请检查 E:D 日志文件位置";
+"Error: Check E:D journal file location" = "Hata: E:D günlük dosyası konumunu kontrol edin";
 
 /* EDMarketConnector.py: Label for commander name in main window; edsm.py: Game Commander name label in EDSM settings; stats.py: Cmdr stats; theme.py: Label for commander name in main window; In files: EDMarketConnector.py:913; edsm.py:332; stats.py:57; theme.py:290; */
-"Cmdr" = "指挥官";
+"Cmdr" = "Cmdr";
 
 /* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: Multicrew role label in main window; In files: EDMarketConnector.py:915; EDMarketConnector.py:1487; */
-"Role" = "角色";
+"Role" = "Rol";
 
 /* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: 'Ship' label in main UI; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:915; EDMarketConnector.py:1497; EDMarketConnector.py:1520; stats.py:405; */
-"Ship" = "飞船";
+"Ship" = "Gemi";
 
 /* EDMarketConnector.py: Label for 'Suit' line in main UI; In files: EDMarketConnector.py:916; */
-"Suit" = "套装";
+"Suit" = "Süit";
 
 /* EDMarketConnector.py: Label for 'System' line in main UI; prefs.py: Configuration - Label for selection of 'System' provider website; stats.py: Main window; In files: EDMarketConnector.py:917; prefs.py:614; stats.py:407; */
-"System" = "星系";
+"System" = "Sistem";
 
 /* EDMarketConnector.py: Label for 'Station' line in main UI; prefs.py: Configuration - Label for selection of 'Station' provider website; prefs.py: Appearance - Example 'Normal' text; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:918; prefs.py:632; prefs.py:770; stats.py:408; */
-"Station" = "站点";
+"Station" = "İstasyon";
 
 /* EDMarketConnector.py: 'File' menu title on OSX; EDMarketConnector.py: 'File' menu title; EDMarketConnector.py: 'File' menu; In files: EDMarketConnector.py:921; EDMarketConnector.py:939; EDMarketConnector.py:942; EDMarketConnector.py:2264; */
-"File" = "文件";
+"File" = "Dosya";
 
 /* EDMarketConnector.py: 'Edit' menu title on OSX; EDMarketConnector.py: 'Edit' menu title; In files: EDMarketConnector.py:922; EDMarketConnector.py:940; EDMarketConnector.py:943; */
-"Edit" = "编辑";
+"Edit" = "Düzenle";
 
 /* EDMarketConnector.py: 'View' menu title on OSX; In files: EDMarketConnector.py:923; */
-"View" = "显示";
+"View" = "Görüntüle";
 
 /* EDMarketConnector.py: 'Window' menu title on OSX; In files: EDMarketConnector.py:924; */
-"Window" = "窗口";
+"Window" = "Pencere";
 
 /* EDMarketConnector.py: Help' menu title on OSX; EDMarketConnector.py: 'Help' menu title; In files: EDMarketConnector.py:925; EDMarketConnector.py:941; EDMarketConnector.py:944; */
-"Help" = "帮助";
+"Help" = "Yardım";
 
 /* EDMarketConnector.py: App menu entry on OSX; EDMarketConnector.py: Help > About App; In files: EDMarketConnector.py:928; EDMarketConnector.py:959; EDMarketConnector.py:1804; */
-"About {APP}" = "关于 {APP}";
+"About {APP}" = "Hakkında {APP}";
 
 /* EDMarketConnector.py: Help > Check for Updates...; In files: EDMarketConnector.py:930; EDMarketConnector.py:958; */
-"Check for Updates..." = "检查版本更新…";
+"Check for Updates..." = "Güncellemeleri Denetle...";
 
 /* EDMarketConnector.py: File > Save Raw Data...; In files: EDMarketConnector.py:931; EDMarketConnector.py:948; */
-"Save Raw Data..." = "保存原始数据…";
+"Save Raw Data..." = "Ham Verileri Kaydet...";
 
 /* EDMarketConnector.py: File > Status; stats.py: Status dialog title; In files: EDMarketConnector.py:932; EDMarketConnector.py:947; stats.py:402; */
-"Status" = "状态";
+"Status" = "Durum";
 
 /* EDMarketConnector.py: Help > Documentation; In files: EDMarketConnector.py:933; EDMarketConnector.py:953; */
-"Documentation" = "帮助文档";
+"Documentation" = "Dokümantasyon";
 
 /* EDMarketConnector.py: Help > Troubleshooting; In files: EDMarketConnector.py:934; EDMarketConnector.py:954; */
-"Troubleshooting" = "故障排除";
+"Troubleshooting" = "Sorun giderme";
 
 /* EDMarketConnector.py: Help > Report A Bug; In files: EDMarketConnector.py:935; EDMarketConnector.py:955; */
-"Report A Bug" = "Bug 反馈";
+"Report A Bug" = "Hata Bildir";
 
 /* EDMarketConnector.py: Help > Privacy Policy; In files: EDMarketConnector.py:936; EDMarketConnector.py:956; */
-"Privacy Policy" = "隐私政策";
+"Privacy Policy" = "Gizlilik Politikası";
 
 /* EDMarketConnector.py: Help > Release Notes; In files: EDMarketConnector.py:937; EDMarketConnector.py:957; EDMarketConnector.py:1838; */
-"Release Notes" = "更新说明";
+"Release Notes" = "Sürüm notları";
 
 /* EDMarketConnector.py: File > Settings; prefs.py: File > Settings (macOS); In files: EDMarketConnector.py:949; EDMarketConnector.py:2265; prefs.py:241; */
-"Settings" = "设置";
+"Settings" = "Ayarlar";
 
 /* EDMarketConnector.py: File > Exit; In files: EDMarketConnector.py:950; */
-"Exit" = "退出";
+"Exit" = "Çıkış";
 
 /* EDMarketConnector.py: Label for 'Copy' as in 'Copy and Paste'; ttkHyperlinkLabel.py: Label for 'Copy' as in 'Copy and Paste'; In files: EDMarketConnector.py:962; ttkHyperlinkLabel.py:53; */
-"Copy" = "复制";
+"Copy" = "Kopyala";
 
 /* EDMarketConnector.py: CAPI auth aborted because of killswitch; EDMarketConnector.py: CAPI auth query aborted because of killswitch; In files: EDMarketConnector.py:973; EDMarketConnector.py:1067; */
-"CAPI auth disabled by killswitch" = "CAPI 验证被 killswitch 禁用";
+"CAPI auth disabled by killswitch" = "CAPI kimlik doğrulaması killswitch tarafından devre dışı bırakıldı";
 
 /* EDMarketConnector.py: Status - Attempting to get a Frontier Auth Access Token; In files: EDMarketConnector.py:978; */
-"Logging in..." = "登录中…";
+"Logging in..." = "Giriş yapılıyor...";
 
 /* EDMarketConnector.py: Successfully authenticated with the Frontier website; In files: EDMarketConnector.py:994; EDMarketConnector.py:1657; */
-"Authentication successful" = "身份验证成功";
+"Authentication successful" = "Kimlik doğrulama başarılı";
 
 /* EDMarketConnector.py: Player is not docked at a station, when we expect them to be; In files: EDMarketConnector.py:1025; */
-"You're not docked at a station!" = "你尚未靠站！";
+"You're not docked at a station!" = "Bir istasyona kenetli değilsiniz!";
 
 /* EDMarketConnector.py: Status - Either no market or no modules data for station from Frontier CAPI; In files: EDMarketConnector.py:1033; */
-"Station doesn't have anything!" = "此站点没有任何货物！";
+"Station doesn't have anything!" = "İstasyon içeriği mevcut değil.";
 
 /* EDMarketConnector.py: Status - No station market data from Frontier CAPI; In files: EDMarketConnector.py:1038; */
-"Station doesn't have a market!" = "此站点没有货物市场！";
+"Station doesn't have a market!" = "İstasyon'da market bulunmuyor!";
 
 /* EDMarketConnector.py: CAPI queries aborted because Cmdr name is unknown; EDMarketConnector.py: CAPI fleetcarrier query aborted because Cmdr name is unknown; In files: EDMarketConnector.py:1077; EDMarketConnector.py:1164; */
-"CAPI query aborted: Cmdr name unknown" = "CAPI 访问中止：指挥官名称未知";
+"CAPI query aborted: Cmdr name unknown" = "CAPI sorgusu iptal edildi: Cmdr adı bilinmiyor";
 
 /* EDMarketConnector.py: CAPI queries aborted because game mode unknown; In files: EDMarketConnector.py:1083; */
-"CAPI query aborted: Game mode unknown" = "CAPI 访问中止：游戏模式未知";
+"CAPI query aborted: Game mode unknown" = "CAPI sorgusu iptal edildi: Oyun modu bilinmiyor";
 
 /* EDMarketConnector.py: CAPI queries aborted because GameVersion unknown; EDMarketConnector.py: CAPI fleetcarrier query aborted because GameVersion unknown; In files: EDMarketConnector.py:1089; EDMarketConnector.py:1170; */
-"CAPI query aborted: GameVersion unknown" = "CAPI 访问中止：未知的游戏版本";
+"CAPI query aborted: GameVersion unknown" = "CAPI sorgusu iptal edildi: GameVersion bilinmiyor";
 
 /* EDMarketConnector.py: CAPI queries aborted because current star system name unknown; In files: EDMarketConnector.py:1095; */
-"CAPI query aborted: Current system unknown" = "CAPI 访问中止：现星系名称未知";
+"CAPI query aborted: Current system unknown" = "CAPI sorgusu iptal edildi: Mevcut sistem bilinmiyor";
 
 /* EDMarketConnector.py: CAPI queries aborted because player is in multi-crew on other Cmdr's ship; In files: EDMarketConnector.py:1101; */
-"CAPI query aborted: In other-ship multi-crew" = "CAPI 访问中止：正在他人飞船上进行多人共乘 (multi-crew)";
+"CAPI query aborted: In other-ship multi-crew" = "CAPI sorgusu iptal edildi: Başka gemi çoklu-mürettebatı";
 
 /* EDMarketConnector.py: CAPI queries aborted because player is in CQC (Arena); In files: EDMarketConnector.py:1107; */
-"CAPI query aborted: CQC (Arena) detected" = "CAPI 访问中止：检测到 CQC (Arena) 正在运行";
+"CAPI query aborted: CQC (Arena) detected" = "CAPI sorgusu iptal edildi: CQC (Arena) tespit edildi";
 
 /* EDMarketConnector.py: Status - Attempting to retrieve data from Frontier CAPI; In files: EDMarketConnector.py:1128; EDMarketConnector.py:1179; */
-"Fetching data..." = "取得数据…";
+"Fetching data..." = "Veri işleniyor...";
 
 /* EDMarketConnector.py: CAPI fleetcarrier query aborted because of killswitch; In files: EDMarketConnector.py:1157; */
-"CAPI fleetcarrier disabled by killswitch" = "CAPI 舰队母舰 (fleet carrier) 被 killswitch 禁用";
+"CAPI fleetcarrier disabled by killswitch" = "CAPI filo taşıyıcısı killswitch tarafından devre dışı bırakıldı";
 
 /* EDMarketConnector.py: No data was returned for the fleetcarrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
-"CAPI: No fleetcarrier data returned" = "CAPI：无舰队母舰 (fleet carrier) 数据";
+"CAPI: No fleetcarrier data returned" = "CAPI: Filo taşıyıcı verisi gelmedi.";
 
 /* EDMarketConnector.py: We didn't have the fleetcarrier callsign when we should have; In files: EDMarketConnector.py:1223; */
-"CAPI: Fleetcarrier data incomplete" = "CAPI：舰队母舰 (fleet carrier) 数据不完整";
+"CAPI: Fleetcarrier data incomplete" = "CAPI: Filo taşıyıcı verileri eksik";
 
 /* EDMarketConnector.py: No data was returned for the commander from the Frontier CAPI; In files: EDMarketConnector.py:1242; */
-"CAPI: No commander data returned" = "CAPI：没有指挥官数据";
+"CAPI: No commander data returned" = "CAPI: Cmdr verisi döndürülmedi";
 
 /* EDMarketConnector.py: We didn't have the commander name when we should have; stats.py: Unknown commander; In files: EDMarketConnector.py:1246; stats.py:333; */
-"Who are you?!" = "你是谁？！";
+"Who are you?!" = "Sen kimsin?!";
 
 /* EDMarketConnector.py: We don't know where the commander is, when we should; stats.py: Unknown location; In files: EDMarketConnector.py:1252; stats.py:341; */
-"Where are you?!" = "你在哪里？！";
+"Where are you?!" = "Neredesin?!";
 
 /* EDMarketConnector.py: We don't know what ship the commander is in, when we should; stats.py: Unknown ship; In files: EDMarketConnector.py:1259; stats.py:349; */
-"What are you flying?!" = "你在飞什么？！";
+"What are you flying?!" = "Ne uçuruyorsun?!";
 
 /* EDMarketConnector.py: Frontier CAPI server error when fetching data; In files: EDMarketConnector.py:1384; */
-"Frontier CAPI server error" = "Frontier CAPI 服务器错误";
+"Frontier CAPI server error" = "Frontier CAPI sunucu hatası";
 
 /* EDMarketConnector.py: Frontier CAPI Access Token expired, trying to get a new one; In files: EDMarketConnector.py:1390; */
-"CAPI: Refreshing access token..." = "CAPI：获取新的访问令牌中…";
+"CAPI: Refreshing access token..." = "CAPI: Erişim token yenileniyor...";
 
 /* EDMarketConnector.py: Time when we last obtained Frontier CAPI data; In files: EDMarketConnector.py:1434; */
-"Last updated at %H:%M:%S" = "最后更新于 %H:%M:%S";
+"Last updated at %H:%M:%S" = "Son güncelleme %H:%M:%S";
 
 /* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1462; */
-"Fighter" = "舰载机驾驶员";
+"Fighter" = "Avcı";
 
 /* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1463; */
-"Gunner" = "炮手";
+"Gunner" = "Nişancı";
 
 /* EDMarketConnector.py: Multicrew role; In files: EDMarketConnector.py:1464; */
-"Helm" = "舵手";
+"Helm" = "Dümen";
 
 /* EDMarketConnector.py: Cooldown on 'Update' button; In files: EDMarketConnector.py:1742; */
-"cooldown {SS}s" = "距离下次更新还有 {SS} 秒";
+"cooldown {SS}s" = "bekleme süresi {SS}s";
 
 /* EDMarketConnector.py: Generic 'OK' button label; prefs.py: 'OK' button on Settings/Preferences window; In files: EDMarketConnector.py:1864; prefs.py:292; */
-"OK" = "确定";
+"OK" = "Tamam";
 
 /* EDMarketConnector.py: The application is shutting down; In files: EDMarketConnector.py:1936; */
-"Shutting down..." = "应用关闭中…";
+"Shutting down..." = "Kapanıyor...";
 
 /* EDMarketConnector.py: Popup-text about 'active' plugins without Python 3.x support; In files: EDMarketConnector.py:2253:2259; */
-"One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "一项或多项你所启用的插件尚不支持 Python 3.x，详情请见 {FILE} > {SETTINGS} > {PLUGINS}。请检查上述插件是否有可用的更新，若没有，则应与插件的开发者就 Python 3.x 的支持问题取得联系。\n\n你也可以禁用某一项插件，只需在其文件夹名称的末尾添加 {DISABLED} 即可。";
+"One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "Etkin eklentilerinizden bir veya daha fazlası henüz Python 3.x desteğine sahip değil.  '{PLUGINS}' sekmesindeki '{FILE}' > '{SETTINGS}' bölümünde bulunan listeyi bulun. Güncellenmiş bir sürümün mevcut olup olmadığını kontrol edin, aksi takdirde geliştiriciyi Python 3.x kodunu güncellemesi gerektiği konusunda uyarmalısınız.\n\nBir eklentiyi, klasörünü adının sonunda '{DISABLED}' olacak şekilde yeniden adlandırarak devre dışı bırakabilirsiniz.";
+
+/* EDMarketConnector.py: Popup-text about missing FDEVID Files; In files: EDMarketConnector.py:2329; */
+"FDevID Files not found! Some functionality regarding commodities may be disabled.\r\n\r\n Do you want to open the Wiki page on how to set up submodules?" = "FDevID Dosyaları bulunamadı! Ürünlerle ilgili bazı işlevler devre dışı bırakılabilir.\n\nAlt modüllerin nasıl kurulacağına ilişkin Wiki sayfasını açmak ister misiniz?";
+
+/* EDMarketConnector.py: Popup window title for missing FDEVID files; In files: EDMarketConnector.py:2340; */
+"FDevIDs: Missing Commodity Files" = "FDevIDs: Eksik Ürün Dosyaları";
 
 /* EDMarketConnector.py: Settings > Plugins tab; prefs.py: Label on Settings > Plugins tab; In files: EDMarketConnector.py:2263; prefs.py:986; */
-"Plugins" = "插件";
+"Plugins" = "Eklentiler";
 
 /* EDMarketConnector.py: Popup window title for list of 'enabled' plugins that don't work with Python 3.x; In files: EDMarketConnector.py:2274; */
-"EDMC: Plugins Without Python 3.x Support" = "EDMC：不支持 Python 3.x 的插件";
+"EDMC: Plugins Without Python 3.x Support" = "EDMC: Python 3.x Desteği Olmayan Eklentiler";
+
+/* EDMarketConnector.py: Popup window title for list of 'broken' plugins that failed to load; In files: EDMarketConnector.py:2285; */
+"EDMC: Broken Plugins" = "EDMC: Bozuk Eklentiler";
+
+/* EDMarketConnector.py: Popup-text about 'broken' plugins that failed to load; In files: EDMarketConnector.py:2266; */
+"One or more of your enabled plugins failed to load. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. This could be caused by a wrong folder structure. The load.py file should be located under plugins/PLUGIN_NAME/load.py.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "Etkin eklentilerinizden bir veya daha fazlası yüklenemedi. '{PLUGINS}' sekmesindeki '{FILE}' > '{SETTINGS}' bölümünde bulunan listeyi bulun. Sorunun sebebi yanlış klasör yapısı olabilir. Load.py dosyası, plugins/PLUGIN_NAME/load.py altında bulunmalıdır.\n\nBir eklentiyi, klasörünü adının sonunda '{DISABLED}' olacak şekilde yeniden adlandırarak devre dışı bırakabilirsiniz.";
+
+/* EDMarketConnector.py: Popup-text about Reset Providers; In files: EDMarketConnector.py:2146; */
+"One or more of your URL Providers were invalid, and have been reset:\r\n\r\n" = "URL Sağlayıcılarınızdan bir veya daha fazlası geçersizdi ve sıfırlandı:";
+
+/* EDMarketConnector.py: Text About What Provider Was Reset; In files: EDMarketConnector.py:2148; */
+"{PROVIDER} was set to {OLDPROV}, and has been reset to {NEWPROV}\r\n" = "{PROVIDER} , {OLDPROV}'a ayarlanmıştı ancak {NEWPROV}'a sıfırlandı";
+
+/* EDMarketConnector.py: Popup window title for Reset Providers; In files: EDMarketConnector.py:2161; */
+"EDMC: Default Providers Reset" = "EDMC: Varsayılan Sağlayıcıların Sıfırlanması";
+
+/* EDMarketConnector.py: Await Full CMDR Login to Game; In files: EDMarketConnector.py:813; */
+"Awaiting Full CMDR Login" = "Tam CMDR Girişi Bekleniyor";
 
 /* journal_lock.py: Title text on popup when Journal directory already locked; In files: journal_lock.py:208; */
-"Journal directory already locked" = "日志目录已被锁定";
+"Journal directory already locked" = "Günlük dizini zaten kilitli";
 
 /* journal_lock.py: Text for when newly selected Journal directory is already locked; In files: journal_lock.py:225:226; */
-"The new Journal Directory location is already locked.{CR}You can either attempt to resolve this and then Retry, or choose to Ignore this." = "新的日志目录位置已被锁定。{CR}你可以尝试解锁并“重试”以解决此问题，或者选择“忽略”。";
+"The new Journal Directory location is already locked.{CR}You can either attempt to resolve this and then Retry, or choose to Ignore this." = "Yeni Günlük Dizini konumu zaten kilitli.{CR}Çözüm için Tekrar deneyebilir veya Yoksay'ı seçebilirsiniz.";
 
 /* journal_lock.py: Generic 'Retry' button label; In files: journal_lock.py:230; */
-"Retry" = "重试";
+"Retry" = "Tekrar Dene";
 
 /* journal_lock.py: Generic 'Ignore' button label; In files: journal_lock.py:234; */
-"Ignore" = "忽略";
+"Ignore" = "Yoksay";
 
 /* l10n.py: The system default language choice in Settings > Appearance; prefs.py: Settings > Configuration - Label on 'reset journal files location to default' button; prefs.py: The system default language choice in Settings > Appearance; prefs.py: Label for 'Default' theme radio button; In files: l10n.py:193; prefs.py:455; prefs.py:709; prefs.py:742; */
-"Default" = "默认";
+"Default" = "Varsayılan";
 
 /* coriolis.py: 'Auto' label for Coriolis site override selection; coriolis.py: Coriolis normal/beta selection - auto; In files: coriolis.py:48; coriolis.py:74; coriolis.py:77; coriolis.py:94; coriolis.py:123; coriolis.py:139; coriolis.py:145; coriolis.py:179; coriolis.py:182; */
-"Auto" = "自动";
+"Auto" = "Otomatik";
 
 /* coriolis.py: 'Normal' label for Coriolis site override selection; coriolis.py: Coriolis normal/beta selection - normal; In files: coriolis.py:49; coriolis.py:75; coriolis.py:95; coriolis.py:121; coriolis.py:137; coriolis.py:180; */
-"Normal" = "普通版";
+"Normal" = "Normal";
 
 /* coriolis.py: 'Beta' label for Coriolis site override selection; coriolis.py: Coriolis normal/beta selection - beta; In files: coriolis.py:50; coriolis.py:76; coriolis.py:96; coriolis.py:122; coriolis.py:138; coriolis.py:181; */
-"Beta" = "测试版";
+"Beta" = "Beta";
 
 /* coriolis.py: Settings>Coriolis: Help/hint for changing coriolis URLs; In files: coriolis.py:91:93; */
-"Set the URL to use with coriolis.io ship loadouts. Note that this MUST end with '/import?data='" = "设置链接以使用 coriolis.io 的飞船配置。注意，链接必须以 /import?data= 结尾";
+"Set the URL to use with coriolis.io ship loadouts. Note that this MUST end with '/import?data='" = "Coriolis.io gemi ekipman tasarımları ile kullanılacak URL'yi ayarlayın. Link'in '/import?data=' ile bitmesi GEREKTİĞİNİ unutmayın.";
 
 /* coriolis.py: Settings>Coriolis: Label for 'NOT alpha/beta game version' URL; In files: coriolis.py:97; */
-"Normal URL" = "普通版链接";
+"Normal URL" = "Normal URL";
 
 /* coriolis.py: Generic 'Reset' button label; In files: coriolis.py:100; coriolis.py:109; */
-"Reset" = "重置";
+"Reset" = "Sıfırla";
 
 /* coriolis.py: Settings>Coriolis: Label for 'alpha/beta game version' URL; In files: coriolis.py:106; */
-"Beta URL" = "测试版链接";
+"Beta URL" = "Beta URL";
 
 /* coriolis.py: Settings>Coriolis: Label for selection of using Normal, Beta or 'auto' Coriolis URL; In files: coriolis.py:116; */
-"Override Beta/Normal Selection" = "覆盖模式选项";
+"Override Beta/Normal Selection" = "Beta/Normal Seçimi Geçersiz Kıl";
 
 /* coriolis.py: Settings>Coriolis - invalid override mode found; In files: coriolis.py:156; */
-"Invalid Coriolis override mode!" = "无效的 Coriolis 覆盖模式！";
+"Invalid Coriolis override mode!" = "Geçersiz Coriolis geçersiz kılma modu!";
 
 /* eddn.py: Error while trying to send data to EDDN; In files: eddn.py:458; eddn.py:2413; eddn.py:2451; eddn.py:2519; */
-"Error: Can't connect to EDDN" = "错误：无法连接到 EDDN";
+"Error: Can't connect to EDDN" = "Hata: EDDN'e bağlanılamıyor";
 
 /* eddn.py: EDDN has banned this version of our client; In files: eddn.py:576; */
-"EDDN Error: EDMC is too old for EDDN. Please update." = "EDDN 错误：EDDN 禁止了此旧版本的 EDMC 应用。请更新应用。";
+"EDDN Error: EDMC is too old for EDDN. Please update." = "EDDN Hatası: EDMC sürümü EDDN için çok eski. Lütfen güncelle.";
 
 /* eddn.py: EDDN returned an error that indicates something about what we sent it was wrong; In files: eddn.py:582; */
-"EDDN Error: Validation Failed (EDMC Too Old?). See Log" = "EDDN 错误：数据有效性检查失败。可能是 EDMC 应用版本过旧，请查看诊断日志。";
+"EDDN Error: Validation Failed (EDMC Too Old?). See Log" = "EDDN Hatası: Doğrulama Başarısız Oldu (EDMC sürümü eski olabilir?). Günlüğe bakın";
 
 /* eddn.py: EDDN returned some sort of HTTP error, one we didn't expect. {STATUS} contains a number; In files: eddn.py:587; */
-"EDDN Error: Returned {STATUS} status code" = "EDDN 错误：返回错误代码 {STATUS}";
+"EDDN Error: Returned {STATUS} status code" = "EDDN Hatası: {STATUS} durum kodu ile döndü.";
 
 /* eddn.py: Enable EDDN support for station data checkbox label; In files: eddn.py:2041; */
-"Send station data to the Elite Dangerous Data Network" = "发送站点数据到 Elite Dangerous Data Network";
+"Send station data to the Elite Dangerous Data Network" = "İstasyon verilerini Elite Dangerous Data Network'e gönderin";
 
 /* eddn.py: Enable EDDN support for system and other scan data checkbox label; In files: eddn.py:2052; */
-"Send system and scan data to the Elite Dangerous Data Network" = "发送星系和扫描数据到 Elite Dangerous Data Network";
+"Send system and scan data to the Elite Dangerous Data Network" = "Sistem ve tarama verilerini Elite Dangerous Data Network'e gönderin";
 
 /* eddn.py: EDDN delay sending until docked option is on, this message notes that a send was skipped due to this; In files: eddn.py:2063; */
-"Delay sending until docked" = "延时更新，靠站时再发送";
+"Delay sending until docked" = "Kenetlenmeye kadar gönderimi ertele";
 
 /* eddn.py: Killswitch disabled EDDN; In files: eddn.py:2178; */
-"EDDN journal handler disabled. See Log." = "EDDN Journal Handler 已禁用。请查看诊断日志。";
+"EDDN journal handler disabled. See Log." = "EDDN günlük düzenleyici devre dışı. Kayıt geçmişini kontrol edin.";
 
 /* eddn.py: Status text shown while attempting to send data; In files: eddn.py:2507; */
-"Sending data to EDDN..." = "正在向 EDDN 发送数据…";
+"Sending data to EDDN..." = "Veriler EDDN'e gönderiliyor...";
 
 /* edsm.py: Settings>EDSM - Label on header/URL to EDSM API key page; In files: edsm.py:319; */
-"Elite Dangerous Star Map credentials" = "Elite Dangerous Star Map 授权凭证";
+"Elite Dangerous Star Map credentials" = "Elite Dangerous Star Map kimlik bilgileri";
 
 /* edsm.py: EDSM Commander name label in EDSM settings; In files: edsm.py:341; */
-"Commander Name" = "指挥官名称";
+"Commander Name" = "Cmdr ismi";
 
 /* edsm.py: EDSM API key label; inara.py: Inara API key label; In files: edsm.py:350; inara.py:278; */
-"API Key" = "API Key";
+"API Key" = "API Anahtarı";
 
 /* edsm.py: We have no data on the current commander; prefs.py: No hotkey/shortcut set; stats.py: No rank; In files: edsm.py:394; prefs.py:527; prefs.py:1157; prefs.py:1190; stats.py:154; stats.py:173; stats.py:192; stats.py:209; */
-"None" = "无";
+"None" = "Hiçbiri";
 
 /* edsm.py: EDSM plugin - Journal handling disabled by killswitch; In files: edsm.py:516; */
-"EDSM Handler disabled. See Log." = "EDSM Handler 已禁用。请查看诊断日志。";
+"EDSM Handler disabled. See Log." = "EDSM düzenleyici devre dışı. Kayıt geçmişini kontrol edin.";
 
 /* edsm.py: EDSM - Only Live data; In files: edsm.py:632; */
-"EDSM only accepts Live galaxy data" = "EDSM 只接受 Live 模式下的星系数据";
+"EDSM only accepts Live galaxy data" = "EDSM sadece canlı galaxy verilerini kabul eder";
 
 /* edsm.py: EDSM Plugin - Error message from EDSM API; In files: edsm.py:916; edsm.py:1048; */
-"Error: EDSM {MSG}" = "错误：EDSM {MSG}";
+"Error: EDSM {MSG}" = "Hata: EDSM {MSG}";
 
 /* edsm.py: EDSM Plugin - Error connecting to EDSM API; In files: edsm.py:953; edsm.py:1043; */
-"Error: Can't connect to EDSM" = "错误：无法连接到 EDSM";
+"Error: Can't connect to EDSM" = "Hata: EDSM'e bağlanılamıyor";
 
 /* inara.py: Checkbox to enable INARA API Usage; In files: inara.py:257; */
-"Send flight log and Cmdr status to Inara" = "发送航行日志和指挥官状态到 Inara";
+"Send flight log and Cmdr status to Inara" = "Uçuş günlüğünü ve Cmdr durumunu Inara'ya gönder";
 
 /* inara.py: Text for INARA API keys link ( goes to https://inara.cz/settings-api ); In files: inara.py:269; */
-"Inara credentials" = "Inara 授权凭证";
+"Inara credentials" = "Inara kimlik bilgileri";
 
 /* inara.py: The Inara API only accepts Live galaxy data, not Legacy galaxy data; inara.py: Inara - Only Live data; In files: inara.py:384; inara.py:386; */
-"Inara only accepts Live galaxy data" = "Inara 只接受 Live 模式下的星系数据";
+"Inara only accepts Live galaxy data" = "Inara sadece canlı galaxy verilerini kabul eder";
 
 /* inara.py: INARA support disabled via killswitch; In files: inara.py:395; */
-"Inara disabled. See Log." = "Inara 已禁用。请查看诊断日志。";
+"Inara disabled. See Log." = "Inara devre dışı. Kayıt geçmişini kontrol edin.";
 
 /* inara.py: INARA API returned some kind of error (error message will be contained in {MSG}); In files: inara.py:1650; inara.py:1663; */
-"Error: Inara {MSG}" = "错误：Inara {MSG}";
+"Error: Inara {MSG}" = "Hata: Inara {MSG}";
 
 /* prefs.py: File > Preferences menu entry for macOS; In files: prefs.py:237; */
-"Preferences" = "偏好";
+"Preferences" = "Tercihler";
 
 /* prefs.py: Settings > Output - choosing what data to save to files; In files: prefs.py:335; */
-"Please choose what data to save" = "请选择想要保存的数据";
+"Please choose what data to save" = "Lütfen hangi verilerin kaydedileceğini seçin";
 
 /* prefs.py: Settings > Output option; In files: prefs.py:341; */
-"Market data in CSV format file" = "货物市场数据，以 CSV 文件格式";
+"Market data in CSV format file" = "CSV formatında Market verileri";
 
 /* prefs.py: Settings > Output option; In files: prefs.py:350; */
-"Market data in Trade Dangerous format file" = "货物市场数据，以 Trade Dangerous 文件格式";
+"Market data in Trade Dangerous format file" = "Trade Dangerous formatında Market verileri";
 
 /* prefs.py: Settings > Output option; In files: prefs.py:360; */
-"Ship loadout" = "飞船配置";
+"Ship loadout" = "Gemi Ekipmanları";
 
 /* prefs.py: Settings > Output option; In files: prefs.py:370; */
-"Automatically update on docking" = "靠站时自动更新";
+"Automatically update on docking" = "Kenetlenme sırasında otomatik güncelle";
 
 /* prefs.py: Settings > Output - Label for "where files are located"; In files: prefs.py:379; prefs.py:398; */
-"File location" = "保存位置";
+"File location" = "Dosya konumu";
 
 /* prefs.py: macOS Preferences - files location selection button; In files: prefs.py:387; prefs.py:437; */
-"Change..." = "更改…";
+"Change..." = "Değiştir...";
 
 /* prefs.py: NOT-macOS Settings - files location selection button; prefs.py: NOT-macOS Setting - files location selection button; In files: prefs.py:390; prefs.py:440; */
-"Browse..." = "浏览…";
+"Browse..." = "Gezin...";
 
 /* prefs.py: Label for 'Output' Settings/Preferences tab; In files: prefs.py:405; */
-"Output" = "导出";
+"Output" = "Kayıt";
 
 /* prefs.py: Settings > Configuration - Label for Journal files location; In files: prefs.py:431; prefs.py:446; */
-"E:D journal file location" = "E:D 日志文件位置";
+"E:D journal file location" = "E:D günlük dosya konumu";
 
 /* prefs.py: Settings > Configuration - Label for CAPI section; In files: prefs.py:469; */
-"CAPI Settings" = "CAPI 设置";
+"CAPI Settings" = "CAPI ayarları";
 
 /* prefs.py: Configuration - Enable or disable the Fleet Carrier CAPI calls; In files: prefs.py:475; */
-"Enable Fleetcarrier CAPI Queries" = "开启舰队母舰 (fleet carrier) CAPI 访问";
+"Enable Fleetcarrier CAPI Queries" = "Filo Taşıyıcı CAPI sorgulamalarını etkinleştir";
 
 /* prefs.py: Hotkey/Shortcut settings prompt on OSX; In files: prefs.py:490; */
-"Keyboard shortcut" = "键盘快捷键";
+"Keyboard shortcut" = "Klavye Kısayolu";
 
 /* prefs.py: Hotkey/Shortcut settings prompt on Windows; In files: prefs.py:492; */
-"Hotkey" = "快捷键";
+"Hotkey" = "Kısayoltuşu";
 
 /* prefs.py: macOS Preferences > Configuration - restart the app message; In files: prefs.py:501; */
-"Re-start {APP} to use shortcuts" = "重启 {APP} 以使用快捷键";
+"Re-start {APP} to use shortcuts" = "Kısayolları kullanmak için {APP}'i yeniden başlat";
 
 /* prefs.py: macOS - Configuration - need to grant the app permission for keyboard shortcuts; In files: prefs.py:510; */
-"{APP} needs permission to use shortcuts" = "{APP} 需要权限以使用快捷键";
+"{APP} needs permission to use shortcuts" = "{APP}'nin kısayolları kullanabilmesi için izne ihtiyacı var";
 
 /* prefs.py: Shortcut settings button on OSX; In files: prefs.py:515; */
-"Open System Preferences" = "打开系统偏好设置";
+"Open System Preferences" = "Sistem Tercihlerini Aç";
 
 /* prefs.py: Configuration - Act on hotkey only when ED is in foreground; In files: prefs.py:538; */
-"Only when Elite: Dangerous is the active app" = "仅当 Elite: Dangerous 在前台运行时生效";
+"Only when Elite: Dangerous is the active app" = "Sadece Elite: Dangerous aktif uygulama olduğunda";
 
 /* prefs.py: Configuration - play sound when hotkey used; In files: prefs.py:549; */
-"Play sound" = "发出提示音";
+"Play sound" = "Ses çal";
 
 /* prefs.py: Configuration - disable checks for app updates when in-game; In files: prefs.py:564; */
-"Disable Automatic Application Updates Check when in-game" = "当我在玩游戏时，禁止此应用自动检查版本更新。";
+"Disable Automatic Application Updates Check when in-game" = "Otomatik Uygulama Güncellemelerini Oyun sırasında Devre Dışı Bırak";
 
 /* prefs.py: Label for preferred shipyard, system and station 'providers'; In files: prefs.py:577; */
-"Preferred websites" = "首选网站";
+"Preferred websites" = "Tercih edilen web siteleri";
 
 /* prefs.py: Label for Shipyard provider selection; In files: prefs.py:588; */
-"Shipyard" = "配船";
+"Shipyard" = "Tersane";
 
 /* prefs.py: Label for checkbox to utilise alternative Coriolis URL method; In files: prefs.py:600; */
-"Use alternate URL method" = "若链接过长无法打开，请勾选此项";
+"Use alternate URL method" = "Alternatif URL yöntemi kullan";
 
 /* prefs.py: Configuration - Label for selection of Log Level; In files: prefs.py:653; */
-"Log Level" = "诊断模式";
+"Log Level" = "Günlük Seviyesi";
 
 /* prefs.py: Label for 'Configuration' tab in Settings; In files: prefs.py:681; */
-"Configuration" = "通用";
+"Configuration" = "Yapılandırma";
 
 /* prefs.py: UI elements privacy section header in privacy tab of preferences; In files: prefs.py:690; */
-"Main UI privacy options" = "用户界面隐私选项";
+"Main UI privacy options" = "Ana Arayüz gizlilik seçenekleri";
 
 /* prefs.py: Hide private group owner name from UI checkbox; In files: prefs.py:695; */
-"Hide private group name in UI" = "在用户界面中隐藏私人组 (private group) 名称";
+"Hide private group name in UI" = "Özel grup ismini arayüzde gizle";
 
 /* prefs.py: Hide multicrew captain name from main UI checkbox; In files: prefs.py:699; */
-"Hide multi-crew captain name" = "在用户界面中隐藏多人共乘 (multi-crew) 时的舰长名称";
+"Hide multi-crew captain name" = "Çoklu-mürettebat ismini gizle";
 
 /* prefs.py: Preferences privacy tab title; In files: prefs.py:703; */
-"Privacy" = "隐私";
+"Privacy" = "Gizlilik";
 
 /* prefs.py: Label for Settings > Appeareance > selection of 'normal' text colour; In files: prefs.py:716; */
-"Normal text" = "普通文本";
+"Normal text" = "Normal metin";
 
 /* prefs.py: Label for Settings > Appeareance > selection of 'highlightes' text colour; In files: prefs.py:718; */
-"Highlighted text" = "重点文本";
+"Highlighted text" = "Vurgulanan metin";
 
 /* prefs.py: Appearance - Label for selection of application display language; In files: prefs.py:727; */
-"Language" = "语言";
+"Language" = "Dil";
 
 /* prefs.py: Label for Settings > Appearance > Theme selection; In files: prefs.py:737; */
-"Theme" = "主题";
+"Theme" = "Tema";
 
 /* prefs.py: Label for 'Dark' theme radio button; In files: prefs.py:749; */
-"Dark" = "深色";
+"Dark" = "Karanlık";
 
 /* prefs.py: Label for 'Transparent' theme radio button; In files: prefs.py:756; */
-"Transparent" = "透明";
+"Transparent" = "Şeffaflık";
 
 /* prefs.py: Appearance - Label for selection of UI scaling; In files: prefs.py:802; */
-"UI Scale Percentage" = "用户界面缩放比例";
+"UI Scale Percentage" = "Arayüz ölçek yüzdesi";
 
 /* prefs.py: Appearance - Help/hint text for UI scaling selection; In files: prefs.py:823; */
-"100 means Default{CR}Restart Required for{CR}changes to take effect!" = "100 为默认设置{CR}需要重启应用{CR}以使修改生效";
+"100 means Default{CR}Restart Required for{CR}changes to take effect!" = "100 Varsayılan değerdir. Değişikliklerin geçerli olması için {CR}Yeniden Başlatma Gereklidir{CR}!";
 
 /* prefs.py: Appearance - Label for selection of main window transparency; In files: prefs.py:833; */
-"Main window transparency" = "主窗口透明度";
+"Main window transparency" = "Ana pencere şeffaflığı";
 
 /* prefs.py: Appearance - Help/hint text for Main window transparency selection; In files: prefs.py:853:856; */
-"100 means fully opaque.{CR}Window is updated in real time" = "100 为完全不透明{CR}效果实时更新";
+"100 means fully opaque.{CR}Window is updated in real time" = "100 tamamen opak anlamına gelir.{CR}Pencere gerçek zamanlı olarak güncellenir";
 
 /* prefs.py: Appearance option for Windows "minimize to system tray"; In files: prefs.py:885; */
-"Minimize to system tray" = "最小化到系统托盘";
+"Minimize to system tray" = "Simge durumuna küçült";
 
 /* prefs.py: Label for Settings > Appearance tab; In files: prefs.py:893; */
-"Appearance" = "外观";
+"Appearance" = "Görünüm";
 
 /* prefs.py: Label for location of third-party plugins folder; In files: prefs.py:908; */
-"Plugins folder" = "插件文件夹";
+"Plugins folder" = "Eklentiler klasörü";
 
 /* prefs.py: Label on button used to open a filesystem folder; In files: prefs.py:915; */
-"Open" = "打开";
+"Open" = "Aç";
 
 /* prefs.py: Tip/label about how to disable plugins; In files: prefs.py:923; */
-"Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "提示：想要禁用某一项插件，{CR}你可以添加 {EXT} 到其文件夹名称中";
+"Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "İpucu: Bir eklentiyi, klasör adına{CR}'{EXT}' ekleyerek devre dışı bırakabilirsiniz";
 
 /* prefs.py: Label on list of enabled plugins; In files: prefs.py:934; */
-"Enabled Plugins" = "已启用插件";
+"Enabled Plugins" = "Etkin Eklentiler";
 
 /* prefs.py: Plugins - Label for list of 'enabled' plugins that don't work with Python 3.x; In files: prefs.py:954; */
-"Plugins Without Python 3.x Support" = "不支持 Python 3.x 的插件";
+"Plugins Without Python 3.x Support" = "Python 3.x Desteği Olmayan Eklentiler";
 
 /* prefs.py: Plugins - Label on URL to documentation about migrating plugins from Python 2.7; In files: prefs.py:962; */
-"Information on migrating plugins" = "关于插件迁移";
+"Information on migrating plugins" = "Eklentilerin taşınmasıyla ilgili bilgiler";
+
+/* prefs.py: Plugins - Label for list of 'broken' plugins that failed to load; In files: prefs.py:1039; */
+"Broken Plugins" = "Bozuk Eklentiler";
 
 /* prefs.py: Lable on list of user-disabled plugins; In files: prefs.py:977; */
-"Disabled Plugins" = "已禁用插件";
+"Disabled Plugins" = "Devre Dışı Eklentiler";
 
 /* stats.py: Cmdr stats; In files: stats.py:58; */
-"Balance" = "资金结余";
+"Balance" = "Bakiye";
 
 /* stats.py: Cmdr stats; In files: stats.py:59; */
-"Loan" = "贷款";
+"Loan" = "Borç";
 
 /* stats.py: Top rank; In files: stats.py:63; */
 "Elite" = "Elite";
@@ -491,31 +526,31 @@
 "Elite V" = "Elite V";
 
 /* stats.py: Ranking; In files: stats.py:74; */
-"Combat" = "战斗等级";
+"Combat" = "Combat";
 
 /* stats.py: Ranking; In files: stats.py:75; */
-"Trade" = "贸易等级";
+"Trade" = "Trade";
 
 /* stats.py: Ranking; In files: stats.py:76; */
-"Explorer" = "探索等级";
+"Explorer" = "Explorer";
 
 /* stats.py: Ranking; In files: stats.py:77; */
-"Mercenary" = "佣兵等级";
+"Mercenary" = "Mercenary";
 
 /* stats.py: Ranking; In files: stats.py:78; */
-"Exobiologist" = "生物学者等级";
+"Exobiologist" = "Exobiologist";
 
 /* stats.py: Ranking; In files: stats.py:79; */
-"CQC" = "竞技场等级";
+"CQC" = "CQC";
 
 /* stats.py: Ranking; In files: stats.py:80; */
-"Federation" = "联邦军衔";
+"Federation" = "Federation";
 
 /* stats.py: Ranking; In files: stats.py:81; */
-"Empire" = "帝国头衔";
+"Empire" = "Empire";
 
 /* stats.py: Ranking; In files: stats.py:82; */
-"Powerplay" = "势力";
+"Powerplay" = "Powerplay";
 
 /* stats.py: Combat rank; In files: stats.py:91; */
 "Harmless" = "Harmless";
@@ -740,29 +775,31 @@
 "King" = "King";
 
 /* stats.py: Power rank; In files: stats.py:193; */
-"Rating 1" = "Rating 1";
+"Rating 1" = "Reyting 1";
 
 /* stats.py: Power rank; In files: stats.py:194; */
-"Rating 2" = "Rating 2";
+"Rating 2" = "Reyting 2";
 
 /* stats.py: Power rank; In files: stats.py:195; */
-"Rating 3" = "Rating 3";
+"Rating 3" = "Reyting 3";
 
 /* stats.py: Power rank; In files: stats.py:196; */
-"Rating 4" = "Rating 4";
+"Rating 4" = "Reyting 4";
 
 /* stats.py: Power rank; In files: stats.py:197; */
-"Rating 5" = "Rating 5";
+"Rating 5" = "Reyting 5";
 
 /* stats.py: Current commander unknown when trying to use 'File' > 'Status'; In files: stats.py:315; */
-"Status: Don't yet know your Commander name" = "状态：暂时未知你的指挥官名称";
+"Status: Don't yet know your Commander name" = "Durum: Cmdr adınızı henüz bilmiyorum";
 
 /* stats.py: No Frontier CAPI data yet when trying to use 'File' > 'Status'; In files: stats.py:323; */
-"Status: No CAPI data yet" = "状态：暂无 CAPI 数据";
+"Status: No CAPI data yet" = "Durum: Henüz CAPI verisi yok";
 
 /* stats.py: Status dialog subtitle - CR value of ship; In files: stats.py:409; */
-"Value" = "价值";
+"Value" = "Değer";
 
 /* stats.py: Status dialog title; In files: stats.py:418; */
-"Ships" = "所有飞船";
+"Ships" = "Gemiler";
 
+/* update.py: Update Available Text; In files: update.py:229; */
+"{NEWVER} is available" = "{NEWVER} sürüm mevcut";

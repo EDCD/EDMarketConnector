@@ -6,6 +6,30 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
       in the source (not distributed with the Windows installer) for the
       currently used version.
 ---
+Release 5.10.4
+===
+This release contains updated dependencies, modules files, translations, and adds two new EDDN schemas. It also 
+adds Turkish translations to EDMC!
+
+We now sign our code! This does mean that built EXEs are now slightly modified on our developer's machines.
+For information on what this means, and opt-out options, please visit https://github.com/EDCD/EDMarketConnector/wiki/Code-Signing-and-EDMC
+
+**Changes and Enhancements**
+* Adds Turkish Translations to EDMC
+* Adds DockingDenied and DockingGranted EDDN Schemas
+* Updated FDevIDs Dependency
+* Updated Translations
+* Updated modules files to process several missing module types used for bug squishing or going fast
+* Updated Python Dependencies
+
+**Bug Fixes**
+* Fixed a bug on older Python versions which couldn't import updated type annotations
+
+**Plugin Developers**
+* modules.p and ships.p are deprecated, and slated for removal in 5.11+!
+* The `openurl()` function in ttkHyperlinkLabel has been deprecated,
+and slated for removal in 5.11+! Please migrate to `webbrowser.open()`.
+
 Release 5.10.3
 ===
 This release contains a bugfix for the shipyard outfitting parsing system and an update to the French translations. 

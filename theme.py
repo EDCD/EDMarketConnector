@@ -150,7 +150,7 @@ class _Theme:
         # the widget has explicit fg or bg attributes.
         assert isinstance(widget, (tk.BitmapImage, tk.Widget)), widget
         if not self.defaults:
-            # Can't initialise this til window is created       # Windows, MacOS
+            # Can't initialise this til window is created       # Windows
             self.defaults = {
                 'fg': tk.Label()['foreground'],         # SystemButtonText, systemButtonText
                 'bg': tk.Label()['background'],         # SystemButtonFace, White
@@ -268,8 +268,7 @@ class _Theme:
             # (Mostly) system colors
             style = ttk.Style()
             self.current = {
-                'background': (sys.platform == 'darwin' and 'systemMovableModalBackground' or
-                               style.lookup('TLabel', 'background')),
+                'background': (style.lookup('TLabel', 'background')),
                 'foreground': style.lookup('TLabel', 'foreground'),
                 'activebackground': (sys.platform == 'win32' and 'SystemHighlight' or
                                      style.lookup('TLabel', 'background', ['active'])),
@@ -366,8 +365,6 @@ class _Theme:
                 if 'bg' not in attribs:
                     widget['background'] = self.current['background']
                     widget['activebackground'] = self.current['activebackground']
-                    if sys.platform == 'darwin' and isinstance(widget, tk.Button):
-                        widget['highlightbackground'] = self.current['background']
 
                 if 'font' not in attribs:
                     widget['font'] = self.current['font']
@@ -426,21 +423,7 @@ class _Theme:
             return  # Don't need to mess with the window manager
         self.active = theme
 
-        if sys.platform == 'darwin':
-            from AppKit import NSAppearance, NSApplication, NSMiniaturizableWindowMask, NSResizableWindowMask
-            root.update_idletasks()  # need main window to be created
-            if theme == self.THEME_DEFAULT:
-                appearance = NSAppearance.appearanceNamed_('NSAppearanceNameAqua')
-
-            else:  # Dark (Transparent only on win32)
-                appearance = NSAppearance.appearanceNamed_('NSAppearanceNameDarkAqua')
-
-            for window in NSApplication.sharedApplication().windows():
-                window.setStyleMask_(window.styleMask() & ~(
-                    NSMiniaturizableWindowMask | NSResizableWindowMask))  # disable zoom
-                window.setAppearance_(appearance)
-
-        elif sys.platform == 'win32':
+        if sys.platform == 'win32':
             GWL_STYLE = -16  # noqa: N806 # ctypes
             WS_MAXIMIZEBOX = 0x00010000  # noqa: N806 # ctypes
             # tk8.5.9/win/tkWinWm.c:342
