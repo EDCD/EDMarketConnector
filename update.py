@@ -35,6 +35,7 @@ def check_for_fdev_updates(silent: bool = False) -> None:  # noqa: CCR001
 
     for file, url in files_urls:
         fdevid_file = pathlib.Path(config.respath_path / 'FDevIDs' / file)
+        fdevid_file.parent.mkdir(parents=True, exist_ok=True)
         try:
             with open(fdevid_file, newline='', encoding='utf-8') as f:
                 local_content = f.read()
