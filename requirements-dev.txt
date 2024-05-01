@@ -20,7 +20,7 @@ flake8-use-fstring==1.4
 
 mypy==1.9.0
 pep8-naming==0.13.3
-safety==3.0.1
+safety==3.2.0
 types-requests==2.31.0.20240311
 types-pkg-resources==0.1.3
 
