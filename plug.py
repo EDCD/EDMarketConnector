@@ -67,8 +67,8 @@ class Plugin:
                 filename = 'plugin_'
                 filename += name.encode(encoding='ascii', errors='replace').decode('utf-8').replace('.', '_')
                 spec = importlib.util.spec_from_file_location(filename, loadfile)
-
-                if spec is not None and spec.loader is not None:  # Check if spec and spec.loader are not None
+                # Replaces older load_module() code. Includes a safety check that the module name is set.
+                if spec is not None and spec.loader is not None:
                     module = importlib.util.module_from_spec(spec)
                     sys.modules[module.__name__] = module
                     spec.loader.exec_module(module)
