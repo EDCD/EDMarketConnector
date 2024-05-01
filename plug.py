@@ -47,14 +47,14 @@ last_error = LastError()
 class Plugin:
     """An EDMC plugin."""
 
-    def __init__(self, name: str, loadfile: str | None, plugin_logger: logging.Logger | None):
+    def __init__(self, name: str, loadfile: str | None, plugin_logger: logging.Logger | None):  # noqa: CCR001
         """
         Load a single plugin.
 
         :param name: Base name of the file being loaded from.
         :param loadfile: Full path/filename of the plugin.
         :param plugin_logger: The logging instance for this plugin to use.
-        :raises Exception: Typically ImportError or OSError
+        :raises Exception: Typically, ImportError or OSError
         """
         self.name: str = name  # Display name.
         self.folder: str | None = name  # basename of plugin folder. None for internal plugins.
@@ -66,19 +66,23 @@ class Plugin:
             try:
                 filename = 'plugin_'
                 filename += name.encode(encoding='ascii', errors='replace').decode('utf-8').replace('.', '_')
-                module = importlib.machinery.SourceFileLoader(
-                    filename,
-                    loadfile
-                ).load_module()
-                if getattr(module, 'plugin_start3', None):
-                    newname = module.plugin_start3(os.path.dirname(loadfile))
-                    self.name = str(newname) if newname else self.name
-                    self.module = module
-                elif getattr(module, 'plugin_start', None):
-                    logger.warning(f'plugin {name} needs migrating\n')
-                    PLUGINS_not_py3.append(self)
+                spec = importlib.util.spec_from_file_location(filename, loadfile)
+
+                if spec is not None and spec.loader is not None:  # Check if spec and spec.loader are not None
+                    module = importlib.util.module_from_spec(spec)
+                    sys.modules[module.__name__] = module
+                    spec.loader.exec_module(module)
+                    if getattr(module, 'plugin_start3', None):
+                        newname = module.plugin_start3(os.path.dirname(loadfile))
+                        self.name = str(newname) if newname else self.name
+                        self.module = module
+                    elif getattr(module, 'plugin_start', None):
+                        logger.warning(f'plugin {name} needs migrating\n')
+                        PLUGINS_not_py3.append(self)
+                    else:
+                        logger.error(f'plugin {name} has no plugin_start3() function')
                 else:
-                    logger.error(f'plugin {name} has no plugin_start3() function')
+                    logger.error(f'Failed to load Plugin "{name}" from file "{loadfile}"')
             except Exception:
                 logger.exception(f': Failed for Plugin "{name}"')
                 raise
