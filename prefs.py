@@ -5,6 +5,7 @@ from __future__ import annotations
 import contextlib
 import logging
 import pathlib
+import subprocess
 import sys
 import tempfile
 import tkinter as tk
@@ -48,6 +49,16 @@ def help_open_log_folder() -> None:
     elif sys.platform.startswith('linux'):
         # On Linux, use the "xdg-open" command to open the folder
         system(f'xdg-open "{logfile_loc}"')
+
+
+def help_open_system_profiler() -> None:
+    """Open the EDMC System Profiler."""
+    profiler_path = pathlib.Path(config.respath_path)
+    if getattr(sys, 'frozen', False):
+        profiler_path /= 'EDMCSystemProfiler.exe'
+        subprocess.run(profiler_path)
+    else:
+        subprocess.run(['python', "EDMC_System_Profiler.py"], shell=True)
 
 
 class PrefsVersion:

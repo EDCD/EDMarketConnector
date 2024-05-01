@@ -175,10 +175,19 @@ def build() -> None:
         ],
     }
 
+    checker_config: dict = {
+        "dest_base": "EDMCSystemProfiler",
+        "script": "EDMC_System_Profiler.py",
+        "icon_resources": [(0, f"{appname}.ico")],
+        "other_resources": [
+            (24, 1, pathlib.Path(f"resources/{appname}.manifest").read_text(encoding="UTF8"))
+        ],
+    }
+
     try:
         py2exe.freeze(
             version_info=version_info,
-            windows=[windows_config],
+            windows=[windows_config, checker_config],
             console=[console_config],
             data_files=data_files,
             options=options,
