@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-EDMC_System_Profiler.py - GUI or Command-Line Tool to Print Diagnostic Information about EDMC.
+EDMCSystemProfiler.py - GUI or Command-Line Tool to Print Diagnostic Information about EDMC.
 
 Copyright (c) EDCD, All Rights Reserved
 Licensed under the GNU General Public License.

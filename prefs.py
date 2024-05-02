@@ -58,7 +58,7 @@ def help_open_system_profiler() -> None:
         profiler_path /= 'EDMCSystemProfiler.exe'
         subprocess.run(profiler_path)
     else:
-        subprocess.run(['python', "EDMC_System_Profiler.py"], shell=True)
+        subprocess.run(['python', "EDMCSystemProfiler.py"], shell=True)
 
 
 class PrefsVersion:

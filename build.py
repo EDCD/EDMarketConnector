@@ -177,7 +177,7 @@ def build() -> None:
 
     checker_config: dict = {
         "dest_base": "EDMCSystemProfiler",
-        "script": "EDMC_System_Profiler.py",
+        "script": "EDMCSystemProfiler.py",
         "icon_resources": [(0, f"{appname}.ico")],
         "other_resources": [
             (24, 1, pathlib.Path(f"resources/{appname}.manifest").read_text(encoding="UTF8"))
