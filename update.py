@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING
 from xml.etree import ElementTree
 import requests
 import semantic_version
-from config import appname, appversion_nobuild, config, update_feed
+from config import appname, appversion_nobuild, config, get_update_feed
 from EDMCLogging import get_main_logger
 from l10n import translations as tr
 
@@ -90,7 +90,7 @@ class Updater:
                 self.updater: ctypes.CDLL | None = ctypes.cdll.WinSparkle
 
                 # Set the appcast URL
-                self.updater.win_sparkle_set_appcast_url(update_feed.encode())
+                self.updater.win_sparkle_set_appcast_url(get_update_feed().encode())
 
                 # Set the appversion *without* build metadata, as WinSparkle
                 # doesn't do proper Semantic Version checks.
@@ -146,7 +146,7 @@ class Updater:
         newversion = None
         items = {}
         try:
-            request = requests.get(update_feed, timeout=10)
+            request = requests.get(get_update_feed(), timeout=10)
 
         except requests.RequestException as ex:
             logger.exception(f'Error retrieving update_feed file: {ex}')

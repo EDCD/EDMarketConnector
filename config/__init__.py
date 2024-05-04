@@ -17,7 +17,6 @@ __all__ = [
     'applongname',
     'appcmdname',
     'copyright',
-    'update_feed',
     'update_interval',
     'debug_senders',
     'trace_on',
@@ -29,7 +28,9 @@ __all__ = [
     'user_agent',
     'appversion_nobuild',
     'AbstractConfig',
-    'config'
+    'config',
+    'get_update_feed',
+    'update_feed'
 ]
 
 import abc
@@ -58,7 +59,7 @@ _static_appversion = '5.10.4'
 _cached_version: semantic_version.Version | None = None
 copyright = '© 2015-2019 Jonathan Harris, 2020-2024 EDCD'
 
-update_feed = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml'
+
 update_interval = 8*60*60  # 8 Hours
 # Providers marked to be in debug mode. Generally this is expected to switch to sending data to a log file
 debug_senders: list[str] = []
@@ -479,3 +480,17 @@ def get_config(*args, **kwargs) -> AbstractConfig:
 
 
 config = get_config()
+
+
+# TODO: Set Proper Beta XML, Bring XML from Releases to Live, Translations, wiki on Updates (WILL NOT DOWNGRADE), link in label
+def get_update_feed() -> str:
+    """Select the proper update feed for the current update track."""
+    if config.get_bool('beta_optin'):
+        print("Checking Using Beta")
+        return 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml'
+    print("Checking Live")
+    return 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml'
+
+
+# TODO: Add Dep Warning
+update_feed = get_update_feed()

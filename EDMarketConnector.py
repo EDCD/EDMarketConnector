@@ -829,7 +829,7 @@ class AppWindow:
             self.suit.grid_forget()
             self.suit_shown = False
 
-    def postprefs(self, dologin: bool = True):
+    def postprefs(self, dologin: bool = True, **postargs):
         """Perform necessary actions after the Preferences dialog is applied."""
         self.prefsdialog = None
         self.set_labels()  # in case language has changed
@@ -852,6 +852,11 @@ class AppWindow:
 
         if dologin and monitor.cmdr:
             self.login()  # Login if not already logged in with this Cmdr
+
+        if postargs.get('Update') and postargs.get('Track'):
+            # LANG: Inform the user the Update Track has changed
+            self.status['text'] = tr.tl('Update Track Changed to {TRACK}').format(TRACK=postargs.get('Track'))
+            self.updater.check_for_updates()
 
     def set_labels(self):
         """Set main window labels, e.g. after language change."""
