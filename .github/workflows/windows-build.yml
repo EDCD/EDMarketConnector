@@ -71,7 +71,7 @@ jobs:
   windows_build:
     needs: [variables]
     name: Build EDMC
-    runs-on: windows-2019
+    runs-on: windows-latest
 
     defaults:
       run:
