@@ -482,15 +482,13 @@ def get_config(*args, **kwargs) -> AbstractConfig:
 config = get_config()
 
 
-# TODO: Set Proper Beta XML, Bring XML from Releases to Live, Translations, wiki on Updates (WILL NOT DOWNGRADE), link in label
+# TODO: Wiki on Updates (WILL NOT DOWNGRADE)
 def get_update_feed() -> str:
     """Select the proper update feed for the current update track."""
     if config.get_bool('beta_optin'):
-        print("Checking Using Beta")
-        return 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml'
-    print("Checking Live")
+        return 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/beta/edmarketconnector.xml'
     return 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml'
 
 
-# TODO: Add Dep Warning
+# WARNING: update_feed is deprecated, and will be removed in 6.0 or later. Please migrate to get_update_feed()
 update_feed = get_update_feed()

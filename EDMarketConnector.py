@@ -854,9 +854,27 @@ class AppWindow:
             self.login()  # Login if not already logged in with this Cmdr
 
         if postargs.get('Update') and postargs.get('Track'):
+            track = postargs.get('Track')
             # LANG: Inform the user the Update Track has changed
-            self.status['text'] = tr.tl('Update Track Changed to {TRACK}').format(TRACK=postargs.get('Track'))
+            self.status['text'] = tr.tl('Update Track Changed to {TRACK}').format(TRACK=track)
             self.updater.check_for_updates()
+            if track == "Stable":
+                # LANG: Inform the user the Update Track has changed
+                title = tr.tl('Update Track Changed to {TRACK}').format(TRACK=track)
+                update_msg = tr.tl(  # LANG: Inform User of Beta -> Stable Transition Risks
+                    'Update track changed to Stable from Beta. '
+                    'You will no longer receive Beta updates. You will stay on your current Beta '
+                    r'version until the next Stable release.\r\n\r\n'
+                    'You can manually revert to the latest Stable version. To do so, you must download and install '
+                    'the latest Stable version manually. Note that this may introduce bugs or break completely'
+                    r' if downgrading between major versions with significant changes.\r\n\r\n'
+                    'Do you want to open GitHub to download the latest release?'
+                )
+                update_msg = update_msg.replace('\\n', '\n')
+                update_msg = update_msg.replace('\\r', '\r')
+                stable_popup = tk.messagebox.askyesno(title=title, message=update_msg)
+                if stable_popup:
+                    webbrowser.open("https://github.com/edCD/eDMarketConnector/releases/latest")
 
     def set_labels(self):
         """Set main window labels, e.g. after language change."""
