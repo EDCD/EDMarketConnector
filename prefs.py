@@ -505,7 +505,7 @@ class PreferencesDialog(tk.Toplevel):
             )
             self.curr_update_track = "Beta" if config.get_bool('beta_optin') else "Stable"
             self.update_paths = tk.StringVar(value=self.curr_update_track)
-            # TODO: LANG
+
             update_paths = [
                 tr.tl("Stable"),  # LANG: Stable Version of EDMC
                 tr.tl("Beta")  # LANG: Beta Version of EDMC

@@ -482,7 +482,7 @@ def get_config(*args, **kwargs) -> AbstractConfig:
 config = get_config()
 
 
-# TODO: Wiki on Updates (WILL NOT DOWNGRADE)
+# Wiki: https://github.com/EDCD/EDMarketConnector/wiki/Participating-in-Open-Betas-of-EDMC
 def get_update_feed() -> str:
     """Select the proper update feed for the current update track."""
     if config.get_bool('beta_optin'):
