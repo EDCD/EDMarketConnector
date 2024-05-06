@@ -105,6 +105,7 @@ jobs:
         with:
           python-version-file: '.python-version'
           architecture: "x86"
+          cache: 'pip' # caching pip dependencies
 
       - name: Install python tools
         run: |
