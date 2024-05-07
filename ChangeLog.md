@@ -24,6 +24,11 @@ be added in a future update.
 * Fixed a bug where the new SCO modules would display as a normal Frame Shift Drive
 * Fixed a bug which could crash EDMC if the exact details of a Frame Shift Drive were unknown
 
+**Plugin Developers**
+* modules.p and ships.p are deprecated, and slated for removal in 5.11+!
+* The `openurl()` function in ttkHyperlinkLabel has been deprecated,
+and slated for removal in 5.11+! Please migrate to `webbrowser.open()`.
+
 Release 5.10.4
 ===
 This release contains updated dependencies, modules files, translations, and adds two new EDDN schemas. It also 
