@@ -213,11 +213,35 @@
 /* EDMarketConnector.py: Popup-text about 'active' plugins without Python 3.x support; In files: EDMarketConnector.py:2253:2259; */
 "One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "Co najmniej jeden z uruchomionych pluginów nie wspiera Python 3.x. Sprawdź listę w '{FILE}' > '{SETTINGS}', sekcja '{PLUGINS}'. Upewnij się, że dostępna jest aktualna wersja pluginu, w przeciwnym razie poinformuj twórcę, że należy zaktualizować kod do wersji Python 3.x.\n\nMożesz wyłączyć plugin, dodając '{DISABLED}' na koniec nazwy jego folderu.";
 
+/* EDMarketConnector.py: Popup-text about missing FDEVID Files; In files: EDMarketConnector.py:2329; */
+"FDevID Files not found! Some functionality regarding commodities may be disabled.\r\n\r\n Do you want to open the Wiki page on how to set up submodules?" = "Pliki FDevID nie znalezione. Część funkcjonalności związanej z materiałami może nie działać. \n\nChcesz otworzyć stronę Wiki dotyczacą konfiguracji podmodułów?";
+
+/* EDMarketConnector.py: Popup window title for missing FDEVID files; In files: EDMarketConnector.py:2340; */
+"FDevIDs: Missing Commodity Files" = "FDevIDs: Brakuje plików z towarami.";
+
 /* EDMarketConnector.py: Settings > Plugins tab; prefs.py: Label on Settings > Plugins tab; In files: EDMarketConnector.py:2263; prefs.py:986; */
 "Plugins" = "Pluginy";
 
 /* EDMarketConnector.py: Popup window title for list of 'enabled' plugins that don't work with Python 3.x; In files: EDMarketConnector.py:2274; */
 "EDMC: Plugins Without Python 3.x Support" = "EDMC: Pluginy Nie Wspierające Python 3.x";
+
+/* EDMarketConnector.py: Popup window title for list of 'broken' plugins that failed to load; In files: EDMarketConnector.py:2285; */
+"EDMC: Broken Plugins" = "EDMC: Uszkodzone pluginy";
+
+/* EDMarketConnector.py: Popup-text about 'broken' plugins that failed to load; In files: EDMarketConnector.py:2266; */
+"One or more of your enabled plugins failed to load. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. This could be caused by a wrong folder structure. The load.py file should be located under plugins/PLUGIN_NAME/load.py.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "Jeden lub więcej plugin nie został załadowany. Sprawdź listę na zakładce '{PLUGINS}' w menu '{FILE}' > '{SETTINGS}'. Może to być spowodowane błedną strukturą katalogów. Plik load.py powinien być umiezczony w plugins/NAZWA PLUGINA/load.py.\n\nMożesz wyłączyć plugin zmieniając nazwę jego folderu tak, aby zawierała '{DISABLED}' na końcu nazwy.";
+
+/* EDMarketConnector.py: Popup-text about Reset Providers; In files: EDMarketConnector.py:2146; */
+"One or more of your URL Providers were invalid, and have been reset:\r\n\r\n" = "Jeden lub więcej adres URL jest błędny i został zresetowany:\n";
+
+/* EDMarketConnector.py: Text About What Provider Was Reset; In files: EDMarketConnector.py:2148; */
+"{PROVIDER} was set to {OLDPROV}, and has been reset to {NEWPROV}\r\n" = "{PROVIDER} ustawiony na {OLDPROV} i został zresetowany do {NEWPROV}\n";
+
+/* EDMarketConnector.py: Popup window title for Reset Providers; In files: EDMarketConnector.py:2161; */
+"EDMC: Default Providers Reset" = "EDMC: Dostawca domyślny zresetowany";
+
+/* EDMarketConnector.py: Await Full CMDR Login to Game; In files: EDMarketConnector.py:813; */
+"Awaiting Full CMDR Login" = "Oczekiwanie na pełne zalogowanie do gry";
 
 /* journal_lock.py: Title text on popup when Journal directory already locked; In files: journal_lock.py:208; */
 "Journal directory already locked" = "Katalog dziennika zablokowany";
@@ -470,6 +494,9 @@
 
 /* prefs.py: Plugins - Label on URL to documentation about migrating plugins from Python 2.7; In files: prefs.py:962; */
 "Information on migrating plugins" = "Informacja o migracji pluginów";
+
+/* prefs.py: Plugins - Label for list of 'broken' plugins that failed to load; In files: prefs.py:1039; */
+"Broken Plugins" = "Niedziałające pluginy";
 
 /* prefs.py: Lable on list of user-disabled plugins; In files: prefs.py:977; */
 "Disabled Plugins" = "Pluginy wyłączone";
@@ -774,3 +801,5 @@
 /* stats.py: Status dialog title; In files: stats.py:418; */
 "Ships" = "Statki";
 
+/* update.py: Update Available Text; In files: update.py:229; */
+"{NEWVER} is available" = "Dostępna nowa wersja {NEWVER}";
