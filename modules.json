@@ -326,6 +326,9 @@
     "hpt_antiunknownshutdown_tiny": {
         "mass": 1.3
     },
+    "hpt_antiunknownshutdown_tiny_v2": {
+        "mass": 3
+    },
     "hpt_atdumbfiremissile_fixed_large": {
         "mass": 8
     },
@@ -445,6 +448,9 @@
     },
     "hpt_causticmissile_fixed_medium": {
         "mass": 4
+    },
+    "hpt_causticsinklauncher_turret_tiny": {
+        "mass": 1.7
     },
     "hpt_chafflauncher_tiny": {
         "mass": 1.3
@@ -832,6 +838,9 @@
     },
     "hpt_slugshot_turret_small": {
         "mass": 2
+    },
+    "hpt_xenoscanner_advanced_tiny": {
+        "mass": 3
     },
     "hpt_xenoscanner_basic_tiny": {
         "mass": 1.3
@@ -1351,6 +1360,12 @@
     },
     "int_engine_size8_class5": {
         "mass": 160
+    },
+    "int_expmodulestabiliser_size3_class3": {
+        "mass": 8
+    },
+    "int_expmodulestabiliser_size5_class3": {
+        "mass": 20
     },
     "int_fighterbay_size5_class1": {
         "mass": 20

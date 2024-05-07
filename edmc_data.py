@@ -357,7 +357,7 @@ outfitting_standard_map = {
     'guardianpowerdistributor':     'Guardian Hybrid Power Distributor',
     'guardianpowerplant':           'Guardian Hybrid Power Plant',
     'hyperdrive':                   'Frame Shift Drive',
-    ('hyperdrive', 'overcharge'):   'Frame Shift Drive',
+    ('hyperdrive', 'overcharge'):   'Frame Shift Drive (SCO)',
     'lifesupport':                  'Life Support',
     # 'planetapproachsuite':        handled separately
     'powerdistributor':             'Power Distributor',
@@ -501,6 +501,7 @@ ship_name_map = {
     'mamba':                        'Mamba',
     'orca':                         'Orca',
     'python':                       'Python',
+    'python_nx':                    'Python Mk II',
     'scout':                        'Taipan Fighter',
     'sidewinder':                   'Sidewinder',
     'testbuggy':                    'Scarab',
