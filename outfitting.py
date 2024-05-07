@@ -224,7 +224,7 @@ def lookup(module, ship_map, entitled=False) -> dict | None:  # noqa: C901, CCR0
             (new['class'], new['rating']) = (str(name[2][4:]), 'H')
 
         elif len(name) > 4 and name[1] == 'hyperdrive':  # e.g. Int_Hyperdrive_Overcharge_Size6_Class3
-            (new['class'], new['rating']) = (str(name[4][-1:]), 'C')
+            (new['class'], new['rating']) = (str(name[3][-1:]), rating_map[name[4][-1:]])
 
         else:
             if len(name) < 3:
@@ -259,7 +259,7 @@ def lookup(module, ship_map, entitled=False) -> dict | None:  # noqa: C901, CCR0
         if not m:
             print(f'No data for module {key}')
 
-        elif new['name'] == 'Frame Shift Drive':
+        elif new['name'] == 'Frame Shift Drive' or new['name'] == 'Frame Shift Drive (SCO)':
             assert 'mass' in m and 'optmass' in m and 'maxfuel' in m and 'fuelmul' in m and 'fuelpower' in m, m
 
         else:

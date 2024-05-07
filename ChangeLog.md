@@ -6,6 +6,29 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
       in the source (not distributed with the Windows installer) for the
       currently used version.
 ---
+Release 5.10.5
+===
+This release contains a fix for a bug that could crash EDMC's console versions when reading outfitting information
+from the new SCO Frame Shift Drive modules. 
+
+Please note that this does not offer full support for the new SCO modules or the Python Mk II. More support will
+be added in a future update.
+
+**Changes and Enhancements**
+* Updated Translations
+* Added limited data regarding the Python Mk II
+* Added a few Coriolis module information entries
+
+**Bug Fixes**
+* Fixed a bug that could cause the new SCO modules to display improper ratings or sizes
+* Fixed a bug where the new SCO modules would display as a normal Frame Shift Drive
+* Fixed a bug which could crash EDMC if the exact details of a Frame Shift Drive were unknown
+
+**Plugin Developers**
+* modules.p and ships.p are deprecated, and slated for removal in 5.11+!
+* The `openurl()` function in ttkHyperlinkLabel has been deprecated,
+and slated for removal in 5.11+! Please migrate to `webbrowser.open()`.
+
 Release 5.10.4
 ===
 This release contains updated dependencies, modules files, translations, and adds two new EDDN schemas. It also 
