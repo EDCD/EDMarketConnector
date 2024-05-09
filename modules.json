@@ -1765,6 +1765,216 @@
     "int_hullreinforcement_size5_class2": {
         "mass": 16
     },
+    "int_hyperdrive_overcharge_size2_class1": {
+        "mass": 2.5,
+        "optmass": 60,
+        "maxfuel": 0.6,
+        "fuelmul": 0.008,
+        "fuelpower": 2
+    },
+    "int_hyperdrive_overcharge_size2_class2": {
+        "mass": 2.5,
+        "optmass": 90,
+        "maxfuel": 0.9,
+        "fuelmul": 0.012,
+        "fuelpower": 2
+    },
+    "int_hyperdrive_overcharge_size2_class3": {
+        "mass": 2.5,
+        "optmass": 90,
+        "maxfuel": 0.9,
+        "fuelmul": 0.012,
+        "fuelpower": 2
+    },
+    "int_hyperdrive_overcharge_size2_class4": {
+        "mass": 2.5,
+        "optmass": 90,
+        "maxfuel": 0.9,
+        "fuelmul": 0.012,
+        "fuelpower": 2
+    },
+    "int_hyperdrive_overcharge_size2_class5": {
+        "mass": 2.5,
+        "optmass": 100,
+        "maxfuel": 1,
+        "fuelmul": 0.013,
+        "fuelpower": 2
+    },
+    "int_hyperdrive_overcharge_size3_class1": {
+        "mass": 5,
+        "optmass": 100,
+        "maxfuel": 1.2,
+        "fuelmul": 0.008,
+        "fuelpower": 2.15
+    },
+    "int_hyperdrive_overcharge_size3_class2": {
+        "mass": 2,
+        "optmass": 150,
+        "maxfuel": 1.8,
+        "fuelmul": 0.012,
+        "fuelpower": 2.15
+    },
+    "int_hyperdrive_overcharge_size3_class3": {
+        "mass": 5,
+        "optmass": 150,
+        "maxfuel": 1.8,
+        "fuelmul": 0.012,
+        "fuelpower": 2.15
+    },
+    "int_hyperdrive_overcharge_size3_class4": {
+        "mass": 5,
+        "optmass": 150,
+        "maxfuel": 1.8,
+        "fuelmul": 0.012,
+        "fuelpower": 2.15
+    },
+    "int_hyperdrive_overcharge_size3_class5": {
+        "mass": 5,
+        "optmass": 167,
+        "maxfuel": 1.9,
+        "fuelmul": 0.013,
+        "fuelpower": 2.15
+    },
+    "int_hyperdrive_overcharge_size4_class1": {
+        "mass": 10,
+        "optmass": 350,
+        "maxfuel": 2,
+        "fuelmul": 0.008,
+        "fuelpower": 2.3
+    },
+    "int_hyperdrive_overcharge_size4_class2": {
+        "mass": 4,
+        "optmass": 525,
+        "maxfuel": 3,
+        "fuelmul": 0.012,
+        "fuelpower": 2.3
+    },
+    "int_hyperdrive_overcharge_size4_class3": {
+        "mass": 10,
+        "optmass": 525,
+        "maxfuel": 3,
+        "fuelmul": 0.012,
+        "fuelpower": 2.3
+    },
+    "int_hyperdrive_overcharge_size4_class4": {
+        "mass": 10,
+        "optmass": 525,
+        "maxfuel": 3,
+        "fuelmul": 0.012,
+        "fuelpower": 2.3
+    },
+    "int_hyperdrive_overcharge_size4_class5": {
+        "mass": 10,
+        "optmass": 585,
+        "maxfuel": 3.2,
+        "fuelmul": 0.013,
+        "fuelpower": 2.3
+    },
+    "int_hyperdrive_overcharge_size5_class1": {
+        "mass": 20,
+        "optmass": 700,
+        "maxfuel": 3.3,
+        "fuelmul": 0.008,
+        "fuelpower": 2.45
+    },
+    "int_hyperdrive_overcharge_size5_class2": {
+        "mass": 8,
+        "optmass": 1050,
+        "maxfuel": 5,
+        "fuelmul": 0.012,
+        "fuelpower": 2.45
+    },
+    "int_hyperdrive_overcharge_size5_class3": {
+        "mass": 20,
+        "optmass": 1050,
+        "maxfuel": 5,
+        "fuelmul": 0.012,
+        "fuelpower": 2.45
+    },
+    "int_hyperdrive_overcharge_size5_class4": {
+        "mass": 20,
+        "optmass": 1050,
+        "maxfuel": 5,
+        "fuelmul": 0.012,
+        "fuelpower": 2.45
+    },
+    "int_hyperdrive_overcharge_size5_class5": {
+        "mass": 20,
+        "optmass": 1175,
+        "maxfuel": 5.2,
+        "fuelmul": 0.013,
+        "fuelpower": 2.45
+    },
+    "int_hyperdrive_overcharge_size6_class1": {
+        "mass": 40,
+        "optmass": 1200,
+        "maxfuel": 5.3,
+        "fuelmul": 0.008,
+        "fuelpower": 2.6
+    },
+    "int_hyperdrive_overcharge_size6_class2": {
+        "mass": 16,
+        "optmass": 1800,
+        "maxfuel": 8,
+        "fuelmul": 0.012,
+        "fuelpower": 2.6
+    },
+    "int_hyperdrive_overcharge_size6_class3": {
+        "mass": 40,
+        "optmass": 1800,
+        "maxfuel": 8,
+        "fuelmul": 0.012,
+        "fuelpower": 2.6
+    },
+    "int_hyperdrive_overcharge_size6_class4": {
+        "mass": 40,
+        "optmass": 1800,
+        "maxfuel": 8,
+        "fuelmul": 0.012,
+        "fuelpower": 2.6
+    },
+    "int_hyperdrive_overcharge_size6_class5": {
+        "mass": 40,
+        "optmass": 2000,
+        "maxfuel": 8.3,
+        "fuelmul": 0.013,
+        "fuelpower": 2.6
+    },
+    "int_hyperdrive_overcharge_size7_class1": {
+        "mass": 80,
+        "optmass": 1800,
+        "maxfuel": 8.5,
+        "fuelmul": 0.008,
+        "fuelpower": 2.75
+    },
+    "int_hyperdrive_overcharge_size7_class2": {
+        "mass": 32,
+        "optmass": 2700,
+        "maxfuel": 12.8,
+        "fuelmul": 0.012,
+        "fuelpower": 2.75
+    },
+    "int_hyperdrive_overcharge_size7_class3": {
+        "mass": 80,
+        "optmass": 2700,
+        "maxfuel": 12.8,
+        "fuelmul": 0.012,
+        "fuelpower": 2.75
+    },
+    "int_hyperdrive_overcharge_size7_class4": {
+        "mass": 80,
+        "optmass": 2700,
+        "maxfuel": 12.8,
+        "fuelmul": 0.012,
+        "fuelpower": 2.75
+    },
+    "int_hyperdrive_overcharge_size7_class5": {
+        "mass": 80,
+        "optmass": 3000,
+        "maxfuel": 13.1,
+        "fuelmul": 0.013,
+        "fuelpower": 2.75
+    },
     "int_hyperdrive_size2_class1": {
         "mass": 2.5,
         "optmass": 48,
