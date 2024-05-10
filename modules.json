@@ -3363,6 +3363,21 @@
     "python_armour_reactive": {
         "mass": 53
     },
+    "python_nx_armour_grade1": {
+        "mass": 0
+    },
+    "python_nx_armour_grade2": {
+        "mass": 26
+    },
+    "python_nx_armour_grade3": {
+        "mass": 53
+    },
+    "python_nx_armour_mirrored": {
+        "mass": 53
+    },
+    "python_nx_armour_reactive": {
+        "mass": 53
+    },
     "sidewinder_armour_grade1": {
         "mass": 0
     },
