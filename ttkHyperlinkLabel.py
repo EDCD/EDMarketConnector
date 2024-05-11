@@ -25,10 +25,8 @@ import tkinter as tk
 import webbrowser
 from tkinter import font as tk_font
 from tkinter import ttk
-from typing import TYPE_CHECKING, Any
-
-if TYPE_CHECKING:
-    def _(x: str) -> str: return x
+from typing import Any
+from l10n import translations as tr
 
 
 class HyperlinkLabel(tk.Label or ttk.Label):  # type: ignore
@@ -55,7 +53,7 @@ class HyperlinkLabel(tk.Label or ttk.Label):  # type: ignore
 
         self.menu = tk.Menu(tearoff=tk.FALSE)
         # LANG: Label for 'Copy' as in 'Copy and Paste'
-        self.menu.add_command(label=_('Copy'), command=self.copy)  # As in Copy and Paste
+        self.menu.add_command(label=tr.tl('Copy'), command=self.copy)  # As in Copy and Paste
         self.bind('<Button-3>', self._contextmenu)
 
         self.bind('<Enter>', self._enter)
