@@ -15,8 +15,9 @@ We now sign our code! This does mean that built EXEs are now slightly modified o
 For information on what this means, and opt-out options, please visit https://github.com/EDCD/EDMarketConnector/wiki/Code-Signing-and-EDMC
 
 **Changes and Enhancements**
-* Added new SCO Module Details
+* Added new SCO and Python Armor Module Details
 * Reverted a change from the prior release due to breaking some consumers. 
+
 **Plugin Developers**
 * modules.p and ships.p are deprecated, and slated for removal in 5.11+!
 * The `openurl()` function in ttkHyperlinkLabel has been deprecated,
