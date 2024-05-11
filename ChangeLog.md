@@ -6,6 +6,27 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
       in the source (not distributed with the Windows installer) for the
       currently used version.
 ---
+Release 5.10.6
+===
+This release contains the data information for the new SCO modules added in Elite update 18.04. 
+This should represent full support for the new Python Mk II.
+
+We now sign our code! This does mean that built EXEs are now slightly modified on our developer's machines.
+For information on what this means, and opt-out options, please visit https://github.com/EDCD/EDMarketConnector/wiki/Code-Signing-and-EDMC
+
+**Changes and Enhancements**
+* Added new SCO Module Details
+* Reverted a change from the prior release due to breaking some consumers. 
+**Plugin Developers**
+* modules.p and ships.p are deprecated, and slated for removal in 5.11+!
+* The `openurl()` function in ttkHyperlinkLabel has been deprecated,
+and slated for removal in 5.11+! Please migrate to `webbrowser.open()`.
+
+**Plugin Developers**
+* modules.p and ships.p are deprecated, and slated for removal in 5.11+!
+* The `openurl()` function in ttkHyperlinkLabel has been deprecated,
+and slated for removal in 5.11+! Please migrate to `webbrowser.open()`.
+
 Release 5.10.5
 ===
 This release contains a fix for a bug that could crash EDMC's console versions when reading outfitting information
@@ -13,6 +34,9 @@ from the new SCO Frame Shift Drive modules.
 
 Please note that this does not offer full support for the new SCO modules or the Python Mk II. More support will
 be added in a future update.
+
+We now sign our code! This does mean that built EXEs are now slightly modified on our developer's machines.
+For information on what this means, and opt-out options, please visit https://github.com/EDCD/EDMarketConnector/wiki/Code-Signing-and-EDMC
 
 **Changes and Enhancements**
 * Updated Translations
