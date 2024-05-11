@@ -178,8 +178,8 @@ def export(data, filename=None) -> None:  # noqa: C901, CCR001
             # a locale that uses comma for decimal separator.
         except ZeroDivisionError:
             range_unladen = range_laden = 0.0
-        string += (f'Range : {range_unladen:.2f} LY current without cargo\n'
-                   f'        {range_laden:.2f} LY current with cargo\n')
+        string += (f'Range : {range_unladen:.2f} LY unladen\n'
+                   f'        {range_laden:.2f} LY laden\n')
 
     except Exception:
         if __debug__:
