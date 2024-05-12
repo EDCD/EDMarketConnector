@@ -24,9 +24,6 @@ from typing import TYPE_CHECKING, Iterable, TextIO, cast
 from config import config
 from EDMCLogging import get_main_logger
 
-if TYPE_CHECKING:
-    def _(x: str) -> str: return x
-
 # Note that this is also done in EDMarketConnector.py, and thus removing this here may not have a desired effect
 try:
     locale.setlocale(locale.LC_ALL, '')
@@ -62,7 +59,16 @@ if sys.platform == 'win32':
     GetNumberFormatEx.restype = ctypes.c_int
 
 
-class _Translations:
+class Translations:
+    """
+    The Translation System.
+
+    Contains all the logic needed to support multiple languages in EDMC.
+    DO NOT USE THIS DIRECTLY UNLESS YOU KNOW WHAT YOU'RE DOING.
+    In most cases, you'll want to import translations.
+
+    For most cases: from l10n import translations as tr.
+    """
 
     FALLBACK = 'en'  # strings in this code are in English
     FALLBACK_NAME = 'English'
@@ -80,6 +86,8 @@ class _Translations:
         Use when translation is not desired or not available
         """
         self.translations = {None: {}}
+        # WARNING: '_' is Deprecated. Will be removed in 6.0 or later.
+        # Migrate to calling translations.translate or tr.tl directly.
         builtins.__dict__['_'] = lambda x: str(x).replace(r'\"', '"').replace('{CR}', '\n')
 
     def install(self, lang: str | None = None) -> None:  # noqa: CCR001
@@ -89,7 +97,7 @@ class _Translations:
         :param lang: The language to translate to, defaults to the preferred language
         """
         available = self.available()
-        available.add(_Translations.FALLBACK)
+        available.add(Translations.FALLBACK)
         if not lang:
             # Choose the default language
             for preferred in Locale.preferred_languages():
@@ -123,6 +131,8 @@ class _Translations:
                 except Exception:
                     logger.exception(f'Exception occurred while parsing {lang}.strings in plugin {plugin}')
 
+        # WARNING: '_' is Deprecated. Will be removed in 6.0 or later.
+        # Migrate to calling translations.translate or tr.tl directly.
         builtins.__dict__['_'] = self.translate
 
     def contents(self, lang: str, plugin_path: str | None = None) -> dict[str, str]:
@@ -136,12 +146,12 @@ class _Translations:
 
         for line in h:
             if line.strip():
-                match = _Translations.TRANS_RE.match(line)
+                match = Translations.TRANS_RE.match(line)
                 if match:
                     to_set = match.group(2).replace(r'\"', '"').replace('{CR}', '\n')
                     translations[match.group(1).replace(r'\"', '"')] = to_set
 
-                elif not _Translations.COMMENT_RE.match(line):
+                elif not Translations.COMMENT_RE.match(line):
                     logger.debug(f'Bad translation: {line.strip()}')
         h.close()
 
@@ -149,6 +159,10 @@ class _Translations:
             translations[LANGUAGE_ID] = str(lang)  # Replace language name with code if missing
 
         return translations
+
+    def tl(self, x: str, context: str | None = None, lang: str | None = None) -> str:
+        """Use the shorthand Dummy loader for the translate function."""
+        return self.translate(x, context, lang)
 
     def translate(self, x: str, context: str | None = None, lang: str | None = None) -> str:  # noqa: CCR001
         """
@@ -203,11 +217,11 @@ class _Translations:
         """Available language names by code."""
         names: dict[str | None, str] = {
             # LANG: The system default language choice in Settings > Appearance
-            None: _('Default'),  # Appearance theme and language setting
+            None: self.tl('Default'),  # Appearance theme and language setting
         }
         names.update(sorted(
             [(lang, self.contents(lang).get(LANGUAGE_ID, lang)) for lang in self.available()] +
-            [(_Translations.FALLBACK, _Translations.FALLBACK_NAME)],
+            [(Translations.FALLBACK, Translations.FALLBACK_NAME)],
             key=lambda x: x[1]
         ))  # Sort by name
 
@@ -345,8 +359,22 @@ class _Locale:
 
 # singletons
 Locale = _Locale()
-Translations = _Translations()
+translations = Translations()
 
+
+# WARNING: 'Translations' singleton is deprecated. Will be removed in 6.0 or later.
+# Migrate to importing 'translations'.
+# Begin Deprecation Zone
+class _Translations(Translations):
+    def __init__(self):
+        logger.warning(DeprecationWarning('Translations and _Translations() are deprecated. '
+                       'Please use translations and Translations() instead.'))
+        super().__init__()
+
+
+# Yes, I know this is awful renaming garbage. But we need it for compat.
+Translations: Translations = translations  # type: ignore
+# End Deprecation Zone
 
 # generate template strings file - like xgettext
 # parsing is limited - only single ' or " delimited strings, and only one string per line

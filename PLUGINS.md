@@ -1193,28 +1193,34 @@ widget if you need to display routine status information.
 ## Localisation
 
 You can localise your plugin to one of the languages that EDMarketConnector
-itself supports. Add the following boilerplate near the top of each source
+itself supports. Add the following boilerplate near the top of the source
 file that contains strings that needs translating:
 
 ```python
 import l10n
 import functools
-_ = functools.partial(l10n.Translations.translate, context=__file__)
+plugin_tl = functools.partial(l10n.translations.tl, context=__file__)
+
 ```
 
-Wrap each string that needs translating with the `_()` function, e.g.:
+Wrap each string that needs translating with the `plugin_tl()` function, e.g.:
 
 ```python
-    somewidget["text"] = _("Happy!")
+    somewidget["text"] = plugin_tl("Happy!")
 ```
+
+Note that you can name the "plugin_tl" function whatever you want - just make sure to stay consistent!
+Many plugins use `_` as the singleton name. We discourage that in versions 5.11 onward, but it should still work.
+If your plugin has multiple files that need translations, simply import the `plugin_tl` function to that location.
+You should only need to add the boilerplate once.
 
 If you wish to override EDMCs current language when translating,
-`l10n.Translations.translate()` takes an optional `lang` parameter which can
-be passed a language identifier. For example to override all translations
-to German:
+`l10n.translations.tl()` also takes an optional `lang` parameter which can
+be passed a language identifier. For example to define a function to override
+all translations to German:
 
 ```python
-_ = functools.partial(l10n.Translations.translate, context=__file__, lang="de")
+plugin_tl_de = functools.partial(l10n.Translations.translate, context=__file__, lang="de")
 ```
 
 If you display localized strings in EDMarketConnector's main window you should

@@ -26,7 +26,6 @@ from EDMCLogging import edmclogger, logger, logging
 
 if TYPE_CHECKING:
     from logging import TRACE  # type: ignore # noqa: F401 # needed to make mypy happy
-    def _(x: str): return x
 
 edmclogger.set_channels_loglevel(logging.INFO)
 
@@ -35,7 +34,7 @@ import collate
 import commodity
 import companion
 import edshipyard
-import l10n
+from l10n import translations as tr
 import loadout
 import outfitting
 import shipyard
@@ -66,7 +65,7 @@ Locale LC_TIME: {locale.getlocale(locale.LC_TIME)}'''
                  )
 
 
-l10n.Translations.install_dummy()
+tr.install_dummy()
 
 SERVER_RETRY = 5  # retry pause for Companion servers [s]
 EXIT_SUCCESS, EXIT_SERVER, EXIT_CREDENTIALS, EXIT_VERIFICATION, EXIT_LAGGING, EXIT_SYS_ERR, EXIT_ARGS, \
@@ -164,7 +163,7 @@ def main():  # noqa: C901, CCR001
             newversion: EDMCVersion | None = updater.check_appcast()
             if newversion:
                 # LANG: Update Available Text
-                newverstr: str = _("{NEWVER} is available").format(NEWVER=newversion.title)
+                newverstr: str = tr.tl("{NEWVER} is available").format(NEWVER=newversion.title)
                 print(f'{appversion()} ({newverstr})')
             else:
                 print(appversion())

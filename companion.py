@@ -37,12 +37,11 @@ from config import config, user_agent
 from edmc_data import companion_category_map as category_map
 from EDMCLogging import get_main_logger
 from monitor import monitor
+from l10n import translations as tr
 
 logger = get_main_logger()
 
 if TYPE_CHECKING:
-    def _(x: str): return x
-
     UserDict = collections.UserDict[str, Any]  # indicate to our type checkers what this generic class holds normally
 else:
     UserDict = collections.UserDict  # Otherwise simply use the actual class
@@ -224,7 +223,7 @@ class ServerError(Exception):
         self.args = args
         if not args:
             # LANG: Frontier CAPI didn't respond
-            self.args = (_("Error: Frontier CAPI didn't respond"),)
+            self.args = (tr.tl("Error: Frontier CAPI didn't respond"),)
 
 
 class ServerConnectionError(ServerError):
@@ -243,7 +242,7 @@ class ServerLagging(Exception):
         self.args = args
         if not args:
             # LANG: Frontier CAPI data doesn't agree with latest Journal game location
-            self.args = (_('Error: Frontier server is lagging'),)
+            self.args = (tr.tl('Error: Frontier server is lagging'),)
 
 
 class NoMonitorStation(Exception):
@@ -259,7 +258,7 @@ class NoMonitorStation(Exception):
         self.args = args
         if not args:
             # LANG: Commander is docked at an EDO settlement, got out and back in, we forgot the station
-            self.args = (_("Docked but unknown station: EDO Settlement?"),)
+            self.args = (tr.tl("Docked but unknown station: EDO Settlement?"),)
 
 
 class CredentialsError(Exception):
@@ -269,7 +268,7 @@ class CredentialsError(Exception):
         self.args = args
         if not args:
             # LANG: Generic "something went wrong with Frontier Auth" error
-            self.args = (_('Error: Invalid Credentials'),)
+            self.args = (tr.tl('Error: Invalid Credentials'),)
 
 
 class CredentialsRequireRefresh(Exception):
@@ -294,7 +293,7 @@ class CmdrError(Exception):
         self.args = args
         if not args:
             # LANG: Frontier CAPI authorisation not for currently game-active commander
-            self.args = (_('Error: Wrong Cmdr'),)
+            self.args = (tr.tl('Error: Wrong Cmdr'),)
 
 
 class Auth:
@@ -429,7 +428,7 @@ class Auth:
                 '<unknown error>'
             )
             # LANG: Generic error prefix - following text is from Frontier auth service
-            raise CredentialsError(f'{_("Error")}: {error!r}')
+            raise CredentialsError(f'{tr.tl("Error")}: {error!r}')
 
         r = None
         try:
@@ -472,18 +471,18 @@ class Auth:
                 if (usr := data_decode.get('usr')) is None:
                     logger.error('No "usr" in /decode data')
                     # LANG: Frontier auth, no 'usr' section in returned data
-                    raise CredentialsError(_("Error: Couldn't check token customer_id"))
+                    raise CredentialsError(tr.tl("Error: Couldn't check token customer_id"))
 
                 if (customer_id := usr.get('customer_id')) is None:
                     logger.error('No "usr"->"customer_id" in /decode data')
                     # LANG: Frontier auth, no 'customer_id' in 'usr' section in returned data
-                    raise CredentialsError(_("Error: Couldn't check token customer_id"))
+                    raise CredentialsError(tr.tl("Error: Couldn't check token customer_id"))
 
                 # All 'FID' seen in Journals so far have been 'F<id>'
                 # Frontier, Steam and Epic
                 if f'F{customer_id}' != monitor.state.get('FID'):
                     # LANG: Frontier auth customer_id doesn't match game session FID
-                    raise CredentialsError(_("Error: customer_id doesn't match!"))
+                    raise CredentialsError(tr.tl("Error: customer_id doesn't match!"))
 
                 logger.info(f'Frontier CAPI Auth: New token for \"{self.cmdr}\"')
                 cmdrs = config.get_list('cmdrs', default=[])
@@ -505,7 +504,7 @@ class Auth:
                 self.dump(r)
 
             # LANG: Failed to get Access Token from Frontier Auth service
-            raise CredentialsError(_('Error: unable to get token')) from e
+            raise CredentialsError(tr.tl('Error: unable to get token')) from e
 
         logger.error(f"Frontier CAPI Auth: Can't get token for \"{self.cmdr}\"")
         self.dump(r)
@@ -514,7 +513,7 @@ class Auth:
             '<unknown error>'
         )
         # LANG: Generic error prefix - following text is from Frontier auth service
-        raise CredentialsError(f'{_("Error")}: {error!r}')
+        raise CredentialsError(f'{tr.tl("Error")}: {error!r}')
 
     @staticmethod
     def invalidate(cmdr: str | None) -> None:
@@ -841,7 +840,7 @@ class Session:
             except Exception as e:
                 logger.debug('Attempting GET', exc_info=e)
                 # LANG: Frontier CAPI data retrieval failed
-                raise ServerError(f'{_("Frontier CAPI query failure")}: {capi_endpoint}') from e
+                raise ServerError(f'{tr.tl("Frontier CAPI query failure")}: {capi_endpoint}') from e
 
             if capi_endpoint == self.FRONTIER_CAPI_PATH_PROFILE and 'commander' not in capi_data:
                 logger.error('No commander in returned data')
@@ -874,7 +873,7 @@ class Session:
             if response.status_code == 418:
                 # "I'm a teapot" - used to signal maintenance
                 # LANG: Frontier CAPI returned 418, meaning down for maintenance
-                raise ServerError(_("Frontier CAPI down for maintenance"))
+                raise ServerError(tr.tl("Frontier CAPI down for maintenance"))
 
             logger.exception('Frontier CAPI: Misc. Error')
             raise ServerError('Frontier CAPI: Misc. Error')
