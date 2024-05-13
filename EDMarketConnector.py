@@ -11,9 +11,11 @@ from __future__ import annotations
 import argparse
 import html
 import locale
+import os
 import pathlib
 import queue
 import re
+import signal
 import subprocess
 import sys
 import threading
@@ -335,29 +337,13 @@ if __name__ == '__main__':  # noqa: C901
 
     def already_running_popup():
         """Create the "already running" popup."""
-        import tkinter as tk
-        from tkinter import ttk
+        from tkinter import messagebox
         # Check for CL arg that suppresses this popup.
         if args.suppress_dupe_process_popup:
             sys.exit(0)
 
-        root = tk.Tk(className=appname.lower())
-
-        frame = tk.Frame(root)
-        frame.grid(row=1, column=0, sticky=tk.NSEW)
-
-        label = tk.Label(frame, text='An EDMarketConnector.exe process was already running, exiting.')
-        label.grid(row=1, column=0, sticky=tk.NSEW)
-
-        button = ttk.Button(frame, text='OK', command=lambda: sys.exit(0))
-        button.grid(row=2, column=0, sticky=tk.S)
-
-        try:
-            root.mainloop()
-        except KeyboardInterrupt:
-            logger.info("Ctrl+C Detected, Attempting Clean Shutdown")
-            sys.exit()
-        logger.info('Exiting')
+        messagebox.showerror(title=appname, message="An EDMarketConnector process was already running, exiting.")
+        sys.exit(0)
 
     journal_lock = JournalLock()
     locked = journal_lock.obtain_lock()
@@ -2226,7 +2212,29 @@ sys.path: {sys.path}'''
     if theme.default_ui_scale is not None:
         root.tk.call('tk', 'scaling', theme.default_ui_scale * float(ui_scale) / 100.0)
 
-    app = AppWindow(root)
+    try:
+        app = AppWindow(root)
+    except Exception as err:
+        logger.exception(f"EDMC Critical Error: {err}")
+        title = tr.tl("Error")  # LANG: Generic error prefix
+        message = tr.tl(  # LANG: EDMC Critical Error Notification
+            "EDSM encountered a critical error, and cannot recover. EDMC is shutting down for its own protection!"
+        )
+        err = f"{err.__class__.__name__}: {err}"  # type: ignore # hijacking the existing exception detection
+        detail = tr.tl(  # LANG: EDMC Critical Error Details
+            r"Here's what EDMC Detected:\r\n\r\n{ERR}\r\n\r\nDo you want to file a Bug Report on GitHub?"
+        ).format(ERR=err)
+        detail = detail.replace('\\n', '\n')
+        detail = detail.replace('\\r', '\r')
+        msg = tk.messagebox.askyesno(
+            title=title, message=message, detail=detail, icon=tkinter.messagebox.ERROR, type=tkinter.messagebox.YESNO
+        )
+        if msg:
+            webbrowser.open(
+                "https://github.com/EDCD/EDMarketConnector/issues/new?"
+                "assignees=&labels=bug%2C+unconfirmed&projects=&template=bug_report.md&title="
+            )
+        os.kill(os.getpid(), signal.SIGTERM)
 
     def messagebox_broken_plugins():
         """Display message about 'broken' plugins that failed to load."""
