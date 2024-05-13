@@ -19,6 +19,7 @@ In addition to standard ttk.Label arguments, takes the following arguments:
 May be imported by plugins
 """
 from __future__ import annotations
+import html
 from functools import partial
 import sys
 import tkinter as tk
@@ -27,9 +28,11 @@ from tkinter import font as tk_font
 from tkinter import ttk
 from typing import Any
 import plug
+from os import path
 from config import config, logger
 from l10n import translations as tr
 from monitor import monitor
+from EDMarketConnector import SHIPYARD_HTML_TEMPLATE
 
 
 class HyperlinkLabel(tk.Label or ttk.Label):  # type: ignore
@@ -70,7 +73,7 @@ class HyperlinkLabel(tk.Label or ttk.Label):  # type: ignore
         # Add Menu Options
         self.plug_options = kw.pop('plug_options', None)
         self.name = kw.get('name', None)
-        if self.name == 'ship' and not bool(config.get_int("use_alt_shipyard_open")):
+        if self.name == 'ship':
             self.menu.add_separator()
             for url in plug.provides('shipyard_url'):
                 self.menu.add_command(
@@ -96,12 +99,27 @@ class HyperlinkLabel(tk.Label or ttk.Label):  # type: ignore
 
     def open_shipyard(self, url: str):
         """Open the Current Ship Loadout in the Selected Provider."""
-        if loadout := monitor.ship():
+        if not (loadout := monitor.ship()):
+            logger.warning('No ship loadout, aborting.')
+            return ''
+        if not bool(config.get_int("use_alt_shipyard_open")):
             opener = plug.invoke(url, 'EDSY', 'shipyard_url', loadout, monitor.is_beta)
             if opener:
                 return webbrowser.open(opener)
-        logger.warning('No ship loadout, aborting.')
-        return ''
+        else:
+            # Avoid file length limits if possible
+            provider = config.get_str('shipyard_provider', default='EDSY')
+            target = plug.invoke(provider, 'EDSY', 'shipyard_url', loadout, monitor.is_beta)
+            file_name = path.join(config.app_dir_path, "last_shipyard.html")
+
+            with open(file_name, 'w') as f:
+                f.write(SHIPYARD_HTML_TEMPLATE.format(
+                    link=html.escape(str(target)),
+                    provider_name=html.escape(str(provider)),
+                    ship_name=html.escape("Ship")
+                ))
+
+            webbrowser.open(f'file://localhost/{file_name}')
 
     def open_system(self, url: str):
         """Open the Current System in the Selected Provider."""
