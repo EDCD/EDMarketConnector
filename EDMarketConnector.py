@@ -413,9 +413,6 @@ if TYPE_CHECKING:
         from infi.systray import SysTrayIcon
     # isort: on
 
-    def _(x: str) -> str:
-        """Fake the l10n translation functions for typing."""
-        return x
 
 import tkinter as tk
 import tkinter.filedialog
@@ -432,7 +429,7 @@ from commodity import COMMODITY_CSV
 from dashboard import dashboard
 from edmc_data import ship_name_map
 from hotkey import hotkeymgr
-from l10n import Translations
+from l10n import translations as tr
 from monitor import monitor
 from theme import theme
 from ttkHyperlinkLabel import HyperlinkLabel
@@ -590,7 +587,7 @@ class AppWindow:
         self.button = ttk.Button(
             frame,
             name='update_button',
-            text=_('Update'),  # LANG: Main UI Update button
+            text=tr.tl('Update'),  # LANG: Main UI Update button
             width=28,
             default=tk.ACTIVE,
             state=tk.DISABLED
@@ -660,7 +657,7 @@ class AppWindow:
             self.system_menu = tk.Menu(self.menubar, name='system', tearoff=tk.FALSE)
             self.system_menu.add_separator()
             # LANG: Appearance - Label for checkbox to select if application always on top
-            self.system_menu.add_checkbutton(label=_('Always on top'),
+            self.system_menu.add_checkbutton(label=tr.tl('Always on top'),
                                              variable=self.always_ontop,
                                              command=self.ontop_changed)  # Appearance setting
             self.menubar.add_cascade(menu=self.system_menu)
@@ -765,7 +762,7 @@ class AppWindow:
         # Check for Valid Providers
         validate_providers()
         if monitor.cmdr is None:
-            self.status['text'] = _("Awaiting Full CMDR Login")  # LANG: Await Full CMDR Login to Game
+            self.status['text'] = tr.tl("Awaiting Full CMDR Login")  # LANG: Await Full CMDR Login to Game
 
         # Start a protocol handler to handle cAPI registration. Requires main loop to be running.
         self.w.after_idle(lambda: protocol.protocolhandler.start(self.w))
@@ -795,7 +792,7 @@ class AppWindow:
 
         suit = monitor.state.get('SuitCurrent')
         if suit is None:
-            self.suit['text'] = f'<{_("Unknown")}>'  # LANG: Unknown suit
+            self.suit['text'] = f'<{tr.tl("Unknown")}>'  # LANG: Unknown suit
             return
 
         suitname = suit['edmcName']
@@ -851,45 +848,45 @@ class AppWindow:
         # (Re-)install log monitoring
         if not monitor.start(self.w):
             # LANG: ED Journal file location appears to be in error
-            self.status['text'] = _('Error: Check E:D journal file location')
+            self.status['text'] = tr.tl('Error: Check E:D journal file location')
 
         if dologin and monitor.cmdr:
             self.login()  # Login if not already logged in with this Cmdr
 
     def set_labels(self):
         """Set main window labels, e.g. after language change."""
-        self.cmdr_label['text'] = _('Cmdr') + ':'  # LANG: Label for commander name in main window
+        self.cmdr_label['text'] = tr.tl('Cmdr') + ':'  # LANG: Label for commander name in main window
         # LANG: 'Ship' or multi-crew role label in main window, as applicable
-        self.ship_label['text'] = (monitor.state['Captain'] and _('Role') or _('Ship')) + ':'  # Main window
-        self.suit_label['text'] = _('Suit') + ':'  # LANG: Label for 'Suit' line in main UI
-        self.system_label['text'] = _('System') + ':'  # LANG: Label for 'System' line in main UI
-        self.station_label['text'] = _('Station') + ':'  # LANG: Label for 'Station' line in main UI
-        self.button['text'] = self.theme_button['text'] = _('Update')  # LANG: Update button in main window
-        self.menubar.entryconfigure(1, label=_('File'))  # LANG: 'File' menu title
-        self.menubar.entryconfigure(2, label=_('Edit'))  # LANG: 'Edit' menu title
-        self.menubar.entryconfigure(3, label=_('Help'))  # LANG: 'Help' menu title
-        self.theme_file_menu['text'] = _('File')  # LANG: 'File' menu title
-        self.theme_edit_menu['text'] = _('Edit')  # LANG: 'Edit' menu title
-        self.theme_help_menu['text'] = _('Help')  # LANG: 'Help' menu title
+        self.ship_label['text'] = (monitor.state['Captain'] and tr.tl('Role') or tr.tl('Ship')) + ':'  # Main window
+        self.suit_label['text'] = tr.tl('Suit') + ':'  # LANG: Label for 'Suit' line in main UI
+        self.system_label['text'] = tr.tl('System') + ':'  # LANG: Label for 'System' line in main UI
+        self.station_label['text'] = tr.tl('Station') + ':'  # LANG: Label for 'Station' line in main UI
+        self.button['text'] = self.theme_button['text'] = tr.tl('Update')  # LANG: Update button in main window
+        self.menubar.entryconfigure(1, label=tr.tl('File'))  # LANG: 'File' menu title
+        self.menubar.entryconfigure(2, label=tr.tl('Edit'))  # LANG: 'Edit' menu title
+        self.menubar.entryconfigure(3, label=tr.tl('Help'))  # LANG: 'Help' menu title
+        self.theme_file_menu['text'] = tr.tl('File')  # LANG: 'File' menu title
+        self.theme_edit_menu['text'] = tr.tl('Edit')  # LANG: 'Edit' menu title
+        self.theme_help_menu['text'] = tr.tl('Help')  # LANG: 'Help' menu title
 
         # File menu
-        self.file_menu.entryconfigure(0, label=_('Status'))  # LANG: File > Status
-        self.file_menu.entryconfigure(1, label=_('Save Raw Data...'))  # LANG: File > Save Raw Data...
-        self.file_menu.entryconfigure(2, label=_('Settings'))  # LANG: File > Settings
-        self.file_menu.entryconfigure(4, label=_('Exit'))  # LANG: File > Exit
+        self.file_menu.entryconfigure(0, label=tr.tl('Status'))  # LANG: File > Status
+        self.file_menu.entryconfigure(1, label=tr.tl('Save Raw Data...'))  # LANG: File > Save Raw Data...
+        self.file_menu.entryconfigure(2, label=tr.tl('Settings'))  # LANG: File > Settings
+        self.file_menu.entryconfigure(4, label=tr.tl('Exit'))  # LANG: File > Exit
 
         # Help menu
-        self.help_menu.entryconfigure(0, label=_('Documentation'))  # LANG: Help > Documentation
-        self.help_menu.entryconfigure(1, label=_('Troubleshooting'))  # LANG: Help > Troubleshooting
-        self.help_menu.entryconfigure(2, label=_('Report A Bug'))  # LANG: Help > Report A Bug
-        self.help_menu.entryconfigure(3, label=_('Privacy Policy'))  # LANG: Help > Privacy Policy
-        self.help_menu.entryconfigure(4, label=_('Release Notes'))  # LANG: Help > Release Notes
-        self.help_menu.entryconfigure(5, label=_('Check for Updates...'))  # LANG: Help > Check for Updates...
-        self.help_menu.entryconfigure(6, label=_("About {APP}").format(APP=applongname))  # LANG: Help > About App
-        self.help_menu.entryconfigure(7, label=_('Open Log Folder'))  # LANG: Help > Open Log Folder
+        self.help_menu.entryconfigure(0, label=tr.tl('Documentation'))  # LANG: Help > Documentation
+        self.help_menu.entryconfigure(1, label=tr.tl('Troubleshooting'))  # LANG: Help > Troubleshooting
+        self.help_menu.entryconfigure(2, label=tr.tl('Report A Bug'))  # LANG: Help > Report A Bug
+        self.help_menu.entryconfigure(3, label=tr.tl('Privacy Policy'))  # LANG: Help > Privacy Policy
+        self.help_menu.entryconfigure(4, label=tr.tl('Release Notes'))  # LANG: Help > Release Notes
+        self.help_menu.entryconfigure(5, label=tr.tl('Check for Updates...'))  # LANG: Help > Check for Updates...
+        self.help_menu.entryconfigure(6, label=tr.tl("About {APP}").format(APP=applongname))  # LANG: Help > About App
+        self.help_menu.entryconfigure(7, label=tr.tl('Open Log Folder'))  # LANG: Help > Open Log Folder
 
         # Edit menu
-        self.edit_menu.entryconfigure(0, label=_('Copy'))  # LANG: Label for 'Copy' as in 'Copy and Paste'
+        self.edit_menu.entryconfigure(0, label=tr.tl('Copy'))  # LANG: Label for 'Copy' as in 'Copy and Paste'
 
     def login(self):
         """Initiate CAPI/Frontier login and set other necessary state."""
@@ -900,12 +897,12 @@ class AppWindow:
         if should_return:
             logger.warning('capi.auth has been disabled via killswitch. Returning.')
             # LANG: CAPI auth aborted because of killswitch
-            self.status['text'] = _('CAPI auth disabled by killswitch')
+            self.status['text'] = tr.tl('CAPI auth disabled by killswitch')
             return
 
         if not self.status['text']:
             # LANG: Status - Attempting to get a Frontier Auth Access Token
-            self.status['text'] = _('Logging in...')
+            self.status['text'] = tr.tl('Logging in...')
 
         self.button['state'] = self.theme_button['state'] = tk.DISABLED
 
@@ -916,7 +913,7 @@ class AppWindow:
         try:
             if companion.session.login(monitor.cmdr, monitor.is_beta):
                 # LANG: Successfully authenticated with the Frontier website
-                self.status['text'] = _('Authentication successful')
+                self.status['text'] = tr.tl('Authentication successful')
 
                 self.file_menu.entryconfigure(0, state=tk.NORMAL)  # Status
                 self.file_menu.entryconfigure(1, state=tk.NORMAL)  # Save Raw Data
@@ -947,17 +944,17 @@ class AppWindow:
                 # Signal as error because the user might actually be docked
                 # but the server hosting the Companion API hasn't caught up
                 # LANG: Player is not docked at a station, when we expect them to be
-                self._handle_status(_("You're not docked at a station!"))
+                self._handle_status(tr.tl("You're not docked at a station!"))
                 return False
 
             # Ignore possibly missing shipyard info
             if output_flags & config.OUT_EDDN_SEND_STATION_DATA and not (has_commodities or has_modules):
                 # LANG: Status - Either no market or no modules data for station from Frontier CAPI
-                self._handle_status(_("Station doesn't have anything!"))
+                self._handle_status(tr.tl("Station doesn't have anything!"))
 
             elif not has_commodities:
                 # LANG: Status - No station market data from Frontier CAPI
-                self._handle_status(_("Station doesn't have a market!"))
+                self._handle_status(tr.tl("Station doesn't have a market!"))
 
             elif output_flags & commodities_flag:
                 # Fixup anomalies in the comodity data
@@ -995,7 +992,7 @@ class AppWindow:
         if should_return:
             logger.warning('capi.auth has been disabled via killswitch. Returning.')
             # LANG: CAPI auth query aborted because of killswitch
-            self.status['text'] = _('CAPI auth disabled by killswitch')
+            self.status['text'] = tr.tl('CAPI auth disabled by killswitch')
             hotkeymgr.play_bad()
             return
 
@@ -1005,37 +1002,37 @@ class AppWindow:
         if not monitor.cmdr:
             logger.trace_if('capi.worker', 'Aborting Query: Cmdr unknown')
             # LANG: CAPI queries aborted because Cmdr name is unknown
-            self.status['text'] = _('CAPI query aborted: Cmdr name unknown')
+            self.status['text'] = tr.tl('CAPI query aborted: Cmdr name unknown')
             return
 
         if not monitor.mode:
             logger.trace_if('capi.worker', 'Aborting Query: Game Mode unknown')
             # LANG: CAPI queries aborted because game mode unknown
-            self.status['text'] = _('CAPI query aborted: Game mode unknown')
+            self.status['text'] = tr.tl('CAPI query aborted: Game mode unknown')
             return
 
         if monitor.state['GameVersion'] is None:
             logger.trace_if('capi.worker', 'Aborting Query: GameVersion unknown')
             # LANG: CAPI queries aborted because GameVersion unknown
-            self.status['text'] = _('CAPI query aborted: GameVersion unknown')
+            self.status['text'] = tr.tl('CAPI query aborted: GameVersion unknown')
             return
 
         if not monitor.state['SystemName']:
             logger.trace_if('capi.worker', 'Aborting Query: Current star system unknown')
             # LANG: CAPI queries aborted because current star system name unknown
-            self.status['text'] = _('CAPI query aborted: Current system unknown')
+            self.status['text'] = tr.tl('CAPI query aborted: Current system unknown')
             return
 
         if monitor.state['Captain']:
             logger.trace_if('capi.worker', 'Aborting Query: In multi-crew')
             # LANG: CAPI queries aborted because player is in multi-crew on other Cmdr's ship
-            self.status['text'] = _('CAPI query aborted: In other-ship multi-crew')
+            self.status['text'] = tr.tl('CAPI query aborted: In other-ship multi-crew')
             return
 
         if monitor.mode == 'CQC':
             logger.trace_if('capi.worker', 'Aborting Query: In CQC')
             # LANG: CAPI queries aborted because player is in CQC (Arena)
-            self.status['text'] = _('CAPI query aborted: CQC (Arena) detected')
+            self.status['text'] = tr.tl('CAPI query aborted: CQC (Arena) detected')
             return
 
         if companion.session.state == companion.Session.STATE_AUTH:
@@ -1056,7 +1053,7 @@ class AppWindow:
                 hotkeymgr.play_good()
 
             # LANG: Status - Attempting to retrieve data from Frontier CAPI
-            self.status['text'] = _('Fetching data...')
+            self.status['text'] = tr.tl('Fetching data...')
             self.button['state'] = self.theme_button['state'] = tk.DISABLED
             self.w.update_idletasks()
 
@@ -1086,20 +1083,20 @@ class AppWindow:
         if should_return:
             logger.warning('capi.fleetcarrier has been disabled via killswitch. Returning.')
             # LANG: CAPI fleetcarrier query aborted because of killswitch
-            self.status['text'] = _('CAPI fleetcarrier disabled by killswitch')
+            self.status['text'] = tr.tl('CAPI fleetcarrier disabled by killswitch')
             hotkeymgr.play_bad()
             return
 
         if not monitor.cmdr:
             logger.trace_if('capi.worker', 'Aborting Query: Cmdr unknown')
             # LANG: CAPI fleetcarrier query aborted because Cmdr name is unknown
-            self.status['text'] = _('CAPI query aborted: Cmdr name unknown')
+            self.status['text'] = tr.tl('CAPI query aborted: Cmdr name unknown')
             return
 
         if monitor.state['GameVersion'] is None:
             logger.trace_if('capi.worker', 'Aborting Query: GameVersion unknown')
             # LANG: CAPI fleetcarrier query aborted because GameVersion unknown
-            self.status['text'] = _('CAPI query aborted: GameVersion unknown')
+            self.status['text'] = tr.tl('CAPI query aborted: GameVersion unknown')
             return
 
         if not companion.session.retrying:
@@ -1108,7 +1105,7 @@ class AppWindow:
                 return
 
             # LANG: Status - Attempting to retrieve data from Frontier CAPI
-            self.status['text'] = _('Fetching data...')
+            self.status['text'] = tr.tl('Fetching data...')
             self.w.update_idletasks()
 
         query_time = int(time())
@@ -1151,11 +1148,11 @@ class AppWindow:
                 # Validation
                 if 'name' not in capi_response.capi_data:
                     # LANG: No data was returned for the fleetcarrier from the Frontier CAPI
-                    err = self.status['text'] = _('CAPI: No fleetcarrier data returned')
+                    err = self.status['text'] = tr.tl('CAPI: No fleetcarrier data returned')
 
                 elif not capi_response.capi_data.get('name', {}).get('callsign'):
                     # LANG: We didn't have the fleetcarrier callsign when we should have
-                    err = self.status['text'] = _("CAPI: Fleetcarrier data incomplete")  # Shouldn't happen
+                    err = self.status['text'] = tr.tl("CAPI: Fleetcarrier data incomplete")  # Shouldn't happen
 
                 else:
                     if __debug__:  # Recording
@@ -1174,24 +1171,24 @@ class AppWindow:
             elif 'commander' not in capi_response.capi_data:
                 # This can happen with EGS Auth if no commander created yet
                 # LANG: No data was returned for the commander from the Frontier CAPI
-                err = self.status['text'] = _('CAPI: No commander data returned')
+                err = self.status['text'] = tr.tl('CAPI: No commander data returned')
 
             elif not capi_response.capi_data.get('commander', {}).get('name'):
                 # LANG: We didn't have the commander name when we should have
-                err = self.status['text'] = _("Who are you?!")  # Shouldn't happen
+                err = self.status['text'] = tr.tl("Who are you?!")  # Shouldn't happen
 
             elif (not capi_response.capi_data.get('lastSystem', {}).get('name')
                   or (capi_response.capi_data['commander'].get('docked')
                       and not capi_response.capi_data.get('lastStarport', {}).get('name'))):
                 # LANG: We don't know where the commander is, when we should
-                err = self.status['text'] = _("Where are you?!")  # Shouldn't happen
+                err = self.status['text'] = tr.tl("Where are you?!")  # Shouldn't happen
 
             elif (
                 not capi_response.capi_data.get('ship', {}).get('name')
                 or not capi_response.capi_data.get('ship', {}).get('modules')
             ):
                 # LANG: We don't know what ship the commander is in, when we should
-                err = self.status['text'] = _("What are you flying?!")  # Shouldn't happen
+                err = self.status['text'] = tr.tl("What are you flying?!")  # Shouldn't happen
 
             elif monitor.cmdr and capi_response.capi_data['commander']['name'] != monitor.cmdr:
                 # Companion API Commander doesn't match Journal
@@ -1318,7 +1315,7 @@ class AppWindow:
 
         except companion.ServerConnectionError as comp_err:
             # LANG: Frontier CAPI server error when fetching data
-            self.status['text'] = _('Frontier CAPI server error')
+            self.status['text'] = tr.tl('Frontier CAPI server error')
             logger.warning(f'Exception while contacting server: {comp_err}')
             err = self.status['text'] = str(comp_err)
             play_bad = True
@@ -1327,7 +1324,7 @@ class AppWindow:
             # We need to 'close' the auth else it'll see STATE_OK and think login() isn't needed
             companion.session.reinit_session()
             # LANG: Frontier CAPI Access Token expired, trying to get a new one
-            self.status['text'] = _('CAPI: Refreshing access token...')
+            self.status['text'] = tr.tl('CAPI: Refreshing access token...')
             if companion.session.login():
                 logger.debug('Initial query failed, but login() just worked, trying again...')
                 companion.session.retrying = True
@@ -1366,7 +1363,7 @@ class AppWindow:
 
         if not err:  # not self.status['text']:  # no errors
             # LANG: Time when we last obtained Frontier CAPI data
-            self.status['text'] = strftime(_('Last updated at %H:%M:%S'), localtime(capi_response.query_time))
+            self.status['text'] = strftime(tr.tl('Last updated at %H:%M:%S'), localtime(capi_response.query_time))
 
         if capi_response.play_sound and play_bad:
             hotkeymgr.play_bad()
@@ -1394,9 +1391,9 @@ class AppWindow:
             return {
                 None:         '',
                 'Idle':       '',
-                'FighterCon': _('Fighter'),  # LANG: Multicrew role
-                'FireCon':    _('Gunner'),  # LANG: Multicrew role
-                'FlightCon':  _('Helm'),  # LANG: Multicrew role
+                'FighterCon': tr.tl('Fighter'),  # LANG: Multicrew role
+                'FireCon':    tr.tl('Gunner'),  # LANG: Multicrew role
+                'FlightCon':  tr.tl('Helm'),  # LANG: Multicrew role
             }.get(role, role)
 
         if monitor.thread is None:
@@ -1419,7 +1416,7 @@ class AppWindow:
                 else:
                     self.cmdr['text'] = f'{monitor.cmdr}'
 
-                self.ship_label['text'] = _('Role') + ':'  # LANG: Multicrew role label in main window
+                self.ship_label['text'] = tr.tl('Role') + ':'  # LANG: Multicrew role label in main window
                 self.ship.configure(state=tk.NORMAL, text=crewroletext(monitor.state['Role']), url=None)
 
             elif monitor.cmdr:
@@ -1429,7 +1426,7 @@ class AppWindow:
                 else:
                     self.cmdr['text'] = monitor.cmdr
 
-                self.ship_label['text'] = _('Ship') + ':'  # LANG: 'Ship' label in main UI
+                self.ship_label['text'] = tr.tl('Ship') + ':'  # LANG: 'Ship' label in main UI
 
                 # TODO: Show something else when on_foot
                 if monitor.state['ShipName']:
@@ -1452,7 +1449,7 @@ class AppWindow:
 
             else:
                 self.cmdr['text'] = ''
-                self.ship_label['text'] = _('Ship') + ':'  # LANG: 'Ship' label in main UI
+                self.ship_label['text'] = tr.tl('Ship') + ':'  # LANG: 'Ship' label in main UI
                 self.ship['text'] = ''
 
             if monitor.cmdr and monitor.is_beta:
@@ -1589,7 +1586,7 @@ class AppWindow:
         try:
             companion.session.auth_callback()
             # LANG: Successfully authenticated with the Frontier website
-            self.status['text'] = _('Authentication successful')
+            self.status['text'] = tr.tl('Authentication successful')
             self.file_menu.entryconfigure(0, state=tk.NORMAL)  # Status
             self.file_menu.entryconfigure(1, state=tk.NORMAL)  # Save Raw Data
 
@@ -1675,10 +1672,10 @@ class AppWindow:
             # Update button in main window
             cooldown_time = int(self.capi_query_holdoff_time - time())
             # LANG: Cooldown on 'Update' button
-            self.button['text'] = self.theme_button['text'] = _('cooldown {SS}s').format(SS=cooldown_time)
+            self.button['text'] = self.theme_button['text'] = tr.tl('cooldown {SS}s').format(SS=cooldown_time)
             self.w.after(1000, self.cooldown)
         else:
-            self.button['text'] = self.theme_button['text'] = _('Update')  # LANG: Update button in main window
+            self.button['text'] = self.theme_button['text'] = tr.tl('Update')  # LANG: Update button in main window
             self.button['state'] = self.theme_button['state'] = (
                 monitor.cmdr and
                 monitor.mode and
@@ -1743,7 +1740,7 @@ class AppWindow:
 
             self.parent = parent
             # LANG: Help > About App
-            self.title(_('About {APP}').format(APP=applongname))
+            self.title(tr.tl('About {APP}').format(APP=applongname))
 
             if parent.winfo_viewable():
                 self.transient(parent)
@@ -1780,7 +1777,7 @@ class AppWindow:
             self.appversion_label.config(state=tk.DISABLED, bg=frame.cget("background"), font="TkDefaultFont")
             self.appversion_label.grid(row=row, column=0, sticky=tk.E)
             # LANG: Help > Release Notes
-            self.appversion = HyperlinkLabel(frame, compound=tk.RIGHT, text=_('Release Notes'),
+            self.appversion = HyperlinkLabel(frame, compound=tk.RIGHT, text=tr.tl('Release Notes'),
                                              url='https://github.com/EDCD/EDMarketConnector/releases/tag/Release/'
                                                  f'{appversion_nobuild()}',
                                              underline=True)
@@ -1806,7 +1803,7 @@ class AppWindow:
             ttk.Label(frame).grid(row=row, column=0)  # spacer
             row += 1
             # LANG: Generic 'OK' button label
-            button = ttk.Button(frame, text=_('OK'), command=self.apply)
+            button = ttk.Button(frame, text=tr.tl('OK'), command=self.apply)
             button.grid(row=row, column=2, sticky=tk.E)
             button.bind("<Return>", lambda event: self.apply())
             self.protocol("WM_DELETE_WINDOW", self._destroy)
@@ -1874,7 +1871,7 @@ class AppWindow:
 
         # Let the user know we're shutting down.
         # LANG: The application is shutting down
-        self.status['text'] = _('Shutting down...')
+        self.status['text'] = tr.tl('Shutting down...')
         self.w.update_idletasks()
         logger.info('Starting shutdown procedures...')
 
@@ -2059,10 +2056,10 @@ def validate_providers():
         return
 
     # LANG: Popup-text about Reset Providers
-    popup_text = _(r'One or more of your URL Providers were invalid, and have been reset:\r\n\r\n')
+    popup_text = tr.tl(r'One or more of your URL Providers were invalid, and have been reset:\r\n\r\n')
     for provider in reset_providers:
         # LANG: Text About What Provider Was Reset
-        popup_text += _(r'{PROVIDER} was set to {OLDPROV}, and has been reset to {NEWPROV}\r\n')
+        popup_text += tr.tl(r'{PROVIDER} was set to {OLDPROV}, and has been reset to {NEWPROV}\r\n')
         popup_text = popup_text.format(
             PROVIDER=provider,
             OLDPROV=reset_providers[provider][0],
@@ -2074,7 +2071,7 @@ def validate_providers():
 
     tk.messagebox.showinfo(
         # LANG: Popup window title for Reset Providers
-        _('EDMC: Default Providers Reset'),
+        tr.tl('EDMC: Default Providers Reset'),
         popup_text
     )
 
@@ -2200,7 +2197,7 @@ sys.path: {sys.path}'''
     # Plain, not via `logger`
     print(f'{applongname} {appversion()}')
 
-    Translations.install(config.get_str('language'))  # Can generate errors so wait til log set up
+    tr.install(config.get_str('language'))  # Can generate errors so wait til log set up
 
     setup_killswitches(args.killswitches_file)
 
@@ -2235,7 +2232,7 @@ sys.path: {sys.path}'''
         """Display message about 'broken' plugins that failed to load."""
         if plug.PLUGINS_broken:
             # LANG: Popup-text about 'broken' plugins that failed to load
-            popup_text = _(
+            popup_text = tr.tl(
                 "One or more of your enabled plugins failed to load. Please see the list on the '{PLUGINS}' "
                 "tab of '{FILE}' > '{SETTINGS}'. This could be caused by a wrong folder structure. The load.py "
                 r"file should be located under plugins/PLUGIN_NAME/load.py.\r\n\r\nYou can disable a plugin by "
@@ -2244,9 +2241,9 @@ sys.path: {sys.path}'''
 
             # Substitute in the other words.
             popup_text = popup_text.format(
-                PLUGINS=_('Plugins'),  # LANG: Settings > Plugins tab
-                FILE=_('File'),  # LANG: 'File' menu
-                SETTINGS=_('Settings'),  # LANG: File > Settings
+                PLUGINS=tr.tl('Plugins'),  # LANG: Settings > Plugins tab
+                FILE=tr.tl('File'),  # LANG: 'File' menu
+                SETTINGS=tr.tl('Settings'),  # LANG: File > Settings
                 DISABLED='.disabled'
             )
             # And now we do need these to be actual \r\n
@@ -2255,7 +2252,7 @@ sys.path: {sys.path}'''
 
             tk.messagebox.showinfo(
                 # LANG: Popup window title for list of 'broken' plugins that failed to load
-                _('EDMC: Broken Plugins'),
+                tr.tl('EDMC: Broken Plugins'),
                 popup_text
             )
 
@@ -2264,7 +2261,7 @@ sys.path: {sys.path}'''
         plugins_not_py3_last = config.get_int('plugins_not_py3_last', default=0)
         if (plugins_not_py3_last + 86400) < int(time()) and plug.PLUGINS_not_py3:
             # LANG: Popup-text about 'active' plugins without Python 3.x support
-            popup_text = _(
+            popup_text = tr.tl(
                 "One or more of your enabled plugins do not yet have support for Python 3.x. Please see the "
                 "list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an "
                 "updated version available, else alert the developer that they need to update the code for "
@@ -2274,9 +2271,9 @@ sys.path: {sys.path}'''
 
             # Substitute in the other words.
             popup_text = popup_text.format(
-                PLUGINS=_('Plugins'),  # LANG: Settings > Plugins tab
-                FILE=_('File'),  # LANG: 'File' menu
-                SETTINGS=_('Settings'),  # LANG: File > Settings
+                PLUGINS=tr.tl('Plugins'),  # LANG: Settings > Plugins tab
+                FILE=tr.tl('File'),  # LANG: 'File' menu
+                SETTINGS=tr.tl('Settings'),  # LANG: File > Settings
                 DISABLED='.disabled'
             )
             # And now we do need these to be actual \r\n
@@ -2285,7 +2282,7 @@ sys.path: {sys.path}'''
 
             tk.messagebox.showinfo(
                 # LANG: Popup window title for list of 'enabled' plugins that don't work with Python 3.x
-                _('EDMC: Plugins Without Python 3.x Support'),
+                tr.tl('EDMC: Plugins Without Python 3.x Support'),
                 popup_text
             )
             config.set('plugins_not_py3_last', int(time()))
@@ -2298,7 +2295,7 @@ sys.path: {sys.path}'''
             if fdevid_file.is_file():
                 continue
             # LANG: Popup-text about missing FDEVID Files
-            popup_text = _(
+            popup_text = tr.tl(
                 "FDevID Files not found! Some functionality regarding commodities "
                 r"may be disabled.\r\n\r\n Do you want to open the Wiki page on "
                 "how to set up submodules?"
@@ -2309,7 +2306,7 @@ sys.path: {sys.path}'''
 
             openwikipage = tk.messagebox.askquestion(
                 # LANG: Popup window title for missing FDEVID files
-                _('FDevIDs: Missing Commodity Files'),
+                tr.tl('FDevIDs: Missing Commodity Files'),
                 popup_text
             )
             if openwikipage == "yes":

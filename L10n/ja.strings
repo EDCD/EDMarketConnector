@@ -231,6 +231,18 @@
 /* EDMarketConnector.py: Popup-text about 'broken' plugins that failed to load; In files: EDMarketConnector.py:2266; */
 "One or more of your enabled plugins failed to load. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. This could be caused by a wrong folder structure. The load.py file should be located under plugins/PLUGIN_NAME/load.py.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "有効にしている1つ以上のプラグインがロードに失敗しました。'{FILE}' > '{SETTINGS}' メニューで表示される設定ダイアログの'{PLUGINS}' タブの一覧を確認してください。この問題は誤ったフォルダ構造によって引き起こされます。load.pyファイルはplugins/プラグイン名/plug-in.pyとして配置される必要があります。\n\nプラグインを無効にするにはフォルダ名の最後に'{DISABLED}'を追加してください。";
 
+/* EDMarketConnector.py: Popup-text about Reset Providers; In files: EDMarketConnector.py:2146; */
+"One or more of your URL Providers were invalid, and have been reset:\r\n\r\n" = "一つ以上のURLプロバイダが無効であったためリセットされました:\n\n";
+
+/* EDMarketConnector.py: Text About What Provider Was Reset; In files: EDMarketConnector.py:2148; */
+"{PROVIDER} was set to {OLDPROV}, and has been reset to {NEWPROV}\r\n" = "{PROVIDER} は {OLDPROV} に設定され、 {NEWPROV} にリセットされました\n";
+
+/* EDMarketConnector.py: Popup window title for Reset Providers; In files: EDMarketConnector.py:2161; */
+"EDMC: Default Providers Reset" = "EDMC: デフォルトプロバイダーのリセット";
+
+/* EDMarketConnector.py: Await Full CMDR Login to Game; In files: EDMarketConnector.py:813; */
+"Awaiting Full CMDR Login" = "完全なCMDRログインを待機しています";
+
 /* journal_lock.py: Title text on popup when Journal directory already locked; In files: journal_lock.py:208; */
 "Journal directory already locked" = "ジャーナルディレクトリは既にロックされています";
 
@@ -789,3 +801,5 @@
 /* stats.py: Status dialog title; In files: stats.py:418; */
 "Ships" = "所有船";
 
+/* update.py: Update Available Text; In files: update.py:229; */
+"{NEWVER} is available" = "{NEWVER} があります";
