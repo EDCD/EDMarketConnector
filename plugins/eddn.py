@@ -31,13 +31,7 @@ import tkinter as tk
 from platform import system
 from textwrap import dedent
 from threading import Lock
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Iterator,
-    Mapping,
-    MutableMapping,
-)
+from typing import Any, Iterator, Mapping, MutableMapping
 import requests
 import companion
 import edmc_data
@@ -52,10 +46,7 @@ from myNotebook import Frame
 from prefs import prefsVersion
 from ttkHyperlinkLabel import HyperlinkLabel
 from util import text
-
-if TYPE_CHECKING:
-    def _(x: str) -> str:
-        return x
+from l10n import translations as tr
 
 logger = get_main_logger()
 
@@ -441,7 +432,7 @@ class EDDNSender:
         except requests.exceptions.RequestException as e:
             logger.debug('Failed sending', exc_info=e)
             # LANG: Error while trying to send data to EDDN
-            self.set_ui_status(_("Error: Can't connect to EDDN"))
+            self.set_ui_status(tr.tl("Error: Can't connect to EDDN"))
 
         except Exception as e:
             logger.debug('Failed sending', exc_info=e)
@@ -566,17 +557,17 @@ class EDDNSender:
         if status_code == 429:  # HTTP UPGRADE REQUIRED
             logger.warning('EDMC is sending schemas that are too old')
             # LANG: EDDN has banned this version of our client
-            return _('EDDN Error: EDMC is too old for EDDN. Please update.')
+            return tr.tl('EDDN Error: EDMC is too old for EDDN. Please update.')
 
         if status_code == 400:
             # we a validation check or something else.
             logger.warning(f'EDDN Error: {status_code} -- {exception.response}')
             # LANG: EDDN returned an error that indicates something about what we sent it was wrong
-            return _('EDDN Error: Validation Failed (EDMC Too Old?). See Log')
+            return tr.tl('EDDN Error: Validation Failed (EDMC Too Old?). See Log')
 
         logger.warning(f'Unknown status code from EDDN: {status_code} -- {exception.response}')
         # LANG: EDDN returned some sort of HTTP error, one we didn't expect. {STATUS} contains a number
-        return _('EDDN Error: Returned {STATUS} status code').format(STATUS=status_code)
+        return tr.tl('EDDN Error: Returned {STATUS} status code').format(STATUS=status_code)
 
 
 # TODO: a good few of these methods are static or could be classmethods. they should be created as such.
@@ -2189,7 +2180,7 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:
     this.eddn_station_button = nb.Checkbutton(
         eddnframe,
         # LANG: Enable EDDN support for station data checkbox label
-        text=_('Send station data to the Elite Dangerous Data Network'),
+        text=tr.tl('Send station data to the Elite Dangerous Data Network'),
         variable=this.eddn_station,
         command=prefsvarchanged
     )  # Output setting
@@ -2201,7 +2192,7 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:
     this.eddn_system_button = nb.Checkbutton(
         eddnframe,
         # LANG: Enable EDDN support for system and other scan data checkbox label
-        text=_('Send system and scan data to the Elite Dangerous Data Network'),
+        text=tr.tl('Send system and scan data to the Elite Dangerous Data Network'),
         variable=this.eddn_system,
         command=prefsvarchanged
     )
@@ -2213,7 +2204,7 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:
     this.eddn_delay_button = nb.Checkbutton(
         eddnframe,
         # LANG: EDDN delay sending until docked option is on, this message notes that a send was skipped due to this
-        text=_('Delay sending until docked'),
+        text=tr.tl('Delay sending until docked'),
         variable=this.eddn_delay
     )
     this.eddn_delay_button.grid(row=cur_row, padx=BUTTONX, pady=PADY, sticky=tk.W)
@@ -2328,7 +2319,7 @@ def journal_entry(  # noqa: C901, CCR001
     """
     should_return, new_data = killswitch.check_killswitch('plugins.eddn.journal', entry)
     if should_return:
-        plug.show_error(_('EDDN journal handler disabled. See Log.'))  # LANG: Killswitch disabled EDDN
+        plug.show_error(tr.tl('EDDN journal handler disabled. See Log.'))  # LANG: Killswitch disabled EDDN
         return None
 
     should_return, new_data = killswitch.check_killswitch(f'plugins.eddn.journal.event.{entry["event"]}', new_data)
@@ -2530,7 +2521,7 @@ def journal_entry(  # noqa: C901, CCR001
 
         except requests.exceptions.RequestException as e:
             logger.debug('Failed in send_message', exc_info=e)
-            return _("Error: Can't connect to EDDN")  # LANG: Error while trying to send data to EDDN
+            return tr.tl("Error: Can't connect to EDDN")  # LANG: Error while trying to send data to EDDN
 
         except Exception as e:
             logger.debug('Failed in export_journal_generic', exc_info=e)
@@ -2568,7 +2559,7 @@ def journal_entry(  # noqa: C901, CCR001
 
         except requests.exceptions.RequestException as e:
             logger.debug(f'Failed exporting {entry["event"]}', exc_info=e)
-            return _("Error: Can't connect to EDDN")  # LANG: Error while trying to send data to EDDN
+            return tr.tl("Error: Can't connect to EDDN")  # LANG: Error while trying to send data to EDDN
 
         except Exception as e:
             logger.debug(f'Failed exporting {entry["event"]}', exc_info=e)
@@ -2622,7 +2613,8 @@ def cmdr_data(data: CAPIData, is_beta: bool) -> str | None:  # noqa: CCR001
             status = this.parent.nametowidget(f".{appname.lower()}.status")
             old_status = status['text']
             if not old_status:
-                status['text'] = _('Sending data to EDDN...')  # LANG: Status text shown while attempting to send data
+                # LANG: Status text shown while attempting to send data
+                status['text'] = tr.tl('Sending data to EDDN...')
                 status.update_idletasks()
 
             this.eddn.export_commodities(data, is_beta)
@@ -2634,7 +2626,7 @@ def cmdr_data(data: CAPIData, is_beta: bool) -> str | None:  # noqa: CCR001
 
         except requests.RequestException as e:
             logger.debug('Failed exporting data', exc_info=e)
-            return _("Error: Can't connect to EDDN")  # LANG: Error while trying to send data to EDDN
+            return tr.tl("Error: Can't connect to EDDN")  # LANG: Error while trying to send data to EDDN
 
         except Exception as e:
             logger.debug('Failed exporting data', exc_info=e)
