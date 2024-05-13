@@ -431,24 +431,9 @@ from hotkey import hotkeymgr
 from l10n import translations as tr
 from monitor import monitor
 from theme import theme
-from ttkHyperlinkLabel import HyperlinkLabel
+from ttkHyperlinkLabel import HyperlinkLabel, SHIPYARD_HTML_TEMPLATE
 
 SERVER_RETRY = 5  # retry pause for Companion servers [s]
-
-SHIPYARD_HTML_TEMPLATE = """
-<!DOCTYPE HTML>
-<html>
-    <head>
-        <meta http-equiv="refresh" content="0; url={link}">
-        <title>Redirecting you to your {ship_name} at {provider_name}...</title>
-    </head>
-    <body>
-        <a href="{link}">
-            You should be redirected to your {ship_name} at {provider_name} shortly...
-        </a>
-    </body>
-</html>
-"""
 
 
 class AppWindow:

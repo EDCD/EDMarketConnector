@@ -32,7 +32,21 @@ from os import path
 from config import config, logger
 from l10n import translations as tr
 from monitor import monitor
-from EDMarketConnector import SHIPYARD_HTML_TEMPLATE
+
+SHIPYARD_HTML_TEMPLATE = """
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta http-equiv="refresh" content="0; url={link}">
+        <title>Redirecting you to your {ship_name} at {provider_name}...</title>
+    </head>
+    <body>
+        <a href="{link}">
+            You should be redirected to your {ship_name} at {provider_name} shortly...
+        </a>
+    </body>
+</html>
+"""
 
 
 class HyperlinkLabel(tk.Label or ttk.Label):  # type: ignore
