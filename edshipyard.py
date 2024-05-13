@@ -106,7 +106,7 @@ def export(data, filename=None) -> None:  # noqa: C901, CCR001
             else:
                 name = module['name']  # type: ignore
 
-            if name == 'Frame Shift Drive':
+            if name == 'Frame Shift Drive' or name == 'Frame Shift Drive (SCO)':
                 fsd = module  # save for range calculation
 
                 if mods.get('OutfittingFieldType_FSDOptimalMass'):
@@ -167,15 +167,19 @@ def export(data, filename=None) -> None:  # noqa: C901, CCR001
     try:
         mass += ships[ship_name_map[data['ship']['name'].lower()]]['hullMass']
         string += f'Mass  : {mass:.2f} T empty\n        {mass + fuel + cargo:.2f} T full\n'
+        maxfuel = fsd.get('maxfuel', 0)  # type: ignore
+        fuelmul = fsd.get('fuelmul', 0)  # type: ignore
 
-        multiplier = pow(min(fuel, fsd['maxfuel']) / fsd['fuelmul'], 1.0  # type: ignore
-                         / fsd['fuelpower']) * fsd['optmass']  # type: ignore
-
-        range_unladen = multiplier / (mass + fuel) + jumpboost
-        range_laden = multiplier / (mass + fuel + cargo) + jumpboost
-        # As of 2021-04-07 edsy.org says text import not yet implemented, so ignore the possible issue with
-        # a locale that uses comma for decimal separator.
-        string += f'Range : {range_unladen:.2f} LY unladen\n        {range_laden:.2f} LY laden\n'
+        try:
+            multiplier = pow(min(fuel, maxfuel) / fuelmul, 1.0 / fsd['fuelpower']) * fsd['optmass']  # type: ignore
+            range_unladen = multiplier / (mass + fuel) + jumpboost
+            range_laden = multiplier / (mass + fuel + cargo) + jumpboost
+            # As of 2021-04-07 edsy.org says text import not yet implemented, so ignore the possible issue with
+            # a locale that uses comma for decimal separator.
+        except ZeroDivisionError:
+            range_unladen = range_laden = 0.0
+        string += (f'Range : {range_unladen:.2f} LY unladen\n'
+                   f'        {range_laden:.2f} LY laden\n')
 
     except Exception:
         if __debug__:

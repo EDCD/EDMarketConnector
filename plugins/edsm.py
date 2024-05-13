@@ -28,7 +28,7 @@ from queue import Queue
 from threading import Thread
 from time import sleep
 from tkinter import ttk
-from typing import TYPE_CHECKING, Any, Literal, Mapping, MutableMapping, cast, Sequence
+from typing import Any, Literal, Mapping, MutableMapping, cast, Sequence
 import requests
 import killswitch
 import monitor
@@ -39,10 +39,8 @@ from config import applongname, appname, appversion, config, debug_senders, user
 from edmc_data import DEBUG_WEBSERVER_HOST, DEBUG_WEBSERVER_PORT
 from EDMCLogging import get_main_logger
 from ttkHyperlinkLabel import HyperlinkLabel
+from l10n import translations as tr
 
-if TYPE_CHECKING:
-    def _(x: str) -> str:
-        return x
 
 # TODO:
 #  1) Re-factor EDSM API calls out of journal_entry() into own function.
@@ -313,7 +311,8 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> nb.Fr
     this.log = tk.IntVar(value=config.get_int('edsm_out') and 1)
     this.log_button = nb.Checkbutton(
         frame,
-        text=_('Send flight log and CMDR status to EDSM'),  # LANG: Settings>EDSM - Label on checkbox for 'send data'
+        # LANG: Settings>EDSM - Label on checkbox for 'send data'
+        text=tr.tl('Send flight log and CMDR status to EDSM'),
         variable=this.log,
         command=prefsvarchanged
     )
@@ -328,7 +327,7 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> nb.Fr
 
     this.label = HyperlinkLabel(
         frame,
-        text=_('Elite Dangerous Star Map credentials'),  # LANG: Elite Dangerous Star Map credentials
+        text=tr.tl('Elite Dangerous Star Map credentials'),  # LANG: Elite Dangerous Star Map credentials
         background=nb.Label().cget('background'),
         url='https://www.edsm.net/settings/api',
         underline=True
@@ -336,21 +335,21 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> nb.Fr
     if this.label:
         this.label.grid(row=cur_row, columnspan=2, padx=PADX, pady=PADY, sticky=tk.W)
     cur_row += 1
-    this.cmdr_label = nb.Label(frame, text=_('Cmdr'))  # LANG: Game Commander name label in EDSM settings
+    this.cmdr_label = nb.Label(frame, text=tr.tl('Cmdr'))  # LANG: Game Commander name label in EDSM settings
     this.cmdr_label.grid(row=cur_row, padx=PADX, pady=PADY, sticky=tk.W)
     this.cmdr_text = nb.Label(frame)
     this.cmdr_text.grid(row=cur_row, column=1, padx=PADX, pady=BOXY, sticky=tk.W)
 
     cur_row += 1
     # LANG: EDSM Commander name label in EDSM settings
-    this.user_label = nb.Label(frame, text=_('Commander Name'))
+    this.user_label = nb.Label(frame, text=tr.tl('Commander Name'))
     this.user_label.grid(row=cur_row, padx=PADX, pady=PADY, sticky=tk.W)
     this.user = nb.EntryMenu(frame)
     this.user.grid(row=cur_row, column=1, padx=PADX, pady=BOXY, sticky=tk.EW)
 
     cur_row += 1
     # LANG: EDSM API key label
-    this.apikey_label = nb.Label(frame, text=_('API Key'))
+    this.apikey_label = nb.Label(frame, text=tr.tl('API Key'))
     this.apikey_label.grid(row=cur_row, padx=PADX, pady=PADY, sticky=tk.W)
     this.apikey = nb.EntryMenu(frame, show="*", width=50)
     this.apikey.grid(row=cur_row, column=1, padx=PADX, pady=BOXY, sticky=tk.EW)
@@ -362,7 +361,7 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> nb.Fr
 
     show_password_checkbox = nb.Checkbutton(
         frame,
-        text=_('Show API Key'),  # LANG: Text EDSM Show API Key
+        text=tr.tl('Show API Key'),  # LANG: Text EDSM Show API Key
         variable=show_password_var,
         command=toggle_password_visibility
     )
@@ -398,7 +397,7 @@ def prefs_cmdr_changed(cmdr: str | None, is_beta: bool) -> None:  # noqa: CCR001
     else:
         if this.cmdr_text:
             # LANG: We have no data on the current commander
-            this.cmdr_text['text'] = _('None')
+            this.cmdr_text['text'] = tr.tl('None')
 
     to_set: Literal['normal'] | Literal['disabled'] = tk.DISABLED
     if cmdr and not is_beta and this.log and this.log.get():
@@ -519,7 +518,7 @@ def journal_entry(  # noqa: C901, CCR001
     should_return, new_entry = killswitch.check_killswitch('plugins.edsm.journal', entry, logger)
     if should_return:
         # LANG: EDSM plugin - Journal handling disabled by killswitch
-        plug.show_error(_('EDSM Handler disabled. See Log.'))
+        plug.show_error(tr.tl('EDSM Handler disabled. See Log.'))
         return ''
 
     should_return, new_entry = killswitch.check_killswitch(
@@ -606,7 +605,7 @@ entry: {entry!r}'''
                 # LANG: The Inara API only accepts Live galaxy data, not Legacy galaxy data
                 logger.info("EDSM only accepts Live galaxy data")
                 this.legacy_galaxy_last_notified = datetime.now(timezone.utc)
-                return _("EDSM only accepts Live galaxy data")  # LANG: EDSM - Only Live data
+                return tr.tl("EDSM only accepts Live galaxy data")  # LANG: EDSM - Only Live data
 
             return ''
 
@@ -778,7 +777,7 @@ def send_to_edsm(  # noqa: CCR001
     if msg_num // 100 == 2:
         logger.warning(f'EDSM\t{msg_num} {msg}\t{json.dumps(pending, separators=(",", ": "))}')
         # LANG: EDSM Plugin - Error message from EDSM API
-        plug.show_error(_('Error: EDSM {MSG}').format(MSG=msg))
+        plug.show_error(tr.tl('Error: EDSM {MSG}').format(MSG=msg))
     else:
         if msg_num // 100 == 1:
             logger.trace_if('plugin.edsm.api', 'Overall OK')
@@ -944,7 +943,7 @@ def worker() -> None:  # noqa: CCR001 C901
 
         else:
             # LANG: EDSM Plugin - Error connecting to EDSM API
-            plug.show_error(_("Error: Can't connect to EDSM"))
+            plug.show_error(tr.tl("Error: Can't connect to EDSM"))
         if entry['event'].lower() in ('shutdown', 'commander', 'fileheader'):
             # Game shutdown or new login, so we MUST not hang on to pending
             pending = []
@@ -1018,11 +1017,11 @@ def edsm_notify_system(reply: Mapping[str, Any]) -> None:
         if not reply:
             this.system_link['image'] = this._IMG_ERROR
             # LANG: EDSM Plugin - Error connecting to EDSM API
-            plug.show_error(_("Error: Can't connect to EDSM"))
+            plug.show_error(tr.tl("Error: Can't connect to EDSM"))
         elif reply['msgnum'] // 100 not in (1, 4):
             this.system_link['image'] = this._IMG_ERROR
             # LANG: EDSM Plugin - Error message from EDSM API
-            plug.show_error(_('Error: EDSM {MSG}').format(MSG=reply['msg']))
+            plug.show_error(tr.tl('Error: EDSM {MSG}').format(MSG=reply['msg']))
         elif reply.get('systemCreated'):
             this.system_link['image'] = this._IMG_NEW
         else:

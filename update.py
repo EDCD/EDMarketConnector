@@ -16,10 +16,10 @@ import requests
 import semantic_version
 from config import appname, appversion_nobuild, config, update_feed
 from EDMCLogging import get_main_logger
+from l10n import translations as tr
 
 if TYPE_CHECKING:
     import tkinter as tk
-    def _(x: str): return x
 
 
 logger = get_main_logger()
@@ -200,7 +200,7 @@ class Updater:
         if newversion and self.root:
             status = self.root.nametowidget(f'.{appname.lower()}.status')
             # LANG: Update Available Text
-            status['text'] = _("{NEWVER} is available").format(NEWVER=newversion.title)
+            status['text'] = tr.tl("{NEWVER} is available").format(NEWVER=newversion.title)
             self.root.update_idletasks()
 
         else:
