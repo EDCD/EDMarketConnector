@@ -18,6 +18,7 @@ import subprocess
 import sys
 import threading
 import webbrowser
+import tempfile
 from os import chdir, environ, path
 from time import localtime, strftime, time
 from typing import TYPE_CHECKING, Any, Literal
@@ -47,8 +48,6 @@ if __name__ == '__main__':
     # output until after this redirect is done, if needed.
     if getattr(sys, 'frozen', False):
         # By default py2exe tries to write log to dirname(sys.executable) which fails when installed
-        import tempfile
-
         # unbuffered not allowed for text in python3, so use `1 for line buffering
         log_file_path = path.join(tempfile.gettempdir(), f'{appname}.log')
         sys.stdout = sys.stderr = open(log_file_path, mode='wt', buffering=1)  # Do NOT use WITH here.
@@ -648,7 +647,8 @@ class AppWindow:
         self.help_menu.add_command(command=lambda: self.updater.check_for_updates())  # Check for Updates...
         # About E:D Market Connector
         self.help_menu.add_command(command=lambda: not self.HelpAbout.showing and self.HelpAbout(self.w))
-        self.help_menu.add_command(command=prefs.help_open_log_folder)  # Open Log Folder
+        logfile_loc = pathlib.Path(tempfile.gettempdir()) / appname
+        self.help_menu.add_command(command=lambda: prefs.open_folder(logfile_loc))  # Open Log Folder
 
         self.menubar.add_cascade(menu=self.help_menu)
         if sys.platform == 'win32':
