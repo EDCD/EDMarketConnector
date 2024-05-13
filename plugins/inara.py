@@ -30,7 +30,7 @@ from datetime import datetime, timedelta, timezone
 from operator import itemgetter
 from threading import Lock, Thread
 from tkinter import ttk
-from typing import TYPE_CHECKING, Any, Callable, Deque, Mapping, NamedTuple, Sequence, cast, Union
+from typing import Any, Callable, Deque, Mapping, NamedTuple, Sequence, cast, Union
 import requests
 import edmc_data
 import killswitch
@@ -42,12 +42,9 @@ from config import applongname, appname, appversion, config, debug_senders
 from EDMCLogging import get_main_logger
 from monitor import monitor
 from ttkHyperlinkLabel import HyperlinkLabel
+from l10n import translations as tr
 
 logger = get_main_logger()
-
-if TYPE_CHECKING:
-    def _(x: str) -> str:
-        return x
 
 
 _TIMEOUT = 20
@@ -264,7 +261,7 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str, is_beta: bool) -> nb.Frame:
     this.log = tk.IntVar(value=config.get_int('inara_out') and 1)
     this.log_button = nb.Checkbutton(
         frame,
-        text=_('Send flight log and Cmdr status to Inara'),  # LANG: Checkbox to enable INARA API Usage
+        text=tr.tl('Send flight log and Cmdr status to Inara'),  # LANG: Checkbox to enable INARA API Usage
         variable=this.log,
         command=prefsvarchanged
     )
@@ -280,7 +277,7 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str, is_beta: bool) -> nb.Frame:
     # Section heading in settings
     this.label = HyperlinkLabel(
         frame,
-        text=_('Inara credentials'),  # LANG: Text for INARA API keys link ( goes to https://inara.cz/settings-api )
+        text=tr.tl('Inara credentials'),  # LANG: Text for INARA API keys link ( goes to https://inara.cz/settings-api )
         background=nb.Label().cget('background'),
         url='https://inara.cz/settings-api',
         underline=True
@@ -290,7 +287,7 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str, is_beta: bool) -> nb.Frame:
     cur_row += 1
 
     # LANG: Inara API key label
-    this.apikey_label = nb.Label(frame, text=_('API Key'))  # Inara setting
+    this.apikey_label = nb.Label(frame, text=tr.tl('API Key'))  # Inara setting
     this.apikey_label.grid(row=cur_row, padx=PADX, pady=PADY, sticky=tk.W)
     this.apikey = nb.EntryMenu(frame, show="*", width=50)
     this.apikey.grid(row=cur_row, column=1, padx=PADX, pady=BOXY, sticky=tk.EW)
@@ -301,7 +298,7 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str, is_beta: bool) -> nb.Frame:
     show_password_var.set(False)  # Password is initially masked
     show_password_checkbox = nb.Checkbutton(
         frame,
-        text=_('Show API Key'),  # LANG: Text Inara Show API key
+        text=tr.tl('Show API Key'),  # LANG: Text Inara Show API key
         variable=show_password_var,
         command=toggle_password_visibility,
     )
@@ -407,7 +404,7 @@ def journal_entry(  # noqa: C901, CCR001
 
     should_return, new_entry = killswitch.check_killswitch('plugins.inara.journal', entry, logger)
     if should_return:
-        plug.show_error(_('Inara disabled. See Log.'))  # LANG: INARA support disabled via killswitch
+        plug.show_error(tr.tl('Inara disabled. See Log.'))  # LANG: INARA support disabled via killswitch
         logger.trace('returning due to killswitch match')
         return ''
 
@@ -432,9 +429,9 @@ def journal_entry(  # noqa: C901, CCR001
             and config.get_int('inara_out') and not (is_beta or this.multicrew or credentials(cmdr))
         ):
             # LANG: The Inara API only accepts Live galaxy data, not Legacy galaxy data
-            logger.info(_("Inara only accepts Live galaxy data"))
+            logger.info(tr.tl("Inara only accepts Live galaxy data"))
             this.legacy_galaxy_last_notified = datetime.now(timezone.utc)
-            return _("Inara only accepts Live galaxy data")  # LANG: Inara - Only Live data
+            return tr.tl("Inara only accepts Live galaxy data")  # LANG: Inara - Only Live data
 
         return ''
 
@@ -1645,7 +1642,7 @@ def handle_api_error(data: Mapping[str, Any], status: int, reply: dict[str, Any]
     logger.warning(f'Inara\t{status} {error_message}')
     logger.debug(f'JSON data:\n{json.dumps(data, indent=2, separators = (",", ": "))}')
     # LANG: INARA API returned some kind of error (error message will be contained in {MSG})
-    plug.show_error(_('Error: Inara {MSG}').format(MSG=error_message))
+    plug.show_error(tr.tl('Error: Inara {MSG}').format(MSG=error_message))
 
 
 def handle_success_reply(data: Mapping[str, Any], reply: dict[str, Any]) -> None:
@@ -1678,7 +1675,7 @@ def handle_individual_error(data_event: dict[str, Any], reply_status: int, reply
 
     if reply_status // 100 != 2:
         # LANG: INARA API returned some kind of error (error message will be contained in {MSG})
-        plug.show_error(_('Error: Inara {MSG}').format(
+        plug.show_error(tr.tl('Error: Inara {MSG}').format(
             MSG=f'{data_event["eventName"]}, {reply_text}'
         ))
 

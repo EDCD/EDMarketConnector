@@ -16,16 +16,13 @@ import tkinter as tk
 from os.path import join
 from tkinter import font as tk_font
 from tkinter import ttk
-from typing import TYPE_CHECKING, Callable
-
+from typing import Callable
+from l10n import translations as tr
 from config import config
 from EDMCLogging import get_main_logger
 from ttkHyperlinkLabel import HyperlinkLabel
 
 logger = get_main_logger()
-
-if TYPE_CHECKING:
-    def _(x: str) -> str: ...
 
 if __debug__:
     from traceback import print_exc
@@ -291,7 +288,7 @@ class _Theme:
                 # Font only supports Latin 1 / Supplement / Extended, and a
                 # few General Punctuation and Mathematical Operators
                 # LANG: Label for commander name in main window
-                'font': (theme > 1 and not 0x250 < ord(_('Cmdr')[0]) < 0x3000 and
+                'font': (theme > 1 and not 0x250 < ord(tr.tl('Cmdr')[0]) < 0x3000 and
                          tk_font.Font(family='Euro Caps', size=10, weight=tk_font.NORMAL) or
                          'TkDefaultFont'),
             }

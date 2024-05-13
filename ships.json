@@ -89,6 +89,9 @@
     "Python": {
         "hullMass": 350
     },
+    "Python Mk II": {
+        "hullMass": 450
+    },
     "Sidewinder": {
         "hullMass": 25
     },
