@@ -493,17 +493,17 @@ def credentials(cmdr: str) -> tuple[str, str] | None:
 
     if not edsm_usernames:  # https://github.com/EDCD/EDMarketConnector/issues/2232
         edsm_usernames = ["" for _ in range(len(cmdrs))]
-        config.set('edsm_usernames', edsm_usernames)
     else:  # Check for Mismatched Length - fill with null values.
         if len(edsm_usernames) < len(cmdrs):
             edsm_usernames.extend(["" for _ in range(len(cmdrs) - len(edsm_usernames))])
+    config.set('edsm_usernames', edsm_usernames)
 
     if not edsm_apikeys:
         edsm_apikeys = ["" for _ in range(len(cmdrs))]
-        config.set('edsm_apikeys', edsm_apikeys)
     else:  # Check for Mismatched Length - fill with null values.
         if len(edsm_apikeys) < len(cmdrs):
             edsm_apikeys.extend(["" for _ in range(len(cmdrs) - len(edsm_apikeys))])
+    config.set('edsm_apikeys', edsm_apikeys)
 
     if cmdr in cmdrs and len(cmdrs) == len(edsm_usernames) == len(edsm_apikeys):
         idx = cmdrs.index(cmdr)
