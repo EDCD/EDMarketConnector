@@ -417,24 +417,9 @@ from hotkey import hotkeymgr
 from l10n import translations as tr
 from monitor import monitor
 from theme import theme
-from ttkHyperlinkLabel import HyperlinkLabel
+from ttkHyperlinkLabel import HyperlinkLabel, SHIPYARD_HTML_TEMPLATE
 
 SERVER_RETRY = 5  # retry pause for Companion servers [s]
-
-SHIPYARD_HTML_TEMPLATE = """
-<!DOCTYPE HTML>
-<html>
-    <head>
-        <meta http-equiv="refresh" content="0; url={link}">
-        <title>Redirecting you to your {ship_name} at {provider_name}...</title>
-    </head>
-    <body>
-        <a href="{link}">
-            You should be redirected to your {ship_name} at {provider_name} shortly...
-        </a>
-    </body>
-</html>
-"""
 
 
 class AppWindow:
@@ -500,13 +485,13 @@ class AppWindow:
         self.cmdr_label = tk.Label(frame, name='cmdr_label')
         self.cmdr = tk.Label(frame, compound=tk.RIGHT, anchor=tk.W, name='cmdr')
         self.ship_label = tk.Label(frame, name='ship_label')
-        self.ship = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.shipyard_url, name='ship')
+        self.ship = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.shipyard_url, name='ship', popup_copy=True)
         self.suit_label = tk.Label(frame, name='suit_label')
         self.suit = tk.Label(frame, compound=tk.RIGHT, anchor=tk.W, name='suit')
         self.system_label = tk.Label(frame, name='system_label')
         self.system = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.system_url, popup_copy=True, name='system')
         self.station_label = tk.Label(frame, name='station_label')
-        self.station = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.station_url, name='station')
+        self.station = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.station_url, name='station', popup_copy=True)
         # system and station text is set/updated by the 'provider' plugins
         # edsm and inara.  Look for:
         #
@@ -1613,7 +1598,7 @@ class AppWindow:
                 hotkeymgr.play_bad()
 
     def shipyard_url(self, shipname: str) -> str | None:
-        """Despatch a ship URL to the configured handler."""
+        """Dispatch a ship URL to the configured handler."""
         if not (loadout := monitor.ship()):
             logger.warning('No ship loadout, aborting.')
             return ''
@@ -1640,13 +1625,13 @@ class AppWindow:
         return f'file://localhost/{file_name}'
 
     def system_url(self, system: str) -> str | None:
-        """Despatch a system URL to the configured handler."""
+        """Dispatch a system URL to the configured handler."""
         return plug.invoke(
             config.get_str('system_provider', default='EDSM'), 'EDSM', 'system_url', monitor.state['SystemName']
         )
 
     def station_url(self, station: str) -> str | None:
-        """Despatch a station URL to the configured handler."""
+        """Dispatch a station URL to the configured handler."""
         return plug.invoke(
             config.get_str('station_provider', default='EDSM'), 'EDSM', 'station_url',
             monitor.state['SystemName'], monitor.state['StationName']
