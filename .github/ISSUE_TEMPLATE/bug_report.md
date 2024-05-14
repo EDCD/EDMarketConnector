@@ -7,22 +7,19 @@ assignees: ''
 
 ---
 
-**Please check the [Known Issues](https://github.com/EDCD/EDMarketConnector/issues/618) in case this has already been reported.**
-
-**Please also check if the issue is covered in our [Troubleshooting Guide](https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting).** It might be something with a known work around, or where a third party (such as EDSM) is causing logging that is harmless.
-
 **Please complete the following information:**
- - Version: [e.g. 4.0.6 - See 'Help > About E:D Market Connector'.  If running from source using git then please paste the output of `git log --decorate=full | head -1`]
+
+[//]: # (You can gather most of this information with the EDMC System Profiler)
+ 
+ - Version: [e.g. 5.10.4+39af6c34`]
  - Game Version: [e.g. 'Live' or 'Odyssey']
  - OS: [e.g. Windows 10, Linux Debian 10.6, etc.]
  - OS Locale: [e.g. English, French, Serbian...]
  - If applicable: Browser [e.g. chrome, safari]
- - Please attach **BOTH** log files, by dragging and dropping them into this input:
-     1. `%TEMP%\EDMarketConnector.log` from *immediately* after the bug occurs (re-running the application overwrites this file).
-     1. `%TEMP%\EDMarketConnector\EDMarketConnector-debug.log`.  See [Debug Log File](https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting#debug-log-files).  NB: If you don't have this log file then you're not running the latest version of the application and should update first to see if we already fixed the bug you're reporting.
 
 **Describe the bug**
-A clear and concise description of what the bug is.
+
+[//]: # (A clear and concise description of what the bug is.)
 
 **To Reproduce**
 Steps to reproduce the behavior:
@@ -32,10 +29,24 @@ Steps to reproduce the behavior:
 4. See error
 
 **Expected behavior**
-A clear and concise description of what you expected to happen.
+
+[//]: # (A clear and concise description of what you expected to happen.)
 
 **Screenshots**
-If applicable, add screenshots to help explain your problem.
+
+[//]: # (If applicable, add screenshots to help explain your problem.)
 
 **Additional context**
-Add any other context about the problem here.
+
+**Please Confirm the Following...**
+
+[//]: # (Add any other context about the problem here.)
+- [ ] I have checked the [Known Issues](https://github.com/EDCD/EDMarketConnector/issues/618) list to ensure this is not a duplicate
+- [ ] I have checked the [Troubleshooting Guide](https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting) to check for known workarounds
+
+**Logs**
+Please attach both the EDMarketConnector.log and EDMarketConnector-debug.log if available.
+
+You can find these logs at `%TEMP%\EDMarketConnector.log` and `%TEMP%\EDMarketConnector\EDMarketConnector-debug.log`
+
+See [Debug Log File](https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting#debug-log-files) for information on the Debug Log files
