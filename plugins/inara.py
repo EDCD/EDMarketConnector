@@ -550,23 +550,6 @@ def journal_entry(  # noqa: C901, CCR001
 
             # Ship change
             if event_name == 'Loadout' and this.shipswap:
-                cur_ship = {
-                    'shipType': state['ShipType'],
-                    'shipGameID': state['ShipID'],
-                    'shipName': state['ShipName'],  # Can be None
-                    'shipIdent': state['ShipIdent'],  # Can be None
-                    'isCurrentShip': True,
-                }
-
-                if state['HullValue']:
-                    cur_ship['shipHullValue'] = state['HullValue']
-
-                if state['ModulesValue']:
-                    cur_ship['shipModulesValue'] = state['ModulesValue']
-
-                cur_ship['shipRebuyCost'] = state['Rebuy']
-                new_add_event('setCommanderShip', entry['timestamp'], cur_ship)
-
                 this.loadout = make_loadout(state)
                 new_add_event('setCommanderShipLoadout', entry['timestamp'], this.loadout)
                 this.shipswap = False
@@ -854,7 +837,7 @@ def journal_entry(  # noqa: C901, CCR001
                 for ship in this.fleet:
                     new_add_event('setCommanderShip', entry['timestamp'], ship)
         # Loadout
-        if event_name == 'Loadout' and not this.newsession:
+        if event_name == 'Loadout':
             loadout = make_loadout(state)
             if this.loadout != loadout:
                 this.loadout = loadout
@@ -867,6 +850,26 @@ def journal_entry(  # noqa: C901, CCR001
                 )
 
                 new_add_event('setCommanderShipLoadout', entry['timestamp'], this.loadout)
+
+            cur_ship = {
+                'shipType': state['ShipType'],
+                'shipGameID': state['ShipID'],
+                'shipName': state['ShipName'],  # Can be None
+                'shipIdent': state['ShipIdent'],  # Can be None
+                'isCurrentShip': True,
+                'shipMaxJumpRange': entry['MaxJumpRange'],
+                'shipCargoCapacity': entry['CargoCapacity']
+            }
+            if state['HullValue']:
+                cur_ship['shipHullValue'] = state['HullValue']
+
+            if state['ModulesValue']:
+                cur_ship['shipModulesValue'] = state['ModulesValue']
+
+            if state['Rebuy']:
+                cur_ship['shipRebuyCost'] = state['Rebuy']
+
+            new_add_event('setCommanderShip', entry['timestamp'], cur_ship)
 
         # Stored modules
         if event_name == 'StoredModules':
