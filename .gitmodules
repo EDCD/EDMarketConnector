@@ -1,6 +1,3 @@
 [submodule "coriolis-data"]
 	path = coriolis-data
 	url = https://github.com/EDCD/coriolis-data.git
-[submodule "FDevIDs"]
-	path = FDevIDs
-	url = https://github.com/EDCD/FDevIDs.git

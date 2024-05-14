@@ -620,6 +620,7 @@ class AppWindow:
         self.help_menu.add_command(command=lambda: not self.HelpAbout.showing and self.HelpAbout(self.w))
         logfile_loc = pathlib.Path(tempfile.gettempdir()) / appname
         self.help_menu.add_command(command=lambda: prefs.open_folder(logfile_loc))  # Open Log Folder
+        self.help_menu.add_command(command=prefs.help_open_system_profiler)  # Open Log Folde
 
         self.menubar.add_cascade(menu=self.help_menu)
         if sys.platform == 'win32':
@@ -878,6 +879,7 @@ class AppWindow:
         self.help_menu.entryconfigure(5, label=tr.tl('Check for Updates...'))  # LANG: Help > Check for Updates...
         self.help_menu.entryconfigure(6, label=tr.tl("About {APP}").format(APP=applongname))  # LANG: Help > About App
         self.help_menu.entryconfigure(7, label=tr.tl('Open Log Folder'))  # LANG: Help > Open Log Folder
+        self.help_menu.entryconfigure(8, label=tr.tl('Open System Profiler'))  # LANG: Help > Open System Profiler
 
         # Edit menu
         self.edit_menu.entryconfigure(0, label=tr.tl('Copy'))  # LANG: Label for 'Copy' as in 'Copy and Paste'
@@ -2303,35 +2305,6 @@ sys.path: {sys.path}'''
             )
             config.set('plugins_not_py3_last', int(time()))
 
-    def check_fdev_ids():
-        """Display message about missing FDEVID files."""
-        fdev_files = {'commodity.csv', 'rare_commodity.csv'}
-        for file in fdev_files:
-            fdevid_file = pathlib.Path(config.respath_path / 'FDevIDs' / file)
-            if fdevid_file.is_file():
-                continue
-            # LANG: Popup-text about missing FDEVID Files
-            popup_text = tr.tl(
-                "FDevID Files not found! Some functionality regarding commodities "
-                r"may be disabled.\r\n\r\n Do you want to open the Wiki page on "
-                "how to set up submodules?"
-            )
-            # And now we do need these to be actual \r\n
-            popup_text = popup_text.replace('\\n', '\n')
-            popup_text = popup_text.replace('\\r', '\r')
-
-            openwikipage = tk.messagebox.askquestion(
-                # LANG: Popup window title for missing FDEVID files
-                tr.tl('FDevIDs: Missing Commodity Files'),
-                popup_text
-            )
-            if openwikipage == "yes":
-                webbrowser.open(
-                    "https://github.com/EDCD/EDMarketConnector/wiki/Running-from-source"
-                    "#obtain-a-copy-of-the-application-source"
-                )
-            break
-
     # UI Transparency
     ui_transparency = config.get_int('ui_transparency')
     if ui_transparency == 0:
@@ -2344,8 +2317,6 @@ sys.path: {sys.path}'''
     root.after(1, messagebox_not_py3)
     # Show warning popup for killswitches matching current version
     root.after(2, show_killswitch_poppup, root)
-    # Check for FDEV IDs
-    root.after(3, check_fdev_ids)
     # Start the main event loop
     try:
         root.mainloop()
