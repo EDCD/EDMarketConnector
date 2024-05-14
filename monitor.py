@@ -38,7 +38,7 @@ if sys.platform == 'win32':
     import ctypes
     from ctypes.wintypes import BOOL, HWND, LPARAM, LPWSTR
 
-    from watchdog.events import FileCreatedEvent, FileSystemEventHandler
+    from watchdog.events import FileSystemEventHandler, FileSystemEvent
     from watchdog.observers import Observer
     from watchdog.observers.api import BaseObserver
 
@@ -60,7 +60,7 @@ else:
     FileSystemEventHandler = object  # dummy
     if TYPE_CHECKING:
         # this isn't ever used, but this will make type checking happy
-        from watchdog.events import FileCreatedEvent
+        from watchdog.events import FileSystemEvent
         from watchdog.observers import Observer
         from watchdog.observers.api import BaseObserver
 
@@ -346,7 +346,7 @@ class EDLogs(FileSystemEventHandler):
         """
         return bool(self.thread and self.thread.is_alive())
 
-    def on_created(self, event: 'FileCreatedEvent') -> None:
+    def on_created(self, event: 'FileSystemEvent') -> None:
         """Watchdog callback when, e.g. client (re)started."""
         if not event.is_directory and self._RE_LOGFILE.search(basename(event.src_path)):
 
