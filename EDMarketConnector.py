@@ -11,13 +11,16 @@ from __future__ import annotations
 import argparse
 import html
 import locale
+import os
 import pathlib
 import queue
 import re
+import signal
 import subprocess
 import sys
 import threading
 import webbrowser
+import tempfile
 from os import chdir, environ, path
 from time import localtime, strftime, time
 from typing import TYPE_CHECKING, Any, Literal
@@ -47,8 +50,6 @@ if __name__ == '__main__':
     # output until after this redirect is done, if needed.
     if getattr(sys, 'frozen', False):
         # By default py2exe tries to write log to dirname(sys.executable) which fails when installed
-        import tempfile
-
         # unbuffered not allowed for text in python3, so use `1 for line buffering
         log_file_path = path.join(tempfile.gettempdir(), f'{appname}.log')
         sys.stdout = sys.stderr = open(log_file_path, mode='wt', buffering=1)  # Do NOT use WITH here.
@@ -336,29 +337,13 @@ if __name__ == '__main__':  # noqa: C901
 
     def already_running_popup():
         """Create the "already running" popup."""
-        import tkinter as tk
-        from tkinter import ttk
+        from tkinter import messagebox
         # Check for CL arg that suppresses this popup.
         if args.suppress_dupe_process_popup:
             sys.exit(0)
 
-        root = tk.Tk(className=appname.lower())
-
-        frame = tk.Frame(root)
-        frame.grid(row=1, column=0, sticky=tk.NSEW)
-
-        label = tk.Label(frame, text='An EDMarketConnector.exe process was already running, exiting.')
-        label.grid(row=1, column=0, sticky=tk.NSEW)
-
-        button = ttk.Button(frame, text='OK', command=lambda: sys.exit(0))
-        button.grid(row=2, column=0, sticky=tk.S)
-
-        try:
-            root.mainloop()
-        except KeyboardInterrupt:
-            logger.info("Ctrl+C Detected, Attempting Clean Shutdown")
-            sys.exit()
-        logger.info('Exiting')
+        messagebox.showerror(title=appname, message="An EDMarketConnector process was already running, exiting.")
+        sys.exit(0)
 
     journal_lock = JournalLock()
     locked = journal_lock.obtain_lock()
@@ -432,24 +417,9 @@ from hotkey import hotkeymgr
 from l10n import translations as tr
 from monitor import monitor
 from theme import theme
-from ttkHyperlinkLabel import HyperlinkLabel
+from ttkHyperlinkLabel import HyperlinkLabel, SHIPYARD_HTML_TEMPLATE
 
 SERVER_RETRY = 5  # retry pause for Companion servers [s]
-
-SHIPYARD_HTML_TEMPLATE = """
-<!DOCTYPE HTML>
-<html>
-    <head>
-        <meta http-equiv="refresh" content="0; url={link}">
-        <title>Redirecting you to your {ship_name} at {provider_name}...</title>
-    </head>
-    <body>
-        <a href="{link}">
-            You should be redirected to your {ship_name} at {provider_name} shortly...
-        </a>
-    </body>
-</html>
-"""
 
 
 class AppWindow:
@@ -515,13 +485,13 @@ class AppWindow:
         self.cmdr_label = tk.Label(frame, name='cmdr_label')
         self.cmdr = tk.Label(frame, compound=tk.RIGHT, anchor=tk.W, name='cmdr')
         self.ship_label = tk.Label(frame, name='ship_label')
-        self.ship = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.shipyard_url, name='ship')
+        self.ship = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.shipyard_url, name='ship', popup_copy=True)
         self.suit_label = tk.Label(frame, name='suit_label')
         self.suit = tk.Label(frame, compound=tk.RIGHT, anchor=tk.W, name='suit')
         self.system_label = tk.Label(frame, name='system_label')
         self.system = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.system_url, popup_copy=True, name='system')
         self.station_label = tk.Label(frame, name='station_label')
-        self.station = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.station_url, name='station')
+        self.station = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.station_url, name='station', popup_copy=True)
         # system and station text is set/updated by the 'provider' plugins
         # edsm and inara.  Look for:
         #
@@ -648,7 +618,8 @@ class AppWindow:
         self.help_menu.add_command(command=lambda: self.updater.check_for_updates())  # Check for Updates...
         # About E:D Market Connector
         self.help_menu.add_command(command=lambda: not self.HelpAbout.showing and self.HelpAbout(self.w))
-        self.help_menu.add_command(command=prefs.help_open_log_folder)  # Open Log Folder
+        logfile_loc = pathlib.Path(tempfile.gettempdir()) / appname
+        self.help_menu.add_command(command=lambda: prefs.open_folder(logfile_loc))  # Open Log Folder
 
         self.menubar.add_cascade(menu=self.help_menu)
         if sys.platform == 'win32':
@@ -1650,7 +1621,7 @@ class AppWindow:
                 hotkeymgr.play_bad()
 
     def shipyard_url(self, shipname: str) -> str | None:
-        """Despatch a ship URL to the configured handler."""
+        """Dispatch a ship URL to the configured handler."""
         if not (loadout := monitor.ship()):
             logger.warning('No ship loadout, aborting.')
             return ''
@@ -1677,13 +1648,13 @@ class AppWindow:
         return f'file://localhost/{file_name}'
 
     def system_url(self, system: str) -> str | None:
-        """Despatch a system URL to the configured handler."""
+        """Dispatch a system URL to the configured handler."""
         return plug.invoke(
             config.get_str('system_provider', default='EDSM'), 'EDSM', 'system_url', monitor.state['SystemName']
         )
 
     def station_url(self, station: str) -> str | None:
-        """Despatch a station URL to the configured handler."""
+        """Dispatch a station URL to the configured handler."""
         return plug.invoke(
             config.get_str('station_provider', default='EDSM'), 'EDSM', 'station_url',
             monitor.state['SystemName'], monitor.state['StationName']
@@ -2249,7 +2220,29 @@ sys.path: {sys.path}'''
     if theme.default_ui_scale is not None:
         root.tk.call('tk', 'scaling', theme.default_ui_scale * float(ui_scale) / 100.0)
 
-    app = AppWindow(root)
+    try:
+        app = AppWindow(root)
+    except Exception as err:
+        logger.exception(f"EDMC Critical Error: {err}")
+        title = tr.tl("Error")  # LANG: Generic error prefix
+        message = tr.tl(  # LANG: EDMC Critical Error Notification
+            "EDSM encountered a critical error, and cannot recover. EDMC is shutting down for its own protection!"
+        )
+        err = f"{err.__class__.__name__}: {err}"  # type: ignore # hijacking the existing exception detection
+        detail = tr.tl(  # LANG: EDMC Critical Error Details
+            r"Here's what EDMC Detected:\r\n\r\n{ERR}\r\n\r\nDo you want to file a Bug Report on GitHub?"
+        ).format(ERR=err)
+        detail = detail.replace('\\n', '\n')
+        detail = detail.replace('\\r', '\r')
+        msg = tk.messagebox.askyesno(
+            title=title, message=message, detail=detail, icon=tkinter.messagebox.ERROR, type=tkinter.messagebox.YESNO
+        )
+        if msg:
+            webbrowser.open(
+                "https://github.com/EDCD/EDMarketConnector/issues/new?"
+                "assignees=&labels=bug%2C+unconfirmed&projects=&template=bug_report.md&title="
+            )
+        os.kill(os.getpid(), signal.SIGTERM)
 
     def messagebox_broken_plugins():
         """Display message about 'broken' plugins that failed to load."""

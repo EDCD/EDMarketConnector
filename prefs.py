@@ -8,7 +8,6 @@ import pathlib
 import sys
 import tempfile
 import tkinter as tk
-import webbrowser
 from os import system
 from os.path import expanduser, expandvars, join, normpath
 from tkinter import colorchooser as tkColorChooser  # type: ignore # noqa: N812
@@ -40,14 +39,21 @@ logger = get_main_logger()
 
 def help_open_log_folder() -> None:
     """Open the folder logs are stored in."""
-    logfile_loc = pathlib.Path(tempfile.gettempdir())
-    logfile_loc /= f'{appname}'
+    logger.warning(
+        DeprecationWarning("This function is deprecated, use open_log_folder instead. "
+                           "This function will be removed in 6.0 or later")
+    )
+    open_folder(pathlib.Path(tempfile.gettempdir()) / appname)
+
+
+def open_folder(file: pathlib.Path) -> None:
+    """Open the given file in the OS file explorer."""
     if sys.platform.startswith('win'):
         # On Windows, use the "start" command to open the folder
-        system(f'start "" "{logfile_loc}"')
+        system(f'start "" "{file}"')
     elif sys.platform.startswith('linux'):
         # On Linux, use the "xdg-open" command to open the folder
-        system(f'xdg-open "{logfile_loc}"')
+        system(f'xdg-open "{file}"')
 
 
 class PrefsVersion:
@@ -295,6 +301,9 @@ class PreferencesDialog(tk.Toplevel):
                 0x10000, None, position
             ):
                 self.geometry(f"+{position.left}+{position.top}")
+
+        # Set Log Directory
+        self.logfile_loc = pathlib.Path(tempfile.gettempdir()) / appname
 
     def __setup_output_tab(self, root_notebook: ttk.Notebook) -> None:
         output_frame = nb.Frame(root_notebook)
@@ -642,7 +651,7 @@ class PreferencesDialog(tk.Toplevel):
                 config_frame,
                 # LANG: Label on button used to open a filesystem folder
                 text=tr.tl('Open Log Folder'),  # Button that opens a folder in Explorer/Finder
-                command=lambda: help_open_log_folder()
+                command=lambda: open_folder(self.logfile_loc)
             ).grid(column=2, padx=self.PADX, pady=0, sticky=tk.NSEW, row=cur_row)
 
         # Big spacer
@@ -903,7 +912,7 @@ class PreferencesDialog(tk.Toplevel):
                 plugins_frame,
                 # LANG: Label on button used to open a filesystem folder
                 text=tr.tl('Open'),  # Button that opens a folder in Explorer/Finder
-                command=lambda: webbrowser.open(f'file:///{config.plugin_dir_path}')
+                command=lambda: open_folder(config.plugin_dir_path)
             ).grid(column=1, padx=self.PADX, pady=self.PADY, sticky=tk.N, row=cur_row)
 
         enabled_plugins = list(filter(lambda x: x.folder and x.module, plug.PLUGINS))
