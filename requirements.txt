@@ -1,5 +1,5 @@
 requests==2.31.0
 pillow==10.3.0
-watchdog==3.0.0
+watchdog==4.0.0
 infi.systray==0.1.12; sys_platform == 'win32'
 semantic-version==2.10.0

@@ -36,6 +36,12 @@
 /* companion.py: Failed to get Access Token from Frontier Auth service; In files: companion.py:508; */
 "Error: unable to get token" = "Error: unable to get token";
 
+/* EDMarketConnector.py: EDMC Critical Error Notification; */
+"EDSM encountered a critical error, and cannot recover. EDMC is shutting down for its own protection!" = "EDSM encountered a critical error, and cannot recover. EDMC is shutting down for its own protection!";
+
+/* EDMarketConnector.py: EDMC Critical Error Details; */
+"Here's what EDMC Detected:\r\n\r\n{ERR}\r\n\r\nDo you want to file a Bug Report on GitHub?" = "Here's what EDMC Detected:\r\n\r\n{ERR}\r\n\r\nDo you want to file a Bug Report on GitHub?";
+
 /* companion.py: Frontier CAPI returned 418, meaning down for maintenance; In files: companion.py:844; */
 "Frontier CAPI down for maintenance" = "Frontier CAPI down for maintenance";
 
@@ -782,3 +788,6 @@
 
 /* myNotebook.py: Can't Paste Images or Files in Text; */
 "Cannot paste non-text content." = "Cannot paste non-text content.";
+
+/* ttkHyperlinkLabel.py: Open Element In Selected Provider; */
+"Open in {URL}" = "Open in {URL}";
