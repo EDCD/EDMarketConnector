@@ -12,11 +12,8 @@ from __future__ import annotations
 import sys
 import tkinter as tk
 from tkinter import ttk, messagebox
-from typing import TYPE_CHECKING
 from PIL import ImageGrab
-
-if TYPE_CHECKING:
-    def _(x: str) -> str: return x
+from l10n import translations as tr
 
 if sys.platform == 'win32':
     PAGEFG = 'SystemWindowText'
@@ -107,9 +104,10 @@ class EntryMenu(ttk.Entry):
             img = ImageGrab.grabclipboard()
             if img:
                 # Hijack existing translation, yes it doesn't exactly match here.
-                # LANG: Generic error prefix - following text is from Frontier auth service;
-                messagebox.showwarning(_('Error'),
-                                       _('Cannot paste non-text content.'))  # LANG: Can't Paste Images or Files in Text
+                messagebox.showwarning(
+                    tr.tl('Error'),  # LANG: Generic error prefix - following text is from Frontier auth service;
+                    tr.tl('Cannot paste non-text content.')  # LANG: Can't Paste Images or Files in Text
+                )
                 return
             text = self.clipboard_get()
             if self.selection_present() and text:
@@ -123,7 +121,7 @@ class EntryMenu(ttk.Entry):
 class Entry(EntryMenu):
     """Custom ttk.Entry class to fix some display issues."""
 
-    # DEPRECATED: Migrate to EntryMenu. Will remove in 5.12 or later.
+    # DEPRECATED: Migrate to EntryMenu. Will remove in 6.0 or later.
     def __init__(self, master: ttk.Frame | None = None, **kw):
         EntryMenu.__init__(self, master, **kw)
 
@@ -141,7 +139,7 @@ class Button(ttk.Button):
 class ColoredButton(tk.Button):
     """Custom tk.Button class to fix some display issues."""
 
-    # DEPRECATED: Migrate to tk.Button. Will remove in 5.12 or later.
+    # DEPRECATED: Migrate to tk.Button. Will remove in 6.0 or later.
     def __init__(self, master: ttk.Frame | None = None, **kw):
         tk.Button.__init__(self, master, **kw)
 

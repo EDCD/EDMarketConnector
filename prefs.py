@@ -8,29 +8,24 @@ import pathlib
 import sys
 import tempfile
 import tkinter as tk
-import webbrowser
 from os import system
 from os.path import expanduser, expandvars, join, normpath
 from tkinter import colorchooser as tkColorChooser  # type: ignore # noqa: N812
 from tkinter import ttk
 from types import TracebackType
-from typing import TYPE_CHECKING, Any, Callable, Optional, Type
-
+from typing import Any, Callable, Optional, Type
 import myNotebook as nb  # noqa: N813
 import plug
 from config import appversion_nobuild, config
 from EDMCLogging import edmclogger, get_main_logger
 from constants import appname
 from hotkey import hotkeymgr
-from l10n import Translations
+from l10n import translations as tr
 from monitor import monitor
 from theme import theme
 from ttkHyperlinkLabel import HyperlinkLabel
 logger = get_main_logger()
 
-if TYPE_CHECKING:
-    def _(x: str) -> str:
-        return x
 
 # TODO: Decouple this from platform as far as possible
 
@@ -44,14 +39,21 @@ if TYPE_CHECKING:
 
 def help_open_log_folder() -> None:
     """Open the folder logs are stored in."""
-    logfile_loc = pathlib.Path(tempfile.gettempdir())
-    logfile_loc /= f'{appname}'
+    logger.warning(
+        DeprecationWarning("This function is deprecated, use open_log_folder instead. "
+                           "This function will be removed in 6.0 or later")
+    )
+    open_folder(pathlib.Path(tempfile.gettempdir()) / appname)
+
+
+def open_folder(file: pathlib.Path) -> None:
+    """Open the given file in the OS file explorer."""
     if sys.platform.startswith('win'):
         # On Windows, use the "start" command to open the folder
-        system(f'start "" "{logfile_loc}"')
+        system(f'start "" "{file}"')
     elif sys.platform.startswith('linux'):
         # On Linux, use the "xdg-open" command to open the folder
-        system(f'xdg-open "{logfile_loc}"')
+        system(f'xdg-open "{file}"')
 
 
 class PrefsVersion:
@@ -224,7 +226,7 @@ class PreferencesDialog(tk.Toplevel):
         self.parent = parent
         self.callback = callback
         # LANG: File > Settings (macOS)
-        self.title(_('Settings'))
+        self.title(tr.tl('Settings'))
 
         if parent.winfo_viewable():
             self.transient(parent)
@@ -270,7 +272,7 @@ class PreferencesDialog(tk.Toplevel):
         buttonframe.columnconfigure(0, weight=1)
         ttk.Label(buttonframe).grid(row=0, column=0)  # spacer
         # LANG: 'OK' button on Settings/Preferences window
-        button = ttk.Button(buttonframe, text=_('OK'), command=self.apply)
+        button = ttk.Button(buttonframe, text=tr.tl('OK'), command=self.apply)
         button.grid(row=0, column=1, sticky=tk.E)
         button.bind("<Return>", lambda event: self.apply())
         self.protocol("WM_DELETE_WINDOW", self._destroy)
@@ -300,6 +302,9 @@ class PreferencesDialog(tk.Toplevel):
             ):
                 self.geometry(f"+{position.left}+{position.top}")
 
+        # Set Log Directory
+        self.logfile_loc = pathlib.Path(tempfile.gettempdir()) / appname
+
     def __setup_output_tab(self, root_notebook: ttk.Notebook) -> None:
         output_frame = nb.Frame(root_notebook)
         output_frame.columnconfigure(0, weight=1)
@@ -313,13 +318,13 @@ class PreferencesDialog(tk.Toplevel):
         row = AutoInc(start=0)
 
         # LANG: Settings > Output - choosing what data to save to files
-        self.out_label = nb.Label(output_frame, text=_('Please choose what data to save'))
+        self.out_label = nb.Label(output_frame, text=tr.tl('Please choose what data to save'))
         self.out_label.grid(columnspan=2, padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get())
 
         self.out_csv = tk.IntVar(value=1 if (output & config.OUT_MKT_CSV) else 0)
         self.out_csv_button = nb.Checkbutton(
             output_frame,
-            text=_('Market data in CSV format file'),  # LANG: Settings > Output option
+            text=tr.tl('Market data in CSV format file'),  # LANG: Settings > Output option
             variable=self.out_csv,
             command=self.outvarchanged
         )
@@ -328,7 +333,7 @@ class PreferencesDialog(tk.Toplevel):
         self.out_td = tk.IntVar(value=1 if (output & config.OUT_MKT_TD) else 0)
         self.out_td_button = nb.Checkbutton(
             output_frame,
-            text=_('Market data in Trade Dangerous format file'),  # LANG: Settings > Output option
+            text=tr.tl('Market data in Trade Dangerous format file'),  # LANG: Settings > Output option
             variable=self.out_td,
             command=self.outvarchanged
         )
@@ -338,7 +343,7 @@ class PreferencesDialog(tk.Toplevel):
         # Output setting
         self.out_ship_button = nb.Checkbutton(
             output_frame,
-            text=_('Ship loadout'),  # LANG: Settings > Output option
+            text=tr.tl('Ship loadout'),  # LANG: Settings > Output option
             variable=self.out_ship,
             command=self.outvarchanged
         )
@@ -348,7 +353,7 @@ class PreferencesDialog(tk.Toplevel):
         # Output setting
         self.out_auto_button = nb.Checkbutton(
             output_frame,
-            text=_('Automatically update on docking'),  # LANG: Settings > Output option
+            text=tr.tl('Automatically update on docking'),  # LANG: Settings > Output option
             variable=self.out_auto,
             command=self.outvarchanged
         )
@@ -357,14 +362,14 @@ class PreferencesDialog(tk.Toplevel):
         self.outdir = tk.StringVar()
         self.outdir.set(str(config.get_str('outdir')))
         # LANG: Settings > Output - Label for "where files are located"
-        self.outdir_label = nb.Label(output_frame, text=_('File location')+':')  # Section heading in settings
+        self.outdir_label = nb.Label(output_frame, text=tr.tl('File location')+':')  # Section heading in settings
         # Type ignored due to incorrect type annotation. a 2 tuple does padding for each side
         self.outdir_label.grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get())  # type: ignore
 
         self.outdir_entry = ttk.Entry(output_frame, takefocus=False)
         self.outdir_entry.grid(columnspan=2, padx=self.PADX, pady=self.BOXY, sticky=tk.EW, row=row.get())
 
-        text = _('Browse...')  # LANG: NOT-macOS Settings - files location selection button
+        text = tr.tl('Browse...')  # LANG: NOT-macOS Settings - files location selection button
 
         self.outbutton = ttk.Button(
             output_frame,
@@ -372,12 +377,12 @@ class PreferencesDialog(tk.Toplevel):
             # Technically this is different from the label in Settings > Output, as *this* is used
             # as the title of the popup folder selection window.
             # LANG: Settings > Output - Label for "where files are located"
-            command=lambda: self.filebrowse(_('File location'), self.outdir)
+            command=lambda: self.filebrowse(tr.tl('File location'), self.outdir)
         )
         self.outbutton.grid(column=1, padx=self.PADX, pady=self.PADY, sticky=tk.EW, row=row.get())
 
         # LANG: Label for 'Output' Settings/Preferences tab
-        root_notebook.add(output_frame, text=_('Output'))  # Tab heading in settings
+        root_notebook.add(output_frame, text=tr.tl('Output'))  # Tab heading in settings
 
     def __setup_plugin_tabs(self, notebook: ttk.Notebook) -> None:
         for plugin in plug.PLUGINS:
@@ -403,19 +408,19 @@ class PreferencesDialog(tk.Toplevel):
         nb.Label(
             config_frame,
             # LANG: Settings > Configuration - Label for Journal files location
-            text=_('E:D journal file location')+':'
+            text=tr.tl('E:D journal file location')+':'
         ).grid(columnspan=4, padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get())
 
         self.logdir_entry.grid(columnspan=4, padx=self.PADX, pady=self.BOXY, sticky=tk.EW, row=row.get())
 
-        text = _('Browse...')  # LANG: NOT-macOS Setting - files location selection button
+        text = tr.tl('Browse...')  # LANG: NOT-macOS Setting - files location selection button
 
         with row as cur_row:
             self.logbutton = ttk.Button(
                 config_frame,
                 text=text,
                 # LANG: Settings > Configuration - Label for Journal files location
-                command=lambda: self.filebrowse(_('E:D journal file location'), self.logdir)
+                command=lambda: self.filebrowse(tr.tl('E:D journal file location'), self.logdir)
             )
             self.logbutton.grid(column=3, padx=self.PADX, pady=self.PADY, sticky=tk.EW, row=cur_row)
 
@@ -424,7 +429,7 @@ class PreferencesDialog(tk.Toplevel):
                 ttk.Button(
                     config_frame,
                     # LANG: Settings > Configuration - Label on 'reset journal files location to default' button
-                    text=_('Default'),
+                    text=tr.tl('Default'),
                     command=self.logdir_reset,
                     state=tk.NORMAL if config.get_str('journaldir') else tk.DISABLED
                 ).grid(column=2, padx=self.PADX, pady=self.PADY, sticky=tk.EW, row=cur_row)
@@ -438,13 +443,13 @@ class PreferencesDialog(tk.Toplevel):
 
         nb.Label(
                 config_frame,
-                text=_('CAPI Settings')  # LANG: Settings > Configuration - Label for CAPI section
+                text=tr.tl('CAPI Settings')  # LANG: Settings > Configuration - Label for CAPI section
             ).grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get())
 
         nb.Checkbutton(
                 config_frame,
                 # LANG: Configuration - Enable or disable the Fleet Carrier CAPI calls
-                text=_('Enable Fleetcarrier CAPI Queries'),
+                text=tr.tl('Enable Fleetcarrier CAPI Queries'),
                 variable=self.capi_fleetcarrier
             ).grid(columnspan=4, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=row.get())
 
@@ -460,7 +465,7 @@ class PreferencesDialog(tk.Toplevel):
             with row as cur_row:
                 nb.Label(
                     config_frame,
-                    text=_('Hotkey')  # LANG: Hotkey/Shortcut settings prompt on Windows
+                    text=tr.tl('Hotkey')  # LANG: Hotkey/Shortcut settings prompt on Windows
                 ).grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=cur_row)
 
                 self.hotkey_text = ttk.Entry(config_frame, width=30, justify=tk.CENTER)
@@ -469,7 +474,7 @@ class PreferencesDialog(tk.Toplevel):
                     # No hotkey/shortcut currently defined
                     # TODO: display Only shows up on windows
                     # LANG: No hotkey/shortcut set
-                    hotkeymgr.display(self.hotkey_code, self.hotkey_mods) if self.hotkey_code else _('None')
+                    hotkeymgr.display(self.hotkey_code, self.hotkey_mods) if self.hotkey_code else tr.tl('None')
                 )
 
                 self.hotkey_text.bind('<FocusIn>', self.hotkeystart)
@@ -480,7 +485,7 @@ class PreferencesDialog(tk.Toplevel):
                 self.hotkey_only_btn = nb.Checkbutton(
                     config_frame,
                     # LANG: Configuration - Act on hotkey only when ED is in foreground
-                    text=_('Only when Elite: Dangerous is the active app'),
+                    text=tr.tl('Only when Elite: Dangerous is the active app'),
                     variable=self.hotkey_only,
                     state=tk.NORMAL if self.hotkey_code else tk.DISABLED
                 )
@@ -491,7 +496,7 @@ class PreferencesDialog(tk.Toplevel):
                 self.hotkey_play_btn = nb.Checkbutton(
                     config_frame,
                     # LANG: Configuration - play sound when hotkey used
-                    text=_('Play sound'),
+                    text=tr.tl('Play sound'),
                     variable=self.hotkey_play,
                     state=tk.NORMAL if self.hotkey_code else tk.DISABLED
                 )
@@ -506,7 +511,7 @@ class PreferencesDialog(tk.Toplevel):
         self.disable_autoappupdatecheckingame_btn = nb.Checkbutton(
             config_frame,
             # LANG: Configuration - disable checks for app updates when in-game
-            text=_('Disable Automatic Application Updates Check when in-game'),
+            text=tr.tl('Disable Automatic Application Updates Check when in-game'),
             variable=self.disable_autoappupdatecheckingame,
             command=self.disable_autoappupdatecheckingame_changed
         )
@@ -521,7 +526,7 @@ class PreferencesDialog(tk.Toplevel):
 
         # Settings prompt for preferred ship loadout, system and station info websites
         # LANG: Label for preferred shipyard, system and station 'providers'
-        nb.Label(config_frame, text=_('Preferred websites')).grid(
+        nb.Label(config_frame, text=tr.tl('Preferred websites')).grid(
             columnspan=4, padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get()
         )
 
@@ -532,7 +537,9 @@ class PreferencesDialog(tk.Toplevel):
             )
             # Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis
             # LANG: Label for Shipyard provider selection
-            nb.Label(config_frame, text=_('Shipyard')).grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=cur_row)
+            nb.Label(config_frame, text=tr.tl('Shipyard')).grid(
+                padx=self.PADX, pady=self.PADY, sticky=tk.W, row=cur_row
+            )
             self.shipyard_button = nb.OptionMenu(
                 config_frame, self.shipyard_provider, self.shipyard_provider.get(), *plug.provides('shipyard_url')
             )
@@ -544,7 +551,7 @@ class PreferencesDialog(tk.Toplevel):
             self.alt_shipyard_open_btn = nb.Checkbutton(
                 config_frame,
                 # LANG: Label for checkbox to utilise alternative Coriolis URL method
-                text=_('Use alternate URL method'),
+                text=tr.tl('Use alternate URL method'),
                 variable=self.alt_shipyard_open,
                 command=self.alt_shipyard_open_changed,
             )
@@ -558,7 +565,7 @@ class PreferencesDialog(tk.Toplevel):
             )
 
             # LANG: Configuration - Label for selection of 'System' provider website
-            nb.Label(config_frame, text=_('System')).grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=cur_row)
+            nb.Label(config_frame, text=tr.tl('System')).grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=cur_row)
             self.system_button = nb.OptionMenu(
                 config_frame,
                 self.system_provider,
@@ -576,7 +583,7 @@ class PreferencesDialog(tk.Toplevel):
             )
 
             # LANG: Configuration - Label for selection of 'Station' provider website
-            nb.Label(config_frame, text=_('Station')).grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=cur_row)
+            nb.Label(config_frame, text=tr.tl('Station')).grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=cur_row)
             self.station_button = nb.OptionMenu(
                 config_frame,
                 self.station_provider,
@@ -597,7 +604,7 @@ class PreferencesDialog(tk.Toplevel):
             nb.Label(
                 config_frame,
                 # LANG: Configuration - Label for selection of Log Level
-                text=_('Log Level')
+                text=tr.tl('Log Level')
             ).grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=cur_row)
 
             current_loglevel = config.get_str('loglevel')
@@ -624,15 +631,15 @@ class PreferencesDialog(tk.Toplevel):
             ttk.Button(
                 config_frame,
                 # LANG: Label on button used to open a filesystem folder
-                text=_('Open Log Folder'),  # Button that opens a folder in Explorer/Finder
-                command=lambda: help_open_log_folder()
+                text=tr.tl('Open Log Folder'),  # Button that opens a folder in Explorer/Finder
+                command=lambda: open_folder(self.logfile_loc)
             ).grid(column=2, padx=self.PADX, pady=0, sticky=tk.NSEW, row=cur_row)
 
         # Big spacer
         nb.Label(config_frame).grid(sticky=tk.W, row=row.get())
 
         # LANG: Label for 'Configuration' tab in Settings
-        notebook.add(config_frame, text=_('Configuration'))
+        notebook.add(config_frame, text=tr.tl('Configuration'))
 
     def __setup_privacy_tab(self, notebook: ttk.Notebook) -> None:
         privacy_frame = nb.Frame(notebook)
@@ -641,37 +648,37 @@ class PreferencesDialog(tk.Toplevel):
         row = AutoInc(start=0)
 
         # LANG: UI elements privacy section header in privacy tab of preferences
-        nb.Label(privacy_frame, text=_('Main UI privacy options')).grid(
+        nb.Label(privacy_frame, text=tr.tl('Main UI privacy options')).grid(
             row=row.get(), column=0, sticky=tk.W, padx=self.PADX, pady=self.PADY
         )
 
         nb.Checkbutton(
             # LANG: Hide private group owner name from UI checkbox
-            privacy_frame, text=_('Hide private group name in UI'),
+            privacy_frame, text=tr.tl('Hide private group name in UI'),
             variable=self.hide_private_group
         ).grid(row=row.get(), column=0, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W)
         nb.Checkbutton(
             # LANG: Hide multicrew captain name from main UI checkbox
-            privacy_frame, text=_('Hide multi-crew captain name'),
+            privacy_frame, text=tr.tl('Hide multi-crew captain name'),
             variable=self.hide_multicrew_captain
         ).grid(row=row.get(), column=0, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W)
 
-        notebook.add(privacy_frame, text=_('Privacy'))  # LANG: Preferences privacy tab title
+        notebook.add(privacy_frame, text=tr.tl('Privacy'))  # LANG: Preferences privacy tab title
 
     def __setup_appearance_tab(self, notebook: ttk.Notebook) -> None:
-        self.languages = Translations.available_names()
+        self.languages = tr.available_names()
         # Appearance theme and language setting
         # LANG: The system default language choice in Settings > Appearance
-        self.lang = tk.StringVar(value=self.languages.get(config.get_str('language'), _('Default')))
+        self.lang = tk.StringVar(value=self.languages.get(config.get_str('language'), tr.tl('Default')))
         self.always_ontop = tk.BooleanVar(value=bool(config.get_int('always_ontop')))
         self.minimize_system_tray = tk.BooleanVar(value=config.get_bool('minimize_system_tray'))
         self.theme = tk.IntVar(value=config.get_int('theme'))
         self.theme_colors = [config.get_str('dark_text'), config.get_str('dark_highlight')]
         self.theme_prompts = [
             # LANG: Label for Settings > Appeareance > selection of 'normal' text colour
-            _('Normal text'),		# Dark theme color setting
+            tr.tl('Normal text'),		# Dark theme color setting
             # LANG: Label for Settings > Appeareance > selection of 'highlightes' text colour
-            _('Highlighted text'),  # Dark theme color setting
+            tr.tl('Highlighted text'),  # Dark theme color setting
         ]
 
         row = AutoInc(start=0)
@@ -680,7 +687,7 @@ class PreferencesDialog(tk.Toplevel):
         appearance_frame.columnconfigure(2, weight=1)
         with row as cur_row:
             # LANG: Appearance - Label for selection of application display language
-            nb.Label(appearance_frame, text=_('Language')).grid(
+            nb.Label(appearance_frame, text=tr.tl('Language')).grid(
                 padx=self.PADX, pady=self.PADY, sticky=tk.W, row=cur_row
             )
             self.lang_button = nb.OptionMenu(appearance_frame, self.lang, self.lang.get(), *self.languages.values())
@@ -692,28 +699,29 @@ class PreferencesDialog(tk.Toplevel):
 
         # Appearance setting
         # LANG: Label for Settings > Appearance > Theme selection
-        nb.Label(appearance_frame, text=_('Theme')).grid(
+        nb.Label(appearance_frame, text=tr.tl('Theme')).grid(
             columnspan=3, padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get()
         )
 
         # Appearance theme and language setting
         nb.Radiobutton(
             # LANG: Label for 'Default' theme radio button
-            appearance_frame, text=_('Default'), variable=self.theme,
+            appearance_frame, text=tr.tl('Default'), variable=self.theme,
             value=theme.THEME_DEFAULT, command=self.themevarchanged
         ).grid(columnspan=3, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=row.get())
 
         # Appearance theme setting
         nb.Radiobutton(
             # LANG: Label for 'Dark' theme radio button
-            appearance_frame, text=_('Dark'), variable=self.theme, value=theme.THEME_DARK, command=self.themevarchanged
+            appearance_frame, text=tr.tl('Dark'), variable=self.theme,
+            value=theme.THEME_DARK, command=self.themevarchanged
         ).grid(columnspan=3, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=row.get())
 
         if sys.platform == 'win32':
             nb.Radiobutton(
                 appearance_frame,
                 # LANG: Label for 'Transparent' theme radio button
-                text=_('Transparent'),  # Appearance theme setting
+                text=tr.tl('Transparent'),  # Appearance theme setting
                 variable=self.theme,
                 value=theme.THEME_TRANSPARENT,
                 command=self.themevarchanged
@@ -727,7 +735,7 @@ class PreferencesDialog(tk.Toplevel):
             self.theme_button_0 = tk.Button(
                 appearance_frame,
                 # LANG: Appearance - Example 'Normal' text
-                text=_('Station'),
+                text=tr.tl('Station'),
                 background='grey4',
                 command=lambda: self.themecolorbrowse(0)
             )
@@ -759,7 +767,7 @@ class PreferencesDialog(tk.Toplevel):
         )
         with row as cur_row:
             # LANG: Appearance - Label for selection of UI scaling
-            nb.Label(appearance_frame, text=_('UI Scale Percentage')).grid(
+            nb.Label(appearance_frame, text=tr.tl('UI Scale Percentage')).grid(
                 padx=self.PADX, pady=self.PADY, sticky=tk.W, row=cur_row
             )
 
@@ -780,7 +788,7 @@ class PreferencesDialog(tk.Toplevel):
             self.ui_scaling_defaultis = nb.Label(
                 appearance_frame,
                 # LANG: Appearance - Help/hint text for UI scaling selection
-                text=_('100 means Default{CR}Restart Required for{CR}changes to take effect!')
+                text=tr.tl('100 means Default{CR}Restart Required for{CR}changes to take effect!')
             ).grid(column=3, padx=self.PADX, pady=self.PADY, sticky=tk.E, row=cur_row)
 
         # Transparency slider
@@ -790,7 +798,7 @@ class PreferencesDialog(tk.Toplevel):
 
         with row as cur_row:
             # LANG: Appearance - Label for selection of main window transparency
-            nb.Label(appearance_frame, text=_("Main window transparency")).grid(
+            nb.Label(appearance_frame, text=tr.tl("Main window transparency")).grid(
                 padx=self.PADX, pady=self.PADY, sticky=tk.W, row=cur_row
             )
             self.transparency = tk.IntVar()
@@ -810,7 +818,7 @@ class PreferencesDialog(tk.Toplevel):
             nb.Label(
                 appearance_frame,
                 # LANG: Appearance - Help/hint text for Main window transparency selection
-                text=_(
+                text=tr.tl(
                     "100 means fully opaque.{CR}"
                     "Window is updated in real time"
                 ).format(CR='\n')
@@ -832,7 +840,7 @@ class PreferencesDialog(tk.Toplevel):
         self.ontop_button = nb.Checkbutton(
             appearance_frame,
             # LANG: Appearance - Label for checkbox to select if application always on top
-            text=_('Always on top'),
+            text=tr.tl('Always on top'),
             variable=self.always_ontop,
             command=self.themevarchanged
         )
@@ -844,7 +852,7 @@ class PreferencesDialog(tk.Toplevel):
             nb.Checkbutton(
                 appearance_frame,
                 # LANG: Appearance option for Windows "minimize to system tray"
-                text=_('Minimize to system tray'),
+                text=tr.tl('Minimize to system tray'),
                 variable=self.minimize_system_tray,
                 command=self.themevarchanged
             ).grid(columnspan=3, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=row.get())  # Appearance setting
@@ -852,7 +860,7 @@ class PreferencesDialog(tk.Toplevel):
         nb.Label(appearance_frame).grid(sticky=tk.W)  # big spacer
 
         # LANG: Label for Settings > Appearance tab
-        notebook.add(appearance_frame, text=_('Appearance'))  # Tab heading in settings
+        notebook.add(appearance_frame, text=tr.tl('Appearance'))  # Tab heading in settings
 
     def __setup_plugin_tab(self, notebook: ttk.Notebook) -> None:  # noqa: CCR001
         # Plugin settings and info
@@ -864,7 +872,7 @@ class PreferencesDialog(tk.Toplevel):
 
         # Section heading in settings
         # LANG: Label for location of third-party plugins folder
-        nb.Label(plugins_frame, text=_('Plugins folder') + ':').grid(
+        nb.Label(plugins_frame, text=tr.tl('Plugins folder') + ':').grid(
             padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get()
         )
 
@@ -877,14 +885,15 @@ class PreferencesDialog(tk.Toplevel):
                 plugins_frame,
                 # Help text in settings
                 # LANG: Tip/label about how to disable plugins
-                text=_("Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name").format(EXT='.disabled')
+                text=tr.tl(
+                    "Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name").format(EXT='.disabled')
             ).grid(columnspan=2, padx=self.PADX, pady=self.PADY, sticky=tk.EW, row=cur_row)
 
             ttk.Button(
                 plugins_frame,
                 # LANG: Label on button used to open a filesystem folder
-                text=_('Open'),  # Button that opens a folder in Explorer/Finder
-                command=lambda: webbrowser.open(f'file:///{config.plugin_dir_path}')
+                text=tr.tl('Open'),  # Button that opens a folder in Explorer/Finder
+                command=lambda: open_folder(config.plugin_dir_path)
             ).grid(column=1, padx=self.PADX, pady=self.PADY, sticky=tk.N, row=cur_row)
 
         enabled_plugins = list(filter(lambda x: x.folder and x.module, plug.PLUGINS))
@@ -895,7 +904,7 @@ class PreferencesDialog(tk.Toplevel):
             nb.Label(
                 plugins_frame,
                 # LANG: Label on list of enabled plugins
-                text=_('Enabled Plugins')+':'  # List of plugins in settings
+                text=tr.tl('Enabled Plugins')+':'  # List of plugins in settings
             ).grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get())
 
             for plugin in enabled_plugins:
@@ -915,13 +924,13 @@ class PreferencesDialog(tk.Toplevel):
                 columnspan=3, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=row.get()
             )
             # LANG: Plugins - Label for list of 'enabled' plugins that don't work with Python 3.x
-            nb.Label(plugins_frame, text=_('Plugins Without Python 3.x Support')+':').grid(
+            nb.Label(plugins_frame, text=tr.tl('Plugins Without Python 3.x Support')+':').grid(
                 padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get()
             )
 
             HyperlinkLabel(
                 # LANG: Plugins - Label on URL to documentation about migrating plugins from Python 2.7
-                plugins_frame, text=_('Information on migrating plugins'),
+                plugins_frame, text=tr.tl('Information on migrating plugins'),
                 background=nb.Label().cget('background'),
                 url='https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#migration-from-python-27',
                 underline=True
@@ -943,7 +952,7 @@ class PreferencesDialog(tk.Toplevel):
             nb.Label(
                 plugins_frame,
                 # LANG: Label on list of user-disabled plugins
-                text=_('Disabled Plugins')+':'  # List of plugins in settings
+                text=tr.tl('Disabled Plugins')+':'  # List of plugins in settings
             ).grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get())
 
             for plugin in disabled_plugins:
@@ -958,7 +967,7 @@ class PreferencesDialog(tk.Toplevel):
                 columnspan=3, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=row.get()
             )
             # LANG: Plugins - Label for list of 'broken' plugins that failed to load
-            nb.Label(plugins_frame, text=_('Broken Plugins')+':').grid(
+            nb.Label(plugins_frame, text=tr.tl('Broken Plugins')+':').grid(
                 padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get()
             )
 
@@ -969,7 +978,7 @@ class PreferencesDialog(tk.Toplevel):
                     )
 
         # LANG: Label on Settings > Plugins tab
-        notebook.add(plugins_frame, text=_('Plugins'))		# Tab heading in settings
+        notebook.add(plugins_frame, text=tr.tl('Plugins'))		# Tab heading in settings
 
     def cmdrchanged(self, event=None):
         """
@@ -1122,7 +1131,7 @@ class PreferencesDialog(tk.Toplevel):
         self.hotkey_text.insert(
             0,
             # LANG: No hotkey/shortcut set
-            hotkeymgr.display(self.hotkey_code, self.hotkey_mods) if self.hotkey_code else _('None'))
+            hotkeymgr.display(self.hotkey_code, self.hotkey_mods) if self.hotkey_code else tr.tl('None'))
 
     def hotkeylisten(self, event: 'tk.Event[Any]') -> str:
         """
@@ -1155,7 +1164,7 @@ class PreferencesDialog(tk.Toplevel):
 
             else:
                 # LANG: No hotkey/shortcut set
-                event.widget.insert(0, _('None'))
+                event.widget.insert(0, tr.tl('None'))
                 self.hotkey_only_btn['state'] = tk.DISABLED
                 self.hotkey_play_btn['state'] = tk.DISABLED
 
@@ -1205,7 +1214,7 @@ class PreferencesDialog(tk.Toplevel):
 
         lang_codes = {v: k for k, v in self.languages.items()}  # Codes by name
         config.set('language', lang_codes.get(self.lang.get()) or '')  # or '' used here due to Default being None above
-        Translations.install(config.get_str('language', default=None))  # type: ignore # This sets self in weird ways.
+        tr.install(config.get_str('language', default=None))  # type: ignore # This sets self in weird ways.
 
         # Privacy options
         config.set('hide_private_group', self.hide_private_group.get())
