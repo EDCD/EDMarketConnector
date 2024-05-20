@@ -42,7 +42,7 @@ import stats
 from commodity import COMMODITY_DEFAULT
 from config import appcmdname, appversion, config
 from monitor import monitor
-from update import EDMCVersion, Updater
+from update import EDMCVersion, Updater, check_for_fdev_updates
 
 sys.path.append(config.internal_plugin_dir)
 # This import must be after the sys.path.append.
@@ -497,6 +497,10 @@ def main():  # noqa: C901, CCR001
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        check_for_fdev_updates(silent=True)
+        main()
+    except KeyboardInterrupt:
+        logger.info("Ctrl+C Detected, Attempting Clean Shutdown")
     logger.debug('Exiting')
     sys.exit(EXIT_SUCCESS)
