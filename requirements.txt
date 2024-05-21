@@ -1,5 +1,5 @@
 certifi==2024.2.2
-requests==2.31.0
+requests==2.32.0
 # requests depends on this now ?
 charset-normalizer==3.3.2
 
