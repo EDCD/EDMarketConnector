@@ -67,12 +67,14 @@ class EntryMenu(ttk.Entry):
         ttk.Entry.__init__(self, *args, **kwargs)
 
         self.menu = tk.Menu(self, tearoff=False)
-        self.menu.add_command(label="Copy", command=self.copy)
-        self.menu.add_command(label="Cut", command=self.cut)
+        self.menu.add_command(label=tr.tl("Copy"), command=self.copy)  # LANG: Label for 'Copy' as in 'Copy and Paste'
+        self.menu.add_command(label=tr.tl("Cut"), command=self.cut)  # LANG: Label for 'Cut' as in 'Cut and Paste'
         self.menu.add_separator()
-        self.menu.add_command(label="Paste", command=self.paste)
+        # LANG: Label for 'Paste' as in 'Copy and Paste'
+        self.menu.add_command(label=tr.tl("Paste"), command=self.paste)
         self.menu.add_separator()
-        self.menu.add_command(label="Select All", command=self.select_all)
+        # LANG: Label for 'Select All'
+        self.menu.add_command(label=tr.tl("Select All"), command=self.select_all)
 
         self.bind("<Button-3>", self.display_popup)
 

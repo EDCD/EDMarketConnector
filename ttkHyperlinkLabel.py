@@ -70,10 +70,6 @@ class HyperlinkLabel(tk.Label or ttk.Label):  # type: ignore
         ttk.Label.__init__(self, master, **kw)
 
         self.bind('<Button-1>', self._click)
-
-        self.menu = tk.Menu(tearoff=tk.FALSE)
-        # LANG: Label for 'Copy' as in 'Copy and Paste'
-        self.menu.add_command(label=tr.tl('Copy'), command=self.copy)  # As in Copy and Paste
         self.bind('<Button-3>', self._contextmenu)
 
         self.bind('<Enter>', self._enter)
@@ -87,29 +83,6 @@ class HyperlinkLabel(tk.Label or ttk.Label):  # type: ignore
         # Add Menu Options
         self.plug_options = kw.pop('plug_options', None)
         self.name = kw.get('name', None)
-        if self.name == 'ship':
-            self.menu.add_separator()
-            for url in plug.provides('shipyard_url'):
-                self.menu.add_command(
-                    label=tr.tl("Open in {URL}").format(URL=url),  # LANG: Open Element In Selected Provider
-                    command=partial(self.open_shipyard, url)
-                )
-
-        if self.name == 'station':
-            self.menu.add_separator()
-            for url in plug.provides('station_url'):
-                self.menu.add_command(
-                    label=tr.tl("Open in {URL}").format(URL=url),  # LANG: Open Element In Selected Provider
-                    command=partial(self.open_station, url)
-                )
-
-        if self.name == 'system':
-            self.menu.add_separator()
-            for url in plug.provides('system_url'):
-                self.menu.add_command(
-                    label=tr.tl("Open in {URL}").format(URL=url),  # LANG: Open Element In Selected Provider
-                    command=partial(self.open_system, url)
-                )
 
     def open_shipyard(self, url: str):
         """Open the Current Ship Loadout in the Selected Provider."""
@@ -122,14 +95,13 @@ class HyperlinkLabel(tk.Label or ttk.Label):  # type: ignore
                 return webbrowser.open(opener)
         else:
             # Avoid file length limits if possible
-            provider = config.get_str('shipyard_provider', default='EDSY')
-            target = plug.invoke(provider, 'EDSY', 'shipyard_url', loadout, monitor.is_beta)
+            target = plug.invoke(url, 'EDSY', 'shipyard_url', loadout, monitor.is_beta)
             file_name = path.join(config.app_dir_path, "last_shipyard.html")
 
             with open(file_name, 'w') as f:
                 f.write(SHIPYARD_HTML_TEMPLATE.format(
                     link=html.escape(str(target)),
-                    provider_name=html.escape(str(provider)),
+                    provider_name=html.escape(str(url)),
                     ship_name=html.escape("Ship")
                 ))
 
@@ -212,8 +184,41 @@ class HyperlinkLabel(tk.Label or ttk.Label):  # type: ignore
                 webbrowser.open(url)
 
     def _contextmenu(self, event: tk.Event) -> None:
+        """
+        Display the context menu when right-clicked.
+
+        :param event: The event object.
+        """
+        menu = tk.Menu(tearoff=tk.FALSE)
+        # LANG: Label for 'Copy' as in 'Copy and Paste'
+        menu.add_command(label=tr.tl('Copy'), command=self.copy)  # As in Copy and Paste
+
+        if self.name == 'ship':
+            menu.add_separator()
+            for url in plug.provides('shipyard_url'):
+                menu.add_command(
+                    label=tr.tl("Open in {URL}").format(URL=url),  # LANG: Open Element In Selected Provider
+                    command=partial(self.open_shipyard, url)
+                )
+
+        if self.name == 'station':
+            menu.add_separator()
+            for url in plug.provides('station_url'):
+                menu.add_command(
+                    label=tr.tl("Open in {URL}").format(URL=url),  # LANG: Open Element In Selected Provider
+                    command=partial(self.open_station, url)
+                )
+
+        if self.name == 'system':
+            menu.add_separator()
+            for url in plug.provides('system_url'):
+                menu.add_command(
+                    label=tr.tl("Open in {URL}").format(URL=url),  # LANG: Open Element In Selected Provider
+                    command=partial(self.open_system, url)
+                )
+
         if self['text'] and (self.popup_copy(self['text']) if callable(self.popup_copy) else self.popup_copy):
-            self.menu.post(event.x_root, event.y_root)
+            menu.post(event.x_root, event.y_root)
 
     def copy(self) -> None:
         """Copy the current text to the clipboard."""
