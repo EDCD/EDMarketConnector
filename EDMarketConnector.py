@@ -17,7 +17,6 @@ import re
 import os
 import subprocess
 import sys
-import threading
 import webbrowser
 from time import localtime, strftime, time
 from typing import TYPE_CHECKING, Any, Literal
@@ -408,27 +407,25 @@ if __name__ == '__main__':  # noqa: C901
 # isort: off
 if TYPE_CHECKING:
     from logging import TRACE  # type: ignore # noqa: F401 # Needed to update mypy
-
-    if sys.platform == 'win32':
-        from infi.systray import SysTrayIcon
     # isort: on
 
     def _(x: str) -> str:
         """Fake the l10n translation functions for typing."""
         return x
 
-import wx
 import commodity
 import plug
 import prefs
 import protocol
 import stats
 import td
+import wx
 from dashboard import dashboard
 from edmc_data import ship_name_map
 from hotkey import hotkeymgr
 from l10n import Translations
 from monitor import monitor
+from wx.adv import TaskBarIcon
 
 SERVER_RETRY = 5  # retry pause for Companion servers [s]
 
@@ -448,6 +445,28 @@ SHIPYARD_HTML_TEMPLATE = """
 """
 
 
+class SysTrayIcon(TaskBarIcon):
+    def __init__(self, frame: wx.Frame):
+        super().__init__()
+        self.frame = frame
+        self.SetIcon(frame.GetIcon())
+        self.Bind(wx.EVT_MENU, self.OnOpen, id=1)
+        self.Bind(wx.EVT_MENU, self.OnQuit, id=2)
+
+    def CreatePopupMenu(self):
+        menu = wx.Menu()
+        menu.Append(1, 'Open')
+        menu.Append(2, 'Quit')
+        return menu
+
+    def OnOpen(self, event):
+        if not self.frame.IsShown():
+            self.frame.Show()
+
+    def OnQuit(self, event):
+        self.frame.Close()
+
+
 class AppWindow:
     """Define the main application window."""
 
@@ -455,112 +474,94 @@ class AppWindow:
 
     PADX = 5
 
-    def __init__(self, master: tk.Tk):  # noqa: C901, CCR001 # TODO - can possibly factor something out
+    def __init__(self, master: wx.App):  # noqa: C901, CCR001 # TODO - can possibly factor something out
 
         self.capi_query_holdoff_time = config.get_int('querytime', default=0) + companion.capi_query_cooldown
         self.capi_fleetcarrier_query_holdoff_time = config.get_int('fleetcarrierquerytime', default=0) \
             + companion.capi_fleetcarrier_query_cooldown
 
         self.w = master
-        self.w.title(applongname)
+        self.w.SetAppDisplayName(applongname)
         self.minimizing = False
-        self.w.rowconfigure(0, weight=1)
-        self.w.columnconfigure(0, weight=1)
 
         # companion needs to be able to send <<CAPIResponse>> events
-        companion.session.set_tk_master(self.w)
+        companion.session.set_wx_master(self.w)
 
         self.prefsdialog = None
 
-        if sys.platform == 'win32':
-            from infi.systray import SysTrayIcon
-
-            def open_window(systray: 'SysTrayIcon') -> None:
-                self.w.deiconify()
-
-            menu_options = (("Open", None, open_window),)
-            # Method associated with on_quit is called whenever the systray is closing
-            self.systray = SysTrayIcon("EDMarketConnector.ico", applongname, menu_options, on_quit=self.exit_tray)
-            self.systray.start()
-
         #plug.load_plugins(master)
 
-        if sys.platform == 'win32':
-            self.w.wm_iconbitmap(default='EDMarketConnector.ico')
+        frame = wx.Frame(self.w, title=appname.lower())
+        frame.SetIcon(wx.Icon('EDMarketConnector.ico', wx.BITMAP_TYPE_ICO))
+        if TaskBarIcon.IsAvailable():
+            self.systray = SysTrayIcon(frame)
 
-        else:
-            self.w.tk.call('wm', 'iconphoto', self.w, '-default',
-                           tk.PhotoImage(file=os.path.join(config.respath_path, 'io.edcd.EDMarketConnector.png')))
-
-        frame = tk.Frame(self.w, name=appname.lower())
-        frame.grid(sticky=tk.NSEW)
-        frame.columnconfigure(1, weight=1)
-
-        self.cmdr_label = tk.Label(frame, name='cmdr_label')
-        self.cmdr = tk.Label(frame, compound=tk.RIGHT, anchor=tk.W, name='cmdr')
-        self.ship_label = tk.Label(frame, name='ship_label')
-        self.ship = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.shipyard_url, name='ship')
-        self.suit_label = tk.Label(frame, name='suit_label')
-        self.suit = tk.Label(frame, compound=tk.RIGHT, anchor=tk.W, name='suit')
-        self.system_label = tk.Label(frame, name='system_label')
-        self.system = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.system_url, popup_copy=True, name='system')
-        self.station_label = tk.Label(frame, name='station_label')
-        self.station = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.station_url, name='station')
+        self.cmdr_label = wx.StaticText(frame, name='cmdr_label')
+        self.cmdr = wx.StaticText(frame, compound=wx.RIGHT, name='cmdr')
+        self.ship_label = wx.StaticText(frame, name='ship_label')
+        self.ship = HyperlinkLabel(frame, compound=wx.RIGHT, url=self.shipyard_url, name='ship')
+        self.suit_label = wx.StaticText(frame, name='suit_label')
+        self.suit = wx.StaticText(frame, compound=wx.RIGHT, name='suit')
+        self.system_label = wx.StaticText(frame, name='system_label')
+        self.system = HyperlinkLabel(frame, compound=wx.RIGHT, url=self.system_url, popup_copy=True, name='system')
+        self.station_label = wx.StaticText(frame, name='station_label')
+        self.station = HyperlinkLabel(frame, compound=wx.RIGHT, url=self.station_url, name='station')
         # system and station text is set/updated by the 'provider' plugins
         # edsm and inara.  Look for:
         #
         # parent.nametowidget(f".{appname.lower()}.system")
         # parent.nametowidget(f".{appname.lower()}.station")
 
+        grid = wx.GridSizer(cols=2)
         ui_row = 1
 
-        self.cmdr_label.grid(row=ui_row, column=0, sticky=tk.W)
-        self.cmdr.grid(row=ui_row, column=1, sticky=tk.EW)
+        self.cmdr_label.grid(row=ui_row, column=0, sticky=wx.W)
+        self.cmdr.grid(row=ui_row, column=1, sticky=wx.EW)
         ui_row += 1
 
-        self.ship_label.grid(row=ui_row, column=0, sticky=tk.W)
-        self.ship.grid(row=ui_row, column=1, sticky=tk.EW)
+        self.ship_label.grid(row=ui_row, column=0, sticky=wx.W)
+        self.ship.grid(row=ui_row, column=1, sticky=wx.EW)
         ui_row += 1
 
         self.suit_grid_row = ui_row
         self.suit_shown = False
         ui_row += 1
 
-        self.system_label.grid(row=ui_row, column=0, sticky=tk.W)
-        self.system.grid(row=ui_row, column=1, sticky=tk.EW)
+        self.system_label.grid(row=ui_row, column=0, sticky=wx.W)
+        self.system.grid(row=ui_row, column=1, sticky=wx.EW)
         ui_row += 1
 
-        self.station_label.grid(row=ui_row, column=0, sticky=tk.W)
-        self.station.grid(row=ui_row, column=1, sticky=tk.EW)
+        self.station_label.grid(row=ui_row, column=0, sticky=wx.W)
+        self.station.grid(row=ui_row, column=1, sticky=wx.EW)
         ui_row += 1
 
         plugin_no = 0
         for plugin in plug.PLUGINS:
             # Per plugin separator
-            plugin_sep = tk.Frame(
+            plugin_sep = wx.Frame(
                 frame, highlightthickness=1, name=f"plugin_hr_{plugin_no + 1}"
             )
             # Per plugin frame, for it to use as its parent for own widgets
-            plugin_frame = tk.Frame(
+            plugin_frame = wx.Frame(
                 frame,
                 name=f"plugin_{plugin_no + 1}"
             )
             appitem = plugin.get_app(plugin_frame)
             if appitem:
                 plugin_no += 1
-                plugin_sep.grid(columnspan=2, sticky=tk.EW)
-                ui_row = frame.grid_size()[1]
+                plugin_sep.grid(columnspan=2, sticky=wx.EW)
+                _, ui_row = frame.grid_size()
                 plugin_frame.grid(
-                    row=ui_row, columnspan=2, sticky=tk.NSEW
+                    row=ui_row, columnspan=2, sticky=wx.NSEW
                 )
                 plugin_frame.columnconfigure(1, weight=1)
                 if isinstance(appitem, tuple) and len(appitem) == 2:
-                    ui_row = frame.grid_size()[1]
-                    appitem[0].grid(row=ui_row, column=0, sticky=tk.W)
-                    appitem[1].grid(row=ui_row, column=1, sticky=tk.EW)
+                    _, ui_row = frame.grid_size()
+                    appitem[0].grid(row=ui_row, column=0, sticky=wx.W)
+                    appitem[1].grid(row=ui_row, column=1, sticky=wx.EW)
 
                 else:
-                    appitem.grid(columnspan=2, sticky=tk.EW)
+                    appitem.grid(columnspan=2, sticky=wx.EW)
 
             else:
                 # This plugin didn't provide any UI, so drop the frames
@@ -568,28 +569,28 @@ class AppWindow:
                 plugin_sep.destroy()
 
         # LANG: Update button in main window
-        self.button = ttk.Button(
+        self.button = wx.Button(
             frame,
             name='update_button',
             text=_('Update'),  # LANG: Main UI Update button
             width=28,
-            default=tk.ACTIVE,
-            state=tk.DISABLED
+            default=wx.ACTIVE,
+            state=wx.DISABLED
         )
 
-        ui_row = frame.grid_size()[1]
-        self.button.grid(row=ui_row, columnspan=2, sticky=tk.NSEW)
+        _, ui_row = frame.grid_size()
+        self.button.grid(row=ui_row, columnspan=2, sticky=wx.NSEW)
         self.button.bind('<Button-1>', self.capi_request_data)
 
         # Bottom 'status' line.
-        self.status = tk.Label(frame, name='status', anchor=tk.W)
-        self.status.grid(columnspan=2, sticky=tk.EW)
+        self.status = wx.StaticText(frame, name='status', anchor=wx.W)
+        self.status.grid(columnspan=2, sticky=wx.EW)
 
         for child in frame.winfo_children():
             child.grid_configure(padx=self.PADX, pady=(
-                sys.platform != 'win32' or isinstance(child, tk.Frame)) and 2 or 0)
+                sys.platform != 'win32' or isinstance(child, wx.Frame)) and 2 or 0)
 
-        self.menubar = tk.Menu()
+        self.menubar = wx.Menu()
 
         # This used to be *after* the menu setup for some reason, but is testing
         # as working (both internal and external) like this. -Ath
@@ -603,17 +604,17 @@ class AppWindow:
             self.updater = update.Updater(tkroot=self.w)
             self.updater.check_for_updates()  # Sparkle / WinSparkle does this automatically for packaged apps
 
-        self.file_menu = self.view_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)
+        self.file_menu = wx.Menu(self.menubar, tearoff=wx.FALSE)
         self.file_menu.add_command(command=lambda: stats.StatsDialog(self.w, self.status))
         self.file_menu.add_command(command=self.save_raw)
         self.file_menu.add_command(command=lambda: prefs.PreferencesDialog(self.w, self.postprefs))
         self.file_menu.add_separator()
         self.file_menu.add_command(command=self.onexit)
         self.menubar.add_cascade(menu=self.file_menu)
-        self.edit_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)
-        self.edit_menu.add_command(accelerator='Ctrl+C', state=tk.DISABLED, command=self.copy)
+        self.edit_menu = wx.Menu(self.menubar, tearoff=wx.FALSE)
+        self.edit_menu.add_command(accelerator='Ctrl+C', state=wx.DISABLED, command=self.copy)
         self.menubar.add_cascade(menu=self.edit_menu)
-        self.help_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)  # type: ignore
+        self.help_menu = wx.Menu(self.menubar, tearoff=wx.FALSE)  # type: ignore
         self.help_menu.add_command(command=self.help_general)  # Documentation
         self.help_menu.add_command(command=self.help_troubleshooting)  # Troubleshooting
         self.help_menu.add_command(command=self.help_report_a_bug)  # Report A Bug
@@ -627,8 +628,8 @@ class AppWindow:
         self.menubar.add_cascade(menu=self.help_menu)
         if sys.platform == 'win32':
             # Must be added after at least one "real" menu entry
-            self.always_ontop = tk.BooleanVar(value=bool(config.get_int('always_ontop')))
-            self.system_menu = tk.Menu(self.menubar, name='system', tearoff=tk.FALSE)
+            self.always_ontop = wx.BooleanVar(value=bool(config.get_int('always_ontop')))
+            self.system_menu = wx.Menu(self.menubar, name='system', tearoff=wx.FALSE)
             self.system_menu.add_separator()
             # LANG: Appearance - Label for checkbox to select if application always on top
             self.system_menu.add_checkbutton(label=_('Always on top'),
@@ -641,13 +642,9 @@ class AppWindow:
         self.w.bind("<Unmap>", self.default_iconify)
 
         self.w.protocol("WM_DELETE_WINDOW", self.onexit)
-        theme.register(self.menubar)  # menus and children aren't automatically registered
-        theme.register(self.file_menu)
-        theme.register(self.edit_menu)
-        theme.register(self.help_menu)
 
         self.drag_offset: tuple[int | None, int | None] = (None, None)
-        self.w.resizable(tk.TRUE, tk.FALSE)
+        self.w.resizable(wx.TRUE, wx.FALSE)
 
         # update geometry
         if config.get_str('geometry'):
@@ -667,9 +664,6 @@ class AppWindow:
                     self.w.geometry(config.get_str('geometry'))
 
         self.w.attributes('-topmost', config.get_int('always_ontop') and 1 or 0)
-
-        theme.register(frame)
-        theme.apply(self.w)
 
         self.w.bind('<Map>', self.onmap)  # Special handling for overrideredict
         self.w.bind('<Enter>', self.onenter)  # Special handling for transparency
@@ -746,8 +740,8 @@ class AppWindow:
         if not self.suit_shown:
             pady = 2 if sys.platform != 'win32' else 0
 
-            self.suit_label.grid(row=self.suit_grid_row, column=0, sticky=tk.W, padx=self.PADX, pady=pady)
-            self.suit.grid(row=self.suit_grid_row, column=1, sticky=tk.EW, padx=self.PADX, pady=pady)
+            self.suit_label.grid(row=self.suit_grid_row, column=0, sticky=wx.W, padx=self.PADX, pady=pady)
+            self.suit.grid(row=self.suit_grid_row, column=1, sticky=wx.EW, padx=self.PADX, pady=pady)
             self.suit_shown = True
 
         else:
@@ -828,10 +822,10 @@ class AppWindow:
             # LANG: Status - Attempting to get a Frontier Auth Access Token
             self.status['text'] = _('Logging in...')
 
-        self.button['state'] = tk.DISABLED
+        self.button['state'] = wx.DISABLED
 
-        self.file_menu.entryconfigure(0, state=tk.DISABLED)  # Status
-        self.file_menu.entryconfigure(1, state=tk.DISABLED)  # Save Raw Data
+        self.file_menu.entryconfigure(0, state=wx.DISABLED)  # Status
+        self.file_menu.entryconfigure(1, state=wx.DISABLED)  # Save Raw Data
 
         self.w.update_idletasks()
         try:
@@ -839,8 +833,8 @@ class AppWindow:
                 # LANG: Successfully authenticated with the Frontier website
                 self.status['text'] = _('Authentication successful')
 
-                self.file_menu.entryconfigure(0, state=tk.NORMAL)  # Status
-                self.file_menu.entryconfigure(1, state=tk.NORMAL)  # Save Raw Data
+                self.file_menu.entryconfigure(0, state=wx.NORMAL)  # Status
+                self.file_menu.entryconfigure(1, state=wx.NORMAL)  # Save Raw Data
 
         except (companion.CredentialsError, companion.ServerError, companion.ServerLagging) as e:
             self.status['text'] = str(e)
@@ -978,7 +972,7 @@ class AppWindow:
 
             # LANG: Status - Attempting to retrieve data from Frontier CAPI
             self.status['text'] = _('Fetching data...')
-            self.button['state'] = tk.DISABLED
+            self.button['state'] = wx.DISABLED
             self.w.update_idletasks()
 
         query_time = int(time())
@@ -1186,7 +1180,7 @@ class AppWindow:
                     monitor.state['ShipType'] = capi_response.capi_data['ship']['name'].lower()
 
                     if not monitor.state['Modules']:
-                        self.ship.configure(state=tk.DISABLED)
+                        self.ship.configure(state=wx.DISABLED)
 
                 # We might have disabled this in the conditional above.
                 if monitor.state['Modules']:
@@ -1341,7 +1335,7 @@ class AppWindow:
                     self.cmdr['text'] = f'{monitor.cmdr}'
 
                 self.ship_label['text'] = _('Role') + ':'  # LANG: Multicrew role label in main window
-                self.ship.configure(state=tk.NORMAL, text=crewroletext(monitor.state['Role']), url=None)
+                self.ship.configure(state=wx.NORMAL, text=crewroletext(monitor.state['Role']), url=None)
 
             elif monitor.cmdr:
                 if monitor.group and not config.get_bool("hide_private_group", default=False):
@@ -1364,10 +1358,10 @@ class AppWindow:
 
                 # Ensure the ship type/name text is clickable, if it should be.
                 if monitor.state['Modules']:
-                    ship_state: Literal['normal', 'disabled'] = tk.NORMAL
+                    ship_state: Literal['normal', 'disabled'] = wx.NORMAL
 
                 else:
-                    ship_state = tk.DISABLED
+                    ship_state = wx.DISABLED
 
                 self.ship.configure(text=ship_text, url=self.shipyard_url, state=ship_state)
 
@@ -1382,7 +1376,7 @@ class AppWindow:
             self.update_suit_text()
             self.suit_show_if_set()
 
-            self.edit_menu.entryconfigure(0, state=monitor.state['SystemName'] and tk.NORMAL or tk.DISABLED)  # Copy
+            self.edit_menu.entryconfigure(0, state=monitor.state['SystemName'] and wx.NORMAL or wx.DISABLED)  # Copy
 
             if entry['event'] in (
                     'Undocked',
@@ -1511,8 +1505,8 @@ class AppWindow:
             companion.session.auth_callback()
             # LANG: Successfully authenticated with the Frontier website
             self.status['text'] = _('Authentication successful')
-            self.file_menu.entryconfigure(0, state=tk.NORMAL)  # Status
-            self.file_menu.entryconfigure(1, state=tk.NORMAL)  # Save Raw Data
+            self.file_menu.entryconfigure(0, state=wx.NORMAL)  # Status
+            self.file_menu.entryconfigure(1, state=wx.NORMAL)  # Save Raw Data
 
         except companion.ServerError as e:
             self.status['text'] = str(e)
@@ -1606,7 +1600,7 @@ class AppWindow:
                 monitor.mode != 'CQC' and
                 not monitor.state['Captain'] and
                 monitor.state['SystemName'] and
-                tk.NORMAL or tk.DISABLED
+                wx.NORMAL or wx.DISABLED
             )
 
     if sys.platform == 'win32':
@@ -1644,12 +1638,12 @@ class AppWindow:
         """Open Releases page in browser."""
         webbrowser.open('https://github.com/EDCD/EDMarketConnector/releases')
 
-    class HelpAbout(tk.Toplevel):
+    class HelpAbout(wx.Toplevel):
         """The applications Help > About popup."""
 
         showing: bool = False
 
-        def __init__(self, parent: tk.Tk) -> None:
+        def __init__(self, parent: wx.App) -> None:
             """
             Initialize the HelpAbout popup.
 
@@ -1660,7 +1654,7 @@ class AppWindow:
 
             self.__class__.showing = True
 
-            tk.Toplevel.__init__(self, parent)
+            wx.Toplevel.__init__(self, parent)
 
             self.parent = parent
             # LANG: Help > About App
@@ -1675,37 +1669,37 @@ class AppWindow:
 
             # remove decoration
             if sys.platform == 'win32':
-                self.attributes('-toolwindow', tk.TRUE)
+                self.attributes('-toolwindow', wx.TRUE)
 
-            self.resizable(tk.FALSE, tk.FALSE)
+            self.resizable(wx.FALSE, wx.FALSE)
 
-            frame = tk.Frame(self)
-            frame.grid(sticky=tk.NSEW)
+            frame = wx.Frame(self)
+            frame.grid(sticky=wx.NSEW)
 
             row = 1
             ############################################################
             # applongname
-            self.appname_label = tk.Label(frame, text=applongname)
-            self.appname_label.grid(row=row, columnspan=3, sticky=tk.EW)
+            self.appname_label = wx.StaticText(frame, text=applongname)
+            self.appname_label.grid(row=row, columnspan=3, sticky=wx.EW)
             row += 1
             ############################################################
 
             ############################################################
             # version <link to changelog>
-            tk.Label(frame).grid(row=row, column=0)  # spacer
+            wx.StaticText(frame).grid(row=row, column=0)  # spacer
             row += 1
-            self.appversion_label = tk.Text(frame, height=1, width=len(str(appversion())), wrap=tk.NONE, bd=0)
+            self.appversion_label = wx.Text(frame, height=1, width=len(str(appversion())), wrap=wx.NONE, bd=0)
             self.appversion_label.insert("1.0", str(appversion()))
             self.appversion_label.tag_configure("center", justify="center")
             self.appversion_label.tag_add("center", "1.0", "end")
-            self.appversion_label.config(state=tk.DISABLED, bg=frame.cget("background"), font="TkDefaultFont")
-            self.appversion_label.grid(row=row, column=0, sticky=tk.E)
+            self.appversion_label.config(state=wx.DISABLED, bg=frame.cget("background"), font="TkDefaultFont")
+            self.appversion_label.grid(row=row, column=0, sticky=wx.E)
             # LANG: Help > Release Notes
-            self.appversion = HyperlinkLabel(frame, compound=tk.RIGHT, text=_('Release Notes'),
+            self.appversion = HyperlinkLabel(frame, compound=wx.RIGHT, text=_('Release Notes'),
                                              url='https://github.com/EDCD/EDMarketConnector/releases/tag/Release/'
                                                  f'{appversion_nobuild()}',
                                              underline=True)
-            self.appversion.grid(row=row, column=2, sticky=tk.W)
+            self.appversion.grid(row=row, column=2, sticky=wx.W)
             row += 1
             ############################################################
 
@@ -1715,20 +1709,20 @@ class AppWindow:
 
             ############################################################
             # <copyright>
-            ttk.Label(frame).grid(row=row, column=0)  # spacer
+            wx.StaticText(frame).grid(row=row, column=0)  # spacer
             row += 1
-            self.copyright = tk.Label(frame, text=copyright)
-            self.copyright.grid(row=row, columnspan=3, sticky=tk.EW)
+            self.copyright = wx.StaticText(frame, text=copyright)
+            self.copyright.grid(row=row, columnspan=3, sticky=wx.EW)
             row += 1
             ############################################################
 
             ############################################################
             # OK button to close the window
-            ttk.Label(frame).grid(row=row, column=0)  # spacer
+            wx.StaticText(frame).grid(row=row, column=0)  # spacer
             row += 1
             # LANG: Generic 'OK' button label
-            button = ttk.Button(frame, text=_('OK'), command=self.apply)
-            button.grid(row=row, column=2, sticky=tk.E)
+            button = wx.Button(frame, text=_('OK'), command=self.apply)
+            button.grid(row=row, column=2, sticky=wx.E)
             button.bind("<Return>", lambda event: self.apply())
             self.protocol("WM_DELETE_WINDOW", self._destroy)
             ############################################################
@@ -1769,24 +1763,8 @@ class AppWindow:
         with open(f, 'wb') as h:
             h.write(str(companion.session.capi_raw_data).encode(encoding='utf-8'))
 
-    if sys.platform == 'win32':
-        def exit_tray(self, systray: 'SysTrayIcon') -> None:
-            """Tray icon is shutting down."""
-            exit_thread = threading.Thread(
-                target=self.onexit,
-                daemon=True,
-            )
-            exit_thread.start()
-
     def onexit(self, event=None) -> None:
         """Application shutdown procedure."""
-        if sys.platform == 'win32':
-            shutdown_thread = threading.Thread(
-                target=self.systray.shutdown,
-                daemon=True,
-            )
-            shutdown_thread.start()
-
         config.set_shutdown()  # Signal we're in shutdown now.
 
         # http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
@@ -1871,13 +1849,6 @@ class AppWindow:
         self.w.iconify()
         self.w.update_idletasks()  # Size and windows styles get recalculated here
         self.w.wait_visibility()  # Need main window to be re-created before returning
-        theme.active = None  # So theme will be re-applied on map
-
-    # TODO: Confirm this is unused and remove.
-    def onmap(self, event=None) -> None:
-        """Perform a now unused function."""
-        if event.widget == self.w:
-            theme.apply(self.w)
 
     def onenter(self, event=None) -> None:
         """Handle when our window gains focus."""
@@ -1925,30 +1896,30 @@ def show_killswitch_poppup(root=None):
         "Please update EDMC as soon as possible to resolve any issues.\n"
     )
 
-    tl = tk.Toplevel(root)
+    tl = wx.Toplevel(root)
     tl.wm_attributes('-topmost', True)
     tl.geometry(f'+{root.winfo_rootx()}+{root.winfo_rooty()}')
 
     tl.columnconfigure(1, weight=1)
     tl.title("EDMC Features have been disabled")
 
-    frame = tk.Frame(tl)
+    frame = wx.Frame(tl)
     frame.grid()
-    t = tk.Label(frame, text=text)
+    t = wx.StaticText(frame, text=text)
     t.grid(columnspan=2)
     idx = 1
 
     for version in kills:
-        tk.Label(frame, text=f'Version: {version.version}').grid(row=idx, sticky=tk.W)
+        wx.StaticText(frame, text=f'Version: {version.version}').grid(row=idx, sticky=wx.W)
         idx += 1
         for id, kill in version.kills.items():
-            tk.Label(frame, text=id).grid(column=0, row=idx, sticky=tk.W, padx=(10, 0))
-            tk.Label(frame, text=kill.reason).grid(column=1, row=idx, sticky=tk.E, padx=(0, 10))
+            wx.StaticText(frame, text=id).grid(column=0, row=idx, sticky=wx.W, padx=(10, 0))
+            wx.StaticText(frame, text=kill.reason).grid(column=1, row=idx, sticky=wx.E, padx=(0, 10))
             idx += 1
         idx += 1
 
-    ok_button = tk.Button(frame, text="Ok", command=tl.destroy)
-    ok_button.grid(columnspan=2, sticky=tk.EW)
+    ok_button = wx.Button(frame, text="Ok", command=tl.destroy)
+    ok_button.grid(columnspan=2, sticky=wx.EW)
 
 
 def validate_providers():
@@ -1989,7 +1960,7 @@ def validate_providers():
     popup_text = popup_text.replace('\\n', '\n')
     popup_text = popup_text.replace('\\r', '\r')
 
-    tk.messagebox.showinfo(
+    wx.messagebox.showinfo(
         # LANG: Popup window title for Reset Providers
         _('EDMC: Default Providers Reset'),
         popup_text
@@ -2121,14 +2092,14 @@ sys.path: {sys.path}'''
 
     setup_killswitches(args.killswitches_file)
 
-    root = tk.Tk(className=appname.lower())
+    root = wx.App(className=appname.lower())
     if sys.platform != 'win32' and ((f := config.get_str('font')) is not None or f != ''):
         size = config.get_int('font_size', default=-1)
         if size == -1:
             size = 10
 
         logger.info(f'Overriding tkinter default font to {f!r} at size {size}')
-        tk.font.nametofont('TkDefaultFont').configure(family=f, size=size)
+        wx.font.nametofont('TkDefaultFont').configure(family=f, size=size)
 
     # UI Scaling
     """
@@ -2140,11 +2111,11 @@ sys.path: {sys.path}'''
         ui_scale = 100
         config.set('ui_scale', ui_scale)
 
-    theme.default_ui_scale = root.tk.call('tk', 'scaling')
+    theme.default_ui_scale = root.wx.call('tk', 'scaling')
     logger.trace_if('tk', f'Default tk scaling = {theme.default_ui_scale}')
     theme.startup_ui_scale = ui_scale
     if theme.default_ui_scale is not None:
-        root.tk.call('tk', 'scaling', theme.default_ui_scale * float(ui_scale) / 100.0)
+        root.wx.call('tk', 'scaling', theme.default_ui_scale * float(ui_scale) / 100.0)
 
     app = AppWindow(root)
 
@@ -2170,7 +2141,7 @@ sys.path: {sys.path}'''
             popup_text = popup_text.replace('\\n', '\n')
             popup_text = popup_text.replace('\\r', '\r')
 
-            tk.messagebox.showinfo(
+            wx.messagebox.showinfo(
                 # LANG: Popup window title for list of 'broken' plugins that failed to load
                 _('EDMC: Broken Plugins'),
                 popup_text
@@ -2200,7 +2171,7 @@ sys.path: {sys.path}'''
             popup_text = popup_text.replace('\\n', '\n')
             popup_text = popup_text.replace('\\r', '\r')
 
-            tk.messagebox.showinfo(
+            wx.messagebox.showinfo(
                 # LANG: Popup window title for list of 'enabled' plugins that don't work with Python 3.x
                 _('EDMC: Plugins Without Python 3.x Support'),
                 popup_text
@@ -2224,7 +2195,7 @@ sys.path: {sys.path}'''
             popup_text = popup_text.replace('\\n', '\n')
             popup_text = popup_text.replace('\\r', '\r')
 
-            openwikipage = tk.messagebox.askquestion(
+            openwikipage = wx.messagebox.askquestion(
                 # LANG: Popup window title for missing FDEVID files
                 _('FDevIDs: Missing Commodity Files'),
                 popup_text
