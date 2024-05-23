@@ -20,7 +20,6 @@ referenced in this file (or only in any other core plugin), and if so...
 """
 from __future__ import annotations
 
-import tkinter as tk
 from typing import Any, cast
 import requests
 from companion import CAPIData

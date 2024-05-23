@@ -3,6 +3,7 @@ requests==2.31.0
 pillow==10.3.0
 # requests depends on this now ?
 charset-normalizer==3.3.2
+wxpython==4.2.1
 
 watchdog==3.0.0
 # Commented out because this doesn't package well with py2exe

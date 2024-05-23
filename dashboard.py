@@ -10,7 +10,6 @@ from __future__ import annotations
 import json
 import sys
 import time
-import tkinter as tk
 from calendar import timegm
 from os.path import getsize, isdir, isfile, join
 from typing import Any, cast

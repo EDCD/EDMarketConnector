@@ -18,7 +18,7 @@ from constants import appname, protocolhandler_redirect
 from EDMCLogging import get_main_logger
 
 if TYPE_CHECKING:
-    import tkinter
+    import wx
 
 logger = get_main_logger()
 

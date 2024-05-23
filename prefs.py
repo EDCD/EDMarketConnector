@@ -7,16 +7,12 @@ import logging
 import pathlib
 import sys
 import tempfile
-import tkinter as tk
 import webbrowser
 from os import system
 from os.path import expanduser, expandvars, join, normpath
-from tkinter import colorchooser as tkColorChooser  # type: ignore # noqa: N812
-from tkinter import ttk
 from types import TracebackType
 from typing import TYPE_CHECKING, Any, Callable, Optional, Type
 
-import myNotebook as nb  # noqa: N813
 import plug
 from config import appversion_nobuild, config
 from EDMCLogging import edmclogger, get_main_logger
@@ -24,8 +20,6 @@ from constants import appname
 from hotkey import hotkeymgr
 from l10n import Translations
 from monitor import monitor
-from theme import theme
-from ttkHyperlinkLabel import HyperlinkLabel
 logger = get_main_logger()
 
 if TYPE_CHECKING:

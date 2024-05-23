@@ -18,7 +18,7 @@ from config import appname, appversion_nobuild, config, update_feed
 from EDMCLogging import get_main_logger
 
 if TYPE_CHECKING:
-    import tkinter as tk
+    import wx
     def _(x: str): return x
 
 

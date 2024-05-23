@@ -9,10 +9,8 @@ from __future__ import annotations
 
 import pathlib
 import sys
-import tkinter as tk
 from enum import Enum
 from os import getpid as os_getpid
-from tkinter import ttk
 from typing import TYPE_CHECKING, Callable
 
 from config import config

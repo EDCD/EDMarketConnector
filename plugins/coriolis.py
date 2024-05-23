@@ -25,10 +25,7 @@ import base64
 import gzip
 import io
 import json
-import tkinter as tk
-from tkinter import ttk
 from typing import TYPE_CHECKING
-import myNotebook as nb  # noqa: N813 # its not my fault.
 from EDMCLogging import get_main_logger
 from plug import show_error
 from config import config

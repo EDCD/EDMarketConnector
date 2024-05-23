@@ -22,23 +22,19 @@ from __future__ import annotations
 
 import json
 import threading
-import tkinter as tk
 from datetime import datetime, timedelta, timezone
 from queue import Queue
 from threading import Thread
 from time import sleep
-from tkinter import ttk
 from typing import TYPE_CHECKING, Any, Literal, Mapping, MutableMapping, cast, Sequence
 import requests
 import killswitch
 import monitor
-import myNotebook as nb  # noqa: N813
 import plug
 from companion import CAPIData
 from config import applongname, appname, appversion, config, debug_senders, user_agent
 from edmc_data import DEBUG_WEBSERVER_HOST, DEBUG_WEBSERVER_PORT
 from EDMCLogging import get_main_logger
-from ttkHyperlinkLabel import HyperlinkLabel
 
 if TYPE_CHECKING:
     def _(x: str) -> str:

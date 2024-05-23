@@ -10,12 +10,9 @@ from __future__ import annotations
 import csv
 import json
 import sys
-import tkinter as tk
-from tkinter import ttk
 from typing import TYPE_CHECKING, Any, AnyStr, Callable, NamedTuple, Sequence, cast
 import companion
 import EDMCLogging
-import myNotebook as nb  # noqa: N813
 from edmc_data import ship_name_map
 from hotkey import hotkeymgr
 from l10n import Locale

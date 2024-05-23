@@ -23,25 +23,21 @@ from __future__ import annotations
 import json
 import threading
 import time
-import tkinter as tk
 from collections import defaultdict, deque
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from operator import itemgetter
 from threading import Lock, Thread
-from tkinter import ttk
 from typing import TYPE_CHECKING, Any, Callable, Deque, Mapping, NamedTuple, Sequence, cast, Union
 import requests
 import edmc_data
 import killswitch
-import myNotebook as nb  # noqa: N813
 import plug
 import timeout_session
 from companion import CAPIData
 from config import applongname, appname, appversion, config, debug_senders
 from EDMCLogging import get_main_logger
 from monitor import monitor
-from ttkHyperlinkLabel import HyperlinkLabel
 
 logger = get_main_logger()
 

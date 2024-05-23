@@ -26,7 +26,7 @@ from edmc_data import edmc_suit_shortnames, edmc_suit_symbol_localised
 from EDMCLogging import get_main_logger
 
 if TYPE_CHECKING:
-    import tkinter
+    import wx
 
 
 logger = get_main_logger()

@@ -13,12 +13,9 @@ import logging
 import operator
 import os
 import sys
-import tkinter as tk
-from tkinter import ttk
 from typing import Any, Mapping, MutableMapping
 
 import companion
-import myNotebook as nb  # noqa: N813
 from config import config
 from EDMCLogging import get_main_logger
 

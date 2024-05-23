@@ -6,7 +6,6 @@ import ctypes
 import pathlib
 import sys
 import threading
-import tkinter as tk
 import winsound
 from ctypes.wintypes import DWORD, HWND, LONG, LPWSTR, MSG, ULONG, WORD
 from config import config

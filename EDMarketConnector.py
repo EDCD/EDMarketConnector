@@ -14,11 +14,11 @@ import locale
 import pathlib
 import queue
 import re
+import os
 import subprocess
 import sys
 import threading
 import webbrowser
-from os import chdir, environ, path
 from time import localtime, strftime, time
 from typing import TYPE_CHECKING, Any, Literal
 from constants import applongname, appname, protocolhandler_redirect
@@ -29,15 +29,11 @@ from constants import applongname, appname, protocolhandler_redirect
 if getattr(sys, 'frozen', False):
     # Under py2exe sys.path[0] is the executable name
     if sys.platform == 'win32':
-        chdir(path.dirname(sys.path[0]))
-        # Allow executable to be invoked from any cwd
-        environ['TCL_LIBRARY'] = path.join(path.dirname(sys.path[0]), 'lib', 'tcl')
-        environ['TK_LIBRARY'] = path.join(path.dirname(sys.path[0]), 'lib', 'tk')
-
+        os.chdir(os.path.dirname(sys.path[0]))
 else:
     # We still want to *try* to have CWD be where the main script is, even if
     # not frozen.
-    chdir(pathlib.Path(__file__).parent)
+    os.chdir(pathlib.Path(__file__).parent)
 
 
 # config will now cause an appname logger to be set up, so we need the
@@ -50,7 +46,7 @@ if __name__ == '__main__':
         import tempfile
 
         # unbuffered not allowed for text in python3, so use `1 for line buffering
-        log_file_path = path.join(tempfile.gettempdir(), f'{appname}.log')
+        log_file_path = os.path.join(tempfile.gettempdir(), f'{appname}.log')
         sys.stdout = sys.stderr = open(log_file_path, mode='wt', buffering=1)  # Do NOT use WITH here.
     # TODO: Test: Make *sure* this redirect is working, else py2exe is going to cause an exit popup
 
@@ -336,25 +332,29 @@ if __name__ == '__main__':  # noqa: C901
 
     def already_running_popup():
         """Create the "already running" popup."""
-        import tkinter as tk
-        from tkinter import ttk
+        import wx
         # Check for CL arg that suppresses this popup.
         if args.suppress_dupe_process_popup:
             sys.exit(0)
 
-        root = tk.Tk(className=appname.lower())
+        root = wx.App()
 
-        frame = tk.Frame(root)
-        frame.grid(row=1, column=0, sticky=tk.NSEW)
+        frame = wx.Frame(None, title=appname.lower(),
+                         style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER ^ wx.MAXIMIZE_BOX)
+        sizer = wx.BoxSizer(wx.VERTICAL)
 
-        label = tk.Label(frame, text='An EDMarketConnector.exe process was already running, exiting.')
-        label.grid(row=1, column=0, sticky=tk.NSEW)
+        label = wx.StaticText(frame, label='An EDMarketConnector.exe process was already running, exiting.')
+        sizer.Add(label)
 
-        button = ttk.Button(frame, text='OK', command=lambda: sys.exit(0))
-        button.grid(row=2, column=0, sticky=tk.S)
+        button = wx.Button(frame, label='OK')
+        button.Bind(wx.EVT_BUTTON, lambda event: frame.Close())
+        sizer.Add(button, flags=wx.SizerFlags().Center())
 
+        sizer.SetSizeHints(frame)
+        frame.SetSizer(sizer)
+        frame.Show()
         try:
-            root.mainloop()
+            root.MainLoop()
         except KeyboardInterrupt:
             logger.info("Ctrl+C Detected, Attempting Clean Shutdown")
             sys.exit()
@@ -417,25 +417,18 @@ if TYPE_CHECKING:
         """Fake the l10n translation functions for typing."""
         return x
 
-import tkinter as tk
-import tkinter.filedialog
-import tkinter.font
-import tkinter.messagebox
-from tkinter import ttk
+import wx
 import commodity
 import plug
 import prefs
 import protocol
 import stats
 import td
-from commodity import COMMODITY_CSV
 from dashboard import dashboard
 from edmc_data import ship_name_map
 from hotkey import hotkeymgr
 from l10n import Translations
 from monitor import monitor
-from theme import theme
-from ttkHyperlinkLabel import HyperlinkLabel
 
 SERVER_RETRY = 5  # retry pause for Companion servers [s]
 
@@ -459,10 +452,6 @@ class AppWindow:
     """Define the main application window."""
 
     _CAPI_RESPONSE_TK_EVENT_NAME = '<<CAPIResponse>>'
-    # Tkinter Event types
-    EVENT_KEYPRESS = 2
-    EVENT_BUTTON = 4
-    EVENT_VIRTUAL = 35
 
     PADX = 5
 
@@ -494,22 +483,14 @@ class AppWindow:
             self.systray = SysTrayIcon("EDMarketConnector.ico", applongname, menu_options, on_quit=self.exit_tray)
             self.systray.start()
 
-        plug.load_plugins(master)
+        #plug.load_plugins(master)
 
         if sys.platform == 'win32':
             self.w.wm_iconbitmap(default='EDMarketConnector.ico')
 
         else:
             self.w.tk.call('wm', 'iconphoto', self.w, '-default',
-                           tk.PhotoImage(file=path.join(config.respath_path, 'io.edcd.EDMarketConnector.png')))
-
-        # TODO: Export to files and merge from them in future ?
-        self.theme_icon = tk.PhotoImage(
-            data='R0lGODlhFAAQAMZQAAoKCQoKCgsKCQwKCQsLCgwLCg4LCQ4LCg0MCg8MCRAMCRANChINCREOChIOChQPChgQChgRCxwTCyYVCSoXCS0YCTkdCTseCT0fCTsjDU0jB0EnDU8lB1ElB1MnCFIoCFMoCEkrDlkqCFwrCGEuCWIuCGQvCFs0D1w1D2wyCG0yCF82D182EHE0CHM0CHQ1CGQ5EHU2CHc3CHs4CH45CIA6CIE7CJdECIdLEolMEohQE5BQE41SFJBTE5lUE5pVE5RXFKNaFKVbFLVjFbZkFrxnFr9oFsNqFsVrF8RsFshtF89xF9NzGNh1GNl2GP+KG////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////yH5BAEKAH8ALAAAAAAUABAAAAeegAGCgiGDhoeIRDiIjIZGKzmNiAQBQxkRTU6am0tPCJSGShuSAUcLoIIbRYMFra4FAUgQAQCGJz6CDQ67vAFJJBi0hjBBD0w9PMnJOkAiJhaIKEI7HRoc19ceNAolwbWDLD8uAQnl5ga1I9CHEjEBAvDxAoMtFIYCBy+kFDKHAgM3ZtgYSLAGgwkp3pEyBOJCC2ELB31QATGioAoVAwEAOw==')  # noqa: E501
-        self.theme_minimize = tk.BitmapImage(
-            data='#define im_width 16\n#define im_height 16\nstatic unsigned char im_bits[] = {\n   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,\n   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfc, 0x3f,\n   0xfc, 0x3f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };\n')  # noqa: E501
-        self.theme_close = tk.BitmapImage(
-            data='#define im_width 16\n#define im_height 16\nstatic unsigned char im_bits[] = {\n   0x00, 0x00, 0x00, 0x00, 0x0c, 0x30, 0x1c, 0x38, 0x38, 0x1c, 0x70, 0x0e,\n   0xe0, 0x07, 0xc0, 0x03, 0xc0, 0x03, 0xe0, 0x07, 0x70, 0x0e, 0x38, 0x1c,\n   0x1c, 0x38, 0x0c, 0x30, 0x00, 0x00, 0x00, 0x00 };\n')  # noqa: E501
+                           tk.PhotoImage(file=os.path.join(config.respath_path, 'io.edcd.EDMarketConnector.png')))
 
         frame = tk.Frame(self.w, name=appname.lower())
         frame.grid(sticky=tk.NSEW)
@@ -595,20 +576,10 @@ class AppWindow:
             default=tk.ACTIVE,
             state=tk.DISABLED
         )
-        self.theme_button = tk.Label(
-            frame,
-            name='themed_update_button',
-            width=28,
-            state=tk.DISABLED
-        )
 
         ui_row = frame.grid_size()[1]
         self.button.grid(row=ui_row, columnspan=2, sticky=tk.NSEW)
-        self.theme_button.grid(row=ui_row, columnspan=2, sticky=tk.NSEW)
-        theme.register_alternate((self.button, self.theme_button, self.theme_button),
-                                 {'row': ui_row, 'columnspan': 2, 'sticky': tk.NSEW})
         self.button.bind('<Button-1>', self.capi_request_data)
-        theme.button_bind(self.theme_button, self.capi_request_data)
 
         # Bottom 'status' line.
         self.status = tk.Label(frame, name='status', anchor=tk.W)
@@ -675,54 +646,7 @@ class AppWindow:
         theme.register(self.edit_menu)
         theme.register(self.help_menu)
 
-        # Alternate title bar and menu for dark theme
-        self.theme_menubar = tk.Frame(frame, name="alternate_menubar")
-        self.theme_menubar.columnconfigure(2, weight=1)
-        theme_titlebar = tk.Label(
-            self.theme_menubar,
-            name="alternate_titlebar",
-            text=applongname,
-            image=self.theme_icon, cursor='fleur',
-            anchor=tk.W, compound=tk.LEFT
-        )
-        theme_titlebar.grid(columnspan=3, padx=2, sticky=tk.NSEW)
         self.drag_offset: tuple[int | None, int | None] = (None, None)
-        theme_titlebar.bind('<Button-1>', self.drag_start)
-        theme_titlebar.bind('<B1-Motion>', self.drag_continue)
-        theme_titlebar.bind('<ButtonRelease-1>', self.drag_end)
-        theme_minimize = tk.Label(self.theme_menubar, image=self.theme_minimize)
-        theme_minimize.grid(row=0, column=3, padx=2)
-        theme.button_bind(theme_minimize, self.oniconify, image=self.theme_minimize)
-        theme_close = tk.Label(self.theme_menubar, image=self.theme_close)
-        theme_close.grid(row=0, column=4, padx=2)
-        theme.button_bind(theme_close, self.onexit, image=self.theme_close)
-        self.theme_file_menu = tk.Label(self.theme_menubar, anchor=tk.W)
-        self.theme_file_menu.grid(row=1, column=0, padx=self.PADX, sticky=tk.W)
-        theme.button_bind(self.theme_file_menu,
-                          lambda e: self.file_menu.tk_popup(e.widget.winfo_rootx(),
-                                                            e.widget.winfo_rooty()
-                                                            + e.widget.winfo_height()))
-        self.theme_edit_menu = tk.Label(self.theme_menubar, anchor=tk.W)
-        self.theme_edit_menu.grid(row=1, column=1, sticky=tk.W)
-        theme.button_bind(self.theme_edit_menu,
-                          lambda e: self.edit_menu.tk_popup(e.widget.winfo_rootx(),
-                                                            e.widget.winfo_rooty()
-                                                            + e.widget.winfo_height()))
-        self.theme_help_menu = tk.Label(self.theme_menubar, anchor=tk.W)
-        self.theme_help_menu.grid(row=1, column=2, sticky=tk.W)
-        theme.button_bind(self.theme_help_menu,
-                          lambda e: self.help_menu.tk_popup(e.widget.winfo_rootx(),
-                                                            e.widget.winfo_rooty()
-                                                            + e.widget.winfo_height()))
-        tk.Frame(self.theme_menubar, highlightthickness=1).grid(columnspan=5, padx=self.PADX, sticky=tk.EW)
-        theme.register(self.theme_minimize)  # images aren't automatically registered
-        theme.register(self.theme_close)
-        self.blank_menubar = tk.Frame(frame, name="blank_menubar")
-        tk.Label(self.blank_menubar).grid()
-        tk.Label(self.blank_menubar).grid()
-        tk.Frame(self.blank_menubar, height=2).grid()
-        theme.register_alternate((self.menubar, self.theme_menubar, self.blank_menubar),
-                                 {'row': 0, 'columnspan': 2, 'sticky': tk.NSEW})
         self.w.resizable(tk.TRUE, tk.FALSE)
 
         # update geometry
@@ -864,13 +788,10 @@ class AppWindow:
         self.suit_label['text'] = _('Suit') + ':'  # LANG: Label for 'Suit' line in main UI
         self.system_label['text'] = _('System') + ':'  # LANG: Label for 'System' line in main UI
         self.station_label['text'] = _('Station') + ':'  # LANG: Label for 'Station' line in main UI
-        self.button['text'] = self.theme_button['text'] = _('Update')  # LANG: Update button in main window
+        self.button['text'] = _('Update')  # LANG: Update button in main window
         self.menubar.entryconfigure(1, label=_('File'))  # LANG: 'File' menu title
         self.menubar.entryconfigure(2, label=_('Edit'))  # LANG: 'Edit' menu title
         self.menubar.entryconfigure(3, label=_('Help'))  # LANG: 'Help' menu title
-        self.theme_file_menu['text'] = _('File')  # LANG: 'File' menu title
-        self.theme_edit_menu['text'] = _('Edit')  # LANG: 'Edit' menu title
-        self.theme_help_menu['text'] = _('Help')  # LANG: 'Help' menu title
 
         # File menu
         self.file_menu.entryconfigure(0, label=_('Status'))  # LANG: File > Status
@@ -907,7 +828,7 @@ class AppWindow:
             # LANG: Status - Attempting to get a Frontier Auth Access Token
             self.status['text'] = _('Logging in...')
 
-        self.button['state'] = self.theme_button['state'] = tk.DISABLED
+        self.button['state'] = tk.DISABLED
 
         self.file_menu.entryconfigure(0, state=tk.DISABLED)  # Status
         self.file_menu.entryconfigure(1, state=tk.DISABLED)  # Save Raw Data
@@ -963,7 +884,7 @@ class AppWindow:
                 # Fixup anomalies in the comodity data
                 fixed = companion.fixup(data)
                 if output_flags & config.OUT_MKT_CSV:
-                    commodity.export(fixed, COMMODITY_CSV)
+                    commodity.export(fixed, commodity.COMMODITY_CSV)
 
                 if output_flags & config.OUT_MKT_TD:
                     td.export(fixed)
@@ -1057,7 +978,7 @@ class AppWindow:
 
             # LANG: Status - Attempting to retrieve data from Frontier CAPI
             self.status['text'] = _('Fetching data...')
-            self.button['state'] = self.theme_button['state'] = tk.DISABLED
+            self.button['state'] = tk.DISABLED
             self.w.update_idletasks()
 
         query_time = int(time())
@@ -1645,7 +1566,7 @@ class AppWindow:
         # Avoid file length limits if possible
         provider = config.get_str('shipyard_provider', default='EDSY')
         target = plug.invoke(provider, 'EDSY', 'shipyard_url', loadout, monitor.is_beta)
-        file_name = path.join(config.app_dir_path, "last_shipyard.html")
+        file_name = os.path.join(config.app_dir_path, "last_shipyard.html")
 
         with open(file_name, 'w') as f:
             f.write(SHIPYARD_HTML_TEMPLATE.format(
@@ -1675,11 +1596,11 @@ class AppWindow:
             # Update button in main window
             cooldown_time = int(self.capi_query_holdoff_time - time())
             # LANG: Cooldown on 'Update' button
-            self.button['text'] = self.theme_button['text'] = _('cooldown {SS}s').format(SS=cooldown_time)
+            self.button['text'] = _('cooldown {SS}s').format(SS=cooldown_time)
             self.w.after(1000, self.cooldown)
         else:
-            self.button['text'] = self.theme_button['text'] = _('Update')  # LANG: Update button in main window
-            self.button['state'] = self.theme_button['state'] = (
+            self.button['text'] = _('Update')  # LANG: Update button in main window
+            self.button['state'] = (
                 monitor.cmdr and
                 monitor.mode and
                 monitor.mode != 'CQC' and
@@ -1962,15 +1883,11 @@ class AppWindow:
         """Handle when our window gains focus."""
         if config.get_int('theme') == theme.THEME_TRANSPARENT:
             self.w.attributes("-transparentcolor", '')
-            self.blank_menubar.grid_remove()
-            self.theme_menubar.grid(row=0, columnspan=2, sticky=tk.NSEW)
 
     def onleave(self, event=None) -> None:
         """Handle when our window loses focus."""
         if config.get_int('theme') == theme.THEME_TRANSPARENT and event.widget == self.w:
             self.w.attributes("-transparentcolor", 'grey4')
-            self.theme_menubar.grid_remove()
-            self.blank_menubar.grid(row=0, columnspan=2, sticky=tk.NSEW)
 
 
 def test_logging() -> None:
@@ -2090,7 +2007,7 @@ sys.path: {sys.path}'''
                  )
 
     if args.reset_ui:
-        config.set('theme', theme.THEME_DEFAULT)
+        config.set('theme', 'default')
         config.set('ui_transparency', 100)  # 100 is completely opaque
         config.delete('font', suppress=True)
         config.delete('font_size', suppress=True)

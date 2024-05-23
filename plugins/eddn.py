@@ -27,7 +27,6 @@ import os
 import pathlib
 import re
 import sqlite3
-import tkinter as tk
 from platform import system
 from textwrap import dedent
 from threading import Lock
@@ -42,15 +41,12 @@ import requests
 import companion
 import edmc_data
 import killswitch
-import myNotebook as nb  # noqa: N813
 import plug
 from companion import CAPIData, category_map
 from config import applongname, appname, appversion_nobuild, config, debug_senders, user_agent
 from EDMCLogging import get_main_logger
 from monitor import monitor
-from myNotebook import Frame
 from prefs import prefsVersion
-from ttkHyperlinkLabel import HyperlinkLabel
 from util import text
 
 if TYPE_CHECKING:

@@ -23,7 +23,6 @@ import random
 import sys
 import threading
 import time
-import tkinter as tk
 import urllib.parse
 import webbrowser
 from email.utils import parsedate
