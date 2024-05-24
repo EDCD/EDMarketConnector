@@ -13,13 +13,12 @@ import html
 import locale
 import pathlib
 import queue
-import re
 import os
 import subprocess
 import sys
 import webbrowser
 from time import localtime, strftime, time
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any
 from constants import applongname, appname, protocolhandler_redirect
 
 # Have this as early as possible for people running EDMarketConnector.exe
@@ -75,7 +74,7 @@ if __name__ == '__main__':  # noqa: C901
     ###########################################################################
     parser.add_argument(
         '--reset-ui',
-        help='Reset UI theme, transparency, font, font size, ui scale, and ui geometry to default',
+        help='Reset UI theme, transparency, font, font size, and ui scale to default',
         action='store_true'
     )
     ###########################################################################
@@ -403,16 +402,7 @@ if __name__ == '__main__':  # noqa: C901
         print("You're running in a DEVELOPMENT branch build. You might encounter bugs!")
 
 
-# See EDMCLogging.py docs.
-# isort: off
-if TYPE_CHECKING:
-    from logging import TRACE  # type: ignore # noqa: F401 # Needed to update mypy
-    # isort: on
-
-    def _(x: str) -> str:
-        """Fake the l10n translation functions for typing."""
-        return x
-
+import builtins
 import commodity
 import plug
 import prefs
@@ -420,12 +410,17 @@ import protocol
 import stats
 import td
 import wx
+import wx.adv
+import wx.lib.newevent
 from dashboard import dashboard
 from edmc_data import ship_name_map
 from hotkey import hotkeymgr
-from l10n import Translations
 from monitor import monitor
-from wx.adv import TaskBarIcon
+
+if TYPE_CHECKING:
+    _ = wx.GetTranslation
+
+builtins.__dict__['_'] = wx.GetTranslation
 
 SERVER_RETRY = 5  # retry pause for Companion servers [s]
 
@@ -445,7 +440,7 @@ SHIPYARD_HTML_TEMPLATE = """
 """
 
 
-class SysTrayIcon(TaskBarIcon):
+class SysTrayIcon(wx.adv.TaskBarIcon):
     def __init__(self, frame: wx.Frame):
         super().__init__()
         self.frame = frame
@@ -470,7 +465,12 @@ class SysTrayIcon(TaskBarIcon):
 class AppWindow:
     """Define the main application window."""
 
-    _CAPI_RESPONSE_TK_EVENT_NAME = '<<CAPIResponse>>'
+    CapiAuthEvent, EVT_CAPI_AUTH = wx.lib.newevent.NewEvent()
+    CapiRequestEvent, EVT_CAPI_REQUEST = wx.lib.newevent.NewEvent()
+    CapiResponseEvent, EVT_CAPI_RESPONSE = wx.lib.newevent.NewEvent()
+    JournalQueueEvent, EVT_JOURNAL_QUEUE = wx.lib.newevent.NewEvent()
+    DashboardEvent, EVT_DASHBOARD = wx.lib.newevent.NewEvent()
+    PluginErrorEvent, EVT_PLUGIN_ERROR = wx.lib.newevent.NewEvent()
 
     PADX = 5
 
@@ -483,6 +483,8 @@ class AppWindow:
         self.w = master
         self.w.SetAppDisplayName(applongname)
         self.minimizing = False
+        self.locale = None
+        self.set_language()
 
         # companion needs to be able to send <<CAPIResponse>> events
         companion.session.set_wx_master(self.w)
@@ -493,104 +495,91 @@ class AppWindow:
 
         frame = wx.Frame(self.w, title=appname.lower())
         frame.SetIcon(wx.Icon('EDMarketConnector.ico', wx.BITMAP_TYPE_ICO))
-        if TaskBarIcon.IsAvailable():
+        if wx.adv.TaskBarIcon.IsAvailable():
             self.systray = SysTrayIcon(frame)
 
-        self.cmdr_label = wx.StaticText(frame, name='cmdr_label')
-        self.cmdr = wx.StaticText(frame, compound=wx.RIGHT, name='cmdr')
-        self.ship_label = wx.StaticText(frame, name='ship_label')
-        self.ship = HyperlinkLabel(frame, compound=wx.RIGHT, url=self.shipyard_url, name='ship')
-        self.suit_label = wx.StaticText(frame, name='suit_label')
-        self.suit = wx.StaticText(frame, compound=wx.RIGHT, name='suit')
-        self.system_label = wx.StaticText(frame, name='system_label')
-        self.system = HyperlinkLabel(frame, compound=wx.RIGHT, url=self.system_url, popup_copy=True, name='system')
-        self.station_label = wx.StaticText(frame, name='station_label')
-        self.station = HyperlinkLabel(frame, compound=wx.RIGHT, url=self.station_url, name='station')
+        self.cmdr_label = wx.StaticText(frame, text=_('Cmdr:'))
+        self.cmdr = wx.StaticText(frame, name='cmdr')
+        self.ship_label = wx.StaticText(frame, text=_('Role:') if monitor.state['Captain'] else _('Ship:'))
+        self.ship = wx.adv.HyperlinkCtrl(frame, url=self.shipyard_url, name='ship')
+        self.suit_label = wx.StaticText(frame, text=_('Suit:'))
+        self.suit = wx.StaticText(frame, name='suit')
+        self.system_label = wx.StaticText(frame, text=_('System:'))
+        self.system = wx.adv.HyperlinkCtrl(frame, url=self.system_url, popup_copy=True, name='system')
+        self.station_label = wx.StaticText(frame, text=_('Station:'))
+        self.station = wx.adv.HyperlinkCtrl(frame, url=self.station_url, name='station')
         # system and station text is set/updated by the 'provider' plugins
         # edsm and inara.  Look for:
         #
         # parent.nametowidget(f".{appname.lower()}.system")
         # parent.nametowidget(f".{appname.lower()}.station")
 
-        grid = wx.GridSizer(cols=2)
+        self.grid = wx.GridBagSizer()
+        self.grid.SetFlexibleDirection(wx.VERTICAL)
         ui_row = 1
 
-        self.cmdr_label.grid(row=ui_row, column=0, sticky=wx.W)
-        self.cmdr.grid(row=ui_row, column=1, sticky=wx.EW)
+        self.grid.Add(self.cmdr_label, wx.GBPosition(ui_row, 0))
+        self.grid.Add(self.cmdr, wx.GBPosition(ui_row, 1))
         ui_row += 1
 
-        self.ship_label.grid(row=ui_row, column=0, sticky=wx.W)
-        self.ship.grid(row=ui_row, column=1, sticky=wx.EW)
+        self.grid.Add(self.ship_label, wx.GBPosition(ui_row, 0))
+        self.grid.Add(self.ship, wx.GBPosition(ui_row, 1))
         ui_row += 1
 
-        self.suit_grid_row = ui_row
-        self.suit_shown = False
+        self.grid.Add(self.suit_label, wx.GBPosition(ui_row, 0))
+        self.grid.Add(self.suit, wx.GBPosition(ui_row, 1))
         ui_row += 1
 
-        self.system_label.grid(row=ui_row, column=0, sticky=wx.W)
-        self.system.grid(row=ui_row, column=1, sticky=wx.EW)
+        self.grid.Add(self.system_label, wx.GBPosition(ui_row, 0))
+        self.grid.Add(self.system, wx.GBPosition(ui_row, 1))
         ui_row += 1
 
-        self.station_label.grid(row=ui_row, column=0, sticky=wx.W)
-        self.station.grid(row=ui_row, column=1, sticky=wx.EW)
+        self.grid.Add(self.station_label, wx.GBPosition(ui_row, 0))
+        self.grid.Add(self.station, wx.GBPosition(ui_row, 1))
         ui_row += 1
 
         plugin_no = 0
         for plugin in plug.PLUGINS:
             # Per plugin separator
-            plugin_sep = wx.Frame(
-                frame, highlightthickness=1, name=f"plugin_hr_{plugin_no + 1}"
-            )
+            plugin_sep = wx.StaticLine(frame, name=f"plugin_hr_{plugin_no + 1}")
             # Per plugin frame, for it to use as its parent for own widgets
-            plugin_frame = wx.Frame(
-                frame,
-                name=f"plugin_{plugin_no + 1}"
-            )
+            plugin_frame = wx.Frame(frame, name=f"plugin_{plugin_no + 1}")
             appitem = plugin.get_app(plugin_frame)
             if appitem:
                 plugin_no += 1
-                plugin_sep.grid(columnspan=2, sticky=wx.EW)
-                _, ui_row = frame.grid_size()
-                plugin_frame.grid(
-                    row=ui_row, columnspan=2, sticky=wx.NSEW
-                )
-                plugin_frame.columnconfigure(1, weight=1)
+                self.grid.Add(plugin_sep, wx.GBPosition(ui_row, 0), wx.GBSpan(1, 2))
+                ui_row += 1
+                self.grid.Add(plugin_frame, wx.GBPosition(ui_row, 0), wx.GBSpan(1, 2))
+                ui_row += 1
                 if isinstance(appitem, tuple) and len(appitem) == 2:
-                    _, ui_row = frame.grid_size()
-                    appitem[0].grid(row=ui_row, column=0, sticky=wx.W)
-                    appitem[1].grid(row=ui_row, column=1, sticky=wx.EW)
-
+                    self.grid.Add(appitem[0], wx.GBPosition(ui_row, 0))
+                    self.grid.Add(appitem[1], wx.GBPosition(ui_row, 1))
                 else:
-                    appitem.grid(columnspan=2, sticky=wx.EW)
+                    self.grid.Add(appitem, wx.GBPosition(ui_row, 0), wx.GBSpan(1, 2))
+                ui_row += 1
 
             else:
                 # This plugin didn't provide any UI, so drop the frames
-                plugin_frame.destroy()
-                plugin_sep.destroy()
+                plugin_frame.Destroy()
+                plugin_sep.Destroy()
 
         # LANG: Update button in main window
         self.button = wx.Button(
             frame,
-            name='update_button',
-            text=_('Update'),  # LANG: Main UI Update button
-            width=28,
-            default=wx.ACTIVE,
-            state=wx.DISABLED
+            'update_button',
+            _('Update'),
+            wx.DefaultPosition,
+            wx.Size(28, -1),
         )
+        self.button.Enable(False)
 
-        _, ui_row = frame.grid_size()
-        self.button.grid(row=ui_row, columnspan=2, sticky=wx.NSEW)
-        self.button.bind('<Button-1>', self.capi_request_data)
+        self.grid.Add(self.button, wx.GBPosition(ui_row, 0), wx.GBSpan(1, 2))
+        self.button.Bind(wx.EVT_BUTTON, self.capi_request_data)
 
         # Bottom 'status' line.
-        self.status = wx.StaticText(frame, name='status', anchor=wx.W)
-        self.status.grid(columnspan=2, sticky=wx.EW)
+        self.status = frame.CreateStatusBar(1)
 
-        for child in frame.winfo_children():
-            child.grid_configure(padx=self.PADX, pady=(
-                sys.platform != 'win32' or isinstance(child, wx.Frame)) and 2 or 0)
-
-        self.menubar = wx.Menu()
+        self.menubar = wx.MenuBar()
 
         # This used to be *after* the menu setup for some reason, but is testing
         # as working (both internal and external) like this. -Ath
@@ -604,89 +593,75 @@ class AppWindow:
             self.updater = update.Updater(tkroot=self.w)
             self.updater.check_for_updates()  # Sparkle / WinSparkle does this automatically for packaged apps
 
-        self.file_menu = wx.Menu(self.menubar, tearoff=wx.FALSE)
-        self.file_menu.add_command(command=lambda: stats.StatsDialog(self.w, self.status))
-        self.file_menu.add_command(command=self.save_raw)
-        self.file_menu.add_command(command=lambda: prefs.PreferencesDialog(self.w, self.postprefs))
-        self.file_menu.add_separator()
-        self.file_menu.add_command(command=self.onexit)
-        self.menubar.add_cascade(menu=self.file_menu)
-        self.edit_menu = wx.Menu(self.menubar, tearoff=wx.FALSE)
-        self.edit_menu.add_command(accelerator='Ctrl+C', state=wx.DISABLED, command=self.copy)
-        self.menubar.add_cascade(menu=self.edit_menu)
-        self.help_menu = wx.Menu(self.menubar, tearoff=wx.FALSE)  # type: ignore
-        self.help_menu.add_command(command=self.help_general)  # Documentation
-        self.help_menu.add_command(command=self.help_troubleshooting)  # Troubleshooting
-        self.help_menu.add_command(command=self.help_report_a_bug)  # Report A Bug
-        self.help_menu.add_command(command=self.help_privacy)  # Privacy Policy
-        self.help_menu.add_command(command=self.help_releases)  # Release Notes
-        self.help_menu.add_command(command=lambda: self.updater.check_for_updates())  # Check for Updates...
-        # About E:D Market Connector
-        self.help_menu.add_command(command=lambda: not self.HelpAbout.showing and self.HelpAbout(self.w))
-        self.help_menu.add_command(command=prefs.help_open_log_folder)  # Open Log Folder
+        self.file_menu = wx.Menu()
+        self.file_stats = wx.MenuItem(self.file_menu, text=_('Status'))
+        self.file_save = wx.MenuItem(self.file_menu, text=_('Save Raw Data...'))
+        self.file_prefs = wx.MenuItem(self.file_menu, text=_('Settings'))
+        self.file_menu.AppendSeparator()
+        self.file_exit = wx.MenuItem(self.file_menu, text=_('Exit'))
+        self.menubar.Append(self.file_menu, _('File'))
 
-        self.menubar.add_cascade(menu=self.help_menu)
-        if sys.platform == 'win32':
-            # Must be added after at least one "real" menu entry
-            self.always_ontop = wx.BooleanVar(value=bool(config.get_int('always_ontop')))
-            self.system_menu = wx.Menu(self.menubar, name='system', tearoff=wx.FALSE)
-            self.system_menu.add_separator()
-            # LANG: Appearance - Label for checkbox to select if application always on top
-            self.system_menu.add_checkbutton(label=_('Always on top'),
-                                             variable=self.always_ontop,
-                                             command=self.ontop_changed)  # Appearance setting
-            self.menubar.add_cascade(menu=self.system_menu)
-        self.w.bind('<Control-c>', self.copy)
+        frame.Bind(wx.EVT_MENU, lambda: stats.StatsDialog(self.w, self.status), id=self.file_stats.GetId())
+        frame.Bind(wx.EVT_MENU, self.save_raw, id=self.file_save.GetId())
+        frame.Bind(wx.EVT_MENU, lambda: prefs.PreferencesDialog(self.w, self.postprefs), id=self.file_prefs.GetId())
+        frame.Bind(wx.EVT_MENU, frame.Close, id=self.file_exit.GetId())
+
+        self.edit_menu = wx.Menu()
+        self.edit_copy = wx.MenuItem(self.edit_menu, text=_('Copy')+'\tCtrl+C')
+        self.edit_copy.Enable(False)
+        self.menubar.Append(self.edit_menu, _('Edit'))
+
+        frame.Bind(wx.EVT_MENU, self.copy, id=self.edit_copy.GetId())
+
+        self.help_menu = wx.Menu()
+        self.help_docs = wx.MenuItem(self.help_menu, text=_('Documentation'))
+        self.help_ts = wx.MenuItem(self.help_menu, text=_('Troubleshooting'))
+        self.help_report = wx.MenuItem(self.help_menu, text=_('Report A Bug'))
+        self.help_policy = wx.MenuItem(self.help_menu, text=_('Privacy Policy'))
+        self.help_notes = wx.MenuItem(self.help_menu, text=_('Release Notes'))
+        self.help_check_updates = wx.MenuItem(self.help_menu, text=_('Check for Updates...'))
+        # About E:D Market Connector
+        self.help_about = wx.MenuItem(self.help_menu, text=_("About {APP}").format(APP=applongname))
+        self.help_open_log_folder = wx.MenuItem(self.help_menu, text=_('Open Log Folder'))
+        self.menubar.Append(self.help_menu, _('Help'))
+
+        frame.Bind(wx.EVT_MENU, self.help_general, id=self.help_docs.GetId())
+        frame.Bind(wx.EVT_MENU, self.help_troubleshooting, id=self.help_ts.GetId())
+        frame.Bind(wx.EVT_MENU, self.help_report_a_bug, id=self.help_report.GetId())
+        frame.Bind(wx.EVT_MENU, self.help_privacy, id=self.help_policy.GetId())
+        frame.Bind(wx.EVT_MENU, self.help_releases, id=self.help_notes.GetId())
+        frame.Bind(wx.EVT_MENU, lambda: self.updater.check_for_updates(), id=self.help_check_updates.GetId())
+        frame.Bind(wx.EVT_MENU, lambda: not self.HelpAbout.showing and self.HelpAbout(self.w), id=self.help_about.GetId())
+        frame.Bind(wx.EVT_MENU, prefs.help_open_log_folder, id=self.help_open_log_folder.GetId())
+
+        frame.SetMenuBar(self.menubar)
+        self.grid.Fit(frame)
 
         # Bind to the Default theme minimise button
-        self.w.bind("<Unmap>", self.default_iconify)
+        self.w.Bind(wx.EVT_ICONIZE, self.default_iconify)
 
-        self.w.protocol("WM_DELETE_WINDOW", self.onexit)
+        self.w.Bind(wx.EVT_CLOSE, self.onexit)
 
-        self.drag_offset: tuple[int | None, int | None] = (None, None)
-        self.w.resizable(wx.TRUE, wx.FALSE)
+        window_style = wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER ^ wx.MAXIMIZE_BOX
+        if config.get_int('always_ontop'):
+            window_style |= wx.STAY_ON_TOP
+        frame.SetWindowStyle(window_style)
 
-        # update geometry
-        if config.get_str('geometry'):
-            match = re.match(r'\+([\-\d]+)\+([\-\d]+)', config.get_str('geometry'))
-            if match:
-                if sys.platform == 'win32':
-                    # Check that the titlebar will be at least partly on screen
-                    import ctypes
-                    from ctypes.wintypes import POINT
-
-                    # https://msdn.microsoft.com/en-us/library/dd145064
-                    MONITOR_DEFAULTTONULL = 0  # noqa: N806
-                    if ctypes.windll.user32.MonitorFromPoint(POINT(int(match.group(1)) + 16, int(match.group(2)) + 16),
-                                                             MONITOR_DEFAULTTONULL):
-                        self.w.geometry(config.get_str('geometry'))
-                else:
-                    self.w.geometry(config.get_str('geometry'))
-
-        self.w.attributes('-topmost', config.get_int('always_ontop') and 1 or 0)
-
-        self.w.bind('<Map>', self.onmap)  # Special handling for overrideredict
-        self.w.bind('<Enter>', self.onenter)  # Special handling for transparency
-        self.w.bind('<FocusIn>', self.onenter)  # Special handling for transparency
-        self.w.bind('<Leave>', self.onleave)  # Special handling for transparency
-        self.w.bind('<FocusOut>', self.onleave)  # Special handling for transparency
-        self.w.bind('<Return>', self.capi_request_data)
-        self.w.bind('<KP_Enter>', self.capi_request_data)
-        self.w.bind_all('<<Invoke>>', self.capi_request_data)  # Ask for CAPI queries to be performed
-        self.w.bind_all(self._CAPI_RESPONSE_TK_EVENT_NAME, self.capi_handle_response)
-        self.w.bind_all('<<JournalEvent>>', self.journal_event)  # type: ignore # Journal monitoring
-        self.w.bind_all('<<DashboardEvent>>', self.dashboard_event)  # Dashboard monitoring
-        self.w.bind_all('<<PluginError>>', self.plugin_error)  # Statusbar
-        self.w.bind_all('<<CompanionAuthEvent>>', self.auth)  # cAPI auth
-        self.w.bind_all('<<Quit>>', self.onexit)  # Updater
+        self.w.Bind(wx.EVT_KEY_DOWN, self.onkeydown)
+        self.w.Bind(self.EVT_CAPI_REQUEST, self.capi_request_data)  # Ask for CAPI queries to be performed
+        self.w.Bind(self.EVT_CAPI_RESPONSE, self.capi_handle_response)
+        self.w.Bind(self.EVT_JOURNAL_QUEUE, self.journal_event)  # type: ignore # Journal monitoring
+        self.w.Bind(self.EVT_DASHBOARD, self.dashboard_event)  # Dashboard monitoring
+        self.w.Bind(self.EVT_PLUGIN_ERROR, self.plugin_error)  # Statusbar
+        self.w.Bind(self.EVT_CAPI_AUTH, self.auth)  # cAPI auth
 
         # Check for Valid Providers
         validate_providers()
         if monitor.cmdr is None:
-            self.status['text'] = _("Awaiting Full CMDR Login")  # LANG: Await Full CMDR Login to Game
+            self.status.SetStatusText(_("Awaiting Full CMDR Login"))  # LANG: Await Full CMDR Login to Game
 
         # Start a protocol handler to handle cAPI registration. Requires main loop to be running.
-        self.w.after_idle(lambda: protocol.protocolhandler.start(self.w))
+        self.w.Bind(wx.EVT_IDLE, lambda: protocol.protocolhandler.start(self.w))
 
         # Migration from <= 3.30
         for username in config.get_list('fdev_usernames', default=[]):
@@ -699,66 +674,51 @@ class AppWindow:
         self.toggle_suit_row(visible=False)
         if args.start_min:
             logger.warning("Trying to start minimized")
-            if root.overrideredirect():
-                self.oniconify()
-            else:
-                self.w.wm_iconify()
+            frame.Iconize()
 
     def update_suit_text(self) -> None:
         """Update the suit text for current type and loadout."""
         if not monitor.state['Odyssey']:
             # Odyssey not detected, no text should be set so it will hide
-            self.suit['text'] = ''
+            self.suit.SetLabel('')
             return
 
         suit = monitor.state.get('SuitCurrent')
         if suit is None:
-            self.suit['text'] = f'<{_("Unknown")}>'  # LANG: Unknown suit
+            self.suit.SetLabel(f'<{_("Unknown")}>')  # LANG: Unknown suit
             return
 
         suitname = suit['edmcName']
         suitloadout = monitor.state.get('SuitLoadoutCurrent')
         if suitloadout is None:
-            self.suit['text'] = ''
+            self.suit.SetLabel('')
             return
 
         loadout_name = suitloadout['name']
-        self.suit['text'] = f'{suitname} ({loadout_name})'
+        self.suit.SetLabel(f'{suitname} ({loadout_name})')
 
     def suit_show_if_set(self) -> None:
         """Show UI Suit row if we have data, else hide."""
-        self.toggle_suit_row(self.suit['text'] != '')
+        self.toggle_suit_row(self.suit.GetLabel() != '')
 
-    def toggle_suit_row(self, visible: bool | None = None) -> None:
+    def toggle_suit_row(self, visible: bool):
         """
         Toggle the visibility of the 'Suit' row.
 
         :param visible: Force visibility to this.
         """
-        self.suit_shown = not visible
-
-        if not self.suit_shown:
-            pady = 2 if sys.platform != 'win32' else 0
-
-            self.suit_label.grid(row=self.suit_grid_row, column=0, sticky=wx.W, padx=self.PADX, pady=pady)
-            self.suit.grid(row=self.suit_grid_row, column=1, sticky=wx.EW, padx=self.PADX, pady=pady)
-            self.suit_shown = True
-
-        else:
-            # Hide the Suit row
-            self.suit_label.grid_forget()
-            self.suit.grid_forget()
-            self.suit_shown = False
+        self.suit_label.Show(visible)
+        self.suit.Show(visible)
 
     def postprefs(self, dologin: bool = True):
         """Perform necessary actions after the Preferences dialog is applied."""
         self.prefsdialog = None
-        self.set_labels()  # in case language has changed
+        self.set_language()  # in case language has changed
 
         # Reset links in case plugins changed them
-        self.ship.configure(url=self.shipyard_url)
-        self.system.configure(url=self.system_url)
-        self.station.configure(url=self.station_url)
+        self.ship.SetURL(self.shipyard_url)
+        self.system.SetURL(self.system_url)
+        self.station.SetURL(self.station_url)
 
         # (Re-)install hotkey monitoring
         hotkeymgr.register(self.w, config.get_int('hotkey_code'), config.get_int('hotkey_mods'))
@@ -769,42 +729,10 @@ class AppWindow:
         # (Re-)install log monitoring
         if not monitor.start(self.w):
             # LANG: ED Journal file location appears to be in error
-            self.status['text'] = _('Error: Check E:D journal file location')
+            self.status.SetStatusText(_('Error: Check E:D journal file location'))
 
         if dologin and monitor.cmdr:
             self.login()  # Login if not already logged in with this Cmdr
-
-    def set_labels(self):
-        """Set main window labels, e.g. after language change."""
-        self.cmdr_label['text'] = _('Cmdr') + ':'  # LANG: Label for commander name in main window
-        # LANG: 'Ship' or multi-crew role label in main window, as applicable
-        self.ship_label['text'] = (monitor.state['Captain'] and _('Role') or _('Ship')) + ':'  # Main window
-        self.suit_label['text'] = _('Suit') + ':'  # LANG: Label for 'Suit' line in main UI
-        self.system_label['text'] = _('System') + ':'  # LANG: Label for 'System' line in main UI
-        self.station_label['text'] = _('Station') + ':'  # LANG: Label for 'Station' line in main UI
-        self.button['text'] = _('Update')  # LANG: Update button in main window
-        self.menubar.entryconfigure(1, label=_('File'))  # LANG: 'File' menu title
-        self.menubar.entryconfigure(2, label=_('Edit'))  # LANG: 'Edit' menu title
-        self.menubar.entryconfigure(3, label=_('Help'))  # LANG: 'Help' menu title
-
-        # File menu
-        self.file_menu.entryconfigure(0, label=_('Status'))  # LANG: File > Status
-        self.file_menu.entryconfigure(1, label=_('Save Raw Data...'))  # LANG: File > Save Raw Data...
-        self.file_menu.entryconfigure(2, label=_('Settings'))  # LANG: File > Settings
-        self.file_menu.entryconfigure(4, label=_('Exit'))  # LANG: File > Exit
-
-        # Help menu
-        self.help_menu.entryconfigure(0, label=_('Documentation'))  # LANG: Help > Documentation
-        self.help_menu.entryconfigure(1, label=_('Troubleshooting'))  # LANG: Help > Troubleshooting
-        self.help_menu.entryconfigure(2, label=_('Report A Bug'))  # LANG: Help > Report A Bug
-        self.help_menu.entryconfigure(3, label=_('Privacy Policy'))  # LANG: Help > Privacy Policy
-        self.help_menu.entryconfigure(4, label=_('Release Notes'))  # LANG: Help > Release Notes
-        self.help_menu.entryconfigure(5, label=_('Check for Updates...'))  # LANG: Help > Check for Updates...
-        self.help_menu.entryconfigure(6, label=_("About {APP}").format(APP=applongname))  # LANG: Help > About App
-        self.help_menu.entryconfigure(7, label=_('Open Log Folder'))  # LANG: Help > Open Log Folder
-
-        # Edit menu
-        self.edit_menu.entryconfigure(0, label=_('Copy'))  # LANG: Label for 'Copy' as in 'Copy and Paste'
 
     def login(self):
         """Initiate CAPI/Frontier login and set other necessary state."""
@@ -815,33 +743,32 @@ class AppWindow:
         if should_return:
             logger.warning('capi.auth has been disabled via killswitch. Returning.')
             # LANG: CAPI auth aborted because of killswitch
-            self.status['text'] = _('CAPI auth disabled by killswitch')
+            self.status.SetStatusText(_('CAPI auth disabled by killswitch'))
             return
 
         if not self.status['text']:
             # LANG: Status - Attempting to get a Frontier Auth Access Token
-            self.status['text'] = _('Logging in...')
+            self.status.SetStatusText(_('Logging in...'))
 
-        self.button['state'] = wx.DISABLED
+        self.button.Enable(False)
 
-        self.file_menu.entryconfigure(0, state=wx.DISABLED)  # Status
-        self.file_menu.entryconfigure(1, state=wx.DISABLED)  # Save Raw Data
+        self.file_stats.Enable(False)
+        self.file_save.Enable(False)
 
-        self.w.update_idletasks()
         try:
             if companion.session.login(monitor.cmdr, monitor.is_beta):
                 # LANG: Successfully authenticated with the Frontier website
-                self.status['text'] = _('Authentication successful')
+                self.status.SetStatusText(_('Authentication successful'))
 
-                self.file_menu.entryconfigure(0, state=wx.NORMAL)  # Status
-                self.file_menu.entryconfigure(1, state=wx.NORMAL)  # Save Raw Data
+                self.file_stats.Enable()
+                self.file_save.Enable()
 
         except (companion.CredentialsError, companion.ServerError, companion.ServerLagging) as e:
-            self.status['text'] = str(e)
+            self.status.SetStatusText(str(e))
 
         except Exception as e:
             logger.debug('Frontier CAPI Auth', exc_info=e)
-            self.status['text'] = str(e)
+            self.status.SetStatusText(str(e))
 
         self.cooldown()
 
@@ -891,17 +818,17 @@ class AppWindow:
 
         :param message: Status message to display.
         """
-        if not self.status['text']:
-            self.status['text'] = message
+        if not self.status.GetStatusText():
+            self.status.SetStatusText(message)
 
-    def capi_request_data(self, event=None) -> None:  # noqa: CCR001
+    def capi_request_data(self, event: wx.Event = None):  # noqa: CCR001
         """
         Perform CAPI data retrieval and associated actions.
 
         This can be triggered by hitting the main UI 'Update' button,
         automatically on docking, or due to a retry.
 
-        :param event: Tk generated event details.
+        :param event: wx generated event details.
         """
         logger.trace_if('capi.worker', 'Begin')
         should_return: bool
@@ -910,47 +837,47 @@ class AppWindow:
         if should_return:
             logger.warning('capi.auth has been disabled via killswitch. Returning.')
             # LANG: CAPI auth query aborted because of killswitch
-            self.status['text'] = _('CAPI auth disabled by killswitch')
+            self.status.SetStatusText(_('CAPI auth disabled by killswitch'))
             hotkeymgr.play_bad()
             return
 
-        auto_update = not event
-        play_sound = (auto_update or int(event.type) == self.EVENT_VIRTUAL) and not config.get_int('hotkey_mute')
+        play_sound = (((not event) or event.GetEventType() == self.CapiRequestEvent) and
+                      not config.get_int('hotkey_mute'))
 
         if not monitor.cmdr:
             logger.trace_if('capi.worker', 'Aborting Query: Cmdr unknown')
             # LANG: CAPI queries aborted because Cmdr name is unknown
-            self.status['text'] = _('CAPI query aborted: Cmdr name unknown')
+            self.status.SetStatusText(_('CAPI query aborted: Cmdr name unknown'))
             return
 
         if not monitor.mode:
             logger.trace_if('capi.worker', 'Aborting Query: Game Mode unknown')
             # LANG: CAPI queries aborted because game mode unknown
-            self.status['text'] = _('CAPI query aborted: Game mode unknown')
+            self.status.SetStatusText(_('CAPI query aborted: Game mode unknown'))
             return
 
         if monitor.state['GameVersion'] is None:
             logger.trace_if('capi.worker', 'Aborting Query: GameVersion unknown')
             # LANG: CAPI queries aborted because GameVersion unknown
-            self.status['text'] = _('CAPI query aborted: GameVersion unknown')
+            self.status.SetStatusText(_('CAPI query aborted: GameVersion unknown'))
             return
 
         if not monitor.state['SystemName']:
             logger.trace_if('capi.worker', 'Aborting Query: Current star system unknown')
             # LANG: CAPI queries aborted because current star system name unknown
-            self.status['text'] = _('CAPI query aborted: Current system unknown')
+            self.status.SetStatusText(_('CAPI query aborted: Current system unknown'))
             return
 
         if monitor.state['Captain']:
             logger.trace_if('capi.worker', 'Aborting Query: In multi-crew')
             # LANG: CAPI queries aborted because player is in multi-crew on other Cmdr's ship
-            self.status['text'] = _('CAPI query aborted: In other-ship multi-crew')
+            self.status.SetStatusText(_('CAPI query aborted: In other-ship multi-crew'))
             return
 
         if monitor.mode == 'CQC':
             logger.trace_if('capi.worker', 'Aborting Query: In CQC')
             # LANG: CAPI queries aborted because player is in CQC (Arena)
-            self.status['text'] = _('CAPI query aborted: CQC (Arena) detected')
+            self.status.SetStatusText(_('CAPI query aborted: CQC (Arena) detected'))
             return
 
         if companion.session.state == companion.Session.STATE_AUTH:
@@ -964,16 +891,16 @@ class AppWindow:
                 # Invoked by key while in cooldown
                 time_remaining = self.capi_query_holdoff_time - time()
                 if play_sound and time_remaining < companion.capi_query_cooldown * 0.75:
-                    self.status['text'] = ''
+                    self.status.SetStatusText('')
                     hotkeymgr.play_bad()
                     return
             elif play_sound:
                 hotkeymgr.play_good()
 
             # LANG: Status - Attempting to retrieve data from Frontier CAPI
-            self.status['text'] = _('Fetching data...')
-            self.button['state'] = wx.DISABLED
-            self.w.update_idletasks()
+            self.status.SetStatusText(_('Fetching data...'))
+            self.button.Enable(False)
+            wx.WakeUpIdle()
 
         query_time = int(time())
         logger.trace_if('capi.worker', 'Requesting full station data')
@@ -981,7 +908,7 @@ class AppWindow:
         logger.trace_if('capi.worker', 'Calling companion.session.station')
 
         companion.session.station(
-            query_time=query_time, tk_response_event=self._CAPI_RESPONSE_TK_EVENT_NAME,
+            query_time=query_time, tk_response_event=self.EVT_CAPI_RESPONSE,
             play_sound=play_sound
         )
 
@@ -1001,20 +928,20 @@ class AppWindow:
         if should_return:
             logger.warning('capi.fleetcarrier has been disabled via killswitch. Returning.')
             # LANG: CAPI fleetcarrier query aborted because of killswitch
-            self.status['text'] = _('CAPI fleetcarrier disabled by killswitch')
+            self.status.SetStatusText(_('CAPI fleetcarrier disabled by killswitch'))
             hotkeymgr.play_bad()
             return
 
         if not monitor.cmdr:
             logger.trace_if('capi.worker', 'Aborting Query: Cmdr unknown')
             # LANG: CAPI fleetcarrier query aborted because Cmdr name is unknown
-            self.status['text'] = _('CAPI query aborted: Cmdr name unknown')
+            self.status.SetStatusText(_('CAPI query aborted: Cmdr name unknown'))
             return
 
         if monitor.state['GameVersion'] is None:
             logger.trace_if('capi.worker', 'Aborting Query: GameVersion unknown')
             # LANG: CAPI fleetcarrier query aborted because GameVersion unknown
-            self.status['text'] = _('CAPI query aborted: GameVersion unknown')
+            self.status.SetStatusText(_('CAPI query aborted: GameVersion unknown'))
             return
 
         if not companion.session.retrying:
@@ -1023,15 +950,15 @@ class AppWindow:
                 return
 
             # LANG: Status - Attempting to retrieve data from Frontier CAPI
-            self.status['text'] = _('Fetching data...')
-            self.w.update_idletasks()
+            self.status.SetStatusText(_('Fetching data...'))
+            wx.WakeUpIdle()
 
         query_time = int(time())
         logger.trace_if('capi.worker', 'Requesting fleetcarrier data')
         config.set('fleetcarrierquerytime', query_time)
         logger.trace_if('capi.worker', 'Calling companion.session.fleetcarrier')
         companion.session.fleetcarrier(
-            query_time=query_time, tk_response_event=self._CAPI_RESPONSE_TK_EVENT_NAME
+            query_time=query_time, tk_response_event=self.EVT_CAPI_RESPONSE
         )
 
     def capi_handle_response(self, event=None):  # noqa: C901, CCR001
@@ -1066,18 +993,18 @@ class AppWindow:
                 # Validation
                 if 'name' not in capi_response.capi_data:
                     # LANG: No data was returned for the fleetcarrier from the Frontier CAPI
-                    err = self.status['text'] = _('CAPI: No fleetcarrier data returned')
+                    err = _('CAPI: No fleetcarrier data returned')
 
                 elif not capi_response.capi_data.get('name', {}).get('callsign'):
                     # LANG: We didn't have the fleetcarrier callsign when we should have
-                    err = self.status['text'] = _("CAPI: Fleetcarrier data incomplete")  # Shouldn't happen
+                    err = _("CAPI: Fleetcarrier data incomplete")  # Shouldn't happen
 
                 else:
                     if __debug__:  # Recording
                         companion.session.dump_capi_data(capi_response.capi_data)
 
                     err = plug.notify_capi_fleetcarrierdata(capi_response.capi_data)
-                    self.status['text'] = err and err or ''
+                    self.status.SetStatusText(err or '')
                     if err:
                         play_bad = True
 
@@ -1089,24 +1016,24 @@ class AppWindow:
             elif 'commander' not in capi_response.capi_data:
                 # This can happen with EGS Auth if no commander created yet
                 # LANG: No data was returned for the commander from the Frontier CAPI
-                err = self.status['text'] = _('CAPI: No commander data returned')
+                err = _('CAPI: No commander data returned')
 
             elif not capi_response.capi_data.get('commander', {}).get('name'):
                 # LANG: We didn't have the commander name when we should have
-                err = self.status['text'] = _("Who are you?!")  # Shouldn't happen
+                err = _("Who are you?!")  # Shouldn't happen
 
             elif (not capi_response.capi_data.get('lastSystem', {}).get('name')
                   or (capi_response.capi_data['commander'].get('docked')
                       and not capi_response.capi_data.get('lastStarport', {}).get('name'))):
                 # LANG: We don't know where the commander is, when we should
-                err = self.status['text'] = _("Where are you?!")  # Shouldn't happen
+                err = _("Where are you?!")  # Shouldn't happen
 
             elif (
                 not capi_response.capi_data.get('ship', {}).get('name')
                 or not capi_response.capi_data.get('ship', {}).get('modules')
             ):
                 # LANG: We don't know what ship the commander is in, when we should
-                err = self.status['text'] = _("What are you flying?!")  # Shouldn't happen
+                err = _("What are you flying?!")  # Shouldn't happen
 
             elif monitor.cmdr and capi_response.capi_data['commander']['name'] != monitor.cmdr:
                 # Companion API Commander doesn't match Journal
@@ -1172,19 +1099,19 @@ class AppWindow:
                     companion.session.dump_capi_data(capi_response.capi_data)
 
                 if not monitor.state['ShipType']:  # Started game in SRV or fighter
-                    self.ship['text'] = ship_name_map.get(
+                    self.ship.SetLabel(ship_name_map.get(
                         capi_response.capi_data['ship']['name'].lower(),
                         capi_response.capi_data['ship']['name']
-                    )
+                    ))
                     monitor.state['ShipID'] = capi_response.capi_data['ship']['id']
                     monitor.state['ShipType'] = capi_response.capi_data['ship']['name'].lower()
 
                     if not monitor.state['Modules']:
-                        self.ship.configure(state=wx.DISABLED)
+                        self.ship.Enable(False)
 
                 # We might have disabled this in the conditional above.
                 if monitor.state['Modules']:
-                    self.ship.configure(state=True)
+                    self.ship.Enable()
 
                 if monitor.state.get('SuitCurrent') is not None:
                     if (loadout := capi_response.capi_data.get('loadout')) is not None:
@@ -1195,7 +1122,7 @@ class AppWindow:
                                     capi_response.capi_data['loadouts'], loadout['loadoutSlotId']
                                 )['name']
 
-                                self.suit['text'] = f'{suitname} ({loadout_name})'
+                                self.suit.SetLabel(f'{suitname} ({loadout_name})')
 
                 self.suit_show_if_set()
                 # Update Odyssey Suit data
@@ -1207,7 +1134,7 @@ class AppWindow:
 
                 # stuff we can do when not docked
                 err = plug.notify_capidata(capi_response.capi_data, monitor.is_beta)
-                self.status['text'] = err and err or ''
+                self.status.SetStatusText(err or '')
                 if err:
                     play_bad = True
 
@@ -1233,16 +1160,16 @@ class AppWindow:
 
         except companion.ServerConnectionError as comp_err:
             # LANG: Frontier CAPI server error when fetching data
-            self.status['text'] = _('Frontier CAPI server error')
+            self.status.SetStatusText(_('Frontier CAPI server error'))
             logger.warning(f'Exception while contacting server: {comp_err}')
-            err = self.status['text'] = str(comp_err)
+            err = str(comp_err)
             play_bad = True
 
         except companion.CredentialsRequireRefresh:
             # We need to 'close' the auth else it'll see STATE_OK and think login() isn't needed
             companion.session.reinit_session()
             # LANG: Frontier CAPI Access Token expired, trying to get a new one
-            self.status['text'] = _('CAPI: Refreshing access token...')
+            self.status.SetStatusText(_('CAPI: Refreshing access token...'))
             if companion.session.login():
                 logger.debug('Initial query failed, but login() just worked, trying again...')
                 companion.session.retrying = True
@@ -1259,7 +1186,6 @@ class AppWindow:
         except companion.ServerLagging as e:
             err = str(e)
             if companion.session.retrying:
-                self.status['text'] = err
                 play_bad = True
 
             else:
@@ -1269,19 +1195,21 @@ class AppWindow:
                 return  # early exit to avoid starting cooldown count
 
         except companion.CmdrError as e:  # Companion API return doesn't match Journal
-            err = self.status['text'] = str(e)
+            err = str(e)
             play_bad = True
             companion.session.invalidate()
             self.login()
 
         except Exception as e:  # Including CredentialsError, ServerError
             logger.debug('"other" exception', exc_info=e)
-            err = self.status['text'] = str(e)
+            err = str(e)
             play_bad = True
 
-        if not err:  # not self.status['text']:  # no errors
+        if err:
+            self.status.SetStatusText(err)
+        else:
             # LANG: Time when we last obtained Frontier CAPI data
-            self.status['text'] = strftime(_('Last updated at %H:%M:%S'), localtime(capi_response.query_time))
+            self.status.SetStatusText(strftime(_('Last updated at %H:%M:%S'), localtime(capi_response.query_time)))
 
         if capi_response.play_sound and play_bad:
             hotkeymgr.play_bad()
@@ -1329,22 +1257,22 @@ class AppWindow:
             self.cooldown()
             if monitor.cmdr and monitor.state['Captain']:
                 if not config.get_bool('hide_multicrew_captain', default=False):
-                    self.cmdr['text'] = f'{monitor.cmdr} / {monitor.state["Captain"]}'
+                    self.cmdr.SetLabel(f'{monitor.cmdr} / {monitor.state["Captain"]}')
 
                 else:
-                    self.cmdr['text'] = f'{monitor.cmdr}'
+                    self.cmdr.SetLabel(f'{monitor.cmdr}')
 
-                self.ship_label['text'] = _('Role') + ':'  # LANG: Multicrew role label in main window
+                self.ship_label.SetLabel(_('Role:'))  # LANG: Multicrew role label in main window
                 self.ship.configure(state=wx.NORMAL, text=crewroletext(monitor.state['Role']), url=None)
 
             elif monitor.cmdr:
                 if monitor.group and not config.get_bool("hide_private_group", default=False):
-                    self.cmdr['text'] = f'{monitor.cmdr} / {monitor.group}'
+                    self.cmdr.SetLabel(f'{monitor.cmdr} / {monitor.group}')
 
                 else:
-                    self.cmdr['text'] = monitor.cmdr
+                    self.cmdr.SetLabel(monitor.cmdr)
 
-                self.ship_label['text'] = _('Ship') + ':'  # LANG: 'Ship' label in main UI
+                self.ship_label.SetLabel(_('Ship:'))  # LANG: 'Ship' label in main UI
 
                 # TODO: Show something else when on_foot
                 if monitor.state['ShipName']:
@@ -1357,18 +1285,14 @@ class AppWindow:
                     ship_text = ''
 
                 # Ensure the ship type/name text is clickable, if it should be.
-                if monitor.state['Modules']:
-                    ship_state: Literal['normal', 'disabled'] = wx.NORMAL
-
-                else:
-                    ship_state = wx.DISABLED
+                ship_state = bool(monitor.state['Modules'])
 
                 self.ship.configure(text=ship_text, url=self.shipyard_url, state=ship_state)
 
             else:
-                self.cmdr['text'] = ''
-                self.ship_label['text'] = _('Ship') + ':'  # LANG: 'Ship' label in main UI
-                self.ship['text'] = ''
+                self.cmdr.SetLabel('')
+                self.ship_label.SetLabel(_('Ship:'))  # LANG: 'Ship' label in main UI
+                self.ship.SetLabel('')
 
             if monitor.cmdr and monitor.is_beta:
                 self.cmdr['text'] += ' (beta)'
@@ -1393,9 +1317,9 @@ class AppWindow:
                     'EngineerCraft',
                     'Synthesis',
                     'JoinACrew'):
-                self.status['text'] = ''  # Periodically clear any old error
+                self.status.SetStatusText('')  # Periodically clear any old error
 
-            self.w.update_idletasks()
+            wx.WakeUpIdle()
 
             # Companion login
             if entry['event'] in (None, 'StartUp', 'NewCommander', 'LoadGame') and monitor.cmdr:
@@ -1406,7 +1330,7 @@ class AppWindow:
             if monitor.cmdr and monitor.mode == 'CQC' and entry['event']:
                 err = plug.notify_journal_entry_cqc(monitor.cmdr, monitor.is_beta, entry, monitor.state)
                 if err:
-                    self.status['text'] = err
+                    self.status.SetStatusText(err)
                     if not config.get_int('hotkey_mute'):
                         hotkeymgr.play_bad()
 
@@ -1446,7 +1370,7 @@ class AppWindow:
                 )
 
                 if err:
-                    self.status['text'] = err
+                    self.status.SetStatusText(err)
                     if not config.get_int('hotkey_mute'):
                         hotkeymgr.play_bad()
 
@@ -1504,16 +1428,16 @@ class AppWindow:
         try:
             companion.session.auth_callback()
             # LANG: Successfully authenticated with the Frontier website
-            self.status['text'] = _('Authentication successful')
+            self.status.SetStatusText(_('Authentication successful'))
             self.file_menu.entryconfigure(0, state=wx.NORMAL)  # Status
             self.file_menu.entryconfigure(1, state=wx.NORMAL)  # Save Raw Data
 
         except companion.ServerError as e:
-            self.status['text'] = str(e)
+            self.status.SetStatusText(str(e))
 
         except Exception as e:
             logger.debug('Frontier CAPI Auth:', exc_info=e)
-            self.status['text'] = str(e)
+            self.status.SetStatusText(str(e))
 
         self.cooldown()
 
@@ -1532,14 +1456,14 @@ class AppWindow:
             err = plug.notify_dashboard_entry(monitor.cmdr, monitor.is_beta, entry)
 
             if err:
-                self.status['text'] = err
+                self.status.SetStatusText(err)
                 if not config.get_int('hotkey_mute'):
                     hotkeymgr.play_bad()
 
     def plugin_error(self, event=None) -> None:
         """Display asynchronous error from plugin."""
         if plug.last_error.msg:
-            self.status['text'] = plug.last_error.msg
+            self.status.SetStatusText(plug.last_error.msg)
             self.w.update_idletasks()
             if not config.get_int('hotkey_mute'):
                 hotkeymgr.play_bad()
@@ -1590,10 +1514,10 @@ class AppWindow:
             # Update button in main window
             cooldown_time = int(self.capi_query_holdoff_time - time())
             # LANG: Cooldown on 'Update' button
-            self.button['text'] = _('cooldown {SS}s').format(SS=cooldown_time)
+            self.button.SetLabel(_('cooldown {SS}s').format(SS=cooldown_time))
             self.w.after(1000, self.cooldown)
         else:
-            self.button['text'] = _('Update')  # LANG: Update button in main window
+            self.button.SetLabel(_('Update'))  # LANG: Update button in main window
             self.button['state'] = (
                 monitor.cmdr and
                 monitor.mode and
@@ -1603,11 +1527,14 @@ class AppWindow:
                 wx.NORMAL or wx.DISABLED
             )
 
-    if sys.platform == 'win32':
-        def ontop_changed(self, event=None) -> None:
-            """Set main window 'on top' state as appropriate."""
-            config.set('always_ontop', self.always_ontop.get())
-            self.w.wm_attributes('-topmost', self.always_ontop.get())
+    def onkeydown(self, event: wx.KeyEvent):
+        if event.GetKeyCode() == wx.WXK_RETURN:
+            self.capi_request_data(event)
+
+    def ontop_changed(self, event=None) -> None:
+        """Set main window 'on top' state as appropriate."""
+        config.set('always_ontop', self.always_ontop.get())
+        self.w.wm_attributes('-topmost', self.always_ontop.get())
 
     def copy(self, event=None) -> None:
         """Copy system, and possible station, name to clipboard."""
@@ -1680,26 +1607,27 @@ class AppWindow:
             ############################################################
             # applongname
             self.appname_label = wx.StaticText(frame, text=applongname)
-            self.appname_label.grid(row=row, columnspan=3, sticky=wx.EW)
+            self.grid.Add(self.appname_label, wx.GBPosition(row, 0), wx.GBSpan(1, 3))
             row += 1
             ############################################################
 
             ############################################################
             # version <link to changelog>
-            wx.StaticText(frame).grid(row=row, column=0)  # spacer
+            self.grid.Add(wx.StaticText(frame), wx.GBPosition(row, 0))  # spacer
             row += 1
             self.appversion_label = wx.Text(frame, height=1, width=len(str(appversion())), wrap=wx.NONE, bd=0)
             self.appversion_label.insert("1.0", str(appversion()))
             self.appversion_label.tag_configure("center", justify="center")
             self.appversion_label.tag_add("center", "1.0", "end")
-            self.appversion_label.config(state=wx.DISABLED, bg=frame.cget("background"), font="TkDefaultFont")
-            self.appversion_label.grid(row=row, column=0, sticky=wx.E)
+            self.appversion_label.Enabled(False)
+            self.grid.Add(self.appversion_label, wx.GBPosition(row, 0))
             # LANG: Help > Release Notes
-            self.appversion = HyperlinkLabel(frame, compound=wx.RIGHT, text=_('Release Notes'),
-                                             url='https://github.com/EDCD/EDMarketConnector/releases/tag/Release/'
-                                                 f'{appversion_nobuild()}',
-                                             underline=True)
-            self.appversion.grid(row=row, column=2, sticky=wx.W)
+            self.appversion = wx.adv.HyperlinkCtrl(
+                frame,
+                text=_('Release Notes'),
+                url=f'https://github.com/EDCD/EDMarketConnector/releases/tag/Release/{appversion_nobuild()}',
+                underline=True)
+            self.grid.Add(self.appversion, wx.GBPosition(row, 2))
             row += 1
             ############################################################
 
@@ -1709,20 +1637,21 @@ class AppWindow:
 
             ############################################################
             # <copyright>
-            wx.StaticText(frame).grid(row=row, column=0)  # spacer
+            self.grid.Add(wx.StaticText(frame), wx.GBPosition(row, 0))  # spacer
             row += 1
             self.copyright = wx.StaticText(frame, text=copyright)
-            self.copyright.grid(row=row, columnspan=3, sticky=wx.EW)
+            self.grid.Add(self.copyright, wx.GBPosition(row, 0), wx.GBSpan(1, 3))
             row += 1
             ############################################################
 
             ############################################################
             # OK button to close the window
-            wx.StaticText(frame).grid(row=row, column=0)  # spacer
+            self.grid.Add(wx.StaticText(frame), wx.GBPosition(row, 0))  # spacer
             row += 1
             # LANG: Generic 'OK' button label
-            button = wx.Button(frame, text=_('OK'), command=self.apply)
-            button.grid(row=row, column=2, sticky=wx.E)
+            button = wx.Button(frame, text=_('OK'))
+            frame.Bind(wx.EVT_MENU, self.apply, id=self.aaaaaa.GetId())
+            self.grid.Add(button, wx.GBPosition(row, 2))
             button.bind("<Return>", lambda event: self.apply())
             self.protocol("WM_DELETE_WINDOW", self._destroy)
             ############################################################
@@ -1763,17 +1692,13 @@ class AppWindow:
         with open(f, 'wb') as h:
             h.write(str(companion.session.capi_raw_data).encode(encoding='utf-8'))
 
-    def onexit(self, event=None) -> None:
+    def onexit(self):
         """Application shutdown procedure."""
         config.set_shutdown()  # Signal we're in shutdown now.
 
-        # http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
-        x, y = self.w.geometry().split('+')[1:3]  # e.g. '212x170+2881+1267'
-        config.set('geometry', f'+{x}+{y}')
-
         # Let the user know we're shutting down.
         # LANG: The application is shutting down
-        self.status['text'] = _('Shutting down...')
+        self.status.SetStatusText(_('Shutting down...'))
         self.w.update_idletasks()
         logger.info('Starting shutdown procedures...')
 
@@ -1816,49 +1741,23 @@ class AppWindow:
         config.close()
 
         logger.info('Destroying app window...')
-        self.w.destroy()
-
-        logger.info('Done.')
-
-    def drag_start(self, event) -> None:
-        """Initiate dragging the window."""
-        self.drag_offset = (event.x_root - self.w.winfo_rootx(), event.y_root - self.w.winfo_rooty())
-
-    def drag_continue(self, event) -> None:
-        """Continued handling of window drag."""
-        if self.drag_offset[0]:
-            offset_x = event.x_root - self.drag_offset[0]
-            offset_y = event.y_root - self.drag_offset[1]
-            self.w.geometry(f'+{offset_x:d}+{offset_y:d}')
-
-    def drag_end(self, event) -> None:
-        """Handle end of window dragging."""
-        self.drag_offset = (None, None)
 
     def default_iconify(self, event=None) -> None:
-        """Handle the Windows default theme 'minimise' button."""
         # If we're meant to "minimize to system tray" then hide the window so no taskbar icon is seen
-        if sys.platform == 'win32' and config.get_bool('minimize_system_tray'):
+        if config.get_bool('minimize_system_tray'):
             # This gets called for more than the root widget, so only react to that
             if str(event.widget) == '.':
                 self.w.withdraw()
 
-    def oniconify(self, event=None) -> None:
-        """Handle the minimize button on non-Default theme main window."""
-        self.w.overrideredirect(False)  # Can't iconize while overrideredirect
-        self.w.iconify()
-        self.w.update_idletasks()  # Size and windows styles get recalculated here
-        self.w.wait_visibility()  # Need main window to be re-created before returning
-
-    def onenter(self, event=None) -> None:
-        """Handle when our window gains focus."""
-        if config.get_int('theme') == theme.THEME_TRANSPARENT:
-            self.w.attributes("-transparentcolor", '')
-
-    def onleave(self, event=None) -> None:
-        """Handle when our window loses focus."""
-        if config.get_int('theme') == theme.THEME_TRANSPARENT and event.widget == self.w:
-            self.w.attributes("-transparentcolor", 'grey4')
+    def set_language(self):
+        if self.locale:
+            del self.locale
+        self.locale = wx.Locale(config.get_str('language'))
+        self.locale.AddCatalogLookupPathPrefix('L10n')
+        if self.locale.IsOk():
+            self.locale.AddCatalog('strings')
+        else:
+            self.locale = None
 
 
 def test_logging() -> None:
@@ -1918,7 +1817,8 @@ def show_killswitch_poppup(root=None):
             idx += 1
         idx += 1
 
-    ok_button = wx.Button(frame, text="Ok", command=tl.destroy)
+    ok_button = wx.Button(frame, text="Ok")
+    ok_button.Bind(wx.EVT_BUTTON, tl.destroy)
     ok_button.grid(columnspan=2, sticky=wx.EW)
 
 
@@ -1984,9 +1884,8 @@ sys.path: {sys.path}'''
         config.delete('font_size', suppress=True)
 
         config.set('ui_scale', 100)  # 100% is the default here
-        config.delete('geometry', suppress=True)  # unset is recreated by other code
 
-        logger.info('reset theme, transparency, font, font size, ui scale, and ui geometry to default.')
+        logger.info('reset theme, transparency, font, font size, and ui scale to default.')
 
     # We prefer a UTF-8 encoding gets set, but older Windows versions have
     # issues with this.  From Windows 10 1903 onwards we can rely on the
@@ -2088,11 +1987,9 @@ sys.path: {sys.path}'''
     # Plain, not via `logger`
     print(f'{applongname} {appversion()}')
 
-    Translations.install(config.get_str('language'))  # Can generate errors so wait til log set up
-
     setup_killswitches(args.killswitches_file)
 
-    root = wx.App(className=appname.lower())
+    root = wx.App()
     if sys.platform != 'win32' and ((f := config.get_str('font')) is not None or f != ''):
         size = config.get_int('font_size', default=-1)
         if size == -1:
@@ -2223,7 +2120,7 @@ sys.path: {sys.path}'''
     root.after(3, check_fdev_ids)
     # Start the main event loop
     try:
-        root.mainloop()
+        root.MainLoop()
     except KeyboardInterrupt:
         logger.info("Ctrl+C Detected, Attempting Clean Shutdown")
         app.onexit()
