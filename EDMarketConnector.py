@@ -2228,7 +2228,7 @@ sys.path: {sys.path}'''
         logger.exception(f"EDMC Critical Error: {err}")
         title = tr.tl("Error")  # LANG: Generic error prefix
         message = tr.tl(  # LANG: EDMC Critical Error Notification
-            "EDSM encountered a critical error, and cannot recover. EDMC is shutting down for its own protection!"
+            "EDMC encountered a critical error, and cannot recover. EDMC is shutting down for its own protection!"
         )
         err = f"{err.__class__.__name__}: {err}"  # type: ignore # hijacking the existing exception detection
         detail = tr.tl(  # LANG: EDMC Critical Error Details

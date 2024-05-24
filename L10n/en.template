@@ -37,7 +37,7 @@
 "Error: unable to get token" = "Error: unable to get token";
 
 /* EDMarketConnector.py: EDMC Critical Error Notification; */
-"EDSM encountered a critical error, and cannot recover. EDMC is shutting down for its own protection!" = "EDSM encountered a critical error, and cannot recover. EDMC is shutting down for its own protection!";
+"EDMC encountered a critical error, and cannot recover. EDMC is shutting down for its own protection!" = "EDMC encountered a critical error, and cannot recover. EDMC is shutting down for its own protection!";
 
 /* EDMarketConnector.py: EDMC Critical Error Details; */
 "Here's what EDMC Detected:\r\n\r\n{ERR}\r\n\r\nDo you want to file a Bug Report on GitHub?" = "Here's what EDMC Detected:\r\n\r\n{ERR}\r\n\r\nDo you want to file a Bug Report on GitHub?";
@@ -125,6 +125,15 @@
 
 /* EDMarketConnector.py: Label for 'Copy' as in 'Copy and Paste'; ttkHyperlinkLabel.py: Label for 'Copy' as in 'Copy and Paste'; In files: EDMarketConnector.py:962; ttkHyperlinkLabel.py:53; */
 "Copy" = "Copy";
+
+/* myNotebook.py: Label for 'Cut' as in 'Cut and Paste'; */
+"Cut" = "Cut";
+
+/* myNotebook.py: Label for 'Paste' as in 'Copy and Paste'; */
+"Paste" = "Paste";
+
+/* myNotebook.py: Label for 'Select All'; */
+"Select All" = "Select All";
 
 /* EDMarketConnector.py: CAPI auth aborted because of killswitch; EDMarketConnector.py: CAPI auth query aborted because of killswitch; In files: EDMarketConnector.py:973; EDMarketConnector.py:1067; */
 "CAPI auth disabled by killswitch" = "CAPI auth disabled by killswitch";
