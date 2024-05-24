@@ -491,6 +491,7 @@ class AppWindow:
 
         self.prefsdialog = None
 
+        # TODO reenable after wx-ing the plugin API
         #plug.load_plugins(master)
 
         self.frame = wx.Frame(self.w, title=appname.lower())
@@ -614,6 +615,7 @@ class AppWindow:
         self.file_exit = wx.MenuItem(self.file_menu, text=_('Exit'))
         self.menubar.Append(self.file_menu, _('File'))
 
+        # TODO reenable after wx-ing Status and Settings
         #self.frame.Bind(wx.EVT_MENU, lambda: stats.StatsDialog(self.w, self.status), id=self.file_stats.GetId())
         self.frame.Bind(wx.EVT_MENU, self.save_raw, id=self.file_save.GetId())
         #self.frame.Bind(wx.EVT_MENU, lambda: prefs.PreferencesDialog(self.w, self.postprefs), id=self.file_prefs.GetId())
@@ -645,6 +647,7 @@ class AppWindow:
         self.frame.Bind(wx.EVT_MENU, self.help_releases, id=self.help_notes.GetId())
         self.frame.Bind(wx.EVT_MENU, lambda: self.updater.check_for_updates(), id=self.help_check_updates.GetId())
         self.frame.Bind(wx.EVT_MENU, self.about, id=self.help_about.GetId())
+        # TODO reenable after prefs is no longer broken
         #self.frame.Bind(wx.EVT_MENU, prefs.help_open_log_folder, id=self.help_open_log_folder.GetId())
 
         self.frame.SetMenuBar(self.menubar)
