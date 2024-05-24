@@ -25,6 +25,7 @@ import threading
 import time
 import urllib.parse
 import webbrowser
+import wx
 from email.utils import parsedate
 from queue import Queue
 from typing import TYPE_CHECKING, Any, Mapping, TypeVar
@@ -33,7 +34,7 @@ import config as conf_module
 import killswitch
 import protocol
 from config import config, user_agent
-from edmc_data import companion_category_map as category_map
+from edmc_data import CapiResponseEvent, companion_category_map as category_map
 from EDMCLogging import get_main_logger
 from monitor import monitor
 
@@ -558,10 +559,10 @@ class EDMCCAPIReturn:
     """Base class for Request, Failure or Response."""
 
     def __init__(
-        self, query_time: int, tk_response_event: str | None = None,
+        self, query_time: int, response_event: str | None = None,
         play_sound: bool = False, auto_update: bool = False
     ):
-        self.tk_response_event = tk_response_event  # Name of tk event to generate when response queued.
+        self.response_event = response_event  # Name of wx event to generate when response queued.
         self.query_time: int = query_time  # When this query is considered to have started (time_t).
         self.play_sound: bool = play_sound  # Whether to play good/bad sounds for success/failure.
         self.auto_update: bool = auto_update  # Whether this was automatically triggered.
@@ -575,11 +576,11 @@ class EDMCCAPIRequest(EDMCCAPIReturn):
     def __init__(
         self, capi_host: str, endpoint: str,
         query_time: int,
-        tk_response_event: str | None = None,
+        response_event: str | None = None,
         play_sound: bool = False, auto_update: bool = False
     ):
         super().__init__(
-            query_time=query_time, tk_response_event=tk_response_event,
+            query_time=query_time, response_event=response_event,
             play_sound=play_sound, auto_update=auto_update
         )
         self.capi_host: str = capi_host  # The CAPI host to use.
@@ -630,7 +631,7 @@ class Session:
         self.requests_session = requests.Session()
         self.auth: Auth | None = None
         self.retrying = False  # Avoid infinite loop when successful auth / unsuccessful query
-        self.tk_master: tk.Tk | None = None
+        self.wx_master: wx.App | None = None
 
         self.capi_raw_data = CAPIDataRaw()  # Cache of raw replies from CAPI service
         # Queue that holds requests for CAPI queries, the items should always
@@ -650,9 +651,9 @@ class Session:
         self.capi_query_thread.start()
         logger.debug('Done')
 
-    def set_tk_master(self, master: tk.Tk) -> None:
-        """Set a reference to main UI Tk root window."""
-        self.tk_master = master
+    def set_wx_master(self, master: wx.App) -> None:
+        """Set a reference to main UI wx root window."""
+        self.wx_master = master
 
     ######################################################################
     # Frontier Authorization
@@ -1012,10 +1013,10 @@ class Session:
 
             # If the query came from EDMC.(py|exe) there's no tk to send an
             # event too, so assume it will be polling the response queue.
-            if query.tk_response_event is not None:
+            if query.response_event is not None:
                 logger.trace_if('capi.worker', 'Sending <<CAPIResponse>>')
-                if self.tk_master is not None:
-                    self.tk_master.event_generate('<<CAPIResponse>>')
+                if self.wx_master is not None:
+                    wx.PostEvent(self.wx_master, CapiResponseEvent())
 
         logger.info('CAPI worker thread DONE')
 
@@ -1030,14 +1031,14 @@ class Session:
         )
 
     def station(
-            self, query_time: int, tk_response_event: str | None = None,
+            self, query_time: int, response_event: str | None = None,
             play_sound: bool = False, auto_update: bool = False
     ) -> None:
         """
         Perform CAPI quer(y|ies) for station data.
 
         :param query_time: When this query was initiated.
-        :param tk_response_event: Name of tk event to generate when response queued.
+        :param response_event: Name of tk event to generate when response queued.
         :param play_sound: Whether the app should play a sound on error.
         :param auto_update: Whether this request was triggered automatically.
         """
@@ -1051,7 +1052,7 @@ class Session:
             EDMCCAPIRequest(
                 capi_host=capi_host,
                 endpoint=self._CAPI_PATH_STATION,
-                tk_response_event=tk_response_event,
+                response_event=response_event,
                 query_time=query_time,
                 play_sound=play_sound,
                 auto_update=auto_update
@@ -1059,14 +1060,14 @@ class Session:
         )
 
     def fleetcarrier(
-            self, query_time: int, tk_response_event: str | None = None,
+            self, query_time: int, response_event: str | None = None,
             play_sound: bool = False, auto_update: bool = False
     ) -> None:
         """
         Perform CAPI query for fleetcarrier data.
 
         :param query_time: When this query was initiated.
-        :param tk_response_event: Name of tk event to generate when response queued.
+        :param response_event: Name of tk event to generate when response queued.
         :param play_sound: Whether the app should play a sound on error.
         :param auto_update: Whether this request was triggered automatically.
         """
@@ -1080,7 +1081,7 @@ class Session:
             EDMCCAPIRequest(
                 capi_host=capi_host,
                 endpoint=self.FRONTIER_CAPI_PATH_FLEETCARRIER,
-                tk_response_event=tk_response_event,
+                response_event=response_event,
                 query_time=query_time,
                 play_sound=play_sound,
                 auto_update=auto_update

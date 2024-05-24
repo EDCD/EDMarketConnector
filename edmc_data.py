@@ -4,6 +4,7 @@ Static data.
 For easy reference any variable should be prefixed with the name of the file it
 was either in originally, or where the primary code utilising it is.
 """
+import wx.lib.newevent
 
 # Map numeric 'demand/supply brackets' to the names as shown in-game.
 commodity_bracketmap = {
@@ -590,6 +591,40 @@ edmc_suit_symbol_localised = {
         'utilitysuit':     'Traje Maverick',
     },
 }
+
+edmc_wx_languages = {
+    None: wx.LANGUAGE_DEFAULT,
+    'cs': wx.LANGUAGE_CZECH,
+    'de': wx.LANGUAGE_GERMAN,
+    'en': wx.LANGUAGE_ENGLISH,
+    'es': wx.LANGUAGE_SPANISH,
+    'fi': wx.LANGUAGE_FINNISH,
+    'fr': wx.LANGUAGE_FRENCH,
+    'hu': wx.LANGUAGE_HUNGARIAN,
+    'it': wx.LANGUAGE_ITALIAN,
+    'ja': wx.LANGUAGE_JAPANESE,
+    'ko': wx.LANGUAGE_KOREAN,
+    'lv': wx.LANGUAGE_LATVIAN,
+    'nl': wx.LANGUAGE_DUTCH,
+    'pl': wx.LANGUAGE_POLISH,
+    'pt-BR': wx.LANGUAGE_PORTUGUESE_BRAZILIAN,
+    'pt-PT': wx.LANGUAGE_PORTUGUESE_PORTUGAL,
+    'ru': wx.LANGUAGE_RUSSIAN,
+    'sl': wx.LANGUAGE_SLOVENIAN,
+    'sr-Latn': wx.LANGUAGE_SERBIAN_LATIN,
+    'sr-Latn-BA': wx.LANGUAGE_SERBIAN_LATIN_BOSNIA_AND_HERZEGOVINA,
+    'sv-SE': wx.LANGUAGE_SWEDISH_SWEDEN,
+    'tr': wx.LANGUAGE_TURKISH,
+    'uk': wx.LANGUAGE_UKRAINIAN,
+    'zh-Hans': wx.LANGUAGE_CHINESE_SIMPLIFIED_EXPLICIT,
+}
+
+CapiAuthEvent, EVT_CAPI_AUTH = wx.lib.newevent.NewEvent()
+CapiRequestEvent, EVT_CAPI_REQUEST = wx.lib.newevent.NewEvent()
+CapiResponseEvent, EVT_CAPI_RESPONSE = wx.lib.newevent.NewEvent()
+JournalQueueEvent, EVT_JOURNAL_QUEUE = wx.lib.newevent.NewEvent()
+DashboardEvent, EVT_DASHBOARD = wx.lib.newevent.NewEvent()
+PluginErrorEvent, EVT_PLUGIN_ERROR = wx.lib.newevent.NewEvent()
 
 # WORKAROUND 2021-07-03 | 4.0.0.600 Update 5: duplicates of `fileheader` keys in `LoadGame`,
 # but the GameLanguage in the latter has doubled up the `\`, so cater for either here.

@@ -14,11 +14,11 @@ from typing import TYPE_CHECKING
 from xml.etree import ElementTree
 import requests
 import semantic_version
-from config import appname, appversion_nobuild, config, update_feed
+import wx
+from config import appversion_nobuild, config, update_feed
 from EDMCLogging import get_main_logger
 
 if TYPE_CHECKING:
-    import wx
     def _(x: str): return x
 
 
@@ -56,7 +56,7 @@ class Updater:
     def shutdown_request(self) -> None:
         """Receive (Win)Sparkle shutdown request and send it to parent."""
         if not config.shutting_down and self.root:
-            self.root.event_generate('<<Quit>>', when="tail")
+            self.root.Close()
 
     def use_internal(self) -> bool:
         """
@@ -69,14 +69,14 @@ class Updater:
 
         return False
 
-    def __init__(self, tkroot: tk.Tk | None = None, provider: str = 'internal'):
+    def __init__(self, root: wx.Frame | None = None, provider: str = 'internal'):
         """
         Initialise an Updater instance.
 
-        :param tkroot: reference to the root window of the GUI
+        :param root: reference to the root window of the GUI
         :param provider: 'internal' or other string if not
         """
-        self.root: tk.Tk | None = tkroot
+        self.root: wx.Frame | None = root
         self.provider: str = provider
         self.thread: threading.Thread | None = None
 
@@ -198,10 +198,9 @@ class Updater:
         newversion = self.check_appcast()
 
         if newversion and self.root:
-            status = self.root.nametowidget(f'.{appname.lower()}.status')
             # LANG: Update Available Text
-            status['text'] = _("{NEWVER} is available").format(NEWVER=newversion.title)
-            self.root.update_idletasks()
+            self.root.SetStatusText(_("{NEWVER} is available").format(NEWVER=newversion.title))
+            wx.WakeUpIdle()
 
         else:
             logger.info("No new version available at this time")

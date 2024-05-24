@@ -403,24 +403,23 @@ if __name__ == '__main__':  # noqa: C901
 
 
 import builtins
+import wx
+import wx.adv
+builtins.__dict__['_'] = wx.GetTranslation
+
 import commodity
+import edmc_data as data
 import plug
 #import prefs
 import protocol
 #import stats
 import td
-import wx
-import wx.adv
-import wx.lib.newevent
 from dashboard import dashboard
-from edmc_data import ship_name_map
 from hotkey import hotkeymgr
 from monitor import monitor
 
 if TYPE_CHECKING:
     _ = wx.GetTranslation
-
-builtins.__dict__['_'] = wx.GetTranslation
 
 SERVER_RETRY = 5  # retry pause for Companion servers [s]
 
@@ -465,13 +464,6 @@ class SysTrayIcon(wx.adv.TaskBarIcon):
 class AppWindow:
     """Define the main application window."""
 
-    CapiAuthEvent, EVT_CAPI_AUTH = wx.lib.newevent.NewEvent()
-    CapiRequestEvent, EVT_CAPI_REQUEST = wx.lib.newevent.NewEvent()
-    CapiResponseEvent, EVT_CAPI_RESPONSE = wx.lib.newevent.NewEvent()
-    JournalQueueEvent, EVT_JOURNAL_QUEUE = wx.lib.newevent.NewEvent()
-    DashboardEvent, EVT_DASHBOARD = wx.lib.newevent.NewEvent()
-    PluginErrorEvent, EVT_PLUGIN_ERROR = wx.lib.newevent.NewEvent()
-
     PADX = 5
 
     def __init__(self, master: wx.App):  # noqa: C901, CCR001 # TODO - can possibly factor something out
@@ -494,7 +486,7 @@ class AppWindow:
         # TODO reenable after wx-ing the plugin API
         #plug.load_plugins(master)
 
-        self.frame = wx.Frame(self.w, title=appname.lower())
+        self.frame = wx.Frame(None, title=appname.lower())
         self.frame.SetIcon(wx.Icon('EDMarketConnector.ico', wx.BITMAP_TYPE_ICO))
         if wx.adv.TaskBarIcon.IsAvailable():
             self.systray = SysTrayIcon(self.frame)
@@ -504,24 +496,27 @@ class AppWindow:
             if size == -1:
                 size = 10
 
-            self.frame.SetFont(wx.FontInfo(size).Family(f))
+            font = wx.FontInfo(size)
+            if f:
+                font = font.Family(f)
+            self.frame.SetFont(wx.Font(font))
 
         # UI Transparency
         ui_transparency = config.get_int('ui_transparency')
         if ui_transparency == 0:
             ui_transparency = 100
-        self.frame.SetTransparent(ui_transparency / 100)
+        self.frame.SetTransparent(int(ui_transparency * 2.55))
 
-        self.cmdr_label = wx.StaticText(self.frame, text=_('Cmdr:'))
-        self.cmdr = wx.StaticText(self.frame, name='cmdr')
-        self.ship_label = wx.StaticText(self.frame, text=_('Role:') if monitor.state['Captain'] else _('Ship:'))
-        self.ship = wx.adv.HyperlinkCtrl(self.frame, url=self.shipyard_url, name='ship')
-        self.suit_label = wx.StaticText(self.frame, text=_('Suit:'))
-        self.suit = wx.StaticText(self.frame, name='suit')
-        self.system_label = wx.StaticText(self.frame, text=_('System:'))
-        self.system = wx.adv.HyperlinkCtrl(self.frame, url=self.system_url, popup_copy=True, name='system')
-        self.station_label = wx.StaticText(self.frame, text=_('Station:'))
-        self.station = wx.adv.HyperlinkCtrl(self.frame, url=self.station_url, name='station')
+        self.cmdr_label = wx.StaticText(self.frame, label=_('Cmdr:'))
+        self.cmdr = wx.StaticText(self.frame)
+        self.ship_label = wx.StaticText(self.frame, label=_('Role:') if monitor.state['Captain'] else _('Ship:'))
+        self.ship = wx.adv.HyperlinkCtrl(self.frame)
+        self.suit_label = wx.StaticText(self.frame, label=_('Suit:'))
+        self.suit = wx.StaticText(self.frame)
+        self.system_label = wx.StaticText(self.frame, label=_('System:'))
+        self.system = wx.adv.HyperlinkCtrl(self.frame)
+        self.station_label = wx.StaticText(self.frame, label=_('Station:'))
+        self.station = wx.adv.HyperlinkCtrl(self.frame)
         # system and station text is set/updated by the 'provider' plugins
         # edsm and inara.  Look for:
         #
@@ -578,13 +573,8 @@ class AppWindow:
                 plugin_sep.Destroy()
 
         # LANG: Update button in main window
-        self.button = wx.Button(
-            self.frame,
-            'update_button',
-            _('Update'),
-            wx.DefaultPosition,
-            wx.Size(28, -1),
-        )
+        # TODO size should be "size of 28 chars", check how wx can do it
+        self.button = wx.Button(self.frame, label=_('Update'), size=wx.Size(28, -1))
         self.button.Disable()
 
         self.grid.Add(self.button, wx.GBPosition(ui_row, 0), wx.GBSpan(1, 2))
@@ -601,10 +591,10 @@ class AppWindow:
 
         if getattr(sys, 'frozen', False):
             # Running in frozen .exe, so use (Win)Sparkle
-            self.updater = update.Updater(tkroot=self.w, provider='external')
+            self.updater = update.Updater(root=self.frame, provider='external')
 
         else:
-            self.updater = update.Updater(tkroot=self.w)
+            self.updater = update.Updater(root=self.frame)
             self.updater.check_for_updates()  # Sparkle / WinSparkle does this automatically for packaged apps
 
         self.file_menu = wx.Menu()
@@ -666,12 +656,12 @@ class AppWindow:
         self.frame.SetWindowStyle(window_style)
 
         self.w.Bind(wx.EVT_KEY_DOWN, self.onkeydown)
-        self.w.Bind(self.EVT_CAPI_REQUEST, self.capi_request_data)  # Ask for CAPI queries to be performed
-        self.w.Bind(self.EVT_CAPI_RESPONSE, self.capi_handle_response)
-        self.w.Bind(self.EVT_JOURNAL_QUEUE, self.journal_event)  # type: ignore # Journal monitoring
-        self.w.Bind(self.EVT_DASHBOARD, self.dashboard_event)  # Dashboard monitoring
-        self.w.Bind(self.EVT_PLUGIN_ERROR, self.plugin_error)  # Statusbar
-        self.w.Bind(self.EVT_CAPI_AUTH, self.auth)  # cAPI auth
+        self.w.Bind(data.EVT_CAPI_REQUEST, self.capi_request_data)  # Ask for CAPI queries to be performed
+        self.w.Bind(data.EVT_CAPI_RESPONSE, self.capi_handle_response)
+        self.w.Bind(data.EVT_JOURNAL_QUEUE, self.journal_event)  # type: ignore # Journal monitoring
+        self.w.Bind(data.EVT_DASHBOARD, self.dashboard_event)  # Dashboard monitoring
+        self.w.Bind(data.EVT_PLUGIN_ERROR, self.plugin_error)  # Statusbar
+        self.w.Bind(data.EVT_CAPI_AUTH, self.auth)  # cAPI auth
 
         # Check for Valid Providers
         validate_providers()
@@ -734,9 +724,9 @@ class AppWindow:
         self.set_language()  # in case language has changed
 
         # Reset links in case plugins changed them
-        self.ship.SetURL(self.shipyard_url)
-        self.system.SetURL(self.system_url)
-        self.station.SetURL(self.station_url)
+        self.ship.SetURL(self.shipyard_url(self.ship.GetLabel()))
+        self.system.SetURL(self.system_url())
+        self.station.SetURL(self.station_url())
 
         # (Re-)install hotkey monitoring
         hotkeymgr.register(self.w, config.get_int('hotkey_code'), config.get_int('hotkey_mods'))
@@ -764,7 +754,7 @@ class AppWindow:
             self.status.SetStatusText(_('CAPI auth disabled by killswitch'))
             return
 
-        if not self.status['text']:
+        if not self.status.GetStatusText():
             # LANG: Status - Attempting to get a Frontier Auth Access Token
             self.status.SetStatusText(_('Logging in...'))
 
@@ -859,7 +849,7 @@ class AppWindow:
             hotkeymgr.play_bad()
             return
 
-        play_sound = (((not event) or event.GetEventType() == self.CapiRequestEvent) and
+        play_sound = (((not event) or event.GetEventType() == data.CapiRequestEvent) and
                       not config.get_int('hotkey_mute'))
 
         if not monitor.cmdr:
@@ -926,7 +916,7 @@ class AppWindow:
         logger.trace_if('capi.worker', 'Calling companion.session.station')
 
         companion.session.station(
-            query_time=query_time, tk_response_event=self.EVT_CAPI_RESPONSE,
+            query_time=query_time, response_event=data.EVT_CAPI_RESPONSE,
             play_sound=play_sound
         )
 
@@ -976,7 +966,7 @@ class AppWindow:
         config.set('fleetcarrierquerytime', query_time)
         logger.trace_if('capi.worker', 'Calling companion.session.fleetcarrier')
         companion.session.fleetcarrier(
-            query_time=query_time, tk_response_event=self.EVT_CAPI_RESPONSE
+            query_time=query_time, response_event=data.EVT_CAPI_RESPONSE
         )
 
     def capi_handle_response(self, event=None):  # noqa: C901, CCR001
@@ -1117,10 +1107,11 @@ class AppWindow:
                     companion.session.dump_capi_data(capi_response.capi_data)
 
                 if not monitor.state['ShipType']:  # Started game in SRV or fighter
-                    self.ship.SetLabel(ship_name_map.get(
+                    self.ship.SetLabel(data.ship_name_map.get(
                         capi_response.capi_data['ship']['name'].lower(),
                         capi_response.capi_data['ship']['name']
                     ))
+                    self.ship.SetURL('')
                     monitor.state['ShipID'] = capi_response.capi_data['ship']['id']
                     monitor.state['ShipType'] = capi_response.capi_data['ship']['name'].lower()
 
@@ -1299,7 +1290,7 @@ class AppWindow:
                     ship_text = monitor.state['ShipName']
 
                 else:
-                    ship_text = ship_name_map.get(monitor.state['ShipType'], monitor.state['ShipType'])
+                    ship_text = data.ship_name_map.get(monitor.state['ShipType'], monitor.state['ShipType'])
 
                 if not ship_text:
                     ship_text = ''
@@ -1308,13 +1299,14 @@ class AppWindow:
                 ship_state = bool(monitor.state['Modules'])
 
                 self.ship.SetLabel(ship_text)
-                self.ship.SetURL(self.shipyard_url)
+                self.ship.SetURL(self.shipyard_url(ship_text))
                 self.ship.Enable(ship_state)
 
             else:
                 self.cmdr.SetLabel('')
                 self.ship_label.SetLabel(_('Ship:'))  # LANG: 'Ship' label in main UI
                 self.ship.SetLabel('')
+                self.ship.SetURL('')
 
             if monitor.cmdr and monitor.is_beta:
                 self.cmdr.SetLabel(self.cmdr.GetLabel() + ' (beta)')
@@ -1490,7 +1482,7 @@ class AppWindow:
             if not config.get_int('hotkey_mute'):
                 hotkeymgr.play_bad()
 
-    def shipyard_url(self, shipname: str) -> str | None:
+    def shipyard_url(self, shipname: str) -> str:
         """Despatch a ship URL to the configured handler."""
         if not (loadout := monitor.ship()):
             logger.warning('No ship loadout, aborting.')
@@ -1501,7 +1493,7 @@ class AppWindow:
                                'EDSY',
                                'shipyard_url',
                                loadout,
-                               monitor.is_beta)
+                               monitor.is_beta) or ''
 
         # Avoid file length limits if possible
         provider = config.get_str('shipyard_provider', default='EDSY')
@@ -1517,18 +1509,18 @@ class AppWindow:
 
         return f'file://localhost/{file_name}'
 
-    def system_url(self, system: str) -> str | None:
+    def system_url(self) -> str:
         """Despatch a system URL to the configured handler."""
         return plug.invoke(
             config.get_str('system_provider', default='EDSM'), 'EDSM', 'system_url', monitor.state['SystemName']
-        )
+        ) or ''
 
-    def station_url(self, station: str) -> str | None:
+    def station_url(self) -> str:
         """Despatch a station URL to the configured handler."""
         return plug.invoke(
             config.get_str('station_provider', default='EDSM'), 'EDSM', 'station_url',
             monitor.state['SystemName'], monitor.state['StationName']
-        )
+        ) or ''
 
     def cooldown(self) -> None:
         """Display and update the cooldown timer for 'Update' button."""
@@ -1540,13 +1532,13 @@ class AppWindow:
             wx.CallLater(1000, self.cooldown)
         else:
             self.button.SetLabel(_('Update'))  # LANG: Update button in main window
-            self.button.Enabled(
+            self.button.Enable(bool(
                 monitor.cmdr and
                 monitor.mode and
                 monitor.mode != 'CQC' and
                 not monitor.state['Captain'] and
                 monitor.state['SystemName']
-            )
+            ))
 
     def onkeydown(self, event: wx.KeyEvent):
         if event.GetKeyCode() == wx.WXK_RETURN:
@@ -1676,7 +1668,7 @@ class AppWindow:
     def set_language(self):
         if self.locale:
             del self.locale
-        self.locale = wx.Locale(config.get_str('language'))
+        self.locale = wx.Locale(data.edmc_wx_languages[config.get_str('language')])
         self.locale.AddCatalogLookupPathPrefix('L10n')
         if self.locale.IsOk():
             self.locale.AddCatalog('strings')

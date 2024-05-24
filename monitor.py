@@ -21,12 +21,10 @@ from time import gmtime, localtime, mktime, sleep, strftime, strptime, time
 from typing import TYPE_CHECKING, Any, BinaryIO, MutableMapping
 import semantic_version
 import util_ships
+import wx
 from config import config
-from edmc_data import edmc_suit_shortnames, edmc_suit_symbol_localised
+from edmc_data import edmc_suit_shortnames, edmc_suit_symbol_localised, JournalQueueEvent
 from EDMCLogging import get_main_logger
-
-if TYPE_CHECKING:
-    import wx
 
 
 logger = get_main_logger()
@@ -460,7 +458,7 @@ class EDLogs(FileSystemEventHandler):
                 if not self.event_queue.empty():
                     if not config.shutting_down:
                         logger.trace_if('journal.queue', 'Sending <<JournalEvent>>')
-                        self.root.event_generate('<<JournalEvent>>', when="tail")
+                        wx.PostEvent(self.root, JournalQueueEvent())
 
                 log_pos = loghandle.tell()
 
