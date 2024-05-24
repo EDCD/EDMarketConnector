@@ -9,9 +9,10 @@ from __future__ import annotations
 
 import pathlib
 import sys
+import wx
 from enum import Enum
 from os import getpid as os_getpid
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING
 
 from config import config
 from EDMCLogging import get_main_logger
@@ -195,69 +196,31 @@ class JournalLock:
 
         return unlocked
 
-    class JournalAlreadyLocked(tk.Toplevel):  # pragma: no cover
+    def journal_already_locked(self, parent: wx.App):
         """Pop-up for when Journal directory already locked."""
 
-        def __init__(self, parent: tk.Tk, callback: Callable) -> None:
-            """
-            Init the user choice popup.
+        popup = wx.MessageDialog(
+            parent,
+            _("The new Journal Directory location is already locked.\n"
+              "You can either attempt to resolve this and then Retry, or choose to Ignore this."),
+            _('Journal directory already locked'),
+            wx.OK | wx.CANCEL,
+        )
+        popup.SetOKCancelLabels(_('Retry'), _('Ignore'))
 
-            :param parent: - The tkinter parent window.
-            :param callback: - The function to be called when the user makes their choice.
-            """
-            tk.Toplevel.__init__(self, parent)
-
-            self.parent = parent
-            self.callback = callback
-            # LANG: Title text on popup when Journal directory already locked
-            self.title(_('Journal directory already locked'))
-
-            # remove decoration
-            if sys.platform == 'win32':
-                self.attributes('-toolwindow', tk.TRUE)
-
-            self.resizable(tk.FALSE, tk.FALSE)
-
-            frame = ttk.Frame(self)
-            frame.grid(sticky=tk.NSEW)
-
-            self.blurb = tk.Label(frame)
-            # LANG: Text for when newly selected Journal directory is already locked
-            self.blurb['text'] = _("The new Journal Directory location is already locked.{CR}"
-                                   "You can either attempt to resolve this and then Retry, or choose to Ignore this.")
-            self.blurb.grid(row=1, column=0, columnspan=2, sticky=tk.NSEW)
-
-            # LANG: Generic 'Retry' button label
-            self.retry_button = ttk.Button(frame, text=_('Retry'), command=self.retry)
-            self.retry_button.grid(row=2, column=0, sticky=tk.EW)
-
-            # LANG: Generic 'Ignore' button label
-            self.ignore_button = ttk.Button(frame, text=_('Ignore'), command=self.ignore)
-            self.ignore_button.grid(row=2, column=1, sticky=tk.EW)
-            self.protocol("WM_DELETE_WINDOW", self._destroy)
-
-        def retry(self) -> None:
-            """Handle user electing to Retry obtaining the lock."""
+        choice = popup.ShowModal()
+        if choice == wx.ID_OK:
             logger.trace_if('journal-lock_if', 'User selected: Retry')
-            self.destroy()
-            self.callback(True, self.parent)
-
-        def ignore(self) -> None:
-            """Handle user electing to Ignore failure to obtain the lock."""
+            self.retry_lock(True, parent)
+        else:
             logger.trace_if('journal-lock', 'User selected: Ignore')
-            self.destroy()
-            self.callback(False, self.parent)
+            self.retry_lock(False, parent)
 
-        def _destroy(self) -> None:
-            """Destroy the Retry/Ignore popup."""
-            logger.trace_if('journal-lock', 'User force-closed popup, treating as Ignore')
-            self.ignore()
-
-    def update_lock(self, parent: tk.Tk) -> None:
+    def update_lock(self, parent: wx.App):
         """
         Update journal directory lock to new location if possible.
 
-        :param parent: - The parent tkinter window.
+        :param parent: - The parent wx window.
         """
         current_journaldir = config.get_str('journaldir') or config.default_journal_dir
 
@@ -271,14 +234,14 @@ class JournalLock:
 
         if self.obtain_lock() == JournalLockResult.ALREADY_LOCKED:
             # Pop-up message asking for Retry or Ignore
-            self.retry_popup = self.JournalAlreadyLocked(parent, self.retry_lock)  # pragma: no cover
+            self.journal_already_locked(parent)
 
-    def retry_lock(self, retry: bool, parent: tk.Tk) -> None:  # pragma: no cover
+    def retry_lock(self, retry: bool, parent: wx.App):
         """
         Try again to obtain a lock on the Journal Directory.
 
         :param retry: - does the user want to retry?  Comes from the dialogue choice.
-        :param parent: - The parent tkinter window.
+        :param parent: - The parent wx window.
         """
         logger.trace_if('journal-lock', f'We should retry: {retry}')
 
@@ -290,4 +253,4 @@ class JournalLock:
         self.set_path_from_journaldir()
         if self.obtain_lock() == JournalLockResult.ALREADY_LOCKED:
             # Pop-up message asking for Retry or Ignore
-            self.retry_popup = self.JournalAlreadyLocked(parent, self.retry_lock)
+            self.journal_already_locked(parent)
