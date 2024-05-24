@@ -609,7 +609,7 @@ class AppWindow:
         #self.frame.Bind(wx.EVT_MENU, lambda: stats.StatsDialog(self.w, self.status), id=self.file_stats.GetId())
         self.frame.Bind(wx.EVT_MENU, self.save_raw, id=self.file_save.GetId())
         #self.frame.Bind(wx.EVT_MENU, lambda: prefs.PreferencesDialog(self.w, self.postprefs), id=self.file_prefs.GetId())
-        self.frame.Bind(wx.EVT_MENU, lambda: self.frame.Close(), id=self.file_exit.GetId())
+        self.frame.Bind(wx.EVT_MENU, lambda event: self.frame.Close(), id=self.file_exit.GetId())
 
         self.edit_menu = wx.Menu()
         self.edit_copy = wx.MenuItem(self.edit_menu, text=_('Copy')+'\tCtrl+C')
@@ -635,7 +635,7 @@ class AppWindow:
         self.frame.Bind(wx.EVT_MENU, self.help_report_a_bug, id=self.help_report.GetId())
         self.frame.Bind(wx.EVT_MENU, self.help_privacy, id=self.help_policy.GetId())
         self.frame.Bind(wx.EVT_MENU, self.help_releases, id=self.help_notes.GetId())
-        self.frame.Bind(wx.EVT_MENU, lambda: self.updater.check_for_updates(), id=self.help_check_updates.GetId())
+        self.frame.Bind(wx.EVT_MENU, lambda event: self.updater.check_for_updates(), id=self.help_check_updates.GetId())
         self.frame.Bind(wx.EVT_MENU, self.about, id=self.help_about.GetId())
         # TODO reenable after prefs is no longer broken
         #self.frame.Bind(wx.EVT_MENU, prefs.help_open_log_folder, id=self.help_open_log_folder.GetId())
@@ -669,7 +669,7 @@ class AppWindow:
             self.status.SetStatusText(_("Awaiting Full CMDR Login"))  # LANG: Await Full CMDR Login to Game
 
         # Start a protocol handler to handle cAPI registration. Requires main loop to be running.
-        self.w.Bind(wx.EVT_IDLE, lambda: protocol.protocolhandler.start(self.w))
+        self.w.Bind(wx.EVT_IDLE, lambda event: protocol.protocolhandler.start(self.w))
 
         # Migration from <= 3.30
         for username in config.get_list('fdev_usernames', default=[]):
@@ -1732,7 +1732,7 @@ def show_killswitch_popup(root=None):
         idx += 1
 
     ok_button = wx.Button(frame, label="Ok")
-    ok_button.Bind(wx.EVT_BUTTON, lambda: tl.Close())
+    ok_button.Bind(wx.EVT_BUTTON, lambda event: tl.Close())
     grid.Add(ok_button, wx.GBPosition(idx, 0), wx.GBSpan(1, 2), flags=wx.SizerFlags().Center())
 
     grid.SetSizeHints(frame)
