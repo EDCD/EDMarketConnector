@@ -125,7 +125,7 @@ class Updater:
         if sys.platform == 'win32' and self.updater:
             self.updater.win_sparkle_set_automatic_check_for_updates(onoroff)
 
-    def check_for_updates(self) -> None:
+    def check_for_updates(self, event=None):
         """Trigger the requisite method to check for an update."""
         if self.use_internal():
             self.thread = threading.Thread(target=self.worker, name='update worker')

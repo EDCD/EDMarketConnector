@@ -445,20 +445,16 @@ class SysTrayIcon(wx.adv.TaskBarIcon):
         self.frame = frame
         self.SetIcon(frame.GetIcon())
         self.Bind(wx.EVT_MENU, self.OnOpen, id=1)
-        self.Bind(wx.EVT_MENU, self.OnQuit, id=2)
 
     def CreatePopupMenu(self):
         menu = wx.Menu()
         menu.Append(1, 'Open')
-        menu.Append(2, 'Quit')
+        menu.Append(wx.ID_EXIT, 'Quit')
         return menu
 
     def OnOpen(self, event):
         if not self.frame.IsShown():
             self.frame.Show()
-
-    def OnQuit(self, event):
-        self.frame.Close()
 
 
 class AppWindow:
@@ -601,48 +597,47 @@ class AppWindow:
             self.updater.check_for_updates()  # Sparkle / WinSparkle does this automatically for packaged apps
 
         self.file_menu = wx.Menu()
-        self.file_stats = wx.MenuItem(self.file_menu, text=_('Status'))
-        self.file_save = wx.MenuItem(self.file_menu, text=_('Save Raw Data...'))
-        self.file_prefs = wx.MenuItem(self.file_menu, text=_('Settings'))
+        self.file_stats = self.file_menu.Append(wx.ID_INFO, _('Status'))
+        self.file_save = self.file_menu.Append(wx.ID_SAVEAS, _('Save Raw Data...'))
+        self.file_prefs = self.file_menu.Append(wx.ID_SETUP, _('Settings'))
         self.file_menu.AppendSeparator()
-        self.file_exit = wx.MenuItem(self.file_menu, text=_('Exit'))
+        self.file_exit = self.file_menu.Append(wx.ID_EXIT, _('Exit'))
+
+        # TODO WX reenable after porting
+        #self.frame.Bind(wx.EVT_MENU, stats.StatsDialog, id=wx.ID_INFO)
+        self.frame.Bind(wx.EVT_MENU, self.save_raw, id=wx.ID_SAVEAS)
+        # TODO WX reenable after porting
+        #self.frame.Bind(wx.EVT_MENU, lambda event: prefs.PreferencesDialog(self.w, self.postprefs), id=wx.ID_SETUP)
         self.menubar.Append(self.file_menu, _('File'))
 
-        # TODO WX reenable after porting
-        #self.frame.Bind(wx.EVT_MENU, lambda: stats.StatsDialog(self.w, self.status), id=self.file_stats.GetId())
-        self.frame.Bind(wx.EVT_MENU, self.save_raw, id=self.file_save.GetId())
-        # TODO WX reenable after porting
-        #self.frame.Bind(wx.EVT_MENU, lambda: prefs.PreferencesDialog(self.w, self.postprefs), id=self.file_prefs.GetId())
-        self.frame.Bind(wx.EVT_MENU, lambda event: self.frame.Close(), id=self.file_exit.GetId())
-
         self.edit_menu = wx.Menu()
-        self.edit_copy = wx.MenuItem(self.edit_menu, text=_('Copy')+'\tCtrl+C')
+        self.edit_copy = self.edit_menu.Append(wx.ID_COPY, _('&Copy')+'\tCtrl+C')
         self.edit_copy.Enable(False)
+
+        self.frame.Bind(wx.EVT_MENU, self.copy, id=wx.ID_COPY)
         self.menubar.Append(self.edit_menu, _('Edit'))
 
-        self.frame.Bind(wx.EVT_MENU, self.copy, id=self.edit_copy.GetId())
-
         self.help_menu = wx.Menu()
-        self.help_docs = wx.MenuItem(self.help_menu, text=_('Documentation'))
-        self.help_ts = wx.MenuItem(self.help_menu, text=_('Troubleshooting'))
-        self.help_report = wx.MenuItem(self.help_menu, text=_('Report A Bug'))
-        self.help_policy = wx.MenuItem(self.help_menu, text=_('Privacy Policy'))
-        self.help_notes = wx.MenuItem(self.help_menu, text=_('Release Notes'))
-        self.help_check_updates = wx.MenuItem(self.help_menu, text=_('Check for Updates...'))
+        self.help_docs = self.help_menu.Append(wx.ID_HELP, _('Documentation'))
+        self.help_ts = self.help_menu.Append(wx.ID_ANY, _('Troubleshooting'))
+        self.help_report = self.help_menu.Append(wx.ID_ANY, _('Report A Bug'))
+        self.help_policy = self.help_menu.Append(wx.ID_ANY, _('Privacy Policy'))
+        self.help_notes = self.help_menu.Append(wx.ID_ANY, _('Release Notes'))
+        self.help_check_updates = self.help_menu.Append(wx.ID_ANY, _('Check for Updates...'))
         # About E:D Market Connector
-        self.help_about = wx.MenuItem(self.help_menu, text=_("About {APP}").format(APP=applongname))
-        self.help_open_log_folder = wx.MenuItem(self.help_menu, text=_('Open Log Folder'))
-        self.menubar.Append(self.help_menu, _('Help'))
+        self.help_about = self.help_menu.Append(wx.ID_ABOUT, _("About {APP}").format(APP=applongname))
+        self.help_open_log_folder = self.help_menu.Append(wx.ID_ANY, _('Open Log Folder'))
 
-        self.frame.Bind(wx.EVT_MENU, self.help_general, id=self.help_docs.GetId())
+        self.frame.Bind(wx.EVT_MENU, self.help_general, id=wx.ID_HELP)
         self.frame.Bind(wx.EVT_MENU, self.help_troubleshooting, id=self.help_ts.GetId())
         self.frame.Bind(wx.EVT_MENU, self.help_report_a_bug, id=self.help_report.GetId())
         self.frame.Bind(wx.EVT_MENU, self.help_privacy, id=self.help_policy.GetId())
         self.frame.Bind(wx.EVT_MENU, self.help_releases, id=self.help_notes.GetId())
-        self.frame.Bind(wx.EVT_MENU, lambda event: self.updater.check_for_updates(), id=self.help_check_updates.GetId())
-        self.frame.Bind(wx.EVT_MENU, self.about, id=self.help_about.GetId())
+        self.frame.Bind(wx.EVT_MENU, self.updater.check_for_updates, id=self.help_check_updates.GetId())
+        self.frame.Bind(wx.EVT_MENU, self.about, id=wx.ID_ABOUT)
         # TODO WX reenable after prefs is ported
         #self.frame.Bind(wx.EVT_MENU, prefs.help_open_log_folder, id=self.help_open_log_folder.GetId())
+        self.menubar.Append(self.help_menu, _('Help'))
 
         self.frame.SetMenuBar(self.menubar)
         self.grid.SetSizeHints(self.frame)
@@ -1570,15 +1565,15 @@ class AppWindow:
 
         info = wx.adv.AboutDialogInfo()
         info.SetName(applongname)
-        info.SetVersion(appversion())
+        info.SetVersion(str(appversion()))
         info.SetWebSite(f'https://github.com/EDCD/EDMarketConnector/releases/tag/Release/{appversion_nobuild()}',
                         _('Release Notes'))
         info.SetCopyright(copyright)
         logger.info(f'Current version is {appversion()}')
 
-        wx.adv.AboutBox(info, self.w)
+        wx.adv.AboutBox(info, self.frame)
 
-    def save_raw(self) -> None:
+    def save_raw(self, event=None):
         """
         Save any CAPI data already acquired to a file.
 
@@ -1588,7 +1583,7 @@ class AppWindow:
         """
         timestamp: str = strftime('%Y-%m-%dT%H.%M.%S', localtime())
         with wx.FileDialog(
-            self.w,
+            self.frame,
             defaultDir=config.get_str('outdir'),
             defaultFile=f"{monitor.state['SystemName']}.{monitor.state['StationName']}.{timestamp}",
             wildcard='JSON|*.json|All Files|*',
