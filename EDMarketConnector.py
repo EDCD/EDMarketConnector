@@ -576,8 +576,8 @@ class AppWindow:
                 plugin_sep.Destroy()
 
         # LANG: Update button in main window
-        # TODO size should be "size of 28 chars", check how wx can do it
-        self.button = wx.Button(self.frame, label=_('Update'), size=wx.Size(28, -1))
+        button_width = self.frame.GetTextExtent('0'*28).GetWidth()
+        self.button = wx.Button(self.frame, label=_('Update'), size=wx.Size(button_width, -1))
         self.button.Disable()
 
         self.grid.Add(self.button, wx.GBPosition(ui_row, 0), wx.GBSpan(1, 2))
@@ -608,9 +608,10 @@ class AppWindow:
         self.file_exit = wx.MenuItem(self.file_menu, text=_('Exit'))
         self.menubar.Append(self.file_menu, _('File'))
 
-        # TODO reenable after wx-ing Status and Settings
+        # TODO WX reenable after porting
         #self.frame.Bind(wx.EVT_MENU, lambda: stats.StatsDialog(self.w, self.status), id=self.file_stats.GetId())
         self.frame.Bind(wx.EVT_MENU, self.save_raw, id=self.file_save.GetId())
+        # TODO WX reenable after porting
         #self.frame.Bind(wx.EVT_MENU, lambda: prefs.PreferencesDialog(self.w, self.postprefs), id=self.file_prefs.GetId())
         self.frame.Bind(wx.EVT_MENU, lambda event: self.frame.Close(), id=self.file_exit.GetId())
 
@@ -640,7 +641,7 @@ class AppWindow:
         self.frame.Bind(wx.EVT_MENU, self.help_releases, id=self.help_notes.GetId())
         self.frame.Bind(wx.EVT_MENU, lambda event: self.updater.check_for_updates(), id=self.help_check_updates.GetId())
         self.frame.Bind(wx.EVT_MENU, self.about, id=self.help_about.GetId())
-        # TODO reenable after prefs is no longer broken
+        # TODO WX reenable after prefs is ported
         #self.frame.Bind(wx.EVT_MENU, prefs.help_open_log_folder, id=self.help_open_log_folder.GetId())
 
         self.frame.SetMenuBar(self.menubar)

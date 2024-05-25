@@ -26,13 +26,16 @@ from datetime import datetime, timedelta, timezone
 from queue import Queue
 from threading import Thread
 from time import sleep
-from typing import TYPE_CHECKING, Any, Literal, Mapping, MutableMapping, cast, Sequence
+from typing import TYPE_CHECKING, Any, Mapping, MutableMapping, cast, Sequence
 import requests
+import wx
+import wx.adv
+import wx.lib.newevent
 import killswitch
 import monitor
 import plug
 from companion import CAPIData
-from config import applongname, appname, appversion, config, debug_senders, user_agent
+from config import applongname, appversion, config, debug_senders, user_agent
 from edmc_data import DEBUG_WEBSERVER_HOST, DEBUG_WEBSERVER_PORT
 from EDMCLogging import get_main_logger
 
@@ -55,9 +58,15 @@ EDSM_POLL = 0.1
 _TIMEOUT = 20
 DISCARDED_EVENTS_SLEEP = 10
 
+EdsmStatusEvent, EVT_EDSM_STATUS = wx.lib.newevent.NewEvent()
 # trace-if events
 CMDR_EVENTS = 'plugin.edsm.cmdr-events'
 CMDR_CREDS = 'plugin.edsm.cmdr-credentials'
+
+IMG_KNOWN = wx.Image('img/edsm_known.gif')  # green circle
+IMG_UNKNOWN = wx.Image('img/edsm_unknown.gif')  # red circle
+IMG_NEW = wx.Image('img/edsm_new.gif')  # yellow star
+IMG_ERROR = wx.Image('img/edsm_error.gif')  # BBC Mode 5 '?'
 
 
 class This:
@@ -76,7 +85,7 @@ class This:
         self.session.headers['User-Agent'] = user_agent
         self.queue: Queue = Queue()		# Items to be sent to EDSM by worker thread
         self.discarded_events: set[str] = set()  # List discarded events from EDSM
-        self.lastlookup: dict[str, Any]  # Result of last system lookup
+        self.lastlookup: dict[str, Any] = {}  # Result of last system lookup
 
         # Game state
         self.multicrew: bool = False  # don't send captain's ship info to EDSM while on a crew
@@ -84,66 +93,34 @@ class This:
         self.newgame: bool = False  # starting up - batch initial burst of events
         self.newgame_docked: bool = False  # starting up while docked
         self.navbeaconscan: int = 0		# batch up burst of Scan events after NavBeaconScan
-        self.system_link: tk.Widget | None = None
-        self.system_name: tk.Tk | None = None
+        self.system_link: wx.adv.HyperlinkCtrl | None = None
+        self.system_name: str | None = None
         self.system_address: int | None = None  # Frontier SystemAddress
         self.system_population: int | None = None
-        self.station_link: tk.Widget | None = None
+        self.station_link: wx.adv.HyperlinkCtrl | None = None
         self.station_name: str | None = None
         self.station_marketid: int | None = None  # Frontier MarketID
         self.on_foot = False
 
-        self._IMG_KNOWN = None
-        self._IMG_UNKNOWN = None
-        self._IMG_NEW = None
-        self._IMG_ERROR = None
-
         self.thread: threading.Thread | None = None
 
-        self.log: tk.IntVar | None = None
-        self.log_button: ttk.Checkbutton | None = None
+        self.log_button: wx.CheckBox | None = None
 
-        self.label: tk.Widget | None = None
+        self.label: wx.adv.HyperlinkCtrl | None = None
 
-        self.cmdr_label: nb.Label | None = None
-        self.cmdr_text: nb.Label | None = None
+        self.cmdr_label: wx.StaticText | None = None
+        self.cmdr_text: wx.StaticText | None = None
 
-        self.user_label: nb.Label | None = None
-        self.user: nb.EntryMenu | None = None
+        self.user_label: wx.StaticText | None = None
+        self.user: wx.TextCtrl | None = None
 
-        self.apikey_label: nb.Label | None = None
-        self.apikey: nb.EntryMenu | None = None
+        self.apikey_label: wx.StaticText | None = None
+        self.apikey: wx.TextCtrl | None = None
 
 
 this = This()
-show_password_var = tk.BooleanVar()
 
 STATION_UNDOCKED: str = '×'  # "Station" name to display when not docked = U+00D7
-__cleanup = str.maketrans({' ': None, '\n': None})
-IMG_KNOWN_B64 = """
-R0lGODlhEAAQAMIEAFWjVVWkVWS/ZGfFZ////////////////yH5BAEKAAQALAAAAAAQABAAAAMvSLrc/lAFIUIkYOgNXt5g14Dk0AQlaC1CuglM6w7wgs7r
-MpvNV4q932VSuRiPjQQAOw==
-""".translate(__cleanup)
-
-IMG_UNKNOWN_B64 = """
-R0lGODlhEAAQAKEDAGVLJ+ddWO5fW////yH5BAEKAAMALAAAAAAQABAAAAItnI+pywYRQBtA2CtVvTwjDgrJFlreEJRXgKSqwB5keQ6vOKq1E+7IE5kIh4kC
-ADs=
-""".translate(__cleanup)
-
-IMG_NEW_B64 = """
-R0lGODlhEAAQAMZwANKVHtWcIteiHuiqLPCuHOS1MN22ZeW7ROG6Zuu9MOy+K/i8Kf/DAuvCVf/FAP3BNf/JCf/KAPHHSv7ESObHdv/MBv/GRv/LGP/QBPXO
-PvjPQfjQSvbRSP/UGPLSae7Sfv/YNvLXgPbZhP7dU//iI//mAP/jH//kFv7fU//fV//ebv/iTf/iUv/kTf/iZ/vgiP/hc/vgjv/jbfriiPriiv7ka//if//j
-d//sJP/oT//tHv/mZv/sLf/rRP/oYv/rUv/paP/mhv/sS//oc//lkf/mif/sUf/uPv/qcv/uTv/uUv/vUP/qhP/xP//pm//ua//sf//ubf/wXv/thv/tif/s
-lv/tjf/smf/yYP/ulf/2R//2Sv/xkP/2av/0gP/ylf/2df/0i//0j//0lP/5cP/7a//1p//5gf/7ev/3o//2sf/5mP/6kv/2vP/3y//+jP//////////////
-/////////////////////////////////////////////////yH5BAEKAH8ALAAAAAAQABAAAAePgH+Cg4SFhoJKPIeHYT+LhVppUTiPg2hrUkKPXWdlb2xH
-Jk9jXoNJQDk9TVtkYCUkOy4wNjdGfy1UXGJYOksnPiwgFwwYg0NubWpmX1ArHREOFYUyWVNIVkxXQSoQhyMoNVUpRU5EixkcMzQaGy8xhwsKHiEfBQkSIg+G
-BAcUCIIBBDSYYGiAAUMALFR6FAgAOw==
-""".translate(__cleanup)
-
-IMG_ERR_B64 = """
-R0lGODlhEAAQAKEBAAAAAP///////////yH5BAEKAAIALAAAAAAQABAAAAIwlBWpeR0AIwwNPRmZuVNJinyWuClhBlZjpm5fqnIAHJPtOd3Hou9mL6NVgj2L
-plEAADs=
-""".translate(__cleanup)
 
 
 # Main window clicks
@@ -198,12 +175,6 @@ def plugin_start3(plugin_dir: str) -> str:
     :param plugin_dir: Name of directory this was loaded from.
     :return: Identifier string for this plugin.
     """
-    # Can't be earlier since can only call PhotoImage after window is created
-    this._IMG_KNOWN = tk.PhotoImage(data=IMG_KNOWN_B64)  # green circle
-    this._IMG_UNKNOWN = tk.PhotoImage(data=IMG_UNKNOWN_B64)  # red circle
-    this._IMG_NEW = tk.PhotoImage(data=IMG_NEW_B64)  # yellow star
-    this._IMG_ERROR = tk.PhotoImage(data=IMG_ERR_B64)  # BBC Mode 5 '?'
-
     # Migrate old settings
     if not config.get_list('edsm_cmdrs'):
         if isinstance(config.get_list('cmdrs'), list) and \
@@ -235,22 +206,16 @@ def plugin_start3(plugin_dir: str) -> str:
     return 'EDSM'
 
 
-def plugin_app(parent: tk.Tk) -> None:
+def plugin_app(parent: wx.Frame) -> None:
     """
     Construct this plugin's main UI, if any.
 
-    :param parent: The tk parent to place our widgets into.
+    :param parent: The wx parent to place our widgets into.
     :return: See PLUGINS.md#display
     """
-    # system label in main window
-    this.system_link = parent.nametowidget(f".{appname.lower()}.system")
-    if this.system_link is None:
-        logger.error("Couldn't look up system widget!!!")
-        return
-
-    this.system_link.bind_all('<<EDSMStatus>>', update_status)
-    # station label in main window
-    this.station_link = parent.nametowidget(f".{appname.lower()}.station")
+    this.system_link = wx.Window.FindWindowByName('cmdr_system')
+    this.station_link = wx.Window.FindWindowByName('cmdr_station')
+    this.system_link.Bind(EVT_EDSM_STATUS, update_status)
 
 
 def plugin_stop() -> None:
@@ -263,19 +228,26 @@ def plugin_stop() -> None:
     this.thread = None
     this.session.close()
     # Suppress 'Exception ignored in: <function Image.__del__ at ...>' errors # TODO: this is bad.
-    this._IMG_KNOWN = this._IMG_UNKNOWN = this._IMG_NEW = this._IMG_ERROR = None
+    this.IMG_KNOWN = this.IMG_UNKNOWN = this.IMG_NEW = this.IMG_ERROR = None
     logger.debug('Done.')
 
 
-def toggle_password_visibility():
+def toggle_password_visibility(event: wx.CommandEvent):
     """Toggle if the API Key is visible or not."""
-    if show_password_var.get():
-        this.apikey.config(show="")  # type: ignore
+    if wx.PlatformId == 'msw':
+        # "wx.TE_PASSWORD (...) can be dynamically changed under wxGTK but not wxMSW."
+        # https://docs.wxpython.org/wx.TextCtrl.html
+        frame = this.apikey.GetParent()
+        value = this.apikey.GetValue()
+        grid = this.apikey.GetSizer()
+        this.apikey.Destroy()
+        this.apikey = wx.TextCtrl(frame, value=value, style=0 if event.IsChecked() else wx.TE_PASSWORD, width=50)
+        grid.Add(this.apikey, wx.GBPosition(4, 1))
     else:
-        this.apikey.config(show="*")  # type: ignore
+        this.apikey.ToggleWindowStyle(wx.TE_PASSWORD)
 
 
-def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> nb.Frame:
+def plugin_prefs(parent: wx.Notebook, cmdr: str, is_beta: bool) -> wx.Panel:
     """
     Plugin preferences setup hook.
 
@@ -293,130 +265,86 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> nb.Fr
     BOXY = 2  # noqa: N806
     SEPY = 10  # noqa: N806
 
-    frame = nb.Frame(parent)
-    frame.columnconfigure(1, weight=1)
+    panel = wx.Panel(parent)
+    grid = wx.GridBagSizer(PADX, PADY)
 
-    cur_row = 0
-    HyperlinkLabel(
-        frame,
-        text='Elite Dangerous Star Map',
-        background=nb.Label().cget('background'),
-        url='https://www.edsm.net/',
-        underline=True
-    ).grid(row=cur_row, columnspan=2, padx=PADX, pady=PADY, sticky=tk.W)
-    cur_row += 1
+    edsm_link = wx.adv.HyperlinkCtrl(panel, label='Elite Dangerous Star Map', url='https://www.edsm.net/')
+    grid.Add(edsm_link, wx.GBPosition(0, 0), wx.GBSpan(1, 2))
 
-    this.log = tk.IntVar(value=config.get_int('edsm_out') and 1)
-    this.log_button = nb.Checkbutton(
-        frame,
-        text=_('Send flight log and CMDR status to EDSM'),  # LANG: Settings>EDSM - Label on checkbox for 'send data'
-        variable=this.log,
-        command=prefsvarchanged
+    this.log_button = wx.CheckBox(
+        panel,
+        label=_('Send flight log and CMDR status to EDSM'),  # LANG: Settings>EDSM - Label on checkbox for 'send data'
     )
-    if this.log_button:
-        this.log_button.grid(row=cur_row, columnspan=2, padx=BUTTONX, pady=PADY, sticky=tk.W)
-        cur_row += 1
+    this.log_button.SetValue(config.get_bool('edsm_out'))
+    grid.Add(this.log_button, wx.GBPosition(1, 0), wx.GBSpan(1, 2))
+    this.log_button.Bind(wx.EVT_CHECKBOX, lambda event: set_prefs_ui_states(event.IsChecked()))
 
-    ttk.Separator(frame, orient=tk.HORIZONTAL).grid(
-        columnspan=2, padx=PADX, pady=SEPY, sticky=tk.EW, row=cur_row
-    )
-    cur_row += 1
+    plugin_sep = wx.StaticLine(panel)
+    grid.Add(plugin_sep, wx.GBPosition(2, 0), wx.GBSpan(1, 2))
 
-    this.label = HyperlinkLabel(
-        frame,
-        text=_('Elite Dangerous Star Map credentials'),  # LANG: Elite Dangerous Star Map credentials
-        background=nb.Label().cget('background'),
+    this.label = wx.adv.HyperlinkCtrl(
+        panel,
+        label=_('Elite Dangerous Star Map credentials'),  # LANG: Elite Dangerous Star Map credentials
         url='https://www.edsm.net/settings/api',
-        underline=True
     )
-    if this.label:
-        this.label.grid(row=cur_row, columnspan=2, padx=PADX, pady=PADY, sticky=tk.W)
-    cur_row += 1
-    this.cmdr_label = nb.Label(frame, text=_('Cmdr'))  # LANG: Game Commander name label in EDSM settings
-    this.cmdr_label.grid(row=cur_row, padx=PADX, pady=PADY, sticky=tk.W)
-    this.cmdr_text = nb.Label(frame)
-    this.cmdr_text.grid(row=cur_row, column=1, padx=PADX, pady=BOXY, sticky=tk.W)
+    grid.Add(this.label, wx.GBPosition(3, 0), wx.GBSpan(1, 2))
 
-    cur_row += 1
+    this.cmdr_label = wx.StaticText(panel, label=_('Cmdr'))  # LANG: Game Commander name label in EDSM settings
+    grid.Add(this.cmdr_label, wx.GBPosition(4, 0))
+    this.cmdr_text = wx.StaticText(panel)
+    grid.Add(this.cmdr_text, wx.GBPosition(4, 1))
+
     # LANG: EDSM Commander name label in EDSM settings
-    this.user_label = nb.Label(frame, text=_('Commander Name'))
-    this.user_label.grid(row=cur_row, padx=PADX, pady=PADY, sticky=tk.W)
-    this.user = nb.EntryMenu(frame)
-    this.user.grid(row=cur_row, column=1, padx=PADX, pady=BOXY, sticky=tk.EW)
+    this.user_label = wx.StaticText(panel, label=_('Commander Name'))
+    grid.Add(this.user_label, wx.GBPosition(5, 0))
+    this.user = wx.StaticText(panel)
+    grid.Add(this.user, wx.GBPosition(5, 1))
 
-    cur_row += 1
     # LANG: EDSM API key label
-    this.apikey_label = nb.Label(frame, text=_('API Key'))
-    this.apikey_label.grid(row=cur_row, padx=PADX, pady=PADY, sticky=tk.W)
-    this.apikey = nb.EntryMenu(frame, show="*", width=50)
-    this.apikey.grid(row=cur_row, column=1, padx=PADX, pady=BOXY, sticky=tk.EW)
-    cur_row += 1
+    this.apikey_label = wx.StaticText(panel, label=_('API Key'))
+    grid.Add(this.apikey_label, wx.GBPosition(6, 0))
+    this.apikey = wx.TextCtrl(panel, style=wx.TE_PASSWORD, width=50)
+    grid.Add(this.apikey, wx.GBPosition(6, 1))
 
     prefs_cmdr_changed(cmdr, is_beta)
 
-    show_password_var.set(False)  # Password is initially masked
+    show_password_checkbox = wx.CheckBox(panel, text=_('Show API Key'))  # LANG: Text EDSM Show API Key
+    grid.Add(show_password_checkbox, wx.GBPosition(7, 0), wx.GBSpan(1, 2))
+    show_password_checkbox.Bind(wx.EVT_CHECKBOX, toggle_password_visibility)
 
-    show_password_checkbox = nb.Checkbutton(
-        frame,
-        text=_('Show API Key'),  # LANG: Text EDSM Show API Key
-        variable=show_password_var,
-        command=toggle_password_visibility
-    )
-    show_password_checkbox.grid(row=cur_row, columnspan=2, padx=BUTTONX, pady=PADY, sticky=tk.W)
-
-    return frame
+    grid.SetSizeHints(panel)
+    panel.SetSizer(grid)
+    return panel
 
 
-def prefs_cmdr_changed(cmdr: str | None, is_beta: bool) -> None:  # noqa: CCR001
+def prefs_cmdr_changed(cmdr: str | None, is_beta: bool):
     """
     Handle the Commander name changing whilst Settings was open.
 
     :param cmdr: The new current Commander name.
     :param is_beta: Whether game beta was detected.
     """
-    if this.log_button:
-        this.log_button['state'] = tk.NORMAL if cmdr and not is_beta else tk.DISABLED
-    if this.user:
-        this.user['state'] = tk.NORMAL
-        this.user.delete(0, tk.END)
-    if this.apikey:
-        this.apikey['state'] = tk.NORMAL
-        this.apikey.delete(0, tk.END)
+    this.log_button.Enable(cmdr and not is_beta)
+    this.user.Enable()
+    this.apikey.Enable()
     if cmdr:
-        if this.cmdr_text:
-            this.cmdr_text['text'] = f'{cmdr}{" [Beta]" if is_beta else ""}'
-        cred = credentials(cmdr)
-        if cred:
-            if this.user:
-                this.user.insert(0, cred[0])
-            if this.apikey:
-                this.apikey.insert(0, cred[1])
+        this.cmdr_text.SetLabel(f'{cmdr}{" [Beta]" if is_beta else ""}')
+        user, apikey = credentials(cmdr)
+        if user and apikey:
+            this.user.SetValue(user)
+            this.apikey.SetValue(apikey)
     else:
-        if this.cmdr_text:
-            # LANG: We have no data on the current commander
-            this.cmdr_text['text'] = _('None')
+        # LANG: We have no data on the current commander
+        this.cmdr_text.SetLabel(_('None'))
 
-    to_set: Literal['normal'] | Literal['disabled'] = tk.DISABLED
-    if cmdr and not is_beta and this.log and this.log.get():
-        to_set = tk.NORMAL
-
-    set_prefs_ui_states(to_set)
+    set_prefs_ui_states(this.log_button.IsEnabled() and this.log_button.IsChecked())
 
 
-def prefsvarchanged() -> None:
-    """Handle the 'Send data to EDSM' tickbox changing state."""
-    to_set = tk.DISABLED
-    if this.log and this.log.get() and this.log_button:
-        to_set = this.log_button['state']
-
-    set_prefs_ui_states(to_set)
-
-
-def set_prefs_ui_states(state: str) -> None:
+def set_prefs_ui_states(enabled: bool):
     """
     Set the state of various config UI entries.
 
-    :param state: the state to set each entry to
+    :param enabled: whether each entry must be enabled
 
     # NOTE: This may break things, watch out in testing. (5.10)
     """
@@ -431,8 +359,7 @@ def set_prefs_ui_states(state: str) -> None:
     ]
 
     for element in elements:
-        if element:
-            element['state'] = state
+        element.Enable(enabled)
 
 
 def prefs_changed(cmdr: str, is_beta: bool) -> None:
@@ -442,8 +369,7 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
     :param cmdr: Name of Commander.
     :param is_beta: Whether game beta was detected.
     """
-    if this.log:
-        config.set('edsm_out', this.log.get())
+    config.set('edsm_out', this.log_button.IsChecked())
 
     if cmdr and not is_beta:
         cmdrs: list[str] = config.get_list('edsm_cmdrs', default=[])
@@ -454,19 +380,19 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
             if cmdr in cmdrs:
                 idx = cmdrs.index(cmdr)
                 usernames.extend([''] * (1 + idx - len(usernames)))
-                usernames[idx] = this.user.get().strip()
+                usernames[idx] = this.user.GetValue().strip()
                 apikeys.extend([''] * (1 + idx - len(apikeys)))
-                apikeys[idx] = this.apikey.get().strip()
+                apikeys[idx] = this.apikey.GetValue().strip()
             else:
                 config.set('edsm_cmdrs', cmdrs + [cmdr])
-                usernames.append(this.user.get().strip())
-                apikeys.append(this.apikey.get().strip())
+                usernames.append(this.user.GetValue().strip())
+                apikeys.append(this.apikey.GetValue().strip())
 
         config.set('edsm_usernames', usernames)
         config.set('edsm_apikeys', apikeys)
 
 
-def credentials(cmdr: str) -> tuple[str, str] | None:
+def credentials(cmdr: str) -> tuple[str | None, str | None]:
     """
     Get credentials for the given commander, if they exist.
 
@@ -477,7 +403,7 @@ def credentials(cmdr: str) -> tuple[str, str] | None:
 
     # Credentials for cmdr
     if not cmdr:
-        return None
+        return None, None
 
     cmdrs = config.get_list('edsm_cmdrs')
     if not cmdrs:
@@ -495,7 +421,7 @@ def credentials(cmdr: str) -> tuple[str, str] | None:
             return edsm_usernames[idx], edsm_apikeys[idx]
 
     logger.trace_if(CMDR_CREDS, f'{cmdr=}: returning None')
-    return None
+    return None, None
 
 
 def journal_entry(  # noqa: C901, CCR001
@@ -554,16 +480,13 @@ entry: {entry!r}'''
             else:
                 to_set = ''
 
-        if this.station_link:
-            this.station_link['text'] = to_set
-            this.station_link['url'] = station_url(str(this.system_name), str(this.station_name))
-            this.station_link.update_idletasks()
+        this.station_link.SetLabel(to_set)
 
     # Update display of 'EDSM Status' image
-    if this.system_link and this.system_link['text'] != system:
-        this.system_link['text'] = system if system else ''
-        this.system_link['image'] = ''
-        this.system_link.update_idletasks()
+    if this.system_link.GetLabel() != system:
+        this.system_link.SetLabel(system or '')
+        # TODO WX find a way to append an image, like tk.Label allows
+        #this.system_link['image'] = ''
 
     this.multicrew = bool(state['Role'])
     if 'StarPos' in entry:
@@ -663,28 +586,20 @@ def cmdr_data(data: CAPIData, is_beta: bool) -> str | None:  # noqa: CCR001
     # TODO: Fire off the EDSM API call to trigger the callback for the icons
 
     if config.get_str('system_provider') == 'EDSM':
-        if this.system_link:
-            this.system_link['text'] = this.system_name
-            # Do *NOT* set 'url' here, as it's set to a function that will call
-            # through correctly.  We don't want a static string.
-            this.system_link.update_idletasks()
+        this.system_link.SetLabel(this.system_name)
+
     if config.get_str('station_provider') == 'EDSM':
-        if this.station_link:
-            if data['commander']['docked'] or this.on_foot and this.station_name:
-                this.station_link['text'] = this.station_name
-            elif data['lastStarport']['name'] and data['lastStarport']['name'] != "":
-                this.station_link['text'] = STATION_UNDOCKED
-            else:
-                this.station_link['text'] = ''
+        if data['commander']['docked'] or this.on_foot and this.station_name:
+            this.station_link.SetLabel(this.station_name)
+        elif data['lastStarport']['name'] and data['lastStarport']['name'] != "":
+            this.station_link.SetLabel(STATION_UNDOCKED)
+        else:
+            this.station_link.SetLabel('')
 
-            # Do *NOT* set 'url' here, as it's set to a function that will call
-            # through correctly.  We don't want a static string.
-            this.station_link.update_idletasks()
-
-    if this.system_link and not this.system_link['text']:
-        this.system_link['text'] = system
-        this.system_link['image'] = ''
-        this.system_link.update_idletasks()
+    if not this.system_link.GetLabel():
+        this.system_link.SetLabel(system)
+        # TODO WX find a way to append an image, like tk.Label allows
+        #this.system_link['image'] = ''
 
     return ''
 
@@ -791,7 +706,7 @@ def send_to_edsm(  # noqa: CCR001
                 this.lastlookup = r
                 # calls update_status in main thread
                 if not config.shutting_down and this.system_link is not None:
-                    this.system_link.event_generate('<<EDSMStatus>>', when="tail")
+                    wx.PostEvent(this.system_link, EdsmStatusEvent())
             if r['msgnum'] // 100 != 1:
                 logger.warning(f'EDSM event with not-1xx status:\n{r["msgnum"]}\n'
                                f'{r["msg"]}\n{json.dumps(e, separators=(",", ": "))}')
@@ -1010,16 +925,17 @@ def update_status(event=None) -> None:
 # msgnum: 1xx = OK, 2xx = fatal error, 3xx = error, 4xx = ignorable errors.
 def edsm_notify_system(reply: Mapping[str, Any]) -> None:
     """Update the image next to the system link."""
+    # TODO WX find a way to append an image, like tk.Label allows
     if this.system_link is not None:
         if not reply:
-            this.system_link['image'] = this._IMG_ERROR
+            #this.system_link['image'] = IMG_ERROR
             # LANG: EDSM Plugin - Error connecting to EDSM API
             plug.show_error(_("Error: Can't connect to EDSM"))
         elif reply['msgnum'] // 100 not in (1, 4):
-            this.system_link['image'] = this._IMG_ERROR
+            #this.system_link['image'] = IMG_ERROR
             # LANG: EDSM Plugin - Error message from EDSM API
             plug.show_error(_('Error: EDSM {MSG}').format(MSG=reply['msg']))
         elif reply.get('systemCreated'):
-            this.system_link['image'] = this._IMG_NEW
+            ... #this.system_link['image'] = IMG_NEW
         else:
-            this.system_link['image'] = this._IMG_KNOWN
+            ... #this.system_link['image'] = IMG_KNOWN

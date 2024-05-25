@@ -176,7 +176,7 @@ def _load_internal_plugins():
 
 def _load_found_plugins():
     found = []
-    return found  # TODO add failsafe to detect Tk plugins
+    return found  # TODO WX add failsafe to detect Tk plugins
     # Load any plugins that are also packages first, but note it's *still*
     # 100% relying on there being a `load.py`, as only that will be loaded.
     # The intent here is to e.g. have EDMC-Overlay load before any plugins

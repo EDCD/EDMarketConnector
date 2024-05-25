@@ -22,8 +22,9 @@ from __future__ import annotations
 
 from typing import Any, cast
 import requests
+import wx
 from companion import CAPIData
-from config import appname, config
+from config import config
 from EDMCLogging import get_main_logger
 
 logger = get_main_logger()
@@ -33,13 +34,13 @@ class This:
     """Holds module globals."""
 
     def __init__(self):
-        self.parent: tk.Tk
+        self.parent: wx.App
         self.shutting_down = False  # Plugin is shutting down.
-        self.system_link: tk.Widget = None  # type: ignore
+        self.system_link: wx.Window | None = None
         self.system_name: str | None = None
         self.system_address: str | None = None
         self.system_population: int | None = None
-        self.station_link: tk.Widget = None  # type: ignore
+        self.station_link: wx.Window | None = None
         self.station_name = None
         self.station_marketid = None
         self.on_foot = False
@@ -59,16 +60,16 @@ def plugin_start3(plugin_dir: str) -> str:
     return 'Spansh'
 
 
-def plugin_app(parent: tk.Tk) -> None:
+def plugin_app(parent: wx.Frame) -> None:
     """
     Construct this plugin's main UI, if any.
 
-    :param parent: The tk parent to place our widgets into.
+    :param parent: The wx parent to place our widgets into.
     :return: See PLUGINS.md#display
     """
     this.parent = parent
-    this.system_link = parent.nametowidget(f".{appname.lower()}.system")
-    this.station_link = parent.nametowidget(f".{appname.lower()}.station")
+    this.system_link = wx.Window.FindWindowByName('cmdr_system')
+    this.station_link = wx.Window.FindWindowByName('cmdr_station')
 
 
 def plugin_stop() -> None:
@@ -99,10 +100,7 @@ def journal_entry(
 
     # Only actually change URLs if we are current provider.
     if config.get_str('system_provider') == 'spansh':
-        this.system_link['text'] = this.system_name
-        # Do *NOT* set 'url' here, as it's set to a function that will call
-        # through correctly.  We don't want a static string.
-        this.system_link.update_idletasks()
+        this.system_link.SetLabel(this.system_name)
 
     if config.get_str('station_provider') == 'spansh':
         to_set: str = cast(str, this.station_name)
@@ -112,10 +110,7 @@ def journal_entry(
             else:
                 to_set = ''
 
-        this.station_link['text'] = to_set
-        # Do *NOT* set 'url' here, as it's set to a function that will call
-        # through correctly.  We don't want a static string.
-        this.station_link.update_idletasks()
+        this.station_link.SetLabel(to_set)
 
     return ''
 
@@ -140,20 +135,14 @@ def cmdr_data(data: CAPIData, is_beta: bool) -> str | None:
 
     # Override standard URL functions
     if config.get_str('system_provider') == 'spansh':
-        this.system_link['text'] = this.system_name
-        # Do *NOT* set 'url' here, as it's set to a function that will call
-        # through correctly.  We don't want a static string.
-        this.system_link.update_idletasks()
+        this.system_link.SetLabel(this.system_name)
     if config.get_str('station_provider') == 'spansh':
         if data['commander']['docked'] or this.on_foot and this.station_name:
-            this.station_link['text'] = this.station_name
+            this.station_link.SetLabel(this.station_name)
         elif data['lastStarport']['name'] and data['lastStarport']['name'] != "":
-            this.station_link['text'] = STATION_UNDOCKED
+            this.station_link.SetLabel(STATION_UNDOCKED)
         else:
-            this.station_link['text'] = ''
-        # Do *NOT* set 'url' here, as it's set to a function that will call
-        # through correctly.  We don't want a static string.
-        this.station_link.update_idletasks()
+            this.station_link.SetLabel('')
 
     return ''
 

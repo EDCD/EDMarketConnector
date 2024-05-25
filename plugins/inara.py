@@ -21,7 +21,6 @@ referenced in this file (or only in any other core plugin), and if so...
 from __future__ import annotations
 
 import json
-import threading
 import time
 from collections import defaultdict, deque
 from dataclasses import dataclass
@@ -30,12 +29,15 @@ from operator import itemgetter
 from threading import Lock, Thread
 from typing import TYPE_CHECKING, Any, Callable, Deque, Mapping, NamedTuple, Sequence, cast, Union
 import requests
+import wx
+import wx.adv
+import wx.lib.newevent
 import edmc_data
 import killswitch
 import plug
 import timeout_session
 from companion import CAPIData
-from config import applongname, appname, appversion, config, debug_senders
+from config import applongname, appversion, config, debug_senders
 from EDMCLogging import get_main_logger
 from monitor import monitor
 
@@ -52,6 +54,9 @@ FAKE = ('CQC', 'Training', 'Destination')  # Fake systems that shouldn't be sent
 # greater than certain thresholds
 CREDITS_DELTA_MIN_FRACTION = 0.05  # Fractional difference threshold
 CREDITS_DELTA_MIN_ABSOLUTE = 10_000_000  # Absolute difference threshold
+
+InaraLocationEvent, EVT_INARA_LOCATION = wx.lib.newevent.NewEvent()
+InaraShipEvent, EVT_INARA_SHIP = wx.lib.newevent.NewEvent()
 
 
 # These need to be defined above This
@@ -81,7 +86,7 @@ class This:
     def __init__(self):
         self.session = timeout_session.new_session()
         self.thread: Thread
-        self.parent: tk.Tk
+        self.parent: wx.Frame
 
         # Handle only sending Live galaxy data
         self.legacy_galaxy_last_notified: datetime | None = None
@@ -109,23 +114,22 @@ class This:
         self.timer_run = True
 
         # Main window clicks
-        self.system_link: tk.Widget = None  # type: ignore
-        self.system_name: str | None = None  # type: ignore
-        self.system_address: str | None = None  # type: ignore
+        self.system_link: wx.Window | None = None
+        self.system_name: str | None = None
+        self.system_address: str | None = None
         self.system_population: int | None = None
-        self.station_link: tk.Widget = None  # type: ignore
+        self.station_link: wx.Window | None = None
         self.station = None
         self.station_marketid = None
 
         # Prefs UI
-        self.log: 'tk.IntVar'
-        self.log_button: nb.Checkbutton
-        self.label: HyperlinkLabel
-        self.apikey: nb.EntryMenu
-        self.apikey_label: tk.Label
+        self.log_button: wx.CheckBox | None = None
+        self.label: wx.adv.HyperlinkCtrl | None = None
+        self.apikey: wx.TextCtrl | None = None
+        self.apikey_label: wx.StaticText | None = None
 
         self.events: dict[Credentials, Deque[Event]] = defaultdict(deque)
-        self.event_lock: Lock = threading.Lock()  # protects events, for use when rewriting events
+        self.event_lock: Lock = Lock()  # protects events, for use when rewriting events
 
     def filter_events(self, key: Credentials, predicate: Callable[[Event], bool]) -> None:
         """
@@ -143,7 +147,6 @@ class This:
 
 
 this = This()
-show_password_var = tk.BooleanVar()
 
 # last time we updated, if unset in config this is 0, which means an instant update
 LAST_UPDATE_CONF_KEY = 'inara_last_update'
@@ -211,13 +214,13 @@ def plugin_start3(plugin_dir: str) -> str:
     return 'Inara'
 
 
-def plugin_app(parent: tk.Tk) -> None:
+def plugin_app(parent: wx.Frame) -> None:
     """Plugin UI setup Hook."""
     this.parent = parent
-    this.system_link = parent.nametowidget(f".{appname.lower()}.system")
-    this.station_link = parent.nametowidget(f".{appname.lower()}.station")
-    this.system_link.bind_all('<<InaraLocation>>', update_location)
-    this.system_link.bind_all('<<InaraShip>>', update_ship)
+    this.system_link = wx.Window.FindWindowByName('cmdr_system')
+    this.station_link = wx.Window.FindWindowByName('cmdr_station')
+    this.system_link.Bind(EVT_INARA_LOCATION, update_location)
+    this.system_link.Bind(EVT_INARA_SHIP, update_ship)
 
 
 def plugin_stop() -> None:
@@ -232,114 +235,94 @@ def plugin_stop() -> None:
     logger.debug('Done.')
 
 
-def toggle_password_visibility():
+def toggle_password_visibility(event: wx.CommandEvent):
     """Toggle if the API Key is visible or not."""
-    if show_password_var.get():
-        this.apikey.config(show="")
+    if wx.PlatformId == 'msw':
+        # "wx.TE_PASSWORD (...) can be dynamically changed under wxGTK but not wxMSW."
+        # https://docs.wxpython.org/wx.TextCtrl.html
+        frame = this.apikey.GetParent()
+        value = this.apikey.GetValue()
+        grid = this.apikey.GetSizer()
+        this.apikey.Destroy()
+        this.apikey = wx.TextCtrl(frame, value=value, style=0 if event.IsChecked() else wx.TE_PASSWORD, width=50)
+        grid.Add(this.apikey, wx.GBPosition(4, 1))
     else:
-        this.apikey.config(show="*")
+        this.apikey.ToggleWindowStyle(wx.TE_PASSWORD)
 
 
-def plugin_prefs(parent: ttk.Notebook, cmdr: str, is_beta: bool) -> nb.Frame:
+def plugin_prefs(parent: wx.Notebook, cmdr: str, is_beta: bool) -> wx.Panel:
     """Plugin Preferences UI hook."""
     PADX = 10  # noqa: N806
     BUTTONX = 12  # noqa: N806  # indent Checkbuttons and Radiobuttons
     PADY = 1  # noqa: N806  # close spacing
     BOXY = 2  # noqa: N806  # box spacing
     SEPY = 10  # noqa: N806  # seperator line spacing
-    cur_row = 0
 
-    frame = nb.Frame(parent)
-    frame.columnconfigure(1, weight=1)
+    panel = wx.Panel(parent)
+    grid = wx.GridBagSizer(PADX, PADY)
 
-    HyperlinkLabel(
-        frame, text='Inara', background=nb.Label().cget('background'), url='https://inara.cz/', underline=True
-    ).grid(row=cur_row, columnspan=2, padx=PADX, pady=PADY, sticky=tk.W)  # Don't translate
-    cur_row += 1
+    inara_link = wx.adv.HyperlinkCtrl(panel, label='Inara', url='https://inara.cz/')
+    grid.Add(inara_link, wx.GBPosition(0, 0), wx.GBSpan(1, 2))
 
-    this.log = tk.IntVar(value=config.get_int('inara_out') and 1)
-    this.log_button = nb.Checkbutton(
-        frame,
-        text=_('Send flight log and Cmdr status to Inara'),  # LANG: Checkbox to enable INARA API Usage
-        variable=this.log,
-        command=prefsvarchanged
+    this.log_button = wx.CheckBox(
+        panel,
+        label=_('Send flight log and Cmdr status to Inara'),  # LANG: Checkbox to enable INARA API Usage
     )
+    this.log_button.SetValue(config.get_bool('inara_out'))
+    grid.Add(this.log_button, wx.GBPosition(1, 0), wx.GBSpan(1, 2))
+    this.log_button.Bind(wx.EVT_CHECKBOX, prefsvarchanged)
 
-    this.log_button.grid(row=cur_row, columnspan=2, padx=BUTTONX, pady=PADY, sticky=tk.W)
-    cur_row += 1
-
-    ttk.Separator(frame, orient=tk.HORIZONTAL).grid(
-        columnspan=2, padx=PADX, pady=SEPY, sticky=tk.EW, row=cur_row
-    )
-    cur_row += 1
+    plugin_sep = wx.StaticLine(panel)
+    grid.Add(plugin_sep, wx.GBPosition(2, 0), wx.GBSpan(1, 2))
 
     # Section heading in settings
-    this.label = HyperlinkLabel(
-        frame,
-        text=_('Inara credentials'),  # LANG: Text for INARA API keys link ( goes to https://inara.cz/settings-api )
-        background=nb.Label().cget('background'),
+    this.label = wx.adv.HyperlinkCtrl(
+        panel,
+        label=_('Inara credentials'),  # LANG: Text for INARA API keys link ( goes to https://inara.cz/settings-api )
         url='https://inara.cz/settings-api',
-        underline=True
     )
-
-    this.label.grid(row=cur_row, columnspan=2, padx=PADX, pady=PADY, sticky=tk.W)
-    cur_row += 1
+    grid.Add(this.label, wx.GBPosition(3, 0), wx.GBSpan(1, 2))
 
     # LANG: Inara API key label
-    this.apikey_label = nb.Label(frame, text=_('API Key'))  # Inara setting
-    this.apikey_label.grid(row=cur_row, padx=PADX, pady=PADY, sticky=tk.W)
-    this.apikey = nb.EntryMenu(frame, show="*", width=50)
-    this.apikey.grid(row=cur_row, column=1, padx=PADX, pady=BOXY, sticky=tk.EW)
-    cur_row += 1
+    this.apikey_label = wx.StaticText(panel, label=_('API Key'))
+    grid.Add(this.apikey_label, wx.GBPosition(4, 0))
+    this.apikey = wx.TextCtrl(panel, style=wx.TE_PASSWORD, width=50)
+    grid.Add(this.apikey, wx.GBPosition(4, 1))
 
-    prefs_cmdr_changed(cmdr, is_beta)
-
-    show_password_var.set(False)  # Password is initially masked
-    show_password_checkbox = nb.Checkbutton(
-        frame,
-        text=_('Show API Key'),  # LANG: Text Inara Show API key
-        variable=show_password_var,
-        command=toggle_password_visibility,
-    )
-    show_password_checkbox.grid(row=cur_row, columnspan=2, padx=BUTTONX, pady=PADY, sticky=tk.W)
-
-    return frame
-
-
-def prefs_cmdr_changed(cmdr: str, is_beta: bool) -> None:
-    """Plugin commander change hook."""
-    this.log_button['state'] = tk.NORMAL if cmdr and not is_beta else tk.DISABLED
-    this.apikey['state'] = tk.NORMAL
-    this.apikey.delete(0, tk.END)
+    this.log_button.Enable(cmdr and not is_beta)
+    this.apikey.Enable()
     if cmdr:
         cred = credentials(cmdr)
         if cred:
-            this.apikey.insert(0, cred)
+            this.apikey.SetValue(cred)
 
-    state: str = tk.DISABLED
-    if cmdr and not is_beta and this.log.get():
-        state = tk.NORMAL
+    state = this.log_button.IsEnabled() and this.log_button.IsChecked()
 
-    this.label['state'] = state
-    this.apikey_label['state'] = state
-    this.apikey['state'] = state
+    this.label.Enable(state)
+    this.apikey_label.Enable(state)
+    this.apikey.Enable(state)
+
+    show_password_checkbox = wx.CheckBox(panel, text=_('Show API Key'))  # LANG: Text Inara Show API Key
+    grid.Add(show_password_checkbox, wx.GBPosition(5, 0), wx.GBSpan(1, 2))
+    show_password_checkbox.Bind(wx.EVT_CHECKBOX, toggle_password_visibility)
+
+    grid.SetSizeHints(panel)
+    panel.SetSizer(grid)
+    return panel
 
 
-def prefsvarchanged():
+def prefsvarchanged(event: wx.CommandEvent):
     """Preferences window change hook."""
-    state = tk.DISABLED
-    if this.log.get():
-        state = this.log_button['state']
-
-    this.label['state'] = state
-    this.apikey_label['state'] = state
-    this.apikey['state'] = state
+    this.label.Enable(event.IsChecked())
+    this.apikey_label.Enable(event.IsChecked())
+    this.apikey.Enable(event.IsChecked())
 
 
 def prefs_changed(cmdr: str, is_beta: bool) -> None:
     """Preferences window closed hook."""
-    changed = config.get_int('inara_out') != this.log.get()
-    config.set('inara_out', this.log.get())
+    log = this.log_button.IsChecked()
+    changed = config.get_int('inara_out') != log
+    config.set('inara_out', log)
 
     if cmdr and not is_beta:
         this.cmdr = cmdr
@@ -349,17 +332,17 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
         if cmdr in cmdrs:
             idx = cmdrs.index(cmdr)
             apikeys.extend([''] * (1 + idx - len(apikeys)))
-            changed |= (apikeys[idx] != this.apikey.get().strip())
-            apikeys[idx] = this.apikey.get().strip()
+            changed |= (apikeys[idx] != this.apikey.GetValue().strip())
+            apikeys[idx] = this.apikey.GetValue().strip()
 
         else:
             config.set('inara_cmdrs', cmdrs + [cmdr])
             changed = True
-            apikeys.append(this.apikey.get().strip())
+            apikeys.append(this.apikey.GetValue().strip())
 
         config.set('inara_apikeys', apikeys)
 
-        if this.log.get() and changed:
+        if log and changed:
             this.newuser = True  # Send basic info at next Journal event
             new_add_event(
                 'getCommanderProfile', time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), {'searchName': cmdr}
@@ -1345,10 +1328,7 @@ def journal_entry(  # noqa: C901, CCR001
 
     # Only actually change URLs if we are current provider.
     if config.get_str('system_provider') == 'Inara':
-        this.system_link['text'] = this.system_name
-        # Do *NOT* set 'url' here, as it's set to a function that will call
-        # through correctly.  We don't want a static string.
-        this.system_link.update_idletasks()
+        this.system_link.SetLabel(this.system_name)
 
     if config.get_str('station_provider') == 'Inara':
         to_set: str = cast(str, this.station)
@@ -1358,10 +1338,7 @@ def journal_entry(  # noqa: C901, CCR001
             else:
                 to_set = ''
 
-        this.station_link['text'] = to_set
-        # Do *NOT* set 'url' here, as it's set to a function that will call
-        # through correctly.  We don't want a static string.
-        this.station_link.update_idletasks()
+        this.station_link.SetLabel(to_set)
 
     return ''  # No error
 
@@ -1382,24 +1359,15 @@ def cmdr_data(data: CAPIData, is_beta):  # noqa: CCR001, reanalyze me later
 
     # Override standard URL functions
     if config.get_str('system_provider') == 'Inara':
-        this.system_link['text'] = this.system_name
-        # Do *NOT* set 'url' here, as it's set to a function that will call
-        # through correctly.  We don't want a static string.
-        this.system_link.update_idletasks()
+        this.system_link.SetLabel(this.system_name)
 
     if config.get_str('station_provider') == 'Inara':
         if data['commander']['docked'] or this.on_foot and this.station:
-            this.station_link['text'] = this.station
-
+            this.station_link.SetLabel(this.station)
         elif data['lastStarport']['name'] and data['lastStarport']['name'] != "":
-            this.station_link['text'] = STATION_UNDOCKED
-
+            this.station_link.SetLabel(STATION_UNDOCKED)
         else:
-            this.station_link['text'] = ''
-
-        # Do *NOT* set 'url' here, as it's set to a function that will call
-        # through correctly.  We don't want a static string.
-        this.station_link.update_idletasks()
+            this.station_link.SetLabel('')
 
     if config.get_int('inara_out') and not is_beta and not this.multicrew and credentials(this.cmdr):
         # Only here to ensure the conditional is correct for future additions
@@ -1691,11 +1659,11 @@ def handle_special_events(data_event: dict[str, Any], reply_event: dict[str, Any
     ):
         this.lastlocation = reply_event.get('eventData', {})
         if not config.shutting_down:
-            this.system_link.event_generate('<<InaraLocation>>', when="tail")
+            wx.PostEvent(this.system_link, InaraLocationEvent())
     elif data_event['eventName'] in ('addCommanderShip', 'setCommanderShip'):
         this.lastship = reply_event.get('eventData', {})
         if not config.shutting_down:
-            this.system_link.event_generate('<<InaraShip>>', when="tail")
+            wx.PostEvent(this.system_link, InaraShipEvent())
 
 
 def update_location(event=None) -> None:

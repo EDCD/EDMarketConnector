@@ -38,15 +38,17 @@ from typing import (
     MutableMapping,
 )
 import requests
+import wx
+import wx.adv
 import companion
 import edmc_data
 import killswitch
 import plug
 from companion import CAPIData, category_map
-from config import applongname, appname, appversion_nobuild, config, debug_senders, user_agent
+from config import applongname, appversion_nobuild, config, debug_senders, user_agent
 from EDMCLogging import get_main_logger
 from monitor import monitor
-from prefs import prefsVersion
+#from prefs import prefsVersion
 from util import text
 
 if TYPE_CHECKING:
@@ -99,33 +101,28 @@ class This:
         self.fcmaterials_capi_marketid: int = 0
         self.fcmaterials_capi: list[dict[str, Any]] | None = None
 
-        # For the tkinter parent window, so we can call update_idletasks()
-        self.parent: tk.Tk
+        # For the wx parent window, so we can call update_idletasks()
+        self.parent: wx.Frame | None = None
 
         # To hold EDDN class instance
-        self.eddn: EDDN
+        self.eddn: EDDN | None = None
 
-        # tkinter UI bits.
-        self.eddn_station: tk.IntVar
-        self.eddn_station_button: nb.Checkbutton
-
-        self.eddn_system: tk.IntVar
-        self.eddn_system_button: nb.Checkbutton
-
-        self.eddn_delay: tk.IntVar
-        self.eddn_delay_button: nb.Checkbutton
+        # wx UI bits.
+        self.eddn_station_button: wx.CheckBox | None = None
+        self.eddn_system_button: wx.CheckBox | None = None
+        self.eddn_delay_button: wx.CheckBox | None = None
 
         # Tracking UI
-        self.ui: tk.Frame
-        self.ui_system_name: tk.Label
-        self.ui_system_address: tk.Label
-        self.ui_j_body_name: tk.Label
-        self.ui_j_body_id: tk.Label
-        self.ui_j_body_type: tk.Label
-        self.ui_s_body_name: tk.Label
-        self.ui_station_name: tk.Label
-        self.ui_station_type: tk.Label
-        self.ui_station_marketid: tk.Label
+        self.ui: wx.Panel | None = None
+        self.ui_system_name: wx.StaticText | None = None
+        self.ui_system_address: wx.StaticText | None = None
+        self.ui_j_body_name: wx.StaticText | None = None
+        self.ui_j_body_id: wx.StaticText | None = None
+        self.ui_j_body_type: wx.StaticText | None = None
+        self.ui_s_body_name: wx.StaticText | None = None
+        self.ui_station_name: wx.StaticText | None = None
+        self.ui_station_type: wx.StaticText | None = None
+        self.ui_station_marketid: wx.StaticText | None = None
 
 
 this = This()
@@ -186,7 +183,7 @@ class EDDNSender:
             f"First queue run scheduled for {self.eddn.REPLAY_STARTUP_DELAY}ms from now"
         )
         if not os.getenv("EDMC_NO_UI"):
-            self.eddn.parent.after(self.eddn.REPLAY_STARTUP_DELAY, self.queue_check_and_send, True)
+            wx.CallLater(self.eddn.REPLAY_STARTUP_DELAY, self.queue_check_and_send, True)
 
     def sqlite_queue_v1(self) -> sqlite3.Connection:
         """
@@ -365,7 +362,7 @@ class EDDNSender:
             logger.info(text)
             return
 
-        self.eddn.parent.nametowidget(f".{appname.lower()}.status")['text'] = text
+        self.eddn.parent.SetStatusText(text)
 
     def send_message(self, msg: str) -> bool:
         """
@@ -460,9 +457,7 @@ class EDDNSender:
                     "plugin.eddn.send",
                     f"Next run scheduled for {self.eddn.REPLAY_PERIOD}ms from now",
                 )
-                self.eddn.parent.after(
-                    self.eddn.REPLAY_PERIOD, self.queue_check_and_send, reschedule
-                )
+                wx.CallLater(self.eddn.REPLAY_PERIOD, self.queue_check_and_send, reschedule)
 
             else:
                 logger.trace_if(
@@ -514,7 +509,7 @@ class EDDNSender:
                         # Always re-schedule as this is only a "Don't hammer EDDN" delay
                         logger.trace_if("plugin.eddn.send", f"Next run scheduled for {self.eddn.REPLAY_DELAY}ms from "
                                                             "now")
-                        self.eddn.parent.after(self.eddn.REPLAY_DELAY, self.queue_check_and_send, reschedule)
+                        wx.CallLater(self.eddn.REPLAY_DELAY, self.queue_check_and_send, reschedule)
                         have_rescheduled = True
 
                 db_cursor.close()
@@ -527,7 +522,7 @@ class EDDNSender:
         if reschedule and not have_rescheduled:
             # Set us up to run again per the configured period
             logger.trace_if("plugin.eddn.send", f"Next run scheduled for {self.eddn.REPLAY_PERIOD}ms from now")
-            self.eddn.parent.after(self.eddn.REPLAY_PERIOD, self.queue_check_and_send, reschedule)
+            wx.CallLater(self.eddn.REPLAY_PERIOD, self.queue_check_and_send, reschedule)
 
     def _log_response(
         self,
@@ -592,8 +587,8 @@ class EDDN:
     CANONICALISE_RE = re.compile(r'\$(.+)_name;')
     CAPI_LOCALISATION_RE = re.compile(r'^loc[A-Z].+')
 
-    def __init__(self, parent: tk.Tk):
-        self.parent: tk.Tk = parent
+    def __init__(self, parent: wx.Frame):
+        self.parent: wx.Frame = parent
 
         if config.eddn_url is not None:
             self.eddn_url = config.eddn_url
@@ -2014,93 +2009,91 @@ def plugin_start3(plugin_dir: str) -> str:
     return 'EDDN'
 
 
-def plugin_app(parent: tk.Tk) -> tk.Frame | None:
+def plugin_app(parent: wx.Frame) -> wx.Panel | None:
     """
     Set up any plugin-specific UI.
 
-    In this case we need the tkinter parent in order to later call
+    In this case we need the wx parent in order to later call
     `update_idletasks()` on it, or schedule things with `after()`.
 
-    :param parent: tkinter parent frame.
-    :return: Optional tk.Frame, if the tracking UI is active.
+    :param parent: wx parent frame.
+    :return: Optional wx.Panel, if the tracking UI is active.
     """
     this.parent = parent
     this.eddn = EDDN(parent)
 
     if config.eddn_tracking_ui:
-        this.ui = tk.Frame(parent)
-
-        row = this.ui.grid_size()[1]
+        this.ui = wx.Panel(parent)
+        grid = wx.GridSizer(cols=2)
 
         #######################################################################
         # System
         #######################################################################
         # SystemName
-        system_name_label = tk.Label(this.ui, text="J:SystemName:")
-        system_name_label.grid(row=row, column=0, sticky=tk.W)
-        this.ui_system_name = tk.Label(this.ui, name='eddn_track_system_name', anchor=tk.W)
-        this.ui_system_name.grid(row=row, column=1, sticky=tk.E)
-        row += 1
+        system_name_label = wx.StaticText(this.ui, label="J:SystemName:")
+        grid.Add(system_name_label)
+        this.ui_system_name = wx.StaticText(this.ui, name='eddn_track_system_name')
+        grid.Add(this.ui_system_name)
+
         # SystemAddress
-        system_address_label = tk.Label(this.ui, text="J:SystemAddress:")
-        system_address_label.grid(row=row, column=0, sticky=tk.W)
-        this.ui_system_address = tk.Label(this.ui, name='eddn_track_system_address', anchor=tk.W)
-        this.ui_system_address.grid(row=row, column=1, sticky=tk.E)
-        row += 1
+        system_address_label = wx.StaticText(this.ui, label="J:SystemAddress:")
+        grid.Add(system_address_label)
+        this.ui_system_address = wx.StaticText(this.ui, name='eddn_track_system_address')
+        grid.Add(this.ui_system_address)
         #######################################################################
 
         #######################################################################
         # Body
         #######################################################################
         # Body Name from Journal
-        journal_body_name_label = tk.Label(this.ui, text="J:BodyName:")
-        journal_body_name_label.grid(row=row, column=0, sticky=tk.W)
-        this.ui_j_body_name = tk.Label(this.ui, name='eddn_track_j_body_name', anchor=tk.W)
-        this.ui_j_body_name.grid(row=row, column=1, sticky=tk.E)
-        row += 1
+        journal_body_name_label = wx.StaticText(this.ui, label="J:BodyName:")
+        grid.Add(journal_body_name_label)
+        this.ui_j_body_name = wx.StaticText(this.ui, name='eddn_track_j_body_name')
+        grid.Add(this.ui_j_body_name)
+
         # Body ID from Journal
-        journal_body_id_label = tk.Label(this.ui, text="J:BodyID:")
-        journal_body_id_label.grid(row=row, column=0, sticky=tk.W)
-        this.ui_j_body_id = tk.Label(this.ui, name='eddn_track_j_body_id', anchor=tk.W)
-        this.ui_j_body_id.grid(row=row, column=1, sticky=tk.E)
-        row += 1
+        journal_body_id_label = wx.StaticText(this.ui, label="J:BodyID:")
+        grid.Add(journal_body_id_label)
+        this.ui_j_body_id = wx.StaticText(this.ui, name='eddn_track_j_body_id')
+        grid.Add(this.ui_j_body_id)
+
         # Body Type from Journal
-        journal_body_type_label = tk.Label(this.ui, text="J:BodyType:")
-        journal_body_type_label.grid(row=row, column=0, sticky=tk.W)
-        this.ui_j_body_type = tk.Label(this.ui, name='eddn_track_j_body_type', anchor=tk.W)
-        this.ui_j_body_type.grid(row=row, column=1, sticky=tk.E)
-        row += 1
+        journal_body_type_label = wx.StaticText(this.ui, label="J:BodyType:")
+        grid.Add(journal_body_type_label)
+        this.ui_j_body_type = wx.StaticText(this.ui, name='eddn_track_j_body_type')
+        grid.Add(this.ui_j_body_type)
+
         # Body Name from Status.json
-        status_body_name_label = tk.Label(this.ui, text="S:BodyName:")
-        status_body_name_label.grid(row=row, column=0, sticky=tk.W)
-        this.ui_s_body_name = tk.Label(this.ui, name='eddn_track_s_body_name', anchor=tk.W)
-        this.ui_s_body_name.grid(row=row, column=1, sticky=tk.E)
-        row += 1
+        status_body_name_label = wx.StaticText(this.ui, label="S:BodyName:")
+        grid.Add(status_body_name_label)
+        this.ui_s_body_name = wx.StaticText(this.ui, name='eddn_track_s_body_name')
+        grid.Add(this.ui_s_body_name)
         #######################################################################
 
         #######################################################################
         # Station
         #######################################################################
         # Name
-        status_station_name_label = tk.Label(this.ui, text="J:StationName:")
-        status_station_name_label.grid(row=row, column=0, sticky=tk.W)
-        this.ui_station_name = tk.Label(this.ui, name='eddn_track_station_name', anchor=tk.W)
-        this.ui_station_name.grid(row=row, column=1, sticky=tk.E)
-        row += 1
+        status_station_name_label = wx.StaticText(this.ui, label="J:StationName:")
+        grid.Add(status_station_name_label)
+        this.ui_station_name = wx.StaticText(this.ui, name='eddn_track_station_name')
+        grid.Add(this.ui_station_name)
+
         # Type
-        status_station_type_label = tk.Label(this.ui, text="J:StationType:")
-        status_station_type_label.grid(row=row, column=0, sticky=tk.W)
-        this.ui_station_type = tk.Label(this.ui, name='eddn_track_station_type', anchor=tk.W)
-        this.ui_station_type.grid(row=row, column=1, sticky=tk.E)
-        row += 1
+        status_station_type_label = wx.StaticText(this.ui, label="J:StationType:")
+        grid.Add(status_station_type_label)
+        this.ui_station_type = wx.StaticText(this.ui, name='eddn_track_station_type')
+        grid.Add(this.ui_station_type)
+
         # MarketID
-        status_station_marketid_label = tk.Label(this.ui, text="J:StationID:")
-        status_station_marketid_label.grid(row=row, column=0, sticky=tk.W)
-        this.ui_station_marketid = tk.Label(this.ui, name='eddn_track_station_id', anchor=tk.W)
-        this.ui_station_marketid.grid(row=row, column=1, sticky=tk.E)
-        row += 1
+        status_station_marketid_label = wx.StaticText(this.ui, label="J:StationID:")
+        grid.Add(status_station_marketid_label)
+        this.ui_station_marketid = wx.StaticText(this.ui, name='eddn_track_station_id')
+        grid.Add(this.ui_station_marketid)
         #######################################################################
 
+        grid.SetSizeHints(this.ui)
+        this.ui.SetSizer(grid)
         return this.ui
 
     return None
@@ -2111,124 +2104,80 @@ def tracking_ui_update() -> None:
     if not config.eddn_tracking_ui:
         return
 
-    this.ui_system_name['text'] = '≪None≫'
-    if this.ui_system_name is not None:
-        this.ui_system_name['text'] = this.system_name
-
-    this.ui_system_address['text'] = '≪None≫'
-    if this.ui_system_address is not None:
-        this.ui_system_address['text'] = this.system_address
-
-    this.ui_j_body_name['text'] = '≪None≫'
-    if this.body_name is not None:
-        this.ui_j_body_name['text'] = this.body_name
-
-    this.ui_j_body_id['text'] = '≪None≫'
-    if this.body_id is not None:
-        this.ui_j_body_id['text'] = str(this.body_id)
-
-    this.ui_j_body_type['text'] = '≪None≫'
-    if this.body_type is not None:
-        this.ui_j_body_type['text'] = str(this.body_type)
-
-    this.ui_s_body_name['text'] = '≪None≫'
-    if this.status_body_name is not None:
-        this.ui_s_body_name['text'] = this.status_body_name
-
-    this.ui_station_name['text'] = '≪None≫'
-    if this.station_name is not None:
-        this.ui_station_name['text'] = this.station_name
-
-    this.ui_station_type['text'] = '≪None≫'
-    if this.station_type is not None:
-        this.ui_station_type['text'] = this.station_type
-
-    this.ui_station_marketid['text'] = '≪None≫'
-    if this.station_marketid is not None:
-        this.ui_station_marketid['text'] = this.station_marketid
-
-    this.ui.update_idletasks()
+    this.ui_system_name.SetLabel(this.system_name or '≪None≫')
+    this.ui_system_address.SetLabel(this.system_address or '≪None≫')
+    this.ui_j_body_name.SetLabel(this.body_name or '≪None≫')
+    this.ui_j_body_id.SetLabel(str(this.body_id) or '≪None≫')
+    this.ui_j_body_type.SetLabel(str(this.body_type) or '≪None≫')
+    this.ui_s_body_name.SetLabel(this.status_body_name or '≪None≫')
+    this.ui_station_name.SetLabel(this.station_name or '≪None≫')
+    this.ui_station_type.SetLabel(this.station_type or '≪None≫')
+    this.ui_station_marketid.SetLabel(this.station_marketid or '≪None≫')
 
 
-def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:
+def plugin_prefs(parent, cmdr: str, is_beta: bool) -> wx.Panel:
     """
     Set up Preferences pane for this plugin.
 
-    :param parent: tkinter parent to attach to.
+    :param parent: wx parent to attach to.
     :param cmdr: `str` - Name of current Cmdr.
     :param is_beta: `bool` - True if this is a beta version of the Game.
-    :return: The tkinter frame we created.
+    :return: The wx frame we created.
     """
     PADX = 10  # noqa: N806
     BUTTONX = 12  # noqa: N806 # indent Checkbuttons and Radiobuttons
     PADY = 1  # noqa: N806
 
-    if prefsVersion.shouldSetDefaults('0.0.0.0', not bool(config.get_int('output'))):
+    # TODO WX reenable after prefs is ported
+    if False:  # prefsVersion.shouldSetDefaults('0.0.0.0', not bool(config.get_int('output'))):
         output: int = config.OUT_EDDN_SEND_STATION_DATA | config.OUT_EDDN_SEND_NON_STATION  # default settings
-
     else:
         output = config.get_int('output')
 
-    eddnframe = nb.Frame(parent)
+    panel = wx.Panel(parent)
+    grid = wx.BoxSizer(wx.VERTICAL)
 
-    cur_row = 0
-    HyperlinkLabel(
-        eddnframe,
-        text='Elite Dangerous Data Network',
-        background=nb.Label().cget('background'),
+    link = wx.adv.HyperlinkCtrl(
+        panel,
+        label='Elite Dangerous Data Network',
         url='https://github.com/EDCD/EDDN#eddn---elite-dangerous-data-network',
-        underline=True
-    ).grid(row=cur_row, padx=PADX, pady=PADY, sticky=tk.W)  # Don't translate
-    cur_row += 1
+    )  # Don't translate
+    grid.Add(link)
 
-    this.eddn_station = tk.IntVar(value=(output & config.OUT_EDDN_SEND_STATION_DATA) and 1)
-    this.eddn_station_button = nb.Checkbutton(
-        eddnframe,
+    this.eddn_station_button = wx.CheckBox(
+        panel,
         # LANG: Enable EDDN support for station data checkbox label
-        text=_('Send station data to the Elite Dangerous Data Network'),
-        variable=this.eddn_station,
-        command=prefsvarchanged
+        label=_('Send station data to the Elite Dangerous Data Network'),
+        value=output & config.OUT_EDDN_SEND_STATION_DATA,
     )  # Output setting
-    this.eddn_station_button.grid(row=cur_row, padx=BUTTONX, pady=PADY, sticky=tk.W)
-    cur_row += 1
+    grid.Add(this.eddn_station_button)
 
-    this.eddn_system = tk.IntVar(value=(output & config.OUT_EDDN_SEND_NON_STATION) and 1)
     # Output setting new in E:D 2.2
-    this.eddn_system_button = nb.Checkbutton(
-        eddnframe,
+    this.eddn_system_button = wx.CheckBox(
+        panel,
         # LANG: Enable EDDN support for system and other scan data checkbox label
-        text=_('Send system and scan data to the Elite Dangerous Data Network'),
-        variable=this.eddn_system,
-        command=prefsvarchanged
+        label=_('Send system and scan data to the Elite Dangerous Data Network'),
+        value=output & config.OUT_EDDN_SEND_NON_STATION,
     )
-    this.eddn_system_button.grid(row=cur_row, padx=BUTTONX, pady=PADY, sticky=tk.W)
-    cur_row += 1
+    grid.Add(this.eddn_system_button)
+    this.eddn_system_button.Bind(wx.EVT_CHECKBOX, prefsvarchanged)
 
-    this.eddn_delay = tk.IntVar(value=(output & config.OUT_EDDN_DELAY) and 1)
     # Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2
-    this.eddn_delay_button = nb.Checkbutton(
-        eddnframe,
+    this.eddn_delay_button = wx.CheckBox(
+        panel,
         # LANG: EDDN delay sending until docked option is on, this message notes that a send was skipped due to this
-        text=_('Delay sending until docked'),
-        variable=this.eddn_delay
+        label=_('Delay sending until docked'),
+        value=output & config.OUT_EDDN_DELAY,
     )
-    this.eddn_delay_button.grid(row=cur_row, padx=BUTTONX, pady=PADY, sticky=tk.W)
+    grid.Add(this.eddn_delay_button)
 
-    return eddnframe
+    grid.SetSizeHints(panel)
+    panel.SetSizer(grid)
+    return panel
 
 
-def prefsvarchanged(event=None) -> None:
-    """
-    Handle changes to EDDN Preferences.
-
-    :param event: tkinter event ?
-    """
-    # These two lines are legacy and probably not even needed
-    this.eddn_station_button['state'] = tk.NORMAL
-    this.eddn_system_button['state'] = tk.NORMAL
-    # This line will grey out the 'Delay sending ...' option if the 'Send
-    #  system and scan data' option is off.
-    this.eddn_delay_button['state'] = tk.NORMAL if this.eddn_system.get() else tk.DISABLED
+def prefsvarchanged(event: wx.CommandEvent):
+    this.eddn_delay_button.Enable(event.IsChecked())
 
 
 def prefs_changed(cmdr: str, is_beta: bool) -> None:
@@ -2242,9 +2191,9 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
         'output',
         (config.get_int('output')
          & (config.OUT_MKT_TD | config.OUT_MKT_CSV | config.OUT_SHIP | config.OUT_MKT_MANUAL)) +
-        (this.eddn_station.get() and config.OUT_EDDN_SEND_STATION_DATA) +
-        (this.eddn_system.get() and config.OUT_EDDN_SEND_NON_STATION) +
-        (this.eddn_delay.get() and config.OUT_EDDN_DELAY)
+        (this.eddn_station_button.IsChecked() and config.OUT_EDDN_SEND_STATION_DATA) +
+        (this.eddn_system_button.IsChecked() and config.OUT_EDDN_SEND_NON_STATION) +
+        (this.eddn_delay_button.IsChecked() and config.OUT_EDDN_DELAY)
     )
 
 
@@ -2371,7 +2320,7 @@ def journal_entry(  # noqa: C901, CCR001
 
     if event_name == 'docked':
         # Trigger a send/retry of pending EDDN messages
-        this.eddn.parent.after(this.eddn.REPLAY_DELAY, this.eddn.sender.queue_check_and_send, False)
+        wx.CallLater(this.eddn.REPLAY_DELAY, this.eddn.sender.queue_check_and_send, False)
 
     elif event_name == 'music':
         if entry['MusicTrack'] == 'MainMenu':
@@ -2615,18 +2564,16 @@ def cmdr_data(data: CAPIData, is_beta: bool) -> str | None:  # noqa: CCR001
                 this.commodities = this.outfitting = this.shipyard = None
                 this.marketId = data['lastStarport']['id']
 
-            status = this.parent.nametowidget(f".{appname.lower()}.status")
-            old_status = status['text']
+            old_status = this.parent.GetStatusBar().GetStatusText()
             if not old_status:
-                status['text'] = _('Sending data to EDDN...')  # LANG: Status text shown while attempting to send data
-                status.update_idletasks()
+                # LANG: Status text shown while attempting to send data
+                this.parent.SetStatusText(_('Sending data to EDDN...'))
 
             this.eddn.export_commodities(data, is_beta)
             this.eddn.export_outfitting(data, is_beta)
             this.eddn.export_shipyard(data, is_beta)
             if not old_status:
-                status['text'] = ''
-                status.update_idletasks()
+                this.parent.SetStatusText('')
 
         except requests.RequestException as e:
             logger.debug('Failed exporting data', exc_info=e)
