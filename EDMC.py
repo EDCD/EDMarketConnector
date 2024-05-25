@@ -35,7 +35,6 @@ import collate
 import commodity
 import companion
 import edshipyard
-import l10n
 import loadout
 import outfitting
 import shipyard
@@ -65,8 +64,6 @@ Locale LC_NUMERIC: {locale.getlocale(locale.LC_NUMERIC)}
 Locale LC_TIME: {locale.getlocale(locale.LC_TIME)}'''
                  )
 
-
-l10n.Translations.install_dummy()
 
 SERVER_RETRY = 5  # retry pause for Companion servers [s]
 EXIT_SUCCESS, EXIT_SERVER, EXIT_CREDENTIALS, EXIT_VERIFICATION, EXIT_LAGGING, EXIT_SYS_ERR, EXIT_ARGS, \
