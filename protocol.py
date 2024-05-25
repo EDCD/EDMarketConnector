@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING, Type
 
 from config import config
 from constants import appname, protocolhandler_redirect
+from edmc_data import CapiAuthEvent
 from EDMCLogging import get_main_logger
 
 if TYPE_CHECKING:
@@ -39,10 +40,10 @@ class GenericProtocolHandler:
 
     def __init__(self) -> None:
         self.redirect = protocolhandler_redirect  # Base redirection URL
-        self.master: 'tkinter.Tk' = None  # type: ignore
+        self.master: 'wx.App' = None  # type: ignore
         self.lastpayload: str | None = None
 
-    def start(self, master: 'tkinter.Tk') -> None:
+    def start(self, master: 'wx.App') -> None:
         """Start Protocol Handler."""
         self.master = master
 
@@ -56,7 +57,7 @@ class GenericProtocolHandler:
         logger.trace_if('frontier-auth', f'Payload: {self.lastpayload}')
         if not config.shutting_down:
             logger.debug('event_generate("<<CompanionAuthEvent>>")')
-            self.master.event_generate('<<CompanionAuthEvent>>', when="tail")
+            wx.PostEvent(self.master, CapiAuthEvent())
 
 
 if (config.auth_force_edmc_protocol  # noqa: C901
@@ -217,7 +218,7 @@ if (config.auth_force_edmc_protocol  # noqa: C901
             super().__init__()
             self.thread: threading.Thread | None = None
 
-        def start(self, master: 'tkinter.Tk') -> None:
+        def start(self, master: 'wx.App') -> None:
             """Start the DDE thread."""
             super().start(master)
             self.thread = threading.Thread(target=self.worker, name='DDE worker')
@@ -327,7 +328,7 @@ else:  # Linux / Run from source
 
             self.thread: threading.Thread | None = None
 
-        def start(self, master: 'tkinter.Tk') -> None:
+        def start(self, master: 'wx.App') -> None:
             """Start the HTTP server thread."""
             GenericProtocolHandler.start(self, master)
             self.thread = threading.Thread(target=self.worker, name='OAuth worker')

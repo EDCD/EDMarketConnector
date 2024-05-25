@@ -478,13 +478,12 @@ class AppWindow:
         self.locale = None
         self.set_language()
 
-        # companion needs to be able to send <<CAPIResponse>> events
+        # companion needs to be able to send CapiResponseEvent
         companion.session.set_wx_master(self.w)
 
         self.prefsdialog = None
 
-        # TODO reenable after wx-ing the plugin API
-        #plug.load_plugins(master)
+        plug.load_plugins(master)
 
         self.frame = wx.Frame(None, title=appname.lower())
         self.frame.SetIcon(wx.Icon('EDMarketConnector.ico', wx.BITMAP_TYPE_ICO))
@@ -514,14 +513,18 @@ class AppWindow:
         self.suit_label = wx.StaticText(self.frame, label=_('Suit:'))
         self.suit = wx.StaticText(self.frame)
         self.system_label = wx.StaticText(self.frame, label=_('System:'))
-        self.system = wx.adv.HyperlinkCtrl(self.frame)
+        self.system = wx.adv.HyperlinkCtrl(self.frame, name='cmdr_system')
         self.station_label = wx.StaticText(self.frame, label=_('Station:'))
-        self.station = wx.adv.HyperlinkCtrl(self.frame)
+        self.station = wx.adv.HyperlinkCtrl(self.frame, name='cmdr_station')
         # system and station text is set/updated by the 'provider' plugins
         # edsm and inara.  Look for:
         #
-        # parent.nametowidget(f".{appname.lower()}.system")
-        # parent.nametowidget(f".{appname.lower()}.station")
+        # wx.Window.FindWindowByName('cmdr_system')
+        # wx.Window.FindWindowByName('cmdr_station')
+
+        self.ship.Bind(wx.adv.EVT_HYPERLINK, self.shipyard_url)
+        self.system.Bind(wx.adv.EVT_HYPERLINK, self.system_url)
+        self.station.Bind(wx.adv.EVT_HYPERLINK, self.station_url)
 
         self.grid = wx.GridBagSizer()
         self.grid.SetFlexibleDirection(wx.VERTICAL)
@@ -722,11 +725,6 @@ class AppWindow:
         """Perform necessary actions after the Preferences dialog is applied."""
         self.prefsdialog = None
         self.set_language()  # in case language has changed
-
-        # Reset links in case plugins changed them
-        self.ship.SetURL(self.shipyard_url(self.ship.GetLabel()))
-        self.system.SetURL(self.system_url())
-        self.station.SetURL(self.station_url())
 
         # (Re-)install hotkey monitoring
         hotkeymgr.register(self.w, config.get_int('hotkey_code'), config.get_int('hotkey_mods'))
@@ -1111,7 +1109,6 @@ class AppWindow:
                         capi_response.capi_data['ship']['name'].lower(),
                         capi_response.capi_data['ship']['name']
                     ))
-                    self.ship.SetURL('')
                     monitor.state['ShipID'] = capi_response.capi_data['ship']['id']
                     monitor.state['ShipType'] = capi_response.capi_data['ship']['name'].lower()
 
@@ -1274,7 +1271,6 @@ class AppWindow:
                 self.ship_label.SetLabel(_('Role:'))  # LANG: Multicrew role label in main window
                 self.ship.Disable()
                 self.ship.SetLabel(crewroletext(monitor.state['Role']))
-                self.ship.SetURL('')
 
             elif monitor.cmdr:
                 if monitor.group and not config.get_bool("hide_private_group", default=False):
@@ -1299,14 +1295,12 @@ class AppWindow:
                 ship_state = bool(monitor.state['Modules'])
 
                 self.ship.SetLabel(ship_text)
-                self.ship.SetURL(self.shipyard_url(ship_text))
                 self.ship.Enable(ship_state)
 
             else:
                 self.cmdr.SetLabel('')
                 self.ship_label.SetLabel(_('Ship:'))  # LANG: 'Ship' label in main UI
                 self.ship.SetLabel('')
-                self.ship.SetURL('')
 
             if monitor.cmdr and monitor.is_beta:
                 self.cmdr.SetLabel(self.cmdr.GetLabel() + ' (beta)')
@@ -1482,45 +1476,40 @@ class AppWindow:
             if not config.get_int('hotkey_mute'):
                 hotkeymgr.play_bad()
 
-    def shipyard_url(self, shipname: str) -> str:
-        """Despatch a ship URL to the configured handler."""
+    def shipyard_url(self, event: wx.adv.HyperlinkEvent):
+        """Dispatch a ship URL to the configured handler."""
         if not (loadout := monitor.ship()):
             logger.warning('No ship loadout, aborting.')
-            return ''
-
-        if not bool(config.get_int("use_alt_shipyard_open")):
-            return plug.invoke(config.get_str('shipyard_provider'),
-                               'EDSY',
-                               'shipyard_url',
-                               loadout,
-                               monitor.is_beta) or ''
+            return
 
         # Avoid file length limits if possible
         provider = config.get_str('shipyard_provider', default='EDSY')
         target = plug.invoke(provider, 'EDSY', 'shipyard_url', loadout, monitor.is_beta)
-        file_name = os.path.join(config.app_dir_path, "last_shipyard.html")
+        if not bool(config.get_int("use_alt_shipyard_open")):
+            wx.LaunchDefaultBrowser(target)
+            return
 
+        file_name = os.path.join(config.app_dir_path, "last_shipyard.html")
         with open(file_name, 'w') as f:
             f.write(SHIPYARD_HTML_TEMPLATE.format(
                 link=html.escape(str(target)),
                 provider_name=html.escape(str(provider)),
-                ship_name=html.escape(str(shipname))
+                ship_name=html.escape(event.GetEventObject().GetLabel())
             ))
 
-        return f'file://localhost/{file_name}'
+        wx.LaunchDefaultBrowser(f'file://localhost/{file_name}')
 
-    def system_url(self) -> str:
-        """Despatch a system URL to the configured handler."""
-        return plug.invoke(
-            config.get_str('system_provider', default='EDSM'), 'EDSM', 'system_url', monitor.state['SystemName']
-        ) or ''
+    def system_url(self, event: wx.adv.HyperlinkEvent):
+        """Dispatch a system URL to the configured handler."""
+        provider = config.get_str('system_provider', default='EDSM')
+        target = plug.invoke(provider, 'EDSM', 'system_url', monitor.state['SystemName'])
+        wx.LaunchDefaultBrowser(target)
 
-    def station_url(self) -> str:
-        """Despatch a station URL to the configured handler."""
-        return plug.invoke(
-            config.get_str('station_provider', default='EDSM'), 'EDSM', 'station_url',
-            monitor.state['SystemName'], monitor.state['StationName']
-        ) or ''
+    def station_url(self, event: wx.adv.HyperlinkEvent):
+        """Dispatch a station URL to the configured handler."""
+        provider = config.get_str('station_provider', default='EDSM')
+        target = plug.invoke(provider, 'EDSM', 'station_url',monitor.state['SystemName'], monitor.state['StationName'])
+        wx.LaunchDefaultBrowser(target)
 
     def cooldown(self) -> None:
         """Display and update the cooldown timer for 'Update' button."""

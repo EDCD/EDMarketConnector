@@ -82,7 +82,7 @@ class EDLogs(FileSystemEventHandler):
     def __init__(self) -> None:
         # TODO(A_D): A bunch of these should be switched to default values (eg '' for strings) and no longer be Optional
         FileSystemEventHandler.__init__(self)  # futureproofing - not need for current version of watchdog
-        self.root: 'tkinter.Tk' = None  # type: ignore # Don't use Optional[] - mypy thinks no methods
+        self.root: wx.App | None = None  # Don't use Optional[] - mypy thinks no methods
         self.currentdir: str | None = None  # The actual logdir that we're monitoring
         self.logfile: str | None = None
         self.observer: BaseObserver | None = None
@@ -190,11 +190,11 @@ class EDLogs(FileSystemEventHandler):
             'NavRoute':           None,
         }
 
-    def start(self, root: 'tkinter.Tk') -> bool:  # noqa: CCR001
+    def start(self, root: wx.App) -> bool:  # noqa: CCR001
         """
         Start journal monitoring.
 
-        :param root: The parent Tk window.
+        :param root: The parent wx window.
         :return: bool - False if we couldn't access/find latest Journal file.
         """
         logger.debug('Begin...')
@@ -363,9 +363,6 @@ class EDLogs(FileSystemEventHandler):
         2. Read in lines from the latest Journal file and queue them up for
           get_entry() to process in the main thread.
         """
-        # Tk isn't thread-safe in general.
-        # event_generate() is the only safe way to poke the main thread from this thread:
-        # https://mail.python.org/pipermail/tkinter-discuss/2013-November/003522.html
 
         logger.debug(f'Starting on logfile "{self.logfile}"')
         # Seek to the end of the latest log file
@@ -494,7 +491,7 @@ class EDLogs(FileSystemEventHandler):
 
                     if not config.shutting_down:
                         logger.trace_if('journal.queue', 'Sending <<JournalEvent>>')
-                        self.root.event_generate('<<JournalEvent>>', when="tail")
+                        wx.PostEvent(self.root, JournalQueueEvent())
 
                     self.game_was_running = False
 

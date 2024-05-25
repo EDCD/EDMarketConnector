@@ -12,9 +12,10 @@ import sys
 import time
 from calendar import timegm
 from os.path import getsize, isdir, isfile, join
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
 from watchdog.observers.api import BaseObserver
 from config import config
+from edmc_data import DashboardEvent
 from EDMCLogging import get_main_logger
 
 logger = get_main_logger()
@@ -27,6 +28,9 @@ else:
     class FileSystemEventHandler:  # type: ignore
         """Dummy class to represent a file system event handler on platforms other than Windows."""
 
+if TYPE_CHECKING:
+    import wx
+
 
 class Dashboard(FileSystemEventHandler):
     """Status.json handler."""
@@ -36,13 +40,13 @@ class Dashboard(FileSystemEventHandler):
     def __init__(self) -> None:
         FileSystemEventHandler.__init__(self)  # futureproofing - not need for current version of watchdog
         self.session_start: int = int(time.time())
-        self.root: tk.Tk = None  # type: ignore
+        self.root: wx.App = None  # type: ignore
         self.currentdir: str = None                 # type: ignore # The actual logdir that we're monitoring
         self.observer: Observer | None = None  # type: ignore
         self.observed = None                   # a watchdog ObservedWatch, or None if polling
         self.status: dict[str, Any] = {}       # Current status for communicating status back to main thread
 
-    def start(self, root: tk.Tk, started: int) -> bool:
+    def start(self, root: wx.App, started: int) -> bool:
         """
         Start monitoring of Journal directory.
 
@@ -95,7 +99,7 @@ class Dashboard(FileSystemEventHandler):
         # data and to check whether the watchdog thread has crashed due to events not
         # being supported on this filesystem.
         logger.debug('Polling once to process pre-existing data, and check whether watchdog thread crashed...')
-        self.root.after(int(self._POLL * 1000/2), self.poll, True)
+        wx.CallLater(int(self._POLL * 1000/2), self.poll, True)
         logger.debug('Done.')
 
         return True
@@ -155,7 +159,7 @@ class Dashboard(FileSystemEventHandler):
                 if emitter and emitter.is_alive():  # type: ignore
                     return  # Watchdog thread still running - stop polling
 
-            self.root.after(self._POLL * 1000, self.poll)  # keep polling
+            wx.CallLater(self._POLL * 1000, self.poll)  # keep polling
 
     def on_modified(self, event) -> None:
         """
@@ -185,7 +189,7 @@ class Dashboard(FileSystemEventHandler):
                     entry_timestamp = timegm(time.strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
                     if entry_timestamp >= self.session_start and self.status != entry:
                         self.status = entry
-                        self.root.event_generate('<<DashboardEvent>>', when="tail")
+                        wx.PostEvent(self.root, DashboardEvent())
         except Exception:
             logger.exception('Processing Status.json')
 

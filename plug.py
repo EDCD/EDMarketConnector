@@ -13,10 +13,12 @@ import logging
 import operator
 import os
 import sys
+import wx
 from typing import Any, Mapping, MutableMapping
 
 import companion
 from config import config
+from edmc_data import PluginErrorEvent
 from EDMCLogging import get_main_logger
 
 logger = get_main_logger()
@@ -32,7 +34,7 @@ class LastError:
     """Holds the last plugin error."""
 
     msg: str | None
-    root: tk.Tk
+    root: wx.App
 
     def __init__(self) -> None:
         self.msg = None
@@ -91,12 +93,12 @@ class Plugin:
         """
         return getattr(self.module, funcname, None)
 
-    def get_app(self, parent: tk.Frame) -> tk.Frame | None:
+    def get_app(self, parent: wx.Frame) -> wx.Panel | None:
         """
         If the plugin provides mainwindow content create and return it.
 
         :param parent: the parent frame for this entry.
-        :returns: None, a tk Widget, or a pair of tk.Widgets
+        :returns: None, a wx.Window, or a pair of wx.Windows
         """
         plugin_app = self._get_func('plugin_app')
         if plugin_app:
@@ -108,12 +110,12 @@ class Plugin:
                 if isinstance(appitem, tuple):
                     if (
                         len(appitem) != 2
-                        or not isinstance(appitem[0], tk.Widget)
-                        or not isinstance(appitem[1], tk.Widget)
+                        or not isinstance(appitem[0], wx.Window)
+                        or not isinstance(appitem[1], wx.Window)
                     ):
                         raise AssertionError
 
-                elif not isinstance(appitem, tk.Widget):
+                elif not isinstance(appitem, wx.Window):
                     raise AssertionError
 
                 return appitem
@@ -123,7 +125,7 @@ class Plugin:
 
         return None
 
-    def get_prefs(self, parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> nb.Frame | None:
+    def get_prefs(self, parent: wx.Notebook, cmdr: str | None, is_beta: bool) -> wx.Frame | None:
         """
         If the plugin provides a prefs frame, create and return it.
 
@@ -137,7 +139,7 @@ class Plugin:
         if plugin_prefs:
             try:
                 frame = plugin_prefs(parent, cmdr, is_beta)
-                if isinstance(frame, nb.Frame):
+                if isinstance(frame, wx.Frame):
                     return frame
                 raise AssertionError
             except Exception:
@@ -145,7 +147,7 @@ class Plugin:
         return None
 
 
-def load_plugins(master: tk.Tk) -> None:
+def load_plugins(master: wx.App) -> None:
     """Find and load all plugins."""
     last_error.root = master
 
@@ -174,6 +176,7 @@ def _load_internal_plugins():
 
 def _load_found_plugins():
     found = []
+    return found  # TODO add failsafe to detect Tk plugins
     # Load any plugins that are also packages first, but note it's *still*
     # 100% relying on there being a `load.py`, as only that will be loaded.
     # The intent here is to e.g. have EDMC-Overlay load before any plugins
@@ -435,7 +438,7 @@ def show_error(err: str) -> None:
     """
     Display an error message in the status line of the main window.
 
-    Will be NOP during shutdown to avoid Tk hang.
+    Will be NOP during shutdown to avoid wx hang.
     :param err:
     .. versionadded:: 2.3.7
     """
@@ -445,4 +448,4 @@ def show_error(err: str) -> None:
 
     if err and last_error.root:
         last_error.msg = str(err)
-        last_error.root.event_generate('<<PluginError>>', when="tail")
+        wx.PostEvent(last_error.root, PluginErrorEvent())
