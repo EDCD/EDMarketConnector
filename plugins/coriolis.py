@@ -77,13 +77,13 @@ def plugin_prefs(parent: wx.Notebook, cmdr: str | None, is_beta: bool) -> wx.Pan
     grid = wx.GridBagSizer(PADY, PADX)
 
     # LANG: Settings>Coriolis: Help/hint for changing coriolis URLs
-    hint = wx.StaticLine(conf_frame, label=_(
+    hint = wx.StaticText(conf_frame, label=_(
         "Set the URL to use with coriolis.io ship loadouts. Note that this MUST end with '/import?data='"
     ))
     grid.Add(hint, wx.GBPosition(0, 0), wx.GBSpan(1, 3))
 
     # LANG: Settings>Coriolis: Label for 'NOT alpha/beta game version' URL
-    normal_url_label = wx.StaticLine(conf_frame, label=_('Normal URL'))
+    normal_url_label = wx.StaticText(conf_frame, label=_('Normal URL'))
     grid.Add(normal_url_label, wx.GBPosition(1, 0))
     this.normal_url_ctrl = wx.TextCtrl(conf_frame, value=this.normal_url)
     grid.Add(this.normal_url_ctrl, wx.GBPosition(1, 1))
@@ -93,7 +93,7 @@ def plugin_prefs(parent: wx.Notebook, cmdr: str | None, is_beta: bool) -> wx.Pan
     normal_url_reset.Bind(wx.EVT_BUTTON, lambda event: this.normal_url_ctrl.SetValue(DEFAULT_NORMAL_URL))
 
     # LANG: Settings>Coriolis: Label for 'alpha/beta game version' URL
-    beta_url_label = wx.StaticLine(conf_frame, label=_('Beta URL'))
+    beta_url_label = wx.StaticText(conf_frame, label=_('Beta URL'))
     grid.Add(beta_url_label, wx.GBPosition(2, 0))
     this.beta_url_ctrl = wx.TextCtrl(conf_frame, value=this.beta_url)
     grid.Add(this.beta_url_ctrl, wx.GBPosition(2, 1))
@@ -104,7 +104,7 @@ def plugin_prefs(parent: wx.Notebook, cmdr: str | None, is_beta: bool) -> wx.Pan
 
     # TODO: This needs a help/hint text to be sure users know what it's for.
     # LANG: Settings>Coriolis: Label for selection of using Normal, Beta or 'auto' Coriolis URL
-    override_mode_label = wx.StaticLine(conf_frame, label=_('Override Beta/Normal Selection'))
+    override_mode_label = wx.StaticText(conf_frame, label=_('Override Beta/Normal Selection'))
     grid.Add(override_mode_label, wx.GBPosition(3, 0))
     this.override_mode_ctrl = wx.Choice(
         conf_frame,
@@ -114,6 +114,7 @@ def plugin_prefs(parent: wx.Notebook, cmdr: str | None, is_beta: bool) -> wx.Pan
             _('Auto')  # LANG: 'Auto' label for Coriolis site override selection
         ]
     )
+    this.override_mode_ctrl.SetStringSelection(this.override_mode)
     grid.Add(this.override_mode_ctrl, wx.GBPosition(3, 1))
 
     return conf_frame

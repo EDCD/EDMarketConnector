@@ -286,7 +286,7 @@ def plugin_prefs(parent: wx.Notebook, cmdr: str, is_beta: bool) -> wx.Panel:
     # LANG: Inara API key label
     this.apikey_label = wx.StaticText(panel, label=_('API Key'))
     grid.Add(this.apikey_label, wx.GBPosition(4, 0))
-    this.apikey = wx.TextCtrl(panel, style=wx.TE_PASSWORD, width=50)
+    this.apikey = wx.TextCtrl(panel, style=wx.TE_PASSWORD, size=(50, -1))
     grid.Add(this.apikey, wx.GBPosition(4, 1))
 
     this.log_button.Enable(cmdr and not is_beta)
@@ -302,7 +302,7 @@ def plugin_prefs(parent: wx.Notebook, cmdr: str, is_beta: bool) -> wx.Panel:
     this.apikey_label.Enable(state)
     this.apikey.Enable(state)
 
-    show_password_checkbox = wx.CheckBox(panel, text=_('Show API Key'))  # LANG: Text Inara Show API Key
+    show_password_checkbox = wx.CheckBox(panel, label=_('Show API Key'))  # LANG: Text Inara Show API Key
     grid.Add(show_password_checkbox, wx.GBPosition(5, 0), wx.GBSpan(1, 2))
     show_password_checkbox.Bind(wx.EVT_CHECKBOX, toggle_password_visibility)
 

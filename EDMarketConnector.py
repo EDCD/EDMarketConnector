@@ -410,9 +410,9 @@ builtins.__dict__['_'] = wx.GetTranslation
 import commodity
 import edmc_data as data
 import plug
-#import prefs
+import prefs
 import protocol
-#import stats
+import stats
 import td
 from dashboard import dashboard
 from hotkey import hotkeymgr
@@ -481,7 +481,7 @@ class AppWindow:
 
         plug.load_plugins(master)
 
-        self.frame = wx.Frame(None, title=appname.lower())
+        self.frame = wx.Frame(None, title=applongname)
         self.frame.SetIcon(wx.Icon('EDMarketConnector.ico', wx.BITMAP_TYPE_ICO))
         if wx.adv.TaskBarIcon.IsAvailable():
             self.systray = SysTrayIcon(self.frame)
@@ -576,7 +576,7 @@ class AppWindow:
         self.button = wx.Button(self.frame, label=_('Update'), size=wx.Size(button_width, -1))
         self.button.Disable()
 
-        self.grid.Add(self.button, wx.GBPosition(ui_row, 0), wx.GBSpan(1, 2))
+        self.grid.Add(self.button, wx.GBPosition(ui_row, 0), wx.GBSpan(1, 2), wx.ALIGN_CENTER)
         self.button.Bind(wx.EVT_BUTTON, self.capi_request_data)
 
         # Bottom 'status' line.
@@ -603,11 +603,9 @@ class AppWindow:
         self.file_menu.AppendSeparator()
         self.file_exit = self.file_menu.Append(wx.ID_EXIT, _('Exit'))
 
-        # TODO WX reenable after porting
-        #self.frame.Bind(wx.EVT_MENU, stats.StatsDialog, id=wx.ID_INFO)
+        self.frame.Bind(wx.EVT_MENU, stats.StatsDialog, id=wx.ID_INFO)
         self.frame.Bind(wx.EVT_MENU, self.save_raw, id=wx.ID_SAVEAS)
-        # TODO WX reenable after porting
-        #self.frame.Bind(wx.EVT_MENU, lambda event: prefs.PreferencesDialog(self.w, self.postprefs), id=wx.ID_SETUP)
+        self.frame.Bind(wx.EVT_MENU, lambda event: prefs.PreferencesDialog(self.frame, self.postprefs), id=wx.ID_SETUP)
         self.menubar.Append(self.file_menu, _('File'))
 
         self.edit_menu = wx.Menu()
@@ -635,8 +633,7 @@ class AppWindow:
         self.frame.Bind(wx.EVT_MENU, self.help_releases, id=self.help_notes.GetId())
         self.frame.Bind(wx.EVT_MENU, self.updater.check_for_updates, id=self.help_check_updates.GetId())
         self.frame.Bind(wx.EVT_MENU, self.about, id=wx.ID_ABOUT)
-        # TODO WX reenable after prefs is ported
-        #self.frame.Bind(wx.EVT_MENU, prefs.help_open_log_folder, id=self.help_open_log_folder.GetId())
+        self.frame.Bind(wx.EVT_MENU, prefs.help_open_log_folder, id=self.help_open_log_folder.GetId())
         self.menubar.Append(self.help_menu, _('Help'))
 
         self.frame.SetMenuBar(self.menubar)

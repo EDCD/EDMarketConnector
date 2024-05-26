@@ -9,43 +9,19 @@ from __future__ import annotations
 
 import csv
 import json
-import sys
-from typing import TYPE_CHECKING, Any, AnyStr, Callable, NamedTuple, Sequence, cast
+from typing import TYPE_CHECKING, Any, AnyStr, NamedTuple, cast
 import companion
 import EDMCLogging
+import wx
+import wx.dataview
 from edmc_data import ship_name_map
 from hotkey import hotkeymgr
-from l10n import Locale
 from monitor import monitor
 
 logger = EDMCLogging.get_main_logger()
 
 if TYPE_CHECKING:
     def _(x: str) -> str: return x
-
-if sys.platform == 'win32':
-    import ctypes
-    from ctypes.wintypes import HWND, POINT, RECT, SIZE, UINT
-
-    try:
-        CalculatePopupWindowPosition = ctypes.windll.user32.CalculatePopupWindowPosition
-        CalculatePopupWindowPosition.argtypes = [
-            ctypes.POINTER(POINT), ctypes.POINTER(SIZE), UINT, ctypes.POINTER(RECT), ctypes.POINTER(RECT)
-        ]
-        GetParent = ctypes.windll.user32.GetParent
-        GetParent.argtypes = [HWND]
-        GetWindowRect = ctypes.windll.user32.GetWindowRect
-        GetWindowRect.argtypes = [HWND, ctypes.POINTER(RECT)]
-
-    except Exception:  # Not supported under Wine 4.0
-        CalculatePopupWindowPosition = None  # type: ignore
-
-
-CR_LINES_START = 1
-CR_LINES_END = 3
-RANK_LINES_START = 3
-RANK_LINES_END = 9
-POWERPLAY_LINES_START = 9
 
 
 def status(data: dict[str, Any]) -> list[list[str]]:
@@ -60,6 +36,7 @@ def status(data: dict[str, Any]) -> list[list[str]]:
         [_('Cmdr'),    data['commander']['name']],                 # LANG: Cmdr stats
         [_('Balance'), str(data['commander'].get('credits', 0))],  # LANG: Cmdr stats
         [_('Loan'),    str(data['commander'].get('debt', 0))],     # LANG: Cmdr stats
+        ['',           ''],
     ]
 
     _ELITE_RANKS = [  # noqa: N806 # Its a constant, just needs to be updated at runtime
@@ -82,6 +59,7 @@ def status(data: dict[str, Any]) -> list[list[str]]:
         (_('CQC'), 'cqc'),                      # LANG: Ranking
         (_('Federation'), 'federation'),        # LANG: Ranking
         (_('Empire'), 'empire'),                # LANG: Ranking
+        ('', ''),
         (_('Powerplay'), 'power'),              # LANG: Ranking
         # ???            , 'crime'),            # LANG: Ranking
         # ???            , 'service'),          # LANG: Ranking
@@ -243,7 +221,7 @@ def ships(companion_data: dict[str, Any]) -> list[ShipRet]:
     """
     Return a list of 5 tuples of ship information.
 
-    :param data: [description]
+    :param companion_data: [description]
     :return: A 5 tuple of strings containing: Ship ID, Ship Type Name (internal), Ship Name, System, Station, and Value
     """
     ships: list[dict[str, Any]] = companion.listify(cast(list, companion_data.get('ships')))
@@ -253,28 +231,9 @@ def ships(companion_data: dict[str, Any]) -> list[ShipRet]:
         ships.insert(0, ships.pop(current))  # Put current ship first
 
         if not companion_data['commander'].get('docked'):
-            out: list[ShipRet] = []
             # Set current system, not last docked
-            out.append(ShipRet(
-                id=str(ships[0]['id']),
-                type=ship_name_map.get(ships[0]['name'].lower(), ships[0]['name']),
-                name=str(ships[0].get('shipName', '')),
-                system=companion_data['lastSystem']['name'],
-                station='',
-                value=str(ships[0]['value']['total'])
-            ))
-            out.extend(
-                ShipRet(
-                    id=str(ship['id']),
-                    type=ship_name_map.get(ship['name'].lower(), ship['name']),
-                    name=ship.get('shipName', ''),
-                    system=ship['starsystem']['name'],
-                    station=ship['station']['name'],
-                    value=str(ship['value']['total'])
-                ) for ship in ships[1:] if ship
-            )
-
-            return out
+            ships[0]['starsystem']['name'] = companion_data['lastSystem']['name']
+            ships[0]['station']['name'] = ''
 
     return [
         ShipRet(
@@ -302,12 +261,11 @@ def export_ships(companion_data: dict[str, Any], filename: AnyStr) -> None:
             h.writerow(list(thing))
 
 
-class StatsDialog():
+class StatsDialog:
     """Status dialog containing all of the current cmdr's stats."""
 
-    def __init__(self, parent: tk.Tk, status: tk.Label) -> None:
-        self.parent: tk.Tk = parent
-        self.status = status
+    def __init__(self, event: wx.MenuEvent):
+        self.parent: wx.Frame = event.GetEventObject().GetWindow()
         self.showstats()
 
     def showstats(self) -> None:
@@ -315,7 +273,7 @@ class StatsDialog():
         if not monitor.cmdr:
             hotkeymgr.play_bad()
             # LANG: Current commander unknown when trying to use 'File' > 'Status'
-            self.status['text'] = _("Status: Don't yet know your Commander name")
+            self.parent.SetStatusText(_("Status: Don't yet know your Commander name"))
             return
 
         # TODO: This needs to use cached data
@@ -323,7 +281,7 @@ class StatsDialog():
             logger.info('No cached data, aborting...')
             hotkeymgr.play_bad()
             # LANG: No Frontier CAPI data yet when trying to use 'File' > 'Status'
-            self.status['text'] = _("Status: No CAPI data yet")
+            self.parent.SetStatusText(_("Status: No CAPI data yet"))
             return
 
         capi_data = json.loads(
@@ -333,7 +291,7 @@ class StatsDialog():
         if not capi_data.get('commander') or not capi_data['commander'].get('name', '').strip():
             # Shouldn't happen
             # LANG: Unknown commander
-            self.status['text'] = _("Who are you?!")
+            self.parent.SetStatusText(_("Who are you?!"))
 
         elif (
             not capi_data.get('lastSystem')
@@ -341,7 +299,7 @@ class StatsDialog():
         ):
             # Shouldn't happen
             # LANG: Unknown location
-            self.status['text'] = _("Where are you?!")
+            self.parent.SetStatusText(_("Where are you?!"))
 
         elif (
             not capi_data.get('ship') or not capi_data['ship'].get('modules')
@@ -349,167 +307,41 @@ class StatsDialog():
         ):
             # Shouldn't happen
             # LANG: Unknown ship
-            self.status['text'] = _("What are you flying?!")
+            self.parent.SetStatusText(_("What are you flying?!"))
 
         else:
-            self.status['text'] = ''
-            StatsResults(self.parent, capi_data)
+            self.parent.SetStatusText('')
+            window = StatsResults(self.parent, capi_data)
+            window.Show()
 
 
-class StatsResults(tk.Toplevel):
+class StatsResults(wx.Frame):
     """Status window."""
 
-    def __init__(self, parent: tk.Tk, data: dict[str, Any]) -> None:
-        tk.Toplevel.__init__(self, parent)
-
+    def __init__(self, parent: wx.Frame, data: dict[str, Any]):
+        super().__init__(parent, style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER ^ wx.MAXIMIZE_BOX)
         self.parent = parent
 
         stats = status(data)
-        self.title(' '.join(stats[0]))  # assumes first thing is player name
+        self.SetTitle(' '.join(stats[0]))  # assumes first thing is player name
+        sizer = wx.BoxSizer()
+        notebook = wx.Notebook(self)
 
-        if parent.winfo_viewable():
-            self.transient(parent)
+        page = wx.dataview.DataViewListCtrl(notebook, style=wx.dataview.DV_NO_HEADER)
+        for thing in stats:
+            page.AppendItem(thing)
+        notebook.AddPage(page, text=_('Status'))
 
-        # position over parent
-        if parent.winfo_rooty() > 0:  # http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
-            self.geometry(f"+{parent.winfo_rootx()}+{parent.winfo_rooty()}")
+        page = wx.dataview.DataViewListCtrl(notebook)
+        page.AppendTextColumn(_('Ship'), width=wx.COL_WIDTH_AUTOSIZE, flags=0)
+        page.AppendTextColumn('', width=wx.COL_WIDTH_AUTOSIZE, flags=0)
+        page.AppendTextColumn(_('System'), width=wx.COL_WIDTH_AUTOSIZE, flags=0)
+        page.AppendTextColumn(_('Station'), width=wx.COL_WIDTH_AUTOSIZE, flags=0)
+        page.AppendTextColumn(_('Value'), width=wx.COL_WIDTH_AUTOSIZE, align=wx.ALIGN_RIGHT, flags=0)
+        for ship_data in ships(data):
+            page.AppendItem(ship_data[1:])
+        notebook.AddPage(page, text=_('Ships'))
 
-        # remove decoration
-        self.resizable(tk.FALSE, tk.FALSE)
-        if sys.platform == 'win32':
-            self.attributes('-toolwindow', tk.TRUE)
-
-        frame = ttk.Frame(self)
-        frame.grid(sticky=tk.NSEW)
-
-        notebook = nb.Notebook(frame)
-
-        page = self.addpage(notebook)
-        for thing in stats[CR_LINES_START:CR_LINES_END]:
-            # assumes things two and three are money
-            self.addpagerow(page, [thing[0], self.credits(int(thing[1]))], with_copy=True)
-
-        self.addpagespacer(page)
-        for thing in stats[RANK_LINES_START:RANK_LINES_END]:
-            self.addpagerow(page, thing, with_copy=True)
-
-        self.addpagespacer(page)
-        for thing in stats[POWERPLAY_LINES_START:]:
-            self.addpagerow(page, thing, with_copy=True)
-
-        ttk.Frame(page).grid(pady=5)   # bottom spacer
-        notebook.add(page, text=_('Status'))  # LANG: Status dialog title
-
-        page = self.addpage(notebook, [
-            _('Ship'),     # LANG: Status dialog subtitle
-            '',
-            _('System'),   # LANG: Main window
-            _('Station'),  # LANG: Status dialog subtitle
-            _('Value'),    # LANG: Status dialog subtitle - CR value of ship
-        ])
-
-        shiplist = ships(data)
-        for ship_data in shiplist:
-            # skip id, last item is money
-            self.addpagerow(page, list(ship_data[1:-1]) + [self.credits(int(ship_data[-1]))], with_copy=True)
-
-        ttk.Frame(page).grid(pady=5)         # bottom spacer
-        notebook.add(page, text=_('Ships'))  # LANG: Status dialog title
-
-        # wait for window to appear on screen before calling grab_set
-        self.wait_visibility()
-        self.grab_set()
-
-        # Ensure fully on-screen
-        if sys.platform == 'win32' and CalculatePopupWindowPosition:
-            position = RECT()
-            GetWindowRect(GetParent(self.winfo_id()), position)
-            if CalculatePopupWindowPosition(
-                POINT(parent.winfo_rootx(), parent.winfo_rooty()),
-                # - is evidently supported on the C side
-                SIZE(position.right - position.left, position.bottom - position.top),  # type: ignore
-                0x10000, None, position
-            ):
-                self.geometry(f"+{position.left}+{position.top}")
-
-    def addpage(
-        self, parent, header: list[str] | None = None, align: str | None = None
-    ) -> ttk.Frame:
-        """
-        Add a page to the StatsResults screen.
-
-        :param parent: The parent widget to put this under
-        :param header: The headers for the table, defaults to an empty list
-        :param align: Alignment to use for this page, defaults to None
-        :return: The Frame that was created
-        """
-        if header is None:
-            header = []
-
-        page = nb.Frame(parent)
-        page.grid(pady=10, sticky=tk.NSEW)
-        page.columnconfigure(0, weight=1)
-        if header:
-            self.addpageheader(page, header, align=align)
-
-        return page
-
-    def addpageheader(self, parent: ttk.Frame, header: Sequence[str], align: str | None = None) -> None:
-        """
-        Add the column headers to the page, followed by a separator.
-
-        :param parent: The parent widget to add this to
-        :param header: The headers to add to the page
-        :param align: The alignment of the page, defaults to None
-        """
-        self.addpagerow(parent, header, align=align, with_copy=False)
-        ttk.Separator(parent, orient=tk.HORIZONTAL).grid(columnspan=len(header), padx=10, pady=2, sticky=tk.EW)
-
-    def addpagespacer(self, parent) -> None:
-        """Add a spacer to the page."""
-        self.addpagerow(parent, [''])
-
-    def addpagerow(
-        self, parent: ttk.Frame, content: Sequence[str], align: str | None = None, with_copy: bool = False
-    ):
-        """
-        Add a single row to parent.
-
-        :param parent: The widget to add the data to
-        :param content: The columns of the row to add
-        :param align: The alignment of the data, defaults to tk.W
-        """
-        row = -1  # To silence unbound warnings
-        for i, col_content in enumerate(content):
-            # label = HyperlinkLabel(parent, text=col_content, popup_copy=True)
-            label = nb.Label(parent, text=col_content)
-            if with_copy:
-                label.bind('<Button-1>', self.copy_callback(label, col_content))
-
-            if i == 0:
-                label.grid(padx=10, sticky=tk.W)
-                row = parent.grid_size()[1]-1
-
-            elif align is None and i == len(content) - 1:  # Assumes last column right justified if unspecified
-                label.grid(row=row, column=i, padx=10, sticky=tk.E)
-
-            else:
-                label.grid(row=row, column=i, padx=10, sticky=align or tk.W)
-
-    def credits(self, value: int) -> str:
-        """Localised string of given int, including a trailing ` Cr`."""
-        # TODO: Locale is a class, this calls an instance method on it with an int as its `self`
-        return Locale.string_from_number(value, 0) + ' Cr'  # type: ignore
-
-    @staticmethod
-    def copy_callback(label: tk.Label, text_to_copy: str) -> Callable[..., None]:
-        """Copy data in Label to clipboard."""
-        def do_copy(event: tk.Event) -> None:
-            label.clipboard_clear()
-            label.clipboard_append(text_to_copy)
-            old_bg = label['bg']
-            label['bg'] = 'gray49'
-
-            label.after(100, (lambda: label.configure(bg=old_bg)))
-
-        return do_copy
+        sizer.Add(notebook)
+        sizer.SetSizeHints(self)
+        self.SetSizer(sizer)

@@ -125,22 +125,22 @@ class Plugin:
 
         return None
 
-    def get_prefs(self, parent: wx.Notebook, cmdr: str | None, is_beta: bool) -> wx.Frame | None:
+    def get_prefs(self, parent: wx.Notebook, cmdr: str | None, is_beta: bool) -> wx.Panel | None:
         """
-        If the plugin provides a prefs frame, create and return it.
+        If the plugin provides a prefs panel, create and return it.
 
-        :param parent: the parent frame for this preference tab.
+        :param parent: the parent for this preference tab.
         :param cmdr: current Cmdr name (or None). Relevant if you want to have
            different settings for different user accounts.
         :param is_beta: whether the player is in a Beta universe.
-        :returns: a myNotebook Frame
+        :returns: a wx.Panel
         """
         plugin_prefs = self._get_func('plugin_prefs')
         if plugin_prefs:
             try:
-                frame = plugin_prefs(parent, cmdr, is_beta)
-                if isinstance(frame, wx.Frame):
-                    return frame
+                panel = plugin_prefs(parent, cmdr, is_beta)
+                if isinstance(panel, wx.Panel):
+                    return panel
                 raise AssertionError
             except Exception:
                 logger.exception(f'Failed for Plugin "{self.name}"')

@@ -2148,8 +2148,8 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> wx.Panel:
         panel,
         # LANG: Enable EDDN support for station data checkbox label
         label=_('Send station data to the Elite Dangerous Data Network'),
-        value=output & config.OUT_EDDN_SEND_STATION_DATA,
     )  # Output setting
+    this.eddn_station_button.SetValue(output & config.OUT_EDDN_SEND_STATION_DATA)
     grid.Add(this.eddn_station_button)
 
     # Output setting new in E:D 2.2
@@ -2157,8 +2157,8 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> wx.Panel:
         panel,
         # LANG: Enable EDDN support for system and other scan data checkbox label
         label=_('Send system and scan data to the Elite Dangerous Data Network'),
-        value=output & config.OUT_EDDN_SEND_NON_STATION,
     )
+    this.eddn_system_button.SetValue(output & config.OUT_EDDN_SEND_NON_STATION)
     grid.Add(this.eddn_system_button)
     this.eddn_system_button.Bind(wx.EVT_CHECKBOX, prefsvarchanged)
 
@@ -2167,8 +2167,8 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> wx.Panel:
         panel,
         # LANG: EDDN delay sending until docked option is on, this message notes that a send was skipped due to this
         label=_('Delay sending until docked'),
-        value=output & config.OUT_EDDN_DELAY,
     )
+    this.eddn_delay_button.SetValue(output & config.OUT_EDDN_DELAY)
     grid.Add(this.eddn_delay_button)
 
     grid.SetSizeHints(panel)
