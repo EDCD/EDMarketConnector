@@ -123,8 +123,8 @@ class HyperlinkLabel(ttk.Label):
             return webbrowser.open(opener)
 
     def configure(  # noqa: CCR001
-        self, cnf: dict[str, Any] | None = None, **kw: Any
-    ) -> dict[str, tuple[str, str, str, Any, Any]]:
+        self, cnf: dict[str, Any] | None = None, **kw
+    ) -> dict[str, tuple[str, str, str, Any, Any]] | None:
         """Change cursor and appearance depending on state and text."""
         # This class' state
         for thing in ('url', 'popup_copy', 'underline'):
