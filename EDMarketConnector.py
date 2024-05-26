@@ -478,19 +478,19 @@ class AppWindow:
         self.theme_close = tk.BitmapImage(
             data='#define im_width 16\n#define im_height 16\nstatic unsigned char im_bits[] = {\n   0x00, 0x00, 0x00, 0x00, 0x0c, 0x30, 0x1c, 0x38, 0x38, 0x1c, 0x70, 0x0e,\n   0xe0, 0x07, 0xc0, 0x03, 0xc0, 0x03, 0xe0, 0x07, 0x70, 0x0e, 0x38, 0x1c,\n   0x1c, 0x38, 0x0c, 0x30, 0x00, 0x00, 0x00, 0x00 };\n')  # noqa: E501
 
-        frame = tk.Frame(self.w, name=appname.lower())
+        frame = ttk.Frame(self.w, name=appname.lower())
         frame.grid(sticky=tk.NSEW)
         frame.columnconfigure(1, weight=1)
 
-        self.cmdr_label = tk.Label(frame, name='cmdr_label')
-        self.cmdr = tk.Label(frame, compound=tk.RIGHT, anchor=tk.W, name='cmdr')
-        self.ship_label = tk.Label(frame, name='ship_label')
+        self.cmdr_label = ttk.Label(frame, name='cmdr_label')
+        self.cmdr = ttk.Label(frame, compound=tk.RIGHT, anchor=tk.W, name='cmdr')
+        self.ship_label = ttk.Label(frame, name='ship_label')
         self.ship = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.shipyard_url, name='ship', popup_copy=True)
-        self.suit_label = tk.Label(frame, name='suit_label')
-        self.suit = tk.Label(frame, compound=tk.RIGHT, anchor=tk.W, name='suit')
-        self.system_label = tk.Label(frame, name='system_label')
+        self.suit_label = ttk.Label(frame, name='suit_label')
+        self.suit = ttk.Label(frame, compound=tk.RIGHT, anchor=tk.W, name='suit')
+        self.system_label = ttk.Label(frame, name='system_label')
         self.system = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.system_url, popup_copy=True, name='system')
-        self.station_label = tk.Label(frame, name='station_label')
+        self.station_label = ttk.Label(frame, name='station_label')
         self.station = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.station_url, name='station', popup_copy=True)
         # system and station text is set/updated by the 'provider' plugins
         # edsm and inara.  Look for:
@@ -523,11 +523,9 @@ class AppWindow:
         plugin_no = 0
         for plugin in plug.PLUGINS:
             # Per plugin separator
-            plugin_sep = tk.Frame(
-                frame, highlightthickness=1, name=f"plugin_hr_{plugin_no + 1}"
-            )
+            plugin_sep = ttk.Separator(frame, name=f"plugin_hr_{plugin_no + 1}")
             # Per plugin frame, for it to use as its parent for own widgets
-            plugin_frame = tk.Frame(
+            plugin_frame = ttk.Frame(
                 frame,
                 name=f"plugin_{plugin_no + 1}"
             )
@@ -562,7 +560,7 @@ class AppWindow:
             default=tk.ACTIVE,
             state=tk.DISABLED
         )
-        self.theme_button = tk.Label(
+        self.theme_button = ttk.Label(
             frame,
             name='themed_update_button',
             width=28,
@@ -578,12 +576,12 @@ class AppWindow:
         theme.button_bind(self.theme_button, self.capi_request_data)
 
         # Bottom 'status' line.
-        self.status = tk.Label(frame, name='status', anchor=tk.W)
+        self.status = ttk.Label(frame, name='status', anchor=tk.W)
         self.status.grid(columnspan=2, sticky=tk.EW)
 
         for child in frame.winfo_children():
             child.grid_configure(padx=self.PADX, pady=(
-                sys.platform != 'win32' or isinstance(child, tk.Frame)) and 2 or 0)
+                sys.platform != 'win32' or isinstance(child, ttk.Frame)) and 2 or 0)
 
         self.menubar = tk.Menu()
 
@@ -645,9 +643,9 @@ class AppWindow:
         theme.register(self.help_menu)
 
         # Alternate title bar and menu for dark theme
-        self.theme_menubar = tk.Frame(frame, name="alternate_menubar")
+        self.theme_menubar = ttk.Frame(frame, name="alternate_menubar")
         self.theme_menubar.columnconfigure(2, weight=1)
-        theme_titlebar = tk.Label(
+        theme_titlebar = ttk.Label(
             self.theme_menubar,
             name="alternate_titlebar",
             text=applongname,
@@ -659,37 +657,37 @@ class AppWindow:
         theme_titlebar.bind('<Button-1>', self.drag_start)
         theme_titlebar.bind('<B1-Motion>', self.drag_continue)
         theme_titlebar.bind('<ButtonRelease-1>', self.drag_end)
-        theme_minimize = tk.Label(self.theme_menubar, image=self.theme_minimize)
+        theme_minimize = ttk.Label(self.theme_menubar, image=self.theme_minimize)
         theme_minimize.grid(row=0, column=3, padx=2)
         theme.button_bind(theme_minimize, self.oniconify, image=self.theme_minimize)
-        theme_close = tk.Label(self.theme_menubar, image=self.theme_close)
+        theme_close = ttk.Label(self.theme_menubar, image=self.theme_close)
         theme_close.grid(row=0, column=4, padx=2)
         theme.button_bind(theme_close, self.onexit, image=self.theme_close)
-        self.theme_file_menu = tk.Label(self.theme_menubar, anchor=tk.W)
+        self.theme_file_menu = ttk.Label(self.theme_menubar, anchor=tk.W)
         self.theme_file_menu.grid(row=1, column=0, padx=self.PADX, sticky=tk.W)
         theme.button_bind(self.theme_file_menu,
                           lambda e: self.file_menu.tk_popup(e.widget.winfo_rootx(),
                                                             e.widget.winfo_rooty()
                                                             + e.widget.winfo_height()))
-        self.theme_edit_menu = tk.Label(self.theme_menubar, anchor=tk.W)
+        self.theme_edit_menu = ttk.Label(self.theme_menubar, anchor=tk.W)
         self.theme_edit_menu.grid(row=1, column=1, sticky=tk.W)
         theme.button_bind(self.theme_edit_menu,
                           lambda e: self.edit_menu.tk_popup(e.widget.winfo_rootx(),
                                                             e.widget.winfo_rooty()
                                                             + e.widget.winfo_height()))
-        self.theme_help_menu = tk.Label(self.theme_menubar, anchor=tk.W)
+        self.theme_help_menu = ttk.Label(self.theme_menubar, anchor=tk.W)
         self.theme_help_menu.grid(row=1, column=2, sticky=tk.W)
         theme.button_bind(self.theme_help_menu,
                           lambda e: self.help_menu.tk_popup(e.widget.winfo_rootx(),
                                                             e.widget.winfo_rooty()
                                                             + e.widget.winfo_height()))
-        tk.Frame(self.theme_menubar, highlightthickness=1).grid(columnspan=5, padx=self.PADX, sticky=tk.EW)
+        ttk.Separator(self.theme_menubar).grid(columnspan=5, padx=self.PADX, sticky=tk.EW)
         theme.register(self.theme_minimize)  # images aren't automatically registered
         theme.register(self.theme_close)
-        self.blank_menubar = tk.Frame(frame, name="blank_menubar")
-        tk.Label(self.blank_menubar).grid()
-        tk.Label(self.blank_menubar).grid()
-        tk.Frame(self.blank_menubar, height=2).grid()
+        self.blank_menubar = ttk.Frame(frame, name="blank_menubar")
+        ttk.Label(self.blank_menubar).grid()
+        ttk.Label(self.blank_menubar).grid()
+        ttk.Frame(self.blank_menubar, height=2).grid()
         theme.register_alternate((self.menubar, self.theme_menubar, self.blank_menubar),
                                  {'row': 0, 'columnspan': 2, 'sticky': tk.NSEW})
         self.w.resizable(tk.TRUE, tk.FALSE)
@@ -2008,22 +2006,22 @@ def show_killswitch_poppup(root=None):
     tl.columnconfigure(1, weight=1)
     tl.title("EDMC Features have been disabled")
 
-    frame = tk.Frame(tl)
+    frame = ttk.Frame(tl)
     frame.grid()
-    t = tk.Label(frame, text=text)
+    t = ttk.Label(frame, text=text)
     t.grid(columnspan=2)
     idx = 1
 
     for version in kills:
-        tk.Label(frame, text=f'Version: {version.version}').grid(row=idx, sticky=tk.W)
+        ttk.Label(frame, text=f'Version: {version.version}').grid(row=idx, sticky=tk.W)
         idx += 1
         for id, kill in version.kills.items():
-            tk.Label(frame, text=id).grid(column=0, row=idx, sticky=tk.W, padx=(10, 0))
-            tk.Label(frame, text=kill.reason).grid(column=1, row=idx, sticky=tk.E, padx=(0, 10))
+            ttk.Label(frame, text=id).grid(column=0, row=idx, sticky=tk.W, padx=(10, 0))
+            ttk.Label(frame, text=kill.reason).grid(column=1, row=idx, sticky=tk.E, padx=(0, 10))
             idx += 1
         idx += 1
 
-    ok_button = tk.Button(frame, text="Ok", command=tl.destroy)
+    ok_button = ttk.Button(frame, text="Ok", command=tl.destroy)
     ok_button.grid(columnspan=2, sticky=tk.EW)
 
 
