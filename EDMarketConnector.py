@@ -844,7 +844,7 @@ class AppWindow:
                 )
                 update_msg = update_msg.replace('\\n', '\n')
                 update_msg = update_msg.replace('\\r', '\r')
-                stable_popup = tk.messagebox.askyesno(title=title, message=update_msg)
+                stable_popup = tk.messagebox.askyesno(title=title, message=update_msg, parent=postargs.get('Parent'))
                 if stable_popup:
                     webbrowser.open("https://github.com/edCD/eDMarketConnector/releases/latest")
 

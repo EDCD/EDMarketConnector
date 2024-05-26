@@ -535,7 +535,7 @@ class PreferencesDialog(tk.Toplevel):
             )
 
             self.update_track.configure(width=15)
-            self.update_track.grid(column=1, pady=self.BOXY, sticky=tk.W, row=curr_row)
+            self.update_track.grid(column=1, pady=self.BOXY, padx=self.PADX, sticky=tk.W, row=curr_row)
 
         self.disable_autoappupdatecheckingame = tk.IntVar(value=config.get_int('disable_autoappupdatecheckingame'))
         self.disable_autoappupdatecheckingame_btn = nb.Checkbutton(
@@ -1262,8 +1262,9 @@ class PreferencesDialog(tk.Toplevel):
         # Send to the Post Config if we updated the update branch
         post_flags = {
             'Update': True if self.curr_update_track != self.update_paths.get() else False,
-            'Track': self.update_paths.get()
-                      }
+            'Track': self.update_paths.get(),
+            'Parent': self
+        }
         # Notify
         if self.callback:
             self.callback(**post_flags)
