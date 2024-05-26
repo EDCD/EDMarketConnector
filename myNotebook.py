@@ -108,7 +108,8 @@ class EntryMenu(ttk.Entry):
                 # Hijack existing translation, yes it doesn't exactly match here.
                 messagebox.showwarning(
                     tr.tl('Error'),  # LANG: Generic error prefix - following text is from Frontier auth service;
-                    tr.tl('Cannot paste non-text content.')  # LANG: Can't Paste Images or Files in Text
+                    tr.tl('Cannot paste non-text content.'),  # LANG: Can't Paste Images or Files in Text
+                    parent=self.master
                 )
                 return
             text = self.clipboard_get()

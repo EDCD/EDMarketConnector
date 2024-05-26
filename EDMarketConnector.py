@@ -2068,7 +2068,8 @@ def validate_providers():
     tk.messagebox.showinfo(
         # LANG: Popup window title for Reset Providers
         tr.tl('EDMC: Default Providers Reset'),
-        popup_text
+        popup_text,
+        parent=root
     )
 
 
@@ -2237,7 +2238,8 @@ sys.path: {sys.path}'''
         detail = detail.replace('\\n', '\n')
         detail = detail.replace('\\r', '\r')
         msg = tk.messagebox.askyesno(
-            title=title, message=message, detail=detail, icon=tkinter.messagebox.ERROR, type=tkinter.messagebox.YESNO
+            title=title, message=message, detail=detail, icon=tkinter.messagebox.ERROR, type=tkinter.messagebox.YESNO,
+            parent=root
         )
         if msg:
             webbrowser.open(
@@ -2271,7 +2273,8 @@ sys.path: {sys.path}'''
             tk.messagebox.showinfo(
                 # LANG: Popup window title for list of 'broken' plugins that failed to load
                 tr.tl('EDMC: Broken Plugins'),
-                popup_text
+                popup_text,
+                parent=root
             )
 
     def messagebox_not_py3():
@@ -2301,7 +2304,8 @@ sys.path: {sys.path}'''
             tk.messagebox.showinfo(
                 # LANG: Popup window title for list of 'enabled' plugins that don't work with Python 3.x
                 tr.tl('EDMC: Plugins Without Python 3.x Support'),
-                popup_text
+                popup_text,
+                parent=root
             )
             config.set('plugins_not_py3_last', int(time()))
 

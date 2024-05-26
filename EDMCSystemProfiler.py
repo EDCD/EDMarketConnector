@@ -105,7 +105,7 @@ def copy_sys_report(root: tk.Tk, report: str) -> None:
     """Copy the system info to the keyboard."""
     root.clipboard_clear()
     root.clipboard_append(report)
-    messagebox.showinfo("System Profiler", "System Report copied to Clipboard")
+    messagebox.showinfo("System Profiler", "System Report copied to Clipboard", parent=root)
 
 
 def main() -> None:
