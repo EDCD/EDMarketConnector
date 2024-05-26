@@ -26,7 +26,7 @@ import tkinter as tk
 import webbrowser
 from tkinter import font as tk_font
 from tkinter import ttk
-from typing import Any
+from typing import Any, no_type_check
 import plug
 from os import path
 from config import config, logger
@@ -122,8 +122,9 @@ class HyperlinkLabel(ttk.Label):
         if opener:
             return webbrowser.open(opener)
 
+    @no_type_check
     def configure(  # noqa: CCR001
-        self, cnf: dict[str, Any] | None = None, **kw
+        self, cnf: dict[str, Any] | None = None, **kw: Any
     ) -> dict[str, tuple[str, str, str, Any, Any]] | None:
         """Change cursor and appearance depending on state and text."""
         # This class' state
@@ -174,7 +175,7 @@ class HyperlinkLabel(ttk.Label):
 
     def _leave(self, event: tk.Event) -> None:
         if not self.underline:
-            super().configure(font=self.font_n)
+            super().configure(font=self.font_n)  # type: ignore
 
     def _click(self, event: tk.Event) -> None:
         if self.url and self['text'] and str(self['state']) != tk.DISABLED:
