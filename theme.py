@@ -163,7 +163,7 @@ class _Theme:
                 'menufont': tk.Menu()['font'],                # TkTextFont
             }
 
-        if widget not in self.widgets:
+        if widget not in self.widgets and not isinstance(widget, ttk.Widget):
             # No general way to tell whether the user has overridden, so compare against widget-type specific defaults
             attribs = set()
             if isinstance(widget, tk.BitmapImage):
@@ -171,14 +171,14 @@ class _Theme:
                     attribs.add('fg')
                 if widget['background'] not in ['', self.defaults['bitmapbg']]:
                     attribs.add('bg')
-            elif isinstance(widget, (tk.Entry, ttk.Entry)):
+            elif isinstance(widget, tk.Entry):
                 if widget['foreground'] not in ['', self.defaults['entryfg']]:
                     attribs.add('fg')
                 if widget['background'] not in ['', self.defaults['entrybg']]:
                     attribs.add('bg')
                 if 'font' in widget.keys() and str(widget['font']) not in ['', self.defaults['entryfont']]:
                     attribs.add('font')
-            elif isinstance(widget, (tk.Canvas, tk.Frame, ttk.Frame)):
+            elif isinstance(widget, (tk.Canvas, tk.Frame)):
                 if (
                     ('background' in widget.keys() or isinstance(widget, tk.Canvas))
                     and widget['background'] not in ['', self.defaults['frame']]
