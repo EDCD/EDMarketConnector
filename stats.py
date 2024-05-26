@@ -305,7 +305,7 @@ def export_ships(companion_data: dict[str, Any], filename: AnyStr) -> None:
 class StatsDialog():
     """Status dialog containing all of the current cmdr's stats."""
 
-    def __init__(self, parent: tk.Tk, status: tk.Label) -> None:
+    def __init__(self, parent: tk.Tk, status: ttk.Label) -> None:
         self.parent: tk.Tk = parent
         self.status = status
         self.showstats()
