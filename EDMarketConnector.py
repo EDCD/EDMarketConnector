@@ -2006,22 +2006,22 @@ def show_killswitch_poppup(root=None):
     tl.columnconfigure(1, weight=1)
     tl.title("EDMC Features have been disabled")
 
-    frame = ttk.Frame(tl)
+    frame = tk.Frame(tl)
     frame.grid()
-    t = ttk.Label(frame, text=text)
+    t = tk.Label(frame, text=text)
     t.grid(columnspan=2)
     idx = 1
 
     for version in kills:
-        ttk.Label(frame, text=f'Version: {version.version}').grid(row=idx, sticky=tk.W)
+        tk.Label(frame, text=f'Version: {version.version}').grid(row=idx, sticky=tk.W)
         idx += 1
         for id, kill in version.kills.items():
-            ttk.Label(frame, text=id).grid(column=0, row=idx, sticky=tk.W, padx=(10, 0))
-            ttk.Label(frame, text=kill.reason).grid(column=1, row=idx, sticky=tk.E, padx=(0, 10))
+            tk.Label(frame, text=id).grid(column=0, row=idx, sticky=tk.W, padx=(10, 0))
+            tk.Label(frame, text=kill.reason).grid(column=1, row=idx, sticky=tk.E, padx=(0, 10))
             idx += 1
         idx += 1
 
-    ok_button = ttk.Button(frame, text="Ok", command=tl.destroy)
+    ok_button = tk.Button(frame, text="Ok", command=tl.destroy)
     ok_button.grid(columnspan=2, sticky=tk.EW)
 
 
