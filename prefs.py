@@ -514,10 +514,29 @@ class PreferencesDialog(tk.Toplevel):
 
                 self.hotkey_play_btn.grid(columnspan=4, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=row.get())
 
-        # Option to disabled Automatic Check For Updates whilst in-game
+        # Options to select the Update Path and Disable Automatic Checks For Updates whilst in-game
         ttk.Separator(config_frame, orient=tk.HORIZONTAL).grid(
             columnspan=4, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=row.get()
         )
+
+        with row as curr_row:
+            nb.Label(config_frame, text=tr.tl('Update Track')).grid(  # LANG: Select the Update Track (Beta, Stable)
+                padx=self.PADX, pady=self.PADY, sticky=tk.W, row=curr_row
+            )
+            self.curr_update_track = "Beta" if config.get_bool('beta_optin') else "Stable"
+            self.update_paths = tk.StringVar(value=self.curr_update_track)
+
+            update_paths = [
+                tr.tl("Stable"),  # LANG: Stable Version of EDMC
+                tr.tl("Beta")  # LANG: Beta Version of EDMC
+            ]
+            self.update_track = nb.OptionMenu(
+                config_frame, self.update_paths, self.update_paths.get(), *update_paths
+            )
+
+            self.update_track.configure(width=15)
+            self.update_track.grid(column=1, pady=self.BOXY, padx=self.PADX, sticky=tk.W, row=curr_row)
+
         self.disable_autoappupdatecheckingame = tk.IntVar(value=config.get_int('disable_autoappupdatecheckingame'))
         self.disable_autoappupdatecheckingame_btn = nb.Checkbutton(
             config_frame,
@@ -1216,7 +1235,7 @@ class PreferencesDialog(tk.Toplevel):
             config.set('hotkey_mods', self.hotkey_mods)
             config.set('hotkey_always', int(not self.hotkey_only.get()))
             config.set('hotkey_mute', int(not self.hotkey_play.get()))
-
+        config.set('beta_optin', 0 if self.update_paths.get() == "Stable" else 1)
         config.set('shipyard_provider', self.shipyard_provider.get())
         config.set('system_provider', self.system_provider.get())
         config.set('station_provider', self.station_provider.get())
@@ -1240,9 +1259,15 @@ class PreferencesDialog(tk.Toplevel):
         config.set('dark_highlight', self.theme_colors[1])
         theme.apply(self.parent)
 
+        # Send to the Post Config if we updated the update branch
+        post_flags = {
+            'Update': True if self.curr_update_track != self.update_paths.get() else False,
+            'Track': self.update_paths.get(),
+            'Parent': self
+        }
         # Notify
         if self.callback:
-            self.callback()
+            self.callback(**post_flags)
 
         plug.notify_prefs_changed(monitor.cmdr, monitor.is_beta)
 

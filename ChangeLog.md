@@ -15,8 +15,9 @@ We now sign our code! This does mean that built EXEs are now slightly modified o
 For information on what this means, and opt-out options, please visit https://github.com/EDCD/EDMarketConnector/wiki/Code-Signing-and-EDMC
 
 **Changes and Enhancements**
-* Added new SCO Module Details
+* Added new SCO and Python Armor Module Details
 * Reverted a change from the prior release due to breaking some consumers. 
+
 **Plugin Developers**
 * modules.p and ships.p are deprecated, and slated for removal in 5.11+!
 * The `openurl()` function in ttkHyperlinkLabel has been deprecated,
@@ -175,7 +176,7 @@ for removal in the next major release! Please look for that change coming soon.
 
 **Changes and Enhancements**
 * Added new `modules.json` and `ships.json` files to improve security and readability
-* Added a core Spanch URL provider plugin
+* Added a core Spansh URL provider plugin
 * Added a new auth response page for successful FDEV authentication
 * Added a new Open Log Folder option to the Help menu
 * Added a new `--start_min` command flag to force the application to start minimized
@@ -241,7 +242,7 @@ Known Issues
 
 Release 5.9.3
 ===
-This release is identical to 5.9.3, except reverts a bad change. 
+This release is identical to 5.9.2, except reverts a bad change. 
 
 - REVERTS Deprecated load_module() is now retired (#1462)
 

@@ -62,16 +62,16 @@ jobs:
             mv ../EDMarketConnector-release-${{ needs.variables.outputs.sem_ver }}.tar.gz .
 
       - name: Upload build files
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: Built files
+          name: built-files-linux
           path: |
               EDMarketConnector-release-*.tar.gz
 
   windows_build:
     needs: [variables]
     name: Build EDMC
-    runs-on: windows-2019
+    runs-on: windows-latest
 
     defaults:
       run:
@@ -105,6 +105,7 @@ jobs:
         with:
           python-version-file: '.python-version'
           architecture: "x86"
+          cache: 'pip' # caching pip dependencies
 
       - name: Install python tools
         run: |
@@ -131,22 +132,31 @@ jobs:
             Get-ChildItem -Path . -Filter "EDMarketConnector_Installer_*.exe" | Rename-Item -NewName {"EDMarketConnector_Installer_Unsigned_$($_.Name -replace '^EDMarketConnector_Installer_', '')"}
 
       - name: Upload build files
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: Built files
+          name: built-files-windows
           path: |
               EDMarketConnector_Installer_*.exe
               EDMarketConnector-release-*.zip
+  Merge:
+    runs-on: ubuntu-latest
+    needs: [ windows_build, linux_build ]
+    steps:
+      - name: Merge Artifacts
+        uses: actions/upload-artifact/merge@v4
+        with:
+          name: Built files
+          pattern: built-files-*
 
   release:
     name: Release new version
     runs-on: ubuntu-latest
-    needs: [ windows_build, linux_build ]
+    needs: Merge
     if: "${{ github.event_name != 'workflow_dispatch' }}"
 
     steps:
       - name: Download binary
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: Built files
           path: ./
