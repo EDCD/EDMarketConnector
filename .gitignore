@@ -30,6 +30,8 @@ appcast_mac_*.xml
 EDMC_Installer_Config.iss
 EDMarketConnector.wxs
 wix/components.wxs
+edmarketconnector.xml
+edmarketconnector-beta.xml
 
 # Ignore Visual Elements Manifest file for Windows
 EDMarketConnector.VisualElementsManifest.xml
