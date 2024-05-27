@@ -1,0 +1,2278 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+   <channel>
+      <title>E:D Market Connector</title>
+      <link>https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml</link>
+      <description>Most recent changes with links to updates.</description>
+      <!-- Important: Mac must be listed before Windows since Sparkle < 1.18.1 on OSX doesn't check sparkle:os -->
+      <item>
+         <title>Release 3.44</title>
+         <description><![CDATA[<style>h2 { font-size: 105%; }</style>
+<h2>Release 3.44</h2>
+<p><b>CHANGE OF MAINTAINER</b></p>
+<p>Due to a lack of time to give the project the attention it needs Marginal has handed over ownership of the EDMarketConnector GitHub repository to the EDCD (Elite Dangerous Community Developers) organisation.</p>
+<p>Initially Athanasius will now be responsible for maintaining the code, including addressing any Pull Requests and Issues, and making releases.  <b><u>Unfortunately he has no access to hardware running MacOS so can't easily generate builds for that platform</u> or test them.  So for the time being releases will be for Windows 10 only.</b>  MacOS users are advised to look into running from source (see the github README).</p>
+<p>Going forwards the intention is to move to the python 3.7 code as soon as possible.  To facilitate this there will be one more python 2.7 release in addition to this one, with the main aim of that being to add code to alert the user about any plugins they use that have apparently not been updated to run under python 3.7.</p>
+<p>See the project GitHub repository's <a href="https://github.com/EDCD/EDMarketConnector/blob/main/README.md">README.md</a> for further information.</p>
+<ul>
+ <li>Version increased to 3.4.4.0 / 3.44.</li>
+ <li>URL the application checks for updates changed to point to github,</li>
+</ul>]]></description>
+         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/rel-344/EDMarketConnector_mac_344.zip" sparkle:os="macos" sparkle:version="3.4.4.0" length="6058091" type="application/octet-stream" />
+      </item>
+      <!-- Windows -->
+      <item>
+         <title>Release 5.10.6</title>
+         <description><![CDATA[<style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
+<p>We now test against, and package with, Python 3.11.7.</p>
+<p><strong>As a result, we do not support Windows 7, 8, or 8.1.</strong><br>
+<h2>Release 5.10.6</h2>
+<p>This release contains the data information for the new SCO modules added in Elite update 18.04.
+This should represent full support for the new Python Mk II.</p>
+<p>We now sign our code! This does mean that built EXEs are now slightly modified on our developer's machines.
+For information on what this means, and opt-out options, please visit <a href="https://github.com/EDCD/EDMarketConnector/wiki/Code-Signing-and-EDMC">https://github.com/EDCD/EDMarketConnector/wiki/Code-Signing-and-EDMC</a></p>
+<p><strong>Changes and Enhancements</strong></p>
+<ul>
+<li>Added new SCO and Python Armor Module Details</li>
+<li>Reverted a change from the prior release due to breaking some consumers.</li>
+</ul>
+<p><strong>Plugin Developers</strong></p>
+<ul>
+<li>modules.p and ships.p are deprecated, and slated for removal in 5.11+!</li>
+<li>The <code>openurl()</code> function in ttkHyperlinkLabel has been deprecated,
+and slated for removal in 5.11+! Please migrate to <code>webbrowser.open()</code>.</li>
+</ul>
+<hr>
+<h2>Release 5.10.5</h2>
+<p>This release contains a fix for a bug that could crash EDMC's console versions when reading outfitting information from the new SCO Frame Shift Drive modules.</p>
+<p>Please note that this does not offer full support for the new SCO modules or the Python Mk II. More support will be added in a future update.</p>
+<p>We now sign our code! This does mean that built EXEs are now slightly modified on our developer's machines.
+For information on what this means, and opt-out options, please visit <a href="https://github.com/EDCD/EDMarketConnector/wiki/Code-Signing-and-EDMC">https://github.com/EDCD/EDMarketConnector/wiki/Code-Signing-and-EDMC</a></p>
+<p><strong>Changes and Enhancements</strong></p>
+<ul>
+<li>Updated Translations</li>
+<li>Added limited data regarding the Python Mk II</li>
+<li>Added a few Coriolis module information entries</li>
+</ul>
+<p><strong>Bug Fixes</strong></p>
+<ul>
+<li>Fixed a bug that could cause the new SCO modules to display improper ratings or sizes</li>
+<li>Fixed a bug where the new SCO modules would display as a normal Frame Shift Drive</li>
+<li>Fixed a bug which could crash EDMC if the exact details of a Frame Shift Drive were unknown</li>
+</ul>
+<p><strong>Plugin Developers</strong></p>
+<ul>
+<li>modules.p and ships.p are deprecated, and slated for removal in 5.11+!</li>
+<li>The <code>openurl()</code> function in ttkHyperlinkLabel has been deprecated,
+and slated for removal in 5.11+! Please migrate to <code>webbrowser.open()</code>.</li>
+</ul>
+<hr>
+<h2>Release 5.10.4</h2>
+<p>This release contains updated dependencies, modules files, translations, and adds two new EDDN schemas. It also
+adds Turkish translations to EDMC!</p>
+<p>We now sign our code! This does mean that built EXEs are now slightly modified on our developer&#39;s machines.
+For information on what this means, and opt-out options, please visit <a href="https://github.com/EDCD/EDMarketConnector/wiki/Code-Signing-and-EDMC">https://github.com/EDCD/EDMarketConnector/wiki/Code-Signing-and-EDMC</a></p>
+<p><strong>Changes and Enhancements</strong></p>
+<ul>
+<li>Adds Turkish Translations to EDMC</li>
+<li>Adds DockingDenied and DockingGranted EDDN Schemas</li>
+<li>Updated FDevIDs Dependency</li>
+<li>Updated Translations</li>
+<li>Updated modules files to process several missing module types used for bug squishing or going fast</li>
+<li>Updated Python Dependencies</li>
+</ul>
+<p><strong>Bug Fixes</strong></p>
+<ul>
+<li>Fixed a bug on older Python versions which couldn&#39;t import updated type annotations</li>
+</ul>
+<p><strong>Plugin Developers</strong></p>
+<ul>
+<li>modules.p and ships.p are deprecated, and slated for removal in 5.11+!</li>
+<li>The <code>openurl()</code> function in ttkHyperlinkLabel has been deprecated,
+and slated for removal in 5.11+! Please migrate to <code>webbrowser.open()</code>.</li>
+</ul>
+<hr>
+<h2>Release 5.10.3</h2>
+<p>This release contains a bugfix for the shipyard outfitting parsing system and an update to the French translations. </p>
+<em>We now sign our code! This does mean that built EXEs are now slightly modified on our developer's machines.
+For information on what this means, and opt-out options, please visit <a href="https://github.com/EDCD/EDMarketConnector/wiki/Code-Signing-and-EDMC">https://github.com/EDCD/EDMarketConnector/wiki/Code-Signing-and-EDMC</a></em>
+<p><strong>Changes and Enhancements</strong></p>
+<ul>
+<li>Updated French Translations</li>
+</ul>
+<p><strong>Bug Fixes</strong></p>
+<ul>
+<li>Fixed a bug that crashed the outfitting system when encountering armor. (Thanks TCE team for identifying this one!)</li>
+</ul>
+<p><strong>Plugin Developers</strong></p>
+<ul>
+<li>modules.p and ships.p are deprecated, and slated
+for removal in the next major release! Please look for that change coming soon. </li>
+<li>Note to plugin developers: The <code>openurl()</code> function in ttkHyperlinkLabel has been deprecated,
+and slated for removal in the next major release! Please migrate to <code>webbrowser.open()</code>.</li>
+</ul>
+
+<hr>
+
+<h2>Release 5.10.2</h2>
+<p>This release contains updated dependencies, some bug fixes, a few minor enhancements to some supporting files,
+and some resorted resources as well as a new image for some of the built EXEs.</p>
+
+<em>We now sign our code! This does mean that built EXEs are now slightly modified on our developer's machines.
+For information on what this means, and opt-out options, please visit <a href="https://github.com/EDCD/EDMarketConnector/wiki/Code-Signing-and-EDMC">https://github.com/EDCD/EDMarketConnector/wiki/Code-Signing-and-EDMC</a></em>
+<p><strong>Changes and Enhancements</strong></p>
+<ul>
+<li>Added additional logging to the Python build string in the case of missing files</li>
+<li>Added a new icon to EDMC's Command-Line EXE</li>
+<li>Added additional logging to the build system</li>
+<li>Updated several dependencies</li>
+<li>Updated FDEV IDs</li>
+<li>Updated relevant copyright dates</li>
+<li>Updated automatic build script to support code signing workflow</li>
+<li>Updated translations to the latest versions</li>
+<li>Moved a few unused files to the resources folder. These files have no references in the code</li>
+</ul>
+<p><strong>Bug Fixes</strong></p>
+<ul>
+<li>Fixed a bug that could cause EDMC to handle SIGINT signals improperly</li>
+<li>Fixed a bug that could result in URL providers to be set to invalid values</li>
+<li>Fixed a bug that could result in Coriolis URL providers to revert back to &quot;Auto&quot; on language translations</li>
+<li>Fixed a bug where Inara didn&#39;t understand being blown up by a Thargoid, and blew itself up instead</li>
+<li>Fixed a printing issue for the localization system for unused strings</li>
+</ul>
+<p><strong>Removed Files</strong></p>
+<ul>
+<li>Removed two unused manifest and MacOS icon files which are no longer in use.</li>
+</ul>
+<p><strong>Known Issues</strong></p>
+<ul>
+<li>Some users of TCE have reported issues with newer versions of EDMC with TCE. <ul>
+<li>We have been unable to replicate this issue. If you are able to assist, please
+add your information here: <a href="https://github.com/EDCD/EDMarketConnector/issues/2176">https://github.com/EDCD/EDMarketConnector/issues/2176</a></li>
+</ul>
+</li>
+</ul>
+<p><strong>Plugin Developers</strong></p>
+<ul>
+<li>modules.p and ships.p are deprecated, and slated
+for removal in the next major release! Please look for that change coming soon. </li>
+<li>Note to plugin developers: The <code>openurl()</code> function in ttkHyperlinkLabel has been deprecated,
+and slated for removal in the next major release! Please migrate to <code>webbrowser.open()</code>.</li>
+</ul>
+
+<hr>
+
+<h2>Release 5.10.1</h2>
+<p>This release contains a number of bugfixes, minor performance enhancements, workflow and dependency updates, and a function deprecation.</p>
+<em>Note to plugin developers: modules.p and ships.p are deprecated, and slated for removal in the next major release! Please look for that change coming soon. </em>
+<em>Note to plugin developers: The openurl() function in ttkHyperlinkLabel has been deprecated, and slated for removal in the next major release! Please migrate to webbrowser.open().</em>
+
+<p><strong>Changes and Enhancements</strong></p>
+<ul>
+<li>Deprecated `openurl()`. Please migrate to `webbrowser.open()`</li>
+<li>Updated a number of list comparisons to use more efficient tuple comparisons</li>
+<li>Updated a few type hints</li>
+<li>Updated a few binary comparitors to be more efficient</li>
+<li>Moved `resources.json` and `modules.json` back to the top level for all users</li>
+<li>Updated several dependencies</li>
+<li>Updated Python version to 3.11.7</li>
+</ul>
+<p><strong>Bug Fixes</strong></p>
+<ul>
+<li>Fixed an issue where resources files could be in different locations for different users.<ul>
+<li>These files are now in the same location (top level) for all users on all distributions.</li>
+</ul>
+</li>
+<li>Fixed an issue where CMDRs without the Git application installed would crash on start if running from Source.<ul>
+<li>Thanks to the Flatpak team for pointing this one out!</li>
+</ul>
+</li>
+<li>Fixed a bug where CMDRs running from source would have their git hash version displayed as UNKNOWN.<ul>
+<li>We're now more failure tolerant and use the bundled .gitversion if no true git hash is provided.</li>
+</ul>
+</li>
+<li>Fixed a bug where starting two copies of EDMC with a valid install would not generate a duplicate warning.</li>
+</ul>
+<hr>
+
+<h2>Release 5.10.0</h2>
+<p>This release contains a number of under-the-hood changes to EDMC designed to improve performance, code maintainability, and stability of the EDMC application, while providing new features and quality-of-life fixes.</p>
+<em>Note to plugin developers: modules.p and ships.p are deprecated, and slated for removal in the next major release! Please look for that change coming soon. </em>
+
+<p><strong>Changes and Enhancements</strong></p>
+<ul>
+<li>Added new <code>modules.json</code> and <code>ships.json</code> files to improve security and readability</li>
+<li>Added a core Spansh URL provider plugin</li>
+<li>Added a new auth response page for successful FDEV authentication</li>
+<li>Added a new Open Log Folder option to the Help menu</li>
+<li>Added a new <code>--start_min</code> command flag to force the application to start minimized</li>
+<li>Added a new pop-up if plugins fail to load or are not supported</li>
+<li>Updated commodities and module files to the latest versions</li>
+<li>Updated core EDMC and core Plugin menus to a standardized layout</li>
+<li>Updates the Inara URL formats to the new endpoints</li>
+</ul>
+<p><strong>Bug Fixes</strong></p>
+<ul>
+<li>Fixed an issue where indentation of text strings in certain settings windows under various languages
+would be unevenly indented</li>
+<li>Fixed an issue where the Plugins Folder label in the Plugins settings window would cut off the
+selection box for the plugin storage location</li>
+</ul>
+<p><strong>Code Clean Up</strong></p>
+<ul>
+<li>Added future annotation imports to help with code compatibility</li>
+<li>Added a few conditional checks on input processing</li>
+<li>Simplified some RegEx expressions, complex functions, logic flows, and Import statements</li>
+<li>Simplified the WinSparkle GitHub Build Action</li>
+<li>Began to change single-character variables to more descriptive names</li>
+<li>Moved a number of global variables into their requisite classes </li>
+<li>Updated a number of dependencies to the latest versions</li>
+<li>Updated GitHub Actions to the latest versions</li>
+<li>Updated a number of resource-allocating functions to use more efficient closing logic</li>
+<li>Updated some calls to arrays to be more efficient</li>
+<li>Removed a number of old-style typing hints in favor of PEP 585 style hints</li>
+<li>Removed a number of redundant <code>if - return - else</code> or <code>raise - else</code> statements for code readability</li>
+<li>Removed some default parameter assignments</li>
+<li>Removed some obsolete calls to Object</li>
+</ul>
+<p><strong>Plugin Developers</strong></p>
+<ul>
+<li><code>modules.p</code> and <code>ships.p</code> have been deprecated, and will be removed in 6.0.
+If you are using these files, please update to use the new <code>modules.json</code> and <code>ships.json</code> files instead. </li>
+<li>A new method of standardizing the paddings used in settings panels has been applied to the core settings panels.
+We strongly encourage you to follow these style hints! A proper guide will be added to the wiki.</li>
+</ul><hr>
+
+<h2>Release 5.9.5</h2>
+<p>This release fixes an uncommon problem with the uninstaller logic if upgrading from a version prior to 5.9.0 to improve consistancy across versions.</p>
+<em>Note to plugin developers: modules.p and ships.p will be deprecated in the next version, and slated for removal in the next major release! Please look for that change coming soon.</em>
+<ul>
+<li>Updates Module pickle files to latest values.</li>
+<li>Fixes a problem with the uninstaller logic caused by prior versions having fluctuating GUIDs.</li>
+</ul><hr>
+
+<h2>Release 5.9.4</h2>
+<p>This release fixes a widely-reported bug that resulted in the cAPI Authentication flow being disrupted for a subset of users. Thank you to all the CMDRs who reported this to us and provided logs to us so that we could get the issue isolated.</p>
+<ul>
+<li>Fixes a missing registry issue that could cause the EDMC:// protocol to fail. (#2061, #2059, #2058, #2057)</li>
+<li>Renames the default start menu shortcut to be more clear. (#2062)</li>
+</ul><hr>
+
+<h2>Release 5.9.3</h2>
+<p>This release is identical to 5.9.2, except reverts a bad change. </p>
+<ul>
+<li>REVERTS Deprecated load_module() is now retired (#1462)</li>
+</ul><hr>
+
+<h2>Release 5.9.2</h2>
+<p>This release fixes a critical issue on clean installs which would not update
+the Windows registry to allow for protocol handling.</p>
+<p>All users are strongly encouraged to update.</p>
+<ul>
+<li>Fixes a critical bug with the installer on new installs not creating registry keys (#2046)</li>
+<li>Re-enables automatic submodule updates (#1443)</li>
+<li>Help -> About Version String can now be copied to clipboard (#1936)</li>
+<li>EDMC Task Manager Printout now is less useless (#2045)</li>
+<li>Deprecated load_module() is now retired (#1462)</li>
+<li>API Keys are masked in Settings (#2047)</li>
+<li>Installer will now refuse to install on Win7 and Earlier (#1122)</li>
+</ul><hr>
+
+<h2>Release 5.9.1</h2>
+<p>This release updates the build system in use for EDMC to a more feature-rich installer, as well
+as updating the commodity information to be up-to-date for Update 16.</p>
+<p>NOTE: This version hands over the installer to an EXE file for Windows instead of an MSI.
+This does not change any functionality or plugin capability of EDMC. You may need to
+manually close EDMC during the update process if updating from version 5.9.0 or earlier.</p>
+<ul>
+<li>Removed the old WiX Build System</li>
+<li>Handed over the Build system to Inno Setup</li>
+<li>Broke apart the Build and Installer scripts for ease of development</li>
+<li>Updated FDevIDs to latest version</li>
+<li>Updated coriolis-data to latest version</li>
+<li>Updated some internal documentation</li>
+</ul><hr>
+
+<h2>Release 5.9.0</h2>
+<p>This release is essentially the same as 5.9.0-rc1 with only a typo, the version and
+this changelog updated.</p>
+<p>This release contains the removal of the EDDB module, as well as a few under-the-hood
+updates.</p>
+<ul>
+<li>Removes the EDDB plugin due to EDDB shutting down.</li>
+<li>Unsets EDDB as the default handler for certain URL preferences.</li>
+<li>Updates the FDevIDs to latest versions.</li>
+<li>Removes EDDB references from help string documentations.</li>
+<li>Updated a number of dependencies to their latest working versions</li>
+</ul><hr>
+
+<h2>Release 5.8.1</h2>
+<p>This fixes a bug where the Cmdr/APIKey sections on Settings > EDSM would never be shown.</p>
+<hr>
+
+<h2>Release 5.8.0</h2>
+<p>This release is essentially the same as 5.8.0-rc3 with only the version and
+this changelog updated.</p>
+<p>It brings a new feature related to Fleetcarrier data, some convenience for
+Linux users, some fixes, and otherwise some internal changes that should not
+adversely affect either users or third-party plugins.  For the latter, read
+below for some new/changed things that could benefit you.</p>
+<ul>
+<li>
+<p>This release, and all future ones, now create two additional archive files
+in the GitHub release:</p>
+<ol>
+<li><code>EDMarketConnector-release-&lt;version&gt;.zip</code></li>
+<li><code>EDMarketConnector-release-&lt;version&gt;.tar.gz</code></li>
+</ol>
+<p>The advantage of these over the GitHub auto-generated ones is that they
+have been hand-crafted to contain <em>all</em> the necessary files, and <em>only</em>
+those files.</p>
+<p><strong>If you use the application from source, and not via a git clone, then we
+highly recommend you use one of these archives, not the GitHub
+auto-generated ones.</strong></p>
+<p>Anyone installing on Windows should continue to use the
+<code>EDMarketConnector_win_&lt;version&gt;.msi</code> files as before.</p>
+</li>
+<li>
+<p><strong>New Feature</strong> - You can now have the application query the <code>/fleetcarrier</code>
+CAPI endpoint for data about your Fleet Carrier.  The data will then be
+passed to interested plugins.</p>
+<p>Note that there are some caveats:</p>
+<ol>
+<li>
+<p>This feature defaults to <em>Off</em>.  The option is on the Configuration tab
+of Settings as "Enable Fleetcarrier CAPI Queries".  <strong>It is advised to only
+enable this if you know you utilise plugins that make use of the data.</strong></p>
+</li>
+<li>
+<p>These queries are <em>only</em> triggered by <code>CarrierBuy</code> and <code>CarrierStats</code>
+Journal events, i.e. upon buying a Fleetcarrier or opening the Carrier
+Management UI in-game.  <strong>NB: There is a 15 minute cooldown between
+queries.</strong></p>
+</li>
+<li>
+<p>If you have Fleetcarrier cargo which got into the cargo hold through a lot
+of individual transactions, or if you have a lot of separate buy/sell
+orders then these queries can take a <em>long</em> time to complete.</p>
+<p><strong>If this happens with your game account then all other CAPI queries will
+be blocked until the <code>/fleetcarrier</code> query completes.</strong>  'Other CAPI
+queries' means those usually triggered upon docking to gather station
+market, shipyard and outfitting data.  To ameliorate the effects of this
+there is currently a timeout of 60 seconds on <code>/fleetcarrier</code> queries,
+<strong>and will not occur more often than every 15 minutes</strong>.</p>
+<p>We plan to address this by moving the <code>/fleetcarrier</code> queries into their
+own separate thread in the future.</p>
+</li>
+</ol>
+</li>
+<li>
+<p>The code for choosing the 'Output' folder is now simply the <code>tkinter</code>
+function for such a dialogue, rather than a special case on Windows.  In
+the past the former had issues with Unicode characters, but in testing no
+such issue was observed (on a supported OS).</p>
+</li>
+<li>
+<p>There are two new items on the "Help" menu:</p>
+<ol>
+<li>Troubleshooting -&gt; <a href="https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting">Wiki:Troubleshooting</a>
+</li>
+<li>Report A Bug -&gt; <a href="https://github.com/EDCD/EDMarketConnector/issues/new?assignees=&amp;labels=bug%2C+unconfirmed&amp;template=bug_report.md&amp;title=">Issues - New Bug Report</a>
+</li>
+</ol>
+</li>
+<li>
+<p>Translations have been updated.  Thanks again to our volunteer translators!</p>
+</li>
+<li>
+<p>If we ever activate any functionality killswitches, the popup denoting which
+are active has been made more readable.</p>
+</li>
+<li>
+<p>There's a new section in <code>Contributing.md</code> - "Python Environment".  This
+should aid any new developers in getting things set up.</p>
+</li>
+</ul>
+<h2><a id="user-content-linux-users" class="anchor" aria-hidden="true" href="#linux-users"><span aria-hidden="true" class="octicon octicon-link"></span></a>Linux Users</h2>
+<p>We now ship an <code>io.edcd.EDMarketConnector.desktop</code> file.  To make use of this
+you should run <code>scripts/linux-setup.sh</code> <em>once</em>.  This will:</p>
+<ol>
+<li>
+<p>Check that you have <code>$HOME/bin</code> in your PATH.  If not, it will abort.</p>
+</li>
+<li>
+<p>Create a shell script <code>edmarketconnector</code> in <code>$HOME/bin</code> to launch the
+application.</p>
+<p>NB: This relies on the filesystem location you placed the source in not
+changing. So if you move the source you will need to re-run the script.</p>
+</li>
+<li>
+<p>Copy the .desktop and .icon files into appropriate locations.  The .desktop
+file utilises the shell script created in step 2, and thus relies on it
+existing <em>and</em> on it being in a directory that is in your PATH.</p>
+</li>
+</ol>
+<p>Once this has been completed any XDG-compliant desktops should have an entry
+for "E:D Market Connector" in their "Games" menu.</p>
+<h2><a id="user-content-fixes" class="anchor" aria-hidden="true" href="#fixes"><span aria-hidden="true" class="octicon octicon-link"></span></a>Fixes</h2>
+<ul>
+<li>
+<p>The tracking of a Cmdr's location that was being performed by the core EDDN
+plugin has been moved into the Journal monitoring code.  This results in
+the tracking being correct upon application (re)start, reflecting the state
+from the latest Journal file, rather than only picking up with any
+subsequent new Journal events.</p>
+<p>This change should remove instances of "Wrong System! Missed Jump ?" and
+similar sanity-check "errors" when continuing to play after a user restarts
+the application whilst the game is running.</p>
+<p>Plugin developers, see below for how this change can positively affect you.</p>
+</li>
+<li>
+<p>The name of the files written by "File" &gt; "Save Raw Data" now have a <code>.</code>
+between the system and station names.</p>
+</li>
+<li>
+<p>Use of CAPI data in <code>EDMC.exe</code> when invoked with either <code>-s</code> or <code>-n</code>
+arguments hadn't been updated for prior changes, causing such invocations to
+fail.  This has been fixed.</p>
+</li>
+</ul>
+<h2><a id="user-content-plugin-developers" class="anchor" aria-hidden="true" href="#plugin-developers"><span aria-hidden="true" class="octicon octicon-link"></span></a>Plugin Developers</h2>
+<ul>
+<li>
+<p>Each plugin is now handed its own sub-frame as the <code>parent</code> parameter passed
+to <code>plugin_app()</code> <em>instead of the actual main UI frame</em>.  These new Frames
+are placed in the position that plugin UI would have gone into. This should
+have no side effects on well-behaved plugins.</p>
+<p>However, if you have code that attempts to do things like <code>parent.children()</code>
+or the like in your <code>plugin_app()</code> implementation, this might have stopped
+working.  You shouldn't be trying to do anything with any of the UI outside
+your plugin <em>anyway</em>, but if you definitely have a need then look things up
+using <code>.nametowidget()</code>.  There are examples in the core plugins (which <em>DO</em>
+have good reason, due to maintaining main UI label values).</p>
+<p>All of the plugins listed on our Wiki were given <em>perfunctory</em> testing and no
+issues from this change were observed.</p>
+<p>This is a necessary first step to some pending plugin/UI work:</p>
+<ul>
+<li><a href="https://github.com/EDCD/EDMarketConnector/issues/1792">UI: Alllow for re-ordering third-party plugins' UIs</a></li>
+<li><a href="https://github.com/EDCD/EDMarketConnector/issues/1813">UI: Allow configuration of number of UI columns.</a></li>
+<li><a href="https://github.com/EDCD/EDMarketConnector/issues/1814">Re-work how Plugins' Settings are accessed</a></li>
+</ul>
+</li>
+<li>
+<p><strong>New</strong> - <code>capi_fleetcarrier()</code> function to receive the data from a CAPI
+<code>/fleetcarrier</code> query.  See PLUGINS.md for details.</p>
+</li>
+<li>
+<p>It was found that the <code>ShutDown</code> event (note the capitalisation, this is
+distinct from the actual Journal <code>Shutdown</code> event) synthesized for plugins
+when it is detected that the game has exited was never actually being
+delivered. Instead this was erroneously replaced with a synthesized <code>StartUp</code>
+event. This has been fixed.</p>
+</li>
+<li>
+<p>As the location tracking has been moved out of the core EDDN plugin, and into
+monitor.py all of it is now available as members of the <code>state</code> dictionary
+which is passed to <code>journal_entry()</code>.</p>
+<p>This both means that no plugin should need to perform such location state
+tracking itself <em>and</em> they can take advantage of it being fully up to date
+when a user restarts the application with the game running.</p>
+<p>A reminder: When performing 'catch up' on the newest Journal file found at
+startup, the application does <strong>not</strong> pass any events to the
+<code>journal_entry()</code> method in plugins.  This is to avoid spamming with
+data/state that has possibly already been handled, and in the case of the
+Cmdr moving around will end up not being relevant by the time the end of the
+file is reached.  This limitation was also why the core EDDN plugin couldn't
+properly initiate its location tracking state in this scenario.</p>
+<p>See PLUGINS.md for details of the new <code>state</code> members.  Pay particular
+attention to the footnote that details the caveats around Body tracking.</p>
+<p>Careful testing has been done for <em>only</em> the following. So, if you make use
+of any of the other new state values and spot a bug, please report it:</p>
+<ol>
+<li>SystemName</li>
+<li>SystemAddress</li>
+<li>Body (Name)</li>
+<li>BodyID</li>
+<li>BodyType</li>
+<li>StationName</li>
+<li>StationType</li>
+<li>(Station) MarketID</li>
+</ol>
+</li>
+<li>
+<p>There is an additional property <code>request_cmdr</code> on <code>CAPIData</code> objects, which
+records the name of the Cmdr the request was made for.</p>
+</li>
+<li>
+<p><code>FDevIDs</code> files are their latest versions at time of this version's build.</p>
+</li>
+<li>
+<p><code>examples\plugintest</code> - dropped the "pre-5.0.0 config" code, as it's long
+since irrelevant.</p>
+</li>
+</ul>
+<h2><a id="user-content-developers" class="anchor" aria-hidden="true" href="#developers"><span aria-hidden="true" class="octicon octicon-link"></span></a>Developers</h2>
+<ul>
+<li>
+<p>If you utilise a git clone of the source code, you should also ensure the
+sub-modules are initialised and synchronised.
+<a href="https://github.com/EDCD/EDMarketConnector/wiki/Running-from-source#obtain-a-copy-of-the-application-source">wiki:Running from source</a>
+has been updated to include the necessary commands.</p>
+</li>
+<li>
+<p>The <code>coriolis-data</code> git sub-module now uses an HTTPS, not "git" URL, so won't
+require authentication for a simple <code>git pull</code>.</p>
+</li>
+<li>
+<p>If you have a <code>dump</code> directory in CWD when running EDMarketConnector.py under
+a debugger you will get files in that location when CAPI queries complete.
+This will now include files with names of the form
+<code>FleetCarrier.&lt;callsign&gt;.&lt;timstamp&gt;.json</code> for <code>/fleetcarrier</code> data.</p>
+</li>
+<li>
+<p>All the main UI tk widgets are now properly named.  This might make things
+easier if debugging UI widgets as you'll no longer see a bunch of <code>!label1</code>,
+<code>!frame1</code> and the like.</p>
+<p>Each plugin's separator is named as per the scheme <code>plugin_hr_&lt;X&gt;</code>, and when
+a plugin has UI its new container Frame is named <code>plugin_X</code>.  Both of these
+start with <code>1</code>, not <code>0</code>.</p>
+</li>
+</ul>
+<hr>
+
+
+<h2>Release 5.7.0</h2>
+<p>This release re-enables CAPI queries for Legacy players.  As a result, the
+'Update' button functionality is now restored for Legacy players, along with
+"Automatically update on docking" functionality.</p>
+<ul>
+<li>
+<p>We now test against, and package with, Python 3.11.1, 32-bit.</p>
+</li>
+<li>
+<p>This release is functionally identical to 5.7.0-rc1, as no problems were
+reported with that.</p>
+</li>
+<li>
+<p>As noted above, Legacy players now have CAPI functionality once more.
+Plugin developers check below for how you can determine the source galaxy
+of such data.</p>
+</li>
+<li>
+<p>Due to a bug it turned out that a workaround for "old browsers don't support
+very long URLs" had been inactive since late 2019.  As no-one has noticed
+or complained we've now removed the defunct code in favour of the simple
+<code>webbrowser.open(&lt;url&gt;)</code>.</p>
+<p>Testing showed that all of Firefox, Chrome and Chrome-based Edge worked with
+very long URLs without issues.</p>
+</li>
+<li>
+<p><code>EDMC.exe -n</code> had been broken for a while, it now functions once more.</p>
+</li>
+<li>
+<p>Some output related to detecting and parsing <code>gameversion</code> from Journals
+has been moved from INFO to DEBUG.  This returns the output of any <code>EDMC.exe</code>
+command to the former, quieter, version.</p>
+</li>
+</ul>
+<h2><a id="user-content-bugs" class="anchor" aria-hidden="true" href="#bugs"><span aria-hidden="true" class="octicon octicon-link"></span></a>Bugs</h2>
+<ul>
+<li>
+<p>A corner case of "game not running" and "user presses 'Update' button" would
+result in an empty <code>uploaderID</code> string being sent to EDDN.  Such messages are
+still accepted by the EDDN Gateway, and the Relay then obfuscates this field
+anyway.  So, at worse, this would make it look like the same uploader was in
+lots of different places.  This has been fixed.</p>
+</li>
+<li>
+<p>The message about converting legacy <code>replay.jsonl</code> was being emitted even
+when there was no file to convert.  This has been fixed.</p>
+</li>
+</ul>
+<h2><a id="user-content-plugin-developers" class="anchor" aria-hidden="true" href="#plugin-developers"><span aria-hidden="true" class="octicon octicon-link"></span></a>Plugin Developers</h2>
+<ul>
+<li>
+<p>An erroneous statement about "all of Python stdlib" in PLUGINS.md has been
+corrected.  We don't/can't easily include all of this.  Ask if any part of it
+you require is missing.</p>
+</li>
+<li>
+<p>In order to not pass Legacy data to plugins without them being aware of it
+there is now a new function <code>cmdr_data_legacy()</code>, which mirrors the
+functionality of <code>cmdr_data()</code>, but for Legacy data only.  See PLUGINS.md
+for more details.</p>
+</li>
+<li>
+<p>The <code>data</code> passed to <code>cmdr_data()</code> and <code>cmdr_data_legacy()</code> is now correctly
+typed as <code>CAPIData</code>.  This is a sub-class of <code>UserDict</code>, so you can continue
+to use it as such.  However, it also has one extra property, <code>source_host</code>,
+which can be used to determine if the data was from the Live or Legacy
+CAPI endpoint host.  See PLUGINS.md for more details.</p>
+</li>
+<li>
+<p>If any plugin had been attempting to make use of <code>config.get_int('theme')</code>,
+then be aware that we've finally moved from hard-coded values to actual
+defined constants.  Example use would be as in:</p>
+<div class="highlight highlight-source-python"><pre><span class="pl-k">from</span> <span class="pl-s1">config</span> <span class="pl-k">import</span> <span class="pl-s1">config</span>
+<span class="pl-k">from</span> <span class="pl-s1">theme</span> <span class="pl-k">import</span> <span class="pl-s1">theme</span>
+
+<span class="pl-s1">active_theme</span> <span class="pl-c1">=</span> <span class="pl-s1">config</span>.<span class="pl-en">get_int</span>(<span class="pl-s">'theme'</span>)
+<span class="pl-k">if</span> <span class="pl-s1">active_theme</span> <span class="pl-c1">==</span> <span class="pl-s1">theme</span>.<span class="pl-v">THEME_DARK</span>:
+    ...
+<span class="pl-k">elif</span> <span class="pl-s1">active_theme</span> <span class="pl-c1">==</span> <span class="pl-s1">theme</span>.<span class="pl-v">THEME_TRANSPARENT</span>:
+    ...
+<span class="pl-k">elif</span> <span class="pl-s1">active_theme</span> <span class="pl-c1">==</span> <span class="pl-s1">theme</span>.<span class="pl-v">THEME_DEFAULT</span>:
+    ...
+<span class="pl-k">else</span>:
+    ...</pre></div>
+<p>But remember that all tkinter widgets in plugins will inherit the main UI
+current theme colours anyway.</p>
+</li>
+<li>
+<p>The contents of <code>NavRoute.json</code> will now be loaded during 'catch-up' when
+EDMarketConnector is (re-)started.  The synthetic <code>StartUp</code> (note the
+capitalisation) event that is emitted after the catch-up ends will have
+<code>state['NavRoute']</code> containing this data.</p>
+<p>However, the <code>Fileheader</code> event from detecting a subsequent new Journal file
+<em>will</em> blank this data again.  Thus, if you're interested in "last plotted
+route" on startup you should react to the <code>StartUp</code> event.  Also, note that
+the contents <em>will</em> indicate a <code>NavRouteClear</code> if that was the last such
+event.</p>
+<p>PLUGINS.md has been updated to reflect this.</p>
+</li>
+<li>
+<p>If you've ever been in the habit of running our <code>develop</code> branch, please
+don't.  Whilst we try to ensure that any code merged into this branch doesn't
+contain bugs, it hasn't at that point undergone more thorough testing.
+Please use the <code>stable</code> branch unless otherwise directed.</p>
+</li>
+<li>
+<p>Some small updates have been made in <code>edmc_data</code> as a part of reviewing the
+latest update to <code>coriolis-data</code>.
+We make no guarantee about keeping these parts of <code>edmc_data</code> up to date.
+Any plugins attempting to use that data should look at alternatives, such
+as <a href="https://github.com/EDCD/FDevIDs/blob/master/outfitting.csv">FDevIDs/outfitting.csv</a>.</p>
+<p>A future update might remove those maps, or at least fully deprecate their
+use by plugins.  Please contact us <strong>now</strong> if you actually make use of this
+data.</p>
+</li>
+</ul>
+<hr>
+
+
+<h2>Release 5.6.1</h2>
+<p>This release addresses some minor bugs and annoyances with v5.6.0, especially
+for Legacy galaxy players.</p>
+<p>In general, at this early stage of the galaxy split, we prefer to continue to
+warn Legacy users who have 'send data' options active for sites that only
+accept Live data.  In the future this might be reviewed and such warnings
+removed such that the functionality <em>fails silently</em>.  This might be of use
+to users who actively play in both galaxies.</p>
+<ul>
+<li>
+<p>CAPI queries will now <strong>only be attempted for Live galaxy players</strong>  This is
+a stop-gap whilst the functionality is implemented for Legacy galaxy players.
+Doing so prevents using Live galaxy data whilst playing Legacy galaxy, which
+would be increasingly wrong and misleading.</p>
+<ol>
+<li>'Automatic update on docking' will do nothing for Legacy players.</li>
+<li>Pressing the 'Update' button whilst playing Legacy will result in a status
+line message "CAPI for Legacy not yet supported", and otherwise achieve
+nothing.  <strong>The only function of this button is to query CAPI data and
+pass it to plugins, which does <em>not</em> include Inara and EDSM</strong>.</li>
+<li>A Legacy player trying to use "File" &gt; "Status" will get the message
+"Status: No CAPI data yet" due to depending on CAPI data.</li>
+</ol>
+<p>It is hoped to implement CAPI data retrieval and use for Legacy players soon,
+although this will likely entail extending the plugins API to include a new
+function specifically for this.  Thus only updated plugins would support
+this.</p>
+</li>
+<li>
+<p>EDDN: Where data has been sourced from the CAPI this application now sends
+a header-&gt;gameversion in the format <code>"CAPI-(Live|Legacy)-&lt;endpoint"</code> as per
+<a href="https://github.com/EDCD/EDDN/blob/live/docs/Developers.md#gameversions-and-gamebuild">the updated documentation</a>.</p>
+<ol>
+<li>
+<p>As <em>this</em> version only queries CAPI for Live players that will only be
+<code>"CAPI-Live-&lt;endpoint&gt;"</code> for the time being.</p>
+</li>
+<li>
+<p>If, somehow, the CAPI host queried matches neither the
+current Live host, the Legacy host, nor the past beta host, you will see
+<code>"CAPI-UNKNOWN-&lt;endpoint&gt;"</code>.</p>
+</li>
+<li>
+<p>As that statement implies, this application will also signal 'Live' if
+<code>pts-companion.orerve.net</code> has been used, due to detecting an alpha or beta
+version of the game.  However, in that case the <code>/test</code> schemas will be used.</p>
+</li>
+</ol>
+<p>Closes <a href="https://github.com/EDCD/EDMarketConnector/issues/1734">#1734</a>.</p>
+</li>
+<li>
+<p>Inara: Only warn about Legacy data if sending is enabled in Settings &gt; Inara.</p>
+<p>Closes <a href="https://github.com/EDCD/EDMarketConnector/issues/1730">#1730</a>.</p>
+</li>
+<li>
+<p>Inara: Handling of some events has had a sanity check added so that the
+Inara API doesn't complain about empty strings being sent.  In these cases
+the event will simply not be sent.</p>
+<p>Closes <a href="https://github.com/EDCD/EDMarketConnector/issues/1732">#1732</a>.</p>
+</li>
+<li>
+<p>EDSM: EDSM has decided to accept only Live data on its API.  Thus, this
+application will only attempt to send data for Live galaxy players.</p>
+<p>If a Legacy galaxy player has the Settings &gt; EDSM &gt; "Send flight log and
+Cmdr status to EDSM" option active then they will receive an error about
+this at most once every 5 minutes.  Disabling that option will prevent the
+warning.</p>
+</li>
+</ul>
+<h2><a id="user-content-plugin-developers" class="anchor" aria-hidden="true" href="#plugin-developers"><span aria-hidden="true" class="octicon octicon-link"></span></a>Plugin Developers</h2>
+<ul>
+<li>PLUGINS.md has been updated to make it clear that the only use of imports
+from the <code>config</code> module are for setting/getting/removing a plugin's own
+configuration, or detecting application shutdown in progress.</li>
+<li>PLUGINS.md has also been updated to add a note about how the <code>data</code> passed
+to a plugin <code>cmdr_data()</code> is, strictly speaking, an instance of <code>CAPIData</code>,
+which is an extension of <code>UserDict</code>.  It has some extra properties on it,
+<strong>but these are for internal use only and no plugin should rely on them</strong>.</li>
+<li>As noted above, implementing CAPI data for Legacy players will likely entail
+an additional function in the API provided to plugins.  See
+<a href="https://github.com/EDCD/EDMarketConnector/issues/1728">#1728</a> for discussion
+about this.</li>
+</ul>
+<hr>
+
+
+<h2>Release 5.6.0</h2>
+<p>Tha major reason for this release is to address the Live versus Legacy galaxy
+split <a href="https://www.elitedangerous.com/news/elite-dangerous-update-14-and-beyond-live-and-legacy-modes" rel="nofollow">coming in Update 14 of the game</a>.
+See the section "Update 14 and the Galaxy Split" below for how this might
+impact you.</p>
+<h2><a id="user-content-changes" class="anchor" aria-hidden="true" href="#changes"><span aria-hidden="true" class="octicon octicon-link"></span></a>Changes</h2>
+<ul>
+<li>
+<p>We now test against, and package with, Python 3.10.8.</p>
+</li>
+<li>
+<p>The code for sending data to EDDN has been reworked.  This changes the
+'replay log' from utilising an internal array, backed by a flat file
+(<code>replay.jsonl</code>), to an sqlite3 database.</p>
+<p>As a result:</p>
+<ol>
+<li>Any messages stored in the old <code>replay.jsonl</code> are converted at startup,
+if that file is present, and then the file removed.</li>
+<li>All new messages are stored in this new sqlite3 queue before any attempt
+is made to send them.  An immediate attempt is then made to send any
+message not affected by "Delay sending until docked".</li>
+<li>Sending of queued messages will be attempted every 5 minutes, unless
+"Delay sending until docked" is active and the Cmdr is not docked in
+their own ship.  This is in case a message failed to send due to an issue
+communicating with the EDDN Gateway.</li>
+<li>When you dock in your own ship an immediate attempt to send all queued
+messages will be initiated.</li>
+<li>When processing queued messages the same 0.4-second inter-message delay
+as with the old code has been implemented.  This serves to not suddenly
+flood the EDDN Gateway.  If any message fails to send for Gateway reasons,
+i.e. not a bad message, then this processing is abandoned to wait for
+the next invocation.</li>
+</ol>
+<p>The 5-minute timer in point 3 differs from the old code, where almost any
+new message sending attempt could initiate processing of the queue.  At
+application startup this delay is only 10 seconds.</p>
+<p>Currently, the feedback of "Sending data to EDDN..." in the UI status line
+has been removed.</p>
+<p><strong>If you do not have "Delay sending until docked" active, then the only
+messages that will be at all delayed will be where there was a communication
+problem with the EDDN Gateway, or it otherwise indicated a problem other
+than 'your message is bad'.</strong></p>
+</li>
+<li>
+<p>As a result of this EDDN rework this application now sends appropriate
+<code>gameversion</code> and <code>gamebuild</code> strings in EDDN message headers.
+The rework was necessary in order to enable this, in case of any queued
+or delayed messages which did not contain this information in the legacy
+<code>replay.jsonl</code> format.</p>
+</li>
+<li>
+<p>For EDSM there is a very unlikely set of circumstances that could, in theory
+lead to some events not being sent.  This is so as to safeguard against
+sending a batch with a gameversion/build claimed that does not match for
+<em>all</em> of the events in that batch.</p>
+<p>It would take a combination of "communications with EDSM are slow", more
+events (the ones that would be lost), a game client crash, <em>and</em> starting
+a new game client before the 'more events' are sent.</p>
+</li>
+</ul>
+<h2><a id="user-content-update-14-and-the-galaxy-split" class="anchor" aria-hidden="true" href="#update-14-and-the-galaxy-split"><span aria-hidden="true" class="octicon octicon-link"></span></a>Update 14 and the Galaxy Split</h2>
+<p>Due to the galaxy split <a href="https://www.elitedangerous.com/news/elite-dangerous-update-14-and-beyond-live-and-legacy-modes" rel="nofollow">announced by Frontier</a>
+there are some changes to the major third-party websites and tools.</p>
+<ul>
+<li>
+<p>Inara <a href="https://inara.cz/elite/board-thread/7049/463292/#463292" rel="nofollow">has chosen</a>
+to only accept Live galaxy data on its API.</p>
+<p>This application will not even process Journal data for Inara after
+2022-11-29T09:00:00+00:00 <em>unless the <code>gameversion</code> indicates a Live client</em>.
+This explicitly checks that the game's version is semantically equal to or
+greater than '4.0.0'.</p>
+<p>If a Live client is <em>not</em> detected, then there is an INFO level logging
+message "Inara only accepts Live galaxy data", which is also set as the main
+UI status line.  This message will repeat, at most, every 5 minutes.</p>
+<p>If you continue to play in the Legacy galaxy only then you probably want to
+just disable the Inara plugin with the checkbox on Settings &gt; Inara.</p>
+</li>
+<li>
+<p>All batches of events sent to EDSM will be tagged with a <code>gameversion</code>, in
+a similar manner to the EDDN header.</p>
+<p>Ref: <a href="https://www.edsm.net/en/api-journal-v1" rel="nofollow">EDSM api-journal-v1</a></p>
+</li>
+<li>
+<p>All EDDN messages will now have appropriate <code>gameversion</code> and <code>gamebuild</code>
+fields in the <code>header</code> as per
+<a href="https://github.com/EDCD/EDDN/blob/live/docs/Developers.md#gameversions-and-gamebuild">EDDN/docs/Developers.md</a>.</p>
+<p>As a result of this you can expect third-party sites to choose to filter data
+based on that.</p>
+<p>Look for announcements by individual sites/tools as to what they have chosen
+to do.</p>
+</li>
+</ul>
+<h2><a id="user-content-known-bugs" class="anchor" aria-hidden="true" href="#known-bugs"><span aria-hidden="true" class="octicon octicon-link"></span></a>Known Bugs</h2>
+<p>In testing if it had been broken at all due to 5.5.0 -&gt; 5.6.0 changes it has
+come to light that <code>EDMC.EXE -n</code>, to send data to EDDN, was already broken in
+5.5.0.</p>
+<p>In addition, there is now some extra 'INFO' logging output which will be
+produced by any invocation of <code>EDMC.EXE</code>.  This might break third-party use of
+it, e.g. <a href="https://forums.frontier.co.uk/threads/trade-computer-extension-mk-ii.223056/" rel="nofollow">Trade Computer Extension Mk.II</a>.
+This will be fixed as soon as the dust settles from Update 14, with emphasis
+being on ensuring the GUI <code>EDMarketConnector.exe</code> functions properly.</p>
+<h2><a id="user-content-notes-for-eddn-listeners" class="anchor" aria-hidden="true" href="#notes-for-eddn-listeners"><span aria-hidden="true" class="octicon octicon-link"></span></a>Notes for EDDN Listeners</h2>
+<ul>
+<li>
+<p>Where EDMC sourced data from the Journal files it will set <code>gameversion</code>
+and <code>gamebuild</code> as per their values in <code>Fileheader</code> or <code>LoadGame</code>, whichever
+was more recent (there are some events that occur between these).</p>
+</li>
+<li>
+<p><em>If any message was already delayed such that it did not
+have the EDDN header recorded, then the <code>gameversion</code> and <code>gamebuild</code> will
+be empty strings</em>.  In order to indicate this the <code>softwareName</code> will have
+<code> (legacy replay)</code> appended to it, e.g. <code>E:D Market Connector Connector [Windows] (legacy replay)</code>.  In general this indicates that the message was
+queued up using a version of EDMC prior to this one.  If you're only
+interested in Live galaxy data then you might want to ignore such messages.</p>
+</li>
+<li>
+<p>Where EDMC sourced data from a CAPI endpoint, the resulting EDDN message
+will have a <code>gameversion</code> of <code>CAPI-&lt;endpoint&gt;</code> set, e.g. <code>CAPI-market</code>.
+<strong>At this time it is not 100% certain which galaxy this data will be for, so
+all listeners are advised to ignore/queue such data until this is clarified</strong>.</p>
+<p><code>gamebuild</code> will be an empty string for all CAPI-sourced data.</p>
+</li>
+</ul>
+<h2><a id="user-content-plugin-developers" class="anchor" aria-hidden="true" href="#plugin-developers"><span aria-hidden="true" class="octicon octicon-link"></span></a>Plugin Developers</h2>
+<ul>
+<li>There is a new flag in <code>state</code> passed to plugins, <code>IsDocked</code>.  See PLUGINS.md
+for details.</li>
+</ul>
+<hr>
+
+<h2>Release 5.5.0</h2>
+<ul>
+<li><a href="https://www.virustotal.com/gui/file/fadbbc742530863396dabc4813fe80103dd149b9e05e7df9fcbf13ed62f64b9b?nocache=1">Virus Total scan results</a> for this release.</li>
+<li>We now test against, and package with, Python 3.10.7.</li>
+<li>EDDN: Support added for the <code>FCMaterials</code> schemas to aid third-party sites in
+offering searches for where to buy and sell Odyssey Micro Resources,
+including on Fleet Carriers with the bar tender facility.</li>
+</ul>
+<h2><a id="user-content-bug-fixes" class="anchor" aria-hidden="true" href="#bug-fixes"><span aria-hidden="true" class="octicon octicon-link"></span></a>Bug Fixes</h2>
+<ul>
+<li>EDDN: Abort <code>fsssignaldiscovered</code> sending of message if no signals passed
+the checks.</li>
+<li>EDDN: Add Horizons check for location on <code>fsssignaldiscovered</code> messages.</li>
+<li>Don't alert the user if the first attempted load of <code>NavRoute.json</code> contains
+no route.</li>
+<li>Inara: Don't set <code>marketID</code> for <code>ApproachSettlement</code> unless it's actually
+present in the event.</li>
+</ul>
+<h2><a id="user-content-plugin-developers" class="anchor" aria-hidden="true" href="#plugin-developers"><span aria-hidden="true" class="octicon octicon-link"></span></a>Plugin Developers</h2>
+<ul>
+<li>
+<p>We now build using the new, <code>setuptools</code> mediated py2exe <code>freeze()</code> method,
+so we're in the clear for when <code>distutils</code> is removed in Python 3.12.</p>
+<p>This shouldn't have any adverse effects on plugins, i.e. all of the same
+Python modules are still packaged as before.</p>
+</li>
+<li>
+<p>Support has been added for the <code>NavRouteClear</code> event.  We <em>do</em> send this
+through to plugins, so that they know the player has cleared the route,
+<strong>but we keep the previously plotted route details in <code>state['NavRoute']</code>.</strong></p>
+</li>
+<li>
+<p>The documentation of the return type of <code>journal_entry()</code> has been corrected
+to <code>Optional[str]</code>.</p>
+</li>
+<li>
+<p>FDevIDs files (<code>commodity.csv</code> <code>rare_commodity.csv</code>) updated to latest
+versions.</p>
+</li>
+</ul>
+<h2><a id="user-content-developers" class="anchor" aria-hidden="true" href="#developers"><span aria-hidden="true" class="octicon octicon-link"></span></a>Developers</h2>
+<ul>
+<li>We now build using the new, <code>setuptools</code> mediated py2exe <code>freeze()</code> method,
+so we're in the clear for when <code>distutils</code> is removed in Python 3.12.</li>
+<li>The old <code>setup.py</code> file, along with associated <code>py2exe.cmd</code> have been removed
+in favour of the new <code>Build-exe-and-msi.py</code> file.  Documentation updated.</li>
+</ul>
+<hr>
+
+<h2>Release 5.4.1</h2>
+<ul>
+<li>
+<p>If for any reason <code>EDMarketConnector.exe</code> fails to shutdown and exit when
+asked to by the upgrade process this should no longer result in a spontaneous
+system reboot.  Closes <a href="https://github.com/EDCD/EDMarketConnector/issues/1492">#1492</a>.</p>
+<p>A manual reboot will still be required to complete the EDMarketConnector
+upgrade process and we make no guarantees about the stability of the
+application until this is done.</p>
+</li>
+<li>
+<p>The new EDDN <code>fsssignaldiscovered/1</code> schema has been implemented.</p>
+</li>
+<li>
+<p>EDSM trace level logging will no longer log API credentials unless explicitly
+asked to, separately from other EDSM API trace logging.</p>
+</li>
+</ul>
+<h2>
+<a id="user-content-bug-fixes" class="anchor" href="#bug-fixes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Bug Fixes</h2>
+<ul>
+<li>EDDN: Ensure we always remove all <code>_Localised</code> suffix keys in data.  This
+was missed in some recent new schemas and turned out to be an issue for at
+least <code>approachsettlement/1</code>.</li>
+</ul>
+<hr>
+
+<h2>Release 5.4.0</h2>
+<ul>
+<li>We now test against, and package with, Python 3.10.4.</li>
+<li>New EDDN schema <code>fssbodysignals</code> is now supported.</li>
+<li>Odyssey Update 12 will add <code>BodyID</code> to <code>CodexEntry</code> journal events, so don't
+overwrite this with an augmentation if it is already present.  We've also
+added the same for <code>BodyName</code> in case Frontier ever add that.</li>
+<li>
+<a href="https://github.com/EDCD/EDMarketConnector/issues/24">Translations</a> updated.
+Thanks again to all the contributors.</li>
+</ul>
+<h2>
+<a id="user-content-bug-fixes" class="anchor" href="#bug-fixes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Bug Fixes</h2>
+<ul>
+<li>Cross-check the <code>MarketID</code> in CAPI data, not only the station name, to ensure
+the data is for the correct station.  Closes <a href="https://github.com/EDCD/EDMarketConnector/issues/1572">#1572</a>.</li>
+<li>Location cross-check paranoia added to several EDDN message types to ensure
+no bad data is sent.</li>
+<li>Ensure we don't send bad BodyID/Name for an orbital station if the player
+uses a taxi.
+Closes <a href="https://github.com/EDCD/EDMarketConnector/issues/1522">#1522</a>.</li>
+</ul>
+<h2>
+<a id="user-content-developers" class="anchor" href="#developers" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Developers</h2>
+<ul>
+<li>Odyssey Update 12 adds a new Journal event, and file, <code>FCMaterials.json</code>,
+detailing the available trades at a Fleet Carrier's bar tender.  Support has
+been added for this.  Plugin developers are sent an <code>FCMaterials</code> event
+with the full contents of the file.</li>
+</ul>
+<h2>
+<a id="user-content-edmcexe" class="anchor" href="#edmcexe" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>EDMC.exe</h2>
+<p>This now uses specific exit codes in all cases, rather than a generic
+<code>EXIT_SYS_ERR</code> (6) for some cases.  See the appropriate line in EDMC.py for
+details.</p>
+
+
+<h2>Release 5.3.4</h2>
+<p>Whilst EDMarketConnector.exe was fixed for the Odyssey Update 11 difference in Journal file names, EDMC.exe was not.   If you're wondering, that's the command-line utility that, for instance, Trade Computer Extensions uses to obtain data.</p>
+<ul>
+<li>Use the new common function for finding latest journal file in EDMC.py.</li>
+<li>Quietens some NavRoute related logging for the benefit of EDMC.py.  This is
+now at DEBUG level, rather than INFO.</li>
+</ul>
+
+
+<h2>Release 5.3.3</h2>
+<p>Unfortunately 5.3.2 failed to fully address the issues caused by the different
+Journal filenames when using the Odyssey Update 11 client.  It's fine if you
+run EDMarketConnector first and <em>then</em> the game, as the code path that detects
+a new file always does just that.</p>
+<p>But the code for EDMarketConnector startup to find the current newest Journal
+file relied on sorting the filenames and that would mean the new-style names
+would always sort as 'oldest'.</p>
+<p>This release fixes that code to properly use the file modification timestamp
+to determine the newest file on startup.</p>
+
+
+<h2>Release 5.3.2</h2>
+<p>This release contains one change to cope with how Frontier decided to name
+the Journal files differently in the Update 11 Odyssey client.</p>
+
+
+<h2>Release 5.3.1</h2>
+<p>This release addresses some issues with newer EDDN code which could cause    erroneous alerts to the player, or sending of bad messages.</p>                 <ul>                                                                            <li>                                                                            <p>EDDN: Cope with <code>ApproachSettlement</code> on login occurring before <code>Location</code>,
+such that we don't yet know the name of the star system the player is in.</p>   <p>Closes <a href="https://github.com/EDCD/EDMarketConnector/pull/1484">#1484</a></p>
+</li>                                                                           <li>                                                                            <p>EDDN: Cope with <code>ApproachSettlement</code> missing planetary coordinates on login
+at/near a settlement in Horizons.</p>                                           <p>Closes <a href="https://github.com/EDCD/EDMarketConnector/pull/1476">#1476</a></p>
+</li>                                                                           <li>                                                                            <p>EDDN: Change the <code>CodexEntry</code> "empty string" checks to only apply to those
+values where the schema enforces "must be at least one character".</p>          <p>This prevents the big 'CodexEntry had empty string, PLEASE ALERT THE EDMC    DEVELOPERS' message from triggering on, e.g. <code>NearestDestination</code> being
+empty, which the schema allows.</p>                                             <p>Closes <a href="https://github.com/EDCD/EDMarketConnector/issues/1481">#1481</a></p>
+</li>                                                                           </ul>                                                                           <h2>                                                                            <a id="user-content-plugin-developers" class="anchor" href="#plugin-developers" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Plugin Developers</h2>
+<ul>                                                                            <li>
+<p>If you use a sub-class for a widget the core code will no longer break if
+your code raises an exception.  e.g. a plugin was failing due to Python
+3.10 using <code>collections.abc</code> instead of <code>collections</code>, and the plugin's
+custom widget had a <code>configure()</code> method which was called by the core
+theme code on startup or theme change.  This then caused the whole
+application UI to never show up on startup.</p>
+<p>This also applies if you set up a button such that enter/leave on it, i.e.
+mouse in/out, causes the <code>theme.py</code> code for that to trigger.</p>
+<p>So, now in such cases the main UI should actually show up, although your
+plugin's UI might look weird due to theming not being properly applied.</p>
+<p>The plugin exception <strong>WILL</strong> be logged, at ERROR level.</p>
+</li>
+</ul>
+
+
+<h2>Release 5.3.0</h2>
+<p>As has sadly become routine now, please read
+<a href="https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting#installer-and-or-executables-flagged-as-malicious-viruses">our statement about malware false positives</a>
+affecting our installers and/or the files they contain.  We are as confident
+as we can be, without detailed auditing of python.org's releases and all
+the py2exe source and releases, that there is no malware in the files we make
+available.</p>
+<p>This release is primarily aimed at fixing some more egregious bugs,
+shortcomings and annoyances with the application.  It also adds support for
+two additional
+<a href="https://github.com/EDCD/EDDN/blob/live/README.md">EDDN</a>
+schemas.</p>
+<ul>
+<li>
+<p>We now test and build using Python 3.10.2.  We do not <em>yet</em> make use of any
+features specific to Python 3.10 (or 3.9).  Let us restate that we
+absolutely reserve the right to commence doing so.</p>
+</li>
+<li>
+<p>We now set a custom User-Agent header in all web requests, i.e. to EDDN,
+EDSM and the like.  This is of the form:</p>
+<p><code>EDCD-EDMarketConnector-&lt;version&gt;</code></p>
+</li>
+<li>
+<p>"File" -&gt; "Status" will now show the new Odyssey ranks, both the new
+categories and the new 'prestige' ranks, e.g. 'Elite I'.</p>
+<p><strong>NB: Due to an oversight there are currently no translations for these.</strong></p>
+<p>Closes <a href="https://github.com/EDCD/EDMarketConnector/issues/1369">#1369</a>.</p>
+</li>
+<li>
+<p>Running <code>EDMarketConnector.exe --reset-ui</code> will now also reset any changes to
+the application "UI Scale" or geometry (position and size).</p>
+<p>Closes <a href="https://github.com/EDCD/EDMarketConnector/issues/1155">#1155</a>.</p>
+</li>
+<li>
+<p>We now use UTC-based timestamps in the application's log files.  Prior to
+this change it was the "local time", but without any indication of the
+applied timezone.  Each line's timestamp has <code> UTC</code> as a suffix now.  We
+are assuming that your local clock is correct <em>and</em> the timezone is set
+correctly, such that Python's <code>time.gmtime()</code> yields UTC times.</p>
+<p>This should make it easier to correlate application logfiles with in-game
+time and/or third-party service timestamps.</p>
+</li>
+<li>
+<p>The process used to build the Windows installers should now always pick up
+all the necessary files automatically.  Prior to this we used a manual
+process to update the installer configuration which was prone to both user
+error and neglecting to update it as necessary.</p>
+</li>
+<li>
+<p>If the application fails to load valid data from the <code>NavRoute.json</code> file
+when processing a Journal <code>NavRoute</code> event, it will attempt to retry this
+operation a number of times as it processes subsequent Journal events.</p>
+<p>This should hopefully work around a race condition where the game might
+not have yet updated <code>NavRoute.json</code> at all, or has truncated it to empty,
+when we first attempt this.</p>
+<p>We will also now <em>NOT</em> attempt to load <code>NavRoute.json</code> during the startup
+'Journal catch-up' mode, which only sets internal state.</p>
+<p>Closes <a href="https://github.com/EDCD/EDMarketConnector/issues/1155">#1348</a>.</p>
+</li>
+<li>
+<p>Inara: Use the <code>&lt;journal log&gt;-&gt;Statistics-&gt;Bank_Account-&gt;Current_Wealth</code>
+value when sending a <code>setCommanderCredits</code> message to Inara to set
+<code>commanderAssets</code>.</p>
+<p>In addition, a <code>setCommanderCredits</code> message at game login <strong>will now only
+ever be sent at game login</strong>.  Yes, you will <strong>NEED</strong> to relog to send an
+updated balance.  This is the only way in which to sanely keep the
+'Total Assets' value on Inara from bouncing around.</p>
+<p>Refer to <a href="https://inara.cz/inara-api-docs/#event-1" rel="nofollow">Inara:API:docs:setCommanderCredits</a>.</p>
+<p>Closes <a href="https://github.com/EDCD/EDMarketConnector/issues/1401">#1401</a>.</p>
+</li>
+<li>
+<p>Inara: Send a <code>setCommanderRankPilot</code> message when the player logs in to the
+game on-foot.  Previously you would <em>HAVE</em> to be in a ship at login time
+for this to be sent.</p>
+<p>Thus, you can now relog on-foot in order to update Inara with any Rank up
+or progress since the session started.</p>
+<p>Closes <a href="https://github.com/EDCD/EDMarketConnector/issues/1378">#1378</a>.</p>
+</li>
+<li>
+<p>Inara: Fix for always sending a Rank Progress of 0%.</p>
+<p>Closes <a href="https://github.com/EDCD/EDMarketConnector/issues/1378">#1378</a>.</p>
+</li>
+<li>
+<p>Inara: You should once more see updates for any materials used in
+Engineering.  The bug was in our more general Journal event processing
+code pertaining to <code>EngineerCraft</code> events, such that the state passed to
+the Inara plugin hadn't been updated.</p>
+<p>Such updates should happen 'immediately', but take into account that there
+can be a delay of up to 35 seconds for any data sent to Inara, due to how
+we avoid breaking the "2 messages a minute" limit on the Inara API.</p>
+<p>Closes <a href="https://github.com/EDCD/EDMarketConnector/issues/1395">#1395</a>.</p>
+</li>
+<li>
+<p>EDDN: Implement new <a href="https://github.com/EDCD/EDDN/blob/live/schemas/approachsettlement-README.md">approachsettlement/1</a>
+schema.</p>
+</li>
+<li>
+<p>EDDN: Implement new <a href="https://github.com/EDCD/EDDN/blob/live/schemas/fssallbodiesfound-README.md">fssallbodiesfound/1</a>
+schema.</p>
+</li>
+<li>
+<p>EDDN: We now compress all outgoing messages.  This might help get some
+particularly large <code>navroute</code> messages go through.</p>
+<p>If any message is now rejected as 'too large' we will drop it, and thus
+not retry it later.  The application logs will reflect this.</p>
+<p>NB: The EDDN Gateway was updated to allow messages up to 1 MiB in size
+anyway.  The old limit was 100 KiB.</p>
+<p>Closes <a href="https://github.com/EDCD/EDMarketConnector/issues/1390">#1390</a>.</p>
+</li>
+<li>
+<p>EDDN: In an attempt to diagnose some errors observed on the EDDN Gateway
+with respect to messages sent from this application some additional checks
+and logging have been added.</p>
+<p><strong>NB: After some thorough investigation it was concluded that these EDDN
+errors were likely the result of long-delayed messages due to use of
+the "Delay sending until docked" option.</strong></p>
+<p>There should be no functional changes for users.  But if you see any of
+the following in this application's log files <strong>PLEASE OPEN
+<a href="https://github.com/EDCD/EDMarketConnector/issues/new?assignees=&amp;labels=bug%2C+unconfirmed&amp;template=bug_report.md&amp;title=">AN ISSUE ON GITHUB</a>
+with all the requested information</strong>, so that we can correct the relevant
+code:</p>
+<ul>
+<li><code>No system name in entry, and system_name was not set either!  entry: ...</code></li>
+<li><code>BodyName was present but not a string! ...</code></li>
+<li><code>post-processing entry contains entry ...</code></li>
+<li><code>this.body_id was not set properly: ...</code></li>
+<li><code>system is falsey, can't add StarSystem</code></li>
+<li><code>this.coordinates is falsey, can't add StarPos</code></li>
+<li><code>this.systemaddress is falsey, can't add SystemAddress</code></li>
+<li><code>this.status_body_name was not set properly: ...</code></li>
+</ul>
+<p>You might also see any of the following in the application status text
+(bottom of the window):</p>
+<ul>
+<li><code>passed-in system_name is empty, can't add System</code></li>
+<li><code>CodexEntry had empty string, PLEASE ALERT THE EDMC DEVELOPERS</code></li>
+<li><code>system is falsey, can't add StarSystem</code></li>
+<li><code>this.coordinates is falsey, can't add StarPos</code></li>
+<li><code>this.systemaddress is falsey, can't add SystemAddress</code></li>
+</ul>
+<p>Ref: <a href="https://github.com/EDCD/EDMarketConnector/issues/1403">#1403</a>
+<a href="https://github.com/EDCD/EDMarketConnector/issues/1393">#1393</a>.</p>
+</li>
+</ul>
+<h2>
+<a id="user-content-translations" class="anchor" href="#translations" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Translations</h2>
+<ul>
+<li>
+<p>Use a different workaround for OneSky (translations website) using "zh-Hans"
+for Chinese (Simplified), whereas Windows will call this "zh-CN". This is
+in-code and documented with a comment, as opposed to some 'magic' in the
+Windows Installer configuration that had no such documentation. It's less
+fragile than relying on that, or developers using a script/documented
+process to rename the file.</p>
+</li>
+<li>
+<p>As noted above we forgot to upload to
+<a href="https://marginal.oneskyapp.com/collaboration/project/52710" rel="nofollow">OneSky</a>
+after adding the Odyssey new ranks/categories.  This has now been done,
+and some new phrases await translation.</p>
+</li>
+</ul>
+
+<h2>Release 5.2.4</h2>
+<p>This is a <em>very</em> minor update that simply imports the latest versions of
+data files so that some niche functionality works properly.</p>
+<ul>
+<li>
+<p>Update <code>commodity.csv</code> and <code>rare_commodity.csv</code> from the latest
+<a href="https://github.com/EDCD/FDevIDs">EDCD/FDevIDs</a> versions.  This addresses
+an issue with export of market data in Trade Dangerous format containing
+<code>OnionHeadC</code> rather than the correct name, <code>Onionhead Gamma Strain</code>, that
+Trade Dangerous is expecting.</p>
+<p>This will only have affected Trade Dangerous users who use EDMarketConnector
+as a source of market data.</p>
+</li>
+</ul>
+<hr>
+
+<h2>Release 5.2.3</h2>
+<p>This release fixes one bug and fixes some example code.</p>
+<ul>
+<li>
+<p>Odyssey changed the order of some Journal events.  This caused our logic
+for tracking the following to break, and thus not report them ever to Inara:</p>
+<ul>
+<li>Ship Combat, Trade and Exploration ranks.</li>
+<li>On-foot Combat and Exobiologist ranks.</li>
+<li>Engineer unlocks and progress.</li>
+<li>Reputations with Major Factions (Superpowers).</li>
+</ul>
+<p>This is now fixed and the current state of all of these will be correctly
+reported to Inara if you have API access for it configured.</p>
+</li>
+</ul>
+<h2>
+<a id="user-content-developers" class="anchor" href="#developers" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Developers</h2>
+<ul>
+<li>
+<p>Now built using Python 3.9.9.</p>
+</li>
+<li>
+<p>Updated <a href="https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#packaging-extra-modules">PLUGINS.md</a>
+to state that we don't actually include <em>all</em> of Python's standard library.</p>
+</li>
+<li>
+<p>The <a href="https://github.com/EDCD/EDMarketConnector/tree/main/docs/examples/click_counter">click_counter</a>
+example plugin code has been corrected to both actually work fully, and pass
+our linting.</p>
+</li>
+</ul>
+
+
+<h2>Release 5.2.2</h2>
+<p>This release adds one new feature and addresses some bugs.  We've also
+updated to using Python 3.9.8.</p>
+<ul>
+<li>
+<p>Windows now has "minimize to system tray" support.</p>
+<ul>
+<li>The system tray icon will always be present.</li>
+<li>There is a new option on the Settings &gt; Appearance tab -
+<code>Minimize to system tray</code>.</li>
+<li>When this new option is active, minimizing the application will <em>also</em>
+hide the taskbar icon.</li>
+<li>When the new option is not active, the application will minimize to the
+taskbar as normal.</li>
+</ul>
+</li>
+</ul>
+<h2>
+<a id="user-content-bug-fixex" class="anchor" href="#bug-fixex" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Bug Fixex</h2>
+<ul>
+<li>
+<p>If a CAPI query failed in such a way that no <code>requests.Response</code> object
+was made available we attempted to blindly dump the non-existent object.<br>
+We now check that it actually exists, and log the specifics of the exception.</p>
+</li>
+<li>
+<p>A user experienced the game writing a NavRoute.json file without a
+<code>Route</code> array, which caused the application to attempt sending a badly formed
+<code>navroute</code> message to EDDN.  That message was then remembered and constantly
+retried.</p>
+<ul>
+<li>
+<p>We now sanity check the NavRoute.json contents to be sure there <em>is</em> a
+<code>Route</code> array, even if it is empty.  If it's not present no attempt
+to send the EDDN message will be made.</p>
+<p>If this scenario occurs the user will see a status line message <code>No  'Route' array in NavRoute.json contents</code>.</p>
+</li>
+<li>
+<p>For any EDDN message that receives a 400 status back we will drop it
+from the replay log.</p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+
+<h2>Release 5.2.1</h2>
+<p>This release primarily addresses the issue of the program asking for
+Frontier authorization much too often.</p>
+<ul>
+<li>Actually utilise the Frontier Refresh Token when the CAPI response is
+"Unauthorized".  The re-factoring of this code to make CAPI queries
+threaded inadvertently prevented this.</li>
+</ul>
+
+<h2>Release 5.2.0</h2>
+<ul>
+<li>
+<p>The 'Update' button is disabled if CQC/Arena is detected.</p>
+</li>
+<li>
+<p>Frontier CAPI queries now run in their own thread.  There should be no
+change in functionality for users.   This affects both EDMarketConnector
+(GUI) and EDMC (command-line).</p>
+</li>
+<li>
+<p><code>File</code> &gt; <code>Status</code> will now use cached CAPI data, rather than causing a fresh
+query.  <strong>Currently if data has not yet been cached nothing will happen when
+trying to use this</strong>.</p>
+</li>
+<li>
+<p>Trying to use <code>File</code> &gt; <code>Status</code> when the current commander is unknown, or
+there is has been no CAPI data retrieval yet, will now result in the 'bad'
+sound being played and an appropriate status line message.</p>
+</li>
+<li>
+<p><code>File</code> &gt; <code>Save Raw Data</code> also now uses the cached CAPI data, rather than
+causing a fresh query.  This will write an empty JSON <code>{}</code> if no data is
+yet available.</p>
+</li>
+<li>
+<p>New <a href="docs/Licenses/">docs/Licenses/</a> directory containing all relevant
+third-party licenses for the software this application uses.</p>
+</li>
+<li>
+<p><code>Settings</code> &gt; <code>Output</code> &gt; <code>File Location</code> 'Browse' button will now always be
+available, even if no output options are active.</p>
+</li>
+<li>
+<p>The 'no git installed' logging when running from source is now at INFO
+level, not ERROR.  This will look less scary.</p>
+</li>
+<li>
+<p>EDMarketConnetor command-line arguments have been re-ordered into
+logical groups for <code>--help</code> output.</p>
+</li>
+<li>
+<p>Support added for several new EDDN schemas relating to specific Journal
+events.  The live EDDN server has been updated to support these.</p>
+<p>Schema support added for:</p>
+<ul>
+<li><code>codexentry/1</code></li>
+<li><code>fssdiscoveryscan/1</code></li>
+<li><code>navbeaconscan/1</code></li>
+<li><code>navroute/1</code></li>
+<li><code>scanbarycentre/1</code></li>
+</ul>
+</li>
+<li>
+<p>If a message to EDDN gets an 'unknown schema' response it will <strong>NOT</strong> be
+saved in the replaylog for later retries, instead being discarded.</p>
+</li>
+</ul>
+<h2>
+<a id="user-content-bug-fixes" class="anchor" href="#bug-fixes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Bug Fixes</h2>
+<ul>
+<li>
+<p>Pressing the 'Update' button when in space (not docked, not on a body
+surface) will no longer cause a spurious "Docked but unknown station: EDO
+Settlement?" message.</p>
+</li>
+<li>
+<p>A bug preventing <code>--force-localserver-auth</code> from working has been fixed.</p>
+</li>
+<li>
+<p><code>horizons</code> and <code>odyssey</code> flags should now always be set properly on <em>all</em>
+EDDN messages.  The <code>horizons</code> flag was missing from some.</p>
+</li>
+</ul>
+<h2>
+<a id="user-content-developers" class="anchor" href="#developers" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Developers</h2>
+<ul>
+<li>
+<p>Now built using Python 3.9.7.</p>
+</li>
+<li>
+<p>New <code>journal_entry_cqc()</code> function for plugins to receive journal events
+<em>specifically and <strong>only</strong> when the player is in CQC/Arena</em>.  This allows
+for tracking things that happen in CQC/Arena without polluting
+<code>journal_entry()</code>.  See <a href="PLUGINS.md">PLUGINS.md</a> for details.</p>
+</li>
+<li>
+<p>Command-line argument <code>--trace-all</code> to force all possible <code>--trace-on</code> to be
+active.</p>
+</li>
+<li>
+<p>Contributing.md has been updated for how to properly use <code>trace_on()</code>.</p>
+</li>
+<li>
+<p>EDMC.(py,exe) now also makes use of <code>--trace-on</code>.</p>
+</li>
+<li>
+<p>EDMarketConnector now has <code>--capi-pretend-down</code> to act as if the CAPI
+server is down.</p>
+</li>
+<li>
+<p>Killswitches now have support for removing key/values entirely, or forcing
+the value.  See <a href="docs/Killswitches.md">docs/Killswitches.md</a> for details.</p>
+</li>
+<li>
+<p><code>state['Odyssey']</code> added, set from <code>LoadGame</code> journal event.</p>
+</li>
+<li>
+<p>You can now test against a different EDDN server using <code>--eddn-url</code>
+command-line argument.  This needs to be the <em>full</em> 'upload' URL, i.e. for
+the live instance this is <code>https://eddn.edcd.io:4430/upload/</code>.</p>
+</li>
+<li>
+<p>New command-line argument <code>--eddn-tracking-ui</code> to track the EDDN plugin's
+idea of the current BodyName and BodyID, from both the Journal and
+Status.json.</p>
+</li>
+</ul>
+
+<h2>Release 5.1.3</h2>
+<ul>
+<li>
+<p>Attempt to flush any pending EDSM API data when a Journal <code>Shutdown</code> or
+<code>Fileheader</code> event is seen.  After this, the data is dropped.  This ensures
+that, if the user next logs in to a different commander, the data isn't then
+sent to the wrong EDSM account.</p>
+</li>
+<li>
+<p>Ensure a previous Journal file is fully read/drained before starting
+processing of a new one.  In particular, this ensures properly seeing the end
+of a continued Journal file when opening the continuation file.</p>
+</li>
+<li>
+<p>New config options, in a new <code>Privacy</code> tab, to hide the current Private
+Group, or captain of a ship you're multi-crewing on.  These usually appear
+on the <code>Commander</code> line of the main UI, appended after your commander name,
+with a <code>/</code> between.</p>
+</li>
+<li>
+<p>EDO dockable settlement names with <code>+</code> characters appended will no longer
+cause 'server lagging' reports.</p>
+</li>
+<li>
+<p>Don't force DEBUG level logging to the
+<a href="https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting#plain-log-file">plain log file</a>
+if <code>--trace</code> isn't used to force TRACE level logging.  This means logging
+<em>to the plain log file</em> will once more respect the user-set Log Level, as in
+the Configuration tab of Settings.</p>
+<p>As its name implies, the <a href="https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting#debug-log-files">debug log file</a>
+will always contain at least DEBUG level logging, or TRACE if forced.</p>
+</li>
+</ul>
+<h2>
+<a id="user-content-plugin-developers" class="anchor" href="#plugin-developers" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>(Plugin) Developers</h2>
+<ul>
+<li>
+<p>New EDMarketConnector option <code>--trace-on ...</code> to control if certain TRACE
+level logging is used or not.  This helps keep the noise down whilst being
+able to have users activate choice bits of logging to help track down bugs.</p>
+<p>See <a href="Contributing.md#use-the-appropriate-logging-level">Contributing.md</a> for
+details.</p>
+</li>
+<li>
+<p>Loading of <code>ShipLocker.json</code> content is now tried up to 5 times, 10ms apart,
+if there is a file loading, or JSON decoding, failure.  This should
+hopefully result in the data being loaded correctly if a race condition with
+the game client actually writing to and closing the file is encountered.</p>
+</li>
+<li>
+<p><code>config.get_bool('some_str', default=SomeDefault)</code> will now actually honour
+that specified default.</p>
+</li>
+</ul>
+
+<h2>Release 5.1.2</h2>
+<ul>
+<li>
+<p>A Journal event change in EDO Update 6 will have caused some translated
+suit names to not be properly mapped to their sane versions.  This change
+has now been addressed and suit names should always come out as intended in
+the EDMarketConnector.exe UI.</p>
+</li>
+<li>
+<p>There is a new command-line argument to cause all Frontier Authorisation to
+be forgotten:  <code>EDMarketConnector.exe --forget-frontier-auth</code>.</p>
+</li>
+<li>
+<p>Situations where Frontier CAPI data doesn't agree on the location we have
+tracked from Journal events will now log more useful information.</p>
+</li>
+</ul>
+<h2>
+<a id="user-content-bug-fixes" class="anchor" href="#bug-fixes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Bug Fixes</h2>
+<ul>
+<li>The code should now be robust against the case of any Journal event name
+changing.</li>
+</ul>
+<h2>
+<a id="user-content-plugin-developers" class="anchor" href="#plugin-developers" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Plugin Developers</h2>
+<ul>
+<li>
+<p>We now store <code>GameLanguage</code>, <code>GameVersion</code> and <code>GameBuild</code> in the <code>state</code>
+passed to <code>journal_entry()</code> from the <code>LoadGame</code> event.</p>
+</li>
+<li>
+<p>Various suit data, i.e. class and mods, is now stored from relevant
+Journal events, rather than only being available from CAPI data.  In
+general we now consider the Journal to be the canonical source of suit
+data, with CAPI only as a backup.</p>
+</li>
+<li>
+<p>Backpack contents should now track correctly if using the 'Resupply' option
+available on the ship boarding menu.</p>
+</li>
+<li>
+<p>We now cache the main application version when first determined, so
+that subsequent references to <code>config.appversion()</code> won't cause extra log
+spam (which was possible when, e.g. having a git command but using non-git
+source).</p>
+</li>
+</ul>
+
+<h2>Release 5.1.1</h2>
+<p>The big change in this is adjustments to be in line with Journal changes in
+Elite Dangerous Odyssey 4.0.0.400, released 2021-06-10, with respect to the
+Odyssey materials Inventory.</p>
+<p><strong>This update is mandatory if you want EDMarketConnector to update Inara.cz
+with your Odyssey inventory.</strong></p>
+<ul>
+<li>
+<p><code>ShipLockerMaterials</code> is dead, long live <code>ShipLocker</code>.  Along with other
+changes to how backpack inventory is handled we should now actually be
+able to fully track all Odyssey on-foot materials and consumables without
+errors.</p>
+</li>
+<li>
+<p>Inara plugin adjusted to send the new <code>ShipLocker</code> inventory to Inara.cz.
+This is <em>still</em> only your <em>ship</em> inventory of Odyssey materials, not
+anything currently in your backpack whilst on foot.
+See <a href="https://github.com/EDCD/EDMarketConnector/issues/1162">this issue</a>
+for some quotes from Artie (Inara.cz developer) about <em>not</em> including
+backpack contents in the Inara inventory.</p>
+</li>
+<li>
+<p>Errors related to sending data to EDDN are now more specific to aid in
+diagnoising issues.</p>
+</li>
+<li>
+<p>Quietened some log output if we encounter connection errors trying to
+utilise the Frontier CAPI service.</p>
+</li>
+</ul>
+<h2>
+<a id="user-content-translations" class="anchor" href="#translations" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Translations</h2>
+<p>We believe that nothing should be worse in this version compared to 5.1.1,
+although a small tweak or two might have leaked through.</p>
+<p>We'll be fully addressing translations in a near-future release after we've
+conclude the necessary code level work for the new system.  Nothing should
+change for those of you helping on OneSky, other than at most the
+'comments' on each translation.  They should be more useful!</p>
+<p>Pending that work we've specifically chosen <em>not</em> to update any
+translations in this release, so they'll be the same as released in 5.1.0.</p>
+<h2>
+<a id="user-content-bug-fixes" class="anchor" href="#bug-fixes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Bug Fixes</h2>
+<ul>
+<li>
+<p>Handle where the <code>Backpack.json</code> file for a <code>Backpack</code> event is a zero length
+file.  Closes #1138.</p>
+</li>
+<li>
+<p>Fixed case of 'Selection' in 'Override Beta/Normal Selection' text on
+Settings &gt; Configuration.  This allows translations to work.</p>
+</li>
+</ul>
+<h2>
+<a id="user-content-plugin-developers" class="anchor" href="#plugin-developers" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Plugin Developers</h2>
+<ul>
+<li>
+<p>We've updated <a href="./Contributing.md">Contributing.md</a> including:</p>
+<ol>
+<li>Re-ordered the sections to be in a more logcial and helpful order.</li>
+<li>Added a section about choosing an appropriate log level for messages.</li>
+<li>fstrings now mandatory, other than some use of <code>.format()</code> with respect to
+translated strings.</li>
+</ol>
+</li>
+<li>
+<p><a href="./docs/Translations.md">docs/Translations.md</a> updated about a forthcoming
+change to how we can programmatically check that all translation strings
+have a proper comment in 'L10n/en.template' to aid translators.</p>
+</li>
+<li>
+<p><code>state</code> passed to <code>journal_entry()</code> now has <code>ShipLockerJSON</code> which contains
+the <code>json.load()</code>-ed data from the new 'ShipLocker.json' file.  We do
+attempt to always load from this file, even when the <code>ShipLocker</code> Journal
+event itself contains all of the data (which it does on startup, embark and
+disembark), so it <em>should</em> always be populated when plugins see any event
+related to Odyssey inventory.</p>
+</li>
+</ul>
+
+
+<h2>Release 5.1.0</h2>
+<ul>
+<li>
+<p>Updates to how this application utilises the Inara.cz API.</p>
+<ol>
+<li>The current state of your ShipLockerMaterials (MicroResources for Odyssey
+Suit and handheld Weapons upgrading and engineering) will now be sent.
+Note that we can't reliably track this on the fly, so it will only
+update when we see a full <code>ShipLockerMaterials</code> Journal event, such as
+at login or when you disembark from any vehicle.</li>
+<li>Odyssey Suits and their Loadouts will now be sent.</li>
+<li>When you land on a body surface, be that in your own ship, in a Taxi,
+or in a Dropship.  Depending on the exact scenario a Station might be
+sent along with this.</li>
+</ol>
+</li>
+<li>
+<p>You can now both edit the 'normal' and 'beta' coriolis.io URLs, and
+choose which of them are used.  'Auto' means allowing the application to
+use the normal one when you're running the live game, or the beta version
+if running a beta version of the game.</p>
+</li>
+<li>
+<p>Suit names will now be displayed correctly when we have pulled the data
+from the Frontier CAPI, rather than Journal entries.</p>
+</li>
+<li>
+<p>Many translations updated once more, especially for new strings.  Thanks
+as always to those contributing!</p>
+</li>
+</ul>
+<h2>
+<a id="user-content-bug-fixes" class="anchor" href="#bug-fixes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Bug Fixes</h2>
+<ul>
+<li>Don't assume we have an EDSM Commander Name and/or API key just because
+we know a game Commander name.  This came to light during the
+investigation of
+"<a href="https://github.com/EDCD/EDMarketConnector/issues/1134">EDSM Plugin sent wrong credit balance when switching accounts</a>".
+We're still investigating that bug report.</li>
+</ul>
+<h2>
+<a id="user-content-plugin-developers" class="anchor" href="#plugin-developers" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Plugin Developers</h2>
+<p>There are some new members of the <code>state</code> dictionary passed to
+<code>journal_entry()</code>; Taxi, Dropship, Body and BodyType.  See
+<a href="./PLUGINS.md">PLUGINS.md</a> for the details.</p>
+
+<h2>Release 5.0.4</h2>
+<p>This is a minor bugfix release, ensuring that Odyssey Suit names (and loadout)
+will actually display if you're in your ship on login and never leave it.</p>
+<p>NB: This still requires a Frontier CAPI data pull, either automatically
+because you're docked if you have that option set, or by pressing the
+'Update' button.  We can't display data when we don't have it from either
+CAPI or Journal sources.  You'll also see '<code>&lt;Unknown&gt;</code>' between the time we
+see the Journal LoadGame event during login and when there's either a
+Journal suit-related event, or a CAPI data pull completes.</p>
+
+
+<h2>Release 5.0.3</h2>
+<ul>
+<li>
+<p>You can now click on a 'cell' in the "File" &gt; "Status" popup to copy that
+text to the clipboard.  This was a relatively easy, and non-intrusive, code
+change.  We'll look at richer, fuller, copy functionality in the future.</p>
+</li>
+<li>
+<p>Suit names, for all grades, should now be displaying as just the relevant
+word, never a symbol, and with the redundant 'suit' word(s) from all
+languages removed.  Note that Frontier have <em>not</em> translated the
+following, so neither do we: "Artemis", "Dominator", "Maverick".  The 'Flight
+Suit' should, approximately, use the Frontier-supplied translation for
+'Flight' in this context.  In essence the displayed name is now as short
+as possible whilst disambiguating the suit names from each other.</p>
+</li>
+</ul>
+<h2>
+<a id="user-content-bug-fixes" class="anchor" href="#bug-fixes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Bug Fixes</h2>
+<ul>
+<li>
+<p>The check for "source, but with extra changes?" in appversion will now
+not cause an error if the "git" command isn't available.  Also, the extra
+text added to the build number is now ".DIRTY".</p>
+</li>
+<li>
+<p>Actually properly handle the "you just made progress" version of the
+<code>EngineerProgress</code> Journal event, so that it doesn't throw errors.</p>
+</li>
+</ul>
+<h2>
+<a id="user-content-plugin-developers" class="anchor" href="#plugin-developers" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Plugin Developers</h2>
+<ul>
+<li>
+<p>The backpack and ship locker tracking of micro-resources <strong>might</strong> now
+actually be correct with respect to 'reality' in-game.  This is in part
+thanks to Frontier changes to some events in 4.0.0.200.</p>
+</li>
+<li>
+<p>Suit names will now only be sourced from Journal events if the
+application didn't (yet) have the equivalent CAPI data.</p>
+</li>
+<li>
+<p>The displayed Suit name is stored in an extra "edmcName" key within
+<code>state['Suits']</code> and <code>state['SuitCurrent']</code>.  What was found in the
+Journal or CAPI data is still present in the "name" and "locName" values.</p>
+</li>
+<li>
+<p>The "language", "gameversion" and "build" values from the "Fileheader" event
+are all now stored in <code>state[]</code> fields.  See <a href="./PLUGINS.md">PLUGINS.md</a> for
+updated documentation.</p>
+</li>
+<li>
+<p>We have a new <a href="./Contributing.md">Contributing.md</a> policy of adding
+comments in a defined format when we add or change code such that there's a
+'hack', 'magic' or 'workaround' in play.  You might find some of this
+enlightening going forwards.</p>
+</li>
+</ul>
+
+<h2>Release 5.0.2</h2>
+<p>This release is primarily aimed at getting the UI "<code>Suit: ...</code>" line working
+properly.</p>
+<ul>
+<li>
+<p>The "<code>Suit: ...</code>" UI line should now function as best it can given the
+available data from the game.  It should not appear if you have launched
+the Horizons version of the game, even if your account has Odyssey
+enabled.  You might see "<code>&lt;Unknown&gt;</code>" as the text when this application
+does not yet have the required data.</p>
+</li>
+<li>
+<p>Changed the less than obvious "<code>unable to get endpoint: /profile</code>" error
+message to "<code>Frontier CAPI query failure: /profile</code>", and similarly for the
+other CAPI endpoints we attempt to access.  This new form is potentially
+translated, but translators need time to do that.</p>
+<p>In addition the old message "<code>Received error {r.status_code} from server</code>"
+has been changed to "<code>Frontier CAPI server error: {r.status_code}</code>" and is
+potentially translated.</p>
+</li>
+<li>
+<p>The filenames used for 'Market data in CSV format file' will now be sane,
+and as they were before 5.0.0.</p>
+</li>
+<li>
+<p>Linux: 'Shipyard provider' will no longer default to showing 'False' if
+no specific provider has been selected.</p>
+</li>
+</ul>
+<h2>
+<a id="user-content-plugin-developers" class="anchor" href="#plugin-developers" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Plugin Developers</h2>
+<ul>
+<li>
+<p>Extra <code>Flagse</code> values added in the live release of Odyssey have been added to
+<code>edmc_data.py</code>.</p>
+</li>
+<li>
+<p>Odyssey 'BackPack' values should now track better, but might still not be
+perfect due to Journal bugs/shortcomings.</p>
+</li>
+<li>
+<p><code>state</code> passed to <code>journal_entry()</code> now has a <code>BackpackJSON</code> (note the case)
+member which is a copy of the data from the <code>Backpack.json</code> (yes, that's
+currently the correct case) file that is written when there's a <code>BackPack</code>
+(guess what, yes, that is currently the correct case) event written to
+the Journal.</p>
+</li>
+<li>
+<p><code>state['Credits']</code> tracking is almost certainly not perfect.  We're
+accounting for the credits component of <code>SuitUpgrade</code> now, but there
+might be other such we've yet accounted for.</p>
+</li>
+<li>
+<p><code>state['Suits']</code> and associated other keys should now be tracking from
+Journal events, where possible, as well as CAPI data.</p>
+</li>
+<li>
+<p>There is a section in PLUGINS.md about how to package an extra Python
+module with your plugin.  Note the new caveat in
+<a href="./PLUGINS.md#avoiding-potential-pitfalls">PLUGINS.md:Avoiding-pitfalls</a>
+about the name of your plugin's directory.</p>
+</li>
+</ul>
+
+<h2>Release 5.0.1</h2>
+<p>The main reason for this release is to add an 'odyssey' boolean flag to all
+EDDN messages for the benefit of listeners, e.g. eddb.io, inara.cz,
+edsm.net, spansh.co.uk, etc.  <strong>Please do update so as to make their lives
+easier once Odyssey has launched!</strong></p>
+<ul>
+<li>
+<p>Translations have been updated again.  Thanks to all the contributors.
+See <a href="https://github.com/EDCD/EDMarketConnector/wiki/Translations">wiki:Translations</a>
+and <a href="https://github.com/EDCD/EDMarketConnector/issues/24">Translations welcome</a>
+for links and discussion if you want to help.</p>
+</li>
+<li>
+<p>Changed the error message "<code>Error: Frontier server is down</code>" to
+"<code>Error: Frontier CAPI didn't respond</code>" to make it clear this pertains to
+the CAPI and not the game servers.</p>
+</li>
+</ul>
+<h2>
+<a id="user-content-killswitches" class="anchor" href="#killswitches" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Killswitches</h2>
+<p>In the 5.0.0 changelog we said:</p>
+  <blockquote>We will **NOT** be using this merely to try and get some
+  laggards to upgrade.</blockquote>
+<p>However, from now on there is an exception to this.  <strong>After</strong> this
+release any subsequent -beta or -rc versions will be killswitched <em>after</em>
+their full release is published.</p>
+<p>For example, if we put out a <code>5.0.2-beta1</code> and <code>5.0.2-rc1</code> before the full
+<code>5.0.2</code>, then when <code>5.0.2</code> was published we would activate all available
+killswitches for versions <code>5.0.2-beta1</code> and <code>5.0.2-rc1</code>.  In this example
+<code>5.0.1</code> would <strong>not</strong> be killswitched as part of <em>this policy</em> (but still
+could be if, e.g. a data corruption bug was found in it).</p>
+<p>In general please do <strong>not</strong> linger on any -beta or -rc release if there
+has been a subsequent release.  Upgrade to the equivalent full release once it
+is published.</p>
+<h2>
+<a id="user-content-plugin-developers" class="anchor" href="#plugin-developers" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Plugin Developers</h2>
+<ul>
+<li>
+<p>Please make the effort to subscribe to GitHub notifications of new
+EDMarketConnector releases:</p>
+<ol>
+<li>Login to <a href="https://github.com">GitHub</a>.</li>
+<li>Navigate to <a href="https://github.com/EDCD/EDMarketConnector">EDMarketConnector</a>.</li>
+<li>Click the 'Watch' (or 'Unwatch' if you previously set up any watches on
+us).  It's currently (2021-05-13) the left-most button of 3 near the
+top-right of the page.</li>
+<li>Click 'Custom'.</li>
+<li>Ensure 'Releases' is selected.</li>
+<li>Click 'Apply'.</li>
+</ol>
+<p>This way you'll be aware, as early as possible, of any -beta and -rc
+changelogs and changes that might affect your work.</p>
+</li>
+<li>
+<p><code>state</code> passed to <code>journal_entry()</code> has a new member <code>Odyssey</code> (note the
+capital <code>O</code>) which is a boolean indicating if the <code>LoadGame</code> event both has
+an <code>Odyssey</code> key, and if so, what the value was.  Defaults to <code>False</code>.</p>
+</li>
+<li>
+<p>PLUGINS.md updated to document the <code>state['Horizons']</code> flag that has been
+present in it since version 3.0 of the game.</p>
+</li>
+<li>
+<p>The <code>stations.p</code> and <code>systems.p</code> files that were deprecated in 5.0.0 have
+now also been removed in git.  As this release is made they will no
+longer be in the <code>develop</code>, <code>main</code> or <code>stable</code> branches.  If you truly
+need to find a copy look at the <code>Release/4.2.7</code> tag, but do read the 5.0.0
+changelog for why we stopped using them and what you can change to also
+not need them.</p>
+</li>
+</ul>
+
+<h2>Release 5.0.0</h2>
+<ul>
+<li>
+<p>We now test against, and package with, Python 3.9.5.</p>
+<p><strong>As a consequence of this we no longer support Windows 7.<br>
+This is due to
+<a href="https://www.python.org/downloads/windows/" rel="nofollow">Python 3.9.x itself not supporting Windows 7</a>.
+The application (both EDMarketConnector.exe and EDMC.exe) will crash on
+startup due to a missing DLL.</strong></p>
+<p>This should have no other impact on users or plugin developers, other
+than the latter now being free to use features that were introduced since the
+Python 3.7 series.</p>
+<p>Developers can check the contents of the <code>.python-version</code> file
+in the source (it's not distributed with the Windows installer) for the
+currently used version in a given branch.</p>
+</li>
+</ul>
+<h2>
+<a id="user-content-this-update-is-mandatory" class="anchor" href="#this-update-is-mandatory" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>This Update Is Mandatory</h2>
+<p>This release is a <strong>mandatory upgrade for the release of Elite Dangerous
+Odyssey</strong>.  Any bug reports against earlier releases, pertaining to Odyssey or
+not, will be directed to reproduce them with 5.0.0 or later.  There are also
+minor bugs in 4.2.7 and earlier that have been fixed in this version.  There
+will <strong>NOT</strong> be another 4.2.x release.</p>
+<p>The major version has been incremented not for Odyssey support, but because
+we have made some minor breaking changes to the APIs we provide for plugin
+developers.</p>
+<p>Due to these plugin API changes (see below) users might need to update their
+plugins.  A check of all the
+<a href="https://github.com/EDCD/EDMarketConnector/wiki/Plugins#available-plugins---confirmed-working-under-python-37">Plugins we know about</a>
+only found one with an issue related to the move to <code>edmc_data.py</code>, the
+developer was informed and the issue addressed.</p>
+<p>Other plugins should, at most, log deprecation warnings about the
+<code>config</code> changes (again, see below).</p>
+<p><strong>In the first instance please report any issues with plugins to <em>their</em>
+developers, not us.  They can contact us about EDMC core code issues if
+they find such in their investigations.</strong></p>
+<p>All plugin developers would benefit from having a GitHub account and then
+setting up a watch on <a href="https://github.com/EDCD/EDMarketConnector/">EDMarketConnector</a>
+of at least 'Releases' under 'Custom'.</p>
+<p>NB: If you had any beta or -rc1 of 5.0.0 installed and see anything weird
+with this full release it would be advisable to manually uninstall, confirm
+the installation directory (default <code>c:\Program Files (x86)\EDMarketConnector</code>)
+is empty, and then re-install 5.0.0 to be sure you have a clean, working,
+install.  Anyone upgrading from 4.2.7 or earlier shouldn't see any issues
+with this.</p>
+<h2>
+<a id="user-content-changes-and-enhancements" class="anchor" href="#changes-and-enhancements" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Changes and Enhancements</h2>
+<ul>
+<li>
+<p>If the application detects it's running against a non-live (alpha or beta)
+version of the game it will append " (beta)" to the Commander name on the
+main UI.</p>
+</li>
+<li>
+<p>Updated translations.  Once more, thanks to all the translators!</p>
+</li>
+<li>
+<p>We now sanity check a returned Frontier Authentication token to be sure
+it's for the current Commander.  If it's not you'll see
+<code>Error: customer_id doesn't match!</code> on the bottom status line.  Double-check
+you're using the correct credentials when authing!</p>
+</li>
+<li>
+<p>New 'Main window transparency' slider on <code>Settings</code> &gt; <code>Appearance</code>.</p>
+</li>
+<li>
+<p>New command-line argument for EDMarketConnector.exe <code>--reset-ui</code>.  This will:</p>
+<ol>
+<li>Reset to the default Theme.</li>
+<li>Reset the UI transparency to fully opaque.</li>
+</ol>
+<p>The intention is this can be used if you've lost sight of the main window
+due to tweaking these options.</p>
+<p>There is a new file <code>EDMarketConnector - reset-ui.bat</code> to make utilising
+this easy on Windows.</p>
+</li>
+<li>
+<p>New CL arg for EDMarketConnector.exe <code>--force-edmc-protocol</code>.
+This is really only of use to core developers (its purpose being to force
+use of the <code>edmc://</code> protocol for Frontier Auth callbacks, even when not
+'frozen').</p>
+</li>
+<li>
+<p>Linux config will be flushed to disk after any change.  This means that
+EDMC.py can now actually make use of the latest CAPI auth if it's been
+updated by EDMarketConnector.py since that started.</p>
+<p>If you want to run multiple instances of the application under Linux then
+please check the updated <a href="https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting#multi-accounting">Troubleshooting: Multi-Accounting</a>
+wiki entry.</p>
+</li>
+<li>
+<p>Linux and macOS: You can now set a font name and size in your config file.<br>
+Ensuring this is a TTF font, rather than a bitmap font, should allow the
+application UI scaling to work.</p>
+<ol>
+<li>'font' - the font name to attempt using</li>
+<li>'font_size' - the font size to attempt using.</li>
+</ol>
+<p>There is no UI for this in Preferences, you will need to edit your
+<a href="https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting#location-of-configuration-files">config file</a>
+to set or change it, and then restart the application.</p>
+<p>This is not supported on Windows so as not to risk weird bugs.  UI
+Scaling works on Windows without this.</p>
+</li>
+<li>
+<p>We now also cite the git 'short hash' in the version string.  For a Windows
+install of the application this is sourced from the <code>.gitversion</code> file
+(written during the build process).</p>
+<p>When running from source we attempt to use the command <code>git rev-parse --short HEAD</code>
+to obtain this.  If this doesn't work it will be set to 'UNKNOWN'.</p>
+</li>
+<li>
+<p>We have added a 'killswitch' feature to turn off specific functionality if it
+is found to have a bug.  An example use of this would be in an "oh
+shit! we're sending bad data to EDDN!" moment so as to protect EDDN
+listeners such as EDDB.</p>
+<p>If we ever have to use this we'll announce it clearly and endeavour to
+get a fixed version of the program released ASAP.  We will <strong>NOT</strong> be
+using this merely to try and get some laggards to upgrade.</p>
+<p>Plugin Developers: See <a href="./docs/Killswitches.md">Killswitches.md</a> for more
+information about this.</p>
+</li>
+<li>
+<p>Our logging code will make best efforts to still show class name and
+other such fields if it has trouble finding any of the required data for
+the calling frame.  This means no longer seeing <code>??:??:??</code> when there is
+an issue with this.</p>
+</li>
+<li>
+<p>macOS: We've managed to test the latest code on macOS Catalina.  Other than
+<a href="https://github.com/EDCD/EDMarketConnector/issues/906">keyboard shortcut support not working</a>
+it appears to be working.</p>
+</li>
+<li>
+<p>We've pulled the latest Coriolis data which might have caused changes to
+ship and module names as written out to some files.</p>
+</li>
+</ul>
+<h2>
+<a id="user-content-odyssey" class="anchor" href="#odyssey" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Odyssey</h2>
+<p>Every effort was made during the Odyssey Alphas to ensure that this
+application will continue to function correctly with it.  As always, make a
+<a href="https://github.com/EDCD/EDMarketConnector/issues/new?assignees=&amp;labels=bug%2C+unconfirmed&amp;template=bug_report.md&amp;title=">Bug Report</a>
+if you find anything not working, but be sure to check our
+<a href="https://github.com/EDCD/EDMarketConnector/issues/618">Known Issues</a> first.</p>
+<ul>
+<li>
+<p>A new UI element 'Suit' now appears below 'Ship' when applicable. It
+details the type of suit you currently have equipped and its Loadout name.<br>
+This UI element is collapsed/hidden if no suit/on-foot state is detected,
+e.g. not playing Odyssey.</p>
+</li>
+<li>
+<p>Note that we can only reliably know about Suits and their Loadouts from a
+CAPI data pull (which is what we do automatically on docking if
+configured to do so, or when you press the 'Update' button).  We do
+attempt to gather this data from Journal events as well, but if you
+switch to a Suit Loadout that hasn't been mentioned in them yet we won't
+be able to display that until the next CAPI data pull.</p>
+</li>
+</ul>
+<p>If anyone becomes aware of a 'suit loadouts' site/tool, a la Coriolis/EDSY
+but for Odyssey Suits, do let us know so we can add support for it!
+We're already kicking around ideas to e.g. place JSON text in the clipboard
+if the Suit Loadout is clicked.</p>
+<h2>
+<a id="user-content-bug-fixes" class="anchor" href="#bug-fixes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Bug Fixes</h2>
+<ul>
+<li>
+<p>Fix ship loadout export to files to not trip up in the face of file encoding
+issues. This relates to the 'Ship Loadout' option on the 'Output' tab of
+Settings/Preferences.</p>
+</li>
+<li>
+<p>Ship Type/Name will now be greyed out, and not clickable, if we don't
+currently have loadout information for it.  This prevents trying to send an
+empty loadout to your shipyard provider.</p>
+</li>
+<li>
+<p>Bug fixed when handling CAPI-sourced shipyard information.  This happens
+due to a Frontier bug with not returning shipyard data at all for normal
+stations.</p>
+<p>It has been observed that Frontier has fixed this bug for Odyssey.</p>
+</li>
+<li>
+<p>Don't try to get Ship information from <code>LoadGame</code> event if directly in CQC.</p>
+</li>
+<li>
+<p>Inara: Don't attempt to send an empty
+<code>setCommanderReputationMajorFaction</code> API call.  This quietens an error
+from the Inara API caused when a Cmdr literally has no Major Faction
+Reputation yet.</p>
+</li>
+</ul>
+<h2>
+<a id="user-content-code-clean-up" class="anchor" href="#code-clean-up" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Code Clean Up</h2>
+<ul>
+<li>
+<p>Code pertaining to processing Journal events was reworked and noisy logging
+reduced as a consequence.</p>
+</li>
+<li>
+<p>A little TRACE logging output has been commented out for now.</p>
+</li>
+<li>
+<p>The code for <code>File</code> &gt; <code>Status</code> has been cleaned up.</p>
+</li>
+<li>
+<p>Localisation code has been cleaned up.</p>
+</li>
+<li>
+<p>Code handling the Frontier Authorisation callback on Windows has been
+cleaned up.</p>
+</li>
+<li>
+<p>A lot of general code cleanup relating to: Inara, outfitting, Frontier
+CAPI, hotkey (manual Updates), dashboard (Status.json monitoring),
+commodities files, and ED format ship loadout files.</p>
+</li>
+</ul>
+<h2>
+<a id="user-content-plugin-developers" class="anchor" href="#plugin-developers" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Plugin Developers</h2>
+<ul>
+<li>
+<p>The files <code>stations.p</code> and <code>systems.p</code> have been removed from the Windows
+Installer.  These were never intended for third-party use.  Their use in
+core code was for generating EDDB-id URLs, but we long since changed the
+EDDB plugin's handlers for that to use alternate URL formats based on
+game IDs or names.</p>
+<p>If you were using either to lookup EDDB IDs for systems and/or stations
+then please see how <code>system_url()</code> and <code>station_url()</code> now work in
+<code>plugins/eddb.py</code>.</p>
+<p>This change also removed the core (not plugin) <code>eddb.py</code> file which
+generated these files.  You can find it still in the git history if needs
+be.  It had gotten to the stage where generating <code>systems.p</code> took many
+hours and required 64-bit Python to have any hope of working due to
+memory usage.</p>
+</li>
+<li>
+<p>All static data that is
+<a href="https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#available-imports">cleared for use by plugins</a>
+is now in the file
+<code>edmc_data.py</code> and should be imported from there, not <em>any</em> other module.</p>
+<p>The one thing we didn't move was the 'bracket map' dictionaries in <code>td.py</code>
+as they're for use only by the code in that file.</p>
+<p>All future such data will be added to this file, and we'll endeavour not
+to make breaking changes to any of it without increasing our Major version.</p>
+</li>
+<li>
+<p><code>config.appversion()</code> is now a function that returns a <code>semantic_version.Version</code>.
+In contexts where you're expecting a string this should mostly
+just work.  If needs be wrap it in <code>str()</code>.</p>
+<p>For backwards compatibility with pre-5.0.0 you can use:</p>
+</li>
+</ul>
+<div class="highlight highlight-source-python"><pre>    <span class="pl-k">from</span> <span class="pl-s1">config</span> <span class="pl-k">import</span> <span class="pl-s1">appversion</span>
+
+    <span class="pl-k">if</span> <span class="pl-en">callable</span>(<span class="pl-s1">appversion</span>):
+        <span class="pl-s1">edmc_version</span> <span class="pl-c1">=</span> <span class="pl-en">appversion</span>()
+    <span class="pl-k">else</span>:
+        <span class="pl-s1">edmc_version</span> <span class="pl-c1">=</span> <span class="pl-s1">appversion</span></pre></div>
+<ul>
+<li>
+<p>Example plugin
+<a href="https://github.com/EDCD/EDMarketConnector/tree/main/docs/examples/plugintest">plugintest</a>
+updated.  This includes an example of how to check core EDMC version if needs
+be.  This example is also in
+<a href="https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#checking-core-edmc-version">PLUGINS.md</a>.</p>
+</li>
+<li>
+<p><code>config.py</code> has undergone a major rewrite.  You should no longer be using
+<code>config.get(...)</code> or <code>config.getint(...)</code>, which will both give a
+deprecation warning.<br>
+Use instead the correct <code>config.get_&lt;type&gt;()</code> function:</p>
+<ul>
+<li><code>config.get_list(&lt;key&gt;)</code></li>
+<li><code>config.get_str(&lt;key&gt;)</code></li>
+<li><code>config.get_bool(&lt;key&gt;)</code></li>
+<li><code>config.get_int(&lt;key&gt;)</code></li>
+</ul>
+<p>Setting still uses <code>config.set(...)</code>.</p>
+<p>So:</p>
+<ol>
+<li>Replace all instances of <code>config.get()</code> and <code>config.getint()</code> as above.</li>
+<li>For ease of maintaining compatibility with pre-5.0.0 versions include
+this code in at least one module/file (no harm in it being in all that
+manipulate plugin config):</li>
+</ol>
+</li>
+</ul>
+<pre><code>from config import config
+
+# For compatibility with pre-5.0.0
+if not hasattr(config, 'get_int'):
+    config.get_int = config.getint
+
+if not hasattr(config, 'get_str'):
+    config.get_str = config.get
+
+if not hasattr(config, 'get_bool'):
+    config.get_bool = lambda key: bool(config.getint(key))
+
+if not hasattr(config, 'get_list'):
+    config.get_list = config.get
+</code></pre>
+<ul>
+<li>
+<p>Utilising our provided logging from a class-level, i.e. not a solid
+instance of a class, property/function will now work.</p>
+</li>
+<li>
+<p>We now change the current working directory of EDMarketConnector.exe to
+its location as soon as possible in its execution.  We're also
+paranoid about ensuring we reference the full path to the <code>.gitversion</code> file.</p>
+<p>However, no plugin should itself call <code>os.chdir(...)</code> or equivalent.  You'll
+change the current working directory for all core code and other plugins as
+well (it's global to the whole <strong>process</strong>, not per-thread).  Use full
+absolute paths instead (<code>pathlib</code> is what to use for this).</p>
+</li>
+<li>
+<p>The <code>state</code> dict passed to plugins in <code>journal_entry()</code> calls (which is
+actually <code>monitor.state</code> in the core code) has received many additions
+relating to Odyssey, as well as other fixes and enhancements.</p>
+<ol>
+<li>
+<p>Support has been added for the <code>NavRoute</code> (not <code>Route</code> as v28 of the
+official Journal documentation erroneously labels it) Journal event and
+its associated file <code>NavRoute.json</code>.  See <a href="https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#journal-entry">PLUGINS.md:Events documentation</a></p>
+</li>
+<li>
+<p>Similarly, there is now support for the <code>ModuleInfo</code> event and its
+associated <code>ModulesInfo.json</code> file.</p>
+</li>
+<li>
+<p><code>state['Credits']</code> - until now no effort was made to keep this
+record of the credits balance up to date after the initial <code>LoadGame</code>
+event.  This has now been addressed, and the balance should stay in sync
+as best it can from the available Journal events.  It will always correct
+back to the actual balance on each CAPI data pull or game relog/restart.</p>
+</li>
+<li>
+<p><code>state['Cargo']</code> now takes account of any <code>CargoTransfer</code> events.
+This was added to the game in the Fleet Carriers update, but also covers
+transfers to/from an SRV.</p>
+</li>
+<li>
+<p><code>state['OnFoot']</code> is a new boolean, set true whenever we detect
+the Cmdr is on-foot, i.e. not in any type of vehicle (Cmdr's own ship,
+SRV, multi-crew in another Cmdr's ship, Apex taxi, or a Dropship).</p>
+</li>
+<li>
+<p><code>state['Suits']</code> and <code>state['SuitLoadouts']</code> added as <code>dict</code>s containing
+information about the Cmdr's owned Suits and the Loadouts the Cmdr has
+defined to utilise them (and on-foot weapons).
+Note that in the raw CAPI data these are arrays if all members
+contiguously exist, else a dictionary, but we have chosen to always coerce
+these to a python <code>dict</code> for simplicity.  They will be empty <code>dict</code>s, not
+<code>None</code> if there is no data.<br>
+We use the CAPI data names for keys, not the Journal ones - e.g. <code>slots</code>
+for weapons equipped, not <code>Modules</code>.
+The <code>id</code> field found on e.g. weapon details in suit loadouts may be <code>None</code>
+if we got the data from the Journal rather than the CAPI data.
+NB: This data is only guaranteed up to date and correct after a fresh CAPI
+data pull, as the current Journal events don't allow for updating it on the
+fly (this should change in a future Odyssey patch).</p>
+</li>
+<li>
+<p><code>state['SuitCurrent']</code> and <code>state['SuitLoadoutCurrent']</code> contain the
+obvious "currently in use" data as per the Suits/SuitLoadouts.</p>
+</li>
+<li>
+<p>Tracking of the new Odyssey 'Microresources' has been added:</p>
+<ol>
+<li>
+<code>Component</code> - <code>dict</code> for 'Ship Locker' inventory.</li>
+<li>
+<code>Item</code> - <code>dict</code> for 'Ship Locker' inventory.</li>
+<li>
+<code>Consumable</code> - <code>dict</code> for 'Ship Locker' inventory.</li>
+<li>
+<code>Data</code> - <code>dict</code> for 'Ship Locker' inventory.</li>
+<li>
+<code>BackPack</code> - on-foot inventory, a <code>dict</code> containing again
+dicts for <code>Component</code>, <code>Item</code>, <code>Consumable</code> and <code>Data</code>.
+However note that the lack of a Journal event when throwing a grenade,
+along with no <code>BackPackMaterials</code> event if logging in on-foot means that
+we can't track the BackPack inventory perfectly.</li>
+</ol>
+</li>
+</ol>
+<p>See the updated <code>PLUGINS.md</code> file for details.</p>
+</li>
+<li>
+<p>As <code>Status.json</code>, and thus the EDMC 'dashboard' output now has a 'flags2'
+key we have added the associated constants to <code>edmc_data.py</code> with a
+<code>Flags2</code> prefix on the names.</p>
+</li>
+<li>
+<p>Note that during the Odyssey Alpha it was observed that the CAPI
+<code>data['commander']['docked']</code> boolean was <strong>always true</strong> if the Cmdr was
+in their ship.  This is a regression from pre-Odyssey behaviour.  The
+core EDMC code copes with this.  Please add a reproduction to the issue
+about this:
+<a href="https://issues.frontierstore.net/issue-detail/28638" rel="nofollow">PTS CAPI saying Commander is Docked after jumping to new system</a>.</p>
+</li>
+</ul>]]></description>
+         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F5.10.6/EDMarketConnector_Installer_5.10.6.exe" sparkle:os="windows" sparkle:version="5.10.6" length="0" type="application/x-ms-dos-executable" />
+      </item>
+   </channel>
+</rss>
