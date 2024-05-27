@@ -61,15 +61,14 @@ class HyperlinkLabel(ttk.Label):
         """
         self.font_u: tk_font.Font
         self.font_n = None
-        self.style = 'Hyperlink.TLabel'
+        self.style = kw.get('style', 'Link.TLabel')
         self.url = kw.pop('url', None)
         self.popup_copy = kw.pop('popup_copy', False)
         self.underline = kw.pop('underline', None)  # override ttk.Label's underline
-        self.foreground = kw.get('foreground', ttk.Style().lookup(
-            'Hyperlink.TLabel', 'foreground'))
+        self.foreground = kw.get('foreground', ttk.Style().lookup(self.style, 'foreground'))
         # ttk.Label doesn't support disabledforeground option
-        self.disabledforeground = kw.pop('disabledforeground', ttk.Style().lookup(
-            'Hyperlink.TLabel', 'foreground', ('disabled',)))
+        self.disabledforeground = kw.pop('disabledforeground',
+                                         ttk.Style().lookup(self.style, 'foreground', ('disabled',)))
         ttk.Label.__init__(self, master, **kw)
 
         self.bind('<Button-1>', self._click)
@@ -79,9 +78,7 @@ class HyperlinkLabel(ttk.Label):
         self.bind('<Leave>', self._leave)
 
         # set up initial appearance
-        self.configure(state=kw.get('state', tk.NORMAL),
-                       text=kw.get('text'),
-                       font=kw.get('font', ttk.Style().lookup('TLabel', 'font')))
+        self.configure(font=kw.get('font', ttk.Style().lookup(self.style, 'font')))
 
         # Add Menu Options
         self.plug_options = kw.pop('plug_options', None)

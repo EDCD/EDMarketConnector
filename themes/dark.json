@@ -1,20 +1,22 @@
 {
-    "TFrame": {
+    ".": {
         "configure": {
             "background": "grey4",
+            "foreground": "#ff8000"
+        }
+    },
+    "TFrame": {
+        "configure": {
             "highlightbackground": "#aa5500"
         }
     },
     "Sep.TFrame": {
         "configure": {
-            "background": "#ff8000",
             "padding": 2
         }
     },
     "TLabel": {
         "configure": {
-            "background": "grey4",
-            "foreground": "#ff8000",
             "padding": 1
         },
         "map": {
@@ -27,15 +29,14 @@
             ]
         }
     },
-    "Hyperlink.TLabel": {
+    "Link.TLabel": {
         "configure": {
-            "foreground": "white"
+            "foreground": "white",
+            "font": "TkDefaultFont"
         }
     },
     "TButton": {
         "configure": {
-            "background": "grey4",
-            "foreground": "#ff8000",
             "relief": "raised",
             "padding": 2
         },
