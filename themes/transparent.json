@@ -1,0 +1,57 @@
+{
+    ".": {
+        "configure": {
+            "background": "grey4",
+            "foreground": "#ff8000",
+            "font": "\"Euro Caps\" 10"
+        }
+    },
+    "TFrame": {
+        "configure": {
+            "highlightbackground": "#aa5500"
+        }
+    },
+    "Sep.TFrame": {
+        "configure": {
+            "background": "#ff8000"
+        }
+    },
+    "TLabel": {
+        "configure": {
+            "padding": 1
+        },
+        "map": {
+            "background": [
+                ["active", "#ff8000"]
+            ],
+            "foreground": [
+                ["active", "grey4"],
+                ["disabled", "#aa5500"]
+            ]
+        }
+    },
+    "Link.TLabel": {
+        "configure": {
+            "foreground": "white",
+            "font": "\"Euro Caps\" 10"
+        }
+    },
+    "TButton": {
+        "configure": {
+            "relief": "raised",
+            "padding": 2
+        },
+        "map": {
+            "background": [
+                ["pressed", "#ff8000"]
+            ],
+            "foreground": [
+                ["pressed", "grey4"],
+                ["disabled", "#aa5500"]
+            ],
+            "relief": [
+                ["pressed", "sunken"]
+            ]
+        }
+    }
+}

@@ -10,11 +10,11 @@ So can't use ttk's theme support. So have to change colors manually.
 """
 from __future__ import annotations
 
+import json
 import os
 import sys
 import tkinter as tk
 from os.path import join
-from tkinter import font as tk_font
 from tkinter import ttk
 from typing import Callable
 from l10n import translations as tr
@@ -131,6 +131,7 @@ class _Theme:
     THEME_DEFAULT = 0
     THEME_DARK = 1
     THEME_TRANSPARENT = 2
+    style: ttk.Style
 
     def __init__(self) -> None:
         self.active: int | None = None  # Starts out with no theme
@@ -141,6 +142,28 @@ class _Theme:
         self.current: dict = {}
         self.default_ui_scale: float | None = None  # None == not yet known
         self.startup_ui_scale: int | None = None
+        self.default_ttk_theme = 'clam'
+
+    def initialize(self):
+        self.style = ttk.Style()
+        if sys.platform == 'win32':
+            self.default_ttk_theme = self.style.theme_use()
+
+        # ttk.Separator does not allow to configure its thickness, so we have to make our own
+        self.style.configure('Sep.TFrame', padding=2,
+                             background=self.style.lookup('TLabel', 'foreground', ['disabled']))
+        self.style.configure('Link.TLabel', font='TkDefaultFont', foreground='blue')  # HyperlinkLabel
+
+        # Default dark theme colors
+        if not config.get_str('dark_text'):
+            config.set('dark_text', '#ff8000')  # "Tangerine" in OSX color picker
+        if not config.get_str('dark_highlight'):
+            config.set('dark_highlight', 'white')
+
+        with open('themes/dark.json') as f:
+            self.style.theme_create('dark', self.default_ttk_theme, json.load(f))
+        with open('themes/transparent.json') as f:
+            self.style.theme_create('transparent', self.default_ttk_theme, json.load(f))
 
     def register(self, widget: tk.Widget | tk.BitmapImage) -> None:  # noqa: CCR001, C901
         # Note widget and children for later application of a theme. Note if
@@ -250,48 +273,23 @@ class _Theme:
                     logger.exception(f'Failure configuring image: {image=}')
 
     # Set up colors
-    def _colors(self, root: tk.Tk, theme: int) -> None:
-        style = ttk.Style()
-        if sys.platform == 'linux':
-            style.theme_use('clam')
-
-        # Default dark theme colors
-        if not config.get_str('dark_text'):
-            config.set('dark_text', '#ff8000')  # "Tangerine" in OSX color picker
-        if not config.get_str('dark_highlight'):
-            config.set('dark_highlight', 'white')
-
+    def _colors(self, theme: int) -> None:
         if theme == self.THEME_DEFAULT:
-            # (Mostly) system colors
-            style = ttk.Style()
-            self.current = {
-                'background': (style.lookup('TLabel', 'background')),
-                'foreground': style.lookup('TLabel', 'foreground'),
-                'activebackground': (sys.platform == 'win32' and 'SystemHighlight' or
-                                     style.lookup('TLabel', 'background', ['active'])),
-                'activeforeground': (sys.platform == 'win32' and 'SystemHighlightText' or
-                                     style.lookup('TLabel', 'foreground', ['active'])),
-                'disabledforeground': style.lookup('TLabel', 'foreground', ['disabled']),
-                'highlight': 'blue',
-                'font': 'TkDefaultFont',
-            }
+            self.style.theme_use(self.default_ttk_theme)
+        elif theme == self.THEME_DARK:
+            self.style.theme_use('dark')
+        elif theme == self.THEME_TRANSPARENT:
+            self.style.theme_use('transparent')
 
-        else:  # Dark *or* Transparent
-            (r, g, b) = root.winfo_rgb(config.get_str('dark_text'))
-            self.current = {
-                'background': 'grey4',  # OSX inactive dark titlebar color
-                'foreground': config.get_str('dark_text'),
-                'activebackground': config.get_str('dark_text'),
-                'activeforeground': 'grey4',
-                'disabledforeground': f'#{int(r/384):02x}{int(g/384):02x}{int(b/384):02x}',
-                'highlight': config.get_str('dark_highlight'),
-                # Font only supports Latin 1 / Supplement / Extended, and a
-                # few General Punctuation and Mathematical Operators
-                # LANG: Label for commander name in main window
-                'font': (theme > 1 and not 0x250 < ord(tr.tl('Cmdr')[0]) < 0x3000 and
-                         tk_font.Font(family='Euro Caps', size=10, weight=tk_font.NORMAL) or
-                         'TkDefaultFont'),
-            }
+        self.current = {
+            'background': self.style.lookup('TLabel', 'background'),
+            'foreground': self.style.lookup('TLabel', 'foreground'),
+            'activebackground': self.style.lookup('TLabel', 'background', ['active']),
+            'activeforeground': self.style.lookup('TLabel', 'foreground', ['active']),
+            'disabledforeground': self.style.lookup('TLabel', 'foreground', ['disabled']),
+            'highlight': self.style.lookup('Link.TLabel', 'foreground'),
+            'font': self.style.lookup('.', 'font') or 'TkDefaultFont',
+        }
 
     def update(self, widget: tk.Widget) -> None:
         """
@@ -390,7 +388,7 @@ class _Theme:
 
     def apply(self, root: tk.Tk) -> None:  # noqa: CCR001, C901
         theme = config.get_int('theme')
-        self._colors(root, theme)
+        self._colors(theme)
 
         # Apply colors
         for widget in set(self.widgets):

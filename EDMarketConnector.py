@@ -400,7 +400,6 @@ if TYPE_CHECKING:
     # isort: on
 
 
-import json
 import tkinter as tk
 import tkinter.filedialog
 import tkinter.font
@@ -412,7 +411,6 @@ import prefs
 import protocol
 import stats
 import td
-from commodity import COMMODITY_CSV
 from dashboard import dashboard
 from edmc_data import ship_name_map
 from hotkey import hotkeymgr
@@ -446,6 +444,7 @@ class AppWindow:
         self.minimizing = False
         self.w.rowconfigure(0, weight=1)
         self.w.columnconfigure(0, weight=1)
+        theme.initialize()
 
         # companion needs to be able to send <<CAPIResponse>> events
         companion.session.set_tk_master(self.w)
@@ -464,15 +463,6 @@ class AppWindow:
             self.systray.start()
 
         plug.load_plugins(master)
-        self.style = ttk.Style()
-        # ttk.Separator does not allow to configure its thickness, so we have to make our own
-        self.style.configure('Sep.TFrame', padding=2,
-                             background=self.style.lookup('TLabel', 'foreground', ['disabled']))
-        self.style.configure('Link.TLabel', font='TkDefaultFont', foreground='blue')  # HyperlinkLabel
-        with open('themes/dark.json') as f:
-            dark = json.load(f)
-            self.style.theme_create('dark', self.style.theme_use(), dark)
-        self.style.theme_use('dark')
 
         if sys.platform == 'win32':
             self.w.wm_iconbitmap(default='EDMarketConnector.ico')
@@ -966,7 +956,7 @@ class AppWindow:
                 # Fixup anomalies in the comodity data
                 fixed = companion.fixup(data)
                 if output_flags & config.OUT_MKT_CSV:
-                    commodity.export(fixed, COMMODITY_CSV)
+                    commodity.export(fixed, commodity.COMMODITY_CSV)
 
                 if output_flags & config.OUT_MKT_TD:
                     td.export(fixed)
