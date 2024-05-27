@@ -485,7 +485,7 @@ config = get_config()
 def get_update_feed() -> str:
     """Select the proper update feed for the current update track."""
     if config.get_bool('beta_optin'):
-        return 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/beta/edmarketconnector.xml'
+        return 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector-beta.xml'
     return 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml'
 
 
