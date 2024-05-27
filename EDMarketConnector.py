@@ -350,8 +350,7 @@ if __name__ == '__main__':  # noqa: C901
 
     handle_edmc_callback_or_foregrounding()
 
-    if False:
-    #if locked == JournalLockResult.ALREADY_LOCKED:
+    if locked == JournalLockResult.ALREADY_LOCKED:
         # There's a copy already running.
 
         logger.info("An EDMarketConnector.exe process was already running, exiting.")
