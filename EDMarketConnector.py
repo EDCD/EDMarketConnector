@@ -350,7 +350,8 @@ if __name__ == '__main__':  # noqa: C901
 
     handle_edmc_callback_or_foregrounding()
 
-    if locked == JournalLockResult.ALREADY_LOCKED:
+    if False:
+    #if locked == JournalLockResult.ALREADY_LOCKED:
         # There's a copy already running.
 
         logger.info("An EDMarketConnector.exe process was already running, exiting.")
@@ -399,6 +400,7 @@ if TYPE_CHECKING:
     # isort: on
 
 
+import json
 import tkinter as tk
 import tkinter.filedialog
 import tkinter.font
@@ -462,6 +464,11 @@ class AppWindow:
             self.systray.start()
 
         plug.load_plugins(master)
+        self.style = ttk.Style()
+        with open('themes/dark.json') as f:
+            dark = json.load(f)
+            self.style.theme_create('dark', 'default', dark)
+        self.style.theme_use('dark')
 
         if sys.platform == 'win32':
             self.w.wm_iconbitmap(default='EDMarketConnector.ico')
@@ -523,7 +530,7 @@ class AppWindow:
         plugin_no = 0
         for plugin in plug.PLUGINS:
             # Per plugin separator
-            plugin_sep = ttk.Separator(frame, name=f"plugin_hr_{plugin_no + 1}")
+            plugin_sep = ttk.Frame(frame, name=f"plugin_hr_{plugin_no + 1}", style='Sep.TFrame')
             # Per plugin frame, for it to use as its parent for own widgets
             plugin_frame = ttk.Frame(
                 frame,
@@ -564,6 +571,7 @@ class AppWindow:
             frame,
             name='themed_update_button',
             width=28,
+            anchor=tk.CENTER,
             state=tk.DISABLED
         )
 
@@ -681,7 +689,7 @@ class AppWindow:
                           lambda e: self.help_menu.tk_popup(e.widget.winfo_rootx(),
                                                             e.widget.winfo_rooty()
                                                             + e.widget.winfo_height()))
-        ttk.Separator(self.theme_menubar).grid(columnspan=5, padx=self.PADX, sticky=tk.EW)
+        ttk.Frame(self.theme_menubar, style='Sep.TFrame').grid(columnspan=5, padx=self.PADX, sticky=tk.EW)
         theme.register(self.theme_minimize)  # images aren't automatically registered
         theme.register(self.theme_close)
         self.blank_menubar = ttk.Frame(frame, name="blank_menubar")

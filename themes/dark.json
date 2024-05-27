@@ -1,0 +1,55 @@
+{
+    "TFrame": {
+        "configure": {
+            "background": "grey4",
+            "highlightbackground": "#aa5500"
+        }
+    },
+    "Sep.TFrame": {
+        "configure": {
+            "background": "#ff8000",
+            "padding": 2
+        }
+    },
+    "TLabel": {
+        "configure": {
+            "background": "grey4",
+            "foreground": "#ff8000",
+            "padding": 1
+        },
+        "map": {
+            "background": [
+                ["active", "#ff8000"]
+            ],
+            "foreground": [
+                ["active", "grey4"],
+                ["disabled", "#aa5500"]
+            ]
+        }
+    },
+    "Hyperlink.TLabel": {
+        "configure": {
+            "foreground": "white"
+        }
+    },
+    "TButton": {
+        "configure": {
+            "background": "grey4",
+            "foreground": "#ff8000",
+            "relief": "raised",
+            "padding": 2
+        },
+        "map": {
+            "background": [
+                ["pressed", "#ff8000"]
+            ],
+            "foreground": [
+                ["pressed", "grey4"],
+                ["disabled", "#aa5500"]
+            ],
+            "relief": [
+                ["pressed", "sunken"]
+            ]
+        }
+    }
+}
