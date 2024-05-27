@@ -162,6 +162,10 @@ class _Theme:
         with open('themes/transparent.json') as f:
             self.style.theme_create('transparent', self.default_ttk_theme, json.load(f))
 
+    @deprecated('Theme colors are now applied automatically, even after initialization')
+    def register(self, widget: tk.Widget | tk.BitmapImage) -> None:  # noqa: CCR001, C901
+        assert isinstance(widget, (tk.BitmapImage, tk.Widget)), widget
+
     def register_alternate(self, pair: tuple, gridopts: dict) -> None:
         self.widgets_pair.append((pair, gridopts))
 
