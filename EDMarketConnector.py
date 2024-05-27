@@ -184,6 +184,12 @@ if __name__ == '__main__':  # noqa: C901
         '--killswitches-file',
         help='Specify a custom killswitches file',
     )
+
+    parser.add_argument(
+        '--ttk-catalog',
+        help='Replace plugins with a catalog of Ttk widgets',
+        action='store_true',
+    )
     ###########################################################################
 
     args: argparse.Namespace = parser.parse_args()
@@ -219,6 +225,9 @@ if __name__ == '__main__':  # noqa: C901
 
     if args.eddn_tracking_ui:
         config.set_eddn_tracking_ui()
+
+    if args.ttk_catalog:
+        config.set_ttk_catalog()
 
     if args.force_edmc_protocol:
         if sys.platform == 'win32':
