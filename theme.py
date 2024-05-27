@@ -6,7 +6,7 @@ Licensed under the GNU General Public License.
 See LICENSE file.
 
 Because of various ttk limitations this app is an unholy mix of Tk and ttk widgets.
-So can't use ttk's theme support. So have to change colors manually.
+So can't just use ttk's theme support. So have to change colors manually.
 """
 from __future__ import annotations
 
@@ -17,7 +17,6 @@ import tkinter as tk
 from os.path import join
 from tkinter import ttk
 from typing import Callable
-from l10n import translations as tr
 from config import config
 from EDMCLogging import get_main_logger
 from ttkHyperlinkLabel import HyperlinkLabel
