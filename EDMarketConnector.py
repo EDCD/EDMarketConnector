@@ -638,10 +638,6 @@ class AppWindow:
         self.w.bind("<Unmap>", self.default_iconify)
 
         self.w.protocol("WM_DELETE_WINDOW", self.onexit)
-        theme.register(self.menubar)  # menus and children aren't automatically registered
-        theme.register(self.file_menu)
-        theme.register(self.edit_menu)
-        theme.register(self.help_menu)
 
         # Alternate title bar and menu for dark theme
         self.theme_menubar = ttk.Frame(frame, name="alternate_menubar")
@@ -683,8 +679,6 @@ class AppWindow:
                                                             e.widget.winfo_rooty()
                                                             + e.widget.winfo_height()))
         ttk.Frame(self.theme_menubar, style='Sep.TFrame').grid(columnspan=5, padx=self.PADX, sticky=tk.EW)
-        theme.register(self.theme_minimize)  # images aren't automatically registered
-        theme.register(self.theme_close)
         self.blank_menubar = ttk.Frame(frame, name="blank_menubar")
         ttk.Label(self.blank_menubar).grid()
         ttk.Label(self.blank_menubar).grid()
@@ -712,7 +706,6 @@ class AppWindow:
 
         self.w.attributes('-topmost', config.get_int('always_ontop') and 1 or 0)
 
-        theme.register(frame)
         theme.apply(self.w)
 
         self.w.bind('<Map>', self.onmap)  # Special handling for overrideredict
