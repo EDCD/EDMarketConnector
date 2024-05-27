@@ -465,9 +465,13 @@ class AppWindow:
 
         plug.load_plugins(master)
         self.style = ttk.Style()
+        # ttk.Separator does not allow to configure its thickness, so we have to make our own
+        self.style.configure('Sep.TFrame', padding=2,
+                             background=self.style.lookup('TLabel', 'foreground', ['disabled']))
+        self.style.configure('Link.TLabel', font='TkDefaultFont', foreground='blue')  # HyperlinkLabel
         with open('themes/dark.json') as f:
             dark = json.load(f)
-            self.style.theme_create('dark', 'default', dark)
+            self.style.theme_create('dark', self.style.theme_use(), dark)
         self.style.theme_use('dark')
 
         if sys.platform == 'win32':

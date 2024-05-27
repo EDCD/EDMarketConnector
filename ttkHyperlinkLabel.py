@@ -78,7 +78,8 @@ class HyperlinkLabel(ttk.Label):
         self.bind('<Leave>', self._leave)
 
         # set up initial appearance
-        self.configure(font=kw.get('font', ttk.Style().lookup(self.style, 'font')))
+        self.configure(state=kw.get('state', tk.NORMAL),
+                       font=kw.get('font', ttk.Style().lookup(self.style, 'font')))
 
         # Add Menu Options
         self.plug_options = kw.pop('plug_options', None)

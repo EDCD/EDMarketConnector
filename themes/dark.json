@@ -12,7 +12,7 @@
     },
     "Sep.TFrame": {
         "configure": {
-            "padding": 2
+            "background": "#ff8000"
         }
     },
     "TLabel": {
