@@ -19,7 +19,7 @@ on:
 jobs:
   push_checks:
 
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
@@ -28,6 +28,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
+        cache: 'pip' # caching pip dependencies
         python-version-file: '.python-version'
     - name: Install dependencies
       run: |

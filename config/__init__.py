@@ -7,7 +7,6 @@ See LICENSE file.
 
 Windows uses the Registry to store values in a flat manner.
 Linux uses a file, but for commonality it's still a flat data structure.
-macOS uses a 'defaults' object.
 """
 from __future__ import annotations
 
@@ -18,7 +17,6 @@ __all__ = [
     'applongname',
     'appcmdname',
     'copyright',
-    'update_feed',
     'update_interval',
     'debug_senders',
     'trace_on',
@@ -30,7 +28,9 @@ __all__ = [
     'user_agent',
     'appversion_nobuild',
     'AbstractConfig',
-    'config'
+    'config',
+    'get_update_feed',
+    'update_feed'
 ]
 
 import abc
@@ -54,11 +54,11 @@ appcmdname = 'EDMC'
 # <https://semver.org/#semantic-versioning-specification-semver>
 # Major.Minor.Patch(-prerelease)(+buildmetadata)
 # NB: Do *not* import this, use the functions appversion() and appversion_nobuild()
-_static_appversion = '5.10.6'
+_static_appversion = '5.11.0-alpha3'
 _cached_version: semantic_version.Version | None = None
 copyright = '© 2015-2019 Jonathan Harris, 2020-2024 EDCD'
 
-update_feed = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml'
+
 update_interval = 8*60*60  # 8 Hours
 # Providers marked to be in debug mode. Generally this is expected to switch to sending data to a log file
 debug_senders: list[str] = []
@@ -467,10 +467,6 @@ def get_config(*args, **kwargs) -> AbstractConfig:
     :param kwargs: Args to be passed through to implementation.
     :return: Instance of the implementation.
     """
-    if sys.platform == "darwin":  # pragma: sys-platform-darwin
-        from .darwin import MacConfig
-        return MacConfig(*args, **kwargs)
-
     if sys.platform == "win32":  # pragma: sys-platform-win32
         from .windows import WinConfig
         return WinConfig(*args, **kwargs)
@@ -483,3 +479,15 @@ def get_config(*args, **kwargs) -> AbstractConfig:
 
 
 config = get_config()
+
+
+# Wiki: https://github.com/EDCD/EDMarketConnector/wiki/Participating-in-Open-Betas-of-EDMC
+def get_update_feed() -> str:
+    """Select the proper update feed for the current update track."""
+    if config.get_bool('beta_optin'):
+        return 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector-beta.xml'
+    return 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml'
+
+
+# WARNING: update_feed is deprecated, and will be removed in 6.0 or later. Please migrate to get_update_feed()
+update_feed = get_update_feed()

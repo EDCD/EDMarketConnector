@@ -19,21 +19,37 @@ In addition to standard ttk.Label arguments, takes the following arguments:
 May be imported by plugins
 """
 from __future__ import annotations
-
+import html
+from functools import partial
 import sys
 import tkinter as tk
-import warnings
 import webbrowser
 from tkinter import font as tk_font
 from tkinter import ttk
-from typing import TYPE_CHECKING, Any
+from typing import Any
+import plug
+from os import path
+from config import config, logger
+from l10n import translations as tr
+from monitor import monitor
 
-if TYPE_CHECKING:
-    def _(x: str) -> str: return x
+SHIPYARD_HTML_TEMPLATE = """
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta http-equiv="refresh" content="0; url={link}">
+        <title>Redirecting you to your {ship_name} at {provider_name}...</title>
+    </head>
+    <body>
+        <a href="{link}">
+            You should be redirected to your {ship_name} at {provider_name} shortly...
+        </a>
+    </body>
+</html>
+"""
 
 
-# FIXME: Split this into multi-file module to separate the platforms
-class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label):  # type: ignore
+class HyperlinkLabel(tk.Label or ttk.Label):  # type: ignore
     """Clickable label for HTTP links."""
 
     def __init__(self, master: ttk.Frame | tk.Frame | None = None, **kw: Any) -> None:
@@ -51,22 +67,10 @@ class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label):  # typ
         self.foreground = kw.get('foreground', 'blue')
         self.disabledforeground = kw.pop('disabledforeground', ttk.Style().lookup(
             'TLabel', 'foreground', ('disabled',)))  # ttk.Label doesn't support disabledforeground option
-
-        if sys.platform == 'darwin':
-            # Use tk.Label 'cos can't set ttk.Label background - http://www.tkdocs.com/tutorial/styles.html#whydifficult
-            kw['background'] = kw.pop('background', 'systemDialogBackgroundActive')
-            kw['anchor'] = kw.pop('anchor', tk.W)  # like ttk.Label
-            tk.Label.__init__(self, master, **kw)
-
-        else:
-            ttk.Label.__init__(self, master, **kw)
+        ttk.Label.__init__(self, master, **kw)
 
         self.bind('<Button-1>', self._click)
-
-        self.menu = tk.Menu(tearoff=tk.FALSE)
-        # LANG: Label for 'Copy' as in 'Copy and Paste'
-        self.menu.add_command(label=_('Copy'), command=self.copy)  # As in Copy and Paste
-        self.bind(sys.platform == 'darwin' and '<Button-2>' or '<Button-3>', self._contextmenu)
+        self.bind('<Button-3>', self._contextmenu)
 
         self.bind('<Enter>', self._enter)
         self.bind('<Leave>', self._leave)
@@ -75,6 +79,48 @@ class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label):  # typ
         self.configure(state=kw.get('state', tk.NORMAL),
                        text=kw.get('text'),
                        font=kw.get('font', ttk.Style().lookup('TLabel', 'font')))
+
+        # Add Menu Options
+        self.plug_options = kw.pop('plug_options', None)
+        self.name = kw.get('name', None)
+
+    def open_shipyard(self, url: str):
+        """Open the Current Ship Loadout in the Selected Provider."""
+        if not (loadout := monitor.ship()):
+            logger.warning('No ship loadout, aborting.')
+            return ''
+        if not bool(config.get_int("use_alt_shipyard_open")):
+            opener = plug.invoke(url, 'EDSY', 'shipyard_url', loadout, monitor.is_beta)
+            if opener:
+                return webbrowser.open(opener)
+        else:
+            # Avoid file length limits if possible
+            target = plug.invoke(url, 'EDSY', 'shipyard_url', loadout, monitor.is_beta)
+            file_name = path.join(config.app_dir_path, "last_shipyard.html")
+
+            with open(file_name, 'w') as f:
+                f.write(SHIPYARD_HTML_TEMPLATE.format(
+                    link=html.escape(str(target)),
+                    provider_name=html.escape(str(url)),
+                    ship_name=html.escape("Ship")
+                ))
+
+            webbrowser.open(f'file://localhost/{file_name}')
+
+    def open_system(self, url: str):
+        """Open the Current System in the Selected Provider."""
+        opener = plug.invoke(url, 'EDSM', 'system_url', monitor.state['SystemName'])
+        if opener:
+            return webbrowser.open(opener)
+
+    def open_station(self, url: str):
+        """Open the Current Station in the Selected Provider."""
+        opener = plug.invoke(
+            url, 'EDSM', 'station_url',
+            monitor.state['SystemName'], monitor.state['StationName']
+        )
+        if opener:
+            return webbrowser.open(opener)
 
     def configure(  # noqa: CCR001
         self, cnf: dict[str, Any] | None = None, **kw: Any
@@ -107,10 +153,9 @@ class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label):  # typ
             if state == tk.DISABLED:
                 kw['cursor'] = 'arrow'  # System default
             elif self.url and (kw['text'] if 'text' in kw else self['text']):
-                kw['cursor'] = 'pointinghand' if sys.platform == 'darwin' else 'hand2'
+                kw['cursor'] = 'hand2'
             else:
-                kw['cursor'] = 'notallowed' if sys.platform == 'darwin' else (
-                    'no' if sys.platform == 'win32' else 'circle')
+                kw['cursor'] = ('no' if sys.platform == 'win32' else 'circle')
 
         return super().configure(cnf, **kw)
 
@@ -139,51 +184,43 @@ class HyperlinkLabel(sys.platform == 'darwin' and tk.Label or ttk.Label):  # typ
                 webbrowser.open(url)
 
     def _contextmenu(self, event: tk.Event) -> None:
+        """
+        Display the context menu when right-clicked.
+
+        :param event: The event object.
+        """
+        menu = tk.Menu(tearoff=tk.FALSE)
+        # LANG: Label for 'Copy' as in 'Copy and Paste'
+        menu.add_command(label=tr.tl('Copy'), command=self.copy)  # As in Copy and Paste
+
+        if self.name == 'ship':
+            menu.add_separator()
+            for url in plug.provides('shipyard_url'):
+                menu.add_command(
+                    label=tr.tl("Open in {URL}").format(URL=url),  # LANG: Open Element In Selected Provider
+                    command=partial(self.open_shipyard, url)
+                )
+
+        if self.name == 'station':
+            menu.add_separator()
+            for url in plug.provides('station_url'):
+                menu.add_command(
+                    label=tr.tl("Open in {URL}").format(URL=url),  # LANG: Open Element In Selected Provider
+                    command=partial(self.open_station, url)
+                )
+
+        if self.name == 'system':
+            menu.add_separator()
+            for url in plug.provides('system_url'):
+                menu.add_command(
+                    label=tr.tl("Open in {URL}").format(URL=url),  # LANG: Open Element In Selected Provider
+                    command=partial(self.open_system, url)
+                )
+
         if self['text'] and (self.popup_copy(self['text']) if callable(self.popup_copy) else self.popup_copy):
-            self.menu.post(sys.platform == 'darwin' and event.x_root + 1 or event.x_root, event.y_root)
+            menu.post(event.x_root, event.y_root)
 
     def copy(self) -> None:
         """Copy the current text to the clipboard."""
         self.clipboard_clear()
         self.clipboard_append(self['text'])
-
-
-def openurl(url: str) -> None:
-    r"""
-    Open the given URL in appropriate browser.
-
-    2022-12-06:
-    Firefox itself will gladly attempt to use very long URLs in its URL
-    input.  Up to 16384 was attempted, but the Apache instance this was
-    tested against only allowed up to 8207 total URL length to pass, that
-    being 8190 octets of REQUEST_URI (path + GET params).
-
-    Testing from Windows 10 Home 21H2 cmd.exe with:
-
-        "<path to>\firefox.exe" -osint -url "<test url>"
-
-    only allowed 8115 octest of REQUEST_URI to pass through.
-
-    Microsoft Edge yielded 8092 octets.  Google Chrome yielded 8093 octets.
-
-    However, this is actually the limit of how long a CMD.EXE command-line
-    can be.  The URL was being cut off *there*.
-
-    The 8207 octet URL makes it through `webbrowser.open(<url>)` to:
-
-        Firefox 107.0.1
-        Microsoft Edge 108.0.1462.42
-        Google Chrome 108.0.5359.95
-
-    This was also tested as working *with* the old winreg/subprocess code,
-    so it wasn't even suffering from the same limit as CMD.EXE.
-
-    Conclusion: No reason to not just use `webbrowser.open()`, as prior
-    to e280d6c2833c25867b8139490e68ddf056477917 there was a bug, introduced
-    in 5989acd0d3263e54429ff99769ff73a20476d863, which meant the code always
-    ended up using `webbrowser.open()` *anyway*.
-    :param url: URL to open.
-    """
-    warnings.warn("This function is deprecated. "
-                  "Please use `webbrowser.open() instead.", DeprecationWarning, stacklevel=2)
-    webbrowser.open(url)
