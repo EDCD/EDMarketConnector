@@ -322,6 +322,12 @@ class PreferencesDialog(tk.Toplevel):
         # Set Log Directory
         self.logfile_loc = pathlib.Path(tempfile.gettempdir()) / appname
 
+        # Set minimum size to prevent content cut-off
+        self.update_idletasks()  # Update "requested size" from geometry manager
+        min_width = self.winfo_reqwidth()
+        min_height = self.winfo_reqheight()
+        self.wm_minsize(min_width, min_height)
+
     def __setup_output_tab(self, root_notebook: ttk.Notebook) -> None:
         output_frame = nb.Frame(root_notebook)
         output_frame.columnconfigure(0, weight=1)
