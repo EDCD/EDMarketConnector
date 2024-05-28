@@ -67,7 +67,7 @@ def help_open_system_profiler(parent) -> None:
         else:
             subprocess.run(['python', "EDMCSystemProfiler.py"], shell=True, check=True)
     except Exception as err:
-        parent.status["text"] = "Unable to Launch System Profiler"
+        parent.status["text"] = tr.tl("Error in System Profiler")  # LANG: Catch & Record Profiler Errors
         logger.exception(err)
 
 
