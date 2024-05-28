@@ -57,14 +57,18 @@ def open_folder(file: pathlib.Path) -> None:
         system(f'xdg-open "{file}"')
 
 
-def help_open_system_profiler() -> None:
+def help_open_system_profiler(parent) -> None:
     """Open the EDMC System Profiler."""
     profiler_path = pathlib.Path(config.respath_path)
-    if getattr(sys, 'frozen', False):
-        profiler_path /= 'EDMCSystemProfiler.exe'
-        subprocess.run(profiler_path)
-    else:
-        subprocess.run(['python', "EDMCSystemProfiler.py"], shell=True)
+    try:
+        if getattr(sys, 'frozen', False):
+            profiler_path /= 'EDMCSystemProfiler.exe'
+            subprocess.run(profiler_path, check=True)
+        else:
+            subprocess.run(['python', "EDMCSystemProfiler.py"], shell=True, check=True)
+    except Exception as err:
+        parent.status["text"] = "Unable to Launch System Profiler"
+        logger.exception(err)
 
 
 class PrefsVersion:
@@ -927,7 +931,7 @@ class PreferencesDialog(tk.Toplevel):
             ).grid(column=1, padx=self.PADX, pady=self.PADY, sticky=tk.N, row=cur_row)
 
         enabled_plugins = list(filter(lambda x: x.folder and x.module, plug.PLUGINS))
-        if len(enabled_plugins):
+        if enabled_plugins:
             ttk.Separator(plugins_frame, orient=tk.HORIZONTAL).grid(
                 columnspan=3, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=row.get()
             )
@@ -949,7 +953,7 @@ class PreferencesDialog(tk.Toplevel):
         ############################################################
         # Show which plugins don't have Python 3.x support
         ############################################################
-        if len(plug.PLUGINS_not_py3):
+        if plug.PLUGINS_not_py3:
             ttk.Separator(plugins_frame, orient=tk.HORIZONTAL).grid(
                 columnspan=3, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=row.get()
             )
@@ -975,7 +979,7 @@ class PreferencesDialog(tk.Toplevel):
         # Show disabled plugins
         ############################################################
         disabled_plugins = list(filter(lambda x: x.folder and not x.module, plug.PLUGINS))
-        if len(disabled_plugins):
+        if disabled_plugins:
             ttk.Separator(plugins_frame, orient=tk.HORIZONTAL).grid(
                 columnspan=3, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=row.get()
             )
@@ -992,7 +996,7 @@ class PreferencesDialog(tk.Toplevel):
         ############################################################
         # Show plugins that failed to load
         ############################################################
-        if len(plug.PLUGINS_broken):
+        if plug.PLUGINS_broken:
             ttk.Separator(plugins_frame, orient=tk.HORIZONTAL).grid(
                 columnspan=3, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=row.get()
             )
