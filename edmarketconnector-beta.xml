@@ -6,10 +6,20 @@
       <description>Most recent changes with links to updates.</description>
       <!-- Windows -->
       <item>
-         <title>Pre-Release 5.11.0-rc1</title>
+         <title>Pre-Release 5.11.0-rc2</title>
          <description><![CDATA[<style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
 <p>We now test against, and package with, Python 3.11.9.</p>
 <p><strong>As a result, we do not support Windows 7, 8, or 8.1.</strong><br>
+<h2>Pre-Release 5.11.0-rc2</h2>
+<p>This is a release candidate for 5.11.0.</p>
+<p>This release is identical to 5.11.0-rc1, with a few additions:</p>
+<p><strong>Changes and Enhancements</strong></p>
+<ul>
+<li>Adds Additional Error Processing to the System Profiler when launched from EDMC</li>
+<li>Adds the ability to resize the Settings window to larger than the initial default size</li>
+<li>Tweaked a few list length checks that could just be boolean to be bool</li>
+</ul>
+<hr>
 <h2>Pre-Release 5.11.0-rc1</h2>
 <p>This is a release candidate for 5.11.0.</p>
 <p>
@@ -81,7 +91,6 @@ take note!</p>
 <li>The <code>openurl()</code> function in ttkHyperlinkLabel has been removed. Please migrate to <code>webbrowser.open()</code></li>
 </ul>
 <hr>
-
 <h2>Release 5.10.6</h2>
 <p>This release contains the data information for the new SCO modules added in Elite update 18.04.
 This should represent full support for the new Python Mk II.</p>
@@ -2328,7 +2337,7 @@ about this:
 <a href="https://issues.frontierstore.net/issue-detail/28638" rel="nofollow">PTS CAPI saying Commander is Docked after jumping to new system</a>.</p>
 </li>
 </ul>]]></description>
-         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F5.11.0-rc1/EDMarketConnector_Installer_5.11.0-rc1.exe" sparkle:os="windows" sparkle:version="5.11.0-rc1" length="0" type="application/x-ms-dos-executable" />
+         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F5.11.0-rc2/EDMarketConnector_Installer_5.11.0-rc2.exe" sparkle:os="windows" sparkle:version="5.11.0-rc2" length="0" type="application/x-ms-dos-executable" />
       </item>
    </channel>
 </rss>
