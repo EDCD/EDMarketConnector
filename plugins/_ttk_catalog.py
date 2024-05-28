@@ -16,8 +16,8 @@ logger = get_main_logger()
 
 
 class Catalog(ttk.Frame):
-    def __init__(self, parent):
-        super().__init__()
+    def __init__(self, parent: ttk.Frame):
+        super().__init__(parent)
 
         # Make the app responsive
         for index in [0, 1, 2]:
