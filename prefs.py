@@ -232,7 +232,7 @@ class PreferencesDialog(tk.Toplevel):
     """The EDMC preferences dialog."""
 
     def __init__(self, parent: tk.Tk, callback: Optional[Callable]):
-        tk.Toplevel.__init__(self, parent)
+        super().__init__(parent)
 
         self.parent = parent
         self.callback = callback
@@ -242,25 +242,30 @@ class PreferencesDialog(tk.Toplevel):
         if parent.winfo_viewable():
             self.transient(parent)
 
-        # position over parent
-        # http://core.tcl.tk/tk/tktview/c84f660833546b1b84e7
-        # TODO this is fixed supposedly.
+        # Position over parent
         self.geometry(f'+{parent.winfo_rootx()}+{parent.winfo_rooty()}')
 
-        # remove decoration
+        # Remove decoration
         if sys.platform == 'win32':
             self.attributes('-toolwindow', tk.TRUE)
 
-        self.resizable(tk.FALSE, tk.FALSE)
+        # Allow the window to be resizable
+        self.resizable(tk.TRUE, tk.TRUE)
 
         self.cmdr: str | bool | None = False  # Note if Cmdr changes in the Journal
         self.is_beta: bool = False  # Note if Beta status changes in the Journal
         self.cmdrchanged_alarm: Optional[str] = None  # This stores an ID that can be used to cancel a scheduled call
 
+        # Set up the main frame
         frame = ttk.Frame(self)
         frame.grid(sticky=tk.NSEW)
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        frame.columnconfigure(0, weight=1)
+        frame.rowconfigure(0, weight=1)
+        frame.rowconfigure(1, weight=0)
 
-        notebook: ttk.Notebook = nb.Notebook(frame)
+        notebook: nb.Notebook = nb.Notebook(frame)
         notebook.bind('<<NotebookTabChanged>>', self.tabchanged)  # Recompute on tab change
 
         self.PADX = 10
@@ -268,16 +273,17 @@ class PreferencesDialog(tk.Toplevel):
         self.LISTX = 25  # indent listed items
         self.PADY = 1  # close spacing
         self.BOXY = 2  # box spacing
-        self.SEPY = 10  # seperator line spacing
+        self.SEPY = 10  # separator line spacing
 
         # Set up different tabs
-        self.__setup_output_tab(notebook)
-        self.__setup_plugin_tabs(notebook)
         self.__setup_config_tab(notebook)
-        self.__setup_privacy_tab(notebook)
         self.__setup_appearance_tab(notebook)
+        self.__setup_output_tab(notebook)
+        self.__setup_privacy_tab(notebook)
         self.__setup_plugin_tab(notebook)
+        self.__setup_plugin_tabs(notebook)
 
+        # Set up the button frame
         buttonframe = ttk.Frame(frame)
         buttonframe.grid(padx=self.PADX, pady=self.PADX, sticky=tk.NSEW)
         buttonframe.columnconfigure(0, weight=1)
@@ -298,7 +304,7 @@ class PreferencesDialog(tk.Toplevel):
 
         # wait for window to appear on screen before calling grab_set
         self.parent.update_idletasks()
-        self.parent.wm_attributes('-topmost', 0)  # needed for dialog to appear ontop of parent on Linux
+        self.parent.wm_attributes('-topmost', 0)  # needed for dialog to appear on top of parent on Linux
         self.wait_visibility()
         self.grab_set()
 
@@ -315,6 +321,12 @@ class PreferencesDialog(tk.Toplevel):
 
         # Set Log Directory
         self.logfile_loc = pathlib.Path(tempfile.gettempdir()) / appname
+
+        # Set minimum size to prevent content cut-off
+        self.update_idletasks()  # Update "requested size" from geometry manager
+        min_width = self.winfo_reqwidth()
+        min_height = self.winfo_reqheight()
+        self.wm_minsize(min_width, min_height)
 
     def __setup_output_tab(self, root_notebook: ttk.Notebook) -> None:
         output_frame = nb.Frame(root_notebook)
