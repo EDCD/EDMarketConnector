@@ -6,8 +6,20 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
       in the source (not distributed with the Windows installer) for the
       currently used version.
 ---
-Release 5.11.0-rc1
+Pre-Release 5.11.0-rc2
 ===
+This is a release candidate for 5.11.0.
+
+This release is identical to 5.11.0-rc1, with a few additions: 
+
+**Changes and Enhancements**
+* Adds Additional Error Processing to the System Profiler when launched from EDMC
+* Adds the ability to resize the Settings window to larger than the initial default size
+* Tweaked a few list length checks that could just be boolean to be bool
+
+Pre-Release 5.11.0-rc1
+===
+This is a release candidate for 5.11.0.
 
 This release includes a number of new features and improvements, including a new Beta Update Track for testing future updates, enhanced context menus for text entry fields and UI elements, a revamp to the existing translation system and logging capabilities, and more. This release includes the Python Image Library (PIL) into our core bundle, adds a number of stability and configuration checks to the tool, and adds new schemas and configuration values to senders. 
 
