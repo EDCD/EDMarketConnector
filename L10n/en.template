@@ -489,6 +489,9 @@
 /* prefs.py: Lable on list of user-disabled plugins; In files: prefs.py:977; */
 "Disabled Plugins" = "Disabled Plugins";
 
+/* prefs.py: Catch & Record Profiler Errors; */
+"Error in System Profiler" = "Error in System Profiler";
+
 /* stats.py: Cmdr stats; In files: stats.py:58; */
 "Balance" = "Balance";
 
