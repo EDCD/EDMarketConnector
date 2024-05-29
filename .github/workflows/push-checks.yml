@@ -69,3 +69,11 @@ jobs:
     - name: mypy type checks
       run: |
           ./scripts/mypy-all.sh --platform win32
+
+    - name: translation checks
+      run: |
+          output=$(python ./scripts/find_localised_strings.py --compare-lang L10n/en.template --directory . --ignore coriolis-data 2>&1)
+          if [ -n "$output" ]; then
+              echo $output
+              exit 1
+          fi
