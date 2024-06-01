@@ -126,13 +126,13 @@ class Catalog(ttk.Frame):
         hyperlink_frame = ttk.LabelFrame(self, text="HyperlinkLabels", padding=(20, 10))
         hyperlink_frame.grid(row=2, column=1, padx=10, pady=10, sticky="nsew")
 
-        hyperlink_1 = HyperlinkLabel(hyperlink_frame, text="underline=None", url=URL)
+        hyperlink_1 = HyperlinkLabel(hyperlink_frame, text="Default", url=URL)
         hyperlink_1.grid(row=0, column=0, padx=5, pady=10, sticky="nsew")
 
-        hyperlink_2 = HyperlinkLabel(hyperlink_frame, text="underline=True", url=URL, underline=True)
+        hyperlink_2 = HyperlinkLabel(hyperlink_frame, text="Underline", url=URL, underline=True)
         hyperlink_2.grid(row=1, column=0, padx=5, pady=10, sticky="nsew")
 
-        hyperlink_3 = HyperlinkLabel(hyperlink_frame, text="underline=False", url=URL, underline=False)
+        hyperlink_3 = HyperlinkLabel(hyperlink_frame, text="No underline", url=URL, underline=False)
         hyperlink_3.grid(row=2, column=0, padx=5, pady=10, sticky="nsew")
 
         hyperlink_4 = HyperlinkLabel(hyperlink_frame, text="Disabled", url=URL, state=tk.DISABLED)
