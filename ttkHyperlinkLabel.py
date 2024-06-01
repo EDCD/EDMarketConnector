@@ -52,7 +52,7 @@ SHIPYARD_HTML_TEMPLATE = """
 class HyperlinkLabel(ttk.Label):
     """Clickable label for HTTP links."""
 
-    def __init__(self, master: ttk.Frame | tk.Frame | None = None, **kw: Any) -> None:
+    def __init__(self, master: tk.Widget | None = None, **kw: Any) -> None:
         """
         Initialize the HyperlinkLabel.
 
