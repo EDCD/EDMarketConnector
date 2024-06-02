@@ -29,6 +29,7 @@ class Catalog(ttk.Frame):
 
         # Create value lists
         self.option_menu_list = ["", "OptionMenu", "Option 1", "Option 2"]
+        self.tk_option_menu_list = ["", "tk.OptionMenu", "Option 1", "Option 2"]
         self.combo_list = ["Combobox", "Editable item 1", "Editable item 2"]
         self.readonly_combo_list = ["Readonly combobox", "Item 1", "Item 2"]
 
@@ -39,12 +40,13 @@ class Catalog(ttk.Frame):
         self.var_3 = tk.IntVar(value=2)
         self.var_4 = tk.StringVar(value=self.option_menu_list[1])
         self.var_5 = tk.DoubleVar(value=75.0)
+        self.var_6 = tk.StringVar(value=self.tk_option_menu_list[1])
 
         # Create widgets :)
         self.setup_widgets()
 
     def setup_widgets(self):
-        check_frame = ttk.LabelFrame(self, text="Checkbuttons", padding=(20, 10))
+        check_frame = ttk.LabelFrame(self, text="Checkbutton", padding=(20, 10))
         check_frame.grid(row=0, column=0, padx=(20, 10), pady=(20, 10), sticky="nsew")
 
         check_1 = ttk.Checkbutton(check_frame, text="Unchecked", variable=self.var_0)
@@ -66,7 +68,7 @@ class Catalog(ttk.Frame):
         separator.grid(row=1, column=0, padx=(20, 10), pady=10, sticky="ew")
 
         # Create a Frame for the Radiobuttons
-        radio_frame = ttk.LabelFrame(self, text="Radiobuttons", padding=(20, 10))
+        radio_frame = ttk.LabelFrame(self, text="Radiobutton", padding=(20, 10))
         radio_frame.grid(row=2, column=0, padx=(20, 10), pady=10, sticky="nsew")
 
         radio_1 = ttk.Radiobutton(radio_frame, text="Unselected", variable=self.var_3, value=1)
@@ -123,7 +125,7 @@ class Catalog(ttk.Frame):
         button = ttk.Button(widgets_frame, text="Button")
         button.grid(row=6, column=0, sticky="nsew")
 
-        hyperlink_frame = ttk.LabelFrame(self, text="HyperlinkLabels", padding=(20, 10))
+        hyperlink_frame = ttk.LabelFrame(self, text="HyperlinkLabel", padding=(20, 10))
         hyperlink_frame.grid(row=2, column=1, padx=10, pady=10, sticky="nsew")
 
         hyperlink_1 = HyperlinkLabel(hyperlink_frame, text="Default", url=URL)
@@ -256,7 +258,7 @@ class Catalog(ttk.Frame):
         tab_3 = ttk.Frame(notebook)
         notebook.add(tab_3, text="Tab 3")
 
-        check_frame = tk.LabelFrame(self, text="Checkbuttons", padx=20, pady=10)
+        check_frame = tk.LabelFrame(self, text="tk.Checkbutton", padx=20, pady=10)
         check_frame.grid(row=0, column=3, padx=(20, 10), pady=(20, 10), sticky="nsew")
 
         check_1 = tk.Checkbutton(check_frame, text="Unchecked", variable=self.var_0)
@@ -269,7 +271,7 @@ class Catalog(ttk.Frame):
         check_4.grid(row=3, column=0, sticky="nsew")
 
         # Create a Frame for the Radiobuttons
-        radio_frame = tk.LabelFrame(self, text="Radiobuttons", padx=20, pady=10)
+        radio_frame = tk.LabelFrame(self, text="tk.Radiobutton", padx=20, pady=10)
         radio_frame.grid(row=2, column=3, padx=(20, 10), pady=10, sticky="nsew")
 
         radio_1 = tk.Radiobutton(radio_frame, text="Unselected", variable=self.var_3, value=1)
@@ -288,7 +290,7 @@ class Catalog(ttk.Frame):
 
         # Entry
         entry = tk.Entry(widgets_frame)
-        entry.insert(0, "Entry")
+        entry.insert(0, "tk.Entry")
         entry.grid(row=0, column=0, padx=5, pady=(0, 10), sticky="ew")
 
         # Spinbox
@@ -304,18 +306,18 @@ class Catalog(ttk.Frame):
         menu.add_command(label="Menu item 4")
 
         # Menubutton
-        menubutton = tk.Menubutton(widgets_frame, text="Menubutton", menu=menu, direction="below")
+        menubutton = tk.Menubutton(widgets_frame, text="tk.Menubutton", menu=menu, direction="below")
         menubutton.grid(row=4, column=0, padx=5, pady=10, sticky="nsew")
 
         # OptionMenu
-        optionmenu = tk.OptionMenu(widgets_frame, self.var_4, *self.option_menu_list)
+        optionmenu = tk.OptionMenu(widgets_frame, self.var_6, *self.tk_option_menu_list)
         optionmenu.grid(row=5, column=0, padx=5, pady=10, sticky="nsew")
 
         # Button
-        button = tk.Button(widgets_frame, text="Button")
+        button = tk.Button(widgets_frame, text="tk.Button")
         button.grid(row=6, column=0, padx=5, pady=10, sticky="nsew")
 
-        hyperlink_frame = tk.LabelFrame(self, text="HyperlinkLabels (legacy)", padx=20, pady=10)
+        hyperlink_frame = tk.LabelFrame(self, text="HyperlinkLabel (legacy)", padx=20, pady=10)
         hyperlink_frame.grid(row=2, column=4, padx=10, pady=10, sticky="nsew")
 
         hyperlink_1 = HyperlinkLabel(hyperlink_frame, text="Default", url=URL)
