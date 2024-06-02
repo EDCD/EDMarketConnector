@@ -192,6 +192,7 @@ class AbstractConfig(abc.ABC):
     app_dir_path: pathlib.Path
     plugin_dir_path: pathlib.Path
     internal_plugin_dir_path: pathlib.Path
+    internal_theme_dir_path: pathlib.Path
     respath_path: pathlib.Path
     home_path: pathlib.Path
     default_journal_dir_path: pathlib.Path

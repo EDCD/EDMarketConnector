@@ -61,14 +61,14 @@ class HyperlinkLabel(ttk.Label):
         """
         self.font_u: tk_font.Font
         self.font_n = None
-        self.style = kw.get('style', 'Link.TLabel')
         self.url = kw.pop('url', None)
         self.popup_copy = kw.pop('popup_copy', False)
         self.underline = kw.pop('underline', None)  # override ttk.Label's underline
-        self.foreground = kw.get('foreground', ttk.Style().lookup(self.style, 'foreground'))
-        # ttk.Label doesn't support disabledforeground option
-        self.disabledforeground = kw.pop('disabledforeground',
-                                         ttk.Style().lookup(self.style, 'foreground', ('disabled',)))
+        self.legacy = not isinstance(master, ttk.Widget)
+        if self.legacy:
+            self.foreground = kw.get('foreground')
+            self.disabledforeground = kw.pop('disabledforeground', None)
+        kw.setdefault('style', 'Link.TLabel')
         ttk.Label.__init__(self, master, **kw)
 
         self.bind('<Button-1>', self._click)
@@ -76,10 +76,11 @@ class HyperlinkLabel(ttk.Label):
 
         self.bind('<Enter>', self._enter)
         self.bind('<Leave>', self._leave)
+        self.bind('<<ThemeChanged>>', self._theme)
 
         # set up initial appearance
         self.configure(state=kw.get('state', tk.NORMAL),
-                       font=kw.get('font', ttk.Style().lookup(self.style, 'font')))
+                       font=kw.get('font', ttk.Style().lookup(kw['style'], 'font')))
 
         # Add Menu Options
         self.plug_options = kw.pop('plug_options', None)
@@ -132,17 +133,14 @@ class HyperlinkLabel(ttk.Label):
         for thing in ('url', 'popup_copy', 'underline'):
             if thing in kw:
                 setattr(self, thing, kw.pop(thing))
-        for thing in ('foreground', 'disabledforeground'):
-            if thing in kw:
-                setattr(self, thing, kw[thing])
+        if self.legacy:
+            for thing in ('foreground', 'disabledforeground'):
+                if thing in kw:
+                    setattr(self, thing, kw[thing])
 
-        # Emulate disabledforeground option for ttk.Label
-        if 'state' in kw:
-            state = kw['state']
-            if state == tk.DISABLED and 'foreground' not in kw:
-                kw['foreground'] = self.disabledforeground
-            elif state != tk.DISABLED and 'foreground' not in kw:
-                kw['foreground'] = self.foreground
+            # Emulate disabledforeground option for ttk.Label
+            if 'state' in kw and 'foreground' not in kw:
+                self._theme(None)
 
         if 'font' in kw:
             self.font_n = kw['font']
@@ -177,6 +175,13 @@ class HyperlinkLabel(ttk.Label):
     def _leave(self, event: tk.Event) -> None:
         if not self.underline:
             super().configure(font=self.font_n)  # type: ignore
+
+    def _theme(self, event: tk.Event | None = None) -> None:
+        if self.legacy:
+            if str(self['state']) == tk.DISABLED:
+                super().configure(foreground=self.disabledforeground or ttk.Style().lookup('TLabel', 'foreground', ['disabled']))
+            else:
+                super().configure(foreground=self.foreground or ttk.Style().lookup('Link.TLabel', 'foreground'))
 
     def _click(self, event: tk.Event) -> None:
         if self.url and self['text'] and str(self['state']) != tk.DISABLED:

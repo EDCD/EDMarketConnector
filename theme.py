@@ -10,7 +10,6 @@ So can't just use ttk's theme support. So have to change colors manually.
 """
 from __future__ import annotations
 
-import json
 import os
 import sys
 import tkinter as tk
@@ -140,14 +139,9 @@ class _Theme:
         self.default_ui_scale: float | None = None  # None == not yet known
         self.startup_ui_scale: int | None = None
 
-    def initialize(self):
+    def initialize(self, root: tk.Tk):
         self.style = ttk.Style()
         self.style.theme_use('clam')
-
-        # ttk.Separator does not allow to configure its thickness, so we have to make our own
-        self.style.configure('Sep.TFrame', padding=2,
-                             background=self.style.lookup('TLabel', 'foreground', ['disabled']))
-        self.style.configure('Link.TLabel', font='TkDefaultFont', foreground='blue')  # HyperlinkLabel
 
         # Default dark theme colors
         if not config.get_str('dark_text'):
@@ -155,10 +149,11 @@ class _Theme:
         if not config.get_str('dark_highlight'):
             config.set('dark_highlight', 'white')
 
-        with open('themes/dark.json') as f:
-            self.style.theme_create('dark', 'clam', json.load(f))
-        with open('themes/transparent.json') as f:
-            self.style.theme_create('transparent', 'clam', json.load(f))
+        for theme_file in config.internal_theme_dir_path.glob('[!._]*.tcl'):
+            try:
+                root.tk.call('source', theme_file)
+            except tk.TclError:
+                logger.exception(f'Failure loading internal theme "{theme_file}"')
 
     @deprecated('Theme colors are now applied automatically, even after initialization')
     def register(self, widget: tk.Widget | tk.BitmapImage) -> None:  # noqa: CCR001, C901
@@ -187,8 +182,8 @@ class _Theme:
 
             if image:
                 try:
-                    image['background'] = self.style.lookup('TLabel', 'background', ['active'])
-                    image['foreground'] = self.style.lookup('TLabel', 'foreground', ['active'])
+                    image['background'] = self.style.lookup('.', 'selectbackground')
+                    image['foreground'] = self.style.lookup('.', 'selectforeground')
 
                 except Exception:
                     logger.exception(f'Failure configuring image: {image=}')
@@ -204,8 +199,8 @@ class _Theme:
 
             if image:
                 try:
-                    image['background'] = self.style.lookup('TLabel', 'background')
-                    image['foreground'] = self.style.lookup('TLabel', 'foreground')
+                    image['background'] = self.style.lookup('.', 'background')
+                    image['foreground'] = self.style.lookup('.', 'foreground')
 
                 except Exception:
                     logger.exception(f'Failure configuring image: {image=}')
@@ -229,18 +224,9 @@ class _Theme:
         elif theme == self.THEME_TRANSPARENT:
             self.style.theme_use('transparent')
 
-        # TODO hover menu / click button
-        root.tk_setPalette(
-            background=self.style.lookup('.', 'background'),
-            foreground=self.style.lookup('.', 'foreground'),
-            activebackground=self.style.lookup('.', 'background', ['active']),
-            activeforeground=self.style.lookup('.', 'foreground', ['active']),
-            disabledforeground=self.style.lookup('.', 'foreground', ['disabled']),
-            highlightcolor=self.style.lookup('Link.TLabel', 'foreground'),
-        )
         for image in self.bitmaps:
-            image['background'] = self.style.lookup('TLabel', 'background')
-            image['foreground'] = self.style.lookup('TLabel', 'foreground')
+            image['background'] = self.style.lookup('.', 'background')
+            image['foreground'] = self.style.lookup('.', 'foreground')
 
         # Switch menus
         for pair, gridopts in self.widgets_pair:

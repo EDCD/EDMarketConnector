@@ -452,7 +452,7 @@ class AppWindow:
         self.minimizing = False
         self.w.rowconfigure(0, weight=1)
         self.w.columnconfigure(0, weight=1)
-        theme.initialize()
+        theme.initialize(self.w)
 
         # companion needs to be able to send <<CAPIResponse>> events
         companion.session.set_tk_master(self.w)
@@ -532,7 +532,7 @@ class AppWindow:
         plugin_no = 0
         for plugin in plug.PLUGINS:
             # Per plugin separator
-            plugin_sep = ttk.Frame(frame, name=f"plugin_hr_{plugin_no + 1}", style='Sep.TFrame')
+            plugin_sep = ttk.Separator(frame, name=f"plugin_hr_{plugin_no + 1}")
             # Per plugin frame, for it to use as its parent for own widgets
             plugin_frame = ttk.Frame(
                 frame,
@@ -687,7 +687,7 @@ class AppWindow:
                           lambda e: self.help_menu.tk_popup(e.widget.winfo_rootx(),
                                                             e.widget.winfo_rooty()
                                                             + e.widget.winfo_height()))
-        ttk.Frame(self.theme_menubar, style='Sep.TFrame').grid(columnspan=5, padx=self.PADX, sticky=tk.EW)
+        ttk.Separator(self.theme_menubar).grid(columnspan=5, padx=self.PADX, sticky=tk.EW)
         self.blank_menubar = ttk.Frame(frame, name="blank_menubar")
         ttk.Label(self.blank_menubar).grid()
         ttk.Label(self.blank_menubar).grid()
