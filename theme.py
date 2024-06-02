@@ -139,12 +139,10 @@ class _Theme:
         self.widgets_pair: list = []
         self.default_ui_scale: float | None = None  # None == not yet known
         self.startup_ui_scale: int | None = None
-        self.default_ttk_theme = 'clam'
 
     def initialize(self):
         self.style = ttk.Style()
-        if sys.platform == 'win32':
-            self.default_ttk_theme = self.style.theme_use()
+        self.style.theme_use('clam')
 
         # ttk.Separator does not allow to configure its thickness, so we have to make our own
         self.style.configure('Sep.TFrame', padding=2,
@@ -158,9 +156,9 @@ class _Theme:
             config.set('dark_highlight', 'white')
 
         with open('themes/dark.json') as f:
-            self.style.theme_create('dark', self.default_ttk_theme, json.load(f))
+            self.style.theme_create('dark', 'clam', json.load(f))
         with open('themes/transparent.json') as f:
-            self.style.theme_create('transparent', self.default_ttk_theme, json.load(f))
+            self.style.theme_create('transparent', 'clam', json.load(f))
 
     @deprecated('Theme colors are now applied automatically, even after initialization')
     def register(self, widget: tk.Widget | tk.BitmapImage) -> None:  # noqa: CCR001, C901
@@ -225,19 +223,20 @@ class _Theme:
     def apply(self, root: tk.Tk) -> None:  # noqa: CCR001, C901
         theme = config.get_int('theme')
         if theme == self.THEME_DEFAULT:
-            self.style.theme_use(self.default_ttk_theme)
+            self.style.theme_use('clam')
         elif theme == self.THEME_DARK:
             self.style.theme_use('dark')
         elif theme == self.THEME_TRANSPARENT:
             self.style.theme_use('transparent')
 
+        # TODO hover menu / click button
         root.tk_setPalette(
-            background=self.style.lookup('TLabel', 'background'),
-            foreground=self.style.lookup('TLabel', 'foreground'),
-            activebackground=self.style.lookup('TLabel', 'background', ['active']),
-            activeforeground=self.style.lookup('TLabel', 'foreground', ['active']),
-            disabledforeground=self.style.lookup('TLabel', 'foreground', ['disabled']),
-            highlight=self.style.lookup('Link.TLabel', 'foreground'),
+            background=self.style.lookup('.', 'background'),
+            foreground=self.style.lookup('.', 'foreground'),
+            activebackground=self.style.lookup('.', 'background', ['active']),
+            activeforeground=self.style.lookup('.', 'foreground', ['active']),
+            disabledforeground=self.style.lookup('.', 'foreground', ['disabled']),
+            highlightcolor=self.style.lookup('Link.TLabel', 'foreground'),
         )
         for image in self.bitmaps:
             image['background'] = self.style.lookup('TLabel', 'background')
