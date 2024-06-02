@@ -48,18 +48,18 @@ class Catalog(ttk.Frame):
         check_frame.grid(row=0, column=0, padx=(20, 10), pady=(20, 10), sticky="nsew")
 
         check_1 = ttk.Checkbutton(check_frame, text="Unchecked", variable=self.var_0)
-        check_1.grid(row=0, column=0, padx=5, pady=10, sticky="nsew")
+        check_1.grid(row=0, column=0, sticky="nsew")
 
         check_2 = ttk.Checkbutton(check_frame, text="Checked", variable=self.var_1)
-        check_2.grid(row=1, column=0, padx=5, pady=10, sticky="nsew")
+        check_2.grid(row=1, column=0, sticky="nsew")
 
         check_3 = ttk.Checkbutton(check_frame, text="Third state", variable=self.var_2)
         check_3.state(["alternate"])
-        check_3.grid(row=2, column=0, padx=5, pady=10, sticky="nsew")
+        check_3.grid(row=2, column=0, sticky="nsew")
 
         check_4 = ttk.Checkbutton(check_frame, text="Disabled", state="disabled")
         check_4.state(["disabled !alternate"])
-        check_4.grid(row=3, column=0, padx=5, pady=10, sticky="nsew")
+        check_4.grid(row=3, column=0, sticky="nsew")
 
         # Separator
         separator = ttk.Separator(self)
@@ -70,13 +70,13 @@ class Catalog(ttk.Frame):
         radio_frame.grid(row=2, column=0, padx=(20, 10), pady=10, sticky="nsew")
 
         radio_1 = ttk.Radiobutton(radio_frame, text="Unselected", variable=self.var_3, value=1)
-        radio_1.grid(row=0, column=0, padx=5, pady=10, sticky="nsew")
+        radio_1.grid(row=0, column=0, sticky="nsew")
 
         radio_2 = ttk.Radiobutton(radio_frame, text="Selected", variable=self.var_3, value=2)
-        radio_2.grid(row=1, column=0, padx=5, pady=10, sticky="nsew")
+        radio_2.grid(row=1, column=0, sticky="nsew")
 
         radio_3 = ttk.Radiobutton(radio_frame, text="Disabled", state="disabled")
-        radio_3.grid(row=2, column=0, padx=5, pady=10, sticky="nsew")
+        radio_3.grid(row=2, column=0, sticky="nsew")
 
         # Create a Frame for input widgets
         widgets_frame = ttk.Frame(self, padding=(0, 0, 0, 10))
@@ -121,22 +121,22 @@ class Catalog(ttk.Frame):
 
         # Button
         button = ttk.Button(widgets_frame, text="Button")
-        button.grid(row=6, column=0, padx=5, pady=10, sticky="nsew")
+        button.grid(row=6, column=0, sticky="nsew")
 
         hyperlink_frame = ttk.LabelFrame(self, text="HyperlinkLabels", padding=(20, 10))
         hyperlink_frame.grid(row=2, column=1, padx=10, pady=10, sticky="nsew")
 
         hyperlink_1 = HyperlinkLabel(hyperlink_frame, text="Default", url=URL)
-        hyperlink_1.grid(row=0, column=0, padx=5, pady=10, sticky="nsew")
+        hyperlink_1.grid(row=0, column=0, sticky="nsew")
 
         hyperlink_2 = HyperlinkLabel(hyperlink_frame, text="Underline", url=URL, underline=True)
-        hyperlink_2.grid(row=1, column=0, padx=5, pady=10, sticky="nsew")
+        hyperlink_2.grid(row=1, column=0, sticky="nsew")
 
         hyperlink_3 = HyperlinkLabel(hyperlink_frame, text="No underline", url=URL, underline=False)
-        hyperlink_3.grid(row=2, column=0, padx=5, pady=10, sticky="nsew")
+        hyperlink_3.grid(row=2, column=0, sticky="nsew")
 
         hyperlink_4 = HyperlinkLabel(hyperlink_frame, text="Disabled", url=URL, state=tk.DISABLED)
-        hyperlink_4.grid(row=3, column=0, padx=5, pady=10, sticky="nsew")
+        hyperlink_4.grid(row=3, column=0, sticky="nsew")
 
         # Panedwindow
         paned = ttk.PanedWindow(self)
@@ -255,6 +255,80 @@ class Catalog(ttk.Frame):
         # Tab #3
         tab_3 = ttk.Frame(notebook)
         notebook.add(tab_3, text="Tab 3")
+
+        check_frame = tk.LabelFrame(self, text="Checkbuttons", padx=20, pady=10)
+        check_frame.grid(row=0, column=3, padx=(20, 10), pady=(20, 10), sticky="nsew")
+
+        check_1 = tk.Checkbutton(check_frame, text="Unchecked", variable=self.var_0)
+        check_1.grid(row=0, column=0, sticky="nsew")
+
+        check_2 = tk.Checkbutton(check_frame, text="Checked", variable=self.var_1)
+        check_2.grid(row=1, column=0, sticky="nsew")
+
+        check_4 = tk.Checkbutton(check_frame, text="Disabled", state="disabled")
+        check_4.grid(row=3, column=0, sticky="nsew")
+
+        # Create a Frame for the Radiobuttons
+        radio_frame = tk.LabelFrame(self, text="Radiobuttons", padx=20, pady=10)
+        radio_frame.grid(row=2, column=3, padx=(20, 10), pady=10, sticky="nsew")
+
+        radio_1 = tk.Radiobutton(radio_frame, text="Unselected", variable=self.var_3, value=1)
+        radio_1.grid(row=0, column=0, sticky="nsew")
+
+        radio_2 = tk.Radiobutton(radio_frame, text="Selected", variable=self.var_3, value=2)
+        radio_2.grid(row=1, column=0, sticky="nsew")
+
+        radio_3 = tk.Radiobutton(radio_frame, text="Disabled", state="disabled")
+        radio_3.grid(row=2, column=0, sticky="nsew")
+
+        # Create a Frame for input widgets
+        widgets_frame = tk.Frame(self)
+        widgets_frame.grid(row=0, column=4, padx=10, pady=(30, 10), sticky="nsew", rowspan=2)
+        widgets_frame.columnconfigure(index=0, weight=1)
+
+        # Entry
+        entry = tk.Entry(widgets_frame)
+        entry.insert(0, "Entry")
+        entry.grid(row=0, column=0, padx=5, pady=(0, 10), sticky="ew")
+
+        # Spinbox
+        spinbox = tk.Spinbox(widgets_frame, from_=0, to=100, increment=0.1)
+        spinbox.grid(row=1, column=0, padx=5, pady=10, sticky="ew")
+
+        # Menu for the Menubutton
+        menu = tk.Menu(self)
+        menu.add_command(label="Menu item 1")
+        menu.add_command(label="Menu item 2")
+        menu.add_separator()
+        menu.add_command(label="Menu item 3")
+        menu.add_command(label="Menu item 4")
+
+        # Menubutton
+        menubutton = tk.Menubutton(widgets_frame, text="Menubutton", menu=menu, direction="below")
+        menubutton.grid(row=4, column=0, padx=5, pady=10, sticky="nsew")
+
+        # OptionMenu
+        optionmenu = tk.OptionMenu(widgets_frame, self.var_4, *self.option_menu_list)
+        optionmenu.grid(row=5, column=0, padx=5, pady=10, sticky="nsew")
+
+        # Button
+        button = tk.Button(widgets_frame, text="Button")
+        button.grid(row=6, column=0, padx=5, pady=10, sticky="nsew")
+
+        hyperlink_frame = tk.LabelFrame(self, text="HyperlinkLabels (legacy)", padx=20, pady=10)
+        hyperlink_frame.grid(row=2, column=4, padx=10, pady=10, sticky="nsew")
+
+        hyperlink_1 = HyperlinkLabel(hyperlink_frame, text="Default", url=URL)
+        hyperlink_1.grid(row=0, column=0, sticky="nsew")
+
+        hyperlink_2 = HyperlinkLabel(hyperlink_frame, text="Underline", url=URL, underline=True)
+        hyperlink_2.grid(row=1, column=0, sticky="nsew")
+
+        hyperlink_3 = HyperlinkLabel(hyperlink_frame, text="No underline", url=URL, underline=False)
+        hyperlink_3.grid(row=2, column=0, sticky="nsew")
+
+        hyperlink_4 = HyperlinkLabel(hyperlink_frame, text="Disabled", url=URL, state=tk.DISABLED)
+        hyperlink_4.grid(row=3, column=0, sticky="nsew")
 
 
 def plugin_start3(path: str) -> str:
