@@ -26,7 +26,7 @@ namespace eval ttk::theme::dark {
             -insertwidth 1 \
             -insertcolor $colors(-fg) \
             -fieldbackground $colors(-bg) \
-            -font {TkDefaultFont 10} \
+            -font {TkDefaultFont} \
             -borderwidth 1 \
             -relief flat
 
