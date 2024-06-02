@@ -141,7 +141,6 @@ class _Theme:
 
     def initialize(self, root: tk.Tk):
         self.style = ttk.Style()
-        self.style.theme_use('clam')
 
         # Default dark theme colors
         if not config.get_str('dark_text'):
@@ -218,11 +217,21 @@ class _Theme:
     def apply(self, root: tk.Tk) -> None:  # noqa: CCR001, C901
         theme = config.get_int('theme')
         if theme == self.THEME_DEFAULT:
-            self.style.theme_use('clam')
+            self.style.theme_use('edmc')
         elif theme == self.THEME_DARK:
             self.style.theme_use('dark')
         elif theme == self.THEME_TRANSPARENT:
             self.style.theme_use('transparent')
+
+        root.tk_setPalette(
+            background=self.style.lookup('.', 'background'),
+            foreground=self.style.lookup('.', 'foreground'),
+            highlightColor=self.style.lookup('.', 'focuscolor'),
+            selectBackground=self.style.lookup('.', 'selectbackground'),
+            selectForeground=self.style.lookup('.', 'selectforeground'),
+            activeBackground=self.style.lookup('.', 'selectbackground'),
+            activeForeground=self.style.lookup('.', 'selectforeground'),
+        )
 
         for image in self.bitmaps:
             image['background'] = self.style.lookup('.', 'background')
