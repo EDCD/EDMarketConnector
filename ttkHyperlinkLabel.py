@@ -179,7 +179,8 @@ class HyperlinkLabel(ttk.Label):
     def _theme(self, event: tk.Event | None = None) -> None:
         if self.legacy:
             if str(self['state']) == tk.DISABLED:
-                super().configure(foreground=self.disabledforeground or ttk.Style().lookup('TLabel', 'foreground', ['disabled']))
+                super().configure(foreground=self.disabledforeground or
+                                  ttk.Style().lookup('TLabel', 'foreground', ['disabled']))
             else:
                 super().configure(foreground=self.foreground or ttk.Style().lookup('Link.TLabel', 'foreground'))
 

@@ -188,7 +188,7 @@ def _load_ttk_catalog_plugin():
         plugin.folder = None
         return plugin
     except Exception:
-        logger.exception(f'Failure loading internal Plugin "ttk_catalog"')
+        logger.exception('Failure loading internal Plugin "ttk_catalog"')
 
 
 def _load_found_plugins():
