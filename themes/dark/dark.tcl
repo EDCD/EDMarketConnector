@@ -30,6 +30,14 @@ namespace eval ttk::theme::dark {
             -borderwidth 1 \
             -relief flat
 
+        tk_setPalette background [ttk::style lookup . -background] \
+            foreground [ttk::style lookup . -foreground] \
+            highlightColor [ttk::style lookup . -focuscolor] \
+            selectBackground [ttk::style lookup . -selectbackground] \
+            selectForeground [ttk::style lookup . -selectforeground] \
+            activeBackground [ttk::style lookup . -selectbackground] \
+            activeForeground [ttk::style lookup . -selectforeground]
+
         ttk::style map . -foreground [list disabled $colors(-disabledfg)]
 
         option add *font [ttk::style lookup . -font]

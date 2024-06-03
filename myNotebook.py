@@ -9,54 +9,37 @@ Entire file may be imported by plugins.
 """
 from __future__ import annotations
 
-import sys
 import tkinter as tk
 from tkinter import ttk, messagebox
 from PIL import ImageGrab
 from l10n import translations as tr
 
-if sys.platform == 'win32':
-    PAGEFG = 'SystemWindowText'
-    PAGEBG = 'SystemWindow'  # typically white
-
 
 class Notebook(ttk.Notebook):
     """Custom ttk.Notebook class to fix some display issues."""
 
+    # DEPRECATED: Migrate to ttk.Notebook. Will remove in 6.0 or later.
     def __init__(self, master: ttk.Frame | None = None, **kw):
 
         super().__init__(master, **kw)
-        style = ttk.Style()
-        if sys.platform == 'win32':
-            style.configure('nb.TFrame',                          background=PAGEBG)
-            style.configure('nb.TButton',                         background=PAGEBG)
-            style.configure('nb.TCheckbutton', foreground=PAGEFG, background=PAGEBG)
-            style.configure('nb.TMenubutton',  foreground=PAGEFG, background=PAGEBG)
-            style.configure('nb.TRadiobutton', foreground=PAGEFG, background=PAGEBG)
         self.grid(padx=10, pady=10, sticky=tk.NSEW)
 
 
 class Frame(ttk.Frame):
     """Custom ttk.Frame class to fix some display issues."""
 
+    # DEPRECATED: Migrate to ttk.Frame. Will remove in 6.0 or later.
     def __init__(self, master: ttk.Notebook | None = None, **kw):
-        if sys.platform == 'win32':
-            ttk.Frame.__init__(self, master, style='nb.TFrame', **kw)
-            ttk.Frame(self).grid(pady=5)  # top spacer
-        else:
-            ttk.Frame.__init__(self, master, **kw)
-            ttk.Frame(self).grid(pady=5)  # top spacer
+        ttk.Frame.__init__(self, master, **kw)
+        ttk.Frame(self).grid(pady=5)  # top spacer
         self.configure(takefocus=1)		# let the frame take focus so that no particular child is focused
 
 
 class Label(tk.Label):
     """Custom tk.Label class to fix some display issues."""
 
+    # DEPRECATED: Migrate to ttk.Label. Will remove in 6.0 or later.
     def __init__(self, master: ttk.Frame | None = None, **kw):
-        kw['foreground'] = kw.pop('foreground', PAGEFG if sys.platform == 'win32'
-                                  else ttk.Style().lookup('TLabel', 'foreground'))
-        kw['background'] = kw.pop('background', PAGEBG if sys.platform == 'win32'
-                                  else ttk.Style().lookup('TLabel', 'background'))
         super().__init__(master, **kw)
 
 
@@ -132,17 +115,15 @@ class Entry(EntryMenu):
 class Button(ttk.Button):
     """Custom ttk.Button class to fix some display issues."""
 
+    # DEPRECATED: Migrate to ttk.Button. Will remove in 6.0 or later.
     def __init__(self, master: ttk.Frame | None = None, **kw):
-        if sys.platform == 'win32':
-            ttk.Button.__init__(self, master, style='nb.TButton', **kw)
-        else:
-            ttk.Button.__init__(self, master, **kw)
+        ttk.Button.__init__(self, master, **kw)
 
 
 class ColoredButton(tk.Button):
     """Custom tk.Button class to fix some display issues."""
 
-    # DEPRECATED: Migrate to tk.Button. Will remove in 6.0 or later.
+    # DEPRECATED: Migrate to ttk.Button. Will remove in 6.0 or later.
     def __init__(self, master: ttk.Frame | None = None, **kw):
         tk.Button.__init__(self, master, **kw)
 
@@ -150,31 +131,22 @@ class ColoredButton(tk.Button):
 class Checkbutton(ttk.Checkbutton):
     """Custom ttk.Checkbutton class to fix some display issues."""
 
+    # DEPRECATED: Migrate to ttk.Checkbutton. Will remove in 6.0 or later.
     def __init__(self, master: ttk.Frame | None = None, **kw):
-        style = 'nb.TCheckbutton' if sys.platform == 'win32' else None
-        super().__init__(master, style=style, **kw)  # type: ignore
+        super().__init__(master, **kw)  # type: ignore
 
 
 class Radiobutton(ttk.Radiobutton):
     """Custom ttk.Radiobutton class to fix some display issues."""
 
+    # DEPRECATED: Migrate to ttk.Radiobutton. Will remove in 6.0 or later.
     def __init__(self, master: ttk.Frame | None = None, **kw):
-        style = 'nb.TRadiobutton' if sys.platform == 'win32' else None
-        super().__init__(master, style=style, **kw)  # type: ignore
+        super().__init__(master, **kw)  # type: ignore
 
 
 class OptionMenu(ttk.OptionMenu):
     """Custom ttk.OptionMenu class to fix some display issues."""
 
+    # DEPRECATED: Migrate to ttk.OptionMenu. Will remove in 6.0 or later.
     def __init__(self, master, variable, default=None, *values, **kw):
-        if sys.platform == 'win32':
-            # OptionMenu derives from Menubutton at the Python level, so uses Menubutton's style
-            ttk.OptionMenu.__init__(self, master, variable, default, *values, style='nb.TMenubutton', **kw)
-            self['menu'].configure(background=PAGEBG)
-        else:
-            ttk.OptionMenu.__init__(self, master, variable, default, *values, **kw)
-            self['menu'].configure(background=ttk.Style().lookup('TMenu', 'background'))
-
-        # Workaround for https://bugs.python.org/issue25684
-        for i in range(0, self['menu'].index('end') + 1):
-            self['menu'].entryconfig(i, variable=variable)
+        ttk.OptionMenu.__init__(self, master, variable, default, *values, **kw)

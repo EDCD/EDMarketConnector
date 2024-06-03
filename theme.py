@@ -121,14 +121,17 @@ elif sys.platform == 'linux':
 
 
 class _Theme:
-
-    # Enum ?  Remember these are, probably, based on 'value' of a tk
-    # RadioButton set.  Looking in prefs.py, they *appear* to be hard-coded
-    # there as well.
+    # TODO ditch indexes, support additional themes in user folder
     THEME_DEFAULT = 0
     THEME_DARK = 1
     THEME_TRANSPARENT = 2
+    packages = {
+        THEME_DEFAULT: 'light',  # 'default' is the name of a builtin theme
+        THEME_DARK: 'dark',
+        THEME_TRANSPARENT: 'transparent',
+    }
     style: ttk.Style
+    root: tk.Tk
 
     def __init__(self) -> None:
         self.active: int | None = None  # Starts out with no theme
@@ -140,6 +143,7 @@ class _Theme:
 
     def initialize(self, root: tk.Tk):
         self.style = ttk.Style()
+        self.root = root
 
         # Default dark theme colors
         if not config.get_str('dark_text'):
@@ -147,11 +151,12 @@ class _Theme:
         if not config.get_str('dark_highlight'):
             config.set('dark_highlight', 'white')
 
-        for theme_file in config.internal_theme_dir_path.glob('[!._]*.tcl'):
+        for theme_file in config.internal_theme_dir_path.glob('*/pkgIndex.tcl'):
             try:
-                root.tk.call('source', theme_file)
+                self.root.tk.call('source', theme_file)
+                logger.info(f'loading theme package from "{theme_file}"')
             except tk.TclError:
-                logger.exception(f'Failure loading internal theme "{theme_file}"')
+                logger.exception(f'Failure loading theme package "{theme_file}"')
 
     def register(self, widget: tk.Widget | tk.BitmapImage) -> None:
         assert isinstance(widget, (tk.BitmapImage, tk.Widget)), widget
@@ -174,7 +179,6 @@ class _Theme:
         if widget and widget['state'] != tk.DISABLED:
             try:
                 widget.configure(state=tk.ACTIVE)
-
             except Exception:
                 logger.exception(f'Failure setting widget active: {widget=}')
 
@@ -182,7 +186,6 @@ class _Theme:
                 try:
                     image['background'] = self.style.lookup('.', 'selectbackground')
                     image['foreground'] = self.style.lookup('.', 'selectforeground')
-
                 except Exception:
                     logger.exception(f'Failure configuring image: {image=}')
 
@@ -191,7 +194,6 @@ class _Theme:
         if widget and widget['state'] != tk.DISABLED:
             try:
                 widget.configure(state=tk.NORMAL)
-
             except Exception:
                 logger.exception(f'Failure setting widget normal: {widget=}')
 
@@ -199,7 +201,6 @@ class _Theme:
                 try:
                     image['background'] = self.style.lookup('.', 'background')
                     image['foreground'] = self.style.lookup('.', 'foreground')
-
                 except Exception:
                     logger.exception(f'Failure configuring image: {image=}')
 
@@ -213,24 +214,11 @@ class _Theme:
         assert isinstance(widget, (tk.BitmapImage, tk.Widget)), widget
         warnings.warn('Theme postprocessing is no longer necessary', category=DeprecationWarning)
 
-    def apply(self, root: tk.Tk) -> None:  # noqa: CCR001, C901
+    def apply(self) -> None:  # noqa: CCR001
         theme = config.get_int('theme')
-        if theme == self.THEME_DEFAULT:
-            self.style.theme_use('edmc')
-        elif theme == self.THEME_DARK:
-            self.style.theme_use('dark')
-        elif theme == self.THEME_TRANSPARENT:
-            self.style.theme_use('transparent')
-
-        root.tk_setPalette(
-            background=self.style.lookup('.', 'background'),
-            foreground=self.style.lookup('.', 'foreground'),
-            highlightColor=self.style.lookup('.', 'focuscolor'),
-            selectBackground=self.style.lookup('.', 'selectbackground'),
-            selectForeground=self.style.lookup('.', 'selectforeground'),
-            activeBackground=self.style.lookup('.', 'selectbackground'),
-            activeForeground=self.style.lookup('.', 'selectforeground'),
-        )
+        theme_name = self.packages[theme]
+        self.root.tk.call('package', 'require', f'ttk::theme::{theme_name}')
+        self.root.tk.call('ttk::setTheme', theme_name)
 
         for image in self.bitmaps:
             image['background'] = self.style.lookup('.', 'background')
@@ -244,12 +232,10 @@ class _Theme:
 
             if isinstance(pair[0], tk.Menu):
                 if theme == self.THEME_DEFAULT:
-                    root['menu'] = pair[0]
-
+                    self.root['menu'] = pair[0]
                 else:  # Dark *or* Transparent
-                    root['menu'] = ''
+                    self.root['menu'] = ''
                     pair[theme].grid(**gridopts)
-
             else:
                 pair[theme].grid(**gridopts)
 
@@ -267,45 +253,37 @@ class _Theme:
             GetWindowLongW = ctypes.windll.user32.GetWindowLongW  # noqa: N806 # ctypes
             SetWindowLongW = ctypes.windll.user32.SetWindowLongW  # noqa: N806 # ctypes
 
-            # FIXME: Lose the "treat this like a boolean" bullshit
-            if theme == self.THEME_DEFAULT:
-                root.overrideredirect(False)
-
-            else:
-                root.overrideredirect(True)
+            self.root.overrideredirect(theme != self.THEME_DEFAULT)
 
             if theme == self.THEME_TRANSPARENT:
-                root.attributes("-transparentcolor", 'grey4')
-
+                self.root.attributes("-transparentcolor", 'grey4')
             else:
-                root.attributes("-transparentcolor", '')
+                self.root.attributes("-transparentcolor", '')
 
-            root.withdraw()
-            root.update_idletasks()  # Size and windows styles get recalculated here
-            hwnd = ctypes.windll.user32.GetParent(root.winfo_id())
+            self.root.withdraw()
+            self.root.update_idletasks()  # Size and windows styles get recalculated here
+            hwnd = ctypes.windll.user32.GetParent(self.root.winfo_id())
             SetWindowLongW(hwnd, GWL_STYLE, GetWindowLongW(hwnd, GWL_STYLE) & ~WS_MAXIMIZEBOX)  # disable maximize
 
             if theme == self.THEME_TRANSPARENT:
                 SetWindowLongW(hwnd, GWL_EXSTYLE, WS_EX_APPWINDOW | WS_EX_LAYERED)  # Add to taskbar
-
             else:
                 SetWindowLongW(hwnd, GWL_EXSTYLE, WS_EX_APPWINDOW)  # Add to taskbar
 
-            root.deiconify()
-            root.wait_visibility()  # need main window to be displayed before returning
+            self.root.deiconify()
+            self.root.wait_visibility()  # need main window to be displayed before returning
 
         else:
-            root.withdraw()
-            root.update_idletasks()  # Size gets recalculated here
+            self.root.withdraw()
+            self.root.update_idletasks()  # Size gets recalculated here
             if dpy:
                 xroot = Window()
                 parent = Window()
                 children = Window()
                 nchildren = c_uint()
-                XQueryTree(dpy, root.winfo_id(), byref(xroot), byref(parent), byref(children), byref(nchildren))
+                XQueryTree(dpy, self.root.winfo_id(), byref(xroot), byref(parent), byref(children), byref(nchildren))
                 if theme == self.THEME_DEFAULT:
                     wm_hints = motif_wm_hints_normal
-
                 else:  # Dark *or* Transparent
                     wm_hints = motif_wm_hints_dark
 
@@ -316,18 +294,14 @@ class _Theme:
                 XFlush(dpy)
 
             else:
-                if theme == self.THEME_DEFAULT:
-                    root.overrideredirect(False)
+                self.root.overrideredirect(theme != self.THEME_DEFAULT)
 
-                else:  # Dark *or* Transparent
-                    root.overrideredirect(True)
-
-            root.deiconify()
-            root.wait_visibility()  # need main window to be displayed before returning
+            self.root.deiconify()
+            self.root.wait_visibility()  # need main window to be displayed before returning
 
         if not self.minwidth:
-            self.minwidth = root.winfo_width()  # Minimum width = width on first creation
-            root.minsize(self.minwidth, -1)
+            self.minwidth = self.root.winfo_width()  # Minimum width = width on first creation
+            self.root.minsize(self.minwidth, -1)
 
 
 # singleton

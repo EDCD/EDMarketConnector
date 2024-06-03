@@ -1,9 +1,9 @@
 package require Tk 8.6
 
-namespace eval ttk::theme::edmc {
+namespace eval ttk::theme::light {
 
     variable version 1.0
-    package provide ttk::theme::edmc $version
+    package provide ttk::theme::light $version
     variable colors
     array set colors {
         -fg         "black"
@@ -14,7 +14,7 @@ namespace eval ttk::theme::edmc {
         -highlight  "blue"
     }
 
-    ttk::style theme create edmc -parent clam -settings {
+    ttk::style theme create light -parent clam -settings {
         ttk::style configure . \
             -background $colors(-bg) \
             -foreground $colors(-fg) \
@@ -28,6 +28,14 @@ namespace eval ttk::theme::edmc {
             -font {TkDefaultFont} \
             -borderwidth 1 \
             -relief flat
+
+        tk_setPalette background [ttk::style lookup . -background] \
+            foreground [ttk::style lookup . -foreground] \
+            highlightColor [ttk::style lookup . -focuscolor] \
+            selectBackground [ttk::style lookup . -selectbackground] \
+            selectForeground [ttk::style lookup . -selectforeground] \
+            activeBackground [ttk::style lookup . -selectbackground] \
+            activeForeground [ttk::style lookup . -selectforeground]
 
         ttk::style map . -foreground [list disabled $colors(-disabledfg)]
 

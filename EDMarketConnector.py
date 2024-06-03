@@ -715,9 +715,7 @@ class AppWindow:
 
         self.w.attributes('-topmost', config.get_int('always_ontop') and 1 or 0)
 
-        theme.apply(self.w)
-
-        self.w.bind('<Map>', self.onmap)  # Special handling for overrideredict
+        self.w.bind('<Map>', self.onmap)  # Special handling for overrideredirect
         self.w.bind('<Enter>', self.onenter)  # Special handling for transparency
         self.w.bind('<FocusIn>', self.onenter)  # Special handling for transparency
         self.w.bind('<Leave>', self.onleave)  # Special handling for transparency
@@ -1946,11 +1944,11 @@ class AppWindow:
         self.w.wait_visibility()  # Need main window to be re-created before returning
         theme.active = None  # So theme will be re-applied on map
 
-    # TODO: Confirm this is unused and remove.
     def onmap(self, event=None) -> None:
-        """Perform a now unused function."""
+        """Handle when our window is rendered."""
         if event.widget == self.w:
-            theme.apply(self.w)
+            # TODO decouple theme switch and window manager stuff
+            theme.apply()
 
     def onenter(self, event=None) -> None:
         """Handle when our window gains focus."""
