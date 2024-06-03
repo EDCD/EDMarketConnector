@@ -177,11 +177,11 @@
 /* EDMarketConnector.py: CAPI fleetcarrier query aborted because of killswitch; In files: EDMarketConnector.py:1157; */
 "CAPI fleetcarrier disabled by killswitch" = "CAPI fleetcarrier disabled by killswitch";
 
-/* EDMarketConnector.py: No data was returned for the fleetcarrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
-"CAPI: No fleetcarrier data returned" = "CAPI: No fleetcarrier data returned";
+/* EDMarketConnector.py: No data was returned for the Fleet Carrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
+"CAPI: No Fleet Carrier data returned" = "CAPI: No Fleet Carrier data returned";
 
-/* EDMarketConnector.py: We didn't have the fleetcarrier callsign when we should have; In files: EDMarketConnector.py:1223; */
-"CAPI: Fleetcarrier data incomplete" = "CAPI: Fleetcarrier data incomplete";
+/* EDMarketConnector.py: We didn't have the Fleet Carrier callsign when we should have; In files: EDMarketConnector.py:1223; */
+"CAPI: Fleet Carrier data incomplete" = "CAPI: Fleet Carrier data incomplete";
 
 /* EDMarketConnector.py: No data was returned for the commander from the Frontier CAPI; In files: EDMarketConnector.py:1242; */
 "CAPI: No commander data returned" = "CAPI: No commander data returned";
@@ -388,7 +388,7 @@
 "CAPI Settings" = "CAPI Settings";
 
 /* prefs.py: Configuration - Enable or disable the Fleet Carrier CAPI calls; In files: prefs.py:475; */
-"Enable Fleetcarrier CAPI Queries" = "Enable Fleetcarrier CAPI Queries";
+"Enable Fleet Carrier CAPI Queries" = "Enable Fleet Carrier CAPI Queries";
 
 /* prefs.py: Hotkey/Shortcut settings prompt on Windows; In files: prefs.py:492; */
 "Hotkey" = "Hotkey";

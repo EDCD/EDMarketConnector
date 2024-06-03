@@ -159,12 +159,12 @@
 /* EDMarketConnector.py: CAPI fleetcarrier query aborted because of killswitch; In files: EDMarketConnector.py:1157; */
 "CAPI fleetcarrier disabled by killswitch" = "CAPIフリートキャリアはkillswitchによって無効にされています";
 
+
 /* EDMarketConnector.py: No data was returned for the fleetcarrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
 "CAPI: No fleetcarrier data returned" = "CAPI: フリートキャリアデータの返信なし";
 
 /* EDMarketConnector.py: We didn't have the fleetcarrier callsign when we should have; In files: EDMarketConnector.py:1223; */
 "CAPI: Fleetcarrier data incomplete" = "CAPI: フリートキャリアデータが不完全";
-
 /* EDMarketConnector.py: No data was returned for the commander from the Frontier CAPI; In files: EDMarketConnector.py:1242; */
 "CAPI: No commander data returned" = "CAPI: コマンダーのデータが返ってきませんでした";
 
@@ -369,9 +369,9 @@
 /* prefs.py: Settings > Configuration - Label for CAPI section; In files: prefs.py:469; */
 "CAPI Settings" = "CAPI設定";
 
+
 /* prefs.py: Configuration - Enable or disable the Fleet Carrier CAPI calls; In files: prefs.py:475; */
 "Enable Fleetcarrier CAPI Queries" = "フリートキャリアCAPIクエリを有効にする";
-
 /* prefs.py: Hotkey/Shortcut settings prompt on Windows; In files: prefs.py:492; */
 "Hotkey" = "ホットキー";
 

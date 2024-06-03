@@ -476,7 +476,7 @@ class PreferencesDialog(tk.Toplevel):
         nb.Checkbutton(
                 config_frame,
                 # LANG: Configuration - Enable or disable the Fleet Carrier CAPI calls
-                text=tr.tl('Enable Fleetcarrier CAPI Queries'),
+                text=tr.tl('Enable Fleet Carrier CAPI Queries'),
                 variable=self.capi_fleetcarrier
             ).grid(columnspan=4, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=row.get())
 

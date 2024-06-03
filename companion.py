@@ -1063,7 +1063,7 @@ class Session:
             play_sound: bool = False, auto_update: bool = False
     ) -> None:
         """
-        Perform CAPI query for fleetcarrier data.
+        Perform CAPI query for Fleet Carrier data.
 
         :param query_time: When this query was initiated.
         :param tk_response_event: Name of tk event to generate when response queued.
@@ -1074,8 +1074,8 @@ class Session:
         if not capi_host:
             return
 
-        # Ask the thread worker to perform a fleetcarrier query
-        logger.trace_if('capi.worker', 'Enqueueing fleetcarrier request')
+        # Ask the thread worker to perform a Fleet Carrier query
+        logger.trace_if('capi.worker', 'Enqueueing Fleet Carrier request')
         self.capi_request_queue.put(
             EDMCCAPIRequest(
                 capi_host=capi_host,

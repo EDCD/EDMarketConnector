@@ -1067,7 +1067,7 @@ class AppWindow:
         """
         Perform CAPI fleetcarrier data retrieval and associated actions.
 
-        This is triggered by certain FleetCarrier journal events
+        This is triggered by certain Fleet Carrier journal events
 
         :param event: Tk generated event details.
         """
@@ -1105,7 +1105,7 @@ class AppWindow:
             self.w.update_idletasks()
 
         query_time = int(time())
-        logger.trace_if('capi.worker', 'Requesting fleetcarrier data')
+        logger.trace_if('capi.worker', 'Requesting Fleet Carrier data')
         config.set('fleetcarrierquerytime', query_time)
         logger.trace_if('capi.worker', 'Calling companion.session.fleetcarrier')
         companion.session.fleetcarrier(
@@ -1144,11 +1144,11 @@ class AppWindow:
                 # Validation
                 if 'name' not in capi_response.capi_data:
                     # LANG: No data was returned for the fleetcarrier from the Frontier CAPI
-                    err = self.status['text'] = tr.tl('CAPI: No fleetcarrier data returned')
+                    err = self.status['text'] = tr.tl('CAPI: No Fleet Carrier data returned')
 
                 elif not capi_response.capi_data.get('name', {}).get('callsign'):
                     # LANG: We didn't have the fleetcarrier callsign when we should have
-                    err = self.status['text'] = tr.tl("CAPI: Fleetcarrier data incomplete")  # Shouldn't happen
+                    err = self.status['text'] = tr.tl("CAPI: Fleet Carrier data incomplete")  # Shouldn't happen
 
                 else:
                     if __debug__:  # Recording

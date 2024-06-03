@@ -126,6 +126,15 @@
 /* EDMarketConnector.py: Label for 'Copy' as in 'Copy and Paste'; ttkHyperlinkLabel.py: Label for 'Copy' as in 'Copy and Paste'; In files: EDMarketConnector.py:962; ttkHyperlinkLabel.py:53; */
 "Copy" = "Kopyala";
 
+/* myNotebook.py: Label for 'Cut' as in 'Cut and Paste'; */
+"Cut" = "Kes";
+
+/* myNotebook.py: Label for 'Paste' as in 'Copy and Paste'; */
+"Paste" = "Yapıştır";
+
+/* myNotebook.py: Label for 'Select All'; */
+"Select All" = "Tümünü Seç";
+
 /* EDMarketConnector.py: CAPI auth aborted because of killswitch; EDMarketConnector.py: CAPI auth query aborted because of killswitch; In files: EDMarketConnector.py:973; EDMarketConnector.py:1067; */
 "CAPI auth disabled by killswitch" = "CAPI kimlik doğrulaması killswitch tarafından devre dışı bırakıldı";
 
@@ -168,12 +177,12 @@
 /* EDMarketConnector.py: CAPI fleetcarrier query aborted because of killswitch; In files: EDMarketConnector.py:1157; */
 "CAPI fleetcarrier disabled by killswitch" = "CAPI filo taşıyıcısı killswitch tarafından devre dışı bırakıldı";
 
+
 /* EDMarketConnector.py: No data was returned for the fleetcarrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
 "CAPI: No fleetcarrier data returned" = "CAPI: Filo taşıyıcı verisi gelmedi.";
 
 /* EDMarketConnector.py: We didn't have the fleetcarrier callsign when we should have; In files: EDMarketConnector.py:1223; */
 "CAPI: Fleetcarrier data incomplete" = "CAPI: Filo taşıyıcı verileri eksik";
-
 /* EDMarketConnector.py: No data was returned for the commander from the Frontier CAPI; In files: EDMarketConnector.py:1242; */
 "CAPI: No commander data returned" = "CAPI: Cmdr verisi döndürülmedi";
 
@@ -378,9 +387,9 @@
 /* prefs.py: Settings > Configuration - Label for CAPI section; In files: prefs.py:469; */
 "CAPI Settings" = "CAPI ayarları";
 
+
 /* prefs.py: Configuration - Enable or disable the Fleet Carrier CAPI calls; In files: prefs.py:475; */
 "Enable Fleetcarrier CAPI Queries" = "Filo Taşıyıcı CAPI sorgulamalarını etkinleştir";
-
 /* prefs.py: Hotkey/Shortcut settings prompt on Windows; In files: prefs.py:492; */
 "Hotkey" = "Kısayoltuşu";
 
@@ -782,6 +791,19 @@
 
 /* update.py: Update Available Text; In files: update.py:229; */
 "{NEWVER} is available" = "{NEWVER} sürüm mevcut";
+
+/* prefs.py: Stable Version of EDMC; */
+"Stable" = "Stabil";
+
+/* prefs.py: Select the Update Track (Beta, Stable); */
+"Update Track" = "Takibi Güncelle";
+
+/* EDMarketConnector.py: Inform the user the Update Track has changed; */
+"Update Track Changed to {TRACK}" = "Aktif Takip {TRACK} olarak güncellendi.";
+
+
+/* EDMarketConnector.py: Inform User of Beta -> Stable Transition Risks; */
+"Update track changed to Stable from Beta. You will no longer receive Beta updates. You will stay on your current Beta version until the next Stable release.\r\n\r\nYou can manually revert to the latest Stable version. To do so, you must download and install the latest Stable version manually. Note that this may introduce bugs or break completely if downgrading between major versions with significant changes.\r\n\r\nDo you want to open GitHub to download the latest release?" = "Güncelleme takibi Beta'dan Kararlı olarak değiştirildi. Artık Beta güncellemelerini almayacaksınız. Bir sonraki Kararlı sürüme kadar mevcut Beta sürümünüzde kalacaksınız.\n\nEn son Stabil sürüme manuel olarak geri dönebilirsiniz. Bunu yapmak için en son Stabil sürümünü manuel olarak indirip yüklemeniz gerekir. Önemli değişiklikler içeren ana sürümler arasında sürüm düşürme durumunda bunun hatalara yol açabileceğini veya tamamen bozulabileceğini unutmayın.\n\nEn son sürümü indirmek için GitHub'u açmak istiyor musunuz?";
 
 /* myNotebook.py: Can't Paste Images or Files in Text; */
 "Cannot paste non-text content." = "Metin dışı içerik yapıştırılamadı";
