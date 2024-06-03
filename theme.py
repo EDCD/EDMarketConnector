@@ -13,10 +13,9 @@ from __future__ import annotations
 import os
 import sys
 import tkinter as tk
-from os.path import join
+import warnings
 from tkinter import ttk
 from typing import Callable
-from typing_extensions import deprecated
 from config import config
 from EDMCLogging import get_main_logger
 
@@ -36,7 +35,7 @@ if sys.platform == 'win32':
     AddFontResourceEx.restypes = [LPCWSTR, DWORD, LPCVOID]  # type: ignore
     FR_PRIVATE = 0x10
     FR_NOT_ENUM = 0x20
-    AddFontResourceEx(join(config.respath, 'EUROCAPS.TTF'), FR_PRIVATE, 0)
+    AddFontResourceEx(os.path.join(config.respath, 'EUROCAPS.TTF'), FR_PRIVATE, 0)
 
 elif sys.platform == 'linux':
     # pyright: reportUnboundVariable=false
@@ -154,9 +153,9 @@ class _Theme:
             except tk.TclError:
                 logger.exception(f'Failure loading internal theme "{theme_file}"')
 
-    @deprecated('Theme colors are now applied automatically, even after initialization')
-    def register(self, widget: tk.Widget | tk.BitmapImage) -> None:  # noqa: CCR001, C901
+    def register(self, widget: tk.Widget | tk.BitmapImage) -> None:
         assert isinstance(widget, (tk.BitmapImage, tk.Widget)), widget
+        warnings.warn('Theme postprocessing is no longer necessary', category=DeprecationWarning)
 
     def register_alternate(self, pair: tuple, gridopts: dict) -> None:
         self.widgets_pair.append((pair, gridopts))
@@ -204,7 +203,6 @@ class _Theme:
                 except Exception:
                     logger.exception(f'Failure configuring image: {image=}')
 
-    @deprecated('Theme colors are now applied automatically, even after initialization')
     def update(self, widget: tk.Widget) -> None:
         """
         Apply current theme to a widget and its children.
@@ -213,6 +211,7 @@ class _Theme:
         :param widget: Target widget.
         """
         assert isinstance(widget, (tk.BitmapImage, tk.Widget)), widget
+        warnings.warn('Theme postprocessing is no longer necessary', category=DeprecationWarning)
 
     def apply(self, root: tk.Tk) -> None:  # noqa: CCR001, C901
         theme = config.get_int('theme')
