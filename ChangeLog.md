@@ -6,6 +6,82 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
       in the source (not distributed with the Windows installer) for the
       currently used version.
 ---
+Pre-Release 5.11.0-rc2
+===
+This is a release candidate for 5.11.0.
+
+This release is identical to 5.11.0-rc1, with a few additions: 
+
+**Changes and Enhancements**
+* Adds Additional Error Processing to the System Profiler when launched from EDMC
+* Adds the ability to resize the Settings window to larger than the initial default size
+* Tweaked a few list length checks that could just be boolean to be bool
+
+Pre-Release 5.11.0-rc1
+===
+This is a release candidate for 5.11.0.
+
+This release includes a number of new features and improvements, including a new Beta Update Track for testing future updates, enhanced context menus for text entry fields and UI elements, a revamp to the existing translation system and logging capabilities, and more. This release includes the Python Image Library (PIL) into our core bundle, adds a number of stability and configuration checks to the tool, and adds new schemas and configuration values to senders. 
+
+This release also includes a number of bug fixes, performance enhancements, and updates to various aspects of the code to enhance maintainability are included. Notably, MacOS support has been removed due to a lack of support for this OS in Elite, and a number of functions have been deprecated and will be removed in later versions. Plugin developers, take note!
+
+**Changes and Enhancements**
+* Established a Beta Update Track to allow users to assist in future update testing
+* Added a global context menu for text entry fields that includes cut, copy, and paste options
+* Added a context menu for Ship, System, and Station UI elements which allows opening the respective link in any of the available resource providers.
+* Added translation hooks to the update available status string
+* Added additional status logging when we're awaiting game log-in
+* Added the Python Image Library (PIL) to the core EDMC library bundle
+* Added respect for EDSM API limits to the default plugin
+* Added EDDN stationType and carrierDockingAccess schemas to the sent events
+* Added MaxJumpRange and CargoCapacity events to the Inara sender
+* Added a high-level critical error handler to gracefully terminate the program in the event of a catastrophic error
+* Added the ability to override the default language for a translation by adding the optional 'lang' parameter to the translate function for individual functions
+* Added an updated template and new security reporting guidance to the documentation
+* Added a new updater for the FDevID Files to keep the dependency up to date without requiring a new patch version push
+* Added a System Profiler Utility to assist with gathering system and environment information for bug report purposes
+* Added a new security policy for responsible disclosure of identified security issues
+* Enabled security code scanning on the GitHub repository
+* Updates the look and feel of the "Already Running" popup to reduce overhead and improve the look of the popup
+* Updated translations to latest versions
+* Updated documentation to reflect certain changes to the code
+* Updated the GitHub Bug Report template
+* Updated the GitHub Pull Request template
+* Updated internal workflows to more recent versions
+* Updated util_ships to avoid using Windows reserved file names as output
+* Converted all usages of the unnecessary OrderedDict to use the standard dict
+* Clarifies the hierarchy of parent classes for custom MyNotebook classes
+* Renamed the default translation function from `_()` to `tr.tl()`
+* Renamed the Translations base class to conform to Pythonic standards
+* Deprecated the `_Translations` class
+* Deprecated the `Translations` singleton in favor of `translations`
+* Unpinned several dependencies that were already dependencies of other dependencies to prevent dependency conflicts (say that 5 times fast)
+* Updated a few type hints to allow updates to more updated dependencies
+* Changed the translation function import to no longer rely on forcing it into Python's builtins
+* Handed over a few tk classes to their ttk equivalents for better styling
+* Reworked the Plugin system to no longer use the deprecated importlib.load_module()
+* Deprecated nb.Entry and nb.ColoredButton as they simply point toward other classes with no processing
+* Removed macOS support
+* Removed deprecated modules.p and ships.p files
+* Removed deprecated openurl() function
+
+**Bug Fixes**
+* Fixed a bug where certain types of exceptions from the Requests module wouldn't be handled properly regarding killswitches
+* Fixed a rare bug where source builds running on 64-bit Python could generate an OverflowError in the monitor system
+* Fixed a bug where EDMC would open directories in the webbrowser instead of the file explorer on Linux
+* Fixed a rare bug that could cause the EDSM plugin to crash due to missing configuration values
+
+**Plugin Developers**
+* nb.Entry is deprecated, and is slated for removal in 6.0 or later. Please migrate to nb.EntryMenu
+* nb.ColoredButton is deprecated, and is slated for removal in 6.0 or later. Please migrate to tk.Button
+* Calling internal translations with `_()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to importing `translations` and calling `translations.translate` or `translations.tl` directly
+* `Translations` as the translate system singleton is deprecated, and is slated for removal in 6.0 or later. Please migrate to the `translations` singleton
+* `help_open_log_folder()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to open_folder()
+* `update_feed` is deprecated, and is slated for removal in 6.0 or later. Please migrate to `get_update_feed()`.
+* modules.p and ships.p are deprecated, and have been removed
+* The `openurl()` function in ttkHyperlinkLabel has been removed. Please migrate to `webbrowser.open()`
+
+
 Release 5.10.6
 ===
 This release contains the data information for the new SCO modules added in Elite update 18.04. 
@@ -15,9 +91,8 @@ We now sign our code! This does mean that built EXEs are now slightly modified o
 For information on what this means, and opt-out options, please visit https://github.com/EDCD/EDMarketConnector/wiki/Code-Signing-and-EDMC
 
 **Changes and Enhancements**
-* Added new SCO and Python Armor Module Details
+* Added new SCO Module Details
 * Reverted a change from the prior release due to breaking some consumers. 
-
 **Plugin Developers**
 * modules.p and ships.p are deprecated, and slated for removal in 5.11+!
 * The `openurl()` function in ttkHyperlinkLabel has been deprecated,

@@ -628,7 +628,7 @@ class AppWindow:
         self.help_menu.add_command(command=lambda: not self.HelpAbout.showing and self.HelpAbout(self.w))
         logfile_loc = pathlib.Path(tempfile.gettempdir()) / appname
         self.help_menu.add_command(command=lambda: prefs.open_folder(logfile_loc))  # Open Log Folder
-        self.help_menu.add_command(command=prefs.help_open_system_profiler)  # Open Log Folde
+        self.help_menu.add_command(command=lambda: prefs.help_open_system_profiler(self))  # Open Log Folde
 
         self.menubar.add_cascade(menu=self.help_menu)
         if sys.platform == 'win32':
