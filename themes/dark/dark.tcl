@@ -13,7 +13,8 @@ namespace eval ttk::theme::dark {
         -selectbg   "#ff8000"
         -highlight  "white"
     }
-    set flatborder [list -relief groove -bordercolor $colors(-fg) -darkcolor $colors(-bg) -lightcolor $colors(-bg)]
+    variable flatborder [list -relief groove -bordercolor $colors(-fg) -darkcolor $colors(-bg) -lightcolor $colors(-bg)]
+    variable font_u [font create {*}[font configure TkDefaultFont] -underline 1]
 
     ttk::style theme create dark -parent clam -settings {
         ttk::style configure . \
@@ -61,10 +62,10 @@ namespace eval ttk::theme::dark {
             {pressed} $colors(-selectfg) \
         ]
 
-        ttk::style configure Link.TButton -foreground $colors(-highlight) -padding 2 -anchor left -relief flat -background blue
-        ttk::style map Link.TButton -font [list active {[ttk::style lookup . -font] underline}]
-        ttk::style map Link.TButton -foreground [list disabled $colors(-disabledfg)]
-        ttk::style map Link.TButton -cursor [list disabled arrow]
+        ttk::style configure Link.TLabel -foreground $colors(-highlight) -relief flat
+        ttk::style map Link.TLabel -font [list active $font_u]
+        ttk::style map Link.TLabel -foreground [list disabled $colors(-disabledfg)]
+        ttk::style map Link.TLabel -cursor [list disabled arrow]
 
         ttk::style configure Toolbutton -padding {8 4 8 4} -width -10 -anchor center
 
