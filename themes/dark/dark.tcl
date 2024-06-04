@@ -45,8 +45,6 @@ namespace eval ttk::theme::dark {
 
         ttk::style configure TLabel -padding 1
 
-        ttk::style configure Link.TLabel -foreground $colors(-highlight)
-
         ttk::style configure TLabelframe {*}$flatborder
 
         ttk::style configure TSeparator -background $colors(-fg)
@@ -62,6 +60,11 @@ namespace eval ttk::theme::dark {
         ttk::style map TButton -foreground [list \
             {pressed} $colors(-selectfg) \
         ]
+
+        ttk::style configure Link.TButton -foreground $colors(-highlight) -padding 2 -anchor left -relief flat -background blue
+        ttk::style map Link.TButton -font [list active {[ttk::style lookup . -font] underline}]
+        ttk::style map Link.TButton -foreground [list disabled $colors(-disabledfg)]
+        ttk::style map Link.TButton -cursor [list disabled arrow]
 
         ttk::style configure Toolbutton -padding {8 4 8 4} -width -10 -anchor center
 

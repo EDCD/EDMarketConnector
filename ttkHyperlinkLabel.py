@@ -49,7 +49,7 @@ SHIPYARD_HTML_TEMPLATE = """
 """
 
 
-class HyperlinkLabel(ttk.Label):
+class HyperlinkLabel(ttk.Button):
     """Clickable label for HTTP links."""
 
     def __init__(self, master: tk.Widget | None = None, **kw: Any) -> None:
@@ -63,24 +63,21 @@ class HyperlinkLabel(ttk.Label):
         self.font_n = None
         self.url = kw.pop('url', None)
         self.popup_copy = kw.pop('popup_copy', False)
-        self.underline = kw.pop('underline', None)  # override ttk.Label's underline
+        self.underline = kw.pop('underline', None)
         self.legacy = not isinstance(master, ttk.Widget)
         if self.legacy:
             self.foreground = kw.get('foreground')
             self.disabledforeground = kw.pop('disabledforeground', None)
-        kw.setdefault('style', 'Link.TLabel')
-        ttk.Label.__init__(self, master, **kw)
+        kw.setdefault('style', 'Link.TButton')
+        super().__init__(master, **kw)
 
         self.bind('<Button-1>', self._click)
         self.bind('<Button-3>', self._contextmenu)
 
-        self.bind('<Enter>', self._enter)
-        self.bind('<Leave>', self._leave)
         self.bind('<<ThemeChanged>>', self._theme)
 
         # set up initial appearance
-        self.configure(state=kw.get('state', tk.NORMAL),
-                       font=kw.get('font', ttk.Style().lookup(kw['style'], 'font')))
+        self.configure(state=kw.get('state', tk.NORMAL))
 
         # Add Menu Options
         self.plug_options = kw.pop('plug_options', None)
@@ -168,27 +165,17 @@ class HyperlinkLabel(ttk.Label):
         """
         self.configure(**{key: value})
 
-    def _enter(self, event: tk.Event) -> None:
-        if self.url and self.underline is not False and str(self['state']) != tk.DISABLED:
-            super().configure(font=self.font_u)
-
-    def _leave(self, event: tk.Event) -> None:
-        if not self.underline:
-            super().configure(font=self.font_n)  # type: ignore
-
     def _theme(self, event: tk.Event | None = None) -> None:
         if self.legacy:
             if str(self['state']) == tk.DISABLED:
-                super().configure(foreground=self.disabledforeground or
-                                  ttk.Style().lookup('TLabel', 'foreground', ['disabled']))
+                ...  # TODO self.disabledforeground
             else:
-                super().configure(foreground=self.foreground or ttk.Style().lookup('Link.TLabel', 'foreground'))
+                ...  # TODO self.foreground
 
     def _click(self, event: tk.Event) -> None:
         if self.url and self['text'] and str(self['state']) != tk.DISABLED:
             url = self.url(self['text']) if callable(self.url) else self.url
             if url:
-                self._leave(event)  # Remove underline before we change window to browser
                 webbrowser.open(url)
 
     def _contextmenu(self, event: tk.Event) -> None:
