@@ -8,15 +8,20 @@ Translations are handled on [OneSky](https://oneskyapp.com/), specifically in [t
 
 ### Setting it up in the code
 
-#### Call `_(...)`
+#### Call `tr.tl(...)`
 If you add any new strings that appear in the application UI, e.g. new configuration options, then you should specify them as:
 
-	_('Text that appears in UI')
-`_()` is a special global function that then handles the translation, using its single argument, plus the configured language, to look up the appropriate text. 
+	tr.tl('Text that appears in UI')
+
+In order to do this, you must add the following import: 
+
+`from l10n import translations as tr`
+
+`tr.tl()` is a function that then handles the translation, using its single argument, plus the configured language, to look up the appropriate text. 
 
 If you need to specify something in the text that shouldn't be translated then use the form:
 
-	_('Some text with a {WORD} not translated').format(WORD='word')
+	tr.tl('Some text with a {WORD} not translated').format(WORD='word')
 This way 'word' will always be used literally.
 
 #### Add a LANG comment
@@ -28,8 +33,9 @@ end of the line in your usage**. If both comments exist, the one on the
 current line is preferred over the one above
 
 ```py
+from l10n import translations as tr
 # LANG: this says stuff.
-_('stuff')
+tr.tl('stuff')
 ```
 
 #### Edit `L10n/en.template` to add the phrase
@@ -43,7 +49,7 @@ e.g.
 	"Authentication successful" = "Authentication successful";
 which matches with:
 
-	self.status['text'] = _('Authentication successful')    # Successfully authenticated with the Frontier website
+	self.status['text'] = tr.tl('Authentication successful')    # Successfully authenticated with the Frontier website
 
 and
 
@@ -51,12 +57,12 @@ and
 	"Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name";
 which matches with:
 
-	nb.Label(plugsframe, text=_("Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name").format(EXT='.disabled')).grid(     # Help text in settings
+	nb.Label(plugsframe, text=tr.tl("Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name").format(EXT='.disabled')).grid(     # Help text in settings
 `{CR}` is handled in `l10n.py`, translating to a unicode `\n`.  See the code in`l10n.py` for any other such special substitutions.
 
 You can even use other translations within a given string, e.g.:
 
-	_("One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name.".format(PLUGINS=_('Plugins'), FILE=_('File'), SETTINGS=_('Settings'), DISABLED='.disabled'))
+	tr.tl("One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name.".format(PLUGINS=tr.tl('Plugins'), FILE=tr.tl('File'), SETTINGS=tr.tl('Settings'), DISABLED='.disabled'))
 	/* Popup body: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
 "One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name.";
 

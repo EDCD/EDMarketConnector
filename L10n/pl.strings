@@ -78,12 +78,6 @@
 /* EDMarketConnector.py: 'Edit' menu title on OSX; EDMarketConnector.py: 'Edit' menu title; In files: EDMarketConnector.py:922; EDMarketConnector.py:940; EDMarketConnector.py:943; */
 "Edit" = "Edycja";
 
-/* EDMarketConnector.py: 'View' menu title on OSX; In files: EDMarketConnector.py:923; */
-"View" = "Widok";
-
-/* EDMarketConnector.py: 'Window' menu title on OSX; In files: EDMarketConnector.py:924; */
-"Window" = "Okno";
-
 /* EDMarketConnector.py: Help' menu title on OSX; EDMarketConnector.py: 'Help' menu title; In files: EDMarketConnector.py:925; EDMarketConnector.py:941; EDMarketConnector.py:944; */
 "Help" = "Pomoc";
 
@@ -165,12 +159,12 @@
 /* EDMarketConnector.py: CAPI fleetcarrier query aborted because of killswitch; In files: EDMarketConnector.py:1157; */
 "CAPI fleetcarrier disabled by killswitch" = "Fleetcarier CAPI wyłączony \"kill switchem\"";
 
+
 /* EDMarketConnector.py: No data was returned for the fleetcarrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
 "CAPI: No fleetcarrier data returned" = "CAPI: Nie zwrócono danych dotyczących lotniskowca";
 
 /* EDMarketConnector.py: We didn't have the fleetcarrier callsign when we should have; In files: EDMarketConnector.py:1223; */
 "CAPI: Fleetcarrier data incomplete" = "CAPI: Niekompletne dane lotniskowca";
-
 /* EDMarketConnector.py: No data was returned for the commander from the Frontier CAPI; In files: EDMarketConnector.py:1242; */
 "CAPI: No commander data returned" = "CAPI: Nie zwrócono danych dowódcy";
 
@@ -212,12 +206,6 @@
 
 /* EDMarketConnector.py: Popup-text about 'active' plugins without Python 3.x support; In files: EDMarketConnector.py:2253:2259; */
 "One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "Co najmniej jeden z uruchomionych pluginów nie wspiera Python 3.x. Sprawdź listę w '{FILE}' > '{SETTINGS}', sekcja '{PLUGINS}'. Upewnij się, że dostępna jest aktualna wersja pluginu, w przeciwnym razie poinformuj twórcę, że należy zaktualizować kod do wersji Python 3.x.\n\nMożesz wyłączyć plugin, dodając '{DISABLED}' na koniec nazwy jego folderu.";
-
-/* EDMarketConnector.py: Popup-text about missing FDEVID Files; In files: EDMarketConnector.py:2329; */
-"FDevID Files not found! Some functionality regarding commodities may be disabled.\r\n\r\n Do you want to open the Wiki page on how to set up submodules?" = "Pliki FDevID nie znalezione. Część funkcjonalności związanej z materiałami może nie działać. \n\nChcesz otworzyć stronę Wiki dotyczacą konfiguracji podmodułów?";
-
-/* EDMarketConnector.py: Popup window title for missing FDEVID files; In files: EDMarketConnector.py:2340; */
-"FDevIDs: Missing Commodity Files" = "FDevIDs: Brakuje plików z towarami.";
 
 /* EDMarketConnector.py: Settings > Plugins tab; prefs.py: Label on Settings > Plugins tab; In files: EDMarketConnector.py:2263; prefs.py:986; */
 "Plugins" = "Pluginy";
@@ -351,9 +339,6 @@
 /* inara.py: INARA API returned some kind of error (error message will be contained in {MSG}); In files: inara.py:1650; inara.py:1663; */
 "Error: Inara {MSG}" = "Błąd: Inara {MSG}";
 
-/* prefs.py: File > Preferences menu entry for macOS; In files: prefs.py:237; */
-"Preferences" = "Preferencje";
-
 /* prefs.py: Settings > Output - choosing what data to save to files; In files: prefs.py:335; */
 "Please choose what data to save" = "Jakie dane zapisywać";
 
@@ -372,9 +357,6 @@
 /* prefs.py: Settings > Output - Label for "where files are located"; In files: prefs.py:379; prefs.py:398; */
 "File location" = "Położenie pliku";
 
-/* prefs.py: macOS Preferences - files location selection button; In files: prefs.py:387; prefs.py:437; */
-"Change..." = "Zmień...";
-
 /* prefs.py: NOT-macOS Settings - files location selection button; prefs.py: NOT-macOS Setting - files location selection button; In files: prefs.py:390; prefs.py:440; */
 "Browse..." = "Przeglądaj...";
 
@@ -387,23 +369,11 @@
 /* prefs.py: Settings > Configuration - Label for CAPI section; In files: prefs.py:469; */
 "CAPI Settings" = "Ustawienia CAPI";
 
+
 /* prefs.py: Configuration - Enable or disable the Fleet Carrier CAPI calls; In files: prefs.py:475; */
 "Enable Fleetcarrier CAPI Queries" = "Włącz zapytania CAPI dla lotniskowca";
-
-/* prefs.py: Hotkey/Shortcut settings prompt on OSX; In files: prefs.py:490; */
-"Keyboard shortcut" = "Skrót klawiaturowy";
-
 /* prefs.py: Hotkey/Shortcut settings prompt on Windows; In files: prefs.py:492; */
 "Hotkey" = "Skr. Klaw.";
-
-/* prefs.py: macOS Preferences > Configuration - restart the app message; In files: prefs.py:501; */
-"Re-start {APP} to use shortcuts" = "Zrestartuj {APP} by użyć{CR}skrótu klawiszowego.";
-
-/* prefs.py: macOS - Configuration - need to grant the app permission for keyboard shortcuts; In files: prefs.py:510; */
-"{APP} needs permission to use shortcuts" = "{APP} wymaga uprawnień by{CR}móc korzystać ze skrótów klawiszowych.";
-
-/* prefs.py: Shortcut settings button on OSX; In files: prefs.py:515; */
-"Open System Preferences" = "Otwórz Preferencje systemowe";
 
 /* prefs.py: Configuration - Act on hotkey only when ED is in foreground; In files: prefs.py:538; */
 "Only when Elite: Dangerous is the active app" = "Tylko gdy Elite: Dangerous jest aplikacją aktywną";
@@ -803,3 +773,4 @@
 
 /* update.py: Update Available Text; In files: update.py:229; */
 "{NEWVER} is available" = "Dostępna nowa wersja {NEWVER}";
+

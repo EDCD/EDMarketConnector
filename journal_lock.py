@@ -13,16 +13,12 @@ import tkinter as tk
 from enum import Enum
 from os import getpid as os_getpid
 from tkinter import ttk
-from typing import TYPE_CHECKING, Callable
-
+from typing import Callable
+from l10n import translations as tr
 from config import config
 from EDMCLogging import get_main_logger
 
 logger = get_main_logger()
-
-if TYPE_CHECKING:  # pragma: no cover
-    def _(x: str) -> str:
-        return x
 
 
 class JournalLockResult(Enum):
@@ -212,15 +208,11 @@ class JournalLock:
             self.parent = parent
             self.callback = callback
             # LANG: Title text on popup when Journal directory already locked
-            self.title(_('Journal directory already locked'))
+            self.title(tr.tl('Journal directory already locked'))
 
             # remove decoration
             if sys.platform == 'win32':
                 self.attributes('-toolwindow', tk.TRUE)
-
-            elif sys.platform == 'darwin':
-                # http://wiki.tcl.tk/13428
-                parent.call('tk::unsupported::MacWindowStyle', 'style', self, 'utility')
 
             self.resizable(tk.FALSE, tk.FALSE)
 
@@ -229,16 +221,17 @@ class JournalLock:
 
             self.blurb = tk.Label(frame)
             # LANG: Text for when newly selected Journal directory is already locked
-            self.blurb['text'] = _("The new Journal Directory location is already locked.{CR}"
-                                   "You can either attempt to resolve this and then Retry, or choose to Ignore this.")
+            self.blurb['text'] = tr.tl("The new Journal Directory location is already locked.{CR}"
+                                       "You can either attempt to resolve this and then Retry, "
+                                       "or choose to Ignore this.")
             self.blurb.grid(row=1, column=0, columnspan=2, sticky=tk.NSEW)
 
             # LANG: Generic 'Retry' button label
-            self.retry_button = ttk.Button(frame, text=_('Retry'), command=self.retry)
+            self.retry_button = ttk.Button(frame, text=tr.tl('Retry'), command=self.retry)
             self.retry_button.grid(row=2, column=0, sticky=tk.EW)
 
             # LANG: Generic 'Ignore' button label
-            self.ignore_button = ttk.Button(frame, text=_('Ignore'), command=self.ignore)
+            self.ignore_button = ttk.Button(frame, text=tr.tl('Ignore'), command=self.ignore)
             self.ignore_button.grid(row=2, column=1, sticky=tk.EW)
             self.protocol("WM_DELETE_WINDOW", self._destroy)
 

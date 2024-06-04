@@ -16,16 +16,13 @@ import numbers
 import re
 import sys
 import warnings
-from collections import OrderedDict
 from contextlib import suppress
-from os import pardir, listdir, sep, makedirs
-from os.path import basename, dirname, isdir, isfile, join, abspath, exists
+from os import listdir, sep, makedirs
+from os.path import basename, dirname, isdir, join, abspath, exists
 from typing import TYPE_CHECKING, Iterable, TextIO, cast
+
 from config import config
 from EDMCLogging import get_main_logger
-
-if TYPE_CHECKING:
-    def _(x: str) -> str: return x
 
 # Note that this is also done in EDMarketConnector.py, and thus removing this here may not have a desired effect
 try:
@@ -40,12 +37,7 @@ logger = get_main_logger()
 LANGUAGE_ID = '!Language'
 LOCALISATION_DIR = 'L10n'
 
-if sys.platform == 'darwin':
-    from Foundation import (  # type: ignore # exists on Darwin
-        NSLocale, NSNumberFormatter, NSNumberFormatterDecimalStyle
-    )
-
-elif sys.platform == 'win32':
+if sys.platform == 'win32':
     import ctypes
     from ctypes.wintypes import BOOL, DWORD, LPCVOID, LPCWSTR, LPWSTR
     if TYPE_CHECKING:
@@ -67,7 +59,16 @@ elif sys.platform == 'win32':
     GetNumberFormatEx.restype = ctypes.c_int
 
 
-class _Translations:
+class Translations:
+    """
+    The Translation System.
+
+    Contains all the logic needed to support multiple languages in EDMC.
+    DO NOT USE THIS DIRECTLY UNLESS YOU KNOW WHAT YOU'RE DOING.
+    In most cases, you'll want to import translations.
+
+    For most cases: from l10n import translations as tr.
+    """
 
     FALLBACK = 'en'  # strings in this code are in English
     FALLBACK_NAME = 'English'
@@ -85,6 +86,8 @@ class _Translations:
         Use when translation is not desired or not available
         """
         self.translations = {None: {}}
+        # WARNING: '_' is Deprecated. Will be removed in 6.0 or later.
+        # Migrate to calling translations.translate or tr.tl directly.
         builtins.__dict__['_'] = lambda x: str(x).replace(r'\"', '"').replace('{CR}', '\n')
 
     def install(self, lang: str | None = None) -> None:  # noqa: CCR001
@@ -94,7 +97,7 @@ class _Translations:
         :param lang: The language to translate to, defaults to the preferred language
         """
         available = self.available()
-        available.add(_Translations.FALLBACK)
+        available.add(Translations.FALLBACK)
         if not lang:
             # Choose the default language
             for preferred in Locale.preferred_languages():
@@ -128,6 +131,8 @@ class _Translations:
                 except Exception:
                     logger.exception(f'Exception occurred while parsing {lang}.strings in plugin {plugin}')
 
+        # WARNING: '_' is Deprecated. Will be removed in 6.0 or later.
+        # Migrate to calling translations.translate or tr.tl directly.
         builtins.__dict__['_'] = self.translate
 
     def contents(self, lang: str, plugin_path: str | None = None) -> dict[str, str]:
@@ -141,12 +146,12 @@ class _Translations:
 
         for line in h:
             if line.strip():
-                match = _Translations.TRANS_RE.match(line)
+                match = Translations.TRANS_RE.match(line)
                 if match:
                     to_set = match.group(2).replace(r'\"', '"').replace('{CR}', '\n')
                     translations[match.group(1).replace(r'\"', '"')] = to_set
 
-                elif not _Translations.COMMENT_RE.match(line):
+                elif not Translations.COMMENT_RE.match(line):
                     logger.debug(f'Bad translation: {line.strip()}')
         h.close()
 
@@ -155,21 +160,45 @@ class _Translations:
 
         return translations
 
-    def translate(self, x: str, context: str | None = None) -> str:
+    def tl(self, x: str, context: str | None = None, lang: str | None = None) -> str:
+        """Use the shorthand Dummy loader for the translate function."""
+        return self.translate(x, context, lang)
+
+    def translate(self, x: str, context: str | None = None, lang: str | None = None) -> str:  # noqa: CCR001
         """
-        Translate the given string to the current lang.
+        Translate the given string to the current lang or an overriden lang.
 
         :param x: The string to translate
-        :param context: Whether or not to search the given directory for translation files, defaults to None
+        :param context: Contains the full path to the file being localised, from which the plugin name is parsed and
+        used to locate the plugin translation files, defaults to None
+        :param lang: Contains a language code to override the EDMC language for this translation, defaults to None
         :return: The translated string
         """
+        plugin_name: str | None = None
+        plugin_path: str | None = None
+
         if context:
             # TODO: There is probably a better way to go about this now.
-            context = context[len(config.plugin_dir)+1:].split(sep)[0]
-            if self.translations[None] and context not in self.translations:
-                logger.debug(f'No translations for {context!r}')
+            plugin_name = context[len(config.plugin_dir)+1:].split(sep)[0]
+            plugin_path = join(config.plugin_dir_path, plugin_name, LOCALISATION_DIR)
 
-            return self.translations.get(context, {}).get(x) or self.translate(x)
+        if lang:
+            contents: dict[str, str] = self.contents(lang=lang, plugin_path=plugin_path)
+
+            if not contents or type(contents) is not dict:
+                logger.debug(f'Failure loading translations for overridden language {lang!r}')
+                return self.translate(x)
+            elif x not in contents.keys():
+                logger.debug(f'Missing translation: {x!r} for overridden language {lang!r}')
+                return self.translate(x)
+            else:
+                return contents.get(x) or self.translate(x)
+
+        if plugin_name:
+            if self.translations[None] and plugin_name not in self.translations:
+                logger.debug(f'No translations for {plugin_name!r}')
+
+            return self.translations.get(plugin_name, {}).get(x) or self.translate(x)
 
         if self.translations[None] and x not in self.translations[None]:
             logger.debug(f'Missing translation: {x!r}')
@@ -179,26 +208,20 @@ class _Translations:
     def available(self) -> set[str]:
         """Return a list of available language codes."""
         path = self.respath()
-        if getattr(sys, 'frozen', False) and sys.platform == 'darwin':
-            available = {
-                x[:-len('.lproj')] for x in listdir(path)
-                if x.endswith('.lproj') and isfile(join(x, 'Localizable.strings'))
-            }
 
-        else:
-            available = {x[:-len('.strings')] for x in listdir(path) if x.endswith('.strings')}
+        available = {x[:-len('.strings')] for x in listdir(path) if x.endswith('.strings')}
 
         return available
 
     def available_names(self) -> dict[str | None, str]:
         """Available language names by code."""
-        names: dict[str | None, str] = OrderedDict([
+        names: dict[str | None, str] = {
             # LANG: The system default language choice in Settings > Appearance
-            (None, _('Default')),  # Appearance theme and language setting
-        ])
+            None: self.tl('Default'),  # Appearance theme and language setting
+        }
         names.update(sorted(
             [(lang, self.contents(lang).get(LANGUAGE_ID, lang)) for lang in self.available()] +
-            [(_Translations.FALLBACK, _Translations.FALLBACK_NAME)],
+            [(Translations.FALLBACK, Translations.FALLBACK_NAME)],
             key=lambda x: x[1]
         ))  # Sort by name
 
@@ -207,9 +230,6 @@ class _Translations:
     def respath(self) -> str:
         """Path to localisation files."""
         if getattr(sys, 'frozen', False):
-            if sys.platform == 'darwin':
-                return abspath(join(dirname(sys.executable), pardir, 'Resources'))
-
             return abspath(join(dirname(sys.executable), LOCALISATION_DIR))
 
         if __file__:
@@ -235,25 +255,12 @@ class _Translations:
             except OSError:
                 logger.exception(f'could not open {file_path}')
 
-        elif getattr(sys, 'frozen', False) and sys.platform == 'darwin':
-            res_path = join(self.respath(), f'{lang}.lproj', 'Localizable.strings')
-            return open(res_path, encoding='utf-16')
-
         res_path = join(self.respath(), f'{lang}.strings')
         return open(res_path, encoding='utf-8')
 
 
 class _Locale:
     """Locale holds a few utility methods to convert data to and from localized versions."""
-
-    def __init__(self) -> None:
-        if sys.platform == 'darwin':
-            self.int_formatter = NSNumberFormatter.alloc().init()
-            self.int_formatter.setNumberStyle_(NSNumberFormatterDecimalStyle)
-            self.float_formatter = NSNumberFormatter.alloc().init()
-            self.float_formatter.setNumberStyle_(NSNumberFormatterDecimalStyle)
-            self.float_formatter.setMinimumFractionDigits_(5)
-            self.float_formatter.setMaximumFractionDigits_(5)
 
     def stringFromNumber(self, number: float | int, decimals: int | None = None) -> str:  # noqa: N802
         warnings.warn(DeprecationWarning('use _Locale.string_from_number instead.'))
@@ -280,14 +287,6 @@ class _Locale:
         if decimals == 0 and not isinstance(number, numbers.Integral):
             number = int(round(number))
 
-        if sys.platform == 'darwin':
-            if not decimals and isinstance(number, numbers.Integral):
-                return self.int_formatter.stringFromNumber_(number)
-
-            self.float_formatter.setMinimumFractionDigits_(decimals)
-            self.float_formatter.setMaximumFractionDigits_(decimals)
-            return self.float_formatter.stringFromNumber_(number)
-
         if not decimals and isinstance(number, numbers.Integral):
             return locale.format_string('%d', number, True)
         return locale.format_string('%.*f', (decimals, number), True)
@@ -300,9 +299,6 @@ class _Locale:
         :param string: The string to convert
         :return: None if the string cannot be parsed, otherwise an int or float dependant on input data.
         """
-        if sys.platform == 'darwin':
-            return self.float_formatter.numberFromString_(string)
-
         with suppress(ValueError):
             return locale.atoi(string)
 
@@ -333,10 +329,8 @@ class _Locale:
         :return: The preferred language list
         """
         languages: Iterable[str]
-        if sys.platform == 'darwin':
-            languages = NSLocale.preferredLanguages()
 
-        elif sys.platform != 'win32':
+        if sys.platform != 'win32':
             # POSIX
             lang = locale.getlocale()[0]
             languages = [lang.replace('_', '-')] if lang else []
@@ -365,8 +359,22 @@ class _Locale:
 
 # singletons
 Locale = _Locale()
-Translations = _Translations()
+translations = Translations()
 
+
+# WARNING: 'Translations' singleton is deprecated. Will be removed in 6.0 or later.
+# Migrate to importing 'translations'.
+# Begin Deprecation Zone
+class _Translations(Translations):
+    def __init__(self):
+        logger.warning(DeprecationWarning('Translations and _Translations() are deprecated. '
+                       'Please use translations and Translations() instead.'))
+        super().__init__()
+
+
+# Yes, I know this is awful renaming garbage. But we need it for compat.
+Translations: Translations = translations  # type: ignore
+# End Deprecation Zone
 
 # generate template strings file - like xgettext
 # parsing is limited - only single ' or " delimited strings, and only one string per line
