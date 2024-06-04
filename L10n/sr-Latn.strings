@@ -36,6 +36,12 @@
 /* companion.py: Failed to get Access Token from Frontier Auth service; In files: companion.py:508; */
 "Error: unable to get token" = "Greška: nemoguće dobaviti token";
 
+/* EDMarketConnector.py: EDMC Critical Error Notification; */
+"EDMC encountered a critical error, and cannot recover. EDMC is shutting down for its own protection!" = "EDMC je naišao na kritičnu grešku i ne može da se oporavi. EDMC će biti ugašen radi svoje zaštite.";
+
+/* EDMarketConnector.py: EDMC Critical Error Details; */
+"Here's what EDMC Detected:\r\n\r\n{ERR}\r\n\r\nDo you want to file a Bug Report on GitHub?" = "Evo šta je EDMC detektovao:\n\n{ERR}\n\nDa li želite da napravite Bug Report na GitHub-u?";
+
 /* companion.py: Frontier CAPI returned 418, meaning down for maintenance; In files: companion.py:844; */
 "Frontier CAPI down for maintenance" = "Frontier CAPI isključen radi održavanja";
 
@@ -78,12 +84,6 @@
 /* EDMarketConnector.py: 'Edit' menu title on OSX; EDMarketConnector.py: 'Edit' menu title; In files: EDMarketConnector.py:922; EDMarketConnector.py:940; EDMarketConnector.py:943; */
 "Edit" = "Izmeni";
 
-/* EDMarketConnector.py: 'View' menu title on OSX; In files: EDMarketConnector.py:923; */
-"View" = "Pogled";
-
-/* EDMarketConnector.py: 'Window' menu title on OSX; In files: EDMarketConnector.py:924; */
-"Window" = "Prozor";
-
 /* EDMarketConnector.py: Help' menu title on OSX; EDMarketConnector.py: 'Help' menu title; In files: EDMarketConnector.py:925; EDMarketConnector.py:941; EDMarketConnector.py:944; */
 "Help" = "Pomoć";
 
@@ -92,6 +92,9 @@
 
 /* EDMarketConnector.py: Help > Check for Updates...; In files: EDMarketConnector.py:930; EDMarketConnector.py:958; */
 "Check for Updates..." = "Proveri da li postoje izmene...";
+
+/* EDMarketConnector.py: Help > Open System Profiler; In files: EDMarketConnector.py:888; */
+"Open System Profiler" = "Otvori System Profiler";
 
 /* EDMarketConnector.py: File > Save Raw Data...; In files: EDMarketConnector.py:931; EDMarketConnector.py:948; */
 "Save Raw Data..." = "Snimi sirove podatke...";
@@ -165,12 +168,12 @@
 /* EDMarketConnector.py: CAPI fleetcarrier query aborted because of killswitch; In files: EDMarketConnector.py:1157; */
 "CAPI fleetcarrier disabled by killswitch" = "CAPI fleetcarrier deaktiviran preko sistemskog prekidača";
 
+
 /* EDMarketConnector.py: No data was returned for the fleetcarrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
 "CAPI: No fleetcarrier data returned" = "CAPI: Podaci o fleetcarrier-u nisu dobijeni";
 
 /* EDMarketConnector.py: We didn't have the fleetcarrier callsign when we should have; In files: EDMarketConnector.py:1223; */
 "CAPI: Fleetcarrier data incomplete" = "CAPI: Podaci o fleetcarrier-u su nepotpuni";
-
 /* EDMarketConnector.py: No data was returned for the commander from the Frontier CAPI; In files: EDMarketConnector.py:1242; */
 "CAPI: No commander data returned" = "CAPI: Nema podataka o komandiru";
 
@@ -212,12 +215,6 @@
 
 /* EDMarketConnector.py: Popup-text about 'active' plugins without Python 3.x support; In files: EDMarketConnector.py:2253:2259; */
 "One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "Jedan ili više aktiviranih dodataka (plugins) nemaju podršku za Python 3.x. Pogledajte listu u '{PLUGINS}' tabu u '{FILE}' > '{SETTINGS}'. Proverite da li postoji nadograđena verzija ili obavesite autora da treba da promeni kod za Python 3.x.\n\nMožete deaktivirati dodatak (plugin) dodavanjem '{DISABLED}' na kraju imena njegovog foldera.";
-
-/* EDMarketConnector.py: Popup-text about missing FDEVID Files; In files: EDMarketConnector.py:2329; */
-"FDevID Files not found! Some functionality regarding commodities may be disabled.\r\n\r\n Do you want to open the Wiki page on how to set up submodules?" = "FDevID fajlovi nisu pronađeni! Neke funkcionalnosti vezane za artikle će možda biti deaktivirane.\n\nDa li želite da otvorite Wiki stranu koja objašnjava kako da podesite pod-module?";
-
-/* EDMarketConnector.py: Popup window title for missing FDEVID files; In files: EDMarketConnector.py:2340; */
-"FDevIDs: Missing Commodity Files" = "FDevIDs: Nedostaju fajlovi za robu";
 
 /* EDMarketConnector.py: Settings > Plugins tab; prefs.py: Label on Settings > Plugins tab; In files: EDMarketConnector.py:2263; prefs.py:986; */
 "Plugins" = "Dodaci (plugins)";
@@ -351,9 +348,6 @@
 /* inara.py: INARA API returned some kind of error (error message will be contained in {MSG}); In files: inara.py:1650; inara.py:1663; */
 "Error: Inara {MSG}" = "Greška: Inara {MSG}";
 
-/* prefs.py: File > Preferences menu entry for macOS; In files: prefs.py:237; */
-"Preferences" = "Podešavanja";
-
 /* prefs.py: Settings > Output - choosing what data to save to files; In files: prefs.py:335; */
 "Please choose what data to save" = "Izaberite koji se podaci snimaju";
 
@@ -372,9 +366,6 @@
 /* prefs.py: Settings > Output - Label for "where files are located"; In files: prefs.py:379; prefs.py:398; */
 "File location" = "Lokacija fajlova";
 
-/* prefs.py: macOS Preferences - files location selection button; In files: prefs.py:387; prefs.py:437; */
-"Change..." = "Izmeni...";
-
 /* prefs.py: NOT-macOS Settings - files location selection button; prefs.py: NOT-macOS Setting - files location selection button; In files: prefs.py:390; prefs.py:440; */
 "Browse..." = "Potraži...";
 
@@ -387,23 +378,11 @@
 /* prefs.py: Settings > Configuration - Label for CAPI section; In files: prefs.py:469; */
 "CAPI Settings" = "CAPI Podešavanja";
 
+
 /* prefs.py: Configuration - Enable or disable the Fleet Carrier CAPI calls; In files: prefs.py:475; */
 "Enable Fleetcarrier CAPI Queries" = "Aktiviraj Fleetcarrier CAPIU Upite";
-
-/* prefs.py: Hotkey/Shortcut settings prompt on OSX; In files: prefs.py:490; */
-"Keyboard shortcut" = "Skraćenica";
-
 /* prefs.py: Hotkey/Shortcut settings prompt on Windows; In files: prefs.py:492; */
 "Hotkey" = "Skraćenica";
-
-/* prefs.py: macOS Preferences > Configuration - restart the app message; In files: prefs.py:501; */
-"Re-start {APP} to use shortcuts" = "Restartujte {APP} da bi ste koristili skraćenice";
-
-/* prefs.py: macOS - Configuration - need to grant the app permission for keyboard shortcuts; In files: prefs.py:510; */
-"{APP} needs permission to use shortcuts" = "{APP} traži dozvolu da koristi skraćenice";
-
-/* prefs.py: Shortcut settings button on OSX; In files: prefs.py:515; */
-"Open System Preferences" = "Otvori sistemska podešavanja";
 
 /* prefs.py: Configuration - Act on hotkey only when ED is in foreground; In files: prefs.py:538; */
 "Only when Elite: Dangerous is the active app" = "Samo kada je Elite: Dangerous aktivna aplikacija";
@@ -803,3 +782,9 @@
 
 /* update.py: Update Available Text; In files: update.py:229; */
 "{NEWVER} is available" = "{NEWVER} je dostupna";
+
+/* myNotebook.py: Can't Paste Images or Files in Text; */
+"Cannot paste non-text content." = "Nemoguće je nalepiti netekstualni sadržaj.";
+
+/* ttkHyperlinkLabel.py: Open Element In Selected Provider; */
+"Open in {URL}" = "Otvori na {URL}";

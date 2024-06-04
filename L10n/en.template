@@ -36,6 +36,12 @@
 /* companion.py: Failed to get Access Token from Frontier Auth service; In files: companion.py:508; */
 "Error: unable to get token" = "Error: unable to get token";
 
+/* EDMarketConnector.py: EDMC Critical Error Notification; */
+"EDMC encountered a critical error, and cannot recover. EDMC is shutting down for its own protection!" = "EDMC encountered a critical error, and cannot recover. EDMC is shutting down for its own protection!";
+
+/* EDMarketConnector.py: EDMC Critical Error Details; */
+"Here's what EDMC Detected:\r\n\r\n{ERR}\r\n\r\nDo you want to file a Bug Report on GitHub?" = "Here's what EDMC Detected:\r\n\r\n{ERR}\r\n\r\nDo you want to file a Bug Report on GitHub?";
+
 /* companion.py: Frontier CAPI returned 418, meaning down for maintenance; In files: companion.py:844; */
 "Frontier CAPI down for maintenance" = "Frontier CAPI down for maintenance";
 
@@ -78,12 +84,6 @@
 /* EDMarketConnector.py: 'Edit' menu title on OSX; EDMarketConnector.py: 'Edit' menu title; In files: EDMarketConnector.py:922; EDMarketConnector.py:940; EDMarketConnector.py:943; */
 "Edit" = "Edit";
 
-/* EDMarketConnector.py: 'View' menu title on OSX; In files: EDMarketConnector.py:923; */
-"View" = "View";
-
-/* EDMarketConnector.py: 'Window' menu title on OSX; In files: EDMarketConnector.py:924; */
-"Window" = "Window";
-
 /* EDMarketConnector.py: Help' menu title on OSX; EDMarketConnector.py: 'Help' menu title; In files: EDMarketConnector.py:925; EDMarketConnector.py:941; EDMarketConnector.py:944; */
 "Help" = "Help";
 
@@ -92,6 +92,9 @@
 
 /* EDMarketConnector.py: Help > Check for Updates...; In files: EDMarketConnector.py:930; EDMarketConnector.py:958; */
 "Check for Updates..." = "Check for Updates...";
+
+/* EDMarketConnector.py: Help > Open System Profiler; In files: EDMarketConnector.py:888; */
+"Open System Profiler" = "Open System Profiler";
 
 /* EDMarketConnector.py: File > Save Raw Data...; In files: EDMarketConnector.py:931; EDMarketConnector.py:948; */
 "Save Raw Data..." = "Save Raw Data...";
@@ -122,6 +125,15 @@
 
 /* EDMarketConnector.py: Label for 'Copy' as in 'Copy and Paste'; ttkHyperlinkLabel.py: Label for 'Copy' as in 'Copy and Paste'; In files: EDMarketConnector.py:962; ttkHyperlinkLabel.py:53; */
 "Copy" = "Copy";
+
+/* myNotebook.py: Label for 'Cut' as in 'Cut and Paste'; */
+"Cut" = "Cut";
+
+/* myNotebook.py: Label for 'Paste' as in 'Copy and Paste'; */
+"Paste" = "Paste";
+
+/* myNotebook.py: Label for 'Select All'; */
+"Select All" = "Select All";
 
 /* EDMarketConnector.py: CAPI auth aborted because of killswitch; EDMarketConnector.py: CAPI auth query aborted because of killswitch; In files: EDMarketConnector.py:973; EDMarketConnector.py:1067; */
 "CAPI auth disabled by killswitch" = "CAPI auth disabled by killswitch";
@@ -165,11 +177,11 @@
 /* EDMarketConnector.py: CAPI fleetcarrier query aborted because of killswitch; In files: EDMarketConnector.py:1157; */
 "CAPI fleetcarrier disabled by killswitch" = "CAPI fleetcarrier disabled by killswitch";
 
-/* EDMarketConnector.py: No data was returned for the fleetcarrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
-"CAPI: No fleetcarrier data returned" = "CAPI: No fleetcarrier data returned";
+/* EDMarketConnector.py: No data was returned for the Fleet Carrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
+"CAPI: No Fleet Carrier data returned" = "CAPI: No Fleet Carrier data returned";
 
-/* EDMarketConnector.py: We didn't have the fleetcarrier callsign when we should have; In files: EDMarketConnector.py:1223; */
-"CAPI: Fleetcarrier data incomplete" = "CAPI: Fleetcarrier data incomplete";
+/* EDMarketConnector.py: We didn't have the Fleet Carrier callsign when we should have; In files: EDMarketConnector.py:1223; */
+"CAPI: Fleet Carrier data incomplete" = "CAPI: Fleet Carrier data incomplete";
 
 /* EDMarketConnector.py: No data was returned for the commander from the Frontier CAPI; In files: EDMarketConnector.py:1242; */
 "CAPI: No commander data returned" = "CAPI: No commander data returned";
@@ -213,12 +225,6 @@
 /* EDMarketConnector.py: Popup-text about 'active' plugins without Python 3.x support; In files: EDMarketConnector.py:2253:2259; */
 "One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name.";
 
-/* EDMarketConnector.py: Popup-text about missing FDEVID Files; In files: EDMarketConnector.py:2329; */
-"FDevID Files not found! Some functionality regarding commodities may be disabled.\r\n\r\n Do you want to open the Wiki page on how to set up submodules?" = "FDevID Files not found! Some functionality regarding commodities may be disabled.\r\n\r\n Do you want to open the Wiki page on how to set up submodules?";
-
-/* EDMarketConnector.py: Popup window title for missing FDEVID files; In files: EDMarketConnector.py:2340; */
-"FDevIDs: Missing Commodity Files" = "FDevIDs: Missing Commodity Files";
-
 /* EDMarketConnector.py: Settings > Plugins tab; prefs.py: Label on Settings > Plugins tab; In files: EDMarketConnector.py:2263; prefs.py:986; */
 "Plugins" = "Plugins";
 
@@ -239,6 +245,9 @@
 
 /* EDMarketConnector.py: Popup window title for Reset Providers; In files: EDMarketConnector.py:2161; */
 "EDMC: Default Providers Reset" = "EDMC: Default Providers Reset";
+
+/* EDMarketConnector.py: Await Full CMDR Login to Game; In files: EDMarketConnector.py:813; */
+"Awaiting Full CMDR Login" = "Awaiting Full CMDR Login";
 
 /* journal_lock.py: Title text on popup when Journal directory already locked; In files: journal_lock.py:208; */
 "Journal directory already locked" = "Journal directory already locked";
@@ -348,9 +357,6 @@
 /* inara.py: INARA API returned some kind of error (error message will be contained in {MSG}); In files: inara.py:1650; inara.py:1663; */
 "Error: Inara {MSG}" = "Error: Inara {MSG}";
 
-/* prefs.py: File > Preferences menu entry for macOS; In files: prefs.py:237; */
-"Preferences" = "Preferences";
-
 /* prefs.py: Settings > Output - choosing what data to save to files; In files: prefs.py:335; */
 "Please choose what data to save" = "Please choose what data to save";
 
@@ -369,9 +375,6 @@
 /* prefs.py: Settings > Output - Label for "where files are located"; In files: prefs.py:379; prefs.py:398; */
 "File location" = "File location";
 
-/* prefs.py: macOS Preferences - files location selection button; In files: prefs.py:387; prefs.py:437; */
-"Change..." = "Change...";
-
 /* prefs.py: NOT-macOS Settings - files location selection button; prefs.py: NOT-macOS Setting - files location selection button; In files: prefs.py:390; prefs.py:440; */
 "Browse..." = "Browse...";
 
@@ -385,22 +388,10 @@
 "CAPI Settings" = "CAPI Settings";
 
 /* prefs.py: Configuration - Enable or disable the Fleet Carrier CAPI calls; In files: prefs.py:475; */
-"Enable Fleetcarrier CAPI Queries" = "Enable Fleetcarrier CAPI Queries";
-
-/* prefs.py: Hotkey/Shortcut settings prompt on OSX; In files: prefs.py:490; */
-"Keyboard shortcut" = "Keyboard shortcut";
+"Enable Fleet Carrier CAPI Queries" = "Enable Fleet Carrier CAPI Queries";
 
 /* prefs.py: Hotkey/Shortcut settings prompt on Windows; In files: prefs.py:492; */
 "Hotkey" = "Hotkey";
-
-/* prefs.py: macOS Preferences > Configuration - restart the app message; In files: prefs.py:501; */
-"Re-start {APP} to use shortcuts" = "Re-start {APP} to use shortcuts";
-
-/* prefs.py: macOS - Configuration - need to grant the app permission for keyboard shortcuts; In files: prefs.py:510; */
-"{APP} needs permission to use shortcuts" = "{APP} needs permission to use shortcuts";
-
-/* prefs.py: Shortcut settings button on OSX; In files: prefs.py:515; */
-"Open System Preferences" = "Open System Preferences";
 
 /* prefs.py: Configuration - Act on hotkey only when ED is in foreground; In files: prefs.py:538; */
 "Only when Elite: Dangerous is the active app" = "Only when Elite: Dangerous is the active app";
@@ -497,6 +488,9 @@
 
 /* prefs.py: Lable on list of user-disabled plugins; In files: prefs.py:977; */
 "Disabled Plugins" = "Disabled Plugins";
+
+/* prefs.py: Catch & Record Profiler Errors; */
+"Error in System Profiler" = "Error in System Profiler";
 
 /* stats.py: Cmdr stats; In files: stats.py:58; */
 "Balance" = "Balance";
@@ -798,3 +792,24 @@
 /* stats.py: Status dialog title; In files: stats.py:418; */
 "Ships" = "Ships";
 
+/* update.py: Update Available Text; In files: update.py:229; */
+"{NEWVER} is available" = "{NEWVER} is available";
+
+/* prefs.py: Stable Version of EDMC; */
+"Stable" = "Stable";
+
+/* prefs.py: Select the Update Track (Beta, Stable); */
+"Update Track" = "Update Track";
+
+/* EDMarketConnector.py: Inform the user the Update Track has changed; */
+"Update Track Changed to {TRACK}" = "Update Track Changed to {TRACK}";
+
+
+/* EDMarketConnector.py: Inform User of Beta -> Stable Transition Risks; */
+"Update track changed to Stable from Beta. You will no longer receive Beta updates. You will stay on your current Beta version until the next Stable release.\r\n\r\nYou can manually revert to the latest Stable version. To do so, you must download and install the latest Stable version manually. Note that this may introduce bugs or break completely if downgrading between major versions with significant changes.\r\n\r\nDo you want to open GitHub to download the latest release?" = "Update track changed to Stable from Beta. You will no longer receive Beta updates. You will stay on your current Beta version until the next Stable release.\r\n\r\nYou can manually revert to the latest Stable version. To do so, you must download and install the latest Stable version manually. Note that this may introduce bugs or break completely if downgrading between major versions with significant changes.\r\n\r\nDo you want to open GitHub to download the latest release?";
+
+/* myNotebook.py: Can't Paste Images or Files in Text; */
+"Cannot paste non-text content." = "Cannot paste non-text content.";
+
+/* ttkHyperlinkLabel.py: Open Element In Selected Provider; */
+"Open in {URL}" = "Open in {URL}";

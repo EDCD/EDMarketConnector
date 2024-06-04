@@ -38,8 +38,9 @@ def find_calls_in_stmt(statement: ast.AST) -> list[ast.Call]:
     out = []
     for n in ast.iter_child_nodes(statement):
         out.extend(find_calls_in_stmt(n))
-    if isinstance(statement, ast.Call) and get_func_name(statement.func) == '_':
-        out.append(statement)
+    if isinstance(statement, ast.Call) and get_func_name(statement.func) in ('tr', 'translations'):
+        if ast.unparse(statement).find('.tl') != -1 or ast.unparse(statement).find('translate') != -1:
+            out.append(statement)
     return out
 
 

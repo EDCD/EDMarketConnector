@@ -14,7 +14,7 @@ import re
 import sys
 import threading
 from calendar import timegm
-from collections import OrderedDict, defaultdict
+from collections import defaultdict
 from os import SEEK_END, SEEK_SET, listdir
 from os.path import basename, expanduser, getctime, isdir, join
 from time import gmtime, localtime, mktime, sleep, strftime, strptime, time
@@ -34,24 +34,11 @@ STARTUP = 'journal.startup'
 MAX_NAVROUTE_DISCREPANCY = 5  # Timestamp difference in seconds
 MAX_FCMATERIALS_DISCREPANCY = 5  # Timestamp difference in seconds
 
-if TYPE_CHECKING:
-    def _(x: str) -> str:
-        return x
-
-if sys.platform == 'darwin':
-    from fcntl import fcntl
-
-    from AppKit import NSWorkspace
-    from watchdog.events import FileSystemEventHandler
-    from watchdog.observers import Observer
-    from watchdog.observers.api import BaseObserver
-    F_GLOBAL_NOCACHE = 55
-
-elif sys.platform == 'win32':
+if sys.platform == 'win32':
     import ctypes
     from ctypes.wintypes import BOOL, HWND, LPARAM, LPWSTR
 
-    from watchdog.events import FileCreatedEvent, FileSystemEventHandler
+    from watchdog.events import FileSystemEventHandler, FileSystemEvent
     from watchdog.observers import Observer
     from watchdog.observers.api import BaseObserver
 
@@ -63,6 +50,8 @@ elif sys.platform == 'win32':
     GetWindowText = ctypes.windll.user32.GetWindowTextW
     GetWindowText.argtypes = [HWND, LPWSTR, ctypes.c_int]
     GetWindowTextLength = ctypes.windll.user32.GetWindowTextLengthW
+    GetWindowTextLength.argtypes = [ctypes.wintypes.HWND]
+    GetWindowTextLength.restype = ctypes.c_int
 
     GetProcessHandleFromHwnd = ctypes.windll.oleacc.GetProcessHandleFromHwnd
 
@@ -71,7 +60,7 @@ else:
     FileSystemEventHandler = object  # dummy
     if TYPE_CHECKING:
         # this isn't ever used, but this will make type checking happy
-        from watchdog.events import FileCreatedEvent
+        from watchdog.events import FileSystemEvent
         from watchdog.observers import Observer
         from watchdog.observers.api import BaseObserver
 
@@ -357,7 +346,7 @@ class EDLogs(FileSystemEventHandler):
         """
         return bool(self.thread and self.thread.is_alive())
 
-    def on_created(self, event: 'FileCreatedEvent') -> None:
+    def on_created(self, event: 'FileSystemEvent') -> None:
         """Watchdog callback when, e.g. client (re)started."""
         if not event.is_directory and self._RE_LOGFILE.search(basename(event.src_path)):
 
@@ -382,8 +371,6 @@ class EDLogs(FileSystemEventHandler):
         logfile = self.logfile
         if logfile:
             loghandle: BinaryIO = open(logfile, 'rb', 0)  # unbuffered
-            if sys.platform == 'darwin':
-                fcntl(loghandle, F_GLOBAL_NOCACHE, -1)  # required to avoid corruption on macOS over SMB
 
             self.catching_up = True
             for line in loghandle:
@@ -450,7 +437,7 @@ class EDLogs(FileSystemEventHandler):
                     new_journal_file = None
 
             if logfile:
-                loghandle.seek(0, SEEK_END)		  # required to make macOS notice log change over SMB
+                loghandle.seek(0, SEEK_END)  # required for macOS to notice log change over SMB. TODO: Do we need this?
                 loghandle.seek(log_pos, SEEK_SET)  # reset EOF flag # TODO: log_pos reported as possibly unbound
                 for line in loghandle:
                     # Paranoia check to see if we're shutting down
@@ -483,9 +470,6 @@ class EDLogs(FileSystemEventHandler):
 
                 if logfile:
                     loghandle = open(logfile, 'rb', 0)  # unbuffered
-                    if sys.platform == 'darwin':
-                        fcntl(loghandle, F_GLOBAL_NOCACHE, -1)  # required to avoid corruption on macOS over SMB
-
                     log_pos = 0
 
             sleep(self._POLL)
@@ -567,7 +551,7 @@ class EDLogs(FileSystemEventHandler):
 
         try:
             # Preserve property order because why not?
-            entry: MutableMapping[str, Any] = json.loads(line, object_pairs_hook=OrderedDict)
+            entry: MutableMapping[str, Any] = json.loads(line)
             assert 'timestamp' in entry, "Timestamp does not exist in the entry"
 
             self.__navroute_retry()
@@ -1042,7 +1026,7 @@ class EDLogs(FileSystemEventHandler):
                         rank[k] = (rank[k][0], min(v, 100))
 
             elif event_type in ('reputation', 'statistics'):
-                payload = OrderedDict(entry)
+                payload = dict(entry)
                 payload.pop('event')
                 payload.pop('timestamp')
                 # NB: We need the original casing for these keys
@@ -1073,7 +1057,7 @@ class EDLogs(FileSystemEventHandler):
                 # From 3.3 full Cargo event (after the first one) is written to a separate file
                 if 'Inventory' not in entry:
                     with open(join(self.currentdir, 'Cargo.json'), 'rb') as h:  # type: ignore
-                        entry = json.load(h, object_pairs_hook=OrderedDict)  # Preserve property order because why not?
+                        entry = json.load(h)
                         self.state['CargoJSON'] = entry
 
                 clean = self.coalesce_cargo(entry['Inventory'])
@@ -1108,7 +1092,7 @@ class EDLogs(FileSystemEventHandler):
                     attempts += 1
                     try:
                         with open(shiplocker_filename, 'rb') as h:
-                            entry = json.load(h, object_pairs_hook=OrderedDict)
+                            entry = json.load(h)
                             self.state['ShipLockerJSON'] = entry
                             break
 
@@ -2144,12 +2128,7 @@ class EDLogs(FileSystemEventHandler):
 
         :return: bool - True if the game is running.
         """
-        if sys.platform == 'darwin':
-            for app in NSWorkspace.sharedWorkspace().runningApplications():
-                if app.bundleIdentifier() == 'uk.co.frontier.EliteDangerous':
-                    return True
-
-        elif sys.platform == 'win32':
+        if sys.platform == 'win32':
             def WindowTitle(h):  # noqa: N802
                 if h:
                     length = GetWindowTextLength(h) + 1
@@ -2189,7 +2168,7 @@ class EDLogs(FileSystemEventHandler):
             'PowerDistributor', 'Radar', 'FuelTank'
         )
 
-        d: MutableMapping[str, Any] = OrderedDict()
+        d: MutableMapping[str, Any] = {}
         if timestamped:
             d['timestamp'] = strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())
 

@@ -24,14 +24,13 @@ import json
 import threading
 import time
 import tkinter as tk
-from collections import OrderedDict, defaultdict, deque
+from collections import defaultdict, deque
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from operator import itemgetter
 from threading import Lock, Thread
 from tkinter import ttk
-from typing import TYPE_CHECKING, Any, Callable, Deque, Mapping, NamedTuple, Sequence, cast, Union
-from typing import OrderedDict as OrderedDictT
+from typing import Any, Callable, Deque, Mapping, NamedTuple, Sequence, cast, Union
 import requests
 import edmc_data
 import killswitch
@@ -43,12 +42,9 @@ from config import applongname, appname, appversion, config, debug_senders
 from EDMCLogging import get_main_logger
 from monitor import monitor
 from ttkHyperlinkLabel import HyperlinkLabel
+from l10n import translations as tr
 
 logger = get_main_logger()
-
-if TYPE_CHECKING:
-    def _(x: str) -> str:
-        return x
 
 
 _TIMEOUT = 20
@@ -102,12 +98,12 @@ class This:
         self.newsession: bool = True  # starting a new session - wait for Cargo event
         self.undocked: bool = False  # just undocked
         self.suppress_docked = False  # Skip initial Docked event if started docked
-        self.cargo: list[OrderedDictT[str, Any]] | None = None
-        self.materials: list[OrderedDictT[str, Any]] | None = None
+        self.cargo: list[dict[str, Any]] | None = None
+        self.materials: list[dict[str, Any]] | None = None
         self.last_credits: int = 0  # Send credit update soon after Startup / new game
-        self.storedmodules: list[OrderedDictT[str, Any]] | None = None
-        self.loadout: OrderedDictT[str, Any] | None = None
-        self.fleet: list[OrderedDictT[str, Any]] | None = None
+        self.storedmodules: list[dict[str, Any]] | None = None
+        self.loadout: dict[str, Any] | None = None
+        self.fleet: list[dict[str, Any]] | None = None
         self.shipswap: bool = False  # just swapped ship
         self.on_foot = False
 
@@ -126,7 +122,7 @@ class This:
         self.log: 'tk.IntVar'
         self.log_button: nb.Checkbutton
         self.label: HyperlinkLabel
-        self.apikey: nb.Entry
+        self.apikey: nb.EntryMenu
         self.apikey_label: tk.Label
 
         self.events: dict[Credentials, Deque[Event]] = defaultdict(deque)
@@ -245,7 +241,7 @@ def toggle_password_visibility():
         this.apikey.config(show="*")
 
 
-def plugin_prefs(parent: ttk.Notebook, cmdr: str, is_beta: bool) -> tk.Frame:
+def plugin_prefs(parent: ttk.Notebook, cmdr: str, is_beta: bool) -> nb.Frame:
     """Plugin Preferences UI hook."""
     PADX = 10  # noqa: N806
     BUTTONX = 12  # noqa: N806  # indent Checkbuttons and Radiobuttons
@@ -265,7 +261,7 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str, is_beta: bool) -> tk.Frame:
     this.log = tk.IntVar(value=config.get_int('inara_out') and 1)
     this.log_button = nb.Checkbutton(
         frame,
-        text=_('Send flight log and Cmdr status to Inara'),  # LANG: Checkbox to enable INARA API Usage
+        text=tr.tl('Send flight log and Cmdr status to Inara'),  # LANG: Checkbox to enable INARA API Usage
         variable=this.log,
         command=prefsvarchanged
     )
@@ -281,7 +277,7 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str, is_beta: bool) -> tk.Frame:
     # Section heading in settings
     this.label = HyperlinkLabel(
         frame,
-        text=_('Inara credentials'),  # LANG: Text for INARA API keys link ( goes to https://inara.cz/settings-api )
+        text=tr.tl('Inara credentials'),  # LANG: Text for INARA API keys link ( goes to https://inara.cz/settings-api )
         background=nb.Label().cget('background'),
         url='https://inara.cz/settings-api',
         underline=True
@@ -291,9 +287,9 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str, is_beta: bool) -> tk.Frame:
     cur_row += 1
 
     # LANG: Inara API key label
-    this.apikey_label = nb.Label(frame, text=_('API Key'))  # Inara setting
+    this.apikey_label = nb.Label(frame, text=tr.tl('API Key'))  # Inara setting
     this.apikey_label.grid(row=cur_row, padx=PADX, pady=PADY, sticky=tk.W)
-    this.apikey = nb.Entry(frame, show="*", width=50)
+    this.apikey = nb.EntryMenu(frame, show="*", width=50)
     this.apikey.grid(row=cur_row, column=1, padx=PADX, pady=BOXY, sticky=tk.EW)
     cur_row += 1
 
@@ -302,7 +298,7 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str, is_beta: bool) -> tk.Frame:
     show_password_var.set(False)  # Password is initially masked
     show_password_checkbox = nb.Checkbutton(
         frame,
-        text=_('Show API Key'),  # LANG: Text Inara Show API key
+        text=tr.tl('Show API Key'),  # LANG: Text Inara Show API key
         variable=show_password_var,
         command=toggle_password_visibility,
     )
@@ -408,7 +404,7 @@ def journal_entry(  # noqa: C901, CCR001
 
     should_return, new_entry = killswitch.check_killswitch('plugins.inara.journal', entry, logger)
     if should_return:
-        plug.show_error(_('Inara disabled. See Log.'))  # LANG: INARA support disabled via killswitch
+        plug.show_error(tr.tl('Inara disabled. See Log.'))  # LANG: INARA support disabled via killswitch
         logger.trace('returning due to killswitch match')
         return ''
 
@@ -433,9 +429,9 @@ def journal_entry(  # noqa: C901, CCR001
             and config.get_int('inara_out') and not (is_beta or this.multicrew or credentials(cmdr))
         ):
             # LANG: The Inara API only accepts Live galaxy data, not Legacy galaxy data
-            logger.info(_("Inara only accepts Live galaxy data"))
+            logger.info(tr.tl("Inara only accepts Live galaxy data"))
             this.legacy_galaxy_last_notified = datetime.now(timezone.utc)
-            return _("Inara only accepts Live galaxy data")  # LANG: Inara - Only Live data
+            return tr.tl("Inara only accepts Live galaxy data")  # LANG: Inara - Only Live data
 
         return ''
 
@@ -554,23 +550,6 @@ def journal_entry(  # noqa: C901, CCR001
 
             # Ship change
             if event_name == 'Loadout' and this.shipswap:
-                cur_ship = {
-                    'shipType': state['ShipType'],
-                    'shipGameID': state['ShipID'],
-                    'shipName': state['ShipName'],  # Can be None
-                    'shipIdent': state['ShipIdent'],  # Can be None
-                    'isCurrentShip': True,
-                }
-
-                if state['HullValue']:
-                    cur_ship['shipHullValue'] = state['HullValue']
-
-                if state['ModulesValue']:
-                    cur_ship['shipModulesValue'] = state['ModulesValue']
-
-                cur_ship['shipRebuyCost'] = state['Rebuy']
-                new_add_event('setCommanderShip', entry['timestamp'], cur_ship)
-
                 this.loadout = make_loadout(state)
                 new_add_event('setCommanderShipLoadout', entry['timestamp'], this.loadout)
                 this.shipswap = False
@@ -721,13 +700,13 @@ def journal_entry(  # noqa: C901, CCR001
                 this.suppress_docked = True
 
             # Send cargo and materials if changed
-            cargo = [OrderedDict({'itemName': k, 'itemCount': state['Cargo'][k]}) for k in sorted(state['Cargo'])]
+            cargo = [{'itemName': k, 'itemCount': state['Cargo'][k]} for k in sorted(state['Cargo'])]
             if this.cargo != cargo:
                 new_add_event('setCommanderInventoryCargo', entry['timestamp'], cargo)
                 this.cargo = cargo
 
             materials = [
-                OrderedDict([('itemName', k), ('itemCount', state[category][k])])
+                {'itemName': k, 'itemCount': state[category][k]}
                 for category in ('Raw', 'Manufactured', 'Encoded')
                 for k in sorted(state[category])
             ]
@@ -823,24 +802,30 @@ def journal_entry(  # noqa: C901, CCR001
 
         # Fleet
         if event_name == 'StoredShips':
-            fleet: list[OrderedDictT[str, Any]] = sorted(
-                [OrderedDict({
-                    'shipType': x['ShipType'],
-                    'shipGameID': x['ShipID'],
-                    'shipName': x.get('Name'),
-                    'isHot': x['Hot'],
-                    'starsystemName': entry['StarSystem'],
-                    'stationName': entry['StationName'],
-                    'marketID': entry['MarketID'],
-                }) for x in entry['ShipsHere']] +
-                [OrderedDict({
-                    'shipType': x['ShipType'],
-                    'shipGameID': x['ShipID'],
-                    'shipName': x.get('Name'),
-                    'isHot': x['Hot'],
-                    'starsystemName': x.get('StarSystem'),  # Not present for ships in transit
-                    'marketID': x.get('ShipMarketID'),  # "
-                }) for x in entry['ShipsRemote']],
+            fleet = sorted(
+                [
+                    {
+                        'shipType': x['ShipType'],
+                        'shipGameID': x['ShipID'],
+                        'shipName': x.get('Name'),
+                        'isHot': x['Hot'],
+                        'starsystemName': entry['StarSystem'],
+                        'stationName': entry['StationName'],
+                        'marketID': entry['MarketID'],
+                    }
+                    for x in entry['ShipsHere']
+                ] +
+                [
+                    {
+                        'shipType': x['ShipType'],
+                        'shipGameID': x['ShipID'],
+                        'shipName': x.get('Name'),
+                        'isHot': x['Hot'],
+                        'starsystemName': x.get('StarSystem'),  # Not present for ships in transit
+                        'marketID': x.get('ShipMarketID'),  # "
+                    }
+                    for x in entry['ShipsRemote']
+                ],
                 key=itemgetter('shipGameID')
             )
 
@@ -851,9 +836,8 @@ def journal_entry(  # noqa: C901, CCR001
                 # this.events = [x for x in this.events if x['eventName'] != 'setCommanderShip']  # Remove any unsent
                 for ship in this.fleet:
                     new_add_event('setCommanderShip', entry['timestamp'], ship)
-
         # Loadout
-        if event_name == 'Loadout' and not this.newsession:
+        if event_name == 'Loadout':
             loadout = make_loadout(state)
             if this.loadout != loadout:
                 this.loadout = loadout
@@ -867,17 +851,37 @@ def journal_entry(  # noqa: C901, CCR001
 
                 new_add_event('setCommanderShipLoadout', entry['timestamp'], this.loadout)
 
+            cur_ship = {
+                'shipType': state['ShipType'],
+                'shipGameID': state['ShipID'],
+                'shipName': state['ShipName'],  # Can be None
+                'shipIdent': state['ShipIdent'],  # Can be None
+                'isCurrentShip': True,
+                'shipMaxJumpRange': entry['MaxJumpRange'],
+                'shipCargoCapacity': entry['CargoCapacity']
+            }
+            if state['HullValue']:
+                cur_ship['shipHullValue'] = state['HullValue']
+
+            if state['ModulesValue']:
+                cur_ship['shipModulesValue'] = state['ModulesValue']
+
+            if state['Rebuy']:
+                cur_ship['shipRebuyCost'] = state['Rebuy']
+
+            new_add_event('setCommanderShip', entry['timestamp'], cur_ship)
+
         # Stored modules
         if event_name == 'StoredModules':
             items = {mod['StorageSlot']: mod for mod in entry['Items']}  # Impose an order
-            modules: list[OrderedDictT[str, Any]] = []
+            modules: list[dict[str, Any]] = []
             for slot in sorted(items):
                 item = items[slot]
-                module: OrderedDictT[str, Any] = OrderedDict([
-                    ('itemName', item['Name']),
-                    ('itemValue', item['BuyPrice']),
-                    ('isHot', item['Hot']),
-                ])
+                module: dict[str, Any] = {
+                    'itemName': item['Name'],
+                    'itemValue': item['BuyPrice'],
+                    'isHot': item['Hot'],
+                }
 
                 # Location can be absent if in transit
                 if 'StarSystem' in item:
@@ -887,7 +891,7 @@ def journal_entry(  # noqa: C901, CCR001
                     module['marketID'] = item['MarketID']
 
                 if 'EngineerModifications' in item:
-                    module['engineering'] = OrderedDict([('blueprintName', item['EngineerModifications'])])
+                    module['engineering'] = {'blueprintName': item['EngineerModifications']}
                     if 'Level' in item:
                         module['engineering']['blueprintLevel'] = item['Level']
 
@@ -907,15 +911,15 @@ def journal_entry(  # noqa: C901, CCR001
 
         # Missions
         if event_name == 'MissionAccepted':
-            data: OrderedDictT[str, Any] = OrderedDict([
-                ('missionName', entry['Name']),
-                ('missionGameID', entry['MissionID']),
-                ('influenceGain', entry['Influence']),
-                ('reputationGain', entry['Reputation']),
-                ('starsystemNameOrigin', system),
-                ('stationNameOrigin', station),
-                ('minorfactionNameOrigin', entry['Faction']),
-            ])
+            data: dict[str, Any] = {
+                'missionName': entry['Name'],
+                'missionGameID': entry['MissionID'],
+                'influenceGain': entry['Influence'],
+                'reputationGain': entry['Reputation'],
+                'starsystemNameOrigin': system,
+                'stationNameOrigin': station,
+                'minorfactionNameOrigin': entry['Faction'],
+            }
 
             # optional mission-specific properties
             for (iprop, prop) in (
@@ -946,7 +950,7 @@ def journal_entry(  # noqa: C901, CCR001
             for x in entry.get('PermitsAwarded', []):
                 new_add_event('addCommanderPermit', entry['timestamp'], {'starsystemName': x})
 
-            data = OrderedDict([('missionGameID', entry['MissionID'])])
+            data = {'missionGameID': entry['MissionID']}
             if 'Donation' in entry:
                 data['donationCredits'] = entry['Donation']
 
@@ -966,7 +970,7 @@ def journal_entry(  # noqa: C901, CCR001
 
             factioneffects = []
             for faction in entry.get('FactionEffects', []):
-                effect: OrderedDictT[str, Any] = OrderedDict([('minorfactionName', faction['Faction'])])
+                effect: dict[str, Any] = {'minorfactionName': faction['Faction']}
                 for influence in faction.get('Influence', []):
                     if 'Influence' in influence:
                         highest_gain = influence['Influence']
@@ -990,7 +994,7 @@ def journal_entry(  # noqa: C901, CCR001
 
         # Combat
         if event_name == 'Died':
-            data = OrderedDict([('starsystemName', system)])
+            data = {'starsystemName': system}
             if 'Killers' in entry:
                 data['wingOpponentNames'] = [x['Name'] for x in entry['Killers']]
 
@@ -1011,10 +1015,11 @@ def journal_entry(  # noqa: C901, CCR001
                 new_add_event('addCommanderCombatDeath', entry['timestamp'], data)
 
         elif event_name == 'Interdicted':
-            data = OrderedDict([('starsystemName', system),
-                                ('isPlayer', entry['IsPlayer']),
-                                ('isSubmit', entry['Submitted']),
-                                ])
+            data = {
+                'starsystemName': system,
+                'isPlayer': entry['IsPlayer'],
+                'isSubmit': entry['Submitted']
+            }
 
             if 'Interdictor' in entry:
                 data['opponentName'] = entry['Interdictor']
@@ -1036,11 +1041,11 @@ def journal_entry(  # noqa: C901, CCR001
                 new_add_event('addCommanderCombatInterdicted', entry['timestamp'], data)
 
         elif event_name == 'Interdiction':
-            data = OrderedDict([
-                ('starsystemName', system),
-                ('isPlayer', entry['IsPlayer']),
-                ('isSuccess', entry['Success']),
-            ])
+            data = {
+                'starsystemName': system,
+                'isPlayer': entry['IsPlayer'],
+                'isSuccess': entry['Success'],
+            }
 
             if 'Interdicted' in entry:
                 data['opponentName'] = entry['Interdicted']
@@ -1064,10 +1069,10 @@ def journal_entry(  # noqa: C901, CCR001
                 new_add_event('addCommanderCombatInterdiction', entry['timestamp'], data)
 
         elif event_name == 'EscapeInterdiction':
-            data = OrderedDict([
-                ('starsystemName', system),
-                ('isPlayer', entry['IsPlayer']),
-            ])
+            data = {
+                'starsystemName': system,
+                'isPlayer': entry['IsPlayer'],
+            }
 
             if 'Interdictor' in entry:
                 data['opponentName'] = entry['Interdictor']
@@ -1281,16 +1286,16 @@ def journal_entry(  # noqa: C901, CCR001
             # ))
 
             for goal in entry['CurrentGoals']:
-                data = OrderedDict([
-                    ('communitygoalGameID', goal['CGID']),
-                    ('communitygoalName', goal['Title']),
-                    ('starsystemName', goal['SystemName']),
-                    ('stationName', goal['MarketName']),
-                    ('goalExpiry', goal['Expiry']),
-                    ('isCompleted', goal['IsComplete']),
-                    ('contributorsNum', goal['NumContributors']),
-                    ('contributionsTotal', goal['CurrentTotal']),
-                ])
+                data = {
+                    'communitygoalGameID': goal['CGID'],
+                    'communitygoalName': goal['Title'],
+                    'starsystemName': goal['SystemName'],
+                    'stationName': goal['MarketName'],
+                    'goalExpiry': goal['Expiry'],
+                    'isCompleted': goal['IsComplete'],
+                    'contributorsNum': goal['NumContributors'],
+                    'contributionsTotal': goal['CurrentTotal'],
+                }
 
                 if 'TierReached' in goal:
                     data['tierReached'] = int(goal['TierReached'].split()[-1])
@@ -1304,11 +1309,11 @@ def journal_entry(  # noqa: C901, CCR001
 
                 new_add_event('setCommunityGoal', entry['timestamp'], data)
 
-                data = OrderedDict([
-                    ('communitygoalGameID', goal['CGID']),
-                    ('contribution', goal['PlayerContribution']),
-                    ('percentileBand', goal['PlayerPercentileBand']),
-                ])
+                data = {
+                    'communitygoalGameID': goal['CGID'],
+                    'contribution': goal['PlayerContribution'],
+                    'percentileBand': goal['PlayerPercentileBand'],
+                }
 
                 if 'Bonus' in goal:
                     data['percentileBandReward'] = goal['Bonus']
@@ -1405,7 +1410,7 @@ def cmdr_data(data: CAPIData, is_beta):  # noqa: CCR001, reanalyze me later
         pass
 
 
-def make_loadout(state: dict[str, Any]) -> OrderedDictT[str, Any]:  # noqa: CCR001
+def make_loadout(state: dict[str, Any]) -> dict[str, Any]:  # noqa: CCR001
     """
     Construct an inara loadout from an event.
 
@@ -1414,13 +1419,13 @@ def make_loadout(state: dict[str, Any]) -> OrderedDictT[str, Any]:  # noqa: CCR0
     """
     modules = []
     for m in state['Modules'].values():
-        module: OrderedDictT[str, Any] = OrderedDict([
-            ('slotName', m['Slot']),
-            ('itemName', m['Item']),
-            ('itemHealth', m['Health']),
-            ('isOn', m['On']),
-            ('itemPriority', m['Priority']),
-        ])
+        module: dict[str, Any] = {
+            'slotName': m['Slot'],
+            'itemName': m['Item'],
+            'itemHealth': m['Health'],
+            'isOn': m['On'],
+            'itemPriority': m['Priority'],
+        }
 
         if 'AmmoInClip' in m:
             module['itemAmmoClip'] = m['AmmoInClip']
@@ -1435,20 +1440,20 @@ def make_loadout(state: dict[str, Any]) -> OrderedDictT[str, Any]:  # noqa: CCR0
             module['isHot'] = m['Hot']
 
         if 'Engineering' in m:
-            engineering: OrderedDictT[str, Any] = OrderedDict([
-                ('blueprintName', m['Engineering']['BlueprintName']),
-                ('blueprintLevel', m['Engineering']['Level']),
-                ('blueprintQuality', m['Engineering']['Quality']),
-            ])
+            engineering: dict[str, Any] = {
+                'blueprintName': m['Engineering']['BlueprintName'],
+                'blueprintLevel': m['Engineering']['Level'],
+                'blueprintQuality': m['Engineering']['Quality'],
+            }
 
             if 'ExperimentalEffect' in m['Engineering']:
                 engineering['experimentalEffect'] = m['Engineering']['ExperimentalEffect']
 
             engineering['modifiers'] = []
             for mod in m['Engineering']['Modifiers']:
-                modifier: OrderedDictT[str, Any] = OrderedDict([
-                    ('name', mod['Label']),
-                ])
+                modifier: dict[str, Any] = {
+                    'name': mod['Label'],
+                }
 
                 if 'OriginalValue' in mod:
                     modifier['value'] = mod['Value']
@@ -1464,11 +1469,11 @@ def make_loadout(state: dict[str, Any]) -> OrderedDictT[str, Any]:  # noqa: CCR0
 
         modules.append(module)
 
-    return OrderedDict([
-        ('shipType', state['ShipType']),
-        ('shipGameID', state['ShipID']),
-        ('shipLoadout', modules),
-    ])
+    return {
+        'shipType': state['ShipType'],
+        'shipGameID': state['ShipID'],
+        'shipLoadout': modules,
+    }
 
 
 def new_add_event(
@@ -1637,7 +1642,7 @@ def handle_api_error(data: Mapping[str, Any], status: int, reply: dict[str, Any]
     logger.warning(f'Inara\t{status} {error_message}')
     logger.debug(f'JSON data:\n{json.dumps(data, indent=2, separators = (",", ": "))}')
     # LANG: INARA API returned some kind of error (error message will be contained in {MSG})
-    plug.show_error(_('Error: Inara {MSG}').format(MSG=error_message))
+    plug.show_error(tr.tl('Error: Inara {MSG}').format(MSG=error_message))
 
 
 def handle_success_reply(data: Mapping[str, Any], reply: dict[str, Any]) -> None:
@@ -1670,7 +1675,7 @@ def handle_individual_error(data_event: dict[str, Any], reply_status: int, reply
 
     if reply_status // 100 != 2:
         # LANG: INARA API returned some kind of error (error message will be contained in {MSG})
-        plug.show_error(_('Error: Inara {MSG}').format(
+        plug.show_error(tr.tl('Error: Inara {MSG}').format(
             MSG=f'{data_event["eventName"]}, {reply_text}'
         ))
 

@@ -76,10 +76,6 @@ def get_hotkeymgr() -> AbstractHotkeyMgr:
     :return: Appropriate class instance.
     :raises ValueError: If unsupported platform.
     """
-    if sys.platform == 'darwin':
-        from hotkey.darwin import MacHotkeyMgr
-        return MacHotkeyMgr()
-
     if sys.platform == 'win32':
         from hotkey.windows import WindowsHotkeyMgr
         return WindowsHotkeyMgr()

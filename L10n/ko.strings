@@ -70,12 +70,6 @@
 /* EDMarketConnector.py: 'Edit' menu title on OSX; EDMarketConnector.py: 'Edit' menu title; In files: EDMarketConnector.py:922; EDMarketConnector.py:940; EDMarketConnector.py:943; */
 "Edit" = "편집";
 
-/* EDMarketConnector.py: 'View' menu title on OSX; In files: EDMarketConnector.py:923; */
-"View" = "보기";
-
-/* EDMarketConnector.py: 'Window' menu title on OSX; In files: EDMarketConnector.py:924; */
-"Window" = "창";
-
 /* EDMarketConnector.py: Help' menu title on OSX; EDMarketConnector.py: 'Help' menu title; In files: EDMarketConnector.py:925; EDMarketConnector.py:941; EDMarketConnector.py:944; */
 "Help" = "도움말";
 
@@ -289,9 +283,6 @@
 /* inara.py: INARA API returned some kind of error (error message will be contained in {MSG}); In files: inara.py:1650; inara.py:1663; */
 "Error: Inara {MSG}" = "오류: Inara {MSG}";
 
-/* prefs.py: File > Preferences menu entry for macOS; In files: prefs.py:237; */
-"Preferences" = "설정";
-
 /* prefs.py: Settings > Output - choosing what data to save to files; In files: prefs.py:335; */
 "Please choose what data to save" = "어느 데이터를 저장할 지 선택해주세요";
 
@@ -310,9 +301,6 @@
 /* prefs.py: Settings > Output - Label for "where files are located"; In files: prefs.py:379; prefs.py:398; */
 "File location" = "파일 위치";
 
-/* prefs.py: macOS Preferences - files location selection button; In files: prefs.py:387; prefs.py:437; */
-"Change..." = "바꾸기...";
-
 /* prefs.py: NOT-macOS Settings - files location selection button; prefs.py: NOT-macOS Setting - files location selection button; In files: prefs.py:390; prefs.py:440; */
 "Browse..." = "찾아보기...";
 
@@ -322,20 +310,8 @@
 /* prefs.py: Settings > Configuration - Label for Journal files location; In files: prefs.py:431; prefs.py:446; */
 "E:D journal file location" = "E:D 저널(journal) 파일 위치";
 
-/* prefs.py: Hotkey/Shortcut settings prompt on OSX; In files: prefs.py:490; */
-"Keyboard shortcut" = "단축키 설정";
-
 /* prefs.py: Hotkey/Shortcut settings prompt on Windows; In files: prefs.py:492; */
 "Hotkey" = "단축키";
-
-/* prefs.py: macOS Preferences > Configuration - restart the app message; In files: prefs.py:501; */
-"Re-start {APP} to use shortcuts" = "단축키를 사용하려면 {APP}을(를) 다시 시작하십시오";
-
-/* prefs.py: macOS - Configuration - need to grant the app permission for keyboard shortcuts; In files: prefs.py:510; */
-"{APP} needs permission to use shortcuts" = "단축기 사용을 위해선 {APP}이 권한 허용을 필요로 합니다";
-
-/* prefs.py: Shortcut settings button on OSX; In files: prefs.py:515; */
-"Open System Preferences" = "시스템 설정 열기";
 
 /* prefs.py: Configuration - Act on hotkey only when ED is in foreground; In files: prefs.py:538; */
 "Only when Elite: Dangerous is the active app" = "Elite: Dangerous가 활성 창 상태일때만";

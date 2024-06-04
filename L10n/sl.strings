@@ -31,12 +31,6 @@
 /* EDMarketConnector.py: 'Edit' menu title on OSX; EDMarketConnector.py: 'Edit' menu title; In files: EDMarketConnector.py:922; EDMarketConnector.py:940; EDMarketConnector.py:943; */
 "Edit" = "Uredi";
 
-/* EDMarketConnector.py: 'View' menu title on OSX; In files: EDMarketConnector.py:923; */
-"View" = "Pogled";
-
-/* EDMarketConnector.py: 'Window' menu title on OSX; In files: EDMarketConnector.py:924; */
-"Window" = "Okno";
-
 /* EDMarketConnector.py: Help' menu title on OSX; EDMarketConnector.py: 'Help' menu title; In files: EDMarketConnector.py:925; EDMarketConnector.py:941; EDMarketConnector.py:944; */
 "Help" = "Pomoč";
 
@@ -136,9 +130,6 @@
 /* edsm.py: EDSM Plugin - Error connecting to EDSM API; In files: edsm.py:953; edsm.py:1043; */
 "Error: Can't connect to EDSM" = "Napaka: Povezava z EDSM ni mogoča";
 
-/* prefs.py: File > Preferences menu entry for macOS; In files: prefs.py:237; */
-"Preferences" = "Nastavitve";
-
 /* prefs.py: Settings > Output - choosing what data to save to files; In files: prefs.py:335; */
 "Please choose what data to save" = "Izberite podatke, ki jih želite shraniti";
 
@@ -154,29 +145,14 @@
 /* prefs.py: Settings > Output - Label for "where files are located"; In files: prefs.py:379; prefs.py:398; */
 "File location" = "Lokacija datoteke";
 
-/* prefs.py: macOS Preferences - files location selection button; In files: prefs.py:387; prefs.py:437; */
-"Change..." = "Spremeni...";
-
 /* prefs.py: NOT-macOS Settings - files location selection button; prefs.py: NOT-macOS Setting - files location selection button; In files: prefs.py:390; prefs.py:440; */
 "Browse..." = "Prebrskaj...";
 
 /* prefs.py: Label for 'Output' Settings/Preferences tab; In files: prefs.py:405; */
 "Output" = "Izpis";
 
-/* prefs.py: Hotkey/Shortcut settings prompt on OSX; In files: prefs.py:490; */
-"Keyboard shortcut" = "Bližnjica";
-
 /* prefs.py: Hotkey/Shortcut settings prompt on Windows; In files: prefs.py:492; */
 "Hotkey" = "Bližnjica";
-
-/* prefs.py: macOS Preferences > Configuration - restart the app message; In files: prefs.py:501; */
-"Re-start {APP} to use shortcuts" = "Ponovno poženi {APP} za uporabo bližnjic";
-
-/* prefs.py: macOS - Configuration - need to grant the app permission for keyboard shortcuts; In files: prefs.py:510; */
-"{APP} needs permission to use shortcuts" = "{APP} potrebuje dovoljenja za uporabo bližnjic";
-
-/* prefs.py: Shortcut settings button on OSX; In files: prefs.py:515; */
-"Open System Preferences" = "Odpri sistemske nastavitve";
 
 /* prefs.py: Configuration - Act on hotkey only when ED is in foreground; In files: prefs.py:538; */
 "Only when Elite: Dangerous is the active app" = "Samo ko je Elite:Dangerous aktivna aplikacija ";
