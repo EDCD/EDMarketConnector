@@ -6,20 +6,8 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
       in the source (not distributed with the Windows installer) for the
       currently used version.
 ---
-Pre-Release 5.11.0-rc2
+Release 5.11.0
 ===
-This is a release candidate for 5.11.0.
-
-This release is identical to 5.11.0-rc1, with a few additions: 
-
-**Changes and Enhancements**
-* Adds Additional Error Processing to the System Profiler when launched from EDMC
-* Adds the ability to resize the Settings window to larger than the initial default size
-* Tweaked a few list length checks that could just be boolean to be bool
-
-Pre-Release 5.11.0-rc1
-===
-This is a release candidate for 5.11.0.
 
 This release includes a number of new features and improvements, including a new Beta Update Track for testing future updates, enhanced context menus for text entry fields and UI elements, a revamp to the existing translation system and logging capabilities, and more. This release includes the Python Image Library (PIL) into our core bundle, adds a number of stability and configuration checks to the tool, and adds new schemas and configuration values to senders. 
 
@@ -41,9 +29,12 @@ This release also includes a number of bug fixes, performance enhancements, and 
 * Added a new updater for the FDevID Files to keep the dependency up to date without requiring a new patch version push
 * Added a System Profiler Utility to assist with gathering system and environment information for bug report purposes
 * Added a new security policy for responsible disclosure of identified security issues
+* Adds Additional Error Processing to the System Profiler when launched from EDMC
+* Adds the ability to resize the Settings window to larger than the initial default size
 * Enabled security code scanning on the GitHub repository
+* Tweaked a few list length checks that could just be boolean to be bool
 * Updates the look and feel of the "Already Running" popup to reduce overhead and improve the look of the popup
-* Updated translations to latest versions
+* Updated translations to latest versions, including a new language: Ukranian!
 * Updated documentation to reflect certain changes to the code
 * Updated the GitHub Bug Report template
 * Updated the GitHub Pull Request template
