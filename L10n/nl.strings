@@ -1,3 +1,14 @@
+/* prefs.py: Catch & Record Profiler Errors; */
+"Error in System Profiler" = "Fout in systeemprofiler";
+
+/* edsm.py:Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:316; */
+"Send flight log and CMDR status to EDSM" = "Stuur logboek en CMDR-status naar EDSM";
+
+/* prefs.py:Label on button used to open a filesystem folder; In files: prefs.py:706; */
+"Open Log Folder" = "Open logboekmap";
+
+/* inara.py:Text Inara Show API key; In files: inara.py:305; */
+"Show API Key" = "Toon API key";
 /* Language name */
 "!Language" = "Nederlands";
 
@@ -10,11 +21,32 @@
 /* companion.py: Frontier CAPI authorisation not for currently game-active commander; In files: companion.py:296; */
 "Error: Wrong Cmdr" = "Fout: Verkeerde Cmdr";
 
+/* companion.py: Generic error prefix - following text is from Frontier auth service; In files: companion.py:432; companion.py:517; */
+"Error" = "Fout";
+
+/* companion.py: Frontier auth customer_id doesn't match game session FID; In files: companion.py:486; */
+"Error: customer_id doesn't match!" = "Fout: customer_id komt niet overeen!";
+
+/* companion.py: Failed to get Access Token from Frontier Auth service; In files: companion.py:508; */
+"Error: unable to get token" = "Fout: kon token niet verkrijgen";
+
+/* EDMarketConnector.py: EDMC Critical Error Notification; */
+"EDMC encountered a critical error, and cannot recover. EDMC is shutting down for its own protection!" = "Er trad een kritieke fout op, en EDMC kan niet herstellen. Het programma sluit af uit zelfbescherming!";
+
+/* companion.py: Frontier CAPI returned 418, meaning down for maintenance; In files: companion.py:844; */
+"Frontier CAPI down for maintenance" = "Frontier CAPI offline voor onderhoud";
+
 /* EDMarketConnector.py: Main UI Update button; EDMarketConnector.py: Update button in main window; In files: EDMarketConnector.py:601; EDMarketConnector.py:919; EDMarketConnector.py:1748; */
 "Update" = "Bijwerken";
 
 /* EDMarketConnector.py: Appearance - Label for checkbox to select if application always on top; prefs.py: Appearance - Label for checkbox to select if application always on top; In files: EDMarketConnector.py:710; prefs.py:875; */
 "Always on top" = "Altijd op voorgrond";
+
+/* EDMarketConnector.py: Unknown suit; In files: EDMarketConnector.py:837; */
+"Unknown" = "Onbekend";
+
+/* EDMarketConnector.py: ED Journal file location appears to be in error; In files: EDMarketConnector.py:906; */
+"Error: Check E:D journal file location" = "Fout: Controleer locatie van E:D logboekbestand";
 
 /* EDMarketConnector.py: Label for commander name in main window; edsm.py: Game Commander name label in EDSM settings; stats.py: Cmdr stats; theme.py: Label for commander name in main window; In files: EDMarketConnector.py:913; edsm.py:332; stats.py:57; theme.py:290; */
 "Cmdr" = "Cmdr";
@@ -37,12 +69,6 @@
 /* EDMarketConnector.py: 'Edit' menu title on OSX; EDMarketConnector.py: 'Edit' menu title; In files: EDMarketConnector.py:922; EDMarketConnector.py:940; EDMarketConnector.py:943; */
 "Edit" = "Bewerken";
 
-/* EDMarketConnector.py: 'View' menu title on OSX; In files: EDMarketConnector.py:923; */
-"View" = "Beeld";
-
-/* EDMarketConnector.py: 'Window' menu title on OSX; In files: EDMarketConnector.py:924; */
-"Window" = "Venster";
-
 /* EDMarketConnector.py: Help' menu title on OSX; EDMarketConnector.py: 'Help' menu title; In files: EDMarketConnector.py:925; EDMarketConnector.py:941; EDMarketConnector.py:944; */
 "Help" = "Help";
 
@@ -52,6 +78,9 @@
 /* EDMarketConnector.py: Help > Check for Updates...; In files: EDMarketConnector.py:930; EDMarketConnector.py:958; */
 "Check for Updates..." = "Controleren op updates...";
 
+/* EDMarketConnector.py: Help > Open System Profiler; In files: EDMarketConnector.py:888; */
+"Open System Profiler" = "Open systeemprofiler";
+
 /* EDMarketConnector.py: File > Save Raw Data...; In files: EDMarketConnector.py:931; EDMarketConnector.py:948; */
 "Save Raw Data..." = "Sla onbewerkte gegevens op...";
 
@@ -60,6 +89,12 @@
 
 /* EDMarketConnector.py: Help > Documentation; In files: EDMarketConnector.py:933; EDMarketConnector.py:953; */
 "Documentation" = "Documentatie";
+
+/* EDMarketConnector.py: Help > Troubleshooting; In files: EDMarketConnector.py:934; EDMarketConnector.py:954; */
+"Troubleshooting" = "Probleemoplossing";
+
+/* EDMarketConnector.py: Help > Report A Bug; In files: EDMarketConnector.py:935; EDMarketConnector.py:955; */
+"Report A Bug" = "Meld een bug";
 
 /* EDMarketConnector.py: Help > Privacy Policy; In files: EDMarketConnector.py:936; EDMarketConnector.py:956; */
 "Privacy Policy" = "Privacybeleid";
@@ -76,6 +111,18 @@
 /* EDMarketConnector.py: Label for 'Copy' as in 'Copy and Paste'; ttkHyperlinkLabel.py: Label for 'Copy' as in 'Copy and Paste'; In files: EDMarketConnector.py:962; ttkHyperlinkLabel.py:53; */
 "Copy" = "Kopieëren";
 
+/* myNotebook.py: Label for 'Cut' as in 'Cut and Paste'; */
+"Cut" = "Knippen";
+
+/* myNotebook.py: Label for 'Paste' as in 'Copy and Paste'; */
+"Paste" = "Plakken";
+
+/* myNotebook.py: Label for 'Select All'; */
+"Select All" = "Selecteer alles";
+
+/* EDMarketConnector.py: CAPI auth aborted because of killswitch; EDMarketConnector.py: CAPI auth query aborted because of killswitch; In files: EDMarketConnector.py:973; EDMarketConnector.py:1067; */
+"CAPI auth disabled by killswitch" = "CAPI authenticatie uitgeschakeld door killswitch";
+
 /* EDMarketConnector.py: Status - Attempting to get a Frontier Auth Access Token; In files: EDMarketConnector.py:978; */
 "Logging in..." = "Bezig met inloggen...";
 
@@ -91,8 +138,38 @@
 /* EDMarketConnector.py: Status - No station market data from Frontier CAPI; In files: EDMarketConnector.py:1038; */
 "Station doesn't have a market!" = "Station heeft geen markt!";
 
+/* EDMarketConnector.py: CAPI queries aborted because Cmdr name is unknown; EDMarketConnector.py: CAPI fleetcarrier query aborted because Cmdr name is unknown; In files: EDMarketConnector.py:1077; EDMarketConnector.py:1164; */
+"CAPI query aborted: Cmdr name unknown" = "CAPI query onderbroken: Cmdr naam onbekend";
+
+/* EDMarketConnector.py: CAPI queries aborted because game mode unknown; In files: EDMarketConnector.py:1083; */
+"CAPI query aborted: Game mode unknown" = "CAPI query onderbroken: game mode onbekend";
+
+/* EDMarketConnector.py: CAPI queries aborted because GameVersion unknown; EDMarketConnector.py: CAPI fleetcarrier query aborted because GameVersion unknown; In files: EDMarketConnector.py:1089; EDMarketConnector.py:1170; */
+"CAPI query aborted: GameVersion unknown" = "CAPI query onderbroken: GameVersion onbekend";
+
+/* EDMarketConnector.py: CAPI queries aborted because current star system name unknown; In files: EDMarketConnector.py:1095; */
+"CAPI query aborted: Current system unknown" = "CAPI query onderbroken: huidig systeem onbekend";
+
+/* EDMarketConnector.py: CAPI queries aborted because player is in multi-crew on other Cmdr's ship; In files: EDMarketConnector.py:1101; */
+"CAPI query aborted: In other-ship multi-crew" = "CAPI query onderbroken: in multi-crew ander schip";
+
+/* EDMarketConnector.py: CAPI queries aborted because player is in CQC (Arena); In files: EDMarketConnector.py:1107; */
+"CAPI query aborted: CQC (Arena) detected" = "CAPI query onderbroken: in CQC (Arena)";
+
 /* EDMarketConnector.py: Status - Attempting to retrieve data from Frontier CAPI; In files: EDMarketConnector.py:1128; EDMarketConnector.py:1179; */
 "Fetching data..." = "Data wordt opgehaald...";
+
+/* EDMarketConnector.py: CAPI fleetcarrier query aborted because of killswitch; In files: EDMarketConnector.py:1157; */
+"CAPI fleetcarrier disabled by killswitch" = "CAPI fleetcarrier uitgeschakeld door killswitch";
+
+
+/* EDMarketConnector.py: No data was returned for the fleetcarrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
+"CAPI: No fleetcarrier data returned" = "CAPI: geen fleet carrier data verkregen";
+
+/* EDMarketConnector.py: We didn't have the fleetcarrier callsign when we should have; In files: EDMarketConnector.py:1223; */
+"CAPI: Fleetcarrier data incomplete" = "CAPI: data fleet carrier incompleet";
+/* EDMarketConnector.py: No data was returned for the commander from the Frontier CAPI; In files: EDMarketConnector.py:1242; */
+"CAPI: No commander data returned" = "CAPI: geen commander data verkregen";
 
 /* EDMarketConnector.py: We didn't have the commander name when we should have; stats.py: Unknown commander; In files: EDMarketConnector.py:1246; stats.py:333; */
 "Who are you?!" = "Wie ben je?!";
@@ -102,6 +179,12 @@
 
 /* EDMarketConnector.py: We don't know what ship the commander is in, when we should; stats.py: Unknown ship; In files: EDMarketConnector.py:1259; stats.py:349; */
 "What are you flying?!" = "Waar vlieg je in?!";
+
+/* EDMarketConnector.py: Frontier CAPI server error when fetching data; In files: EDMarketConnector.py:1384; */
+"Frontier CAPI server error" = "Frontier CAPI serverfout";
+
+/* EDMarketConnector.py: Frontier CAPI Access Token expired, trying to get a new one; In files: EDMarketConnector.py:1390; */
+"CAPI: Refreshing access token..." = "CAPI: toegangstoken vernieuwen...";
 
 /* EDMarketConnector.py: Time when we last obtained Frontier CAPI data; In files: EDMarketConnector.py:1434; */
 "Last updated at %H:%M:%S" = "Voor het laatst bijgewerkt om %H:%M:%S";
@@ -121,6 +204,9 @@
 /* EDMarketConnector.py: Generic 'OK' button label; prefs.py: 'OK' button on Settings/Preferences window; In files: EDMarketConnector.py:1864; prefs.py:292; */
 "OK" = "OK";
 
+/* EDMarketConnector.py: The application is shutting down; In files: EDMarketConnector.py:1936; */
+"Shutting down..." = "Afsluiten...";
+
 /* EDMarketConnector.py: Popup-text about 'active' plugins without Python 3.x support; In files: EDMarketConnector.py:2253:2259; */
 "One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "Een of meer ingeschakelde plugins hebben nog geen Python 3.x ondersteuning. Kijk op de lijst op de '{PLUGINS}' tab van '{FILE}' > '{SETTINGS}'. Check of er een bijgewerkte versie beschikbaar is. Laat anders de developer weten dat ze de code moeten updaten voor Python 3.x.\n\nJe kan de plugin uitschakelen door het mapje te hernoemen met '{DISABLED}' aan het eind van de naam.";
 
@@ -130,8 +216,44 @@
 /* EDMarketConnector.py: Popup window title for list of 'enabled' plugins that don't work with Python 3.x; In files: EDMarketConnector.py:2274; */
 "EDMC: Plugins Without Python 3.x Support" = "EDMS: Plugins zonder Python 3.x ondersteuning";
 
+/* EDMarketConnector.py: Popup-text about 'broken' plugins that failed to load; In files: EDMarketConnector.py:2266; */
+"One or more of your enabled plugins failed to load. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. This could be caused by a wrong folder structure. The load.py file should be located under plugins/PLUGIN_NAME/load.py.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "Een of meer van je ingeschakelde plugins kon niet laden. Controleer de lijst op de '{PLUGINS}' tab van '{FILE}' > '{SETTINGS}'. Dit zou veroorzaakt kunnen worden door een verkeerde mappenstructuur. Het bestand load.py hoort op plugins/PLUGIN_NAAM/load.py\n\nJe kunt een plugin uitschakelen door '{DISABLED}' aan het einde van de naam van de plugin-map toe te voegen.";
+
+/* EDMarketConnector.py: Await Full CMDR Login to Game; In files: EDMarketConnector.py:813; */
+"Awaiting Full CMDR Login" = "Wachten op volledige CMDR login";
+
+/* journal_lock.py: Title text on popup when Journal directory already locked; In files: journal_lock.py:208; */
+"Journal directory already locked" = "Logboekmap al vergrendeld";
+
+/* journal_lock.py: Text for when newly selected Journal directory is already locked; In files: journal_lock.py:225:226; */
+"The new Journal Directory location is already locked.{CR}You can either attempt to resolve this and then Retry, or choose to Ignore this." = "De nieuwe logboekmaplocatie is al vergrendeld. {CR} Je kan dit probleem verhelpen en het dan opnieuw proberen, of dit probleem negeren.";
+
+/* journal_lock.py: Generic 'Retry' button label; In files: journal_lock.py:230; */
+"Retry" = "Probeer opnieuw";
+
+/* journal_lock.py: Generic 'Ignore' button label; In files: journal_lock.py:234; */
+"Ignore" = "Negeer";
+
 /* l10n.py: The system default language choice in Settings > Appearance; prefs.py: Settings > Configuration - Label on 'reset journal files location to default' button; prefs.py: The system default language choice in Settings > Appearance; prefs.py: Label for 'Default' theme radio button; In files: l10n.py:193; prefs.py:455; prefs.py:709; prefs.py:742; */
 "Default" = "Standaard";
+
+/* coriolis.py: 'Auto' label for Coriolis site override selection; coriolis.py: Coriolis normal/beta selection - auto; In files: coriolis.py:48; coriolis.py:74; coriolis.py:77; coriolis.py:94; coriolis.py:123; coriolis.py:139; coriolis.py:145; coriolis.py:179; coriolis.py:182; */
+"Auto" = "Auto";
+
+/* coriolis.py: 'Normal' label for Coriolis site override selection; coriolis.py: Coriolis normal/beta selection - normal; In files: coriolis.py:49; coriolis.py:75; coriolis.py:95; coriolis.py:121; coriolis.py:137; coriolis.py:180; */
+"Normal" = "Normaal";
+
+/* coriolis.py: 'Beta' label for Coriolis site override selection; coriolis.py: Coriolis normal/beta selection - beta; In files: coriolis.py:50; coriolis.py:76; coriolis.py:96; coriolis.py:122; coriolis.py:138; coriolis.py:181; */
+"Beta" = "Beta";
+
+/* coriolis.py: Settings>Coriolis: Label for 'NOT alpha/beta game version' URL; In files: coriolis.py:97; */
+"Normal URL" = "Normale URL";
+
+/* coriolis.py: Generic 'Reset' button label; In files: coriolis.py:100; coriolis.py:109; */
+"Reset" = "Reset";
+
+/* coriolis.py: Settings>Coriolis: Label for 'alpha/beta game version' URL; In files: coriolis.py:106; */
+"Beta URL" = "Beta-URL";
 
 /* eddn.py: Error while trying to send data to EDDN; In files: eddn.py:458; eddn.py:2413; eddn.py:2451; eddn.py:2519; */
 "Error: Can't connect to EDDN" = "Fout: Kan geen verbinding maken met EDDN";
@@ -175,9 +297,6 @@
 /* inara.py: INARA API returned some kind of error (error message will be contained in {MSG}); In files: inara.py:1650; inara.py:1663; */
 "Error: Inara {MSG}" = "Fout: Inara {MSG}";
 
-/* prefs.py: File > Preferences menu entry for macOS; In files: prefs.py:237; */
-"Preferences" = "Preferences";
-
 /* prefs.py: Settings > Output - choosing what data to save to files; In files: prefs.py:335; */
 "Please choose what data to save" = "Welke gegevens wilt u opslaan?";
 
@@ -196,9 +315,6 @@
 /* prefs.py: Settings > Output - Label for "where files are located"; In files: prefs.py:379; prefs.py:398; */
 "File location" = "Bestand locatie";
 
-/* prefs.py: macOS Preferences - files location selection button; In files: prefs.py:387; prefs.py:437; */
-"Change..." = "Wijzigen...";
-
 /* prefs.py: NOT-macOS Settings - files location selection button; prefs.py: NOT-macOS Setting - files location selection button; In files: prefs.py:390; prefs.py:440; */
 "Browse..." = "Bladeren...";
 
@@ -208,20 +324,8 @@
 /* prefs.py: Settings > Configuration - Label for Journal files location; In files: prefs.py:431; prefs.py:446; */
 "E:D journal file location" = "E:D journaal bestand locatie";
 
-/* prefs.py: Hotkey/Shortcut settings prompt on OSX; In files: prefs.py:490; */
-"Keyboard shortcut" = "Toetscombinaties";
-
 /* prefs.py: Hotkey/Shortcut settings prompt on Windows; In files: prefs.py:492; */
 "Hotkey" = "Hotkey";
-
-/* prefs.py: macOS Preferences > Configuration - restart the app message; In files: prefs.py:501; */
-"Re-start {APP} to use shortcuts" = "{APP} heropstarten om toetscombinaties te gebruiken";
-
-/* prefs.py: macOS - Configuration - need to grant the app permission for keyboard shortcuts; In files: prefs.py:510; */
-"{APP} needs permission to use shortcuts" = "{APP} heeft toestemming nodig om toetscombinaties te gebruiken";
-
-/* prefs.py: Shortcut settings button on OSX; In files: prefs.py:515; */
-"Open System Preferences" = "Open Systeemvoorkeuren";
 
 /* prefs.py: Configuration - Act on hotkey only when ED is in foreground; In files: prefs.py:538; */
 "Only when Elite: Dangerous is the active app" = "Alleen wanneer Elite: Dangerous de actieve applicatie is";

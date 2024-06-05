@@ -21,6 +21,7 @@ from config import (
     _static_appversion,
     update_interval
 )
+from update import check_for_fdev_updates
 
 
 def iss_build(template_path: str, output_file: str) -> None:
@@ -76,10 +77,8 @@ def generate_data_files(
                 "ChangeLog.md",
                 "snd_good.wav",
                 "snd_bad.wav",
-                "modules.p",  # TODO: Remove in 6.0
                 "modules.json",
                 "ships.json",
-                "ships.p",  # TODO: Remove in 6.0
                 f"{app_name}.ico",
                 f"resources/{appcmdname}.ico",
                 "EDMarketConnector - TRACE.bat",
@@ -133,7 +132,6 @@ def build() -> None:
                 "distutils",
                 "_markerlib",
                 "optparse",
-                "PIL",
                 "simplejson",
                 "unittest",
                 "doctest",
@@ -178,10 +176,19 @@ def build() -> None:
         ],
     }
 
+    checker_config: dict = {
+        "dest_base": "EDMCSystemProfiler",
+        "script": "EDMCSystemProfiler.py",
+        "icon_resources": [(0, f"{appname}.ico")],
+        "other_resources": [
+            (24, 1, pathlib.Path(f"resources/{appname}.manifest").read_text(encoding="UTF8"))
+        ],
+    }
+
     try:
         py2exe.freeze(
             version_info=version_info,
-            windows=[windows_config],
+            windows=[windows_config, checker_config],
             console=[console_config],
             data_files=data_files,
             options=options,
@@ -201,4 +208,5 @@ def build() -> None:
 
 
 if __name__ == "__main__":
+    check_for_fdev_updates()
     build()

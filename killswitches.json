@@ -1,6 +1,0 @@
-{
-	"__COMMENT_READ_ME": "Do *NOT* commit this file to any branch other than `releases` !!! See docs/Killswitches.md",
-	"version": 1,
-	"last_updated": "2021-01-05",
-	"kill_switches": []
-}

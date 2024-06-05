@@ -4,7 +4,6 @@ Static data.
 For easy reference any variable should be prefixed with the name of the file it
 was either in originally, or where the primary code utilising it is.
 """
-from collections import OrderedDict
 
 # Map numeric 'demand/supply brackets' to the names as shown in-game.
 commodity_bracketmap = {
@@ -57,13 +56,14 @@ edshipyard_slot_map = {
 
 # Map API module names to in-game names
 
-outfitting_armour_map = OrderedDict([
-    ('grade1',   'Lightweight Alloy'),
-    ('grade2',   'Reinforced Alloy'),
-    ('grade3',   'Military Grade Composite'),
-    ('mirrored', 'Mirrored Surface Composite'),
-    ('reactive', 'Reactive Surface Composite'),
-])
+outfitting_armour_map = {
+    'grade1': 'Lightweight Alloy',
+    'grade2': 'Reinforced Alloy',
+    'grade3': 'Military Grade Composite',
+    'mirrored': 'Mirrored Surface Composite',
+    'reactive': 'Reactive Surface Composite',
+}
+
 
 outfitting_weapon_map = {
     'advancedtorppylon':                 'Torpedo Pylon',
