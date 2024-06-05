@@ -26,6 +26,72 @@
          <description><![CDATA[<style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
 <p>We now test against, and package with, Python 3.11.7.</p>
 <p><strong>As a result, we do not support Windows 7, 8, or 8.1.</strong><br>
+<h2>Release 5.11.0</h2>
+<p>This release includes a number of new features and improvements, including a new Beta Update Track for testing future updates, enhanced context menus for text entry fields and UI elements, a revamp to the existing translation system and logging capabilities, and more. This release includes the Python Image Library (PIL) into our core bundle, adds a number of stability and configuration checks to the tool, and adds new schemas and configuration values to senders. </p>
+<p>This release also includes a number of bug fixes, performance enhancements, and updates to various aspects of the code to enhance maintainability are included. Notably, MacOS support has been removed due to a lack of support for this OS in Elite, and a number of functions have been deprecated and will be removed in later versions. Plugin developers, take note!</p>
+<p><strong>Changes and Enhancements</strong></p>
+<ul>
+<li>Established a Beta Update Track to allow users to assist in future update testing</li>
+<li>Added a global context menu for text entry fields that includes cut, copy, and paste options</li>
+<li>Added a context menu for Ship, System, and Station UI elements which allows opening the respective link in any of the available resource providers.</li>
+<li>Added translation hooks to the update available status string</li>
+<li>Added additional status logging when we&#39;re awaiting game log-in</li>
+<li>Added the Python Image Library (PIL) to the core EDMC library bundle</li>
+<li>Added respect for EDSM API limits to the default plugin</li>
+<li>Added EDDN stationType and carrierDockingAccess schemas to the sent events</li>
+<li>Added MaxJumpRange and CargoCapacity events to the Inara sender</li>
+<li>Added a high-level critical error handler to gracefully terminate the program in the event of a catastrophic error</li>
+<li>Added the ability to override the default language for a translation by adding the optional &#39;lang&#39; parameter to the translate function for individual functions</li>
+<li>Added an updated template and new security reporting guidance to the documentation</li>
+<li>Added a new updater for the FDevID Files to keep the dependency up to date without requiring a new patch version push</li>
+<li>Added a System Profiler Utility to assist with gathering system and environment information for bug report purposes</li>
+<li>Added a new security policy for responsible disclosure of identified security issues</li>
+<li>Adds Additional Error Processing to the System Profiler when launched from EDMC</li>
+<li>Adds the ability to resize the Settings window to larger than the initial default size</li>
+<li>Enabled security code scanning on the GitHub repository</li>
+<li>Tweaked a few list length checks that could just be boolean to be bool</li>
+<li>Updates the look and feel of the &quot;Already Running&quot; popup to reduce overhead and improve the look of the popup</li>
+<li>Updated translations to latest versions, including a new language: Ukranian!</li>
+<li>Updated documentation to reflect certain changes to the code</li>
+<li>Updated the GitHub Bug Report template</li>
+<li>Updated the GitHub Pull Request template</li>
+<li>Updated internal workflows to more recent versions</li>
+<li>Updated util_ships to avoid using Windows reserved file names as output</li>
+<li>Converted all usages of the unnecessary OrderedDict to use the standard dict</li>
+<li>Clarifies the hierarchy of parent classes for custom MyNotebook classes</li>
+<li>Renamed the default translation function from <code>_()</code> to <code>tr.tl()</code></li>
+<li>Renamed the Translations base class to conform to Pythonic standards</li>
+<li>Deprecated the <code>_Translations</code> class</li>
+<li>Deprecated the <code>Translations</code> singleton in favor of <code>translations</code></li>
+<li>Unpinned several dependencies that were already dependencies of other dependencies to prevent dependency conflicts (say that 5 times fast)</li>
+<li>Updated a few type hints to allow updates to more updated dependencies</li>
+<li>Changed the translation function import to no longer rely on forcing it into Python&#39;s builtins</li>
+<li>Handed over a few tk classes to their ttk equivalents for better styling</li>
+<li>Reworked the Plugin system to no longer use the deprecated importlib.load_module()</li>
+<li>Deprecated nb.Entry and nb.ColoredButton as they simply point toward other classes with no processing</li>
+<li>Removed macOS support</li>
+<li>Removed deprecated modules.p and ships.p files</li>
+<li>Removed deprecated openurl() function</li>
+</ul>
+<p><strong>Bug Fixes</strong></p>
+<ul>
+<li>Fixed a bug where certain types of exceptions from the Requests module wouldn&#39;t be handled properly regarding killswitches</li>
+<li>Fixed a rare bug where source builds running on 64-bit Python could generate an OverflowError in the monitor system</li>
+<li>Fixed a bug where EDMC would open directories in the webbrowser instead of the file explorer on Linux</li>
+<li>Fixed a rare bug that could cause the EDSM plugin to crash due to missing configuration values</li>
+</ul>
+<p><strong>Plugin Developers</strong></p>
+<ul>
+<li>nb.Entry is deprecated, and is slated for removal in 6.0 or later. Please migrate to nb.EntryMenu</li>
+<li>nb.ColoredButton is deprecated, and is slated for removal in 6.0 or later. Please migrate to tk.Button</li>
+<li>Calling internal translations with <code>_()</code> is deprecated, and is slated for removal in 6.0 or later. Please migrate to importing <code>translations</code> and calling <code>translations.translate</code> or <code>translations.tl</code> directly</li>
+<li><code>Translations</code> as the translate system singleton is deprecated, and is slated for removal in 6.0 or later. Please migrate to the <code>translations</code> singleton</li>
+<li><code>help_open_log_folder()</code> is deprecated, and is slated for removal in 6.0 or later. Please migrate to open_folder()</li>
+<li><code>update_feed</code> is deprecated, and is slated for removal in 6.0 or later. Please migrate to <code>get_update_feed()</code>.</li>
+<li>modules.p and ships.p are deprecated, and have been removed</li>
+<li>The <code>openurl()</code> function in ttkHyperlinkLabel has been removed. Please migrate to <code>webbrowser.open()</code></li>
+</ul>
+<hr>
 <h2>Release 5.10.6</h2>
 <p>This release contains the data information for the new SCO modules added in Elite update 18.04.
 This should represent full support for the new Python Mk II.</p>
@@ -2270,7 +2336,7 @@ about this:
 <a href="https://issues.frontierstore.net/issue-detail/28638" rel="nofollow">PTS CAPI saying Commander is Docked after jumping to new system</a>.</p>
 </li>
 </ul>]]></description>
-         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F5.10.6/EDMarketConnector_Installer_5.10.6.exe" sparkle:os="windows" sparkle:version="5.10.6" length="0" type="application/x-ms-dos-executable" />
+         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F5.11.0/EDMarketConnector_Installer_5.11.0.exe" sparkle:os="windows" sparkle:version="5.11.0" length="0" type="application/x-ms-dos-executable" />
       </item>
    </channel>
 </rss>
