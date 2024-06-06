@@ -49,7 +49,7 @@ def check_for_fdev_updates(silent: bool = False, local: bool = False) -> None:  
             logger.info(f'File {file} not found. Writing from bundle...')
             try:
                 for localfile in files_urls:
-                    filepath = f"FDevIDs/{localfile[0]}"
+                    filepath = pathlib.Path(f"FDevIDs/{localfile[0]}")
                     try:
                         shutil.copy(filepath, pathway / 'FDevIDs')
                     except shutil.SameFileError:
