@@ -54,7 +54,7 @@ def check_for_fdev_updates(silent: bool = False, local: bool = False) -> None:  
             with open(fdevid_file, newline='', encoding='utf-8') as f:
                 local_content = f.read()
 
-        response = requests.get(url)
+        response = requests.get(url, timeout=20)
         if response.status_code != 200:
             if not silent:
                 logger.error(f'Failed to download {file}! Unable to continue.')
