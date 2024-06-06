@@ -8,6 +8,7 @@ See LICENSE file.
 from __future__ import annotations
 
 import pathlib
+import shutil
 import sys
 import threading
 from traceback import print_exc
@@ -26,21 +27,32 @@ if TYPE_CHECKING:
 logger = get_main_logger()
 
 
-def check_for_fdev_updates(silent: bool = False) -> None:  # noqa: CCR001
+def check_for_fdev_updates(silent: bool = False, local: bool = False) -> None:  # noqa: CCR001
     """Check for and download FDEV ID file updates."""
+    if local:
+        pathway = config.app_dir_path
+    else:
+        pathway = config.respath_path
+
     files_urls = [
         ('commodity.csv', 'https://raw.githubusercontent.com/EDCD/FDevIDs/master/commodity.csv'),
         ('rare_commodity.csv', 'https://raw.githubusercontent.com/EDCD/FDevIDs/master/rare_commodity.csv')
     ]
 
     for file, url in files_urls:
-        fdevid_file = pathlib.Path(config.respath_path / 'FDevIDs' / file)
+        fdevid_file = pathlib.Path(pathway / 'FDevIDs' / file)
         fdevid_file.parent.mkdir(parents=True, exist_ok=True)
         try:
             with open(fdevid_file, newline='', encoding='utf-8') as f:
                 local_content = f.read()
         except FileNotFoundError:
-            local_content = None
+            logger.info(f'File {file} not found. Writing from bundle...')
+            for localfile in files_urls:
+                filepath = f"FDevIDs/{localfile[0]}"
+                shutil.copy(filepath, pathway / 'FDevIDs')
+                fdevid_file = pathlib.Path(pathway / 'FDevIDs' / file)
+            with open(fdevid_file, newline='', encoding='utf-8') as f:
+                local_content = f.read()
 
         response = requests.get(url)
         if response.status_code != 200:
