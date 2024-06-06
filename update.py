@@ -187,6 +187,12 @@ class Updater:
             self.updater.win_sparkle_check_update_with_ui()
 
         check_for_fdev_updates()
+        # TEMP: Only include until 6.0
+        try:
+            check_for_fdev_updates(local=True)
+        except Exception as e:
+            logger.info('Tried to update local FDEV files but failed.')
+            logger.info(e)
 
     def check_appcast(self) -> EDMCVersion | None:
         """
