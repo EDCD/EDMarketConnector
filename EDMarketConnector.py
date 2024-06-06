@@ -25,7 +25,6 @@ from os import chdir, environ, path
 from time import localtime, strftime, time
 from typing import TYPE_CHECKING, Any, Literal
 from constants import applongname, appname, protocolhandler_redirect
-from update import check_for_fdev_updates
 
 # Have this as early as possible for people running EDMarketConnector.exe
 # from cmd.exe or a bat file or similar.  Else they might not be in the correct
@@ -66,6 +65,7 @@ from config import appversion, appversion_nobuild, config, copyright
 
 from EDMCLogging import edmclogger, logger, logging
 from journal_lock import JournalLock, JournalLockResult
+from update import check_for_fdev_updates
 
 if __name__ == '__main__':  # noqa: C901
     # Command-line arguments
