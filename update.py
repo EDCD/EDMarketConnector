@@ -30,9 +30,9 @@ logger = get_main_logger()
 def check_for_fdev_updates(silent: bool = False, local: bool = False) -> None:  # noqa: CCR001
     """Check for and download FDEV ID file updates."""
     if local:
-        pathway = config.app_dir_path
-    else:
         pathway = config.respath_path
+    else:
+        pathway = config.app_dir_path
 
     files_urls = [
         ('commodity.csv', 'https://raw.githubusercontent.com/EDCD/FDevIDs/master/commodity.csv'),
@@ -47,12 +47,15 @@ def check_for_fdev_updates(silent: bool = False, local: bool = False) -> None:  
                 local_content = f.read()
         except FileNotFoundError:
             logger.info(f'File {file} not found. Writing from bundle...')
-            for localfile in files_urls:
-                filepath = f"FDevIDs/{localfile[0]}"
-                shutil.copy(filepath, pathway / 'FDevIDs')
-                fdevid_file = pathlib.Path(pathway / 'FDevIDs' / file)
-            with open(fdevid_file, newline='', encoding='utf-8') as f:
-                local_content = f.read()
+            try:
+                for localfile in files_urls:
+                    filepath = f"FDevIDs/{localfile[0]}"
+                    shutil.copy(filepath, pathway / 'FDevIDs')
+                    fdevid_file = pathlib.Path(pathway / 'FDevIDs' / file)
+                    with open(fdevid_file, newline='', encoding='utf-8') as f:
+                        local_content = f.read()
+            except FileNotFoundError:
+                local_content = None
 
         response = requests.get(url, timeout=20)
         if response.status_code != 200:
