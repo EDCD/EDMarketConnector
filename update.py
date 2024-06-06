@@ -50,7 +50,10 @@ def check_for_fdev_updates(silent: bool = False, local: bool = False) -> None:  
             try:
                 for localfile in files_urls:
                     filepath = f"FDevIDs/{localfile[0]}"
-                    shutil.copy(filepath, pathway / 'FDevIDs')
+                    try:
+                        shutil.copy(filepath, pathway / 'FDevIDs')
+                    except shutil.SameFileError:
+                        logger.info("Not replacing same file...")
                     fdevid_file = pathlib.Path(pathway / 'FDevIDs' / file)
                     with open(fdevid_file, newline='', encoding='utf-8') as f:
                         local_content = f.read()
