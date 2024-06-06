@@ -25,6 +25,7 @@ from os import chdir, environ, path
 from time import localtime, strftime, time
 from typing import TYPE_CHECKING, Any, Literal
 from constants import applongname, appname, protocolhandler_redirect
+from update import check_for_fdev_updates
 
 # Have this as early as possible for people running EDMarketConnector.exe
 # from cmd.exe or a bat file or similar.  Else they might not be in the correct
@@ -2323,6 +2324,7 @@ sys.path: {sys.path}'''
     root.after(2, show_killswitch_poppup, root)
     # Start the main event loop
     try:
+        check_for_fdev_updates()
         root.mainloop()
     except KeyboardInterrupt:
         logger.info("Ctrl+C Detected, Attempting Clean Shutdown")
