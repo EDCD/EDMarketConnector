@@ -21,10 +21,10 @@ May be imported by plugins
 from __future__ import annotations
 import html
 from functools import partial
-import sys
+import random
+import string
 import tkinter as tk
 import webbrowser
-from tkinter import font as tk_font
 from tkinter import ttk
 from typing import Any, no_type_check
 import plug
@@ -47,10 +47,16 @@ SHIPYARD_HTML_TEMPLATE = """
     </body>
 </html>
 """
+LABEL_TO_STYLE = ['anchor', 'background', 'font', 'foreground', 'justify', 'relief']
+
+
+def _generate_random_style():
+    return f'{"".join(random.choices(string.ascii_letters + string.digits, k=8))}.Link.TLabel'
 
 
 class HyperlinkLabel(ttk.Button):
     """Clickable label for HTTP links."""
+    _legacy_style: str
 
     def __init__(self, master: tk.Widget | None = None, **kw: Any) -> None:
         """
@@ -59,25 +65,22 @@ class HyperlinkLabel(ttk.Button):
         :param master: The master widget.
         :param kw: Additional keyword arguments.
         """
-        self.font_u: tk_font.Font
-        self.font_n = None
         self.url = kw.pop('url', None)
         self.popup_copy = kw.pop('popup_copy', False)
         self.underline = kw.pop('underline', None)
-        self.legacy = not isinstance(master, ttk.Widget)
-        if self.legacy:
-            self.foreground = kw.get('foreground')
-            self.disabledforeground = kw.pop('disabledforeground', None)
-        kw.setdefault('style', 'Link.TButton')
+        kw.setdefault('command', self._click)
+        kw.setdefault('style', 'Link.TLabel')
+
+        self._legacy_options = {opt: kw[opt] for opt in LABEL_TO_STYLE if opt in kw}
+        if len(self._legacy_options) > 0:
+            self._legacy_style = _generate_random_style()
+            kw['style'] = self._legacy_style
+            ttk.Style().configure(self._legacy_style, **self._legacy_options)
+        # TODO underline, disabledforeground, cursor
+
         super().__init__(master, **kw)
 
-        self.bind('<Button-1>', self._click)
         self.bind('<Button-3>', self._contextmenu)
-
-        self.bind('<<ThemeChanged>>', self._theme)
-
-        # set up initial appearance
-        self.configure(state=kw.get('state', tk.NORMAL))
 
         # Add Menu Options
         self.plug_options = kw.pop('plug_options', None)
@@ -130,30 +133,8 @@ class HyperlinkLabel(ttk.Button):
         for thing in ('url', 'popup_copy', 'underline'):
             if thing in kw:
                 setattr(self, thing, kw.pop(thing))
-        if self.legacy:
-            for thing in ('foreground', 'disabledforeground'):
-                if thing in kw:
-                    setattr(self, thing, kw[thing])
 
-            # Emulate disabledforeground option for ttk.Label
-            if 'state' in kw and 'foreground' not in kw:
-                self._theme(None)
-
-        if 'font' in kw:
-            self.font_n = kw['font']
-            self.font_u = tk_font.Font(font=self.font_n)
-            self.font_u.configure(underline=True)
-            kw['font'] = self.font_u if self.underline is True else self.font_n
-
-        if 'cursor' not in kw:
-            state = kw.get('state', str(self['state']))
-            if state == tk.DISABLED:
-                kw['cursor'] = 'arrow'  # System default
-            elif self.url and (kw['text'] if 'text' in kw else self['text']):
-                kw['cursor'] = 'hand2'
-            else:
-                kw['cursor'] = ('no' if sys.platform == 'win32' else 'circle')
-
+        # TODO _legacy_options, underline, disabledforeground, cursor
         return super().configure(cnf, **kw)
 
     def __setitem__(self, key: str, value: Any) -> None:
@@ -164,13 +145,6 @@ class HyperlinkLabel(ttk.Button):
         :param value: option value
         """
         self.configure(**{key: value})
-
-    def _theme(self, event: tk.Event | None = None) -> None:
-        if self.legacy:
-            if str(self['state']) == tk.DISABLED:
-                ...  # TODO self.disabledforeground
-            else:
-                ...  # TODO self.foreground
 
     def _click(self, event: tk.Event) -> None:
         if self.url and self['text'] and str(self['state']) != tk.DISABLED:

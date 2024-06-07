@@ -53,19 +53,15 @@ namespace eval ttk::theme::dark {
         ttk::style configure TEntry -padding 2 {*}$flatborder
 
         ttk::style configure TButton -padding {8 4 8 4} -width -10 -anchor center {*}$flatborder
-
-        ttk::style map TButton -background [list \
-            {pressed} $colors(-selectbg) \
-        ]
-
-        ttk::style map TButton -foreground [list \
-            {pressed} $colors(-selectfg) \
-        ]
+        ttk::style map TButton \
+            -background [list pressed $colors(-selectbg)] \
+            -foreground [list pressed $colors(-selectfg)]
 
         ttk::style configure Link.TLabel -foreground $colors(-highlight) -relief flat
-        ttk::style map Link.TLabel -font [list active $font_u]
-        ttk::style map Link.TLabel -foreground [list disabled $colors(-disabledfg)]
-        ttk::style map Link.TLabel -cursor [list disabled arrow]
+        ttk::style map Link.TLabel \
+            -font [list active $font_u] \
+            -foreground [list disabled $colors(-disabledfg)] \
+            -cursor [list disabled arrow]
 
         ttk::style configure Toolbutton -padding {8 4 8 4} -width -10 -anchor center
 
@@ -82,13 +78,11 @@ namespace eval ttk::theme::dark {
         ttk::style configure TSpinbox -padding 2 {*}$flatborder -arrowcolor $colors(-fg) -arrowsize 10
 
         ttk::style configure TCombobox -padding 2 {*}$flatborder -arrowcolor $colors(-fg)
-
         ttk::style map TCombobox -selectbackground [list \
             {!focus} $colors(-selectbg) \
             {readonly hover} $colors(-selectbg) \
             {readonly focus} $colors(-selectbg) \
         ]
-
         ttk::style map TCombobox -selectforeground [list \
             {!focus} $colors(-selectfg) \
             {readonly hover} $colors(-selectfg) \
@@ -103,11 +97,10 @@ namespace eval ttk::theme::dark {
             -lightcolor [list selected $colors(-selectbg)]
 
         ttk::style configure Treeview {*}$flatborder
-        ttk::style configure Treeview.Item -padding {2 0 0 0}
-
         ttk::style map Treeview \
             -background [list selected $colors(-selectbg)] \
             -foreground [list selected $colors(-selectfg)]
+        ttk::style configure Treeview.Item -padding {2 0 0 0}
 
         ttk::style configure TScrollbar {*}$flatborder -background $colors(-selectbg)
 
