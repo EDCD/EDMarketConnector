@@ -6,6 +6,29 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
       in the source (not distributed with the Windows installer) for the
       currently used version.
 ---
+Pre-Release 5.11.1-beta0
+===
+
+This is a release candidate for 5.11.1.
+
+This release fixes a bug regarding FDevID files when running from Source in a non-writable location.
+
+**Changes and Enhancements**
+* Added a check on Git Pushes to check for updated translation strings for developers
+
+**Bug Fixes**
+* Fixed a bug that could result in the program not updating or writing FDevID files when running from source in a location where the running user can't write to
+
+**Plugin Developers**
+* nb.Entry is deprecated, and is slated for removal in 6.0 or later. Please migrate to nb.EntryMenu
+* nb.ColoredButton is deprecated, and is slated for removal in 6.0 or later. Please migrate to tk.Button
+* Calling internal translations with `_()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to importing `translations` and calling `translations.translate` or `translations.tl` directly
+* `Translations` as the translate system singleton is deprecated, and is slated for removal in 6.0 or later. Please migrate to the `translations` singleton
+* `help_open_log_folder()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to open_folder()
+* `update_feed` is deprecated, and is slated for removal in 6.0 or later. Please migrate to `get_update_feed()`.
+* FDevID files (`commodity.csv` and `rare_commodity.csv`) have moved their preferred location to the app dir (same location as default Plugins folder). Please migrate to use `config.app_dir_path`.
+
+
 Release 5.11.0
 ===
 
