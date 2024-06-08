@@ -8,7 +8,7 @@ See LICENSE file.
 from __future__ import annotations
 
 import copy
-import importlib
+import importlib.util
 import logging
 import operator
 import os
@@ -18,7 +18,6 @@ from tkinter import ttk
 from typing import Any, Mapping, MutableMapping
 
 import companion
-import myNotebook as nb  # noqa: N813
 from config import config
 from EDMCLogging import get_main_logger
 
@@ -130,7 +129,7 @@ class Plugin:
 
         return None
 
-    def get_prefs(self, parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> nb.Frame | None:
+    def get_prefs(self, parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> ttk.Frame | None:
         """
         If the plugin provides a prefs frame, create and return it.
 
@@ -138,13 +137,13 @@ class Plugin:
         :param cmdr: current Cmdr name (or None). Relevant if you want to have
            different settings for different user accounts.
         :param is_beta: whether the player is in a Beta universe.
-        :returns: a myNotebook Frame
+        :returns: a ttk Frame
         """
         plugin_prefs = self._get_func('plugin_prefs')
         if plugin_prefs:
             try:
                 frame = plugin_prefs(parent, cmdr, is_beta)
-                if isinstance(frame, nb.Frame):
+                if isinstance(frame, ttk.Frame):
                     return frame
                 raise AssertionError
             except Exception:

@@ -34,13 +34,13 @@ from typing import Any, Callable, Deque, Mapping, NamedTuple, Sequence, cast, Un
 import requests
 import edmc_data
 import killswitch
-import myNotebook as nb  # noqa: N813
 import plug
 import timeout_session
 from companion import CAPIData
 from config import applongname, appname, appversion, config, debug_senders
 from EDMCLogging import get_main_logger
 from monitor import monitor
+from myNotebook import EntryMenu
 from ttkHyperlinkLabel import HyperlinkLabel
 from l10n import translations as tr
 
@@ -120,10 +120,10 @@ class This:
 
         # Prefs UI
         self.log: 'tk.IntVar'
-        self.log_button: nb.Checkbutton
+        self.log_button: ttk.Checkbutton
         self.label: HyperlinkLabel
-        self.apikey: nb.EntryMenu
-        self.apikey_label: tk.Label
+        self.apikey: EntryMenu
+        self.apikey_label: ttk.Label
 
         self.events: dict[Credentials, Deque[Event]] = defaultdict(deque)
         self.event_lock: Lock = threading.Lock()  # protects events, for use when rewriting events
@@ -241,7 +241,7 @@ def toggle_password_visibility():
         this.apikey.config(show="*")
 
 
-def plugin_prefs(parent: ttk.Notebook, cmdr: str, is_beta: bool) -> nb.Frame:
+def plugin_prefs(parent: ttk.Notebook, cmdr: str, is_beta: bool) -> ttk.Frame:
     """Plugin Preferences UI hook."""
     PADX = 10  # noqa: N806
     BUTTONX = 12  # noqa: N806  # indent Checkbuttons and Radiobuttons
@@ -250,16 +250,16 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str, is_beta: bool) -> nb.Frame:
     SEPY = 10  # noqa: N806  # seperator line spacing
     cur_row = 0
 
-    frame = nb.Frame(parent)
+    frame = ttk.Frame(parent)
     frame.columnconfigure(1, weight=1)
 
     HyperlinkLabel(
-        frame, text='Inara', background=nb.Label().cget('background'), url='https://inara.cz/', underline=True
+        frame, text='Inara', url='https://inara.cz/', underline=True
     ).grid(row=cur_row, columnspan=2, padx=PADX, pady=PADY, sticky=tk.W)  # Don't translate
     cur_row += 1
 
     this.log = tk.IntVar(value=config.get_int('inara_out') and 1)
-    this.log_button = nb.Checkbutton(
+    this.log_button = ttk.Checkbutton(
         frame,
         text=tr.tl('Send flight log and Cmdr status to Inara'),  # LANG: Checkbox to enable INARA API Usage
         variable=this.log,
@@ -277,8 +277,7 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str, is_beta: bool) -> nb.Frame:
     # Section heading in settings
     this.label = HyperlinkLabel(
         frame,
-        text=tr.tl('Inara credentials'),  # LANG: Text for INARA API keys link ( goes to https://inara.cz/settings-api )
-        background=nb.Label().cget('background'),
+        text=tr.tl('Inara credentials'),  # LANG: Text for INARA API keys link (goes to https://inara.cz/settings-api)
         url='https://inara.cz/settings-api',
         underline=True
     )
@@ -287,16 +286,16 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str, is_beta: bool) -> nb.Frame:
     cur_row += 1
 
     # LANG: Inara API key label
-    this.apikey_label = nb.Label(frame, text=tr.tl('API Key'))  # Inara setting
+    this.apikey_label = ttk.Label(frame, text=tr.tl('API Key'))  # Inara setting
     this.apikey_label.grid(row=cur_row, padx=PADX, pady=PADY, sticky=tk.W)
-    this.apikey = nb.EntryMenu(frame, show="*", width=50)
+    this.apikey = EntryMenu(frame, show="*", width=50)
     this.apikey.grid(row=cur_row, column=1, padx=PADX, pady=BOXY, sticky=tk.EW)
     cur_row += 1
 
     prefs_cmdr_changed(cmdr, is_beta)
 
     show_password_var.set(False)  # Password is initially masked
-    show_password_checkbox = nb.Checkbutton(
+    show_password_checkbox = ttk.Checkbutton(
         frame,
         text=tr.tl('Show API Key'),  # LANG: Text Inara Show API key
         variable=show_password_var,

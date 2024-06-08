@@ -37,7 +37,6 @@ import requests
 import companion
 import edmc_data
 import killswitch
-import myNotebook as nb  # noqa: N813
 import plug
 from companion import CAPIData, category_map
 from config import applongname, appname, appversion_nobuild, config, debug_senders, user_agent
@@ -102,13 +101,13 @@ class This:
 
         # tkinter UI bits.
         self.eddn_station: tk.IntVar
-        self.eddn_station_button: nb.Checkbutton
+        self.eddn_station_button: ttk.Checkbutton
 
         self.eddn_system: tk.IntVar
-        self.eddn_system_button: nb.Checkbutton
+        self.eddn_system_button: ttk.Checkbutton
 
         self.eddn_delay: tk.IntVar
-        self.eddn_delay_button: nb.Checkbutton
+        self.eddn_delay_button: ttk.Checkbutton
 
         # Tracking UI
         self.ui: ttk.Frame
@@ -2145,7 +2144,7 @@ def tracking_ui_update() -> None:
     this.ui.update_idletasks()
 
 
-def plugin_prefs(parent, cmdr: str, is_beta: bool) -> nb.Frame:
+def plugin_prefs(parent, cmdr: str, is_beta: bool) -> ttk.Frame:
     """
     Set up Preferences pane for this plugin.
 
@@ -2164,20 +2163,19 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> nb.Frame:
     else:
         output = config.get_int('output')
 
-    eddnframe = nb.Frame(parent)
+    eddnframe = ttk.Frame(parent)
 
     cur_row = 0
     HyperlinkLabel(
         eddnframe,
         text='Elite Dangerous Data Network',
-        background=nb.Label().cget('background'),
         url='https://github.com/EDCD/EDDN#eddn---elite-dangerous-data-network',
         underline=True
     ).grid(row=cur_row, padx=PADX, pady=PADY, sticky=tk.W)  # Don't translate
     cur_row += 1
 
     this.eddn_station = tk.IntVar(value=(output & config.OUT_EDDN_SEND_STATION_DATA) and 1)
-    this.eddn_station_button = nb.Checkbutton(
+    this.eddn_station_button = ttk.Checkbutton(
         eddnframe,
         # LANG: Enable EDDN support for station data checkbox label
         text=tr.tl('Send station data to the Elite Dangerous Data Network'),
@@ -2189,7 +2187,7 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> nb.Frame:
 
     this.eddn_system = tk.IntVar(value=(output & config.OUT_EDDN_SEND_NON_STATION) and 1)
     # Output setting new in E:D 2.2
-    this.eddn_system_button = nb.Checkbutton(
+    this.eddn_system_button = ttk.Checkbutton(
         eddnframe,
         # LANG: Enable EDDN support for system and other scan data checkbox label
         text=tr.tl('Send system and scan data to the Elite Dangerous Data Network'),
@@ -2201,7 +2199,7 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> nb.Frame:
 
     this.eddn_delay = tk.IntVar(value=(output & config.OUT_EDDN_DELAY) and 1)
     # Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2
-    this.eddn_delay_button = nb.Checkbutton(
+    this.eddn_delay_button = ttk.Checkbutton(
         eddnframe,
         # LANG: EDDN delay sending until docked option is on, this message notes that a send was skipped due to this
         text=tr.tl('Delay sending until docked'),

@@ -27,8 +27,8 @@ import io
 import json
 import tkinter as tk
 from tkinter import ttk
-import myNotebook as nb  # noqa: N813 # its not my fault.
 from EDMCLogging import get_main_logger
+from myNotebook import EntryMenu
 from plug import show_error
 from config import config
 from l10n import translations as tr
@@ -80,7 +80,7 @@ def plugin_start3(path: str) -> str:
     return 'Coriolis'
 
 
-def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> nb.Frame:
+def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> ttk.Frame:
     """Set up plugin preferences."""
     PADX = 10  # noqa: N806
     PADY = 1  # noqa: N806
@@ -91,45 +91,45 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> nb.Fr
     coriolis_config.override_text_old_normal = tr.tl('Normal')  # LANG: Coriolis normal/beta selection - normal
     coriolis_config.override_text_old_beta = tr.tl('Beta')  # LANG: Coriolis normal/beta selection - beta
 
-    conf_frame = nb.Frame(parent)
+    conf_frame = ttk.Frame(parent)
     conf_frame.columnconfigure(index=1, weight=1)
     cur_row = 0
     # LANG: Settings>Coriolis: Help/hint for changing coriolis URLs
-    nb.Label(conf_frame, text=tr.tl(
+    ttk.Label(conf_frame, text=tr.tl(
         "Set the URL to use with coriolis.io ship loadouts. Note that this MUST end with '/import?data='"
     )).grid(sticky=tk.EW, row=cur_row, column=0, padx=PADX, pady=PADY, columnspan=3)
     cur_row += 1
 
     # LANG: Settings>Coriolis: Label for 'NOT alpha/beta game version' URL
-    nb.Label(conf_frame, text=tr.tl('Normal URL')).grid(sticky=tk.W, row=cur_row, column=0, padx=PADX, pady=PADY)
-    nb.EntryMenu(conf_frame, textvariable=coriolis_config.normal_textvar).grid(
+    ttk.Label(conf_frame, text=tr.tl('Normal URL')).grid(sticky=tk.W, row=cur_row, column=0, padx=PADX, pady=PADY)
+    EntryMenu(conf_frame, textvariable=coriolis_config.normal_textvar).grid(
                 sticky=tk.EW, row=cur_row, column=1, padx=PADX, pady=BOXY
             )
     # LANG: Generic 'Reset' button label
-    nb.Button(conf_frame, text=tr.tl("Reset"),
-              command=lambda: coriolis_config.normal_textvar.set(value=DEFAULT_NORMAL_URL)).grid(
+    ttk.Button(conf_frame, text=tr.tl("Reset"),
+               command=lambda: coriolis_config.normal_textvar.set(value=DEFAULT_NORMAL_URL)).grid(
         sticky=tk.W, row=cur_row, column=2, padx=PADX, pady=0
     )
     cur_row += 1
 
     # LANG: Settings>Coriolis: Label for 'alpha/beta game version' URL
-    nb.Label(conf_frame, text=tr.tl('Beta URL')).grid(sticky=tk.W, row=cur_row, column=0, padx=PADX, pady=PADY)
-    nb.EntryMenu(conf_frame, textvariable=coriolis_config.beta_textvar).grid(
+    ttk.Label(conf_frame, text=tr.tl('Beta URL')).grid(sticky=tk.W, row=cur_row, column=0, padx=PADX, pady=PADY)
+    EntryMenu(conf_frame, textvariable=coriolis_config.beta_textvar).grid(
                  sticky=tk.EW, row=cur_row, column=1, padx=PADX, pady=BOXY
     )
     # LANG: Generic 'Reset' button label
-    nb.Button(conf_frame, text=tr.tl('Reset'),
-              command=lambda: coriolis_config.beta_textvar.set(value=DEFAULT_BETA_URL)).grid(
+    ttk.Button(conf_frame, text=tr.tl('Reset'),
+               command=lambda: coriolis_config.beta_textvar.set(value=DEFAULT_BETA_URL)).grid(
         sticky=tk.W, row=cur_row, column=2, padx=PADX, pady=0
     )
     cur_row += 1
 
     # TODO: This needs a help/hint text to be sure users know what it's for.
     # LANG: Settings>Coriolis: Label for selection of using Normal, Beta or 'auto' Coriolis URL
-    nb.Label(conf_frame, text=tr.tl('Override Beta/Normal Selection')).grid(
+    ttk.Label(conf_frame, text=tr.tl('Override Beta/Normal Selection')).grid(
         sticky=tk.W, row=cur_row, column=0, padx=PADX, pady=PADY
     )
-    nb.OptionMenu(
+    ttk.OptionMenu(
         conf_frame,
         coriolis_config.override_textvar,
         coriolis_config.override_textvar.get(),
