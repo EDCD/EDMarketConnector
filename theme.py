@@ -216,9 +216,7 @@ class _Theme:
 
     def apply(self) -> None:  # noqa: CCR001
         theme = config.get_int('theme')
-        theme_name = self.packages[theme]
-        self.root.tk.call('package', 'require', f'ttk::theme::{theme_name}')
-        self.root.tk.call('ttk::setTheme', theme_name)
+        self.root.tk.call('ttk::setTheme', self.packages[theme])
 
         for image in self.bitmaps:
             image['background'] = self.style.lookup('.', 'background')
