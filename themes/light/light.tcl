@@ -13,6 +13,7 @@ namespace eval ttk::theme::light {
         -selectbg   "#9e9a91"
         -highlight  "blue"
     }
+    variable font_u [font create {*}[font configure TkDefaultFont] -underline 1]
 
     ttk::style theme create light -parent clam -settings {
         ttk::style configure . \
@@ -45,20 +46,19 @@ namespace eval ttk::theme::light {
         ttk::style configure TLabel -padding 1
 
         ttk::style configure Link.TLabel -foreground $colors(-highlight)
+        ttk::style map Link.TLabel \
+            -font [list active $font_u] \
+            -foreground [list disabled $colors(-disabledfg)] \
+            -cursor [list disabled arrow]
 
         ttk::style configure TLabelframe -relief groove
 
         ttk::style configure TEntry -padding 2
 
         ttk::style configure TButton -padding {8 4 8 4} -width -10 -anchor center -relief groove
-
-        ttk::style map TButton -background [list \
-            {pressed} $colors(-selectbg) \
-        ]
-
-        ttk::style map TButton -foreground [list \
-            {pressed} $colors(-selectfg) \
-        ]
+        ttk::style map TButton \
+            -background [list pressed $colors(-selectbg)] \
+            -foreground [list pressed $colors(-selectfg)]
 
         ttk::style configure Toolbutton -padding {8 4 8 4} -width -10 -anchor center
 
@@ -80,7 +80,6 @@ namespace eval ttk::theme::light {
         ttk::style configure TNotebook.Tab -padding 2
 
         ttk::style configure Treeview.Item -padding {2 0 0 0}
-
         ttk::style map Treeview \
             -background [list selected $colors(-selectbg)] \
             -foreground [list selected $colors(-selectfg)]

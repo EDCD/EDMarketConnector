@@ -978,7 +978,6 @@ class PreferencesDialog(tk.Toplevel):
             HyperlinkLabel(
                 # LANG: Plugins - Label on URL to documentation about migrating plugins from Python 2.7
                 plugins_frame, text=tr.tl('Information on migrating plugins'),
-                background=ttk.Label().cget('background'),
                 url='https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#migration-from-python-27',
                 underline=True
             ).grid(columnspan=2, padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get())

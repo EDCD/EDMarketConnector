@@ -46,6 +46,12 @@ namespace eval ttk::theme::dark {
 
         ttk::style configure TLabel -padding 1
 
+        ttk::style configure Link.TLabel -foreground $colors(-highlight) -relief flat
+        ttk::style map Link.TLabel \
+            -font [list active $font_u] \
+            -foreground [list disabled $colors(-disabledfg)] \
+            -cursor [list disabled arrow]
+
         ttk::style configure TLabelframe {*}$flatborder
 
         ttk::style configure TSeparator -background $colors(-fg)
@@ -56,12 +62,6 @@ namespace eval ttk::theme::dark {
         ttk::style map TButton \
             -background [list pressed $colors(-selectbg)] \
             -foreground [list pressed $colors(-selectfg)]
-
-        ttk::style configure Link.TLabel -foreground $colors(-highlight) -relief flat
-        ttk::style map Link.TLabel \
-            -font [list active $font_u] \
-            -foreground [list disabled $colors(-disabledfg)] \
-            -cursor [list disabled arrow]
 
         ttk::style configure Toolbutton -padding {8 4 8 4} -width -10 -anchor center
 
@@ -78,16 +78,15 @@ namespace eval ttk::theme::dark {
         ttk::style configure TSpinbox -padding 2 {*}$flatborder -arrowcolor $colors(-fg) -arrowsize 10
 
         ttk::style configure TCombobox -padding 2 {*}$flatborder -arrowcolor $colors(-fg)
-        ttk::style map TCombobox -selectbackground [list \
-            {!focus} $colors(-selectbg) \
-            {readonly hover} $colors(-selectbg) \
-            {readonly focus} $colors(-selectbg) \
-        ]
-        ttk::style map TCombobox -selectforeground [list \
-            {!focus} $colors(-selectfg) \
-            {readonly hover} $colors(-selectfg) \
-            {readonly focus} $colors(-selectfg) \
-        ]
+        ttk::style map TCombobox \
+            -selectbackground [list \
+                {!focus} $colors(-selectbg) \
+                {readonly hover} $colors(-selectbg) \
+                {readonly focus} $colors(-selectbg)] \
+            -selectforeground [list \
+                {!focus} $colors(-selectfg) \
+                {readonly hover} $colors(-selectfg) \
+                {readonly focus} $colors(-selectfg)]
 
         ttk::style configure TNotebook -padding 2 {*}$flatborder
         ttk::style configure TNotebook.Tab -padding 2 {*}$flatborder

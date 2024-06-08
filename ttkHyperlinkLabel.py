@@ -47,16 +47,49 @@ SHIPYARD_HTML_TEMPLATE = """
     </body>
 </html>
 """
-LABEL_TO_STYLE = ['anchor', 'background', 'font', 'foreground', 'justify', 'relief']
-
-
-def _generate_random_style():
-    return f'{"".join(random.choices(string.ascii_letters + string.digits, k=8))}.Link.TLabel'
+LABEL_TO_STYLE = ['anchor', 'background', 'font', 'foreground', 'relief']
 
 
 class HyperlinkLabel(ttk.Button):
     """Clickable label for HTTP links."""
-    _legacy_style: str
+
+    _legacy_style: str | None = None
+
+    def _handle_legacy_options(self, options: dict):  # noqa: CCR001
+        label_options = {opt: options.pop(opt) for opt in LABEL_TO_STYLE if opt in options}
+        disabledforeground = options.pop('disabledforeground', None)
+        wraplength = options.pop('wraplength', None)
+        if len(label_options) > 0 or disabledforeground or wraplength or self.font or self.underline is not None:
+            if not self._legacy_style:
+                self._legacy_style = f'{"".join(random.choices(string.ascii_letters+string.digits, k=8))}.Link.TLabel'
+            if len(label_options) > 0:
+                ttk.Style().configure(self._legacy_style, **label_options)
+            if disabledforeground:
+                ttk.Style().map(self._legacy_style, foreground=[('disabled', disabledforeground)])
+            if self.font:
+                font_u = tk.font.Font(font=self.font)
+                if self.underline is None:
+                    ttk.Style().configure(self._legacy_style, font=self.font)
+                    font_u.configure(underline=True)
+                    ttk.Style().map(self._legacy_style, font=[('active', font_u.name)])
+                else:
+                    font_u.configure(underline=self.underline)
+                    ttk.Style().configure(self._legacy_style, font=font_u.name)
+            else:
+                font_n = ttk.Style().lookup('Link.TLabel', 'font')
+                font_u = ttk.Style().lookup('Link.TLabel', 'font', ['active'])
+                if self.underline is None:
+                    ttk.Style().configure(self._legacy_style, font=font_n)
+                    ttk.Style().map(self._legacy_style, font=[('active', font_u)])
+                elif self.underline:
+                    ttk.Style().configure(self._legacy_style, font=font_u)
+                    ttk.Style().map(self._legacy_style, font=[('active', font_u)])
+                else:
+                    ttk.Style().configure(self._legacy_style, font=font_n)
+                    ttk.Style().map(self._legacy_style, font=[('active', font_n)])
+            # TODO emulate wraplength
+            options['style'] = self._legacy_style
+        return options
 
     def __init__(self, master: tk.Widget | None = None, **kw: Any) -> None:
         """
@@ -68,19 +101,14 @@ class HyperlinkLabel(ttk.Button):
         self.url = kw.pop('url', None)
         self.popup_copy = kw.pop('popup_copy', False)
         self.underline = kw.pop('underline', None)
+        self.font = kw.pop('font', None)
         kw.setdefault('command', self._click)
         kw.setdefault('style', 'Link.TLabel')
-
-        self._legacy_options = {opt: kw[opt] for opt in LABEL_TO_STYLE if opt in kw}
-        if len(self._legacy_options) > 0:
-            self._legacy_style = _generate_random_style()
-            kw['style'] = self._legacy_style
-            ttk.Style().configure(self._legacy_style, **self._legacy_options)
-        # TODO underline, disabledforeground, cursor
-
+        kw = self._handle_legacy_options(kw)
         super().__init__(master, **kw)
 
         self.bind('<Button-3>', self._contextmenu)
+        self.bind('<<ThemeChanged>>', self._theme)
 
         # Add Menu Options
         self.plug_options = kw.pop('plug_options', None)
@@ -125,16 +153,14 @@ class HyperlinkLabel(ttk.Button):
             return webbrowser.open(opener)
 
     @no_type_check
-    def configure(  # noqa: CCR001
+    def configure(
         self, cnf: dict[str, Any] | None = None, **kw: Any
     ) -> dict[str, tuple[str, str, str, Any, Any]] | None:
         """Change cursor and appearance depending on state and text."""
-        # This class' state
-        for thing in ('url', 'popup_copy', 'underline'):
+        for thing in ('url', 'popup_copy', 'underline', 'font'):
             if thing in kw:
                 setattr(self, thing, kw.pop(thing))
-
-        # TODO _legacy_options, underline, disabledforeground, cursor
+        kw = self._handle_legacy_options(kw)
         return super().configure(cnf, **kw)
 
     def __setitem__(self, key: str, value: Any) -> None:
@@ -146,7 +172,10 @@ class HyperlinkLabel(ttk.Button):
         """
         self.configure(**{key: value})
 
-    def _click(self, event: tk.Event) -> None:
+    def _theme(self, event: tk.Event):
+        self._handle_legacy_options({})
+
+    def _click(self) -> None:
         if self.url and self['text'] and str(self['state']) != tk.DISABLED:
             url = self.url(self['text']) if callable(self.url) else self.url
             if url:
