@@ -58,8 +58,9 @@ class HyperlinkLabel(ttk.Button):
     def _handle_legacy_options(self, options: dict):  # noqa: CCR001
         label_options = {opt: options.pop(opt) for opt in LABEL_TO_STYLE if opt in options}
         disabledforeground = options.pop('disabledforeground', None)
-        wraplength = options.pop('wraplength', None)
-        if len(label_options) > 0 or disabledforeground or wraplength or self.font or self.underline is not None:
+        justify = options.pop('justify', None)  # noqa: F841
+        wraplength = options.pop('wraplength', None)  # noqa: F841
+        if len(label_options) > 0 or disabledforeground or self.font or self.underline is not None:
             if not self._legacy_style:
                 self._legacy_style = f'{"".join(random.choices(string.ascii_letters+string.digits, k=8))}.Link.TLabel'
             if len(label_options) > 0:
@@ -87,7 +88,7 @@ class HyperlinkLabel(ttk.Button):
                 else:
                     ttk.Style().configure(self._legacy_style, font=font_n)
                     ttk.Style().map(self._legacy_style, font=[('active', font_n)])
-            # TODO emulate wraplength
+            # TODO emulate justify and wraplength
             options['style'] = self._legacy_style
         return options
 
