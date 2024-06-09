@@ -22,10 +22,35 @@
       </item>
       <!-- Windows -->
       <item>
-         <title>Release 5.11.0</title>
+         <title>Release 5.11.1</title>
          <description><![CDATA[<style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
-<p>We now test against, and package with, Python 3.11.7.</p>
+<p>We now test against, and package with, Python 3.11.9.</p>
 <p><strong>As a result, we do not support Windows 7, 8, or 8.1.</strong><br>
+<h2>Release 5.11.1</h2>
+<p>This release fixes a bug regarding FDevID files when running from Source in a non-writable location. Additionally,
+Deprecation Warnings are now more visible to aid in plugin development.</p>
+<p><strong>Changes and Enhancements</strong></p>
+<ul>
+<li>Added a check on Git Pushes to check for updated translation strings for developers</li>
+<li>Enabled deprecation warnings to pass to plugins and logs</li>
+<li>Updated Dependencies</li>
+<li>Replaced infi.systray with drop-in replacement simplesystray</li>
+</ul>
+<p><strong>Bug Fixes</strong></p>
+<ul>
+<li>Fixed a bug that could result in the program not updating or writing FDevID files when running from source in a location where the running user can&#39;t write to</li>
+</ul>
+<p><strong>Plugin Developers</strong></p>
+<ul>
+<li>nb.Entry is deprecated, and is slated for removal in 6.0 or later. Please migrate to nb.EntryMenu</li>
+<li>nb.ColoredButton is deprecated, and is slated for removal in 6.0 or later. Please migrate to tk.Button</li>
+<li>Calling internal translations with <code>_()</code> is deprecated, and is slated for removal in 6.0 or later. Please migrate to importing <code>translations</code> and calling <code>translations.translate</code> or <code>translations.tl</code> directly</li>
+<li><code>Translations</code> as the translate system singleton is deprecated, and is slated for removal in 6.0 or later. Please migrate to the <code>translations</code> singleton</li>
+<li><code>help_open_log_folder()</code> is deprecated, and is slated for removal in 6.0 or later. Please migrate to open_folder()</li>
+<li><code>update_feed</code> is deprecated, and is slated for removal in 6.0 or later. Please migrate to <code>get_update_feed()</code>.</li>
+<li>FDevID files (<code>commodity.csv</code> and <code>rare_commodity.csv</code>) have moved their preferred location to the app dir (same location as default Plugins folder). Please migrate to use <code>config.app_dir_path</code>.</li>
+</ul>
+<hr>
 <h2>Release 5.11.0</h2>
 <p>This release includes a number of new features and improvements, including a new Beta Update Track for testing future updates, enhanced context menus for text entry fields and UI elements, a revamp to the existing translation system and logging capabilities, and more. This release includes the Python Image Library (PIL) into our core bundle, adds a number of stability and configuration checks to the tool, and adds new schemas and configuration values to senders. </p>
 <p>This release also includes a number of bug fixes, performance enhancements, and updates to various aspects of the code to enhance maintainability are included. Notably, MacOS support has been removed due to a lack of support for this OS in Elite, and a number of functions have been deprecated and will be removed in later versions. Plugin developers, take note!</p>
@@ -2336,7 +2361,7 @@ about this:
 <a href="https://issues.frontierstore.net/issue-detail/28638" rel="nofollow">PTS CAPI saying Commander is Docked after jumping to new system</a>.</p>
 </li>
 </ul>]]></description>
-         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F5.11.0/EDMarketConnector_Installer_5.11.0.exe" sparkle:os="windows" sparkle:version="5.11.0" length="0" type="application/x-ms-dos-executable" />
+         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F5.11.1/EDMarketConnector_Installer_5.11.1.exe" sparkle:os="windows" sparkle:version="5.11.1" length="0" type="application/x-ms-dos-executable" />
       </item>
    </channel>
 </rss>
