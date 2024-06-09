@@ -328,6 +328,7 @@ class AbstractConfig(abc.ABC):
         :raises OSError: On Windows, if a Registry error occurs.
         :return: The data or the default.
         """
+        # DEPRECATED: Migrate to specific type getters. Will remove in 6.0 or later.
         warnings.warn('get is Deprecated. use the specific getter for your type', DeprecationWarning, stacklevel=2)
 
         if (a_list := self._suppress_call(self.get_list, ValueError, key, default=None)) is not None:
@@ -386,6 +387,7 @@ class AbstractConfig(abc.ABC):
         See get_int for its replacement.
         :raises OSError: On Windows, if a Registry error occurs.
         """
+        # DEPRECATED: Migrate to get_int. Will remove in 6.0 or later.
         warnings.warn('getint is Deprecated. Use get_int instead', DeprecationWarning, stacklevel=2)
 
         return self.get_int(key, default=default)
@@ -443,6 +445,7 @@ class AbstractConfig(abc.ABC):
         """Close this config and release any associated resources."""
         raise NotImplementedError
 
+# DEPRECATED: Password system doesn't do anything. Will remove in 6.0 or later.
     def get_password(self, account: str) -> None:
         """Legacy password retrieval."""
         warnings.warn("password subsystem is no longer supported", DeprecationWarning, stacklevel=2)
@@ -454,6 +457,7 @@ class AbstractConfig(abc.ABC):
     def delete_password(self, account: str) -> None:
         """Legacy password deletion."""
         warnings.warn("password subsystem is no longer supported", DeprecationWarning, stacklevel=2)
+# End Dep Zone
 
 
 def get_config(*args, **kwargs) -> AbstractConfig:
@@ -486,6 +490,7 @@ def get_update_feed() -> str:
     return 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml'
 
 
+# DEPRECATED: Migrate to get_update_feed(). Will remove in 6.0 or later.
 def __getattr__(name: str):
     if name == 'update_feed':
         warnings.warn('update_feed is deprecated, and will be removed in 6.0 or later. '

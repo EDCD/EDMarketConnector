@@ -86,8 +86,7 @@ class Translations:
         Use when translation is not desired or not available
         """
         self.translations = {None: {}}
-        # WARNING: '_' is Deprecated. Will be removed in 6.0 or later.
-        # Migrate to calling translations.translate or tr.tl directly.
+        # DEPRECATED: Migrate to translations.translate or tr.tl. Will remove in 6.0 or later.
         builtins.__dict__['_'] = lambda x: str(x).replace(r'\"', '"').replace('{CR}', '\n')
 
     def install(self, lang: str | None = None) -> None:  # noqa: CCR001
@@ -131,8 +130,7 @@ class Translations:
                 except Exception:
                     logger.exception(f'Exception occurred while parsing {lang}.strings in plugin {plugin}')
 
-        # WARNING: '_' is Deprecated. Will be removed in 6.0 or later.
-        # Migrate to calling translations.translate or tr.tl directly.
+        # DEPRECATED: Migrate to translations.translate or tr.tl. Will remove in 6.0 or later.
         builtins.__dict__['_'] = self.translate
 
     def contents(self, lang: str, plugin_path: str | None = None) -> dict[str, str]:
@@ -262,14 +260,17 @@ class Translations:
 class _Locale:
     """Locale holds a few utility methods to convert data to and from localized versions."""
 
-    def stringFromNumber(self, number: float | int, decimals: int | None = None) -> str:  # noqa: N802
+    # DEPRECATED: Migrate to _Locale.string_from_number. Will remove in 6.0 or later.
+    def stringFromNumber(self, number: float | int, decimals: int | None = None) -> str:  # noqa:
         warnings.warn('use _Locale.string_from_number instead.', DeprecationWarning, stacklevel=2)
         return self.string_from_number(number, decimals)  # type: ignore
 
+    # DEPRECATED: Migrate to _Locale.number_from_string. Will remove in 6.0 or later.
     def numberFromString(self, string: str) -> int | float | None:  # noqa: N802
         warnings.warn('use _Locale.number_from_string instead.', DeprecationWarning, stacklevel=2)
         return self.number_from_string(string)
 
+    # DEPRECATED: Migrate to _Locale.preferred_languages. Will remove in 6.0 or later.
     def preferredLanguages(self) -> Iterable[str]:  # noqa: N802
         warnings.warn('use _Locale.preferred_languages instead.', DeprecationWarning, stacklevel=2)
         return self.preferred_languages()
@@ -362,8 +363,8 @@ Locale = _Locale()
 translations = Translations()
 
 
-# WARNING: 'Translations' singleton is deprecated. Will be removed in 6.0 or later.
-# Migrate to importing 'translations'.
+# DEPRECATED: Migrate to `translations`. Will be removed in 6.0 or later.
+# 'Translations' singleton is deprecated.
 # Begin Deprecation Zone
 class _Translations(Translations):
     def __init__(self):

@@ -38,7 +38,7 @@ logger = get_main_logger()
 
 # May be imported by plugins
 
-
+# DEPRECATED: Migrate to open_log_folder. Will remove in 6.0 or later.
 def help_open_log_folder() -> None:
     """Open the folder logs are stored in."""
     warnings.warn('prefs.help_open_log_folder is deprecated, use open_log_folder instead. '
