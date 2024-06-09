@@ -261,7 +261,7 @@ class _Locale:
     """Locale holds a few utility methods to convert data to and from localized versions."""
 
     # DEPRECATED: Migrate to _Locale.string_from_number. Will remove in 6.0 or later.
-    def stringFromNumber(self, number: float | int, decimals: int | None = None) -> str:  # noqa:
+    def stringFromNumber(self, number: float | int, decimals: int | None = None) -> str:  # noqa: N802
         warnings.warn('use _Locale.string_from_number instead.', DeprecationWarning, stacklevel=2)
         return self.string_from_number(number, decimals)  # type: ignore
 
