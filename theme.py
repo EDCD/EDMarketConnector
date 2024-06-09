@@ -209,9 +209,12 @@ class _Theme:
         warnings.warn('theme.update() is no longer necessary as theme attributes are set on tk level',
                       category=DeprecationWarning)
 
-    def apply(self) -> None:  # noqa: CCR001
+    def apply(self) -> None:  # noqa: CCR001, C901
         theme = config.get_int('theme')
-        self.root.tk.call('ttk::setTheme', self.packages[theme])
+        try:
+            self.root.tk.call('ttk::setTheme', self.packages[theme])
+        except tk.TclError:
+            logger.exception(f'Failure setting theme: {self.packages[theme]}')
 
         for image in self.bitmaps:
             image['background'] = self.style.lookup('.', 'background')
