@@ -208,5 +208,5 @@ def build() -> None:
 
 
 if __name__ == "__main__":
-    check_for_fdev_updates()
+    check_for_fdev_updates(local=True)
     build()

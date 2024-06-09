@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import sys
 import tkinter as tk
+import warnings
 from tkinter import ttk, messagebox
 from PIL import ImageGrab
 from l10n import translations as tr
@@ -126,6 +127,7 @@ class Entry(EntryMenu):
 
     # DEPRECATED: Migrate to EntryMenu. Will remove in 6.0 or later.
     def __init__(self, master: ttk.Frame | None = None, **kw):
+        warnings.warn('Migrate to EntryMenu. Will remove in 6.0 or later.', DeprecationWarning, stacklevel=2)
         EntryMenu.__init__(self, master, **kw)
 
 
@@ -144,6 +146,7 @@ class ColoredButton(tk.Button):
 
     # DEPRECATED: Migrate to tk.Button. Will remove in 6.0 or later.
     def __init__(self, master: ttk.Frame | None = None, **kw):
+        warnings.warn('Migrate to tk.Button. Will remove in 6.0 or later.', DeprecationWarning, stacklevel=2)
         tk.Button.__init__(self, master, **kw)
 
 

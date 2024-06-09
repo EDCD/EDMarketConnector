@@ -8,6 +8,7 @@ See LICENSE file.
 from __future__ import annotations
 
 import pathlib
+import shutil
 import sys
 import threading
 from traceback import print_exc
@@ -26,23 +27,40 @@ if TYPE_CHECKING:
 logger = get_main_logger()
 
 
-def check_for_fdev_updates(silent: bool = False) -> None:  # noqa: CCR001
+def check_for_fdev_updates(silent: bool = False, local: bool = False) -> None:  # noqa: CCR001
     """Check for and download FDEV ID file updates."""
+    if local:
+        pathway = config.respath_path
+    else:
+        pathway = config.app_dir_path
+
     files_urls = [
         ('commodity.csv', 'https://raw.githubusercontent.com/EDCD/FDevIDs/master/commodity.csv'),
         ('rare_commodity.csv', 'https://raw.githubusercontent.com/EDCD/FDevIDs/master/rare_commodity.csv')
     ]
 
     for file, url in files_urls:
-        fdevid_file = pathlib.Path(config.respath_path / 'FDevIDs' / file)
+        fdevid_file = pathlib.Path(pathway / 'FDevIDs' / file)
         fdevid_file.parent.mkdir(parents=True, exist_ok=True)
         try:
             with open(fdevid_file, newline='', encoding='utf-8') as f:
                 local_content = f.read()
         except FileNotFoundError:
-            local_content = None
+            logger.info(f'File {file} not found. Writing from bundle...')
+            try:
+                for localfile in files_urls:
+                    filepath = pathlib.Path(f"FDevIDs/{localfile[0]}")
+                    try:
+                        shutil.copy(filepath, pathway / 'FDevIDs')
+                    except shutil.SameFileError:
+                        logger.info("Not replacing same file...")
+                    fdevid_file = pathlib.Path(pathway / 'FDevIDs' / file)
+                    with open(fdevid_file, newline='', encoding='utf-8') as f:
+                        local_content = f.read()
+            except FileNotFoundError:
+                local_content = None
 
-        response = requests.get(url)
+        response = requests.get(url, timeout=20)
         if response.status_code != 200:
             if not silent:
                 logger.error(f'Failed to download {file}! Unable to continue.')
@@ -169,10 +187,17 @@ class Updater:
             self.updater.win_sparkle_check_update_with_ui()
 
         check_for_fdev_updates()
+        # TEMP: Only include until 6.0
+        try:
+            check_for_fdev_updates(local=True)
+        except Exception as e:
+            logger.info("Tried to update bundle FDEV files but failed. Don't worry, "
+                        "this likely isn't important and can be ignored unless"
+                        f" you run into other issues. If you're curious: {e}")
 
     def check_appcast(self) -> EDMCVersion | None:
         """
-        Manually (no Sparkle or WinSparkle) check the update_feed appcast file.
+        Manually (no Sparkle or WinSparkle) check the get_update_feed() appcast file.
 
         Checks if any listed version is semantically greater than the current
         running version.

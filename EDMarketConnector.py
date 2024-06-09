@@ -65,6 +65,7 @@ from config import appversion, appversion_nobuild, config, copyright
 
 from EDMCLogging import edmclogger, logger, logging
 from journal_lock import JournalLock, JournalLockResult
+from update import check_for_fdev_updates
 
 if __name__ == '__main__':  # noqa: C901
     # Command-line arguments
@@ -395,7 +396,7 @@ if TYPE_CHECKING:
     from logging import TRACE  # type: ignore # noqa: F401 # Needed to update mypy
 
     if sys.platform == 'win32':
-        from infi.systray import SysTrayIcon
+        from simplesystray import SysTrayIcon
     # isort: on
 
 
@@ -451,7 +452,7 @@ class AppWindow:
         self.prefsdialog = None
 
         if sys.platform == 'win32':
-            from infi.systray import SysTrayIcon
+            from simplesystray import SysTrayIcon
 
             def open_window(systray: 'SysTrayIcon') -> None:
                 self.w.deiconify()
@@ -2323,6 +2324,7 @@ sys.path: {sys.path}'''
     root.after(2, show_killswitch_poppup, root)
     # Start the main event loop
     try:
+        check_for_fdev_updates()
         root.mainloop()
     except KeyboardInterrupt:
         logger.info("Ctrl+C Detected, Attempting Clean Shutdown")
