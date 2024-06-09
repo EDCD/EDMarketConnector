@@ -24,21 +24,13 @@ logger = get_main_logger()
 if __debug__:
     from traceback import print_exc
 
-if sys.platform == "linux":
-    from ctypes import POINTER, Structure, byref, c_char_p, c_int, c_long, c_uint, c_ulong, c_void_p, cdll
-
-
 if sys.platform == 'win32':
-    import ctypes
-    from ctypes.wintypes import DWORD, LPCVOID, LPCWSTR
-    AddFontResourceEx = ctypes.windll.gdi32.AddFontResourceExW
-    AddFontResourceEx.restypes = [LPCWSTR, DWORD, LPCVOID]  # type: ignore
+    from ctypes import windll
     FR_PRIVATE = 0x10
-    FR_NOT_ENUM = 0x20
-    AddFontResourceEx(os.path.join(config.respath, 'EUROCAPS.TTF'), FR_PRIVATE, 0)
+    windll.gdi32.AddFontResourceExW(str(config.respath_path / 'EUROCAPS.TTF'), FR_PRIVATE, 0)
 
 elif sys.platform == 'linux':
-    # pyright: reportUnboundVariable=false
+    from ctypes import POINTER, Structure, byref, c_char_p, c_int, c_long, c_uint, c_ulong, c_void_p, cdll
     XID = c_ulong 	# from X.h: typedef unsigned long XID
     Window = XID
     Atom = c_ulong
@@ -248,8 +240,8 @@ class _Theme:
             GWL_EXSTYLE = -20  # noqa: N806 # ctypes
             WS_EX_APPWINDOW = 0x00040000  # noqa: N806 # ctypes
             WS_EX_LAYERED = 0x00080000  # noqa: N806 # ctypes
-            GetWindowLongW = ctypes.windll.user32.GetWindowLongW  # noqa: N806 # ctypes
-            SetWindowLongW = ctypes.windll.user32.SetWindowLongW  # noqa: N806 # ctypes
+            GetWindowLongW = windll.user32.GetWindowLongW  # noqa: N806 # ctypes
+            SetWindowLongW = windll.user32.SetWindowLongW  # noqa: N806 # ctypes
 
             self.root.overrideredirect(theme != self.THEME_DEFAULT)
 
@@ -260,7 +252,7 @@ class _Theme:
 
             self.root.withdraw()
             self.root.update_idletasks()  # Size and windows styles get recalculated here
-            hwnd = ctypes.windll.user32.GetParent(self.root.winfo_id())
+            hwnd = windll.user32.GetParent(self.root.winfo_id())
             SetWindowLongW(hwnd, GWL_STYLE, GetWindowLongW(hwnd, GWL_STYLE) & ~WS_MAXIMIZEBOX)  # disable maximize
 
             if theme == self.THEME_TRANSPARENT:
