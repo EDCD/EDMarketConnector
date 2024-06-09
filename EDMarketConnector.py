@@ -396,7 +396,7 @@ if TYPE_CHECKING:
     from logging import TRACE  # type: ignore # noqa: F401 # Needed to update mypy
 
     if sys.platform == 'win32':
-        from infi.systray import SysTrayIcon
+        from simplesystray import SysTrayIcon
     # isort: on
 
 
@@ -452,7 +452,7 @@ class AppWindow:
         self.prefsdialog = None
 
         if sys.platform == 'win32':
-            from infi.systray import SysTrayIcon
+            from simplesystray import SysTrayIcon
 
             def open_window(systray: 'SysTrayIcon') -> None:
                 self.w.deiconify()
