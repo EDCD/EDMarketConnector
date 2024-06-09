@@ -27,7 +27,9 @@ if __debug__:
 if sys.platform == 'win32':
     from ctypes import windll
     FR_PRIVATE = 0x10
-    windll.gdi32.AddFontResourceExW(str(config.respath_path / 'EUROCAPS.TTF'), FR_PRIVATE, 0)
+    fonts_loaded = windll.gdi32.AddFontResourceExW(str(config.respath_path / 'EUROCAPS.TTF'), FR_PRIVATE, 0)
+    if fonts_loaded < 1:
+        logger.error('Unable to load Euro Caps font for Transparent theme')
 
 elif sys.platform == 'linux':
     from ctypes import POINTER, Structure, byref, c_char_p, c_int, c_long, c_uint, c_ulong, c_void_p, cdll
