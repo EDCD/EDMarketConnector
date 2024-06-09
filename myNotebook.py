@@ -10,6 +10,7 @@ Entire file may be imported by plugins.
 from __future__ import annotations
 
 import tkinter as tk
+import warnings
 from tkinter import ttk, messagebox
 from PIL import ImageGrab
 from l10n import translations as tr
@@ -18,29 +19,29 @@ from l10n import translations as tr
 class Notebook(ttk.Notebook):
     """Custom ttk.Notebook class to fix some display issues."""
 
-    # DEPRECATED: Migrate to ttk.Notebook. Will remove in 6.0 or later.
     def __init__(self, master: ttk.Frame | None = None, **kw):
 
         super().__init__(master, **kw)
+        warnings.warn('Migrate to ttk.Notebook. Will be removed in 6.0 or later', DeprecationWarning, stacklevel=2)
         self.grid(padx=10, pady=10, sticky=tk.NSEW)
 
 
 class Frame(ttk.Frame):
     """Custom ttk.Frame class to fix some display issues."""
 
-    # DEPRECATED: Migrate to ttk.Frame. Will remove in 6.0 or later.
     def __init__(self, master: ttk.Notebook | None = None, **kw):
         ttk.Frame.__init__(self, master, **kw)
         ttk.Frame(self).grid(pady=5)  # top spacer
         self.configure(takefocus=1)		# let the frame take focus so that no particular child is focused
+        warnings.warn('Migrate to ttk.Frame. Will be removed in 6.0 or later', DeprecationWarning, stacklevel=2)
 
 
 class Label(tk.Label):
     """Custom tk.Label class to fix some display issues."""
 
-    # DEPRECATED: Migrate to ttk.Label. Will remove in 6.0 or later.
     def __init__(self, master: ttk.Frame | None = None, **kw):
         super().__init__(master, **kw)
+        warnings.warn('Migrate to ttk.Label. Will be removed in 6.0 or later', DeprecationWarning, stacklevel=2)
 
 
 class EntryMenu(ttk.Entry):
@@ -107,46 +108,46 @@ class EntryMenu(ttk.Entry):
 class Entry(EntryMenu):
     """Custom ttk.Entry class to fix some display issues."""
 
-    # DEPRECATED: Migrate to EntryMenu. Will remove in 6.0 or later.
     def __init__(self, master: ttk.Frame | None = None, **kw):
         EntryMenu.__init__(self, master, **kw)
+        warnings.warn('Migrate to EntryMenu. Will be removed in 6.0 or later', DeprecationWarning, stacklevel=2)
 
 
 class Button(ttk.Button):
     """Custom ttk.Button class to fix some display issues."""
 
-    # DEPRECATED: Migrate to ttk.Button. Will remove in 6.0 or later.
     def __init__(self, master: ttk.Frame | None = None, **kw):
         ttk.Button.__init__(self, master, **kw)
+        warnings.warn('Migrate to ttk.Button. Will be removed in 6.0 or later', DeprecationWarning, stacklevel=2)
 
 
 class ColoredButton(tk.Button):
     """Custom tk.Button class to fix some display issues."""
 
-    # DEPRECATED: Migrate to ttk.Button. Will remove in 6.0 or later.
     def __init__(self, master: ttk.Frame | None = None, **kw):
         tk.Button.__init__(self, master, **kw)
+        warnings.warn('Migrate to ttk.Button. Will be removed in 6.0 or later', DeprecationWarning, stacklevel=2)
 
 
 class Checkbutton(ttk.Checkbutton):
     """Custom ttk.Checkbutton class to fix some display issues."""
 
-    # DEPRECATED: Migrate to ttk.Checkbutton. Will remove in 6.0 or later.
     def __init__(self, master: ttk.Frame | None = None, **kw):
         super().__init__(master, **kw)  # type: ignore
+        warnings.warn('Migrate to ttk.Checkbutton. Will be removed in 6.0 or later', DeprecationWarning, stacklevel=2)
 
 
 class Radiobutton(ttk.Radiobutton):
     """Custom ttk.Radiobutton class to fix some display issues."""
 
-    # DEPRECATED: Migrate to ttk.Radiobutton. Will remove in 6.0 or later.
     def __init__(self, master: ttk.Frame | None = None, **kw):
         super().__init__(master, **kw)  # type: ignore
+        warnings.warn('Migrate to ttk.Radiobutton. Will be removed in 6.0 or later', DeprecationWarning, stacklevel=2)
 
 
 class OptionMenu(ttk.OptionMenu):
     """Custom ttk.OptionMenu class to fix some display issues."""
 
-    # DEPRECATED: Migrate to ttk.OptionMenu. Will remove in 6.0 or later.
     def __init__(self, master, variable, default=None, *values, **kw):
         ttk.OptionMenu.__init__(self, master, variable, default, *values, **kw)
+        warnings.warn('Migrate to ttk.OptionMenu. Will be removed in 6.0 or later', DeprecationWarning, stacklevel=2)

@@ -154,7 +154,7 @@ class _Theme:
     def register(self, widget: tk.Widget | tk.BitmapImage) -> None:
         assert isinstance(widget, (tk.BitmapImage, tk.Widget)), widget
         warnings.warn('theme.register() is no longer necessary as theme attributes are set on tk level',
-                      category=DeprecationWarning)
+                      DeprecationWarning, stacklevel=2)
 
     def register_alternate(self, pair: tuple, gridopts: dict) -> None:
         self.widgets_pair.append((pair, gridopts))
@@ -207,7 +207,7 @@ class _Theme:
         """
         assert isinstance(widget, (tk.BitmapImage, tk.Widget)), widget
         warnings.warn('theme.update() is no longer necessary as theme attributes are set on tk level',
-                      category=DeprecationWarning)
+                      DeprecationWarning, stacklevel=2)
 
     def apply(self) -> None:  # noqa: CCR001, C901
         theme = config.get_int('theme')
