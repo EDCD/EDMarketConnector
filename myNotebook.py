@@ -1,11 +1,7 @@
 """
 Custom `ttk.Notebook` to fix various display issues.
 
-Hacks to fix various display issues with notebooks and their child widgets on Windows.
-
-- Windows: page background should be White, not SystemButtonFace
-
-Entire file may be imported by plugins.
+This is mostly no longer necessary, with ttk themes applying consistent behaviour across the board.
 """
 from __future__ import annotations
 
