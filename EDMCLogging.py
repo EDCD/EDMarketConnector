@@ -101,8 +101,6 @@ logging.Logger.trace = lambda self, message, *args, **kwargs: self._log(  # type
 logging.Formatter.converter = gmtime
 
 warnings.simplefilter('default', DeprecationWarning)
-# TODO remove after infi.systray drops pkg_resources
-warnings.filterwarnings('ignore', '.*pkg_resources', DeprecationWarning)
 
 
 def _trace_if(self: logging.Logger, condition: str, message: str, *args, **kwargs) -> None:
