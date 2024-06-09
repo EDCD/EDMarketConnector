@@ -1,5 +1,17 @@
+/* prefs.py: Catch & Record Profiler Errors; */
+"Error in System Profiler" = "Greša u System Profileru";
+
+/* EDMarketConnector.py: We didn't have the Fleet Carrier callsign when we should have; In files: EDMarketConnector.py:1223; */
+"CAPI: Fleet Carrier data incomplete" = "CAPI: Fleet Carrier podaci nisu kompletni";
+
+/* EDMarketConnector.py: No data was returned for the Fleet Carrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
+"CAPI: No Fleet Carrier data returned" = "CAPI: Fleet Carrier nisu dobijeni";
+
+/* prefs.py: Configuration - Enable or disable the Fleet Carrier CAPI calls; In files: prefs.py:475; */
+"Enable Fleet Carrier CAPI Queries" = "Omogući Fleet Carrier CAPI upite";
+
 /* edsm.py:Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:316; */
-"Send flight log and CMDR status to EDSM" = "Pošalji log leta i Cmdr status na EDSM";
+"Send flight log and CMDR status to EDSM" = "Pošalji log leta i CMDR status na EDSM";
 
 /* prefs.py:Label on button used to open a filesystem folder; In files: prefs.py:706; */
 "Open Log Folder" = "Otvori folder sa logovima";
@@ -22,7 +34,7 @@
 "Error: Invalid Credentials" = "Greška: Neispravni kredencijali";
 
 /* companion.py: Frontier CAPI authorisation not for currently game-active commander; In files: companion.py:296; */
-"Error: Wrong Cmdr" = "Greška: Pogrešan Cmdr";
+"Error: Wrong Cmdr" = "Greška: Pogrešan CMDR";
 
 /* companion.py: Generic error prefix - following text is from Frontier auth service; In files: companion.py:432; companion.py:517; */
 "Error" = "Greška";
@@ -35,6 +47,12 @@
 
 /* companion.py: Failed to get Access Token from Frontier Auth service; In files: companion.py:508; */
 "Error: unable to get token" = "Greška: Nemoguće dobaviti token";
+
+/* EDMarketConnector.py: EDMC Critical Error Notification; */
+"EDMC encountered a critical error, and cannot recover. EDMC is shutting down for its own protection!" = "EDMC je naišao na kritičnu grešku i ne može da se oporavi. EDMC će biti ugašen zbog vlastite zaštite.";
+
+/* EDMarketConnector.py: EDMC Critical Error Details; */
+"Here's what EDMC Detected:\r\n\r\n{ERR}\r\n\r\nDo you want to file a Bug Report on GitHub?" = "EDMC je detektovao sljedeće:\n\n{ERR}\n\nDa li želite da izvršite Bug Report na GitHub-u?";
 
 /* companion.py: Frontier CAPI returned 418, meaning down for maintenance; In files: companion.py:844; */
 "Frontier CAPI down for maintenance" = "Frontier CAPI nedostupan zbog održavanja";
@@ -55,7 +73,7 @@
 "Error: Check E:D journal file location" = "Greška: Provjerite lokaciju E:D journal fajla";
 
 /* EDMarketConnector.py: Label for commander name in main window; edsm.py: Game Commander name label in EDSM settings; stats.py: Cmdr stats; theme.py: Label for commander name in main window; In files: EDMarketConnector.py:913; edsm.py:332; stats.py:57; theme.py:290; */
-"Cmdr" = "Cmdr";
+"Cmdr" = "CMDR";
 
 /* EDMarketConnector.py: 'Ship' or multi-crew role label in main window, as applicable; EDMarketConnector.py: Multicrew role label in main window; In files: EDMarketConnector.py:915; EDMarketConnector.py:1487; */
 "Role" = "Uloga";
@@ -87,6 +105,9 @@
 /* EDMarketConnector.py: Help > Check for Updates...; In files: EDMarketConnector.py:930; EDMarketConnector.py:958; */
 "Check for Updates..." = "Provjeri nadogradnje...";
 
+/* EDMarketConnector.py: Help > Open System Profiler; In files: EDMarketConnector.py:888; */
+"Open System Profiler" = "Otvori System Profiler";
+
 /* EDMarketConnector.py: File > Save Raw Data...; In files: EDMarketConnector.py:931; EDMarketConnector.py:948; */
 "Save Raw Data..." = "Snimi sirove podatke...";
 
@@ -116,6 +137,15 @@
 
 /* EDMarketConnector.py: Label for 'Copy' as in 'Copy and Paste'; ttkHyperlinkLabel.py: Label for 'Copy' as in 'Copy and Paste'; In files: EDMarketConnector.py:962; ttkHyperlinkLabel.py:53; */
 "Copy" = "Kopiraj";
+
+/* myNotebook.py: Label for 'Cut' as in 'Cut and Paste'; */
+"Cut" = "Izreži";
+
+/* myNotebook.py: Label for 'Paste' as in 'Copy and Paste'; */
+"Paste" = "Nalijepi";
+
+/* myNotebook.py: Label for 'Select All'; */
+"Select All" = "Selektuj sve";
 
 /* EDMarketConnector.py: CAPI auth aborted because of killswitch; EDMarketConnector.py: CAPI auth query aborted because of killswitch; In files: EDMarketConnector.py:973; EDMarketConnector.py:1067; */
 "CAPI auth disabled by killswitch" = "CAPI autentifikacija onemogućena putem sistemskog prekidača";
@@ -159,12 +189,12 @@
 /* EDMarketConnector.py: CAPI fleetcarrier query aborted because of killswitch; In files: EDMarketConnector.py:1157; */
 "CAPI fleetcarrier disabled by killswitch" = "CAPI fleetcarrier onemogućen putem sistemskog prekidača";
 
+
 /* EDMarketConnector.py: No data was returned for the fleetcarrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
 "CAPI: No fleetcarrier data returned" = "CAPI: Fleetcarrier podaci nisu dobijeni";
 
 /* EDMarketConnector.py: We didn't have the fleetcarrier callsign when we should have; In files: EDMarketConnector.py:1223; */
 "CAPI: Fleetcarrier data incomplete" = "CAPI: Fleetcarrier podaci nisu potpuni";
-
 /* EDMarketConnector.py: No data was returned for the commander from the Frontier CAPI; In files: EDMarketConnector.py:1242; */
 "CAPI: No commander data returned" = "CAPI: Nema podataka o komandantu";
 
@@ -218,6 +248,18 @@
 
 /* EDMarketConnector.py: Popup-text about 'broken' plugins that failed to load; In files: EDMarketConnector.py:2266; */
 "One or more of your enabled plugins failed to load. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. This could be caused by a wrong folder structure. The load.py file should be located under plugins/PLUGIN_NAME/load.py.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "Jedan ili više aktiviranih dodataka (plugins) nemaju podršku za Python 3.x. Pogledajte listu u '{PLUGINS}' tabu u '{FILE}' > '{SETTINGS}'. Pogrešna struktura foldera može da uzrokuje problem. Fajl load.py treba da bude smješten u plugins/PLUGIN_NAME/load.py.\n\nMožete deaktivirati dodatak (plugin) dodavanjem '{DISABLED}' na kraju imena njegovog foldera.";
+
+/* EDMarketConnector.py: Popup-text about Reset Providers; In files: EDMarketConnector.py:2146; */
+"One or more of your URL Providers were invalid, and have been reset:\r\n\r\n" = "Jedan ili više URL Providera su pogrešni i zbog toga su resetovani:\n";
+
+/* EDMarketConnector.py: Text About What Provider Was Reset; In files: EDMarketConnector.py:2148; */
+"{PROVIDER} was set to {OLDPROV}, and has been reset to {NEWPROV}\r\n" = "{PROVIDER} je bio postavljen na {OLDPROV}, a sad je resetovan na {NEWPROV}\n";
+
+/* EDMarketConnector.py: Popup window title for Reset Providers; In files: EDMarketConnector.py:2161; */
+"EDMC: Default Providers Reset" = "EDMC: Standardni Provideri su resetovani";
+
+/* EDMarketConnector.py: Await Full CMDR Login to Game; In files: EDMarketConnector.py:813; */
+"Awaiting Full CMDR Login" = "Čekam da se CMDR potpuno uloguje";
 
 /* journal_lock.py: Title text on popup when Journal directory already locked; In files: journal_lock.py:208; */
 "Journal directory already locked" = "Journal direktorijum je već zaključan";
@@ -313,7 +355,7 @@
 "Error: Can't connect to EDSM" = "Greška: Nemoguće povezivanje sa EDSM";
 
 /* inara.py: Checkbox to enable INARA API Usage; In files: inara.py:257; */
-"Send flight log and Cmdr status to Inara" = "Pošalji log leta i Cmdr status na Inara";
+"Send flight log and Cmdr status to Inara" = "Pošalji log leta i CMDR status na Inara";
 
 /* inara.py: Text for INARA API keys link ( goes to https://inara.cz/settings-api ); In files: inara.py:269; */
 "Inara credentials" = "Kredencijali za Inara";
@@ -357,9 +399,9 @@
 /* prefs.py: Settings > Configuration - Label for CAPI section; In files: prefs.py:469; */
 "CAPI Settings" = "CAPI Podešavanja";
 
+
 /* prefs.py: Configuration - Enable or disable the Fleet Carrier CAPI calls; In files: prefs.py:475; */
 "Enable Fleetcarrier CAPI Queries" = "Omogući Fleetcarrier CAPI Upite";
-
 /* prefs.py: Hotkey/Shortcut settings prompt on Windows; In files: prefs.py:492; */
 "Hotkey" = "Prečica";
 
@@ -759,3 +801,24 @@
 /* stats.py: Status dialog title; In files: stats.py:418; */
 "Ships" = "Brodovi";
 
+/* update.py: Update Available Text; In files: update.py:229; */
+"{NEWVER} is available" = "{NEWVER} je dostupna";
+
+/* prefs.py: Stable Version of EDMC; */
+"Stable" = "Stabilna";
+
+/* prefs.py: Select the Update Track (Beta, Stable); */
+"Update Track" = "Kanal osvježavanja";
+
+/* EDMarketConnector.py: Inform the user the Update Track has changed; */
+"Update Track Changed to {TRACK}" = "Kanal za osvježavanje je promijenjen u {TRACK}";
+
+
+/* EDMarketConnector.py: Inform User of Beta -> Stable Transition Risks; */
+"Update track changed to Stable from Beta. You will no longer receive Beta updates. You will stay on your current Beta version until the next Stable release.\r\n\r\nYou can manually revert to the latest Stable version. To do so, you must download and install the latest Stable version manually. Note that this may introduce bugs or break completely if downgrading between major versions with significant changes.\r\n\r\nDo you want to open GitHub to download the latest release?" = "Kanal za osvježavanje je promijenjen iz Beta u Stabilni. Više nećete primati Beta osvježavanja. Ostaćete na trenutnoj Beta verziji do sljedeće Stabilne verzije.\n\nMožete se ručno vratiti na posljednju Stabilnu verziju. Da biste to učinili morate da skinete i ručno instališete posljednju Stabilnu verziju. Ova procedura može da uvede nove bugove ili da potpuno onesposobi program ako prelazite između verzija sa mnogo značajnih promjena.\n\nDa li želite da otvorite GitHub stranicu za download posljednje verzije?";
+
+/* myNotebook.py: Can't Paste Images or Files in Text; */
+"Cannot paste non-text content." = "Nije moguće da se zalijepi netekstualni sadržaj.";
+
+/* ttkHyperlinkLabel.py: Open Element In Selected Provider; */
+"Open in {URL}" = "Otvori u {URL}";

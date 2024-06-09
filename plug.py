@@ -429,7 +429,7 @@ def notify_capidata(data: companion.CAPIData, is_beta: bool) -> str | None:
 
 def notify_capi_fleetcarrierdata(data: companion.CAPIData) -> str | None:
     """
-    Send the latest CAPI Fleetcarrier data from the FD servers to each plugin.
+    Send the latest CAPI Fleet Carrier data from the FD servers to each plugin.
 
     :param data: The CAPIData returned in the CAPI response
     :returns: Error message from the first plugin that returns one (if any)
@@ -444,7 +444,7 @@ def notify_capi_fleetcarrierdata(data: companion.CAPIData) -> str | None:
                 error = error if error else newerror
 
             except Exception:
-                logger.exception(f'Plugin "{plugin.name}" failed on receiving Fleetcarrier data')
+                logger.exception(f'Plugin "{plugin.name}" failed on receiving Fleet Carrier data')
 
     return error
 
