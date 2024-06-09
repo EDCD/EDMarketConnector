@@ -13,8 +13,9 @@ namespace eval ttk::theme::transparent {
         -selectbg   "#ff8000"
         -highlight  "white"
     }
-    variable flatborder [list -relief groove -bordercolor $colors(-fg) -darkcolor $colors(-bg) -lightcolor $colors(-bg)]
+    variable font [font create -family "Euro Caps" -size 10]
     variable font_u [font create -family "Euro Caps" -size 10 -underline 1]
+    variable flatborder [list -relief groove -bordercolor $colors(-fg) -darkcolor $colors(-bg) -lightcolor $colors(-bg)]
 
     ttk::style theme create transparent -parent clam -settings {
         ttk::style configure . \
@@ -27,21 +28,21 @@ namespace eval ttk::theme::transparent {
             -insertwidth 1 \
             -insertcolor $colors(-fg) \
             -fieldbackground $colors(-bg) \
-            -font {"Euro Caps" 10} \
+            -font $font \
             -borderwidth 1 \
             -relief flat
 
-        tk_setPalette background [ttk::style lookup . -background] \
-            foreground [ttk::style lookup . -foreground] \
-            highlightColor [ttk::style lookup . -focuscolor] \
-            selectBackground [ttk::style lookup . -selectbackground] \
-            selectForeground [ttk::style lookup . -selectforeground] \
-            activeBackground [ttk::style lookup . -selectbackground] \
-            activeForeground [ttk::style lookup . -selectforeground]
+        tk_setPalette background $colors(-bg) \
+            foreground $colors(-fg) \
+            highlightColor $colors(-selectbg) \
+            selectBackground $colors(-selectbg) \
+            selectForeground $colors(-fg) \
+            activeBackground $colors(-selectbg) \
+            activeForeground $colors(-fg)
 
         ttk::style map . -foreground [list disabled $colors(-disabledfg)]
 
-        option add *font [ttk::style lookup . -font]
+        option add *Font $font
         option add *Menu.selectcolor $colors(-fg)
 
         ttk::style configure TLabel -padding 1

@@ -13,6 +13,7 @@ namespace eval ttk::theme::light {
         -selectbg   "#9e9a91"
         -highlight  "blue"
     }
+    variable font TkDefaultFont
     variable font_u [font create {*}[font configure TkDefaultFont] -underline 1]
 
     ttk::style theme create light -parent clam -settings {
@@ -26,21 +27,21 @@ namespace eval ttk::theme::light {
             -insertwidth 1 \
             -insertcolor $colors(-fg) \
             -fieldbackground $colors(-bg) \
-            -font {TkDefaultFont} \
+            -font $font \
             -borderwidth 1 \
             -relief flat
 
-        tk_setPalette background [ttk::style lookup . -background] \
-            foreground [ttk::style lookup . -foreground] \
-            highlightColor [ttk::style lookup . -focuscolor] \
-            selectBackground [ttk::style lookup . -selectbackground] \
-            selectForeground [ttk::style lookup . -selectforeground] \
-            activeBackground [ttk::style lookup . -selectbackground] \
-            activeForeground [ttk::style lookup . -selectforeground]
+        tk_setPalette background $colors(-bg) \
+            foreground $colors(-fg) \
+            highlightColor $colors(-selectbg) \
+            selectBackground $colors(-selectbg) \
+            selectForeground $colors(-fg) \
+            activeBackground $colors(-selectbg) \
+            activeForeground $colors(-fg)
 
         ttk::style map . -foreground [list disabled $colors(-disabledfg)]
 
-        option add *font [ttk::style lookup . -font]
+        option add *Font $font
         option add *Menu.selectcolor $colors(-fg)
 
         ttk::style configure TLabel -padding 1
