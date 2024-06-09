@@ -5,8 +5,7 @@ Copyright (c) EDCD, All Rights Reserved
 Licensed under the GNU General Public License.
 See LICENSE file.
 
-Because of various ttk limitations this app is an unholy mix of Tk and ttk widgets.
-So can't just use ttk's theme support. So have to change colors manually.
+Believe us, this used to be much worse before ttk's theme support was properly leveraged.
 """
 from __future__ import annotations
 
