@@ -42,6 +42,7 @@ import logging.handlers
 import os
 import pathlib
 import tempfile
+import warnings
 from contextlib import suppress
 from fnmatch import fnmatch
 # So that any warning about accessing a protected member is only in one place.
@@ -98,6 +99,8 @@ logging.Logger.trace = lambda self, message, *args, **kwargs: self._log(  # type
 # MAGIC-CONT: local idea of it.  So don't expect our log timestamps to perfectly match Journal ones.
 # MAGIC-CONT: See MAGIC tagged comment in Logger.__init__()
 logging.Formatter.converter = gmtime
+
+warnings.simplefilter('default', DeprecationWarning)
 
 
 def _trace_if(self: logging.Logger, condition: str, message: str, *args, **kwargs) -> None:

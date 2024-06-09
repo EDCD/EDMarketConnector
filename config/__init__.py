@@ -41,7 +41,6 @@ import pathlib
 import re
 import subprocess
 import sys
-import traceback
 import warnings
 from abc import abstractmethod
 from typing import Any, Callable, Type, TypeVar
@@ -329,8 +328,7 @@ class AbstractConfig(abc.ABC):
         :raises OSError: On Windows, if a Registry error occurs.
         :return: The data or the default.
         """
-        warnings.warn(DeprecationWarning('get is Deprecated. use the specific getter for your type'))
-        logger.debug('Attempt to use Deprecated get() method\n' + ''.join(traceback.format_stack()))
+        warnings.warn('get is Deprecated. use the specific getter for your type', DeprecationWarning, stacklevel=2)
 
         if (a_list := self._suppress_call(self.get_list, ValueError, key, default=None)) is not None:
             return a_list
@@ -388,8 +386,7 @@ class AbstractConfig(abc.ABC):
         See get_int for its replacement.
         :raises OSError: On Windows, if a Registry error occurs.
         """
-        warnings.warn(DeprecationWarning('getint is Deprecated. Use get_int instead'))
-        logger.debug('Attempt to use Deprecated getint() method\n' + ''.join(traceback.format_stack()))
+        warnings.warn('getint is Deprecated. Use get_int instead', DeprecationWarning, stacklevel=2)
 
         return self.get_int(key, default=default)
 
@@ -448,15 +445,15 @@ class AbstractConfig(abc.ABC):
 
     def get_password(self, account: str) -> None:
         """Legacy password retrieval."""
-        warnings.warn("password subsystem is no longer supported", DeprecationWarning)
+        warnings.warn("password subsystem is no longer supported", DeprecationWarning, stacklevel=2)
 
     def set_password(self, account: str, password: str) -> None:
         """Legacy password setting."""
-        warnings.warn("password subsystem is no longer supported", DeprecationWarning)
+        warnings.warn("password subsystem is no longer supported", DeprecationWarning, stacklevel=2)
 
     def delete_password(self, account: str) -> None:
         """Legacy password deletion."""
-        warnings.warn("password subsystem is no longer supported", DeprecationWarning)
+        warnings.warn("password subsystem is no longer supported", DeprecationWarning, stacklevel=2)
 
 
 def get_config(*args, **kwargs) -> AbstractConfig:
@@ -489,5 +486,9 @@ def get_update_feed() -> str:
     return 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml'
 
 
-# WARNING: update_feed is deprecated, and will be removed in 6.0 or later. Please migrate to get_update_feed()
-update_feed = get_update_feed()
+def __getattr__(name: str):
+    if name == 'update_feed':
+        warnings.warn('update_feed is deprecated, and will be removed in 6.0 or later. '
+                      'Please migrate to get_update_feed()', DeprecationWarning, stacklevel=2)
+        return get_update_feed()
+    raise AttributeError(name=name)

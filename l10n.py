@@ -263,15 +263,15 @@ class _Locale:
     """Locale holds a few utility methods to convert data to and from localized versions."""
 
     def stringFromNumber(self, number: float | int, decimals: int | None = None) -> str:  # noqa: N802
-        warnings.warn(DeprecationWarning('use _Locale.string_from_number instead.'))
+        warnings.warn('use _Locale.string_from_number instead.', DeprecationWarning, stacklevel=2)
         return self.string_from_number(number, decimals)  # type: ignore
 
     def numberFromString(self, string: str) -> int | float | None:  # noqa: N802
-        warnings.warn(DeprecationWarning('use _Locale.number_from_string instead.'))
+        warnings.warn('use _Locale.number_from_string instead.', DeprecationWarning, stacklevel=2)
         return self.number_from_string(string)
 
     def preferredLanguages(self) -> Iterable[str]:  # noqa: N802
-        warnings.warn(DeprecationWarning('use _Locale.preferred_languages instead.'))
+        warnings.warn('use _Locale.preferred_languages instead.', DeprecationWarning, stacklevel=2)
         return self.preferred_languages()
 
     def string_from_number(self, number: float | int, decimals: int = 5) -> str:
@@ -367,8 +367,8 @@ translations = Translations()
 # Begin Deprecation Zone
 class _Translations(Translations):
     def __init__(self):
-        logger.warning(DeprecationWarning('Translations and _Translations() are deprecated. '
-                       'Please use translations and Translations() instead.'))
+        warnings.warn('Translations and _Translations() are deprecated. '
+                      'Please use translations and Translations() instead.', DeprecationWarning, stacklevel=2)
         super().__init__()
 
 
