@@ -6,15 +6,17 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
       in the source (not distributed with the Windows installer) for the
       currently used version.
 ---
-Pre-Release 5.11.1-beta0
+Release 5.11.1
 ===
 
-This is a release candidate for 5.11.1.
-
-This release fixes a bug regarding FDevID files when running from Source in a non-writable location.
+This release fixes a bug regarding FDevID files when running from Source in a non-writable location. Additionally,
+Deprecation Warnings are now more visible to aid in plugin development.
 
 **Changes and Enhancements**
 * Added a check on Git Pushes to check for updated translation strings for developers
+* Enabled deprecation warnings to pass to plugins and logs
+* Updated Dependencies
+* Replaced infi.systray with drop-in replacement simplesystray
 
 **Bug Fixes**
 * Fixed a bug that could result in the program not updating or writing FDevID files when running from source in a location where the running user can't write to

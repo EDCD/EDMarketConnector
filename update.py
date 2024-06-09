@@ -197,7 +197,7 @@ class Updater:
 
     def check_appcast(self) -> EDMCVersion | None:
         """
-        Manually (no Sparkle or WinSparkle) check the update_feed appcast file.
+        Manually (no Sparkle or WinSparkle) check the get_update_feed() appcast file.
 
         Checks if any listed version is semantically greater than the current
         running version.
