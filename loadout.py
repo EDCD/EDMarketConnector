@@ -53,9 +53,9 @@ def export(data: companion.CAPIData, requested_filename: str | None = None) -> N
 
     # Write
 
-    output_directory = config.get_str('outdir')
+    output_directory = Path(config.get_str('outdir'))
     ship_time = time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(query_time))
-    file_path = output_directory / Path(f"{ship}.{ship_time}.txt")
+    file_path = output_directory / f"{ship}.{ship_time}.txt"
 
     with open(file_path, 'wt') as h:
         h.write(string)

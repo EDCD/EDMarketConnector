@@ -232,7 +232,7 @@ class Translations:
         if __file__:
             return pathlib.Path(__file__).parent.joinpath(LOCALISATION_DIR).resolve()
 
-        return pathlib.Path(LOCALISATION_DIR).resolve()
+        return LOCALISATION_DIR.resolve()
 
     def file(self, lang: str, plugin_path: pathlib.Path | None = None) -> TextIO | None:
         """
@@ -396,8 +396,8 @@ if __name__ == "__main__":
                             (match.group(4) and (match.group(4)[1:].strip()) + '. ' or '') + f'[{pathlib.Path(f).name}]'
                     )
     if seen:
-        target_path = pathlib.Path(LOCALISATION_DIR / 'en.template.new')
-        pathlib.Path(target_path).parent.mkdir(parents=True, exist_ok=True)
+        target_path = LOCALISATION_DIR / 'en.template.new'
+        target_path.parent.mkdir(parents=True, exist_ok=True)
         with open(target_path, 'w', encoding='utf-8') as target_file:
             target_file.write(f'/* Language name */\n"{LANGUAGE_ID}" = "English";\n\n')
             for thing in sorted(seen, key=str.lower):

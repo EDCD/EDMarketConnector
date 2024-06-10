@@ -230,7 +230,7 @@ def main():  # noqa: C901, CCR001
             try:
                 monitor.currentdir = Path(config.get_str('journaldir', default=config.default_journal_dir))
                 if not monitor.currentdir:
-                    monitor.currentdir = Path(config.default_journal_dir)
+                    monitor.currentdir = config.default_journal_dir_path
 
                 logger.debug(f'logdir = "{monitor.currentdir}"')
                 logfile = monitor.journal_newest_filename(monitor.currentdir)

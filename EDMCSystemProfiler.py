@@ -49,7 +49,7 @@ def get_sys_report(config: config.AbstractConfig) -> str:
         )
     )
     if not monitor.currentdir:
-        monitor.currentdir = pathlib.Path(config.default_journal_dir)
+        monitor.currentdir = config.default_journal_dir_path
     try:
         logfile = monitor.journal_newest_filename(monitor.currentdir)
         if logfile is None:
