@@ -1,25 +1,38 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
-* We currently test against, and package with, Python 3.11.7, 32-bit.
+* We currently test against, and package with, Python 3.11.9, 32-bit.
   * As a result, we do not support Windows 7, 8, or 8.1.
   * Developers can check the contents of the `.python-version` file
       in the source (not distributed with the Windows installer) for the
       currently used version.
 ---
-Pre-Release 5.11.0-rc2
+Release 5.11.1
 ===
-This is a release candidate for 5.11.0.
 
-This release is identical to 5.11.0-rc1, with a few additions: 
+This release fixes a bug regarding FDevID files when running from Source in a non-writable location. Additionally,
+Deprecation Warnings are now more visible to aid in plugin development.
 
 **Changes and Enhancements**
-* Adds Additional Error Processing to the System Profiler when launched from EDMC
-* Adds the ability to resize the Settings window to larger than the initial default size
-* Tweaked a few list length checks that could just be boolean to be bool
+* Added a check on Git Pushes to check for updated translation strings for developers
+* Enabled deprecation warnings to pass to plugins and logs
+* Updated Dependencies
+* Replaced infi.systray with drop-in replacement simplesystray
 
-Pre-Release 5.11.0-rc1
+**Bug Fixes**
+* Fixed a bug that could result in the program not updating or writing FDevID files when running from source in a location where the running user can't write to
+
+**Plugin Developers**
+* nb.Entry is deprecated, and is slated for removal in 6.0 or later. Please migrate to nb.EntryMenu
+* nb.ColoredButton is deprecated, and is slated for removal in 6.0 or later. Please migrate to tk.Button
+* Calling internal translations with `_()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to importing `translations` and calling `translations.translate` or `translations.tl` directly
+* `Translations` as the translate system singleton is deprecated, and is slated for removal in 6.0 or later. Please migrate to the `translations` singleton
+* `help_open_log_folder()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to open_folder()
+* `update_feed` is deprecated, and is slated for removal in 6.0 or later. Please migrate to `get_update_feed()`.
+* FDevID files (`commodity.csv` and `rare_commodity.csv`) have moved their preferred location to the app dir (same location as default Plugins folder). Please migrate to use `config.app_dir_path`.
+
+
+Release 5.11.0
 ===
-This is a release candidate for 5.11.0.
 
 This release includes a number of new features and improvements, including a new Beta Update Track for testing future updates, enhanced context menus for text entry fields and UI elements, a revamp to the existing translation system and logging capabilities, and more. This release includes the Python Image Library (PIL) into our core bundle, adds a number of stability and configuration checks to the tool, and adds new schemas and configuration values to senders. 
 
@@ -41,9 +54,12 @@ This release also includes a number of bug fixes, performance enhancements, and 
 * Added a new updater for the FDevID Files to keep the dependency up to date without requiring a new patch version push
 * Added a System Profiler Utility to assist with gathering system and environment information for bug report purposes
 * Added a new security policy for responsible disclosure of identified security issues
+* Adds Additional Error Processing to the System Profiler when launched from EDMC
+* Adds the ability to resize the Settings window to larger than the initial default size
 * Enabled security code scanning on the GitHub repository
+* Tweaked a few list length checks that could just be boolean to be bool
 * Updates the look and feel of the "Already Running" popup to reduce overhead and improve the look of the popup
-* Updated translations to latest versions
+* Updated translations to latest versions, including a new language: Ukranian!
 * Updated documentation to reflect certain changes to the code
 * Updated the GitHub Bug Report template
 * Updated the GitHub Pull Request template

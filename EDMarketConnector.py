@@ -65,6 +65,7 @@ from config import appversion, appversion_nobuild, config, copyright
 
 from EDMCLogging import edmclogger, logger, logging
 from journal_lock import JournalLock, JournalLockResult
+from update import check_for_fdev_updates
 
 if __name__ == '__main__':  # noqa: C901
     # Command-line arguments
@@ -404,7 +405,7 @@ if TYPE_CHECKING:
     from logging import TRACE  # type: ignore # noqa: F401 # Needed to update mypy
 
     if sys.platform == 'win32':
-        from infi.systray import SysTrayIcon
+        from simplesystray import SysTrayIcon
     # isort: on
 
 
@@ -460,7 +461,7 @@ class AppWindow:
         self.prefsdialog = None
 
         if sys.platform == 'win32':
-            from infi.systray import SysTrayIcon
+            from simplesystray import SysTrayIcon
 
             def open_window(systray: 'SysTrayIcon') -> None:
                 self.w.deiconify()
@@ -1066,7 +1067,7 @@ class AppWindow:
         """
         Perform CAPI fleetcarrier data retrieval and associated actions.
 
-        This is triggered by certain FleetCarrier journal events
+        This is triggered by certain Fleet Carrier journal events
 
         :param event: Tk generated event details.
         """
@@ -1104,7 +1105,7 @@ class AppWindow:
             self.w.update_idletasks()
 
         query_time = int(time())
-        logger.trace_if('capi.worker', 'Requesting fleetcarrier data')
+        logger.trace_if('capi.worker', 'Requesting Fleet Carrier data')
         config.set('fleetcarrierquerytime', query_time)
         logger.trace_if('capi.worker', 'Calling companion.session.fleetcarrier')
         companion.session.fleetcarrier(
@@ -1143,11 +1144,11 @@ class AppWindow:
                 # Validation
                 if 'name' not in capi_response.capi_data:
                     # LANG: No data was returned for the fleetcarrier from the Frontier CAPI
-                    err = self.status['text'] = tr.tl('CAPI: No fleetcarrier data returned')
+                    err = self.status['text'] = tr.tl('CAPI: No Fleet Carrier data returned')
 
                 elif not capi_response.capi_data.get('name', {}).get('callsign'):
                     # LANG: We didn't have the fleetcarrier callsign when we should have
-                    err = self.status['text'] = tr.tl("CAPI: Fleetcarrier data incomplete")  # Shouldn't happen
+                    err = self.status['text'] = tr.tl("CAPI: Fleet Carrier data incomplete")  # Shouldn't happen
 
                 else:
                     if __debug__:  # Recording
@@ -2322,6 +2323,7 @@ sys.path: {sys.path}'''
     root.after(2, show_killswitch_poppup, root)
     # Start the main event loop
     try:
+        check_for_fdev_updates()
         root.mainloop()
     except KeyboardInterrupt:
         logger.info("Ctrl+C Detected, Attempting Clean Shutdown")

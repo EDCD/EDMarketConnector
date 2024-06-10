@@ -22,6 +22,7 @@ from traceback import print_exc
 
 import companion
 import outfitting
+from config import config
 from edmc_data import companion_category_map, ship_name_map
 
 
@@ -50,7 +51,10 @@ def addcommodities(data) -> None:  # noqa: CCR001
     if not data['lastStarport'].get('commodities'):
         return
 
-    commodityfile = pathlib.Path('FDevIDs/commodity.csv')
+    try:
+        commodityfile = pathlib.Path(config.app_dir_path / 'FDevIDs' / 'commodity.csv')
+    except FileNotFoundError:
+        commodityfile = pathlib.Path('FDevIDs/commodity.csv')
     commodities = {}
 
     # slurp existing

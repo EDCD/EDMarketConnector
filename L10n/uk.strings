@@ -1,8 +1,34 @@
+/* prefs.py: Catch & Record Profiler Errors; */
+"Error in System Profiler" = "Помилка у Профайлері Систем";
+
+/* EDMarketConnector.py: We didn't have the Fleet Carrier callsign when we should have; In files: EDMarketConnector.py:1223; */
+"CAPI: Fleet Carrier data incomplete" = "CAPI: Дані корабля-носія неповні";
+
+/* EDMarketConnector.py: No data was returned for the Fleet Carrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
+"CAPI: No Fleet Carrier data returned" = "CAPI: Немає даних корабля-носія";
+
+/* prefs.py: Configuration - Enable or disable the Fleet Carrier CAPI calls; In files: prefs.py:475; */
+"Enable Fleet Carrier CAPI Queries" = "Ввімкнути запити CAPI кораблів-носіїв";
+
+/* edsm.py:Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:316; */
+"Send flight log and CMDR status to EDSM" = "Відправляти дані бортового журналу до EDSM";
+
+/* prefs.py:Label on button used to open a filesystem folder; In files: prefs.py:706; */
+"Open Log Folder" = "Відкрити папку журналу";
+
+/* inara.py:Text Inara Show API key; In files: inara.py:305; */
+"Show API Key" = "Показати ключ API";
 /* Language name */
 "!Language" = "Українська";
 
+/* companion.py: Frontier CAPI didn't respond; In files: companion.py:226; */
+"Error: Frontier CAPI didn't respond" = "Помилка: Frontier CAPI не відповідає";
+
 /* companion.py: Frontier CAPI data doesn't agree with latest Journal game location; In files: companion.py:245; */
 "Error: Frontier server is lagging" = "Помилка: З`єднання з сервером гри з затримками!";
+
+/* companion.py: Commander is docked at an EDO settlement, got out and back in, we forgot the station; In files: companion.py:261; */
+"Docked but unknown station: EDO Settlement?" = "Пристикований, проте станція невідома: поселення EDO?";
 
 /* companion.py: Generic "something went wrong with Frontier Auth" error; In files: companion.py:271; */
 "Error: Invalid Credentials" = "Помилка: Невірні облікові дані!";
@@ -22,6 +48,18 @@
 /* companion.py: Failed to get Access Token from Frontier Auth service; In files: companion.py:508; */
 "Error: unable to get token" = "Помилка: не вдалося отримати токен";
 
+/* EDMarketConnector.py: EDMC Critical Error Notification; */
+"EDMC encountered a critical error, and cannot recover. EDMC is shutting down for its own protection!" = "EDMC виявив критичну помилку, і не може відновити функціонування. EDMC вимкнеться заради самозахисту!";
+
+/* EDMarketConnector.py: EDMC Critical Error Details; */
+"Here's what EDMC Detected:\r\n\r\n{ERR}\r\n\r\nDo you want to file a Bug Report on GitHub?" = "Ось що EDMC зміг з'ясувати:\n\n{ERR}\n\nХочете створити баг репорт на GitHub?";
+
+/* companion.py: Frontier CAPI returned 418, meaning down for maintenance; In files: companion.py:844; */
+"Frontier CAPI down for maintenance" = "Frontier CAPI відключений через технічне обслуговування";
+
+/* companion.py: Frontier CAPI data retrieval failed; In files: companion.py:856; */
+"Frontier CAPI query failure" = "Помилка запиту Frontier CAPI";
+
 /* EDMarketConnector.py: Main UI Update button; EDMarketConnector.py: Update button in main window; In files: EDMarketConnector.py:601; EDMarketConnector.py:919; EDMarketConnector.py:1748; */
 "Update" = "Оновлення";
 
@@ -30,6 +68,9 @@
 
 /* EDMarketConnector.py: Unknown suit; In files: EDMarketConnector.py:837; */
 "Unknown" = "Невідомо";
+
+/* EDMarketConnector.py: ED Journal file location appears to be in error; In files: EDMarketConnector.py:906; */
+"Error: Check E:D journal file location" = "Помилка: перевірте розташування файлу журналу E:D";
 
 /* EDMarketConnector.py: Label for commander name in main window; edsm.py: Game Commander name label in EDSM settings; stats.py: Cmdr stats; theme.py: Label for commander name in main window; In files: EDMarketConnector.py:913; edsm.py:332; stats.py:57; theme.py:290; */
 "Cmdr" = "Км-др";
@@ -64,6 +105,9 @@
 /* EDMarketConnector.py: Help > Check for Updates...; In files: EDMarketConnector.py:930; EDMarketConnector.py:958; */
 "Check for Updates..." = "Перевірка оновлень...";
 
+/* EDMarketConnector.py: Help > Open System Profiler; In files: EDMarketConnector.py:888; */
+"Open System Profiler" = "Відкрити Профайлер Систем";
+
 /* EDMarketConnector.py: File > Save Raw Data...; In files: EDMarketConnector.py:931; EDMarketConnector.py:948; */
 "Save Raw Data..." = "Зберегти необроблені дані...";
 
@@ -72,6 +116,12 @@
 
 /* EDMarketConnector.py: Help > Documentation; In files: EDMarketConnector.py:933; EDMarketConnector.py:953; */
 "Documentation" = "Документація";
+
+/* EDMarketConnector.py: Help > Troubleshooting; In files: EDMarketConnector.py:934; EDMarketConnector.py:954; */
+"Troubleshooting" = "Усунення несправностей";
+
+/* EDMarketConnector.py: Help > Report A Bug; In files: EDMarketConnector.py:935; EDMarketConnector.py:955; */
+"Report A Bug" = "Повідомити про помилку";
 
 /* EDMarketConnector.py: Help > Privacy Policy; In files: EDMarketConnector.py:936; EDMarketConnector.py:956; */
 "Privacy Policy" = "Політика конфіденційності";
@@ -88,6 +138,18 @@
 /* EDMarketConnector.py: Label for 'Copy' as in 'Copy and Paste'; ttkHyperlinkLabel.py: Label for 'Copy' as in 'Copy and Paste'; In files: EDMarketConnector.py:962; ttkHyperlinkLabel.py:53; */
 "Copy" = "Копіювати";
 
+/* myNotebook.py: Label for 'Cut' as in 'Cut and Paste'; */
+"Cut" = "Вирізати";
+
+/* myNotebook.py: Label for 'Paste' as in 'Copy and Paste'; */
+"Paste" = "Вставити";
+
+/* myNotebook.py: Label for 'Select All'; */
+"Select All" = "Вибрати все";
+
+/* EDMarketConnector.py: CAPI auth aborted because of killswitch; EDMarketConnector.py: CAPI auth query aborted because of killswitch; In files: EDMarketConnector.py:973; EDMarketConnector.py:1067; */
+"CAPI auth disabled by killswitch" = "Автентифікація CAPI виключена функцією аварійного відключення";
+
 /* EDMarketConnector.py: Status - Attempting to get a Frontier Auth Access Token; In files: EDMarketConnector.py:978; */
 "Logging in..." = "Вхід в...";
 
@@ -103,9 +165,36 @@
 /* EDMarketConnector.py: Status - No station market data from Frontier CAPI; In files: EDMarketConnector.py:1038; */
 "Station doesn't have a market!" = "На станції немає ринку!";
 
+/* EDMarketConnector.py: CAPI queries aborted because Cmdr name is unknown; EDMarketConnector.py: CAPI fleetcarrier query aborted because Cmdr name is unknown; In files: EDMarketConnector.py:1077; EDMarketConnector.py:1164; */
+"CAPI query aborted: Cmdr name unknown" = "Запит CAPI скасований: Невідоме ім'я КМДР";
+
+/* EDMarketConnector.py: CAPI queries aborted because game mode unknown; In files: EDMarketConnector.py:1083; */
+"CAPI query aborted: Game mode unknown" = "Запит CAPI скасований: Невідомий режим гри";
+
+/* EDMarketConnector.py: CAPI queries aborted because GameVersion unknown; EDMarketConnector.py: CAPI fleetcarrier query aborted because GameVersion unknown; In files: EDMarketConnector.py:1089; EDMarketConnector.py:1170; */
+"CAPI query aborted: GameVersion unknown" = "Запит CAPI скасований: Невідома версія гри";
+
+/* EDMarketConnector.py: CAPI queries aborted because current star system name unknown; In files: EDMarketConnector.py:1095; */
+"CAPI query aborted: Current system unknown" = "Запит CAPI скасований: Невідома поточна система";
+
+/* EDMarketConnector.py: CAPI queries aborted because player is in multi-crew on other Cmdr's ship; In files: EDMarketConnector.py:1101; */
+"CAPI query aborted: In other-ship multi-crew" = "Запит CAPI скасований: в режимі мультиекіпажу іншого корабля";
+
+/* EDMarketConnector.py: CAPI queries aborted because player is in CQC (Arena); In files: EDMarketConnector.py:1107; */
+"CAPI query aborted: CQC (Arena) detected" = "Запит CAPI скасований: Арена Близького бою (CQC) виявлена";
+
 /* EDMarketConnector.py: Status - Attempting to retrieve data from Frontier CAPI; In files: EDMarketConnector.py:1128; EDMarketConnector.py:1179; */
 "Fetching data..." = "Отримання даних...";
 
+/* EDMarketConnector.py: CAPI fleetcarrier query aborted because of killswitch; In files: EDMarketConnector.py:1157; */
+"CAPI fleetcarrier disabled by killswitch" = "Запит CAPI корабля-носія скасований функцією аварійного відключення";
+
+
+/* EDMarketConnector.py: No data was returned for the fleetcarrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
+"CAPI: No fleetcarrier data returned" = "CAPI: Немає даних корабля-носія";
+
+/* EDMarketConnector.py: We didn't have the fleetcarrier callsign when we should have; In files: EDMarketConnector.py:1223; */
+"CAPI: Fleetcarrier data incomplete" = "CAPI: Дані корабля-носія неповні";
 /* EDMarketConnector.py: No data was returned for the commander from the Frontier CAPI; In files: EDMarketConnector.py:1242; */
 "CAPI: No commander data returned" = "CAPI: Не отримано данних пілота";
 
@@ -117,6 +206,12 @@
 
 /* EDMarketConnector.py: We don't know what ship the commander is in, when we should; stats.py: Unknown ship; In files: EDMarketConnector.py:1259; stats.py:349; */
 "What are you flying?!" = "На чому летимо?!";
+
+/* EDMarketConnector.py: Frontier CAPI server error when fetching data; In files: EDMarketConnector.py:1384; */
+"Frontier CAPI server error" = "Frontier CAPI: cерверна помилка";
+
+/* EDMarketConnector.py: Frontier CAPI Access Token expired, trying to get a new one; In files: EDMarketConnector.py:1390; */
+"CAPI: Refreshing access token..." = "CAPI: Оновлюємо токен доступу...";
 
 /* EDMarketConnector.py: Time when we last obtained Frontier CAPI data; In files: EDMarketConnector.py:1434; */
 "Last updated at %H:%M:%S" = "Останнє оновлення було %H:%M:%S";
@@ -148,6 +243,24 @@
 /* EDMarketConnector.py: Popup window title for list of 'enabled' plugins that don't work with Python 3.x; In files: EDMarketConnector.py:2274; */
 "EDMC: Plugins Without Python 3.x Support" = "EDMC: Плагіни без підтримки Python 3.x!";
 
+/* EDMarketConnector.py: Popup window title for list of 'broken' plugins that failed to load; In files: EDMarketConnector.py:2285; */
+"EDMC: Broken Plugins" = "EDMC: Поломані плагіни";
+
+/* EDMarketConnector.py: Popup-text about 'broken' plugins that failed to load; In files: EDMarketConnector.py:2266; */
+"One or more of your enabled plugins failed to load. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. This could be caused by a wrong folder structure. The load.py file should be located under plugins/PLUGIN_NAME/load.py.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "Не вдалося завантажити один або декілька увімкнених плагінів. Перегляньте список на вкладці '{PLUGINS}'  в '{FILE}' > '{SETTINGS}'. Ця помилка могла бути спричинена неправильною структурою папок. Файл load.py повинен знаходитися у папці  plugins/PLUGIN_NAME/load.py\n\nВи можете відключити плагін, перейменувавши його папку додавши '{DISABLED}' в кінці назви.";
+
+/* EDMarketConnector.py: Popup-text about Reset Providers; In files: EDMarketConnector.py:2146; */
+"One or more of your URL Providers were invalid, and have been reset:\r\n\r\n" = "Один або декілька ваших провайдерів URL були хибні та скинуті:\n";
+
+/* EDMarketConnector.py: Text About What Provider Was Reset; In files: EDMarketConnector.py:2148; */
+"{PROVIDER} was set to {OLDPROV}, and has been reset to {NEWPROV}\r\n" = "{PROVIDER} мав значення {OLDPROV}, та був скинутий до {NEWPROV}\n";
+
+/* EDMarketConnector.py: Popup window title for Reset Providers; In files: EDMarketConnector.py:2161; */
+"EDMC: Default Providers Reset" = "EDMC: Провайдери за замовчуванням були скинуті";
+
+/* EDMarketConnector.py: Await Full CMDR Login to Game; In files: EDMarketConnector.py:813; */
+"Awaiting Full CMDR Login" = "Очікуємо повного входу КМДР";
+
 /* journal_lock.py: Title text on popup when Journal directory already locked; In files: journal_lock.py:208; */
 "Journal directory already locked" = "Каталог журналу вже заблокований";
 
@@ -163,8 +276,44 @@
 /* l10n.py: The system default language choice in Settings > Appearance; prefs.py: Settings > Configuration - Label on 'reset journal files location to default' button; prefs.py: The system default language choice in Settings > Appearance; prefs.py: Label for 'Default' theme radio button; In files: l10n.py:193; prefs.py:455; prefs.py:709; prefs.py:742; */
 "Default" = "Стандартне налаштування";
 
+/* coriolis.py: 'Auto' label for Coriolis site override selection; coriolis.py: Coriolis normal/beta selection - auto; In files: coriolis.py:48; coriolis.py:74; coriolis.py:77; coriolis.py:94; coriolis.py:123; coriolis.py:139; coriolis.py:145; coriolis.py:179; coriolis.py:182; */
+"Auto" = "Авто";
+
+/* coriolis.py: 'Normal' label for Coriolis site override selection; coriolis.py: Coriolis normal/beta selection - normal; In files: coriolis.py:49; coriolis.py:75; coriolis.py:95; coriolis.py:121; coriolis.py:137; coriolis.py:180; */
+"Normal" = "Нормальний";
+
+/* coriolis.py: 'Beta' label for Coriolis site override selection; coriolis.py: Coriolis normal/beta selection - beta; In files: coriolis.py:50; coriolis.py:76; coriolis.py:96; coriolis.py:122; coriolis.py:138; coriolis.py:181; */
+"Beta" = "Бета";
+
+/* coriolis.py: Settings>Coriolis: Help/hint for changing coriolis URLs; In files: coriolis.py:91:93; */
+"Set the URL to use with coriolis.io ship loadouts. Note that this MUST end with '/import?data='" = "Вставте URL для використання із корабельними збірками coriolis.io. Зауважте що '/import?data=' ПОВИННО бути в кінці!";
+
+/* coriolis.py: Settings>Coriolis: Label for 'NOT alpha/beta game version' URL; In files: coriolis.py:97; */
+"Normal URL" = "Нормальний URL";
+
+/* coriolis.py: Generic 'Reset' button label; In files: coriolis.py:100; coriolis.py:109; */
+"Reset" = "Скинути";
+
+/* coriolis.py: Settings>Coriolis: Label for 'alpha/beta game version' URL; In files: coriolis.py:106; */
+"Beta URL" = "Бета URL";
+
+/* coriolis.py: Settings>Coriolis: Label for selection of using Normal, Beta or 'auto' Coriolis URL; In files: coriolis.py:116; */
+"Override Beta/Normal Selection" = "Перевизначити вибір Бета/Нормальний";
+
+/* coriolis.py: Settings>Coriolis - invalid override mode found; In files: coriolis.py:156; */
+"Invalid Coriolis override mode!" = "Неправильний режим перевизначення Coriolis!";
+
 /* eddn.py: Error while trying to send data to EDDN; In files: eddn.py:458; eddn.py:2413; eddn.py:2451; eddn.py:2519; */
 "Error: Can't connect to EDDN" = "Помилка: Немає зв'язку з EDDN!";
+
+/* eddn.py: EDDN has banned this version of our client; In files: eddn.py:576; */
+"EDDN Error: EDMC is too old for EDDN. Please update." = "Помилка EDDN: версія EDMC є занадто старою для EDDN. Будь-ласка, оновіть.";
+
+/* eddn.py: EDDN returned an error that indicates something about what we sent it was wrong; In files: eddn.py:582; */
+"EDDN Error: Validation Failed (EDMC Too Old?). See Log" = "Помилка EDDN: Перевірка провалена (EDMC занадно старий?). Див. Лог";
+
+/* eddn.py: EDDN returned some sort of HTTP error, one we didn't expect. {STATUS} contains a number; In files: eddn.py:587; */
+"EDDN Error: Returned {STATUS} status code" = "Помилка EDDN: Код {STATUS} було повернуто.";
 
 /* eddn.py: Enable EDDN support for station data checkbox label; In files: eddn.py:2041; */
 "Send station data to the Elite Dangerous Data Network" = "Надсилати дані станцій до Elite Dangerous Data Network";
@@ -174,6 +323,9 @@
 
 /* eddn.py: EDDN delay sending until docked option is on, this message notes that a send was skipped due to this; In files: eddn.py:2063; */
 "Delay sending until docked" = "Відкласти відправку даних до стикування";
+
+/* eddn.py: Killswitch disabled EDDN; In files: eddn.py:2178; */
+"EDDN journal handler disabled. See Log." = "Журнал EDDN відключено. Див. Лог";
 
 /* eddn.py: Status text shown while attempting to send data; In files: eddn.py:2507; */
 "Sending data to EDDN..." = "Відправка даних до EDDN...";
@@ -190,6 +342,12 @@
 /* edsm.py: We have no data on the current commander; prefs.py: No hotkey/shortcut set; stats.py: No rank; In files: edsm.py:394; prefs.py:527; prefs.py:1157; prefs.py:1190; stats.py:154; stats.py:173; stats.py:192; stats.py:209; */
 "None" = "Нічого";
 
+/* edsm.py: EDSM plugin - Journal handling disabled by killswitch; In files: edsm.py:516; */
+"EDSM Handler disabled. See Log." = "Обробник EDSM відключено. Див. Лог";
+
+/* edsm.py: EDSM - Only Live data; In files: edsm.py:632; */
+"EDSM only accepts Live galaxy data" = "EDSM приймає дані тільки Live версії галактики";
+
 /* edsm.py: EDSM Plugin - Error message from EDSM API; In files: edsm.py:916; edsm.py:1048; */
 "Error: EDSM {MSG}" = "Помилка: EDSM {MSG}!";
 
@@ -201,6 +359,12 @@
 
 /* inara.py: Text for INARA API keys link ( goes to https://inara.cz/settings-api ); In files: inara.py:269; */
 "Inara credentials" = "Обліковий запис Inara";
+
+/* inara.py: The Inara API only accepts Live galaxy data, not Legacy galaxy data; inara.py: Inara - Only Live data; In files: inara.py:384; inara.py:386; */
+"Inara only accepts Live galaxy data" = "Inara приймає дані тільки Live версії галактики";
+
+/* inara.py: INARA support disabled via killswitch; In files: inara.py:395; */
+"Inara disabled. See Log." = "Inara відключено. Див. Лог";
 
 /* inara.py: INARA API returned some kind of error (error message will be contained in {MSG}); In files: inara.py:1650; inara.py:1663; */
 "Error: Inara {MSG}" = "Помилка: Inara {MSG}";
@@ -232,6 +396,12 @@
 /* prefs.py: Settings > Configuration - Label for Journal files location; In files: prefs.py:431; prefs.py:446; */
 "E:D journal file location" = "Розташування файлу-журналу E:D";
 
+/* prefs.py: Settings > Configuration - Label for CAPI section; In files: prefs.py:469; */
+"CAPI Settings" = "Налаштування CAPI";
+
+
+/* prefs.py: Configuration - Enable or disable the Fleet Carrier CAPI calls; In files: prefs.py:475; */
+"Enable Fleetcarrier CAPI Queries" = "Ввімкнути запити CAPI кораблів-носіїв";
 /* prefs.py: Hotkey/Shortcut settings prompt on Windows; In files: prefs.py:492; */
 "Hotkey" = "Гаряча клавіша";
 
@@ -258,6 +428,15 @@
 
 /* prefs.py: Label for 'Configuration' tab in Settings; In files: prefs.py:681; */
 "Configuration" = "Конфігурація";
+
+/* prefs.py: UI elements privacy section header in privacy tab of preferences; In files: prefs.py:690; */
+"Main UI privacy options" = "Налаштування приватності основного вікна.";
+
+/* prefs.py: Hide private group owner name from UI checkbox; In files: prefs.py:695; */
+"Hide private group name in UI" = "Приховати назву приватної групи у вікні";
+
+/* prefs.py: Hide multicrew captain name from main UI checkbox; In files: prefs.py:699; */
+"Hide multi-crew captain name" = "Приховати ім'я капітана мультиекіпажу";
 
 /* prefs.py: Preferences privacy tab title; In files: prefs.py:703; */
 "Privacy" = "Конфіденційність";
@@ -316,6 +495,9 @@
 /* prefs.py: Plugins - Label on URL to documentation about migrating plugins from Python 2.7; In files: prefs.py:962; */
 "Information on migrating plugins" = "Інформація про міграцію плагінів";
 
+/* prefs.py: Plugins - Label for list of 'broken' plugins that failed to load; In files: prefs.py:1039; */
+"Broken Plugins" = "Поломані плагіни";
+
 /* prefs.py: Lable on list of user-disabled plugins; In files: prefs.py:977; */
 "Disabled Plugins" = "Вимкнені плагіни";
 
@@ -328,6 +510,21 @@
 /* stats.py: Top rank; In files: stats.py:63; */
 "Elite" = "Еліта";
 
+/* stats.py: Top rank +1; In files: stats.py:64; */
+"Elite I" = "Еліта І";
+
+/* stats.py: Top rank +2; In files: stats.py:65; */
+"Elite II" = "Еліта ІІ";
+
+/* stats.py: Top rank +3; In files: stats.py:66; */
+"Elite III" = "Еліта ІІІ";
+
+/* stats.py: Top rank +4; In files: stats.py:67; */
+"Elite IV" = "Еліта IV";
+
+/* stats.py: Top rank +5; In files: stats.py:68; */
+"Elite V" = "Еліта V";
+
 /* stats.py: Ranking; In files: stats.py:74; */
 "Combat" = "Бойовий";
 
@@ -336,6 +533,12 @@
 
 /* stats.py: Ranking; In files: stats.py:76; */
 "Explorer" = "Дослідницький";
+
+/* stats.py: Ranking; In files: stats.py:77; */
+"Mercenary" = "Найманець";
+
+/* stats.py: Ranking; In files: stats.py:78; */
+"Exobiologist" = "Екзобіолог";
 
 /* stats.py: Ranking; In files: stats.py:79; */
 "CQC" = "Близький бій (CQC)";
@@ -420,6 +623,51 @@
 
 /* stats.py: Explorer rank; In files: stats.py:118; */
 "Pioneer" = "Піонер";
+
+/* stats.py: Mercenary rank; In files: stats.py:122; */
+"Defenceless" = "Беззахисний";
+
+/* stats.py: Mercenary rank; In files: stats.py:123; */
+"Mostly Defenceless" = "Здебільшого беззахисний";
+
+/* stats.py: Mercenary rank; In files: stats.py:124; */
+"Rookie" = "Новачок";
+
+/* stats.py: Mercenary rank; In files: stats.py:125; */
+"Soldier" = "Солдат";
+
+/* stats.py: Mercenary rank; In files: stats.py:126; stats.py:128; */
+"Gunslinger" = "Стрілець";
+
+/* stats.py: Mercenary rank; In files: stats.py:127; */
+"Warrior" = "Воїн";
+
+/* stats.py: Mercenary rank; In files: stats.py:129; */
+"Deadeye" = "Снайпер";
+
+/* stats.py: Exobiologist rank; In files: stats.py:132; */
+"Directionless" = "Безнапрямний";
+
+/* stats.py: Exobiologist rank; In files: stats.py:133; */
+"Mostly Directionless" = "Здебільшого безнапрямний";
+
+/* stats.py: Exobiologist rank; In files: stats.py:134; */
+"Compiler" = "Упорядник";
+
+/* stats.py: Exobiologist rank; In files: stats.py:135; */
+"Collector" = "Колектор";
+
+/* stats.py: Exobiologist rank; In files: stats.py:136; */
+"Cataloguer" = "Каталогіст";
+
+/* stats.py: Exobiologist rank; In files: stats.py:137; */
+"Taxonomist" = "Систематик";
+
+/* stats.py: Exobiologist rank; In files: stats.py:138; */
+"Ecologist" = "Еколог";
+
+/* stats.py: Exobiologist rank; In files: stats.py:139; */
+"Geneticist" = "Генетик";
 
 /* stats.py: CQC rank; In files: stats.py:142; */
 "Helpless" = "Безпорадний";
@@ -541,9 +789,36 @@
 /* stats.py: Power rank; In files: stats.py:197; */
 "Rating 5" = "Рейтинг 5";
 
+/* stats.py: Current commander unknown when trying to use 'File' > 'Status'; In files: stats.py:315; */
+"Status: Don't yet know your Commander name" = "Статус: Поки ще не знаємо ім'я вашого КМДР";
+
+/* stats.py: No Frontier CAPI data yet when trying to use 'File' > 'Status'; In files: stats.py:323; */
+"Status: No CAPI data yet" = "Статус: Поки ще немає даних CAPI";
+
 /* stats.py: Status dialog subtitle - CR value of ship; In files: stats.py:409; */
 "Value" = "Вартість";
 
 /* stats.py: Status dialog title; In files: stats.py:418; */
 "Ships" = "Кораблі";
 
+/* update.py: Update Available Text; In files: update.py:229; */
+"{NEWVER} is available" = "{NEWVER} доступна";
+
+/* prefs.py: Stable Version of EDMC; */
+"Stable" = "Стабільний";
+
+/* prefs.py: Select the Update Track (Beta, Stable); */
+"Update Track" = "Шлях оновлень";
+
+/* EDMarketConnector.py: Inform the user the Update Track has changed; */
+"Update Track Changed to {TRACK}" = "Шлях оновлень змінено на {TRACK}";
+
+
+/* EDMarketConnector.py: Inform User of Beta -> Stable Transition Risks; */
+"Update track changed to Stable from Beta. You will no longer receive Beta updates. You will stay on your current Beta version until the next Stable release.\r\n\r\nYou can manually revert to the latest Stable version. To do so, you must download and install the latest Stable version manually. Note that this may introduce bugs or break completely if downgrading between major versions with significant changes.\r\n\r\nDo you want to open GitHub to download the latest release?" = "Шлях оновлень змінено з \"Бета\" на \"Стабільний\". Ви більше не будете отримувати бета оновлень. Ви залишитеся на версії бета до наступного стабільного релізу.\n\nВи можете вручну вернутися до останньої стабільної версії. Щоб це зробити, вам необхідно завантажити останню стабільну версію вручну. Зауважте що заниження версії між релізами з багатьма змінами може спричинити помилки чи повністю унеможливити роботу програми.\n\nБажаєте відкрити сторінку GitHub для завантаження останнього релізу?";
+
+/* myNotebook.py: Can't Paste Images or Files in Text; */
+"Cannot paste non-text content." = "Неможливо вставити нетекстовий вміст буфера обміну.";
+
+/* ttkHyperlinkLabel.py: Open Element In Selected Provider; */
+"Open in {URL}" = "Відкрити у {URL}";

@@ -1063,7 +1063,7 @@ class Session:
             play_sound: bool = False, auto_update: bool = False
     ) -> None:
         """
-        Perform CAPI query for fleetcarrier data.
+        Perform CAPI query for Fleet Carrier data.
 
         :param query_time: When this query was initiated.
         :param tk_response_event: Name of tk event to generate when response queued.
@@ -1074,8 +1074,8 @@ class Session:
         if not capi_host:
             return
 
-        # Ask the thread worker to perform a fleetcarrier query
-        logger.trace_if('capi.worker', 'Enqueueing fleetcarrier request')
+        # Ask the thread worker to perform a Fleet Carrier query
+        logger.trace_if('capi.worker', 'Enqueueing Fleet Carrier request')
         self.capi_request_queue.put(
             EDMCCAPIRequest(
                 capi_host=capi_host,
@@ -1203,10 +1203,10 @@ def fixup(data: CAPIData) -> CAPIData:  # noqa: C901, CCR001 # Can't be usefully
     if not commodity_map:
         # Lazily populate
         for f in ('commodity.csv', 'rare_commodity.csv'):
-            if not os.path.isfile(config.respath_path / 'FDevIDs/' / f):
+            if not os.path.isfile(config.app_dir_path / 'FDevIDs/' / f):
                 logger.warning(f'FDevID file {f} not found! Generating output without these commodity name rewrites.')
                 continue
-            with open(config.respath_path / 'FDevIDs' / f, 'r') as csvfile:
+            with open(config.app_dir_path / 'FDevIDs' / f, 'r') as csvfile:
                 reader = csv.DictReader(csvfile)
 
                 for row in reader:

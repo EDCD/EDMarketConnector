@@ -9,6 +9,7 @@ import subprocess
 import sys
 import tempfile
 import tkinter as tk
+import warnings
 from os import system
 from os.path import expanduser, expandvars, join, normpath
 from tkinter import colorchooser as tkColorChooser  # type: ignore # noqa: N812
@@ -36,13 +37,11 @@ logger = get_main_logger()
 
 # May be imported by plugins
 
-
+# DEPRECATED: Migrate to open_log_folder. Will remove in 6.0 or later.
 def help_open_log_folder() -> None:
     """Open the folder logs are stored in."""
-    logger.warning(
-        DeprecationWarning("This function is deprecated, use open_log_folder instead. "
-                           "This function will be removed in 6.0 or later")
-    )
+    warnings.warn('prefs.help_open_log_folder is deprecated, use open_log_folder instead. '
+                  'This function will be removed in 6.0 or later', DeprecationWarning, stacklevel=2)
     open_folder(pathlib.Path(tempfile.gettempdir()) / appname)
 
 
@@ -476,7 +475,7 @@ class PreferencesDialog(tk.Toplevel):
         ttk.Checkbutton(
                 config_frame,
                 # LANG: Configuration - Enable or disable the Fleet Carrier CAPI calls
-                text=tr.tl('Enable Fleetcarrier CAPI Queries'),
+                text=tr.tl('Enable Fleet Carrier CAPI Queries'),
                 variable=self.capi_fleetcarrier
             ).grid(columnspan=4, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=row.get())
 
