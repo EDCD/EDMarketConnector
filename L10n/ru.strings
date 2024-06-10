@@ -1,3 +1,15 @@
+/* prefs.py: Catch & Record Profiler Errors; */
+"Error in System Profiler" = "Ошибка в системном профайлере";
+
+/* EDMarketConnector.py: We didn't have the Fleet Carrier callsign when we should have; In files: EDMarketConnector.py:1223; */
+"CAPI: Fleet Carrier data incomplete" = "CAPI: Неполная информация о корабле-носителе";
+
+/* EDMarketConnector.py: No data was returned for the Fleet Carrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
+"CAPI: No Fleet Carrier data returned" = "CAPI: Нет данных о корабле-носителе";
+
+/* prefs.py: Configuration - Enable or disable the Fleet Carrier CAPI calls; In files: prefs.py:475; */
+"Enable Fleet Carrier CAPI Queries" = "Включить запросы к CAPI о корабле-носителе";
+
 /* edsm.py:Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:316; */
 "Send flight log and CMDR status to EDSM" = "Отправить журнал полетов и статус командира в EDSM";
 

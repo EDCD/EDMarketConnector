@@ -5,7 +5,7 @@
 "CAPI: Fleet Carrier data incomplete" = "CAPI: Fleet Carrier podaci nisu kompletni";
 
 /* EDMarketConnector.py: No data was returned for the Fleet Carrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
-"CAPI: No Fleet Carrier data returned" = "CAPI: Fleet Carrier nisu dobijeni";
+"CAPI: No Fleet Carrier data returned" = "CAPI: Fleet Carrier podaci nisu dobijeni";
 
 /* prefs.py: Configuration - Enable or disable the Fleet Carrier CAPI calls; In files: prefs.py:475; */
 "Enable Fleet Carrier CAPI Queries" = "Omogući Fleet Carrier CAPI upite";
