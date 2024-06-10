@@ -13,7 +13,7 @@ from os import chdir
 import mistune
 
 
-def get_changelog() -> str:
+def get_changelog() -> tuple[str, str]:
     """Pull the last full changelog details in MD."""
     with open("../CHANGELOG.md", encoding="utf-8") as changelog_file:
         content = changelog_file.read()
@@ -27,15 +27,65 @@ def get_changelog() -> str:
         changelog_list[1] = "\n".join(changelog_list[1].split("\n")[:-2])
         changelog = changelog_list[0] + changelog_list[1]
         changelog = changelog.rstrip()
-        return changelog
+        version = changelog.split("\n")[0]
+        version = version.split(" ")[1]
+        return changelog, version
 
 
-def build_html(md_changelog) -> None:
+def build_html(md_changelog) -> str:
     html_out = mistune.html(md_changelog)
     html_out = re.sub("h1", "h2", html_out)
     html_out += "\n<hr>"
     with open("script_output/html_changelog.txt", "w", encoding="utf-8") as html_file:
         html_file.write(html_out)
+    return html_out
+
+
+def build_fdev(
+    vt_signed: str,
+    vt_unsigned: str,
+    version: str,
+    gh_link: str,
+    html: str,
+) -> None:
+    fdev_out = (
+        "[HEADING=2][URL='"
+        + gh_link
+        + "'][SIZE=7]Release "
+        + version
+        + "[/SIZE][/URL][/HEADING]\n[URL='"
+        + vt_signed
+    )
+    fdev_out += (
+        "']Pre-emptive upload to VirusTotal[/URL]. ([URL='"
+        + vt_unsigned
+        + "']Unsigned Installer[/URL])\n\n"
+    )
+
+    if version.startswith("Pre-Release") or version.startswith("Beta"):
+        fdev_out += f'This is a release candidate for {version}. It has been pushed to the "Beta" track for updates!'
+        fdev_out += (
+            '\n\nFor more information on the "Beta" update track, please read '
+            "[URL='https://github.com/EDCD/EDMarketConnector/wiki/Participating-in-Open-Betas-of-EDMC']"
+            "This Wiki Article[/URL]. Questions and comments are welcome!\n\n"
+        )
+    changelog_trim = html.split("\n", maxsplit=1)
+    md_log = changelog_trim[1]
+    md_log = re.sub("<p>", "", md_log)
+    md_log = re.sub("</p>", "", md_log)
+    md_log = re.sub("<strong>", "\n[HEADING=3]", md_log)
+    md_log = re.sub("</strong>", "[/HEADING]", md_log)
+    md_log = re.sub("<ul>", "[LIST]", md_log)
+    md_log = re.sub("<li>", "[*]", md_log)
+    md_log = re.sub("</li>", "", md_log)
+    md_log = re.sub("<code>", "[ICODE]", md_log)
+    md_log = re.sub("</code>", "[/ICODE]", md_log)
+    md_log = re.sub("</ul>\n", "[/LIST]", md_log)
+    fdev_out += md_log
+
+    with open("script_output/fdev_changelog.txt", "w", encoding="utf-8") as fdev_file:
+        fdev_file.write(fdev_out)
+    return
 
 
 def build_reddit(
@@ -93,13 +143,14 @@ If you're running on Linux, try the [Flatpak](https://flathub.org/apps/io.edcd.E
 
 
 def main() -> None:
+    md_changelog, version = get_changelog()
+    print(f"Detected version {version} in the changelog. Continuing...")
+    gh_link = input(f"Please enter the GitHub link for {version}: ")
     vt_signed = input("Please enter the VirusTotal URL for the Signed Installer: ")
     vt_unsigned = input("Please enter the VirusTotal URL for the Unsigned Installer: ")
-    version = input("Please enter the version of EDMC: ")
-    gh_link = input(f"Please enter the GitHub link for {version}: ")
-    md_changelog = get_changelog()
     build_reddit(md_changelog, vt_signed, vt_unsigned, version, gh_link)
-    build_html(md_changelog)
+    html = build_html(md_changelog)
+    build_fdev(vt_signed, vt_unsigned, version, gh_link, html)
 
 
 if __name__ == "__main__":
