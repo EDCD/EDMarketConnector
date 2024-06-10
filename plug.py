@@ -189,12 +189,12 @@ def _load_found_plugins():
     # The intent here is to e.g. have EDMC-Overlay load before any plugins
     # that depend on it.
 
-    plugin_files = sorted(Path(config.plugin_dir_path).iterdir(), key=lambda p: (
+    plugin_files = sorted(config.plugin_dir_path.iterdir(), key=lambda p: (
         not (p / '__init__.py').is_file(), p.name.lower()))
 
     for plugin_file in plugin_files:
         name = plugin_file.name
-        if not (Path(config.plugin_dir_path) / name).is_dir() or name.startswith(('.', '_')):
+        if not (config.plugin_dir_path / name).is_dir() or name.startswith(('.', '_')):
             pass
         elif name.endswith('.disabled'):
             name, discard = name.rsplit('.', 1)
@@ -202,7 +202,7 @@ def _load_found_plugins():
         else:
             try:
                 # Add plugin's folder to load path in case plugin has internal package dependencies
-                sys.path.append(str(Path(config.plugin_dir_path) / name))
+                sys.path.append(str(config.plugin_dir_path / name))
 
                 import EDMCLogging
                 # Create a logger for this 'found' plugin.  Must be before the load.py is loaded.

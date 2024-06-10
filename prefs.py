@@ -58,7 +58,7 @@ def open_folder(file: Path) -> None:
 
 def help_open_system_profiler(parent) -> None:
     """Open the EDMC System Profiler."""
-    profiler_path = Path(config.respath_path)
+    profiler_path = config.respath_path
     try:
         if getattr(sys, 'frozen', False):
             profiler_path /= 'EDMCSystemProfiler.exe'

@@ -116,12 +116,12 @@ def main() -> None:
     root.withdraw()  # Hide the window initially to calculate the dimensions
     try:
         icon_image = tk.PhotoImage(
-            file=pathlib.Path(cur_config.respath_path) / "io.edcd.EDMarketConnector.png"
+            file=cur_config.respath_path / "io.edcd.EDMarketConnector.png"
         )
 
         root.iconphoto(True, icon_image)
     except tk.TclError:
-        root.iconbitmap(pathlib.Path(cur_config.respath_path) / "EDMarketConnector.ico")
+        root.iconbitmap(cur_config.respath_path / "EDMarketConnector.ico")
 
     sys_report = get_sys_report(cur_config)
 

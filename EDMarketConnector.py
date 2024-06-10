@@ -468,7 +468,7 @@ class AppWindow:
             self.w.wm_iconbitmap(default='EDMarketConnector.ico')
 
         else:
-            image_path = pathlib.Path(config.respath_path) / 'io.edcd.EDMarketConnector.png'
+            image_path = config.respath_path / 'io.edcd.EDMarketConnector.png'
             self.w.tk.call('wm', 'iconphoto', self.w, '-default', image=tk.PhotoImage(file=image_path))
 
         # TODO: Export to files and merge from them in future ?
@@ -1639,7 +1639,7 @@ class AppWindow:
         # Avoid file length limits if possible
         provider = config.get_str('shipyard_provider', default='EDSY')
         target = plug.invoke(provider, 'EDSY', 'shipyard_url', loadout, monitor.is_beta)
-        file_name = pathlib.Path(config.app_dir_path) / "last_shipyard.html"
+        file_name = config.app_dir_path / "last_shipyard.html"
 
         with open(file_name, 'w') as f:
             f.write(SHIPYARD_HTML_TEMPLATE.format(

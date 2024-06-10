@@ -51,7 +51,7 @@ def addcommodities(data) -> None:  # noqa: CCR001
         return
 
     try:
-        commodityfile = pathlib.Path(config.app_dir_path / 'FDevIDs' / 'commodity.csv')
+        commodityfile = config.app_dir_path / 'FDevIDs' / 'commodity.csv'
     except FileNotFoundError:
         commodityfile = pathlib.Path('FDevIDs/commodity.csv')
     commodities = {}

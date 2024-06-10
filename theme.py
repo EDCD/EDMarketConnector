@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import os
 import sys
-from pathlib import Path
 import tkinter as tk
 from tkinter import font as tk_font
 from tkinter import ttk
@@ -38,7 +37,7 @@ if sys.platform == 'win32':
     AddFontResourceEx.restypes = [LPCWSTR, DWORD, LPCVOID]  # type: ignore
     FR_PRIVATE = 0x10
     FR_NOT_ENUM = 0x20
-    font_path = Path(config.respath) / 'EUROCAPS.TTF'
+    font_path = config.respath_path / 'EUROCAPS.TTF'
     AddFontResourceEx(str(font_path), FR_PRIVATE, 0)
 
 elif sys.platform == 'linux':

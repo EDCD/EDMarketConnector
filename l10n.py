@@ -177,7 +177,7 @@ class Translations:
         if context:
             # TODO: There is probably a better way to go about this now.
             plugin_name = context[len(config.plugin_dir)+1:].split(sep)[0]
-            plugin_path = pathlib.Path(config.plugin_dir_path / plugin_name / LOCALISATION_DIR)
+            plugin_path = config.plugin_dir_path / plugin_name / LOCALISATION_DIR
 
         if lang:
             contents: dict[str, str] = self.contents(lang=lang, plugin_path=plugin_path)
