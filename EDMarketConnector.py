@@ -845,9 +845,19 @@ class AppWindow:
                 )
                 update_msg = update_msg.replace('\\n', '\n')
                 update_msg = update_msg.replace('\\r', '\r')
-                stable_popup = tk.messagebox.askyesno(title=title, message=update_msg, parent=postargs.get('Parent'))
+                stable_popup = tk.messagebox.askyesno(title=title, message=update_msg)
                 if stable_popup:
                     webbrowser.open("https://github.com/edCD/eDMarketConnector/releases/latest")
+        if postargs.get('Restart_Req'):
+            restart_msg = tr.tl('A restart of EDMC is required. EDMC will now shut down.')
+            restart_box = tk.messagebox.Message(
+                title=tr.tl('Restart Required'),
+                message=restart_msg,
+                type=tk.messagebox.OK
+            )
+            restart_box.show()
+            if restart_box:
+                app.onexit()
 
     def set_labels(self):
         """Set main window labels, e.g. after language change."""

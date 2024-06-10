@@ -239,6 +239,7 @@ class PreferencesDialog(tk.Toplevel):
 
         self.parent = parent
         self.callback = callback
+        self.req_restart = False
         # LANG: File > Settings (macOS)
         self.title(tr.tl('Settings'))
 
@@ -1274,19 +1275,22 @@ class PreferencesDialog(tk.Toplevel):
         config.set('dark_highlight', self.theme_colors[1])
         theme.apply(self.parent)
 
-        # Send to the Post Config if we updated the update branch
-        post_flags = {
-            'Update': True if self.curr_update_track != self.update_paths.get() else False,
-            'Track': self.update_paths.get(),
-            'Parent': self
-        }
         # Notify
         if self.callback:
-            self.callback(**post_flags)
+            self.callback()
 
         plug.notify_prefs_changed(monitor.cmdr, monitor.is_beta)
 
         self._destroy()
+        # Send to the Post Config if we updated the update branch or need to restart
+        post_flags = {
+            'Update': True if self.curr_update_track != self.update_paths.get() else False,
+            'Track': self.update_paths.get(),
+            'Parent': self,
+            'Restart_Req': True if self.req_restart else False
+        }
+        if self.callback:
+            self.callback(**post_flags)
 
     def _destroy(self) -> None:
         """widget.destroy wrapper that does some extra cleanup."""
