@@ -34,6 +34,7 @@ if sys.platform == "linux":
 if sys.platform == 'win32':
     import ctypes
     from ctypes.wintypes import DWORD, LPCVOID, LPCWSTR
+    import win32gui
     AddFontResourceEx = ctypes.windll.gdi32.AddFontResourceExW
     AddFontResourceEx.restypes = [LPCWSTR, DWORD, LPCVOID]  # type: ignore
     FR_PRIVATE = 0x10
@@ -427,8 +428,6 @@ class _Theme:
             GWL_EXSTYLE = -20  # noqa: N806 # ctypes
             WS_EX_APPWINDOW = 0x00040000  # noqa: N806 # ctypes
             WS_EX_LAYERED = 0x00080000  # noqa: N806 # ctypes
-            GetWindowLongW = ctypes.windll.user32.GetWindowLongW  # noqa: N806 # ctypes
-            SetWindowLongW = ctypes.windll.user32.SetWindowLongW  # noqa: N806 # ctypes
 
             # FIXME: Lose the "treat this like a boolean" bullshit
             if theme == self.THEME_DEFAULT:
@@ -445,14 +444,14 @@ class _Theme:
 
             root.withdraw()
             root.update_idletasks()  # Size and windows styles get recalculated here
-            hwnd = ctypes.windll.user32.GetParent(root.winfo_id())
-            SetWindowLongW(hwnd, GWL_STYLE, GetWindowLongW(hwnd, GWL_STYLE) & ~WS_MAXIMIZEBOX)  # disable maximize
+            hwnd = win32gui.GetParent(root.winfo_id())
+            win32gui.SetWindowLong(hwnd, GWL_STYLE, win32gui.GetWindowLong(hwnd, GWL_STYLE) & ~WS_MAXIMIZEBOX)  # disable maximize
 
             if theme == self.THEME_TRANSPARENT:
-                SetWindowLongW(hwnd, GWL_EXSTYLE, WS_EX_APPWINDOW | WS_EX_LAYERED)  # Add to taskbar
+                win32gui.SetWindowLong(hwnd, GWL_EXSTYLE, WS_EX_APPWINDOW | WS_EX_LAYERED)  # Add to taskbar
 
             else:
-                SetWindowLongW(hwnd, GWL_EXSTYLE, WS_EX_APPWINDOW)  # Add to taskbar
+                win32gui.SetWindowLong(hwnd, GWL_EXSTYLE, WS_EX_APPWINDOW)  # Add to taskbar
 
             root.deiconify()
             root.wait_visibility()  # need main window to be displayed before returning

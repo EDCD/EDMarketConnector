@@ -25,17 +25,14 @@ logger = EDMCLogging.get_main_logger()
 
 if sys.platform == 'win32':
     import ctypes
-    from ctypes.wintypes import HWND, POINT, RECT, SIZE, UINT
+    from ctypes.wintypes import POINT, RECT, SIZE, UINT
+    import win32gui
 
     try:
         CalculatePopupWindowPosition = ctypes.windll.user32.CalculatePopupWindowPosition
         CalculatePopupWindowPosition.argtypes = [
             ctypes.POINTER(POINT), ctypes.POINTER(SIZE), UINT, ctypes.POINTER(RECT), ctypes.POINTER(RECT)
         ]
-        GetParent = ctypes.windll.user32.GetParent
-        GetParent.argtypes = [HWND]
-        GetWindowRect = ctypes.windll.user32.GetWindowRect
-        GetWindowRect.argtypes = [HWND, ctypes.POINTER(RECT)]
 
     except Exception:  # Not supported under Wine 4.0
         CalculatePopupWindowPosition = None  # type: ignore
@@ -423,7 +420,7 @@ class StatsResults(tk.Toplevel):
         # Ensure fully on-screen
         if sys.platform == 'win32' and CalculatePopupWindowPosition:
             position = RECT()
-            GetWindowRect(GetParent(self.winfo_id()), position)
+            win32gui.GetWindowRect(win32gui.GetParent(self.winfo_id()), position)
             if CalculatePopupWindowPosition(
                 POINT(parent.winfo_rootx(), parent.winfo_rooty()),
                 # - is evidently supported on the C side

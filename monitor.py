@@ -36,23 +36,15 @@ MAX_FCMATERIALS_DISCREPANCY = 5  # Timestamp difference in seconds
 
 if sys.platform == 'win32':
     import ctypes
-    from ctypes.wintypes import BOOL, HWND, LPARAM, LPWSTR
+    from ctypes.wintypes import BOOL, HWND, LPARAM
+    import win32gui
 
     from watchdog.events import FileSystemEventHandler, FileSystemEvent
     from watchdog.observers import Observer
     from watchdog.observers.api import BaseObserver
 
-    EnumWindows = ctypes.windll.user32.EnumWindows
     EnumWindowsProc = ctypes.WINFUNCTYPE(BOOL, HWND, LPARAM)
-
     CloseHandle = ctypes.windll.kernel32.CloseHandle
-
-    GetWindowText = ctypes.windll.user32.GetWindowTextW
-    GetWindowText.argtypes = [HWND, LPWSTR, ctypes.c_int]
-    GetWindowTextLength = ctypes.windll.user32.GetWindowTextLengthW
-    GetWindowTextLength.argtypes = [ctypes.wintypes.HWND]
-    GetWindowTextLength.restype = ctypes.c_int
-
     GetProcessHandleFromHwnd = ctypes.windll.oleacc.GetProcessHandleFromHwnd
 
 else:
@@ -2131,9 +2123,9 @@ class EDLogs(FileSystemEventHandler):
         if sys.platform == 'win32':
             def WindowTitle(h):  # noqa: N802
                 if h:
-                    length = GetWindowTextLength(h) + 1
+                    length = win32gui.GetWindowTextLength(h) + 1
                     buf = ctypes.create_unicode_buffer(length)
-                    if GetWindowText(h, buf, length):
+                    if win32gui.GetWindowText(h, buf, length):
                         return buf.value
                 return None
 
@@ -2147,7 +2139,7 @@ class EDLogs(FileSystemEventHandler):
 
                 return True
 
-            return not EnumWindows(EnumWindowsProc(callback), 0)
+            return not win32gui.EnumWindows(EnumWindowsProc(callback), 0)
 
         return False
 
