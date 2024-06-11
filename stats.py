@@ -420,7 +420,7 @@ class StatsResults(tk.Toplevel):
         # Ensure fully on-screen
         if sys.platform == 'win32' and CalculatePopupWindowPosition:
             position = RECT()
-            win32gui.GetWindowRect(win32gui.GetParent(self.winfo_id()), position)
+            win32gui.GetWindowRect(win32gui.GetParent(self.winfo_id()))
             if CalculatePopupWindowPosition(
                 POINT(parent.winfo_rootx(), parent.winfo_rooty()),
                 # - is evidently supported on the C side

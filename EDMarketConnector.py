@@ -263,8 +263,6 @@ if __name__ == '__main__':  # noqa: C901
                 import win32con
 
                 GetProcessHandleFromHwnd = windll.oleacc.GetProcessHandleFromHwnd  # noqa: N806
-
-                ShowWindow = windll.user32.ShowWindow  # noqa: N806
                 ShowWindowAsync = windll.user32.ShowWindowAsync  # noqa: N806
 
                 COINIT_MULTITHREADED = 0  # noqa: N806,F841
@@ -308,7 +306,7 @@ if __name__ == '__main__':  # noqa: C901
                                     if len(sys.argv) > 1 and sys.argv[1].startswith(protocolhandler_redirect):
                                         CoInitializeEx(0, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)
                                         # Wait for it to be responsive to avoid ShellExecute recursing
-                                        ShowWindow(window_handle, win32con.SW_RESTORE)
+                                        win32gui.ShowWindow(window_handle, win32con.SW_RESTORE)
                                         win32api.ShellExecute(0, None, sys.argv[1], None, None, win32con.SW_RESTORE)
 
                                     else:

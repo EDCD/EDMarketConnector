@@ -188,8 +188,9 @@ class AutoInc(contextlib.AbstractContextManager):
 if sys.platform == 'win32':
     import ctypes
     import winreg
-    from ctypes.wintypes import HINSTANCE, LPCWSTR, LPWSTR, MAX_PATH, POINT, RECT, SIZE, UINT, BOOL
+    from ctypes.wintypes import LPCWSTR, LPWSTR, MAX_PATH, POINT, RECT, SIZE, UINT, BOOL
     import win32gui
+    import win32api
     is_wine = False
     try:
         WINE_REGISTRY_KEY = r'HKEY_LOCAL_MACHINE\Software\Wine'
@@ -224,10 +225,6 @@ if sys.platform == 'win32':
 
     SHGetLocalizedName = ctypes.windll.shell32.SHGetLocalizedName
     SHGetLocalizedName.argtypes = [LPCWSTR, LPWSTR, UINT, ctypes.POINTER(ctypes.c_int)]
-
-    LoadString = ctypes.windll.user32.LoadStringW
-    LoadString.argtypes = [HINSTANCE, UINT, LPWSTR, ctypes.c_int]
-    LoadString.restype = ctypes.c_int
 
 
 class PreferencesDialog(tk.Toplevel):
@@ -313,7 +310,7 @@ class PreferencesDialog(tk.Toplevel):
         # Ensure fully on-screen
         if sys.platform == 'win32' and CalculatePopupWindowPosition:
             position = RECT()
-            win32gui.GetWindowRect(win32gui.GetParent(self.winfo_id()), position)
+            win32gui.GetWindowRect(win32gui.GetParent(self.winfo_id()))
             if CalculatePopupWindowPosition(
                 POINT(parent.winfo_rootx(), parent.winfo_rooty()),
                 SIZE(position.right - position.left, position.bottom - position.top),  # type: ignore
@@ -1093,7 +1090,7 @@ class PreferencesDialog(tk.Toplevel):
             for i in range(start, len(components)):
                 try:
                     if (not SHGetLocalizedName('\\'.join(components[:i+1]), buf, MAX_PATH, ctypes.byref(pidsRes)) and
-                            LoadString(ctypes.WinDLL(expandvars(buf.value))._handle, pidsRes.value, buf, MAX_PATH)):
+                            win32api.LoadString(ctypes.WinDLL(expandvars(buf.value))._handle, pidsRes.value, buf, MAX_PATH)):
                         display.append(buf.value)
 
                     else:

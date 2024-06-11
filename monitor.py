@@ -36,17 +36,15 @@ MAX_FCMATERIALS_DISCREPANCY = 5  # Timestamp difference in seconds
 
 if sys.platform == 'win32':
     import ctypes
-    from ctypes.wintypes import BOOL, HWND, LPARAM, HANDLE
+    from ctypes.wintypes import BOOL, HWND, LPARAM
     import win32gui
+    import win32api
 
     from watchdog.events import FileSystemEventHandler, FileSystemEvent
     from watchdog.observers import Observer
     from watchdog.observers.api import BaseObserver
 
     EnumWindowsProc = ctypes.WINFUNCTYPE(BOOL, HWND, LPARAM)
-    CloseHandle = ctypes.windll.kernel32.CloseHandle
-    CloseHandle.argtypes = [HANDLE]
-    CloseHandle.restype = BOOL
     GetProcessHandleFromHwnd = ctypes.windll.oleacc.GetProcessHandleFromHwnd
 
 else:
@@ -2136,7 +2134,7 @@ class EDLogs(FileSystemEventHandler):
                 if name and name.startswith('Elite - Dangerous'):
                     handle = GetProcessHandleFromHwnd(hWnd)
                     if handle:  # If GetProcessHandleFromHwnd succeeds then the app is already running as this user
-                        CloseHandle(handle)
+                        win32api.CloseHandle(handle)
                         return False  # stop enumeration
 
                 return True

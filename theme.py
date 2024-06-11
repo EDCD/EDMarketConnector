@@ -422,12 +422,7 @@ class _Theme:
         self.active = theme
 
         if sys.platform == 'win32':
-            GWL_STYLE = -16  # noqa: N806 # ctypes
-            WS_MAXIMIZEBOX = 0x00010000  # noqa: N806 # ctypes
-            # tk8.5.9/win/tkWinWm.c:342
-            GWL_EXSTYLE = -20  # noqa: N806 # ctypes
-            WS_EX_APPWINDOW = 0x00040000  # noqa: N806 # ctypes
-            WS_EX_LAYERED = 0x00080000  # noqa: N806 # ctypes
+            import win32con
 
             # FIXME: Lose the "treat this like a boolean" bullshit
             if theme == self.THEME_DEFAULT:
@@ -445,14 +440,14 @@ class _Theme:
             root.withdraw()
             root.update_idletasks()  # Size and windows styles get recalculated here
             hwnd = win32gui.GetParent(root.winfo_id())
-            win32gui.SetWindowLong(hwnd, GWL_STYLE,
-                                   win32gui.GetWindowLong(hwnd, GWL_STYLE) & ~WS_MAXIMIZEBOX)  # disable maximize
+            win32gui.SetWindowLong(hwnd, win32con.GWL_STYLE,
+                                   win32gui.GetWindowLong(hwnd, win32con.GWL_STYLE) & ~win32con.WS_MAXIMIZEBOX)  # disable maximize
 
             if theme == self.THEME_TRANSPARENT:
-                win32gui.SetWindowLong(hwnd, GWL_EXSTYLE, WS_EX_APPWINDOW | WS_EX_LAYERED)  # Add to taskbar
+                win32gui.SetWindowLong(hwnd, win32con.GWL_EXSTYLE, win32con.WS_EX_APPWINDOW | win32con.WS_EX_LAYERED)  # Add to taskbar
 
             else:
-                win32gui.SetWindowLong(hwnd, GWL_EXSTYLE, WS_EX_APPWINDOW)  # Add to taskbar
+                win32gui.SetWindowLong(hwnd, win32con.GWL_EXSTYLE, win32con.WS_EX_APPWINDOW)  # Add to taskbar
 
             root.deiconify()
             root.wait_visibility()  # need main window to be displayed before returning
