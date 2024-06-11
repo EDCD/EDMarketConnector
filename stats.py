@@ -25,7 +25,7 @@ logger = EDMCLogging.get_main_logger()
 
 if sys.platform == 'win32':
     import ctypes
-    from ctypes.wintypes import POINT, RECT, SIZE, UINT
+    from ctypes.wintypes import POINT, RECT, SIZE, UINT, BOOL
     import win32gui
 
     try:
@@ -33,6 +33,7 @@ if sys.platform == 'win32':
         CalculatePopupWindowPosition.argtypes = [
             ctypes.POINTER(POINT), ctypes.POINTER(SIZE), UINT, ctypes.POINTER(RECT), ctypes.POINTER(RECT)
         ]
+        CalculatePopupWindowPosition.restype = BOOL
 
     except Exception:  # Not supported under Wine 4.0
         CalculatePopupWindowPosition = None  # type: ignore
@@ -240,7 +241,7 @@ def ships(companion_data: dict[str, Any]) -> list[ShipRet]:
     """
     Return a list of 5 tuples of ship information.
 
-    :param data: [description]
+    :param companion_data: [description]
     :return: A 5 tuple of strings containing: Ship ID, Ship Type Name (internal), Ship Name, System, Station, and Value
     """
     ships: list[dict[str, Any]] = companion.listify(cast(list, companion_data.get('ships')))
@@ -250,16 +251,15 @@ def ships(companion_data: dict[str, Any]) -> list[ShipRet]:
         ships.insert(0, ships.pop(current))  # Put current ship first
 
         if not companion_data['commander'].get('docked'):
-            out: list[ShipRet] = []
             # Set current system, not last docked
-            out.append(ShipRet(
+            out: list[ShipRet] = [ShipRet(
                 id=str(ships[0]['id']),
                 type=ship_name_map.get(ships[0]['name'].lower(), ships[0]['name']),
                 name=str(ships[0].get('shipName', '')),
                 system=companion_data['lastSystem']['name'],
                 station='',
                 value=str(ships[0]['value']['total'])
-            ))
+            )]
             out.extend(
                 ShipRet(
                     id=str(ship['id']),
@@ -299,7 +299,7 @@ def export_ships(companion_data: dict[str, Any], filename: AnyStr) -> None:
             h.writerow(list(thing))
 
 
-class StatsDialog():
+class StatsDialog:
     """Status dialog containing all of the current cmdr's stats."""
 
     def __init__(self, parent: tk.Tk, status: tk.Label) -> None:

@@ -8,7 +8,7 @@ import sys
 import threading
 import tkinter as tk
 import winsound
-from ctypes.wintypes import DWORD, LONG, MSG, ULONG, WORD
+from ctypes.wintypes import DWORD, LONG, MSG, ULONG, WORD, HWND, BOOL, UINT
 import pywintypes
 import win32api
 import win32gui
@@ -21,6 +21,8 @@ assert sys.platform == 'win32'
 logger = get_main_logger()
 
 UnregisterHotKey = ctypes.windll.user32.UnregisterHotKey  # TODO: Coming Soon
+UnregisterHotKey.argtypes = [HWND, ctypes.c_int]
+UnregisterHotKey.restype = BOOL
 
 MOD_ALT = 0x0001
 MOD_CONTROL = 0x0002
@@ -138,6 +140,7 @@ class INPUT(ctypes.Structure):
 
 SendInput = ctypes.windll.user32.SendInput
 SendInput.argtypes = [ctypes.c_uint, ctypes.POINTER(INPUT), ctypes.c_int]
+SendInput.restype = UINT
 
 INPUT_MOUSE = 0
 INPUT_KEYBOARD = 1

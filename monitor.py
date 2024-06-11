@@ -36,7 +36,7 @@ MAX_FCMATERIALS_DISCREPANCY = 5  # Timestamp difference in seconds
 
 if sys.platform == 'win32':
     import ctypes
-    from ctypes.wintypes import BOOL, HWND, LPARAM
+    from ctypes.wintypes import BOOL, HWND, LPARAM, HANDLE
     import win32gui
 
     from watchdog.events import FileSystemEventHandler, FileSystemEvent
@@ -45,6 +45,8 @@ if sys.platform == 'win32':
 
     EnumWindowsProc = ctypes.WINFUNCTYPE(BOOL, HWND, LPARAM)
     CloseHandle = ctypes.windll.kernel32.CloseHandle
+    CloseHandle.argtypes = [HANDLE]
+    CloseHandle.restype = BOOL
     GetProcessHandleFromHwnd = ctypes.windll.oleacc.GetProcessHandleFromHwnd
 
 else:

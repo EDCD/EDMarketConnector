@@ -188,7 +188,7 @@ class AutoInc(contextlib.AbstractContextManager):
 if sys.platform == 'win32':
     import ctypes
     import winreg
-    from ctypes.wintypes import HINSTANCE, LPCWSTR, LPWSTR, MAX_PATH, POINT, RECT, SIZE, UINT
+    from ctypes.wintypes import HINSTANCE, LPCWSTR, LPWSTR, MAX_PATH, POINT, RECT, SIZE, UINT, BOOL
     import win32gui
     is_wine = False
     try:
@@ -204,6 +204,8 @@ if sys.platform == 'win32':
     if not is_wine:
         try:
             CalculatePopupWindowPosition = ctypes.windll.user32.CalculatePopupWindowPosition
+            CalculatePopupWindowPosition.argtypes = [POINT, SIZE, UINT, RECT, RECT]
+            CalculatePopupWindowPosition.restype = BOOL
 
         except AttributeError as e:
             logger.error(
@@ -225,6 +227,7 @@ if sys.platform == 'win32':
 
     LoadString = ctypes.windll.user32.LoadStringW
     LoadString.argtypes = [HINSTANCE, UINT, LPWSTR, ctypes.c_int]
+    LoadString.restype = ctypes.c_int
 
 
 class PreferencesDialog(tk.Toplevel):
