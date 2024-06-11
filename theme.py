@@ -129,7 +129,6 @@ class _Theme:
     def __init__(self) -> None:
         self.active: int | None = None  # Starts out with no theme
         self.minwidth: int | None = None
-        self.bitmaps: list = []
         self.widgets_pair: list = []
         self.default_ui_scale: float | None = None  # None == not yet known
         self.startup_ui_scale: int | None = None
@@ -159,16 +158,12 @@ class _Theme:
     def register_alternate(self, pair: tuple, gridopts: dict) -> None:
         self.widgets_pair.append((pair, gridopts))
 
-    def button_bind(
-        self, widget: tk.Widget, command: Callable, image: tk.BitmapImage | None = None
-    ) -> None:
+    def button_bind(self, widget: tk.Widget, command: Callable) -> None:
         widget.bind('<Button-1>', command)
-        widget.bind('<Enter>', lambda e: self._enter(e, image))
-        widget.bind('<Leave>', lambda e: self._leave(e, image))
-        if image:
-            self.bitmaps.append(image)
+        widget.bind('<Enter>', self._enter)
+        widget.bind('<Leave>', self._leave)
 
-    def _enter(self, event: tk.Event, image: tk.BitmapImage | None) -> None:
+    def _enter(self, event: tk.Event) -> None:
         widget = event.widget
         if widget and widget['state'] != tk.DISABLED:
             try:
@@ -176,27 +171,13 @@ class _Theme:
             except Exception:
                 logger.exception(f'Failure setting widget active: {widget=}')
 
-            if image:
-                try:
-                    image['background'] = self.style.lookup('.', 'selectbackground')
-                    image['foreground'] = self.style.lookup('.', 'selectforeground')
-                except Exception:
-                    logger.exception(f'Failure configuring image: {image=}')
-
-    def _leave(self, event: tk.Event, image: tk.BitmapImage | None) -> None:
+    def _leave(self, event: tk.Event) -> None:
         widget = event.widget
         if widget and widget['state'] != tk.DISABLED:
             try:
                 widget.configure(state=tk.NORMAL)
             except Exception:
                 logger.exception(f'Failure setting widget normal: {widget=}')
-
-            if image:
-                try:
-                    image['background'] = self.style.lookup('.', 'background')
-                    image['foreground'] = self.style.lookup('.', 'foreground')
-                except Exception:
-                    logger.exception(f'Failure configuring image: {image=}')
 
     def update(self, widget: tk.Widget) -> None:
         """
@@ -215,10 +196,6 @@ class _Theme:
             self.root.tk.call('ttk::setTheme', self.packages[theme])
         except tk.TclError:
             logger.exception(f'Failure setting theme: {self.packages[theme]}')
-
-        for image in self.bitmaps:
-            image['background'] = self.style.lookup('.', 'background')
-            image['foreground'] = self.style.lookup('.', 'foreground')
 
         # Switch menus
         for pair, gridopts in self.widgets_pair:
@@ -248,13 +225,6 @@ class _Theme:
             WS_EX_LAYERED = 0x00080000  # noqa: N806 # ctypes
             GetWindowLongW = windll.user32.GetWindowLongW  # noqa: N806 # ctypes
             SetWindowLongW = windll.user32.SetWindowLongW  # noqa: N806 # ctypes
-
-            self.root.overrideredirect(theme != self.THEME_DEFAULT)
-
-            if theme == self.THEME_TRANSPARENT:
-                self.root.attributes("-transparentcolor", 'grey4')
-            else:
-                self.root.attributes("-transparentcolor", '')
 
             self.root.withdraw()
             self.root.update_idletasks()  # Size and windows styles get recalculated here
@@ -288,9 +258,6 @@ class _Theme:
                 )
 
                 XFlush(dpy)
-
-            else:
-                self.root.overrideredirect(theme != self.THEME_DEFAULT)
 
             self.root.deiconify()
             self.root.wait_visibility()  # need main window to be displayed before returning

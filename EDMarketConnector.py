@@ -570,21 +570,10 @@ class AppWindow:
             default=tk.ACTIVE,
             state=tk.DISABLED
         )
-        self.theme_button = ttk.Label(
-            frame,
-            name='themed_update_button',
-            width=28,
-            anchor=tk.CENTER,
-            state=tk.DISABLED
-        )
 
         ui_row = frame.grid_size()[1]
         self.button.grid(row=ui_row, columnspan=2, sticky=tk.NSEW)
-        self.theme_button.grid(row=ui_row, columnspan=2, sticky=tk.NSEW)
-        theme.register_alternate((self.button, self.theme_button, self.theme_button),
-                                 {'row': ui_row, 'columnspan': 2, 'sticky': tk.NSEW})
         self.button.bind('<Button-1>', self.capi_request_data)
-        theme.button_bind(self.theme_button, self.capi_request_data)
 
         # Bottom 'status' line.
         self.status = ttk.Label(frame, name='status', anchor=tk.W)
@@ -652,38 +641,21 @@ class AppWindow:
         # Alternate title bar and menu for dark theme
         self.theme_menubar = ttk.Frame(frame, name="alternate_menubar")
         self.theme_menubar.columnconfigure(2, weight=1)
-        theme_titlebar = ttk.Label(
-            self.theme_menubar,
-            name="alternate_titlebar",
-            text=applongname,
-            image=self.theme_icon, cursor='fleur',
-            anchor=tk.W, compound=tk.LEFT
-        )
-        theme_titlebar.grid(columnspan=3, padx=2, sticky=tk.NSEW)
         self.drag_offset: tuple[int | None, int | None] = (None, None)
-        theme_titlebar.bind('<Button-1>', self.drag_start)
-        theme_titlebar.bind('<B1-Motion>', self.drag_continue)
-        theme_titlebar.bind('<ButtonRelease-1>', self.drag_end)
-        theme_minimize = ttk.Label(self.theme_menubar, image=self.theme_minimize)
-        theme_minimize.grid(row=0, column=3, padx=2)
-        theme.button_bind(theme_minimize, self.oniconify, image=self.theme_minimize)
-        theme_close = ttk.Label(self.theme_menubar, image=self.theme_close)
-        theme_close.grid(row=0, column=4, padx=2)
-        theme.button_bind(theme_close, self.onexit, image=self.theme_close)
         self.theme_file_menu = ttk.Label(self.theme_menubar, anchor=tk.W)
-        self.theme_file_menu.grid(row=1, column=0, padx=self.PADX, sticky=tk.W)
+        self.theme_file_menu.grid(row=0, column=0, padx=self.PADX, sticky=tk.W)
         theme.button_bind(self.theme_file_menu,
                           lambda e: self.file_menu.tk_popup(e.widget.winfo_rootx(),
                                                             e.widget.winfo_rooty()
                                                             + e.widget.winfo_height()))
         self.theme_edit_menu = ttk.Label(self.theme_menubar, anchor=tk.W)
-        self.theme_edit_menu.grid(row=1, column=1, sticky=tk.W)
+        self.theme_edit_menu.grid(row=0, column=1, sticky=tk.W)
         theme.button_bind(self.theme_edit_menu,
                           lambda e: self.edit_menu.tk_popup(e.widget.winfo_rootx(),
                                                             e.widget.winfo_rooty()
                                                             + e.widget.winfo_height()))
         self.theme_help_menu = ttk.Label(self.theme_menubar, anchor=tk.W)
-        self.theme_help_menu.grid(row=1, column=2, sticky=tk.W)
+        self.theme_help_menu.grid(row=0, column=2, sticky=tk.W)
         theme.button_bind(self.theme_help_menu,
                           lambda e: self.help_menu.tk_popup(e.widget.winfo_rootx(),
                                                             e.widget.winfo_rooty()
@@ -695,7 +667,8 @@ class AppWindow:
         ttk.Frame(self.blank_menubar, height=2).grid()
         theme.register_alternate((self.menubar, self.theme_menubar, self.blank_menubar),
                                  {'row': 0, 'columnspan': 2, 'sticky': tk.NSEW})
-        self.w.resizable(tk.TRUE, tk.FALSE)
+        self.w.resizable(tk.FALSE, tk.FALSE)
+        theme.apply()
 
         # update geometry
         if config.get_str('geometry'):
@@ -716,7 +689,6 @@ class AppWindow:
 
         self.w.attributes('-topmost', config.get_int('always_ontop') and 1 or 0)
 
-        self.w.bind('<Map>', self.onmap)  # Special handling for overrideredirect
         self.w.bind('<Enter>', self.onenter)  # Special handling for transparency
         self.w.bind('<FocusIn>', self.onenter)  # Special handling for transparency
         self.w.bind('<Leave>', self.onleave)  # Special handling for transparency
@@ -750,10 +722,7 @@ class AppWindow:
         self.toggle_suit_row(visible=False)
         if args.start_min:
             logger.warning("Trying to start minimized")
-            if root.overrideredirect():
-                self.oniconify()
-            else:
-                self.w.wm_iconify()
+            self.w.wm_iconify()
 
     def update_suit_text(self) -> None:
         """Update the suit text for current type and loadout."""
@@ -856,7 +825,7 @@ class AppWindow:
         self.suit_label['text'] = tr.tl('Suit') + ':'  # LANG: Label for 'Suit' line in main UI
         self.system_label['text'] = tr.tl('System') + ':'  # LANG: Label for 'System' line in main UI
         self.station_label['text'] = tr.tl('Station') + ':'  # LANG: Label for 'Station' line in main UI
-        self.button['text'] = self.theme_button['text'] = tr.tl('Update')  # LANG: Update button in main window
+        self.button['text'] = tr.tl('Update')  # LANG: Update button in main window
         self.menubar.entryconfigure(1, label=tr.tl('File'))  # LANG: 'File' menu title
         self.menubar.entryconfigure(2, label=tr.tl('Edit'))  # LANG: 'Edit' menu title
         self.menubar.entryconfigure(3, label=tr.tl('Help'))  # LANG: 'Help' menu title
@@ -900,7 +869,7 @@ class AppWindow:
             # LANG: Status - Attempting to get a Frontier Auth Access Token
             self.status['text'] = tr.tl('Logging in...')
 
-        self.button['state'] = self.theme_button['state'] = tk.DISABLED
+        self.button['state'] = tk.DISABLED
 
         self.file_menu.entryconfigure(0, state=tk.DISABLED)  # Status
         self.file_menu.entryconfigure(1, state=tk.DISABLED)  # Save Raw Data
@@ -1050,7 +1019,7 @@ class AppWindow:
 
             # LANG: Status - Attempting to retrieve data from Frontier CAPI
             self.status['text'] = tr.tl('Fetching data...')
-            self.button['state'] = self.theme_button['state'] = tk.DISABLED
+            self.button['state'] = tk.DISABLED
             self.w.update_idletasks()
 
         query_time = int(time())
@@ -1668,11 +1637,11 @@ class AppWindow:
             # Update button in main window
             cooldown_time = int(self.capi_query_holdoff_time - time())
             # LANG: Cooldown on 'Update' button
-            self.button['text'] = self.theme_button['text'] = tr.tl('cooldown {SS}s').format(SS=cooldown_time)
+            self.button['text'] = tr.tl('cooldown {SS}s').format(SS=cooldown_time)
             self.w.after(1000, self.cooldown)
         else:
-            self.button['text'] = self.theme_button['text'] = tr.tl('Update')  # LANG: Update button in main window
-            self.button['state'] = self.theme_button['state'] = (
+            self.button['text'] = tr.tl('Update')  # LANG: Update button in main window
+            self.button['state'] = (
                 monitor.cmdr and
                 monitor.mode and
                 monitor.mode != 'CQC' and
@@ -1936,20 +1905,6 @@ class AppWindow:
             # This gets called for more than the root widget, so only react to that
             if str(event.widget) == '.':
                 self.w.withdraw()
-
-    def oniconify(self, event=None) -> None:
-        """Handle the minimize button on non-Default theme main window."""
-        self.w.overrideredirect(False)  # Can't iconize while overrideredirect
-        self.w.iconify()
-        self.w.update_idletasks()  # Size and windows styles get recalculated here
-        self.w.wait_visibility()  # Need main window to be re-created before returning
-        theme.active = None  # So theme will be re-applied on map
-
-    def onmap(self, event=None) -> None:
-        """Handle when our window is rendered."""
-        if event.widget == self.w:
-            # TODO decouple theme switch and window manager stuff
-            theme.apply()
 
     def onenter(self, event=None) -> None:
         """Handle when our window gains focus."""
