@@ -1090,7 +1090,8 @@ class PreferencesDialog(tk.Toplevel):
             for i in range(start, len(components)):
                 try:
                     if (not SHGetLocalizedName('\\'.join(components[:i+1]), buf, MAX_PATH, ctypes.byref(pidsRes)) and
-                            win32api.LoadString(ctypes.WinDLL(expandvars(buf.value))._handle, pidsRes.value, buf, MAX_PATH)):
+                            win32api.LoadString(ctypes.WinDLL(expandvars(buf.value))._handle,
+                                                pidsRes.value, buf, MAX_PATH)):
                         display.append(buf.value)
 
                     else:
