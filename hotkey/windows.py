@@ -12,6 +12,7 @@ from ctypes.wintypes import DWORD, LONG, MSG, ULONG, WORD, HWND, BOOL, UINT
 import pywintypes
 import win32api
 import win32gui
+import win32con
 from config import config
 from EDMCLogging import get_main_logger
 from hotkey import AbstractHotkeyMgr
@@ -24,40 +25,10 @@ UnregisterHotKey = ctypes.windll.user32.UnregisterHotKey  # TODO: Coming Soon
 UnregisterHotKey.argtypes = [HWND, ctypes.c_int]
 UnregisterHotKey.restype = BOOL
 
-MOD_ALT = 0x0001
-MOD_CONTROL = 0x0002
-MOD_SHIFT = 0x0004
-MOD_WIN = 0x0008
 MOD_NOREPEAT = 0x4000
-
-WM_QUIT = 0x0012
-WM_HOTKEY = 0x0312
-WM_APP = 0x8000
-WM_SND_GOOD = WM_APP + 1
-WM_SND_BAD = WM_APP + 2
-
-VK_BACK = 0x08
-VK_CLEAR = 0x0c
-VK_RETURN = 0x0d
-VK_SHIFT = 0x10
-VK_CONTROL = 0x11
-VK_MENU = 0x12
-VK_CAPITAL = 0x14
-VK_MODECHANGE = 0x1f
-VK_ESCAPE = 0x1b
-VK_SPACE = 0x20
-VK_DELETE = 0x2e
-VK_LWIN = 0x5b
-VK_RWIN = 0x5c
-VK_NUMPAD0 = 0x60
-VK_DIVIDE = 0x6f
-VK_F1 = 0x70
-VK_F24 = 0x87
+WM_SND_GOOD = win32con.WM_APP + 1
+WM_SND_BAD = win32con.WM_APP + 2
 VK_OEM_MINUS = 0xbd
-VK_NUMLOCK = 0x90
-VK_SCROLL = 0x91
-VK_PROCESSKEY = 0xe5
-VK_OEM_CLEAR = 0xfe
 
 # VirtualKey mapping values
 # <https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-mapvirtualkeyexa>
@@ -200,7 +171,7 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
             logger.debug('Thread is/was running')
             self.thread = None  # type: ignore
             logger.debug('Telling thread WM_QUIT')
-            win32gui.PostThreadMessage(thread.ident, WM_QUIT, 0, 0)
+            win32gui.PostThreadMessage(thread.ident, win32con.WM_QUIT, 0, 0)
             logger.debug('Joining thread')
             thread.join()  # Wait for it to unregister hotkey and quit
 
@@ -226,7 +197,7 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
         logger.debug('Entering GetMessage() loop...')
         while win32gui.GetMessage(ctypes.byref(msg), None, 0, 0) != 0:
             logger.debug('Got message')
-            if msg.message == WM_HOTKEY:
+            if msg.message == win32con.WM_HOTKEY:
                 logger.debug('WM_HOTKEY')
 
                 if (
@@ -284,31 +255,32 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
         :param event: tk event ?
         :return: False to retain previous, None to not use, else (keycode, modifiers)
         """
-        modifiers = ((win32api.GetKeyState(VK_MENU) & 0x8000) and MOD_ALT) \
-            | ((win32api.GetKeyState(VK_CONTROL) & 0x8000) and MOD_CONTROL) \
-            | ((win32api.GetKeyState(VK_SHIFT) & 0x8000) and MOD_SHIFT) \
-            | ((win32api.GetKeyState(VK_LWIN) & 0x8000) and MOD_WIN) \
-            | ((win32api.GetKeyState(VK_RWIN) & 0x8000) and MOD_WIN)
+        modifiers = ((win32api.GetKeyState(win32con.VK_MENU) & 0x8000) and win32con.MOD_ALT) \
+            | ((win32api.GetKeyState(win32con.VK_CONTROL) & 0x8000) and win32con.MOD_CONTROL) \
+            | ((win32api.GetKeyState(win32con.VK_SHIFT) & 0x8000) and win32con.MOD_SHIFT) \
+            | ((win32api.GetKeyState(win32con.VK_LWIN) & 0x8000) and win32con.MOD_WIN) \
+            | ((win32api.GetKeyState(win32con.VK_RWIN) & 0x8000) and win32con.MOD_WIN)
         keycode = event.keycode
 
-        if keycode in (VK_SHIFT, VK_CONTROL, VK_MENU, VK_LWIN, VK_RWIN):
+        if keycode in (win32con.VK_SHIFT, win32con.VK_CONTROL, win32con.VK_MENU, win32con.VK_LWIN, win32con.VK_RWIN):
             return 0, modifiers
 
         if not modifiers:
-            if keycode == VK_ESCAPE:  # Esc = retain previous
+            if keycode == win32con.VK_ESCAPE:  # Esc = retain previous
                 return False
 
-            if keycode in (VK_BACK, VK_DELETE, VK_CLEAR, VK_OEM_CLEAR):  # BkSp, Del, Clear = clear hotkey
+            if keycode in (win32con.VK_BACK, win32con.VK_DELETE,
+                           win32con.VK_CLEAR, win32con.VK_OEM_CLEAR):  # BkSp, Del, Clear = clear hotkey
                 return None
 
             if (
-                    keycode in (VK_RETURN, VK_SPACE, VK_OEM_MINUS) or ord('A') <= keycode <= ord('Z')
+                    keycode in (win32con.VK_RETURN, win32con.VK_SPACE, VK_OEM_MINUS) or ord('A') <= keycode <= ord('Z')
             ):  # don't allow keys needed for typing in System Map
                 winsound.MessageBeep()
                 return None
 
-            if (keycode in (VK_NUMLOCK, VK_SCROLL, VK_PROCESSKEY)
-                    or VK_CAPITAL <= keycode <= VK_MODECHANGE):  # ignore unmodified mode switch keys
+            if (keycode in (win32con.VK_NUMLOCK, win32con.VK_SCROLL, win32con.VK_PROCESSKEY)
+                    or win32con.VK_CAPITAL <= keycode <= win32con.VK_MODECHANGE):  # ignore unmodified mode switch keys
                 return 0, modifiers
 
         # See if the keycode is usable and available
@@ -329,26 +301,26 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
         :return: string form
         """
         text = ''
-        if modifiers & MOD_WIN:
+        if modifiers & win32con.MOD_WIN:
             text += '❖+'
 
-        if modifiers & MOD_CONTROL:
+        if modifiers & win32con.MOD_CONTROL:
             text += 'Ctrl+'
 
-        if modifiers & MOD_ALT:
+        if modifiers & win32con.MOD_ALT:
             text += 'Alt+'
 
-        if modifiers & MOD_SHIFT:
+        if modifiers & win32con.MOD_SHIFT:
             text += '⇧+'
 
-        if VK_NUMPAD0 <= keycode <= VK_DIVIDE:
+        if win32con.VK_NUMPAD0 <= keycode <= win32con.VK_DIVIDE:
             text += '№'
 
         if not keycode:
             pass
 
-        elif VK_F1 <= keycode <= VK_F24:
-            text += f'F{keycode + 1 - VK_F1}'
+        elif win32con.VK_F1 <= keycode <= win32con.VK_F24:
+            text += f'F{keycode + 1 - win32con.VK_F1}'
 
         elif keycode in WindowsHotkeyMgr.DISPLAY:  # specials
             text += WindowsHotkeyMgr.DISPLAY[keycode]

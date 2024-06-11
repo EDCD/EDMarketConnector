@@ -2127,7 +2127,7 @@ class EDLogs(FileSystemEventHandler):
                 if h:
                     length = win32gui.GetWindowTextLength(h) + 1
                     buf = ctypes.create_unicode_buffer(length)
-                    if win32gui.GetWindowText(h, buf, length):
+                    if win32gui.GetWindowText(h):
                         return buf.value
                 return None
 
