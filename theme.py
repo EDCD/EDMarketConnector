@@ -445,7 +445,8 @@ class _Theme:
             root.withdraw()
             root.update_idletasks()  # Size and windows styles get recalculated here
             hwnd = win32gui.GetParent(root.winfo_id())
-            win32gui.SetWindowLong(hwnd, GWL_STYLE, win32gui.GetWindowLong(hwnd, GWL_STYLE) & ~WS_MAXIMIZEBOX)  # disable maximize
+            win32gui.SetWindowLong(hwnd, GWL_STYLE,
+                                   win32gui.GetWindowLong(hwnd, GWL_STYLE) & ~WS_MAXIMIZEBOX)  # disable maximize
 
             if theme == self.THEME_TRANSPARENT:
                 win32gui.SetWindowLong(hwnd, GWL_EXSTYLE, WS_EX_APPWINDOW | WS_EX_LAYERED)  # Add to taskbar

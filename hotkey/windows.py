@@ -270,7 +270,7 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
         """Stop acquiring hotkey state."""
         pass
 
-    def fromevent(self, event) -> bool | tuple | None:
+    def fromevent(self, event) -> bool | tuple | None:  # noqa: CCR001
         """
         Return configuration (keycode, modifiers) or None=clear or False=retain previous.
 
