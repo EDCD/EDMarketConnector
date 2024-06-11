@@ -24,7 +24,7 @@ if __debug__:
     from traceback import print_exc
 
 if sys.platform == 'win32':
-    from ctypes import windll
+    from ctypes import windll, byref, c_int
     FR_PRIVATE = 0x10
     fonts_loaded = windll.gdi32.AddFontResourceExW(str(config.respath_path / 'EUROCAPS.TTF'), FR_PRIVATE, 0)
     if fonts_loaded < 1:
@@ -216,6 +216,8 @@ class _Theme:
             return  # Don't need to mess with the window manager
         self.active = theme
 
+        self.root.withdraw()
+        self.root.update_idletasks()  # Size gets recalculated here
         if sys.platform == 'win32':
             GWL_STYLE = -16  # noqa: N806 # ctypes
             WS_MAXIMIZEBOX = 0x00010000  # noqa: N806 # ctypes
@@ -223,11 +225,17 @@ class _Theme:
             GWL_EXSTYLE = -20  # noqa: N806 # ctypes
             WS_EX_APPWINDOW = 0x00040000  # noqa: N806 # ctypes
             WS_EX_LAYERED = 0x00080000  # noqa: N806 # ctypes
+            DWMWA_USE_IMMERSIVE_DARK_MODE = 20
+            DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1 = 19
             GetWindowLongW = windll.user32.GetWindowLongW  # noqa: N806 # ctypes
             SetWindowLongW = windll.user32.SetWindowLongW  # noqa: N806 # ctypes
+            DwmSetWindowAttribute = windll.dwmapi.DwmSetWindowAttribute
 
-            self.root.withdraw()
-            self.root.update_idletasks()  # Size and windows styles get recalculated here
+            if theme == self.THEME_DEFAULT:
+                dark = 0
+            else:
+                dark = 1
+
             hwnd = windll.user32.GetParent(self.root.winfo_id())
             SetWindowLongW(hwnd, GWL_STYLE, GetWindowLongW(hwnd, GWL_STYLE) & ~WS_MAXIMIZEBOX)  # disable maximize
 
@@ -236,12 +244,9 @@ class _Theme:
             else:
                 SetWindowLongW(hwnd, GWL_EXSTYLE, WS_EX_APPWINDOW)  # Add to taskbar
 
-            self.root.deiconify()
-            self.root.wait_visibility()  # need main window to be displayed before returning
-
+            if DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, byref(c_int(dark)), 4) != 0:
+                DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1, byref(c_int(dark)), 4)
         else:
-            self.root.withdraw()
-            self.root.update_idletasks()  # Size gets recalculated here
             if dpy:
                 xroot = Window()
                 parent = Window()
@@ -259,8 +264,8 @@ class _Theme:
 
                 XFlush(dpy)
 
-            self.root.deiconify()
-            self.root.wait_visibility()  # need main window to be displayed before returning
+        self.root.deiconify()
+        self.root.wait_visibility()  # need main window to be displayed before returning
 
         if not self.minwidth:
             self.minwidth = self.root.winfo_width()  # Minimum width = width on first creation
