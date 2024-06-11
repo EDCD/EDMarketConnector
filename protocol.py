@@ -76,6 +76,9 @@ if (config.auth_force_edmc_protocol  # noqa: C901
         ATOM, BOOL, DWORD, HBRUSH, HGLOBAL, HICON, HINSTANCE, HMENU, HWND, INT, LPARAM, LPCWSTR, LPMSG, LPVOID, LPWSTR,
         MSG, UINT, WPARAM
     )
+    from win32con import CW_USEDEFAULT
+    import win32gui
+    import win32con
 
     class WNDCLASS(Structure):
         """
@@ -98,7 +101,6 @@ if (config.auth_force_edmc_protocol  # noqa: C901
             ('lpszClassName', LPCWSTR)
         ]
 
-    CW_USEDEFAULT = 0x80000000
 
     CreateWindowExW = windll.user32.CreateWindowExW
     CreateWindowExW.argtypes = [DWORD, LPCWSTR, LPCWSTR, DWORD, INT, INT, INT, INT, HWND, HMENU, HINSTANCE, LPVOID]
@@ -114,7 +116,6 @@ if (config.auth_force_edmc_protocol  # noqa: C901
     paramflags = (1, "hWnd"), (1, "Msg"), (1, "wParam"), (1, "lParam")
     DefWindowProcW = prototype(("DefWindowProcW", windll.user32), paramflags)
 
-    GetParent = windll.user32.GetParent
     SetForegroundWindow = windll.user32.SetForegroundWindow
 
     # <https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getmessagew>
@@ -132,7 +133,6 @@ if (config.auth_force_edmc_protocol  # noqa: C901
     PostMessageW = windll.user32.PostMessageW
     PostMessageW.argtypes = [HWND, UINT, WPARAM, LPARAM]
 
-    WM_QUIT = 0x0012
     # https://docs.microsoft.com/en-us/windows/win32/dataxchg/wm-dde-initiate
     WM_DDE_INITIATE = 0x03E0
     WM_DDE_TERMINATE = 0x03E1
@@ -229,7 +229,7 @@ if (config.auth_force_edmc_protocol  # noqa: C901
             thread = self.thread
             if thread:
                 self.thread = None
-                PostThreadMessageW(thread.ident, WM_QUIT, 0, 0)
+                PostThreadMessageW(thread.ident, win32con.WM_QUIT, 0, 0)
                 thread.join()  # Wait for it to quit
 
         def worker(self) -> None:
@@ -291,7 +291,7 @@ if (config.auth_force_edmc_protocol  # noqa: C901
                             logger.debug(f'Message starts with {self.redirect}')
                             self.event(url)
 
-                        SetForegroundWindow(GetParent(self.master.winfo_id()))  # raise app window
+                        SetForegroundWindow(win32gui.GetParent(self.master.winfo_id()))  # raise app window
                         # Send back a WM_DDE_ACK. this is _required_ with WM_DDE_EXECUTE
                         PostMessageW(msg.wParam, WM_DDE_ACK, hwnd, PackDDElParam(WM_DDE_ACK, 0x80, msg.lParam))
 

@@ -49,7 +49,7 @@ def window_title(h) -> str:
     if h:
         title_length = win32gui.GetWindowTextLength(h) + 1
         buf = ctypes.create_unicode_buffer(title_length)
-        if win32gui.GetWindowText(h, buf, title_length):
+        if win32gui.GetWindowText(h):
             return buf.value
 
     return ''

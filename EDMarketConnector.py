@@ -260,10 +260,10 @@ if __name__ == '__main__':  # noqa: C901
                 from ctypes.wintypes import BOOL, HWND, LPARAM
                 import win32gui
                 import win32api
+                import win32con
 
                 GetProcessHandleFromHwnd = windll.oleacc.GetProcessHandleFromHwnd  # noqa: N806
 
-                SW_RESTORE = 9  # noqa: N806
                 ShowWindow = windll.user32.ShowWindow  # noqa: N806
                 ShowWindowAsync = windll.user32.ShowWindowAsync  # noqa: N806
 
@@ -308,11 +308,11 @@ if __name__ == '__main__':  # noqa: C901
                                     if len(sys.argv) > 1 and sys.argv[1].startswith(protocolhandler_redirect):
                                         CoInitializeEx(0, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)
                                         # Wait for it to be responsive to avoid ShellExecute recursing
-                                        ShowWindow(window_handle, SW_RESTORE)
-                                        win32api.ShellExecute(0, None, sys.argv[1], None, None, SW_RESTORE)
+                                        ShowWindow(window_handle, win32con.SW_RESTORE)
+                                        win32api.ShellExecute(0, None, sys.argv[1], None, None, win32con.SW_RESTORE)
 
                                     else:
-                                        ShowWindowAsync(window_handle, SW_RESTORE)
+                                        ShowWindowAsync(window_handle, win32con.SW_RESTORE)
                                         win32gui.SetForegroundWindow(window_handle)
 
                             return False  # Indicate window found, so stop iterating
