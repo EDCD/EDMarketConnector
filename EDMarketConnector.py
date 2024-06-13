@@ -480,14 +480,6 @@ class AppWindow:
             self.w.tk.call('wm', 'iconphoto', self.w, '-default',
                            tk.PhotoImage(file=path.join(config.respath_path, 'io.edcd.EDMarketConnector.png')))
 
-        # TODO: Export to files and merge from them in future ?
-        self.theme_icon = tk.PhotoImage(
-            data='R0lGODlhFAAQAMZQAAoKCQoKCgsKCQwKCQsLCgwLCg4LCQ4LCg0MCg8MCRAMCRANChINCREOChIOChQPChgQChgRCxwTCyYVCSoXCS0YCTkdCTseCT0fCTsjDU0jB0EnDU8lB1ElB1MnCFIoCFMoCEkrDlkqCFwrCGEuCWIuCGQvCFs0D1w1D2wyCG0yCF82D182EHE0CHM0CHQ1CGQ5EHU2CHc3CHs4CH45CIA6CIE7CJdECIdLEolMEohQE5BQE41SFJBTE5lUE5pVE5RXFKNaFKVbFLVjFbZkFrxnFr9oFsNqFsVrF8RsFshtF89xF9NzGNh1GNl2GP+KG////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////yH5BAEKAH8ALAAAAAAUABAAAAeegAGCgiGDhoeIRDiIjIZGKzmNiAQBQxkRTU6am0tPCJSGShuSAUcLoIIbRYMFra4FAUgQAQCGJz6CDQ67vAFJJBi0hjBBD0w9PMnJOkAiJhaIKEI7HRoc19ceNAolwbWDLD8uAQnl5ga1I9CHEjEBAvDxAoMtFIYCBy+kFDKHAgM3ZtgYSLAGgwkp3pEyBOJCC2ELB31QATGioAoVAwEAOw==')  # noqa: E501
-        self.theme_minimize = tk.BitmapImage(
-            data='#define im_width 16\n#define im_height 16\nstatic unsigned char im_bits[] = {\n   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,\n   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfc, 0x3f,\n   0xfc, 0x3f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };\n')  # noqa: E501
-        self.theme_close = tk.BitmapImage(
-            data='#define im_width 16\n#define im_height 16\nstatic unsigned char im_bits[] = {\n   0x00, 0x00, 0x00, 0x00, 0x0c, 0x30, 0x1c, 0x38, 0x38, 0x1c, 0x70, 0x0e,\n   0xe0, 0x07, 0xc0, 0x03, 0xc0, 0x03, 0xe0, 0x07, 0x70, 0x0e, 0x38, 0x1c,\n   0x1c, 0x38, 0x0c, 0x30, 0x00, 0x00, 0x00, 0x00 };\n')  # noqa: E501
-
         frame = ttk.Frame(self.w, name=appname.lower())
         frame.grid(sticky=tk.NSEW)
         frame.columnconfigure(1, weight=1)
@@ -583,8 +575,6 @@ class AppWindow:
             child.grid_configure(padx=self.PADX, pady=(
                 sys.platform != 'win32' or isinstance(child, ttk.Frame)) and 2 or 0)
 
-        self.menubar = tk.Menu()
-
         # This used to be *after* the menu setup for some reason, but is testing
         # as working (both internal and external) like this. -Ath
         import update
@@ -597,17 +587,15 @@ class AppWindow:
             self.updater = update.Updater(tkroot=self.w)
             self.updater.check_for_updates()  # Sparkle / WinSparkle does this automatically for packaged apps
 
-        self.file_menu = self.view_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)
+        self.file_menu = self.view_menu = tk.Menu(self.w, tearoff=tk.FALSE)
         self.file_menu.add_command(command=lambda: stats.StatsDialog(self.w, self.status))
         self.file_menu.add_command(command=self.save_raw)
         self.file_menu.add_command(command=lambda: prefs.PreferencesDialog(self.w, self.postprefs))
         self.file_menu.add_separator()
         self.file_menu.add_command(command=self.onexit)
-        self.menubar.add_cascade(menu=self.file_menu)
-        self.edit_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)
+        self.edit_menu = tk.Menu(self.w, tearoff=tk.FALSE)
         self.edit_menu.add_command(accelerator='Ctrl+C', state=tk.DISABLED, command=self.copy)
-        self.menubar.add_cascade(menu=self.edit_menu)
-        self.help_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)  # type: ignore
+        self.help_menu = tk.Menu(self.w, tearoff=tk.FALSE)
         self.help_menu.add_command(command=self.help_general)  # Documentation
         self.help_menu.add_command(command=self.help_troubleshooting)  # Troubleshooting
         self.help_menu.add_command(command=self.help_report_a_bug)  # Report A Bug
@@ -620,17 +608,15 @@ class AppWindow:
         self.help_menu.add_command(command=lambda: prefs.open_folder(logfile_loc))  # Open Log Folder
         self.help_menu.add_command(command=lambda: prefs.help_open_system_profiler(self))  # Open Log Folde
 
-        self.menubar.add_cascade(menu=self.help_menu)
         if sys.platform == 'win32':
             # Must be added after at least one "real" menu entry
             self.always_ontop = tk.BooleanVar(value=bool(config.get_int('always_ontop')))
-            self.system_menu = tk.Menu(self.menubar, name='system', tearoff=tk.FALSE)
+            self.system_menu = tk.Menu(self.w, name='system', tearoff=tk.FALSE)
             self.system_menu.add_separator()
             # LANG: Appearance - Label for checkbox to select if application always on top
             self.system_menu.add_checkbutton(label=tr.tl('Always on top'),
                                              variable=self.always_ontop,
                                              command=self.ontop_changed)  # Appearance setting
-            self.menubar.add_cascade(menu=self.system_menu)
         self.w.bind('<Control-c>', self.copy)
 
         # Bind to the Default theme minimise button
@@ -638,35 +624,17 @@ class AppWindow:
 
         self.w.protocol("WM_DELETE_WINDOW", self.onexit)
 
-        # Alternate title bar and menu for dark theme
         self.theme_menubar = ttk.Frame(frame, name="alternate_menubar")
         self.theme_menubar.columnconfigure(2, weight=1)
         self.drag_offset: tuple[int | None, int | None] = (None, None)
-        self.theme_file_menu = ttk.Label(self.theme_menubar, anchor=tk.W)
+        self.theme_file_menu = ttk.Menubutton(self.theme_menubar, menu=self.file_menu, style='Menubar.TMenubutton')
         self.theme_file_menu.grid(row=0, column=0, padx=self.PADX, sticky=tk.W)
-        theme.button_bind(self.theme_file_menu,
-                          lambda e: self.file_menu.tk_popup(e.widget.winfo_rootx(),
-                                                            e.widget.winfo_rooty()
-                                                            + e.widget.winfo_height()))
-        self.theme_edit_menu = ttk.Label(self.theme_menubar, anchor=tk.W)
+        self.theme_edit_menu = ttk.Menubutton(self.theme_menubar, menu=self.edit_menu, style='Menubar.TMenubutton')
         self.theme_edit_menu.grid(row=0, column=1, sticky=tk.W)
-        theme.button_bind(self.theme_edit_menu,
-                          lambda e: self.edit_menu.tk_popup(e.widget.winfo_rootx(),
-                                                            e.widget.winfo_rooty()
-                                                            + e.widget.winfo_height()))
-        self.theme_help_menu = ttk.Label(self.theme_menubar, anchor=tk.W)
+        self.theme_help_menu = ttk.Menubutton(self.theme_menubar, menu=self.help_menu, style='Menubar.TMenubutton')
         self.theme_help_menu.grid(row=0, column=2, sticky=tk.W)
-        theme.button_bind(self.theme_help_menu,
-                          lambda e: self.help_menu.tk_popup(e.widget.winfo_rootx(),
-                                                            e.widget.winfo_rooty()
-                                                            + e.widget.winfo_height()))
         ttk.Separator(self.theme_menubar).grid(columnspan=5, padx=self.PADX, sticky=tk.EW)
-        self.blank_menubar = ttk.Frame(frame, name="blank_menubar")
-        ttk.Label(self.blank_menubar).grid()
-        ttk.Label(self.blank_menubar).grid()
-        ttk.Frame(self.blank_menubar, height=2).grid()
-        theme.register_alternate((self.menubar, self.theme_menubar, self.blank_menubar),
-                                 {'row': 0, 'columnspan': 2, 'sticky': tk.NSEW})
+        self.theme_menubar.grid(row=0, columnspan=2, sticky=tk.NSEW)
         self.w.resizable(tk.FALSE, tk.FALSE)
         theme.apply()
 
@@ -826,9 +794,6 @@ class AppWindow:
         self.system_label['text'] = tr.tl('System') + ':'  # LANG: Label for 'System' line in main UI
         self.station_label['text'] = tr.tl('Station') + ':'  # LANG: Label for 'Station' line in main UI
         self.button['text'] = tr.tl('Update')  # LANG: Update button in main window
-        self.menubar.entryconfigure(1, label=tr.tl('File'))  # LANG: 'File' menu title
-        self.menubar.entryconfigure(2, label=tr.tl('Edit'))  # LANG: 'Edit' menu title
-        self.menubar.entryconfigure(3, label=tr.tl('Help'))  # LANG: 'Help' menu title
         self.theme_file_menu['text'] = tr.tl('File')  # LANG: 'File' menu title
         self.theme_edit_menu['text'] = tr.tl('Edit')  # LANG: 'Edit' menu title
         self.theme_help_menu['text'] = tr.tl('Help')  # LANG: 'Help' menu title
@@ -1910,15 +1875,11 @@ class AppWindow:
         """Handle when our window gains focus."""
         if config.get_int('theme') == theme.THEME_TRANSPARENT:
             self.w.attributes("-transparentcolor", '')
-            self.blank_menubar.grid_remove()
-            self.theme_menubar.grid(row=0, columnspan=2, sticky=tk.NSEW)
 
     def onleave(self, event=None) -> None:
         """Handle when our window loses focus."""
         if config.get_int('theme') == theme.THEME_TRANSPARENT and event.widget == self.w:
             self.w.attributes("-transparentcolor", 'grey4')
-            self.theme_menubar.grid_remove()
-            self.blank_menubar.grid(row=0, columnspan=2, sticky=tk.NSEW)
 
 
 def test_logging() -> None:

@@ -129,7 +129,6 @@ class _Theme:
     def __init__(self) -> None:
         self.active: int | None = None  # Starts out with no theme
         self.minwidth: int | None = None
-        self.widgets_pair: list = []
         self.default_ui_scale: float | None = None  # None == not yet known
         self.startup_ui_scale: int | None = None
 
@@ -156,28 +155,10 @@ class _Theme:
                       DeprecationWarning, stacklevel=2)
 
     def register_alternate(self, pair: tuple, gridopts: dict) -> None:
-        self.widgets_pair.append((pair, gridopts))
+        ...  # does any plugin even use this?
 
     def button_bind(self, widget: tk.Widget, command: Callable) -> None:
-        widget.bind('<Button-1>', command)
-        widget.bind('<Enter>', self._enter)
-        widget.bind('<Leave>', self._leave)
-
-    def _enter(self, event: tk.Event) -> None:
-        widget = event.widget
-        if widget and widget['state'] != tk.DISABLED:
-            try:
-                widget.configure(state=tk.ACTIVE)
-            except Exception:
-                logger.exception(f'Failure setting widget active: {widget=}')
-
-    def _leave(self, event: tk.Event) -> None:
-        widget = event.widget
-        if widget and widget['state'] != tk.DISABLED:
-            try:
-                widget.configure(state=tk.NORMAL)
-            except Exception:
-                logger.exception(f'Failure setting widget normal: {widget=}')
+        ...  # does any plugin even use this?
 
     def update(self, widget: tk.Widget) -> None:
         """
@@ -190,27 +171,12 @@ class _Theme:
         warnings.warn('theme.update() is no longer necessary as theme attributes are set on tk level',
                       DeprecationWarning, stacklevel=2)
 
-    def apply(self) -> None:  # noqa: CCR001, C901
+    def apply(self) -> None:
         theme = config.get_int('theme')
         try:
             self.root.tk.call('ttk::setTheme', self.packages[theme])
         except tk.TclError:
             logger.exception(f'Failure setting theme: {self.packages[theme]}')
-
-        # Switch menus
-        for pair, gridopts in self.widgets_pair:
-            for widget in pair:
-                if isinstance(widget, tk.Widget):
-                    widget.grid_remove()
-
-            if isinstance(pair[0], tk.Menu):
-                if theme == self.THEME_DEFAULT:
-                    self.root['menu'] = pair[0]
-                else:  # Dark *or* Transparent
-                    self.root['menu'] = ''
-                    pair[theme].grid(**gridopts)
-            else:
-                pair[theme].grid(**gridopts)
 
         if self.active == theme:
             return  # Don't need to mess with the window manager
@@ -225,11 +191,11 @@ class _Theme:
             GWL_EXSTYLE = -20  # noqa: N806 # ctypes
             WS_EX_APPWINDOW = 0x00040000  # noqa: N806 # ctypes
             WS_EX_LAYERED = 0x00080000  # noqa: N806 # ctypes
-            DWMWA_USE_IMMERSIVE_DARK_MODE = 20
-            DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1 = 19
+            DWMWA_USE_IMMERSIVE_DARK_MODE = 20  # noqa: N806 # ctypes
+            DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1 = 19  # noqa: N806 # ctypes
             GetWindowLongW = windll.user32.GetWindowLongW  # noqa: N806 # ctypes
             SetWindowLongW = windll.user32.SetWindowLongW  # noqa: N806 # ctypes
-            DwmSetWindowAttribute = windll.dwmapi.DwmSetWindowAttribute
+            DwmSetWindowAttribute = windll.dwmapi.DwmSetWindowAttribute  # noqa: N806 # ctypes
 
             if theme == self.THEME_DEFAULT:
                 dark = 0
