@@ -66,13 +66,12 @@ namespace eval ttk::theme::transparent {
 
         ttk::style configure Toolbutton -padding {8 4 8 4} -width -10 -anchor center
 
-        ttk::style configure TMenubutton -padding {8 4 4 4} {*}$flatborder
+        ttk::style configure TMenubutton -padding {8 4 4 4} {*}$flatborder -arrowcolor $colors(-fg)
         ttk::style map TMenubutton \
             -background [list active $colors(-selectbg)] \
-            -foreground [list active $colors(-selectfg)]
+            -foreground [list active $colors(-selectfg)] \
+            -arrowcolor [list active $colors(-selectfg)]
         ttk::style configure Menubar.TMenubutton -padding 2 -relief flat -arrowsize 0
-
-        ttk::style configure TOptionMenu -padding {8 4 4 4} {*}$flatborder
 
         ttk::style configure TCheckbutton -padding 4 -indicatormargin 4
 
