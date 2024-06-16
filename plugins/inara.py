@@ -35,6 +35,7 @@ import requests
 import edmc_data
 import killswitch
 import myNotebook as nb  # noqa: N813
+from edshipyard import ships
 import plug
 import timeout_session
 from companion import CAPIData
@@ -870,6 +871,7 @@ def journal_entry(  # noqa: C901, CCR001
                 cur_ship['shipRebuyCost'] = state['Rebuy']
 
             new_add_event('setCommanderShip', entry['timestamp'], cur_ship)
+            make_slef(state, entry)
 
         # Stored modules
         if event_name == 'StoredModules':
@@ -1474,6 +1476,57 @@ def make_loadout(state: dict[str, Any]) -> dict[str, Any]:  # noqa: CCR001
         'shipGameID': state['ShipID'],
         'shipLoadout': modules,
     }
+
+
+def make_slef(state: dict[str, Any], entry) -> None:
+    initial_dict = {
+        "header": {"appName": appname, "appVersion": str(appversion())}
+    }
+    data_dict = {}
+    loadout = make_loadout(state)
+    modules = loadout['shipLoadout']
+    mod_dict = []
+    for module in modules:
+        if module['slotName']:
+            builder = {
+                'Slot': module['slotName'],
+                'Item': module['itemName']
+            }
+            if module.get('itemHealth'):
+                builder.update({'ItemHealth': module['itemHealth']})
+            if module.get('isOn'):
+                builder.update({'On': True})
+            elif not module.get('isOn'):
+                builder.update({'On': False})
+            if module.get('itemPriority'):
+                builder.update({'Priority': module['itemPriority']})
+            if module.get('itemValue'):
+                builder.update({'Value': module['itemValue']})
+            if not module.get('itemValue'):
+                builder.update({'Value': 0})
+            if module.get('slotName') == 'FuelTank':
+                cap = module['itemName'].split('size')
+                cap = cap[1].split('_')
+                cap = 2**int(cap[0])
+                ship = edmc_data.ship_name_map[state["ShipType"]]
+                fuel = {'Main': cap, 'Reserve': ships[ship]['reserveFuelCapacity']}
+                data_dict.update({"FuelCapacity": fuel})
+            mod_dict.append(builder)
+    data_dict.update({
+        'Ship': state["ShipType"],
+        'ShipName': state['ShipName'],
+        'ShipIdent': state['ShipIdent'],
+        'HullValue': state['HullValue'],
+        'ModulesValue': state['ModulesValue'],
+        'Rebuy': state['Rebuy'],
+        'MaxJumpRange': entry['MaxJumpRange'],
+        'UnladenMass': entry['UnladenMass'],
+        'CargoCapacity': entry['CargoCapacity'],
+        'Modules': mod_dict,
+    })
+    initial_dict.update({'data': data_dict})
+    json.dump(initial_dict, open('inara.json', 'w'), indent=4)
+    return None
 
 
 def new_add_event(

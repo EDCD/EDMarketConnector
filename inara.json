@@ -1,0 +1,267 @@
+{
+    "header": {
+        "appName": "EDMarketConnector",
+        "appVersion": "5.11.1+85f5c328.DIRTY"
+    },
+    "data": {
+        "FuelCapacity": {
+            "Main": 128,
+            "Reserve": 0.81
+        },
+        "Ship": "belugaliner",
+        "ShipName": "HSRV Guiding Light",
+        "ShipIdent": "NFC-23",
+        "HullValue": 69924158,
+        "ModulesValue": 96918434,
+        "Rebuy": 8342132,
+        "MaxJumpRange": 52.615143,
+        "UnladenMass": 1233.057983,
+        "CargoCapacity": 16,
+        "Modules": [
+            {
+                "Slot": "TinyHardpoint1",
+                "Item": "hpt_heatsinklauncher_turret_tiny",
+                "ItemHealth": 1.0,
+                "On": true,
+                "Value": 3072
+            },
+            {
+                "Slot": "TinyHardpoint2",
+                "Item": "hpt_heatsinklauncher_turret_tiny",
+                "ItemHealth": 1.0,
+                "On": true,
+                "Value": 3413
+            },
+            {
+                "Slot": "TinyHardpoint3",
+                "Item": "hpt_heatsinklauncher_turret_tiny",
+                "ItemHealth": 1.0,
+                "On": true,
+                "Value": 3072
+            },
+            {
+                "Slot": "TinyHardpoint4",
+                "Item": "hpt_heatsinklauncher_turret_tiny",
+                "ItemHealth": 1.0,
+                "On": true,
+                "Value": 3072
+            },
+            {
+                "Slot": "PaintJob",
+                "Item": "paintjob_belugaliner_lrpo_azure",
+                "ItemHealth": 1.0,
+                "On": true,
+                "Priority": 1
+            },
+            {
+                "Slot": "Armour",
+                "Item": "belugaliner_armour_grade1",
+                "ItemHealth": 1.0,
+                "On": true,
+                "Priority": 1
+            },
+            {
+                "Slot": "PowerPlant",
+                "Item": "int_powerplant_size6_class5",
+                "ItemHealth": 1.0,
+                "On": true,
+                "Priority": 1,
+                "Value": 11382139
+            },
+            {
+                "Slot": "MainEngines",
+                "Item": "int_engine_size7_class2",
+                "ItemHealth": 1.0,
+                "On": true,
+                "Priority": 1,
+                "Value": 1666898
+            },
+            {
+                "Slot": "FrameShiftDrive",
+                "Item": "int_hyperdrive_size7_class5",
+                "ItemHealth": 1.0,
+                "On": true,
+                "Value": 45006196
+            },
+            {
+                "Slot": "LifeSupport",
+                "Item": "int_lifesupport_size8_class2",
+                "ItemHealth": 1.0,
+                "On": true,
+                "Value": 1530326
+            },
+            {
+                "Slot": "PowerDistributor",
+                "Item": "int_powerdistributor_size6_class5",
+                "ItemHealth": 1.0,
+                "On": true,
+                "Priority": 1,
+                "Value": 3049917
+            },
+            {
+                "Slot": "Radar",
+                "Item": "int_sensors_size5_class2",
+                "ItemHealth": 1.0,
+                "On": true,
+                "Priority": 1,
+                "Value": 69713
+            },
+            {
+                "Slot": "FuelTank",
+                "Item": "int_fueltank_size7_class3",
+                "ItemHealth": 1.0,
+                "On": true,
+                "Priority": 1,
+                "Value": 1562752
+            },
+            {
+                "Slot": "Decal1",
+                "Item": "decal_distantworlds2",
+                "ItemHealth": 1.0,
+                "On": true,
+                "Priority": 1
+            },
+            {
+                "Slot": "Decal2",
+                "Item": "decal_distantworlds2",
+                "ItemHealth": 1.0,
+                "On": true,
+                "Priority": 1
+            },
+            {
+                "Slot": "Decal3",
+                "Item": "decal_distantworlds2",
+                "ItemHealth": 1.0,
+                "On": true,
+                "Priority": 1
+            },
+            {
+                "Slot": "ShipName0",
+                "Item": "nameplate_practical01_black",
+                "ItemHealth": 1.0,
+                "On": true,
+                "Priority": 1
+            },
+            {
+                "Slot": "ShipName1",
+                "Item": "nameplate_practical01_black",
+                "ItemHealth": 1.0,
+                "On": true,
+                "Priority": 1
+            },
+            {
+                "Slot": "ShipID0",
+                "Item": "nameplate_shipid_singleline_black",
+                "ItemHealth": 1.0,
+                "On": true,
+                "Priority": 1
+            },
+            {
+                "Slot": "ShipID1",
+                "Item": "nameplate_shipid_singleline_black",
+                "ItemHealth": 1.0,
+                "On": true,
+                "Priority": 1
+            },
+            {
+                "Slot": "Slot01_Size6",
+                "Item": "int_fuelscoop_size6_class5",
+                "ItemHealth": 1.0,
+                "On": true,
+                "Value": 25240068
+            },
+            {
+                "Slot": "Slot02_Size6",
+                "Item": "int_repairer_size6_class2",
+                "ItemHealth": 1.0,
+                "On": true,
+                "Value": 497429
+            },
+            {
+                "Slot": "Slot03_Size6",
+                "Item": "int_shieldgenerator_size5_class2",
+                "ItemHealth": 1.0,
+                "On": true,
+                "Value": 165879
+            },
+            {
+                "Slot": "Slot04_Size6",
+                "Item": "int_dronecontrol_repair_size5_class2",
+                "ItemHealth": 1.0,
+                "On": true,
+                "Value": 85293
+            },
+            {
+                "Slot": "Slot05_Size5",
+                "Item": "int_guardianfsdbooster_size5",
+                "ItemHealth": 1.0,
+                "On": true,
+                "Value": 5688921
+            },
+            {
+                "Slot": "Slot07_Size4",
+                "Item": "int_cargorack_size4_class1",
+                "ItemHealth": 1.0,
+                "On": true,
+                "Priority": 1,
+                "Value": 30124
+            },
+            {
+                "Slot": "Slot11_Size3",
+                "Item": "int_detailedsurfacescanner_tiny",
+                "ItemHealth": 1.0,
+                "On": true,
+                "Value": 219375
+            },
+            {
+                "Slot": "Slot12_Size1",
+                "Item": "int_repairer_size1_class5",
+                "ItemHealth": 1.0,
+                "On": false,
+                "Value": 710775
+            },
+            {
+                "Slot": "PlanetaryApproachSuite",
+                "Item": "int_planetapproachsuite_advanced",
+                "ItemHealth": 1.0,
+                "On": true,
+                "Priority": 1
+            },
+            {
+                "Slot": "WeaponColour",
+                "Item": "weaponcustomisation_red",
+                "ItemHealth": 1.0,
+                "On": true,
+                "Priority": 1
+            },
+            {
+                "Slot": "EngineColour",
+                "Item": "enginecustomisation_orange",
+                "ItemHealth": 1.0,
+                "On": true,
+                "Priority": 1
+            },
+            {
+                "Slot": "VesselVoice",
+                "Item": "voicepack_verity",
+                "ItemHealth": 1.0,
+                "On": true,
+                "Priority": 1
+            },
+            {
+                "Slot": "ShipCockpit",
+                "Item": "belugaliner_cockpit",
+                "ItemHealth": 1.0,
+                "On": true,
+                "Priority": 1
+            },
+            {
+                "Slot": "CargoHatch",
+                "Item": "modularcargobaydoor",
+                "ItemHealth": 1.0,
+                "On": false,
+                "Priority": 1
+            }
+        ]
+    }
+}
