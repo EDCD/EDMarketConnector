@@ -34,9 +34,9 @@ def get_changelog() -> tuple[str, str]:
     changelog[1] = "\n".join(changelog[1].strip().split("\n")[:-2])
     version = changelog[0]
     version = version.split(" ")[1]
-    changelog = changelog[1].strip()
+    final_changelog = changelog[1].strip()
 
-    return changelog, version
+    return final_changelog, version
 
 
 def build_html(md_changelog: str, version: str) -> str:
