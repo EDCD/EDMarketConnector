@@ -28,7 +28,6 @@ from tkinter import font as tk_font
 from tkinter import ttk
 from typing import Any
 import plug
-from os import path
 from config import config, logger
 from l10n import translations as tr
 from monitor import monitor
@@ -96,7 +95,7 @@ class HyperlinkLabel(tk.Label or ttk.Label):  # type: ignore
         else:
             # Avoid file length limits if possible
             target = plug.invoke(url, 'EDSY', 'shipyard_url', loadout, monitor.is_beta)
-            file_name = path.join(config.app_dir_path, "last_shipyard.html")
+            file_name = config.app_dir_path / "last_shipyard.html"
 
             with open(file_name, 'w') as f:
                 f.write(SHIPYARD_HTML_TEMPLATE.format(

@@ -11,7 +11,7 @@ import json
 import re
 import time
 from os import listdir
-from os.path import join
+from pathlib import Path
 import companion
 import util_ships
 from config import config
@@ -45,7 +45,7 @@ def export(data: companion.CAPIData, requested_filename: str | None = None) -> N
     regexp = re.compile(re.escape(ship) + r'\.\d\d\d\d-\d\d-\d\dT\d\d\.\d\d\.\d\d\.txt')
     oldfiles = sorted([x for x in listdir(config.get_str('outdir')) if regexp.match(x)])
     if oldfiles:
-        with open(join(config.get_str('outdir'), oldfiles[-1]), 'rU') as h:
+        with open(Path(config.get_str('outdir')) / Path(oldfiles[-1]), 'rU') as h:
             if h.read() == string:
                 return  # same as last time - don't write
 
@@ -53,9 +53,9 @@ def export(data: companion.CAPIData, requested_filename: str | None = None) -> N
 
     # Write
 
-    output_directory = config.get_str('outdir')
+    output_directory = Path(config.get_str('outdir'))
     ship_time = time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(query_time))
-    file_path = join(output_directory, f"{ship}.{ship_time}.txt")
+    file_path = output_directory / f"{ship}.{ship_time}.txt"
 
     with open(file_path, 'wt') as h:
         h.write(string)

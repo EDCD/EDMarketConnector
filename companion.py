@@ -27,6 +27,7 @@ import tkinter as tk
 import urllib.parse
 import webbrowser
 from email.utils import parsedate
+from pathlib import Path
 from queue import Queue
 from typing import TYPE_CHECKING, Any, Mapping, TypeVar
 import requests
@@ -1135,7 +1136,7 @@ class Session:
 
     def dump_capi_data(self, data: CAPIData) -> None:
         """Dump CAPI data to file for examination."""
-        if os.path.isdir('dump'):
+        if Path('dump').is_dir():
             file_name: str = ""
             if data.source_endpoint == self.FRONTIER_CAPI_PATH_FLEETCARRIER:
                 file_name += f"FleetCarrier.{data['name']['callsign']}"
@@ -1203,7 +1204,7 @@ def fixup(data: CAPIData) -> CAPIData:  # noqa: C901, CCR001 # Can't be usefully
     if not commodity_map:
         # Lazily populate
         for f in ('commodity.csv', 'rare_commodity.csv'):
-            if not os.path.isfile(config.app_dir_path / 'FDevIDs/' / f):
+            if not (config.app_dir_path / 'FDevIDs' / f).is_file():
                 logger.warning(f'FDevID file {f} not found! Generating output without these commodity name rewrites.')
                 continue
             with open(config.app_dir_path / 'FDevIDs' / f, 'r') as csvfile:

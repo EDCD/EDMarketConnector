@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import time
-from os.path import join
+from pathlib import Path
 
 from config import config
 from edmc_data import commodity_bracketmap as bracketmap
@@ -29,7 +29,7 @@ def export(data, kind=COMMODITY_DEFAULT, filename=None) -> None:
         filename_time = time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(querytime))
         filename_kind = 'csv'
         filename = f'{filename_system}.{filename_starport}.{filename_time}.{filename_kind}'
-        filename = join(config.get_str('outdir'), filename)
+        filename = Path(config.get_str('outdir')) / filename
 
     if kind == COMMODITY_CSV:
         sep = ';'  # BUG: for fixing later after cleanup

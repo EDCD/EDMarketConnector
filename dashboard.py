@@ -12,7 +12,7 @@ import sys
 import time
 import tkinter as tk
 from calendar import timegm
-from os.path import getsize, isdir, isfile, join
+from pathlib import Path
 from typing import Any, cast
 from watchdog.observers.api import BaseObserver
 from config import config
@@ -57,7 +57,7 @@ class Dashboard(FileSystemEventHandler):
 
         logdir = config.get_str('journaldir', default=config.default_journal_dir)
         logdir = logdir or config.default_journal_dir
-        if not isdir(logdir):
+        if not Path.is_dir(Path(logdir)):
             logger.info(f"No logdir, or it isn't a directory: {logdir=}")
             self.stop()
             return False
@@ -164,7 +164,8 @@ class Dashboard(FileSystemEventHandler):
 
         :param event: Watchdog event.
         """
-        if event.is_directory or (isfile(event.src_path) and getsize(event.src_path)):
+        modpath = Path(event.src_path)
+        if event.is_directory or (modpath.is_file() and modpath.stat().st_size):
             # Can get on_modified events when the file is emptied
             self.process(event.src_path if not event.is_directory else None)
 
@@ -177,7 +178,7 @@ class Dashboard(FileSystemEventHandler):
         if config.shutting_down:
             return
         try:
-            status_json_path = join(self.currentdir, 'Status.json')
+            status_json_path = Path(self.currentdir) / 'Status.json'
             with open(status_json_path, 'rb') as h:
                 data = h.read().strip()
                 if data:  # Can be empty if polling while the file is being re-written
