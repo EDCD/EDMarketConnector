@@ -13,7 +13,7 @@ This release fixes a bug where minimizing to the system tray could cause the pro
 
 **Changes and Enhancements**
 * Updated Translations
-* Added a developer utilty to help speed up changelog development
+* Added a developer utility to help speed up changelog development
 
 **Bug Fixes**
 * Fixed a bug where minimizing to the system tray could cause the program to not un-minimize.
