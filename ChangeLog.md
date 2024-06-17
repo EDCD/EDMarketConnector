@@ -6,6 +6,18 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
       in the source (not distributed with the Windows installer) for the
       currently used version.
 ---
+Release 5.11.2
+===
+
+This release fixes a bug where minimizing to the system tray could cause the program to not un-minimize.
+
+**Changes and Enhancements**
+* Updated Translations
+* Added a developer utilty to help speed up changelog development
+
+**Bug Fixes**
+* Fixed a bug where minimizing to the system tray could cause the program to not un-minimize.
+
 Release 5.11.1
 ===
 
