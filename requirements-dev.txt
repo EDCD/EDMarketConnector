@@ -31,7 +31,7 @@ autopep8==2.2.0
 pre-commit==3.7.1
 
 # HTML changelogs
-grip==4.6.2
+mistune==3.0.2
 
 # Packaging
 # We only need py2exe on windows.
