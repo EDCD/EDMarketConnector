@@ -50,8 +50,7 @@ from threading import get_native_id as thread_native_id
 from time import gmtime
 from traceback import print_exc
 from typing import TYPE_CHECKING, cast
-import config as config_mod
-from config import appcmdname, appname, config
+from config import appcmdname, appname, config, trace_on
 
 # TODO: Tests:
 #
@@ -102,7 +101,7 @@ warnings.simplefilter('default', DeprecationWarning)
 
 
 def _trace_if(self: logging.Logger, condition: str, message: str, *args, **kwargs) -> None:
-    if any(fnmatch(condition, p) for p in config_mod.trace_on):
+    if any(fnmatch(condition, p) for p in trace_on):
         self._log(logging.TRACE, message, args, **kwargs)  # type: ignore # we added it
         return
 
