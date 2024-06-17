@@ -6,10 +6,22 @@
       <description>Most recent changes with links to updates.</description>
       <!-- Windows -->
       <item>
-         <title>Release 5.11.1</title>
+         <title>Release 5.11.2</title>
          <description><![CDATA[<style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
 <p>We now test against, and package with, Python 3.11.9.</p>
 <p><strong>As a result, we do not support Windows 7, 8, or 8.1.</strong><br>
+<h2>Release 5.11.2</h2>
+<p>This release fixes a bug where minimizing to the system tray could cause the program to not un-minimize.</p>
+<p><strong>Changes and Enhancements</strong></p>
+<ul>
+<li>Updated Translations</li>
+<li>Added a developer utilty to help speed up changelog development</li>
+</ul>
+<p><strong>Bug Fixes</strong></p>
+<ul>
+<li>Fixed a bug where minimizing to the system tray could cause the program to not un-minimize.</li>
+</ul>
+<hr>
 <h2>Release 5.11.1</h2>
 <p>This release fixes a bug regarding FDevID files when running from Source in a non-writable location. Additionally,
 Deprecation Warnings are now more visible to aid in plugin development.</p>
@@ -2450,7 +2462,7 @@ about this:
 <a href="https://issues.frontierstore.net/issue-detail/28638" rel="nofollow">PTS CAPI saying Commander is Docked after jumping to new system</a>.</p>
 </li>
 </ul>]]></description>
-         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F5.11.1/EDMarketConnector_Installer_5.11.1.exe" sparkle:os="windows" sparkle:version="5.11.1" length="0" type="application/x-ms-dos-executable" />
+         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F5.11.2/EDMarketConnector_Installer_5.11.2.exe" sparkle:os="windows" sparkle:version="5.11.2" length="0" type="application/x-ms-dos-executable" />
       </item>
    </channel>
 </rss>
