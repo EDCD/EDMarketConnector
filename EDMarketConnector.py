@@ -272,11 +272,7 @@ if __name__ == '__main__':  # noqa: C901
 
                 def window_title(h: int) -> str | None:
                     if h:
-                        text_length = win32gui.GetWindowTextLength(h) + 1
-                        buf = create_unicode_buffer(text_length)
-                        if win32gui.GetWindowText(h):
-                            return buf.value
-
+                        return win32gui.GetWindowText(h)
                     return None
 
                 @WINFUNCTYPE(BOOL, HWND, LPARAM)
