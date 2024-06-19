@@ -107,6 +107,7 @@ class This:
         self.fleet: list[dict[str, Any]] | None = None
         self.shipswap: bool = False  # just swapped ship
         self.on_foot = False
+        self.SLEF: str | None = None
 
         self.timer_run = True
 
@@ -1504,7 +1505,10 @@ def make_slef(entry) -> None:
         'Modules': entry['Modules'],
     })
     initial_dict.update({'data': data_dict})
-    json.dump(initial_dict, open('inara.json', 'w'), indent=4)
+    output = json.dumps(initial_dict, indent=4)
+    this.SLEF = str(output)
+    print('set output')
+    print(type(this.SLEF))
     return None
 
 

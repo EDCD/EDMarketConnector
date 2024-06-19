@@ -194,6 +194,11 @@ class HyperlinkLabel(tk.Label or ttk.Label):  # type: ignore
         menu.add_command(label=tr.tl('Copy'), command=self.copy)  # As in Copy and Paste
 
         if self.name == 'ship':
+            # TODO: Get SLEF from Inara
+            # print(self.SLEF)
+            # menu.add_command(label=tr.tl('Copy INARA SLEF'), command=lambda: self.copy_slef(self), state=tk.DISABLED)
+            # menu.entryconfigure(1, state=self.SLEF and tk.NORMAL or tk.DISABLED)
+
             menu.add_separator()
             for url in plug.provides('shipyard_url'):
                 menu.add_command(
@@ -224,3 +229,8 @@ class HyperlinkLabel(tk.Label or ttk.Label):  # type: ignore
         """Copy the current text to the clipboard."""
         self.clipboard_clear()
         self.clipboard_append(self['text'])
+
+    # def copy_slef(self, this) -> None:
+    #     """Copy the current text to the clipboard."""
+    #     self.clipboard_clear()
+    #     self.clipboard_append(this.SLEF)
