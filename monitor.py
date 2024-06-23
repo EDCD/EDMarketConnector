@@ -21,9 +21,10 @@ from time import gmtime, localtime, mktime, sleep, strftime, strptime, time
 from typing import TYPE_CHECKING, Any, BinaryIO, MutableMapping
 import semantic_version
 import util_ships
-from config import config
-from edmc_data import edmc_suit_shortnames, edmc_suit_symbol_localised
+from config import config, appname, appversion
+from edmc_data import edmc_suit_shortnames, edmc_suit_symbol_localised, ship_name_map
 from EDMCLogging import get_main_logger
+from edshipyard import ships
 
 if TYPE_CHECKING:
     import tkinter
@@ -109,6 +110,7 @@ class EDLogs(FileSystemEventHandler):
         self.group: str | None = None
         self.cmdr: str | None = None
         self.started: int | None = None  # Timestamp of the LoadGame event
+        self.slef: str | None = None
 
         self._navroute_retries_remaining = 0
         self._last_navroute_journal_timestamp: float | None = None
@@ -701,6 +703,34 @@ class EDLogs(FileSystemEventHandler):
                         module.pop('AmmoInHopper')
 
                     self.state['Modules'][module['Slot']] = module
+                # SLEF
+                initial_dict = {
+                    "header": {"appName": appname, "appVersion": str(appversion())}
+                }
+                data_dict = {}
+                for module in entry['Modules']:
+                    if module.get('Slot') == 'FuelTank':
+                        cap = module['Item'].split('size')
+                        cap = cap[1].split('_')
+                        cap = 2 ** int(cap[0])
+                        ship = ship_name_map[entry["Ship"]]
+                        fuel = {'Main': cap, 'Reserve': ships[ship]['reserveFuelCapacity']}
+                        data_dict.update({"FuelCapacity": fuel})
+                data_dict.update({
+                    'Ship': entry["Ship"],
+                    'ShipName': entry['ShipName'],
+                    'ShipIdent': entry['ShipIdent'],
+                    'HullValue': entry['HullValue'],
+                    'ModulesValue': entry['ModulesValue'],
+                    'Rebuy': entry['Rebuy'],
+                    'MaxJumpRange': entry['MaxJumpRange'],
+                    'UnladenMass': entry['UnladenMass'],
+                    'CargoCapacity': entry['CargoCapacity'],
+                    'Modules': entry['Modules'],
+                })
+                initial_dict.update({'data': data_dict})
+                output = json.dumps(initial_dict, indent=4)
+                self.slef = str(output)
 
             elif event_type == 'modulebuy':
                 self.state['Modules'][entry['Slot']] = {

@@ -35,7 +35,6 @@ import requests
 import edmc_data
 import killswitch
 import myNotebook as nb  # noqa: N813
-from edshipyard import ships
 import plug
 import timeout_session
 from companion import CAPIData
@@ -872,7 +871,6 @@ def journal_entry(  # noqa: C901, CCR001
                 cur_ship['shipRebuyCost'] = state['Rebuy']
 
             new_add_event('setCommanderShip', entry['timestamp'], cur_ship)
-            make_slef(entry)
 
         # Stored modules
         if event_name == 'StoredModules':
@@ -1477,39 +1475,6 @@ def make_loadout(state: dict[str, Any]) -> dict[str, Any]:  # noqa: CCR001
         'shipGameID': state['ShipID'],
         'shipLoadout': modules,
     }
-
-
-def make_slef(entry) -> None:
-    initial_dict = {
-        "header": {"appName": appname, "appVersion": str(appversion())}
-    }
-    data_dict = {}
-    for module in entry['Modules']:
-        if module.get('Slot') == 'FuelTank':
-            cap = module['Item'].split('size')
-            cap = cap[1].split('_')
-            cap = 2 ** int(cap[0])
-            ship = edmc_data.ship_name_map[entry["Ship"]]
-            fuel = {'Main': cap, 'Reserve': ships[ship]['reserveFuelCapacity']}
-            data_dict.update({"FuelCapacity": fuel})
-    data_dict.update({
-        'Ship': entry["Ship"],
-        'ShipName': entry['ShipName'],
-        'ShipIdent': entry['ShipIdent'],
-        'HullValue': entry['HullValue'],
-        'ModulesValue': entry['ModulesValue'],
-        'Rebuy': entry['Rebuy'],
-        'MaxJumpRange': entry['MaxJumpRange'],
-        'UnladenMass': entry['UnladenMass'],
-        'CargoCapacity': entry['CargoCapacity'],
-        'Modules': entry['Modules'],
-    })
-    initial_dict.update({'data': data_dict})
-    output = json.dumps(initial_dict, indent=4)
-    this.SLEF = str(output)
-    print('set output')
-    print(type(this.SLEF))
-    return None
 
 
 def new_add_event(
