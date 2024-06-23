@@ -106,7 +106,6 @@ class This:
         self.fleet: list[dict[str, Any]] | None = None
         self.shipswap: bool = False  # just swapped ship
         self.on_foot = False
-        self.SLEF: str | None = None
 
         self.timer_run = True
 
