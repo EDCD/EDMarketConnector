@@ -194,8 +194,6 @@ class HyperlinkLabel(tk.Label or ttk.Label):  # type: ignore
         menu.add_command(label=tr.tl('Copy'), command=self.copy)  # As in Copy and Paste
 
         if self.name == 'ship':
-            # TODO: Get SLEF from Inara
-            print(bool(monitor.slef))
             menu.add_command(label=tr.tl('Copy INARA SLEF'), command=self.copy_slef, state=tk.DISABLED)
             menu.entryconfigure(1, state=monitor.slef and tk.NORMAL or tk.DISABLED)
 
