@@ -704,7 +704,7 @@ class EDLogs(FileSystemEventHandler):
 
                     self.state['Modules'][module['Slot']] = module
                 # SLEF
-                initial_dict = {
+                initial_dict: dict[str, dict[str, Any]] = {
                     "header": {"appName": appname, "appVersion": str(appversion())}
                 }
                 data_dict = {}
