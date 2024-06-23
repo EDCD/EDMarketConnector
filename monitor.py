@@ -730,7 +730,7 @@ class EDLogs(FileSystemEventHandler):
                 })
                 initial_dict.update({'data': data_dict})
                 output = json.dumps(initial_dict, indent=4)
-                self.slef = str(output)
+                self.slef = str(f"[{output}]")
 
             elif event_type == 'modulebuy':
                 self.state['Modules'][entry['Slot']] = {
