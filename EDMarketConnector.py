@@ -415,6 +415,7 @@ import tkinter.font
 import tkinter.messagebox
 from tkinter import ttk
 import commodity
+import companion
 import plug
 import prefs
 import protocol
@@ -672,7 +673,7 @@ class AppWindow:
         self.w.bind_all('<<Quit>>', self.onexit)  # Updater
 
         # Check for Valid Providers
-        validate_providers()
+        validate_providers(self.w)
         if monitor.cmdr is None:
             self.status['text'] = tr.tl("Awaiting Full CMDR Login")  # LANG: Await Full CMDR Login to Game
 
@@ -857,7 +858,7 @@ class AppWindow:
 
         self.cooldown()
 
-    def export_market_data(self, data: 'CAPIData') -> bool:  # noqa: CCR001
+    def export_market_data(self, data: 'companion.CAPIData') -> bool:  # noqa: CCR001
         """
         Export CAPI market data.
 
@@ -1203,7 +1204,7 @@ class AppWindow:
                         if (suit := loadout.get('suit')) is not None:
                             if (suitname := suit.get('edmcName')) is not None:
                                 # We've been paranoid about loadout->suit->suitname, now just assume loadouts is there
-                                loadout_name = index_possibly_sparse_list(
+                                loadout_name = companion.index_possibly_sparse_list(
                                     capi_response.capi_data['loadouts'], loadout['loadoutSlotId']
                                 )['name']
 
@@ -1943,7 +1944,7 @@ def show_killswitch_poppup(root=None):
     ok_button.grid(columnspan=2, sticky=tk.EW)
 
 
-def validate_providers():
+def validate_providers(root):
     """Check if Config has an invalid provider set, and reset to default if we do."""
     reset_providers = {}
     station_provider: str = config.get_str("station_provider")
@@ -1990,7 +1991,8 @@ def validate_providers():
 
 
 # Run the app
-def main():
+def main():  # noqa: C901, CCR001
+    """Run the main code of the program."""
     logger.info(f'Startup v{appversion()} : Running on Python v{sys.version}')
     logger.debug(f'''Platform: {sys.platform} {sys.platform == "win32" and sys.getwindowsversion()}
 argv[0]: {sys.argv[0]}
@@ -2067,11 +2069,6 @@ sys.path: {sys.path}'''
 
             else:
                 log_locale('After switching to UTF-8 encoding (same language)')
-
-    # HACK: n/a | 2021-11-24: --force-localserver-auth does not work if companion is imported early -cont.
-    # HACK: n/a | 2021-11-24: as we modify config before this is used.
-    import companion
-    from companion import CAPIData, index_possibly_sparse_list
 
     # Do this after locale silliness, just in case
     if args.forget_frontier_auth:
