@@ -627,7 +627,6 @@ class AppWindow:
 
         self.theme_menubar = ttk.Frame(frame, name="alternate_menubar")
         self.theme_menubar.columnconfigure(2, weight=1)
-        self.drag_offset: tuple[int | None, int | None] = (None, None)
         self.theme_file_menu = ttk.Menubutton(self.theme_menubar, menu=self.file_menu, style='Menubar.TMenubutton')
         self.theme_file_menu.grid(row=0, column=0, padx=self.PADX, sticky=tk.W)
         self.theme_edit_menu = ttk.Menubutton(self.theme_menubar, menu=self.edit_menu, style='Menubar.TMenubutton')
@@ -1849,23 +1848,8 @@ class AppWindow:
 
         logger.info('Done.')
 
-    def drag_start(self, event) -> None:
-        """Initiate dragging the window."""
-        self.drag_offset = (event.x_root - self.w.winfo_rootx(), event.y_root - self.w.winfo_rooty())
-
-    def drag_continue(self, event) -> None:
-        """Continued handling of window drag."""
-        if self.drag_offset[0]:
-            offset_x = event.x_root - self.drag_offset[0]
-            offset_y = event.y_root - self.drag_offset[1]
-            self.w.geometry(f'+{offset_x:d}+{offset_y:d}')
-
-    def drag_end(self, event) -> None:
-        """Handle end of window dragging."""
-        self.drag_offset = (None, None)
-
     def default_iconify(self, event=None) -> None:
-        """Handle the Windows default theme 'minimise' button."""
+        """Handle the Windows 'minimize' button."""
         # If we're meant to "minimize to system tray" then hide the window so no taskbar icon is seen
         if sys.platform == 'win32' and config.get_bool('minimize_system_tray'):
             # This gets called for more than the root widget, so only react to that
