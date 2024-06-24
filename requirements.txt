@@ -2,4 +2,8 @@ requests==2.32.3
 pillow==10.3.0
 watchdog==4.0.0
 simplesystray==0.1.0; sys_platform == 'win32'
+pywin32==306; sys_platform == 'win32'
+winrt-Microsoft.UI.Interop==2.1.0; sys_platform == 'win32'
+winrt-Microsoft.UI.Windowing==2.1.0; sys_platform == 'win32'
+winrt-Microsoft.Windows.ApplicationModel.DynamicDependency.Bootstrap==2.1.0; sys_platform == 'win32'
 semantic-version==2.10.0

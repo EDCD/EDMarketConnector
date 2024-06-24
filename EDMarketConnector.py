@@ -1990,7 +1990,7 @@ def validate_providers():
 
 
 # Run the app
-if __name__ == "__main__":  # noqa: C901
+def main():
     logger.info(f'Startup v{appversion()} : Running on Python v{sys.version}')
     logger.debug(f'''Platform: {sys.platform} {sys.platform == "win32" and sys.getwindowsversion()}
 argv[0]: {sys.argv[0]}
@@ -2245,3 +2245,13 @@ sys.path: {sys.path}'''
         logger.info("Ctrl+C Detected, Attempting Clean Shutdown")
         app.onexit()
     logger.info('Exiting')
+
+
+if __name__ == '__main__':
+    if sys.platform == 'win32':
+        from winrt.microsoft.windows.applicationmodel.dynamicdependency import bootstrap
+
+        with bootstrap.initialize(options=bootstrap.InitializeOptions.ON_NO_MATCH_SHOW_UI):
+            main()
+    else:
+        main()

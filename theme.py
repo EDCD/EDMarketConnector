@@ -24,7 +24,11 @@ if __debug__:
     from traceback import print_exc
 
 if sys.platform == 'win32':
-    from ctypes import windll, byref, c_int
+    import win32con
+    import win32gui
+    from winrt.microsoft.ui.interop import get_window_id_from_window
+    from winrt.microsoft.ui.windowing import AppWindow
+    from ctypes import windll
     FR_PRIVATE = 0x10
     fonts_loaded = windll.gdi32.AddFontResourceExW(str(config.respath_path / 'EUROCAPS.TTF'), FR_PRIVATE, 0)
     if fonts_loaded < 1:
@@ -185,33 +189,19 @@ class _Theme:
         self.root.withdraw()
         self.root.update_idletasks()  # Size gets recalculated here
         if sys.platform == 'win32':
-            GWL_STYLE = -16  # noqa: N806 # ctypes
-            WS_MAXIMIZEBOX = 0x00010000  # noqa: N806 # ctypes
-            # tk8.5.9/win/tkWinWm.c:342
-            GWL_EXSTYLE = -20  # noqa: N806 # ctypes
-            WS_EX_APPWINDOW = 0x00040000  # noqa: N806 # ctypes
-            WS_EX_LAYERED = 0x00080000  # noqa: N806 # ctypes
-            DWMWA_USE_IMMERSIVE_DARK_MODE = 20  # noqa: N806 # ctypes
-            DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1 = 19  # noqa: N806 # ctypes
-            GetWindowLongW = windll.user32.GetWindowLongW  # noqa: N806 # ctypes
-            SetWindowLongW = windll.user32.SetWindowLongW  # noqa: N806 # ctypes
-            DwmSetWindowAttribute = windll.dwmapi.DwmSetWindowAttribute  # noqa: N806 # ctypes
+            hwnd = win32gui.GetParent(self.root.winfo_id())
+            window = AppWindow.get_from_window_id(get_window_id_from_window(hwnd))
 
             if theme == self.THEME_DEFAULT:
-                dark = 0
+                window.title_bar.reset_to_default()
             else:
-                dark = 1
-
-            hwnd = windll.user32.GetParent(self.root.winfo_id())
-            SetWindowLongW(hwnd, GWL_STYLE, GetWindowLongW(hwnd, GWL_STYLE) & ~WS_MAXIMIZEBOX)  # disable maximize
+                window.title_bar.extends_content_into_title_bar = True
 
             if theme == self.THEME_TRANSPARENT:
-                SetWindowLongW(hwnd, GWL_EXSTYLE, WS_EX_APPWINDOW | WS_EX_LAYERED)  # Add to taskbar
+                win32gui.SetWindowLong(hwnd, win32con.GWL_EXSTYLE,
+                                       win32con.WS_EX_APPWINDOW | win32con.WS_EX_LAYERED)  # Add to taskbar
             else:
-                SetWindowLongW(hwnd, GWL_EXSTYLE, WS_EX_APPWINDOW)  # Add to taskbar
-
-            if DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, byref(c_int(dark)), 4) != 0:
-                DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1, byref(c_int(dark)), 4)
+                win32gui.SetWindowLong(hwnd, win32con.GWL_EXSTYLE, win32con.WS_EX_APPWINDOW)  # Add to taskbar
         else:
             if dpy:
                 xroot = Window()
