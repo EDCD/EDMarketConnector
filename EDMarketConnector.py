@@ -1862,7 +1862,7 @@ class AppWindow:
             )
             exit_thread.start()
 
-    def onexit(self, event=None, restart: bool=False) -> None:
+    def onexit(self, event=None, restart: bool = False) -> None:
         """Application shutdown procedure."""
         if sys.platform == 'win32':
             shutdown_thread = threading.Thread(
