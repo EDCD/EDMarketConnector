@@ -32,12 +32,6 @@ class LinuxConfig(AbstractConfig):
         self.app_dir_path.mkdir(exist_ok=True, parents=True)
 
         self.default_plugin_dir_path = self.app_dir_path / 'plugins'
-        if (plugdir_str := self.get_str('plugin_dir')) is None or not pathlib.Path(plugdir_str).is_dir():
-            self.set("plugin_dir", str(self.default_plugin_dir_path))
-            plugdir_str = self.default_plugin_dir
-        self.plugin_dir_path = pathlib.Path(plugdir_str)
-        self.plugin_dir_path.mkdir(exist_ok=True)
-
         self.respath_path = pathlib.Path(__file__).parent.parent
 
         self.internal_plugin_dir_path = self.respath_path / 'plugins'
@@ -65,6 +59,12 @@ class LinuxConfig(AbstractConfig):
                 (self.filename.parent / f'{appname}.ini.backup').write_bytes(self.filename.read_bytes())
 
             self.config.add_section(self.SECTION)
+
+        if (plugdir_str := self.get_str('plugin_dir')) is None or not pathlib.Path(plugdir_str).is_dir():
+            self.set("plugin_dir", str(self.default_plugin_dir_path))
+            plugdir_str = self.default_plugin_dir
+        self.plugin_dir_path = pathlib.Path(plugdir_str)
+        self.plugin_dir_path.mkdir(exist_ok=True)
 
         if (outdir := self.get_str('outdir')) is None or not pathlib.Path(outdir).is_dir():
             self.set('outdir', self.home)

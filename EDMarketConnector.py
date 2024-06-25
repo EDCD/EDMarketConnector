@@ -1926,7 +1926,7 @@ class AppWindow:
 
         logger.info('Done.')
         if restart:
-            return os.execv(sys.executable, ['python'] + sys.argv)
+            os.execv(sys.executable, ['python'] + sys.argv)
 
     def drag_start(self, event) -> None:
         """Initiate dragging the window."""
