@@ -847,7 +847,7 @@ class AppWindow:
                 update_msg = update_msg.replace('\\r', '\r')
                 stable_popup = tk.messagebox.askyesno(title=title, message=update_msg)
                 if stable_popup:
-                    webbrowser.open("https://github.com/edCD/eDMarketConnector/releases/latest")
+                    webbrowser.open("https://github.com/EDCD/eDMarketConnector/releases/latest")
         if postargs.get('Restart_Req'):
             # LANG: Text of Notification Popup for EDMC Restart
             restart_msg = tr.tl('A restart of EDMC is required. EDMC will now restart.')
