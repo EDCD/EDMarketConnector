@@ -912,20 +912,15 @@ class PreferencesDialog(tk.Toplevel):
         # Plugin settings and info
         plugins_frame = nb.Frame(notebook)
         plugins_frame.columnconfigure(0, weight=1)
-        plugdir = tk.StringVar()
-        plugdir.set(config.plugin_dir)
         row = AutoInc(start=0)
-
-        # Section heading in settings
+        self.plugdir = tk.StringVar()
+        self.plugdir.set(str(config.get_str('plugin_dir')))
         # LANG: Label for location of third-party plugins folder
-        nb.Label(plugins_frame, text=tr.tl('Plugins folder') + ':').grid(
-            padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get()
-        )
-
-        plugdirentry = ttk.Entry(plugins_frame, justify=tk.LEFT)
-        self.displaypath(plugdir, plugdirentry)
-        plugdirentry.grid(columnspan=2, padx=self.PADX, pady=self.BOXY, sticky=tk.EW, row=row.get())
-
+        self.plugdir_label = nb.Label(plugins_frame, text=tr.tl('Plugins folder') + ':')
+        self.plugdir_label.grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get())
+        self.plugdir_entry = ttk.Entry(plugins_frame, takefocus=False,
+                                       textvariable=self.plugdir)  # Link StringVar to Entry widget
+        self.plugdir_entry.grid(columnspan=4, padx=self.PADX, pady=self.BOXY, sticky=tk.EW, row=row.get())
         with row as cur_row:
             nb.Label(
                 plugins_frame,
@@ -933,19 +928,41 @@ class PreferencesDialog(tk.Toplevel):
                 # LANG: Tip/label about how to disable plugins
                 text=tr.tl(
                     "Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name").format(EXT='.disabled')
-            ).grid(columnspan=2, padx=self.PADX, pady=self.PADY, sticky=tk.EW, row=cur_row)
+            ).grid(columnspan=1, padx=self.PADX, pady=self.PADY, sticky=tk.EW, row=cur_row)
 
-            ttk.Button(
+            # Open Plugin Folder Button
+            self.open_plug_folder_btn = ttk.Button(
                 plugins_frame,
-                # LANG: Label on button used to open a filesystem folder
-                text=tr.tl('Open'),  # Button that opens a folder in Explorer/Finder
+                # LANG: Label on button used to open the Plugin Folder
+                text=tr.tl('Open Plugins Folder'),
                 command=lambda: open_folder(config.plugin_dir_path)
-            ).grid(column=1, padx=self.PADX, pady=self.PADY, sticky=tk.N, row=cur_row)
+            )
+            self.open_plug_folder_btn.grid(column=1, padx=self.PADX, pady=self.PADY, sticky=tk.EW, row=cur_row)
+
+            # Browse Button
+            text = tr.tl('Browse...')  # LANG: NOT-macOS Settings - files location selection button
+            self.plugbutton = ttk.Button(
+                plugins_frame,
+                text=text,
+                # LANG: Selecting the Location of the Plugin Directory on the Filesystem
+                command=lambda: self.filebrowse(tr.tl('Plugin Directory Location'), self.plugdir)
+            )
+            self.plugbutton.grid(column=2, padx=self.PADX, pady=self.PADY, sticky=tk.EW, row=cur_row)
+
+            if config.default_journal_dir_path:
+                # Appearance theme and language setting
+                ttk.Button(
+                    plugins_frame,
+                    # LANG: Settings > Configuration - Label on 'reset journal files location to default' button
+                    text=tr.tl('Default'),
+                    command=self.plugdir_reset,
+                    state=tk.NORMAL if config.get_str('plugin_dir') else tk.DISABLED
+                ).grid(column=3, padx=self.PADX, pady=self.PADY, sticky=tk.EW, row=cur_row)
 
         enabled_plugins = list(filter(lambda x: x.folder and x.module, plug.PLUGINS))
         if enabled_plugins:
             ttk.Separator(plugins_frame, orient=tk.HORIZONTAL).grid(
-                columnspan=3, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=row.get()
+                columnspan=4, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=row.get()
             )
             nb.Label(
                 plugins_frame,
@@ -1123,6 +1140,13 @@ class PreferencesDialog(tk.Toplevel):
 
         self.outvarchanged()
 
+    def plugdir_reset(self) -> None:
+        """Reset the log dir to the default."""
+        if config.default_plugin_dir_path:
+            self.plugdir.set(config.default_plugin_dir)
+
+        self.outvarchanged()
+
     def disable_autoappupdatecheckingame_changed(self) -> None:
         """Save out the auto update check in game config."""
         config.set('disable_autoappupdatecheckingame', self.disable_autoappupdatecheckingame.get())
@@ -1218,7 +1242,7 @@ class PreferencesDialog(tk.Toplevel):
 
         return 'break'  # stops further processing - insertion, Tab traversal etc
 
-    def apply(self) -> None:
+    def apply(self) -> None:  # noqa: CCR001
         """Update the config with the options set on the dialog."""
         config.set('PrefsVersion', prefsVersion.stringToSerial(appversion_nobuild()))
         config.set(
@@ -1274,6 +1298,13 @@ class PreferencesDialog(tk.Toplevel):
         config.set('dark_text', self.theme_colors[0])
         config.set('dark_highlight', self.theme_colors[1])
         theme.apply(self.parent)
+        if self.plugdir.get() != config.get('plugin_dir'):
+            config.set(
+                'plugin_dir',
+                join(config.home_path, self.plugdir.get()[2:]) if self.plugdir.get().startswith(
+                    '~') else self.plugdir.get()
+            )
+            self.req_restart = True
 
         # Notify
         if self.callback:

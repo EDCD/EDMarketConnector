@@ -31,7 +31,11 @@ class LinuxConfig(AbstractConfig):
         self.app_dir_path = xdg_data_home / appname
         self.app_dir_path.mkdir(exist_ok=True, parents=True)
 
-        self.plugin_dir_path = self.app_dir_path / 'plugins'
+        self.default_plugin_dir_path = self.app_dir_path / 'plugins'
+        if (plugdir_str := self.get_str('plugin_dir')) is None or not pathlib.Path(plugdir_str).is_dir():
+            self.set("plugin_dir", str(self.default_plugin_dir_path))
+            plugdir_str = self.default_plugin_dir
+        self.plugin_dir_path = pathlib.Path(plugdir_str)
         self.plugin_dir_path.mkdir(exist_ok=True)
 
         self.respath_path = pathlib.Path(__file__).parent.parent

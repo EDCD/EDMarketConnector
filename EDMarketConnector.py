@@ -849,9 +849,10 @@ class AppWindow:
                 if stable_popup:
                     webbrowser.open("https://github.com/edCD/eDMarketConnector/releases/latest")
         if postargs.get('Restart_Req'):
+            # LANG: Text of Notification Popup for EDMC Restart
             restart_msg = tr.tl('A restart of EDMC is required. EDMC will now shut down.')
             restart_box = tk.messagebox.Message(
-                title=tr.tl('Restart Required'),
+                title=tr.tl('Restart Required'),  # LANG: Title of Notification Popup for EDMC Restart
                 message=restart_msg,
                 type=tk.messagebox.OK
             )
