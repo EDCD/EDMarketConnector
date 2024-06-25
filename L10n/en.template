@@ -814,7 +814,7 @@
 "Restart Required" = "Restart Required";
 
 /* EDMarketConnector.py: Text of Notification Popup for EDMC Restart; */
-"A restart of EDMC is required. EDMC will now shut down." = "A restart of EDMC is required. EDMC will now shut down.";
+"A restart of EDMC is required. EDMC will now restart." = "A restart of EDMC is required. EDMC will now restart.";
 
 /* myNotebook.py: Can't Paste Images or Files in Text; */
 "Cannot paste non-text content." = "Cannot paste non-text content.";
