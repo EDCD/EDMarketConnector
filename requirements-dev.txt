@@ -11,7 +11,7 @@ setuptools==70.0.0
 flake8==7.1.0
 flake8-annotations-coverage==0.0.6
 flake8-cognitive-complexity==0.1.0
-flake8-comprehensions==3.14.0
+flake8-comprehensions==3.15.0
 flake8-docstrings==1.7.0
 flake8-json==24.4.0
 flake8-noqa==1.4.0
