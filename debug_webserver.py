@@ -18,7 +18,7 @@ logger = get_main_logger()
 
 output_lock = threading.Lock()
 output_data_path = pathlib.Path(tempfile.gettempdir()) / f'{appname}' / 'http_debug'
-SAFE_TRANSLATE = str.maketrans({x: '_' for x in "!@#$%^&*()./\\\r\n[]-+='\";:?<>,~`"})
+SAFE_TRANSLATE = str.maketrans(dict.fromkeys("!@#$%^&*()./\\\r\n[]-+='\";:?<>,~`", '_'))
 
 
 class LoggingHandler(server.BaseHTTPRequestHandler):
