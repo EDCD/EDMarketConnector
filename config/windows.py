@@ -49,10 +49,28 @@ class WinConfig(AbstractConfig):
 
     def __init__(self) -> None:
         super().__init__()
+        REGISTRY_SUBKEY = r'Software\Marginal\EDMarketConnector'  # noqa: N806
+        create_key_defaults = functools.partial(
+            winreg.CreateKeyEx,
+            key=winreg.HKEY_CURRENT_USER,
+            access=winreg.KEY_ALL_ACCESS | winreg.KEY_WOW64_64KEY,
+        )
+
+        try:
+            self.__reg_handle: winreg.HKEYType = create_key_defaults(sub_key=REGISTRY_SUBKEY)
+
+        except OSError:
+            logger.exception('Could not create required registry keys')
+            raise
+
         self.app_dir_path = pathlib.Path(known_folder_path(FOLDERID_LocalAppData)) / appname  # type: ignore
         self.app_dir_path.mkdir(exist_ok=True)
 
-        self.plugin_dir_path = self.app_dir_path / 'plugins'
+        self.default_plugin_dir_path = self.app_dir_path / 'plugins'
+        if (plugdir_str := self.get_str('plugin_dir')) is None or not pathlib.Path(plugdir_str).is_dir():
+            self.set("plugin_dir", str(self.default_plugin_dir_path))
+            plugdir_str = self.default_plugin_dir
+        self.plugin_dir_path = pathlib.Path(plugdir_str)
         self.plugin_dir_path.mkdir(exist_ok=True)
 
         if getattr(sys, 'frozen', False):
@@ -67,20 +85,6 @@ class WinConfig(AbstractConfig):
         journal_dir_path = pathlib.Path(
             known_folder_path(FOLDERID_SavedGames)) / 'Frontier Developments' / 'Elite Dangerous'  # type: ignore
         self.default_journal_dir_path = journal_dir_path if journal_dir_path.is_dir() else None  # type: ignore
-
-        REGISTRY_SUBKEY = r'Software\Marginal\EDMarketConnector'  # noqa: N806
-        create_key_defaults = functools.partial(
-            winreg.CreateKeyEx,
-            key=winreg.HKEY_CURRENT_USER,
-            access=winreg.KEY_ALL_ACCESS | winreg.KEY_WOW64_64KEY,
-        )
-
-        try:
-            self.__reg_handle: winreg.HKEYType = create_key_defaults(sub_key=REGISTRY_SUBKEY)
-
-        except OSError:
-            logger.exception('Could not create required registry keys')
-            raise
 
         self.identifier = applongname
         if (outdir_str := self.get_str('outdir')) is None or not pathlib.Path(outdir_str).is_dir():
