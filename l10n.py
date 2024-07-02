@@ -50,7 +50,6 @@ if sys.platform == 'win32':
     GetUserPreferredUILanguages.argtypes = [
         DWORD, ctypes.POINTER(ctypes.c_ulong), LPCVOID, ctypes.POINTER(ctypes.c_ulong)
     ]
-
     GetUserPreferredUILanguages.restype = BOOL
 
     LOCALE_NAME_USER_DEFAULT = None
