@@ -7,7 +7,6 @@ import logging
 import pathlib
 import subprocess
 import sys
-import tempfile
 import tkinter as tk
 import warnings
 from os import system
@@ -20,7 +19,6 @@ import myNotebook as nb  # noqa: N813
 import plug
 from config import appversion_nobuild, config
 from EDMCLogging import edmclogger, get_main_logger
-from constants import appname
 from hotkey import hotkeymgr
 from l10n import translations as tr
 from monitor import monitor
@@ -43,7 +41,7 @@ def help_open_log_folder() -> None:
     """Open the folder logs are stored in."""
     warnings.warn('prefs.help_open_log_folder is deprecated, use open_log_folder instead. '
                   'This function will be removed in 6.0 or later', DeprecationWarning, stacklevel=2)
-    open_folder(pathlib.Path(tempfile.gettempdir()) / appname)
+    open_folder(pathlib.Path(config.app_dir_path / 'logs'))
 
 
 def open_folder(file: pathlib.Path) -> None:
@@ -323,7 +321,7 @@ class PreferencesDialog(tk.Toplevel):
                 self.geometry(f"+{position.left}+{position.top}")
 
         # Set Log Directory
-        self.logfile_loc = pathlib.Path(tempfile.gettempdir()) / appname
+        self.logfile_loc = pathlib.Path(config.app_dir_path / 'logs')
 
         # Set minimum size to prevent content cut-off
         self.update_idletasks()  # Update "requested size" from geometry manager

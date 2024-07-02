@@ -20,7 +20,6 @@ import subprocess
 import sys
 import threading
 import webbrowser
-import tempfile
 from os import chdir, environ, path
 from time import localtime, strftime, time
 from typing import TYPE_CHECKING, Any, Literal
@@ -42,16 +41,19 @@ else:
     # not frozen.
     chdir(pathlib.Path(__file__).parent)
 
-
 # config will now cause an appname logger to be set up, so we need the
 # console redirect before this
 if __name__ == '__main__':
     # Keep this as the very first code run to be as sure as possible of no
     # output until after this redirect is done, if needed.
     if getattr(sys, 'frozen', False):
+        from config import config
         # By default py2exe tries to write log to dirname(sys.executable) which fails when installed
         # unbuffered not allowed for text in python3, so use `1 for line buffering
-        log_file_path = path.join(tempfile.gettempdir(), f'{appname}.log')
+        log_file_path = pathlib.Path(config.app_dir_path / 'logs')
+        log_file_path.mkdir(exist_ok=True)
+        log_file_path /= f'{appname}.log'
+
         sys.stdout = sys.stderr = open(log_file_path, mode='wt', buffering=1)  # Do NOT use WITH here.
     # TODO: Test: Make *sure* this redirect is working, else py2exe is going to cause an exit popup
 
@@ -619,7 +621,7 @@ class AppWindow:
         self.help_menu.add_command(command=lambda: self.updater.check_for_updates())  # Check for Updates...
         # About E:D Market Connector
         self.help_menu.add_command(command=lambda: not self.HelpAbout.showing and self.HelpAbout(self.w))
-        logfile_loc = pathlib.Path(tempfile.gettempdir()) / appname
+        logfile_loc = pathlib.Path(config.app_dir_path / 'logs')
         self.help_menu.add_command(command=lambda: prefs.open_folder(logfile_loc))  # Open Log Folder
         self.help_menu.add_command(command=lambda: prefs.help_open_system_profiler(self))  # Open Log Folde
 
