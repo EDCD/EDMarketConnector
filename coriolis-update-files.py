@@ -51,7 +51,8 @@ if __name__ == "__main__":
     for m in list(data['Ships'].values()):
         name = coriolis_ship_map.get(m['properties']['name'], str(m['properties']['name']))
         assert name in reverse_ship_map, name
-        ships[name] = {'hullMass': m['properties']['hullMass']}
+        ships[name] = {'hullMass': m['properties']['hullMass'],
+                       'reserveFuelCapacity': m['properties']['reserveFuelCapacity']}
         for i, bulkhead in enumerate(bulkheads):
             modules['_'.join([reverse_ship_map[name], 'armour', bulkhead])] = {'mass': m['bulkheads'][i]['mass']}
 
