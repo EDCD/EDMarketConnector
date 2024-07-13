@@ -1416,15 +1416,6 @@ class EDDN:
         #######################################################################
         # Elisions
         #######################################################################
-        # WORKAROUND WIP EDDN schema | 2021-10-17: This will reject with the Odyssey or Horizons flags present
-        if 'odyssey' in entry:
-            del entry['odyssey']
-
-        if 'horizons' in entry:
-            del entry['horizons']
-
-        # END WORKAROUND
-
         # In case Frontier ever add any
         entry = filter_localised(entry)
         #######################################################################
