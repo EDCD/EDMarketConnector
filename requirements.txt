@@ -8,3 +8,6 @@ winrt-Microsoft.UI.Interop==2.1.0; sys_platform == 'win32'
 winrt-Microsoft.UI.Windowing==2.1.0; sys_platform == 'win32'
 winrt-Microsoft.Windows.ApplicationModel.DynamicDependency.Bootstrap==2.1.0.post1; sys_platform == 'win32'
 semantic-version==2.10.0
+# For manipulating folder permissions and the like.
+pywin32==306; sys_platform == 'win32'
+psutil==5.9.8

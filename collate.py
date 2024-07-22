@@ -17,7 +17,6 @@ import json
 import os
 import pathlib
 import sys
-from os.path import isfile
 from traceback import print_exc
 
 import companion
@@ -35,7 +34,7 @@ def __make_backup(file_name: pathlib.Path, suffix: str = '.bak') -> None:
     """
     backup_name = file_name.parent / (file_name.name + suffix)
 
-    if isfile(backup_name):
+    if pathlib.Path.is_file(backup_name):
         os.unlink(backup_name)
 
     os.rename(file_name, backup_name)
@@ -52,13 +51,13 @@ def addcommodities(data) -> None:  # noqa: CCR001
         return
 
     try:
-        commodityfile = pathlib.Path(config.app_dir_path / 'FDevIDs' / 'commodity.csv')
+        commodityfile = config.app_dir_path / 'FDevIDs' / 'commodity.csv'
     except FileNotFoundError:
         commodityfile = pathlib.Path('FDevIDs/commodity.csv')
     commodities = {}
 
     # slurp existing
-    if isfile(commodityfile):
+    if pathlib.Path.is_file(commodityfile):
         with open(commodityfile) as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
@@ -86,7 +85,7 @@ def addcommodities(data) -> None:  # noqa: CCR001
     if len(commodities) <= size_pre:
         return
 
-    if isfile(commodityfile):
+    if pathlib.Path.is_file(commodityfile):
         __make_backup(commodityfile)
 
     with open(commodityfile, 'w', newline='\n') as csvfile:
@@ -109,7 +108,7 @@ def addmodules(data):  # noqa: C901, CCR001
     fields = ('id', 'symbol', 'category', 'name', 'mount', 'guidance', 'ship', 'class', 'rating', 'entitlement')
 
     # slurp existing
-    if isfile(outfile):
+    if pathlib.Path.is_file(outfile):
         with open(outfile) as csvfile:
             reader = csv.DictReader(csvfile, restval='')
             for row in reader:
@@ -147,7 +146,7 @@ def addmodules(data):  # noqa: C901, CCR001
     if not len(modules) > size_pre:
         return
 
-    if isfile(outfile):
+    if pathlib.Path.is_file(outfile):
         __make_backup(outfile)
 
     with open(outfile, 'w', newline='\n') as csvfile:
@@ -170,7 +169,7 @@ def addships(data) -> None:  # noqa: CCR001
     fields = ('id', 'symbol', 'name')
 
     # slurp existing
-    if isfile(shipfile):
+    if pathlib.Path.is_file(shipfile):
         with open(shipfile) as csvfile:
             reader = csv.DictReader(csvfile, restval='')
             for row in reader:
@@ -200,7 +199,7 @@ def addships(data) -> None:  # noqa: CCR001
     if not len(ships) > size_pre:
         return
 
-    if isfile(shipfile):
+    if pathlib.Path.is_file(shipfile):
         __make_backup(shipfile)
 
     with open(shipfile, 'w', newline='\n') as csvfile:

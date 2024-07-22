@@ -14,6 +14,7 @@ import operator
 import os
 import sys
 import tkinter as tk
+from pathlib import Path
 from tkinter import ttk
 from typing import Any, Mapping, MutableMapping
 
@@ -46,7 +47,7 @@ last_error = LastError()
 class Plugin:
     """An EDMC plugin."""
 
-    def __init__(self, name: str, loadfile: str | None, plugin_logger: logging.Logger | None):  # noqa: CCR001
+    def __init__(self, name: str, loadfile: Path | None, plugin_logger: logging.Logger | None):  # noqa: CCR001
         """
         Load a single plugin.
 
@@ -72,7 +73,7 @@ class Plugin:
                     sys.modules[module.__name__] = module
                     spec.loader.exec_module(module)
                     if getattr(module, 'plugin_start3', None):
-                        newname = module.plugin_start3(os.path.dirname(loadfile))
+                        newname = module.plugin_start3(Path(loadfile).resolve().parent)
                         self.name = str(newname) if newname else self.name
                         self.module = module
                     elif getattr(module, 'plugin_start', None):
@@ -173,7 +174,9 @@ def _load_internal_plugins():
     for name in sorted(os.listdir(config.internal_plugin_dir_path)):
         if name.endswith('.py') and name[0] not in ('.', '_'):
             try:
-                plugin = Plugin(name[:-3], os.path.join(config.internal_plugin_dir_path, name), logger)
+                plugin_name = name[:-3]
+                plugin_path = config.internal_plugin_dir_path / name
+                plugin = Plugin(plugin_name, plugin_path, logger)
                 plugin.folder = None
                 internal.append(plugin)
             except Exception:
@@ -197,9 +200,12 @@ def _load_found_plugins():
     # The intent here is to e.g. have EDMC-Overlay load before any plugins
     # that depend on it.
 
-    for name in sorted(os.listdir(config.plugin_dir_path), key=lambda n: (
-            not os.path.isfile(os.path.join(config.plugin_dir_path, n, '__init__.py')), n.lower())):
-        if not os.path.isdir(os.path.join(config.plugin_dir_path, name)) or name[0] in ('.', '_'):
+    plugin_files = sorted(config.plugin_dir_path.iterdir(), key=lambda p: (
+        not (p / '__init__.py').is_file(), p.name.lower()))
+
+    for plugin_file in plugin_files:
+        name = plugin_file.name
+        if not (config.plugin_dir_path / name).is_dir() or name.startswith(('.', '_')):
             pass
         elif name.endswith('.disabled'):
             name, discard = name.rsplit('.', 1)
@@ -207,12 +213,12 @@ def _load_found_plugins():
         else:
             try:
                 # Add plugin's folder to load path in case plugin has internal package dependencies
-                sys.path.append(os.path.join(config.plugin_dir_path, name))
+                sys.path.append(str(config.plugin_dir_path / name))
 
                 import EDMCLogging
                 # Create a logger for this 'found' plugin.  Must be before the load.py is loaded.
                 plugin_logger = EDMCLogging.get_plugin_logger(name)
-                found.append(Plugin(name, os.path.join(config.plugin_dir_path, name, 'load.py'), plugin_logger))
+                found.append(Plugin(name, config.plugin_dir_path / name / 'load.py', plugin_logger))
             except Exception:
                 PLUGINS_broken.append(Plugin(name, None, logger))
                 logger.exception(f'Failure loading found Plugin "{name}"')

@@ -5,23 +5,23 @@ Copyright (c) EDCD, All Rights Reserved
 Licensed under the GNU General Public License.
 See LICENSE file.
 """
-import os
 import subprocess
+from pathlib import Path
 from build import build
 
 
-def run_inno_setup_installer(iss_path: str) -> None:
+def run_inno_setup_installer(iss_path: Path) -> None:
     """Run the Inno installer, building the installation exe."""
     # Get the path to the Inno Setup compiler (iscc.exe) (Currently set to default path)
-    inno_setup_compiler_path: str = "C:\\Program Files (x86)\\Inno Setup 6\\ISCC.exe"
+    inno_setup_compiler_path = Path("C:\\Program Files (x86)\\Inno Setup 6\\ISCC.exe")
 
     # Check if the Inno Setup compiler executable exists
-    if not os.path.isfile(inno_setup_compiler_path):
+    if not inno_setup_compiler_path.exists():
         print(f"Error: Inno Setup compiler not found at '{inno_setup_compiler_path}'.")
         return
 
     # Check if the provided .iss file exists
-    if not os.path.isfile(iss_file_path):
+    if not iss_file_path.exists():
         print(f"Error: The provided .iss file '{iss_path}' not found.")
         return
 
@@ -40,6 +40,6 @@ def run_inno_setup_installer(iss_path: str) -> None:
 if __name__ == "__main__":
     build()
     # Add the ISS Template File
-    iss_file_path: str = "./EDMC_Installer_Config.iss"
+    iss_file_path = Path("./EDMC_Installer_Config.iss")
     # Build the ISS file
     run_inno_setup_installer(iss_file_path)

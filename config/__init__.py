@@ -189,6 +189,7 @@ class AbstractConfig(abc.ABC):
 
     app_dir_path: pathlib.Path
     plugin_dir_path: pathlib.Path
+    default_plugin_dir_path: pathlib.Path
     internal_plugin_dir_path: pathlib.Path
     internal_theme_dir_path: pathlib.Path
     respath_path: pathlib.Path
@@ -293,6 +294,11 @@ class AbstractConfig(abc.ABC):
     def plugin_dir(self) -> str:
         """Return a string version of plugin_dir."""
         return str(self.plugin_dir_path)
+
+    @property
+    def default_plugin_dir(self) -> str:
+        """Return a string version of plugin_dir."""
+        return str(self.default_plugin_dir_path)
 
     @property
     def internal_plugin_dir(self) -> str:
