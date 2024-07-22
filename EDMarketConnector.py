@@ -20,7 +20,6 @@ import subprocess
 import sys
 import threading
 import webbrowser
-import tempfile
 from os import chdir, environ
 from time import localtime, strftime, time
 from typing import TYPE_CHECKING, Any, Literal
@@ -42,16 +41,19 @@ else:
     # not frozen.
     chdir(pathlib.Path(__file__).parent)
 
-
 # config will now cause an appname logger to be set up, so we need the
 # console redirect before this
 if __name__ == '__main__':
     # Keep this as the very first code run to be as sure as possible of no
     # output until after this redirect is done, if needed.
     if getattr(sys, 'frozen', False):
+        from config import config
         # By default py2exe tries to write log to dirname(sys.executable) which fails when installed
         # unbuffered not allowed for text in python3, so use `1 for line buffering
-        log_file_path = pathlib.Path(tempfile.gettempdir()) / f'{appname}.log'
+        log_file_path = pathlib.Path(config.app_dir_path / 'logs')
+        log_file_path.mkdir(exist_ok=True)
+        log_file_path /= f'{appname}.log'
+
         sys.stdout = sys.stderr = open(log_file_path, mode='wt', buffering=1)  # Do NOT use WITH here.
     # TODO: Test: Make *sure* this redirect is working, else py2exe is going to cause an exit popup
 
@@ -454,7 +456,7 @@ class AppWindow:
         if sys.platform == 'win32':
             from simplesystray import SysTrayIcon
 
-            def open_window(systray: 'SysTrayIcon') -> None:
+            def open_window(systray: 'SysTrayIcon', *args) -> None:
                 self.w.deiconify()
 
             menu_options = (("Open", None, open_window),)
@@ -619,7 +621,7 @@ class AppWindow:
         self.help_menu.add_command(command=lambda: self.updater.check_for_updates())  # Check for Updates...
         # About E:D Market Connector
         self.help_menu.add_command(command=lambda: not self.HelpAbout.showing and self.HelpAbout(self.w))
-        logfile_loc = pathlib.Path(tempfile.gettempdir()) / appname
+        logfile_loc = pathlib.Path(config.app_dir_path / 'logs')
         self.help_menu.add_command(command=lambda: prefs.open_folder(logfile_loc))  # Open Log Folder
         self.help_menu.add_command(command=lambda: prefs.help_open_system_profiler(self))  # Open Log Folde
 
@@ -845,9 +847,20 @@ class AppWindow:
                 )
                 update_msg = update_msg.replace('\\n', '\n')
                 update_msg = update_msg.replace('\\r', '\r')
-                stable_popup = tk.messagebox.askyesno(title=title, message=update_msg, parent=postargs.get('Parent'))
+                stable_popup = tk.messagebox.askyesno(title=title, message=update_msg)
                 if stable_popup:
-                    webbrowser.open("https://github.com/edCD/eDMarketConnector/releases/latest")
+                    webbrowser.open("https://github.com/EDCD/eDMarketConnector/releases/latest")
+        if postargs.get('Restart_Req'):
+            # LANG: Text of Notification Popup for EDMC Restart
+            restart_msg = tr.tl('A restart of EDMC is required. EDMC will now restart.')
+            restart_box = tk.messagebox.Message(
+                title=tr.tl('Restart Required'),  # LANG: Title of Notification Popup for EDMC Restart
+                message=restart_msg,
+                type=tk.messagebox.OK
+            )
+            restart_box.show()
+            if restart_box:
+                app.onexit(restart=True)
 
     def set_labels(self):
         """Set main window labels, e.g. after language change."""
@@ -1851,7 +1864,7 @@ class AppWindow:
             )
             exit_thread.start()
 
-    def onexit(self, event=None) -> None:
+    def onexit(self, event=None, restart: bool = False) -> None:
         """Application shutdown procedure."""
         if sys.platform == 'win32':
             shutdown_thread = threading.Thread(
@@ -1914,6 +1927,8 @@ class AppWindow:
         self.w.destroy()
 
         logger.info('Done.')
+        if restart:
+            os.execv(sys.executable, ['python'] + sys.argv)
 
     def drag_start(self, event) -> None:
         """Initiate dragging the window."""
