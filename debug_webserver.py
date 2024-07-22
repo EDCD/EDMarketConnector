@@ -4,20 +4,18 @@ from __future__ import annotations
 import gzip
 import json
 import pathlib
-import tempfile
 import threading
 import zlib
 from http import server
 from typing import Any, Callable, Literal
 from urllib.parse import parse_qs
-
-from config import appname
+import config
 from EDMCLogging import get_main_logger
 
 logger = get_main_logger()
 
 output_lock = threading.Lock()
-output_data_path = pathlib.Path(tempfile.gettempdir()) / f'{appname}' / 'http_debug'
+output_data_path = pathlib.Path(config.app_dir_path / 'logs' / 'http_debug')
 SAFE_TRANSLATE = str.maketrans(dict.fromkeys("!@#$%^&*()./\\\r\n[]-+='\";:?<>,~`", '_'))
 
 
