@@ -41,7 +41,7 @@ def help_open_log_folder() -> None:
     """Open the folder logs are stored in."""
     warnings.warn('prefs.help_open_log_folder is deprecated, use open_log_folder instead. '
                   'This function will be removed in 6.0 or later', DeprecationWarning, stacklevel=2)
-    open_folder(pathlib.Path(config.app_dir_path / 'logs'))
+    open_folder(Path(config.app_dir_path / 'logs'))
 
 
 def open_folder(file: Path) -> None:
@@ -322,7 +322,7 @@ class PreferencesDialog(tk.Toplevel):
                 self.geometry(f"+{position.left}+{position.top}")
 
         # Set Log Directory
-        self.logfile_loc = pathlib.Path(config.app_dir_path / 'logs')
+        self.logfile_loc = Path(config.app_dir_path / 'logs')
 
         # Set minimum size to prevent content cut-off
         self.update_idletasks()  # Update "requested size" from geometry manager
@@ -1299,8 +1299,8 @@ class PreferencesDialog(tk.Toplevel):
         if self.plugdir.get() != config.get('plugin_dir'):
             config.set(
                 'plugin_dir',
-                join(config.home_path, self.plugdir.get()[2:]) if self.plugdir.get().startswith(
-                    '~') else self.plugdir.get()
+                str(Path(config.home_path, self.plugdir.get()[2:])) if self.plugdir.get().startswith('~') else
+                str(Path(self.plugdir.get()))
             )
             self.req_restart = True
 
