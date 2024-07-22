@@ -20,7 +20,7 @@ import subprocess
 import sys
 import threading
 import webbrowser
-from os import chdir, environ, path
+from os import chdir, environ
 from time import localtime, strftime, time
 from typing import TYPE_CHECKING, Any, Literal
 from constants import applongname, appname, protocolhandler_redirect
@@ -31,10 +31,10 @@ from constants import applongname, appname, protocolhandler_redirect
 if getattr(sys, 'frozen', False):
     # Under py2exe sys.path[0] is the executable name
     if sys.platform == 'win32':
-        chdir(path.dirname(sys.path[0]))
+        os.chdir(pathlib.Path(sys.path[0]).parent)
         # Allow executable to be invoked from any cwd
-        environ['TCL_LIBRARY'] = path.join(path.dirname(sys.path[0]), 'lib', 'tcl')
-        environ['TK_LIBRARY'] = path.join(path.dirname(sys.path[0]), 'lib', 'tk')
+        environ['TCL_LIBRARY'] = str(pathlib.Path(sys.path[0]).parent / 'lib' / 'tcl')
+        environ['TK_LIBRARY'] = str(pathlib.Path(sys.path[0]).parent / 'lib' / 'tk')
 
 else:
     # We still want to *try* to have CWD be where the main script is, even if
@@ -470,8 +470,8 @@ class AppWindow:
             self.w.wm_iconbitmap(default='EDMarketConnector.ico')
 
         else:
-            self.w.tk.call('wm', 'iconphoto', self.w, '-default',
-                           tk.PhotoImage(file=path.join(config.respath_path, 'io.edcd.EDMarketConnector.png')))
+            image_path = config.respath_path / 'io.edcd.EDMarketConnector.png'
+            self.w.tk.call('wm', 'iconphoto', self.w, '-default', image=tk.PhotoImage(file=image_path))
 
         # TODO: Export to files and merge from them in future ?
         self.theme_icon = tk.PhotoImage(
@@ -1652,7 +1652,7 @@ class AppWindow:
         # Avoid file length limits if possible
         provider = config.get_str('shipyard_provider', default='EDSY')
         target = plug.invoke(provider, 'EDSY', 'shipyard_url', loadout, monitor.is_beta)
-        file_name = path.join(config.app_dir_path, "last_shipyard.html")
+        file_name = config.app_dir_path / "last_shipyard.html"
 
         with open(file_name, 'w') as f:
             f.write(SHIPYARD_HTML_TEMPLATE.format(

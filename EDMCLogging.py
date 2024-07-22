@@ -26,12 +26,13 @@ To utilise logging in core code, or internal plugins, include this:
 
 To utilise logging in a 'found' (third-party) plugin, include this:
 
-    import os
+    from pathlib import Path
     import logging
 
-    plugin_name = os.path.basename(os.path.dirname(__file__))
+    # Retrieve the name of the plugin folder
+    plugin_name = Path(__file__).resolve().parent.name
+    # Set up logger with hierarchical name including appname and plugin_name
     # plugin_name here *must* be the name of the folder the plugin resides in
-    # See, plug.py:load_plugins()
     logger = logging.getLogger(f'{appname}.{plugin_name}')
 """
 from __future__ import annotations
@@ -485,8 +486,8 @@ class EDMCContextFilter(logging.Filter):
         :return: The munged module_name.
         """
         file_name = pathlib.Path(frame_info.filename).expanduser()
-        plugin_dir = pathlib.Path(config.plugin_dir_path).expanduser()
-        internal_plugin_dir = pathlib.Path(config.internal_plugin_dir_path).expanduser()
+        plugin_dir = config.plugin_dir_path.expanduser()
+        internal_plugin_dir = config.internal_plugin_dir_path.expanduser()
         # Find the first parent called 'plugins'
         plugin_top = file_name
         while plugin_top and plugin_top.name != '':

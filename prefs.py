@@ -4,13 +4,13 @@ from __future__ import annotations
 
 import contextlib
 import logging
-import pathlib
+from os.path import expandvars
+from pathlib import Path
 import subprocess
 import sys
 import tkinter as tk
 import warnings
 from os import system
-from os.path import expanduser, expandvars, join, normpath
 from tkinter import colorchooser as tkColorChooser  # type: ignore # noqa: N812
 from tkinter import ttk
 from types import TracebackType
@@ -41,10 +41,10 @@ def help_open_log_folder() -> None:
     """Open the folder logs are stored in."""
     warnings.warn('prefs.help_open_log_folder is deprecated, use open_log_folder instead. '
                   'This function will be removed in 6.0 or later', DeprecationWarning, stacklevel=2)
-    open_folder(pathlib.Path(config.app_dir_path / 'logs'))
+    open_folder(Path(config.app_dir_path / 'logs'))
 
 
-def open_folder(file: pathlib.Path) -> None:
+def open_folder(file: Path) -> None:
     """Open the given file in the OS file explorer."""
     if sys.platform.startswith('win'):
         # On Windows, use the "start" command to open the folder
@@ -56,7 +56,7 @@ def open_folder(file: pathlib.Path) -> None:
 
 def help_open_system_profiler(parent) -> None:
     """Open the EDMC System Profiler."""
-    profiler_path = pathlib.Path(config.respath_path)
+    profiler_path = config.respath_path
     try:
         if getattr(sys, 'frozen', False):
             profiler_path /= 'EDMCSystemProfiler.exe'
@@ -322,7 +322,7 @@ class PreferencesDialog(tk.Toplevel):
                 self.geometry(f"+{position.left}+{position.top}")
 
         # Set Log Directory
-        self.logfile_loc = pathlib.Path(config.app_dir_path / 'logs')
+        self.logfile_loc = Path(config.app_dir_path / 'logs')
 
         # Set minimum size to prevent content cut-off
         self.update_idletasks()  # Update "requested size" from geometry manager
@@ -1082,7 +1082,7 @@ class PreferencesDialog(tk.Toplevel):
         import tkinter.filedialog
         directory = tkinter.filedialog.askdirectory(
             parent=self,
-            initialdir=expanduser(pathvar.get()),
+            initialdir=Path(pathvar.get()).expanduser(),
             title=title,
             mustexist=tk.TRUE
         )
@@ -1104,7 +1104,7 @@ class PreferencesDialog(tk.Toplevel):
         if sys.platform == 'win32':
             start = len(config.home.split('\\')) if pathvar.get().lower().startswith(config.home.lower()) else 0
             display = []
-            components = normpath(pathvar.get()).split('\\')
+            components = Path(pathvar.get()).resolve().parts
             buf = ctypes.create_unicode_buffer(MAX_PATH)
             pidsRes = ctypes.c_int()  # noqa: N806 # Windows convention
             for i in range(start, len(components)):
@@ -1256,7 +1256,7 @@ class PreferencesDialog(tk.Toplevel):
 
         config.set(
             'outdir',
-            join(config.home_path, self.outdir.get()[2:]) if self.outdir.get().startswith('~') else self.outdir.get()
+            str(config.home_path / self.outdir.get()[2:]) if self.outdir.get().startswith('~') else self.outdir.get()
         )
 
         logdir = self.logdir.get()
@@ -1299,8 +1299,8 @@ class PreferencesDialog(tk.Toplevel):
         if self.plugdir.get() != config.get('plugin_dir'):
             config.set(
                 'plugin_dir',
-                join(config.home_path, self.plugdir.get()[2:]) if self.plugdir.get().startswith(
-                    '~') else self.plugdir.get()
+                str(Path(config.home_path, self.plugdir.get()[2:])) if self.plugdir.get().startswith('~') else
+                str(Path(self.plugdir.get()))
             )
             self.req_restart = True
 
