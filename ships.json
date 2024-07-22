@@ -1,119 +1,158 @@
 {
     "Adder": {
-        "hullMass": 35
+        "hullMass": 35,
+        "reserveFuelCapacity": 0.36
     },
     "Alliance Challenger": {
-        "hullMass": 450
+        "hullMass": 450,
+        "reserveFuelCapacity": 0.77
     },
     "Alliance Chieftain": {
-        "hullMass": 400
+        "hullMass": 400,
+        "reserveFuelCapacity": 0.77
     },
     "Alliance Crusader": {
-        "hullMass": 500
+        "hullMass": 500,
+        "reserveFuelCapacity": 0.77
     },
     "Anaconda": {
-        "hullMass": 400
+        "hullMass": 400,
+        "reserveFuelCapacity": 1.07
     },
     "Asp Explorer": {
-        "hullMass": 280
+        "hullMass": 280,
+        "reserveFuelCapacity": 0.63
     },
     "Asp Scout": {
-        "hullMass": 150
+        "hullMass": 150,
+        "reserveFuelCapacity": 0.47
     },
     "Beluga Liner": {
-        "hullMass": 950
+        "hullMass": 950,
+        "reserveFuelCapacity": 0.81
     },
     "Cobra MkIII": {
-        "hullMass": 180
+        "hullMass": 180,
+        "reserveFuelCapacity": 0.49
     },
     "Cobra MkIV": {
-        "hullMass": 210
+        "hullMass": 210,
+        "reserveFuelCapacity": 0.51
     },
     "Diamondback Explorer": {
-        "hullMass": 260
+        "hullMass": 260,
+        "reserveFuelCapacity": 0.52
     },
     "Diamondback Scout": {
-        "hullMass": 170
+        "hullMass": 170,
+        "reserveFuelCapacity": 0.49
     },
     "Dolphin": {
-        "hullMass": 140
+        "hullMass": 140,
+        "reserveFuelCapacity": 0.5
     },
     "Eagle": {
-        "hullMass": 50
+        "hullMass": 50,
+        "reserveFuelCapacity": 0.34
     },
     "Federal Assault Ship": {
-        "hullMass": 480
+        "hullMass": 480,
+        "reserveFuelCapacity": 0.72
     },
     "Federal Corvette": {
-        "hullMass": 900
+        "hullMass": 900,
+        "reserveFuelCapacity": 1.13
     },
     "Federal Dropship": {
-        "hullMass": 580
+        "hullMass": 580,
+        "reserveFuelCapacity": 0.83
     },
     "Federal Gunship": {
-        "hullMass": 580
+        "hullMass": 580,
+        "reserveFuelCapacity": 0.82
     },
     "Fer-de-Lance": {
-        "hullMass": 250
+        "hullMass": 250,
+        "reserveFuelCapacity": 0.67
     },
     "Hauler": {
-        "hullMass": 14
+        "hullMass": 14,
+        "reserveFuelCapacity": 0.25
     },
     "Imperial Clipper": {
-        "hullMass": 400
+        "hullMass": 400,
+        "reserveFuelCapacity": 0.74
     },
     "Imperial Courier": {
-        "hullMass": 35
+        "hullMass": 35,
+        "reserveFuelCapacity": 0.41
     },
     "Imperial Cutter": {
-        "hullMass": 1100
+        "hullMass": 1100,
+        "reserveFuelCapacity": 1.16
     },
     "Imperial Eagle": {
-        "hullMass": 50
+        "hullMass": 50,
+        "reserveFuelCapacity": 0.37
     },
     "Keelback": {
-        "hullMass": 180
+        "hullMass": 180,
+        "reserveFuelCapacity": 0.39
     },
     "Krait MkII": {
-        "hullMass": 320
+        "hullMass": 320,
+        "reserveFuelCapacity": 0.63
     },
     "Krait Phantom": {
-        "hullMass": 270
+        "hullMass": 270,
+        "reserveFuelCapacity": 0.63
     },
     "Mamba": {
-        "hullMass": 250
+        "hullMass": 250,
+        "reserveFuelCapacity": 0.5
     },
     "Orca": {
-        "hullMass": 290
+        "hullMass": 290,
+        "reserveFuelCapacity": 0.79
     },
     "Python": {
-        "hullMass": 350
+        "hullMass": 350,
+        "reserveFuelCapacity": 0.83
     },
     "Python Mk II": {
-        "hullMass": 450
+        "hullMass": 450,
+        "reserveFuelCapacity": 0.83
     },
     "Sidewinder": {
-        "hullMass": 25
+        "hullMass": 25,
+        "reserveFuelCapacity": 0.3
     },
     "Type-10 Defender": {
-        "hullMass": 1200
+        "hullMass": 1200,
+        "reserveFuelCapacity": 0.77
     },
     "Type-6 Transporter": {
-        "hullMass": 155
+        "hullMass": 155,
+        "reserveFuelCapacity": 0.39
     },
     "Type-7 Transporter": {
-        "hullMass": 350
+        "hullMass": 350,
+        "reserveFuelCapacity": 0.52
     },
     "Type-9 Heavy": {
-        "hullMass": 850
+        "hullMass": 850,
+        "reserveFuelCapacity": 0.77
     },
     "Viper MkIII": {
-        "hullMass": 50
+        "hullMass": 50,
+        "reserveFuelCapacity": 0.41
     },
     "Viper MkIV": {
-        "hullMass": 190
+        "hullMass": 190,
+        "reserveFuelCapacity": 0.46
     },
     "Vulture": {
-        "hullMass": 230
+        "hullMass": 230,
+        "reserveFuelCapacity": 0.57
     }
 }

@@ -9,8 +9,9 @@ build
 dist.win32/
 dist.*
 
-# Ignore generated ChangeLog.html file
+# Ignore generated ChangeLog files
 ChangeLog.html
+/scripts/script_output
 
 # Ignore files
 dump

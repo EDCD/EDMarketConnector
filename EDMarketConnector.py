@@ -456,7 +456,7 @@ class AppWindow:
         if sys.platform == 'win32':
             from simplesystray import SysTrayIcon
 
-            def open_window(systray: 'SysTrayIcon') -> None:
+            def open_window(systray: 'SysTrayIcon', *args) -> None:
                 self.w.deiconify()
 
             menu_options = (("Open", None, open_window),)
