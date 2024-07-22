@@ -121,9 +121,10 @@ class Button(ttk.Button):
 class ColoredButton(tk.Button):
     """Custom tk.Button class to fix some display issues."""
 
+    # DEPRECATED: Migrate to ttk.Button. Will remove in 6.0 or later.
     def __init__(self, master: ttk.Frame | None = None, **kw):
+        warnings.warn('Migrate to ttk.Button. Will remove in 6.0 or later.', DeprecationWarning, stacklevel=2)
         tk.Button.__init__(self, master, **kw)
-        warnings.warn('Migrate to ttk.Button. Will be removed in 6.0 or later', DeprecationWarning, stacklevel=2)
 
 
 class Checkbutton(ttk.Checkbutton):
