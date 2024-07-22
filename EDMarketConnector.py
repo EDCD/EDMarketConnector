@@ -267,7 +267,7 @@ if __name__ == '__main__':  # noqa: C901
             # If *this* instance hasn't locked, then another already has and we
             # now need to do the edmc:// checks for auth callback
             if locked != JournalLockResult.LOCKED:
-                from ctypes import windll, create_unicode_buffer, WINFUNCTYPE
+                from ctypes import windll, WINFUNCTYPE
                 from ctypes.wintypes import BOOL, HWND, LPARAM
                 import win32gui
                 import win32api
@@ -302,25 +302,22 @@ if __name__ == '__main__':  # noqa: C901
                     :param l_param: The second parameter to the EnumWindows() call.
                     :return: False if we found a match, else True to continue iteration
                     """
-                    # class name limited to 256 - https://msdn.microsoft.com/en-us/library/windows/desktop/ms633576
-                    cls = create_unicode_buffer(257)
                     # This conditional is exploded to make debugging slightly easier
-                    if win32gui.GetClassName(window_handle, cls, 257):
-                        if cls.value == 'TkTopLevel':
-                            if window_title(window_handle) == applongname:
-                                if GetProcessHandleFromHwnd(window_handle):
-                                    # If GetProcessHandleFromHwnd succeeds then the app is already running as this user
-                                    if len(sys.argv) > 1 and sys.argv[1].startswith(protocolhandler_redirect):
-                                        CoInitializeEx(0, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)
-                                        # Wait for it to be responsive to avoid ShellExecute recursing
-                                        win32gui.ShowWindow(window_handle, win32con.SW_RESTORE)
-                                        win32api.ShellExecute(0, None, sys.argv[1], None, None, win32con.SW_RESTORE)
+                    if win32gui.GetClassName(window_handle) == 'TkTopLevel':
+                        if window_title(window_handle) == applongname:
+                            if GetProcessHandleFromHwnd(window_handle):
+                                # If GetProcessHandleFromHwnd succeeds then the app is already running as this user
+                                if len(sys.argv) > 1 and sys.argv[1].startswith(protocolhandler_redirect):
+                                    CoInitializeEx(0, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)
+                                    # Wait for it to be responsive to avoid ShellExecute recursing
+                                    win32gui.ShowWindow(window_handle, win32con.SW_RESTORE)
+                                    win32api.ShellExecute(0, None, sys.argv[1], None, None, win32con.SW_RESTORE)
 
-                                    else:
-                                        ShowWindowAsync(window_handle, win32con.SW_RESTORE)
-                                        win32gui.SetForegroundWindow(window_handle)
+                                else:
+                                    ShowWindowAsync(window_handle, win32con.SW_RESTORE)
+                                    win32gui.SetForegroundWindow(window_handle)
 
-                            return False  # Indicate window found, so stop iterating
+                        return False  # Indicate window found, so stop iterating
 
                     # Indicate that EnumWindows() needs to continue iterating
                     return True  # Do not remove, else this function as a callback breaks
