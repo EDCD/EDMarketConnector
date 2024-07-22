@@ -17,10 +17,9 @@ import re
 import sys
 import warnings
 from contextlib import suppress
-from os import listdir, sep, makedirs
-from os.path import basename, dirname, isdir, join, abspath, exists
+from os import listdir, sep
 from typing import TYPE_CHECKING, Iterable, TextIO, cast
-
+import pathlib
 from config import config
 from EDMCLogging import get_main_logger
 
@@ -35,7 +34,7 @@ logger = get_main_logger()
 
 # Language name
 LANGUAGE_ID = '!Language'
-LOCALISATION_DIR = 'L10n'
+LOCALISATION_DIR: pathlib.Path = pathlib.Path('L10n')
 
 if sys.platform == 'win32':
     import ctypes
@@ -118,10 +117,10 @@ class Translations:
 
         self.translations = {None: self.contents(cast(str, lang))}
         for plugin in listdir(config.plugin_dir_path):
-            plugin_path = join(config.plugin_dir_path, plugin, LOCALISATION_DIR)
-            if isdir(plugin_path):
+            plugin_path = config.plugin_dir_path / plugin / LOCALISATION_DIR
+            if pathlib.Path.is_dir(plugin_path):
                 try:
-                    self.translations[plugin] = self.contents(cast(str, lang), str(plugin_path))
+                    self.translations[plugin] = self.contents(cast(str, lang), plugin_path)
 
                 except UnicodeDecodeError as e:
                     logger.warning(f'Malformed file {lang}.strings in plugin {plugin}: {e}')
@@ -132,7 +131,7 @@ class Translations:
         # DEPRECATED: Migrate to translations.translate or tr.tl. Will remove in 6.0 or later.
         builtins.__dict__['_'] = self.translate
 
-    def contents(self, lang: str, plugin_path: str | None = None) -> dict[str, str]:
+    def contents(self, lang: str, plugin_path: pathlib.Path | None = None) -> dict[str, str]:
         """Load all the translations from a translation file."""
         assert lang in self.available()
         translations = {}
@@ -172,12 +171,12 @@ class Translations:
         :return: The translated string
         """
         plugin_name: str | None = None
-        plugin_path: str | None = None
+        plugin_path: pathlib.Path | None = None
 
         if context:
             # TODO: There is probably a better way to go about this now.
             plugin_name = context[len(config.plugin_dir)+1:].split(sep)[0]
-            plugin_path = join(config.plugin_dir_path, plugin_name, LOCALISATION_DIR)
+            plugin_path = config.plugin_dir_path / plugin_name / LOCALISATION_DIR
 
         if lang:
             contents: dict[str, str] = self.contents(lang=lang, plugin_path=plugin_path)
@@ -224,17 +223,17 @@ class Translations:
 
         return names
 
-    def respath(self) -> str:
+    def respath(self) -> pathlib.Path:
         """Path to localisation files."""
         if getattr(sys, 'frozen', False):
-            return abspath(join(dirname(sys.executable), LOCALISATION_DIR))
+            return pathlib.Path(sys.executable).parent.joinpath(LOCALISATION_DIR).resolve()
 
         if __file__:
-            return abspath(join(dirname(__file__), LOCALISATION_DIR))
+            return pathlib.Path(__file__).parent.joinpath(LOCALISATION_DIR).resolve()
 
-        return abspath(LOCALISATION_DIR)
+        return LOCALISATION_DIR.resolve()
 
-    def file(self, lang: str, plugin_path: str | None = None) -> TextIO | None:
+    def file(self, lang: str, plugin_path: pathlib.Path | None = None) -> TextIO | None:
         """
         Open the given lang file for reading.
 
@@ -243,8 +242,8 @@ class Translations:
         :return: the opened file (Note: This should be closed when done)
         """
         if plugin_path:
-            file_path = join(plugin_path, f'{lang}.strings')
-            if not exists(file_path):
+            file_path = plugin_path / f"{lang}.strings"
+            if not file_path.exists():
                 return None
 
             try:
@@ -252,7 +251,7 @@ class Translations:
             except OSError:
                 logger.exception(f'could not open {file_path}')
 
-        res_path = join(self.respath(), f'{lang}.strings')
+        res_path = self.respath() / f'{lang}.strings'
         return open(res_path, encoding='utf-8')
 
 
@@ -381,9 +380,10 @@ Translations: Translations = translations  # type: ignore
 if __name__ == "__main__":
     regexp = re.compile(r'''_\([ur]?(['"])(((?<!\\)\\\1|.)+?)\1\)[^#]*(#.+)?''')  # match a single line python literal
     seen: dict[str, str] = {}
+    plugin_dir = pathlib.Path('plugins')
     for f in (
         sorted(x for x in listdir('.') if x.endswith('.py')) +
-        sorted(join('plugins', x) for x in (listdir('plugins') if isdir('plugins') else []) if x.endswith('.py'))
+        sorted(plugin_dir.glob('*.py')) if plugin_dir.is_dir() else []
     ):
         with open(f, encoding='utf-8') as h:
             lineno = 0
@@ -392,11 +392,11 @@ if __name__ == "__main__":
                 match = regexp.search(line)
                 if match and not seen.get(match.group(2)):  # only record first commented instance of a string
                     seen[match.group(2)] = (
-                        (match.group(4) and (match.group(4)[1:].strip()) + '. ' or '') + f'[{basename(f)}]'
+                            (match.group(4) and (match.group(4)[1:].strip()) + '. ' or '') + f'[{pathlib.Path(f).name}]'
                     )
     if seen:
-        target_path = join(LOCALISATION_DIR, 'en.template.new')
-        makedirs(dirname(target_path), exist_ok=True)
+        target_path = LOCALISATION_DIR / 'en.template.new'
+        target_path.parent.mkdir(parents=True, exist_ok=True)
         with open(target_path, 'w', encoding='utf-8') as target_file:
             target_file.write(f'/* Language name */\n"{LANGUAGE_ID}" = "English";\n\n')
             for thing in sorted(seen, key=str.lower):

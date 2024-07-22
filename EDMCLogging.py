@@ -26,12 +26,13 @@ To utilise logging in core code, or internal plugins, include this:
 
 To utilise logging in a 'found' (third-party) plugin, include this:
 
-    import os
+    from pathlib import Path
     import logging
 
-    plugin_name = os.path.basename(os.path.dirname(__file__))
+    # Retrieve the name of the plugin folder
+    plugin_name = Path(__file__).resolve().parent.name
+    # Set up logger with hierarchical name including appname and plugin_name
     # plugin_name here *must* be the name of the folder the plugin resides in
-    # See, plug.py:load_plugins()
     logger = logging.getLogger(f'{appname}.{plugin_name}')
 """
 from __future__ import annotations
@@ -41,7 +42,6 @@ import logging
 import logging.handlers
 import os
 import pathlib
-import tempfile
 import warnings
 from contextlib import suppress
 from fnmatch import fnmatch
@@ -51,9 +51,7 @@ from threading import get_native_id as thread_native_id
 from time import gmtime
 from traceback import print_exc
 from typing import TYPE_CHECKING, cast
-
-import config as config_mod
-from config import appcmdname, appname, config
+from config import appcmdname, appname, config, trace_on
 
 # TODO: Tests:
 #
@@ -104,7 +102,7 @@ warnings.simplefilter('default', DeprecationWarning)
 
 
 def _trace_if(self: logging.Logger, condition: str, message: str, *args, **kwargs) -> None:
-    if any(fnmatch(condition, p) for p in config_mod.trace_on):
+    if any(fnmatch(condition, p) for p in trace_on):
         self._log(logging.TRACE, message, args, **kwargs)  # type: ignore # we added it
         return
 
@@ -184,8 +182,7 @@ class Logger:
         # We want the files in %TEMP%\{appname}\ as {logger_name}-debug.log and
         # rotated versions.
         # This is {logger_name} so that EDMC.py logs to a different file.
-        logfile_rotating = pathlib.Path(tempfile.gettempdir())
-        logfile_rotating /= f'{appname}'
+        logfile_rotating = pathlib.Path(config.app_dir_path / 'logs')
         logfile_rotating.mkdir(exist_ok=True)
         logfile_rotating /= f'{logger_name}-debug.log'
 
@@ -489,8 +486,8 @@ class EDMCContextFilter(logging.Filter):
         :return: The munged module_name.
         """
         file_name = pathlib.Path(frame_info.filename).expanduser()
-        plugin_dir = pathlib.Path(config.plugin_dir_path).expanduser()
-        internal_plugin_dir = pathlib.Path(config.internal_plugin_dir_path).expanduser()
+        plugin_dir = config.plugin_dir_path.expanduser()
+        internal_plugin_dir = config.internal_plugin_dir_path.expanduser()
         # Find the first parent called 'plugins'
         plugin_top = file_name
         while plugin_top and plugin_top.name != '':

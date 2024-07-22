@@ -13,7 +13,6 @@ from __future__ import annotations
 import os
 import sys
 import tkinter as tk
-from os.path import join
 from tkinter import font as tk_font
 from tkinter import ttk
 from typing import Callable
@@ -39,7 +38,8 @@ if sys.platform == 'win32':
     AddFontResourceEx.restypes = [LPCWSTR, DWORD, LPCVOID]  # type: ignore
     FR_PRIVATE = 0x10
     FR_NOT_ENUM = 0x20
-    AddFontResourceEx(join(config.respath, 'EUROCAPS.TTF'), FR_PRIVATE, 0)
+    font_path = config.respath_path / 'EUROCAPS.TTF'
+    AddFontResourceEx(str(font_path), FR_PRIVATE, 0)
 
 elif sys.platform == 'linux':
     # pyright: reportUnboundVariable=false

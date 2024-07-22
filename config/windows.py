@@ -31,25 +31,6 @@ class WinConfig(AbstractConfig):
 
     def __init__(self) -> None:
         super().__init__()
-        if local_appdata := known_folder_path(shell.FOLDERID_LocalAppData):
-            self.app_dir_path = pathlib.Path(local_appdata) / appname
-        self.app_dir_path.mkdir(exist_ok=True)
-
-        self.plugin_dir_path = self.app_dir_path / 'plugins'
-        self.plugin_dir_path.mkdir(exist_ok=True)
-
-        if getattr(sys, 'frozen', False):
-            self.respath_path = pathlib.Path(sys.executable).parent
-            self.internal_plugin_dir_path = self.respath_path / 'plugins'
-        else:
-            self.respath_path = pathlib.Path(__file__).parent.parent
-            self.internal_plugin_dir_path = self.respath_path / 'plugins'
-
-        self.home_path = pathlib.Path.home()
-
-        journal_dir_path = pathlib.Path(
-            known_folder_path(shell.FOLDERID_SavedGames)) / 'Frontier Developments' / 'Elite Dangerous'  # type: ignore
-        self.default_journal_dir_path = journal_dir_path if journal_dir_path.is_dir() else None  # type: ignore
 
         REGISTRY_SUBKEY = r'Software\Marginal\EDMarketConnector'  # noqa: N806
         create_key_defaults = functools.partial(
@@ -64,6 +45,30 @@ class WinConfig(AbstractConfig):
         except OSError:
             logger.exception('Could not create required registry keys')
             raise
+
+        if local_appdata := known_folder_path(shell.FOLDERID_LocalAppData):
+            self.app_dir_path = pathlib.Path(local_appdata) / appname
+        self.app_dir_path.mkdir(exist_ok=True)
+
+        self.default_plugin_dir_path = self.app_dir_path / 'plugins'
+        if (plugdir_str := self.get_str('plugin_dir')) is None or not pathlib.Path(plugdir_str).is_dir():
+            self.set("plugin_dir", str(self.default_plugin_dir_path))
+            plugdir_str = self.default_plugin_dir
+        self.plugin_dir_path = pathlib.Path(plugdir_str)
+        self.plugin_dir_path.mkdir(exist_ok=True)
+
+        if getattr(sys, 'frozen', False):
+            self.respath_path = pathlib.Path(sys.executable).parent
+            self.internal_plugin_dir_path = self.respath_path / 'plugins'
+        else:
+            self.respath_path = pathlib.Path(__file__).parent.parent
+            self.internal_plugin_dir_path = self.respath_path / 'plugins'
+
+        self.home_path = pathlib.Path.home()
+
+        journal_dir_path = pathlib.Path(
+            known_folder_path(shell.FOLDERID_SavedGames)) / 'Frontier Developments' / 'Elite Dangerous'  # type: ignore
+        self.default_journal_dir_path = journal_dir_path if journal_dir_path.is_dir() else None  # type: ignore
 
         self.identifier = applongname
         if (outdir_str := self.get_str('outdir')) is None or not pathlib.Path(outdir_str).is_dir():

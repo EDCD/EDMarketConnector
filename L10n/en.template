@@ -468,8 +468,11 @@
 /* prefs.py: Label for location of third-party plugins folder; In files: prefs.py:908; */
 "Plugins folder" = "Plugins folder";
 
-/* prefs.py: Label on button used to open a filesystem folder; In files: prefs.py:915; */
-"Open" = "Open";
+/* prefs.py: Label on button used to open the Plugin Folder; */
+"Open Plugins Folder" = "Open Plugins Folder";
+
+/* prefs.py: Selecting the Location of the Plugin Directory on the Filesystem; */
+"Plugin Directory Location" = "Plugin Directory Location";
 
 /* prefs.py: Tip/label about how to disable plugins; In files: prefs.py:923; */
 "Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name";
@@ -804,12 +807,20 @@
 /* EDMarketConnector.py: Inform the user the Update Track has changed; */
 "Update Track Changed to {TRACK}" = "Update Track Changed to {TRACK}";
 
-
 /* EDMarketConnector.py: Inform User of Beta -> Stable Transition Risks; */
 "Update track changed to Stable from Beta. You will no longer receive Beta updates. You will stay on your current Beta version until the next Stable release.\r\n\r\nYou can manually revert to the latest Stable version. To do so, you must download and install the latest Stable version manually. Note that this may introduce bugs or break completely if downgrading between major versions with significant changes.\r\n\r\nDo you want to open GitHub to download the latest release?" = "Update track changed to Stable from Beta. You will no longer receive Beta updates. You will stay on your current Beta version until the next Stable release.\r\n\r\nYou can manually revert to the latest Stable version. To do so, you must download and install the latest Stable version manually. Note that this may introduce bugs or break completely if downgrading between major versions with significant changes.\r\n\r\nDo you want to open GitHub to download the latest release?";
+
+/* EDMarketConnector.py: Title of Notification Popup for EDMC Restart; */
+"Restart Required" = "Restart Required";
+
+/* EDMarketConnector.py: Text of Notification Popup for EDMC Restart; */
+"A restart of EDMC is required. EDMC will now restart." = "A restart of EDMC is required. EDMC will now restart.";
 
 /* myNotebook.py: Can't Paste Images or Files in Text; */
 "Cannot paste non-text content." = "Cannot paste non-text content.";
 
 /* ttkHyperlinkLabel.py: Open Element In Selected Provider; */
 "Open in {URL}" = "Open in {URL}";
+
+/* ttkHyperlinkLabel.py: Copy the Inara SLEF Format of the active ship to the clipboard; */
+"Copy Inara SLEF" = "Copy Inara SLEF";
