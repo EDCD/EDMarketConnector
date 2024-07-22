@@ -296,7 +296,7 @@ if __name__ == '__main__':  # noqa: C901
                     # class name limited to 256 - https://msdn.microsoft.com/en-us/library/windows/desktop/ms633576
                     cls = create_unicode_buffer(257)
                     # This conditional is exploded to make debugging slightly easier
-                    if win32gui.GetClassName(window_handle, cls, 257):
+                    if win32gui.GetClassName(window_handle):
                         if cls.value == 'TkTopLevel':
                             if window_title(window_handle) == applongname:
                                 if GetProcessHandleFromHwnd(window_handle):
