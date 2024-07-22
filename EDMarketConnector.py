@@ -845,9 +845,20 @@ class AppWindow:
                 )
                 update_msg = update_msg.replace('\\n', '\n')
                 update_msg = update_msg.replace('\\r', '\r')
-                stable_popup = tk.messagebox.askyesno(title=title, message=update_msg, parent=postargs.get('Parent'))
+                stable_popup = tk.messagebox.askyesno(title=title, message=update_msg)
                 if stable_popup:
-                    webbrowser.open("https://github.com/edCD/eDMarketConnector/releases/latest")
+                    webbrowser.open("https://github.com/EDCD/eDMarketConnector/releases/latest")
+        if postargs.get('Restart_Req'):
+            # LANG: Text of Notification Popup for EDMC Restart
+            restart_msg = tr.tl('A restart of EDMC is required. EDMC will now restart.')
+            restart_box = tk.messagebox.Message(
+                title=tr.tl('Restart Required'),  # LANG: Title of Notification Popup for EDMC Restart
+                message=restart_msg,
+                type=tk.messagebox.OK
+            )
+            restart_box.show()
+            if restart_box:
+                app.onexit(restart=True)
 
     def set_labels(self):
         """Set main window labels, e.g. after language change."""
@@ -1851,7 +1862,7 @@ class AppWindow:
             )
             exit_thread.start()
 
-    def onexit(self, event=None) -> None:
+    def onexit(self, event=None, restart: bool = False) -> None:
         """Application shutdown procedure."""
         if sys.platform == 'win32':
             shutdown_thread = threading.Thread(
@@ -1914,6 +1925,8 @@ class AppWindow:
         self.w.destroy()
 
         logger.info('Done.')
+        if restart:
+            os.execv(sys.executable, ['python'] + sys.argv)
 
     def drag_start(self, event) -> None:
         """Initiate dragging the window."""
