@@ -18,6 +18,7 @@ from collections import defaultdict
 from os import SEEK_END, SEEK_SET, listdir
 from time import gmtime, localtime, mktime, sleep, strftime, strptime, time
 from typing import TYPE_CHECKING, Any, BinaryIO, MutableMapping
+import psutil
 import semantic_version
 import util_ships
 from config import config, appname, appversion
@@ -35,25 +36,9 @@ MAX_NAVROUTE_DISCREPANCY = 5  # Timestamp difference in seconds
 MAX_FCMATERIALS_DISCREPANCY = 5  # Timestamp difference in seconds
 
 if sys.platform == 'win32':
-    import ctypes
-    from ctypes.wintypes import BOOL, HWND, LPARAM, LPWSTR
-
     from watchdog.events import FileSystemEventHandler, FileSystemEvent
     from watchdog.observers import Observer
     from watchdog.observers.api import BaseObserver
-
-    EnumWindows = ctypes.windll.user32.EnumWindows
-    EnumWindowsProc = ctypes.WINFUNCTYPE(BOOL, HWND, LPARAM)
-
-    CloseHandle = ctypes.windll.kernel32.CloseHandle
-
-    GetWindowText = ctypes.windll.user32.GetWindowTextW
-    GetWindowText.argtypes = [HWND, LPWSTR, ctypes.c_int]
-    GetWindowTextLength = ctypes.windll.user32.GetWindowTextLengthW
-    GetWindowTextLength.argtypes = [ctypes.wintypes.HWND]
-    GetWindowTextLength.restype = ctypes.c_int
-
-    GetProcessHandleFromHwnd = ctypes.windll.oleacc.GetProcessHandleFromHwnd
 
 else:
     # Linux's inotify doesn't work over CIFS or NFS, so poll
@@ -70,7 +55,8 @@ class EDLogs(FileSystemEventHandler):
     """Monitoring of Journal files."""
 
     # Magic with FileSystemEventHandler can confuse type checkers when they do not have access to every import
-    _POLL = 1		# Polling is cheap, so do it often
+    _POLL = 1		# Polling while running is cheap, so do it often
+    _INACTIVE_POLL = 10		# Polling while not running isn't as cheap, so do it less often
     _RE_CANONICALISE = re.compile(r'\$(.+)_name;')
     _RE_CATEGORY = re.compile(r'\$MICRORESOURCE_CATEGORY_(.+);')
     _RE_LOGFILE = re.compile(r'^Journal(Alpha|Beta)?\.[0-9]{2,4}(-)?[0-9]{2}(-)?[0-9]{2}(T)?[0-9]{2}[0-9]{2}[0-9]{2}'
@@ -100,6 +86,7 @@ class EDLogs(FileSystemEventHandler):
         self.catching_up = False
 
         self.game_was_running = False  # For generation of the "ShutDown" event
+        self.running_process = None
 
         # Context for journal handling
         self.version: str | None = None
@@ -474,7 +461,10 @@ class EDLogs(FileSystemEventHandler):
                     loghandle = open(logfile, 'rb', 0)  # unbuffered
                     log_pos = 0
 
-            sleep(self._POLL)
+            if self.game_was_running:
+                sleep(self._POLL)
+            else:
+                sleep(self._INACTIVE_POLL)
 
             # Check whether we're still supposed to be running
             if threading.current_thread() != self.thread:
@@ -2150,36 +2140,34 @@ class EDLogs(FileSystemEventHandler):
 
         return entry
 
-    def game_running(self) -> bool:  # noqa: CCR001
+    def game_running(self) -> bool:
         """
         Determine if the game is currently running.
 
-        TODO: Implement on Linux
-
         :return: bool - True if the game is running.
         """
-        if sys.platform == 'win32':
-            def WindowTitle(h):  # noqa: N802
-                if h:
-                    length = GetWindowTextLength(h) + 1
-                    buf = ctypes.create_unicode_buffer(length)
-                    if GetWindowText(h, buf, length):
-                        return buf.value
-                return None
-
-            def callback(hWnd, lParam):  # noqa: N803
-                name = WindowTitle(hWnd)
-                if name and name.startswith('Elite - Dangerous'):
-                    handle = GetProcessHandleFromHwnd(hWnd)
-                    if handle:  # If GetProcessHandleFromHwnd succeeds then the app is already running as this user
-                        CloseHandle(handle)
-                        return False  # stop enumeration
-
-                return True
-
-            return not EnumWindows(EnumWindowsProc(callback), 0)
-
-        return False
+        if self.running_process:
+            p = self.running_process
+            try:
+                with p.oneshot():
+                    if p.status() not in [psutil.STATUS_RUNNING, psutil.STATUS_SLEEPING]:
+                        raise psutil.NoSuchProcess
+            except psutil.NoSuchProcess:
+                # Process likely expired
+                self.running_process = None
+        if not self.running_process:
+            edmc_process = psutil.Process()
+            edmc_user = edmc_process.username()
+            try:
+                for pid in psutil.pids():
+                    proc = psutil.Process(pid)
+                    if 'EliteDangerous' in proc.name() and proc.username() == edmc_user:
+                        self.running_process = proc
+                        return True
+            except psutil.NoSuchProcess:
+                pass
+            return False
+        return bool(self.running_process)
 
     def ship(self, timestamped=True) -> MutableMapping[str, Any] | None:
         """

@@ -255,24 +255,16 @@ if __name__ == '__main__':  # noqa: C901
         logger.trace_if('frontier-auth.windows', 'Begin...')
 
         if sys.platform == 'win32':
-
             # If *this* instance hasn't locked, then another already has and we
             # now need to do the edmc:// checks for auth callback
             if locked != JournalLockResult.LOCKED:
-                from ctypes import windll, c_int, create_unicode_buffer, WINFUNCTYPE
-                from ctypes.wintypes import BOOL, HWND, INT, LPARAM, LPCWSTR, LPWSTR
+                from ctypes import windll, create_unicode_buffer, WINFUNCTYPE
+                from ctypes.wintypes import BOOL, HWND, LPARAM
+                import win32gui
+                import win32api
+                import win32con
 
-                EnumWindows = windll.user32.EnumWindows  # noqa: N806
-                GetClassName = windll.user32.GetClassNameW  # noqa: N806
-                GetClassName.argtypes = [HWND, LPWSTR, c_int]
-                GetWindowText = windll.user32.GetWindowTextW  # noqa: N806
-                GetWindowText.argtypes = [HWND, LPWSTR, c_int]
-                GetWindowTextLength = windll.user32.GetWindowTextLengthW  # noqa: N806
                 GetProcessHandleFromHwnd = windll.oleacc.GetProcessHandleFromHwnd  # noqa: N806
-
-                SW_RESTORE = 9  # noqa: N806
-                SetForegroundWindow = windll.user32.SetForegroundWindow  # noqa: N806
-                ShowWindow = windll.user32.ShowWindow  # noqa: N806
                 ShowWindowAsync = windll.user32.ShowWindowAsync  # noqa: N806
 
                 COINIT_MULTITHREADED = 0  # noqa: N806,F841
@@ -280,16 +272,9 @@ if __name__ == '__main__':  # noqa: C901
                 COINIT_DISABLE_OLE1DDE = 0x4  # noqa: N806
                 CoInitializeEx = windll.ole32.CoInitializeEx  # noqa: N806
 
-                ShellExecute = windll.shell32.ShellExecuteW  # noqa: N806
-                ShellExecute.argtypes = [HWND, LPCWSTR, LPCWSTR, LPCWSTR, LPCWSTR, INT]
-
                 def window_title(h: int) -> str | None:
                     if h:
-                        text_length = GetWindowTextLength(h) + 1
-                        buf = create_unicode_buffer(text_length)
-                        if GetWindowText(h, buf, text_length):
-                            return buf.value
-
+                        return win32gui.GetWindowText(h)
                     return None
 
                 @WINFUNCTYPE(BOOL, HWND, LPARAM)
@@ -311,7 +296,7 @@ if __name__ == '__main__':  # noqa: C901
                     # class name limited to 256 - https://msdn.microsoft.com/en-us/library/windows/desktop/ms633576
                     cls = create_unicode_buffer(257)
                     # This conditional is exploded to make debugging slightly easier
-                    if GetClassName(window_handle, cls, 257):
+                    if win32gui.GetClassName(window_handle, cls, 257):
                         if cls.value == 'TkTopLevel':
                             if window_title(window_handle) == applongname:
                                 if GetProcessHandleFromHwnd(window_handle):
@@ -319,12 +304,12 @@ if __name__ == '__main__':  # noqa: C901
                                     if len(sys.argv) > 1 and sys.argv[1].startswith(protocolhandler_redirect):
                                         CoInitializeEx(0, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)
                                         # Wait for it to be responsive to avoid ShellExecute recursing
-                                        ShowWindow(window_handle, SW_RESTORE)
-                                        ShellExecute(0, None, sys.argv[1], None, None, SW_RESTORE)
+                                        win32gui.ShowWindow(window_handle, win32con.SW_RESTORE)
+                                        win32api.ShellExecute(0, None, sys.argv[1], None, None, win32con.SW_RESTORE)
 
                                     else:
-                                        ShowWindowAsync(window_handle, SW_RESTORE)
-                                        SetForegroundWindow(window_handle)
+                                        ShowWindowAsync(window_handle, win32con.SW_RESTORE)
+                                        win32gui.SetForegroundWindow(window_handle)
 
                             return False  # Indicate window found, so stop iterating
 
@@ -336,7 +321,7 @@ if __name__ == '__main__':  # noqa: C901
                 # enumwindwsproc() on each.  When an invocation returns False it
                 # stops iterating.
                 # Ref: <https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-enumwindows>
-                EnumWindows(enumwindowsproc, 0)
+                win32gui.EnumWindows(enumwindowsproc, 0)
 
     def already_running_popup():
         """Create the "already running" popup."""
@@ -703,13 +688,14 @@ class AppWindow:
             if match:
                 if sys.platform == 'win32':
                     # Check that the titlebar will be at least partly on screen
-                    import ctypes
-                    from ctypes.wintypes import POINT
+                    import win32api
+                    import win32con
 
+                    x = int(match.group(1)) + 16
+                    y = int(match.group(2)) + 16
+                    point = (x, y)
                     # https://msdn.microsoft.com/en-us/library/dd145064
-                    MONITOR_DEFAULTTONULL = 0  # noqa: N806
-                    if ctypes.windll.user32.MonitorFromPoint(POINT(int(match.group(1)) + 16, int(match.group(2)) + 16),
-                                                             MONITOR_DEFAULTTONULL):
+                    if win32api.MonitorFromPoint(point, win32con.MONITOR_DEFAULTTONULL):
                         self.w.geometry(config.get_str('geometry'))
                 else:
                     self.w.geometry(config.get_str('geometry'))
