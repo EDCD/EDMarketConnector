@@ -104,17 +104,18 @@ class EntryMenu(ttk.Entry):
 class Entry(EntryMenu):
     """Custom ttk.Entry class to fix some display issues."""
 
+    # DEPRECATED: Migrate to EntryMenu. Will remove in 6.0 or later.
     def __init__(self, master: ttk.Frame | None = None, **kw):
+        warnings.warn('Migrate to EntryMenu. Will remove in 6.0 or later.', DeprecationWarning, stacklevel=2)
         EntryMenu.__init__(self, master, **kw)
-        warnings.warn('Migrate to EntryMenu. Will be removed in 6.0 or later', DeprecationWarning, stacklevel=2)
 
 
 class Button(ttk.Button):
     """Custom ttk.Button class to fix some display issues."""
 
     def __init__(self, master: ttk.Frame | None = None, **kw):
+        warnings.warn('Migrate to ttk.Button. Will remove in 6.0 or later', DeprecationWarning, stacklevel=2)
         ttk.Button.__init__(self, master, **kw)
-        warnings.warn('Migrate to ttk.Button. Will be removed in 6.0 or later', DeprecationWarning, stacklevel=2)
 
 
 class ColoredButton(tk.Button):
