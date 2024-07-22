@@ -15,7 +15,6 @@ from tkinter import ttk
 from typing import Any, AnyStr, Callable, NamedTuple, Sequence, cast
 import companion
 import EDMCLogging
-import myNotebook as nb  # noqa: N813
 from edmc_data import ship_name_map
 from hotkey import hotkeymgr
 from l10n import Locale, translations as tr
@@ -302,7 +301,7 @@ def export_ships(companion_data: dict[str, Any], filename: AnyStr) -> None:
 class StatsDialog:
     """Status dialog containing all of the current cmdr's stats."""
 
-    def __init__(self, parent: tk.Tk, status: tk.Label) -> None:
+    def __init__(self, parent: tk.Tk, status: ttk.Label) -> None:
         self.parent: tk.Tk = parent
         self.status = status
         self.showstats()
@@ -379,7 +378,8 @@ class StatsResults(tk.Toplevel):
         frame = ttk.Frame(self)
         frame.grid(sticky=tk.NSEW)
 
-        notebook = nb.Notebook(frame)
+        notebook = ttk.Notebook(frame)
+        notebook.grid(padx=10, pady=10, sticky=tk.NSEW)
 
         page = self.addpage(notebook)
         for thing in stats[CR_LINES_START:CR_LINES_END]:
@@ -443,7 +443,7 @@ class StatsResults(tk.Toplevel):
         if header is None:
             header = []
 
-        page = nb.Frame(parent)
+        page = ttk.Frame(parent)
         page.grid(pady=10, sticky=tk.NSEW)
         page.columnconfigure(0, weight=1)
         if header:
@@ -479,7 +479,7 @@ class StatsResults(tk.Toplevel):
         row = -1  # To silence unbound warnings
         for i, col_content in enumerate(content):
             # label = HyperlinkLabel(parent, text=col_content, popup_copy=True)
-            label = nb.Label(parent, text=col_content)
+            label = ttk.Label(parent, text=col_content)
             if with_copy:
                 label.bind('<Button-1>', self.copy_callback(label, col_content))
 
@@ -499,7 +499,7 @@ class StatsResults(tk.Toplevel):
         return Locale.string_from_number(value, 0) + ' Cr'  # type: ignore
 
     @staticmethod
-    def copy_callback(label: tk.Label, text_to_copy: str) -> Callable[..., None]:
+    def copy_callback(label: ttk.Label, text_to_copy: str) -> Callable[..., None]:
         """Copy data in Label to clipboard."""
         def do_copy(event: tk.Event) -> None:
             label.clipboard_clear()
@@ -507,6 +507,6 @@ class StatsResults(tk.Toplevel):
             old_bg = label['bg']
             label['bg'] = 'gray49'
 
-            label.after(100, (lambda: label.configure(bg=old_bg)))
+            label.after(100, (lambda: label.configure(background=old_bg)))
 
         return do_copy

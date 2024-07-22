@@ -32,12 +32,12 @@ from typing import Any, Literal, Mapping, MutableMapping, cast, Sequence
 import requests
 import killswitch
 import monitor
-import myNotebook as nb  # noqa: N813
 import plug
 from companion import CAPIData
 from config import applongname, appname, appversion, config, debug_senders, user_agent
 from edmc_data import DEBUG_WEBSERVER_HOST, DEBUG_WEBSERVER_PORT
 from EDMCLogging import get_main_logger
+from myNotebook import EntryMenu
 from ttkHyperlinkLabel import HyperlinkLabel
 from l10n import translations as tr
 
@@ -107,14 +107,14 @@ class This:
 
         self.label: tk.Widget | None = None
 
-        self.cmdr_label: nb.Label | None = None
-        self.cmdr_text: nb.Label | None = None
+        self.cmdr_label: ttk.Label | None = None
+        self.cmdr_text: ttk.Label | None = None
 
-        self.user_label: nb.Label | None = None
-        self.user: nb.EntryMenu | None = None
+        self.user_label: ttk.Label | None = None
+        self.user: EntryMenu | None = None
 
-        self.apikey_label: nb.Label | None = None
-        self.apikey: nb.EntryMenu | None = None
+        self.apikey_label: ttk.Label | None = None
+        self.apikey: EntryMenu | None = None
 
 
 this = This()
@@ -277,7 +277,7 @@ def toggle_password_visibility():
         this.apikey.config(show="*")  # type: ignore
 
 
-def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> nb.Frame:
+def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> ttk.Frame:
     """
     Plugin preferences setup hook.
 
@@ -295,21 +295,20 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> nb.Fr
     BOXY = 2  # noqa: N806
     SEPY = 10  # noqa: N806
 
-    frame = nb.Frame(parent)
+    frame = ttk.Frame(parent)
     frame.columnconfigure(1, weight=1)
 
     cur_row = 0
     HyperlinkLabel(
         frame,
         text='Elite Dangerous Star Map',
-        background=nb.Label().cget('background'),
         url='https://www.edsm.net/',
         underline=True
     ).grid(row=cur_row, columnspan=2, padx=PADX, pady=PADY, sticky=tk.W)
     cur_row += 1
 
     this.log = tk.IntVar(value=config.get_int('edsm_out') and 1)
-    this.log_button = nb.Checkbutton(
+    this.log_button = ttk.Checkbutton(
         frame,
         # LANG: Settings>EDSM - Label on checkbox for 'send data'
         text=tr.tl('Send flight log and CMDR status to EDSM'),
@@ -328,30 +327,29 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> nb.Fr
     this.label = HyperlinkLabel(
         frame,
         text=tr.tl('Elite Dangerous Star Map credentials'),  # LANG: Elite Dangerous Star Map credentials
-        background=nb.Label().cget('background'),
         url='https://www.edsm.net/settings/api',
         underline=True
     )
     if this.label:
         this.label.grid(row=cur_row, columnspan=2, padx=PADX, pady=PADY, sticky=tk.W)
     cur_row += 1
-    this.cmdr_label = nb.Label(frame, text=tr.tl('Cmdr'))  # LANG: Game Commander name label in EDSM settings
+    this.cmdr_label = ttk.Label(frame, text=tr.tl('Cmdr'))  # LANG: Game Commander name label in EDSM settings
     this.cmdr_label.grid(row=cur_row, padx=PADX, pady=PADY, sticky=tk.W)
-    this.cmdr_text = nb.Label(frame)
+    this.cmdr_text = ttk.Label(frame)
     this.cmdr_text.grid(row=cur_row, column=1, padx=PADX, pady=BOXY, sticky=tk.W)
 
     cur_row += 1
     # LANG: EDSM Commander name label in EDSM settings
-    this.user_label = nb.Label(frame, text=tr.tl('Commander Name'))
+    this.user_label = ttk.Label(frame, text=tr.tl('Commander Name'))
     this.user_label.grid(row=cur_row, padx=PADX, pady=PADY, sticky=tk.W)
-    this.user = nb.EntryMenu(frame)
+    this.user = EntryMenu(frame)
     this.user.grid(row=cur_row, column=1, padx=PADX, pady=BOXY, sticky=tk.EW)
 
     cur_row += 1
     # LANG: EDSM API key label
-    this.apikey_label = nb.Label(frame, text=tr.tl('API Key'))
+    this.apikey_label = ttk.Label(frame, text=tr.tl('API Key'))
     this.apikey_label.grid(row=cur_row, padx=PADX, pady=PADY, sticky=tk.W)
-    this.apikey = nb.EntryMenu(frame, show="*", width=50)
+    this.apikey = EntryMenu(frame, show="*", width=50)
     this.apikey.grid(row=cur_row, column=1, padx=PADX, pady=BOXY, sticky=tk.EW)
     cur_row += 1
 
@@ -359,7 +357,7 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> nb.Fr
 
     show_password_var.set(False)  # Password is initially masked
 
-    show_password_checkbox = nb.Checkbutton(
+    show_password_checkbox = ttk.Checkbutton(
         frame,
         text=tr.tl('Show API Key'),  # LANG: Text EDSM Show API Key
         variable=show_password_var,
