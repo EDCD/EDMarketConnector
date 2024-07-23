@@ -15,7 +15,7 @@ import tkinter as tk
 import warnings
 from tkinter import ttk
 from typing import Callable
-from config import config
+from config import appname, config
 from EDMCLogging import get_main_logger
 
 logger = get_main_logger()
@@ -191,11 +191,14 @@ class _Theme:
         if sys.platform == 'win32':
             hwnd = win32gui.GetParent(self.root.winfo_id())
             window = AppWindow.get_from_window_id(get_window_id_from_window(hwnd))
+            title_gap: ttk.Frame = self.root.nametowidget(f'{appname.lower()}.alternate_menubar.title_gap')
 
             if theme == self.THEME_DEFAULT:
                 window.title_bar.reset_to_default()
+                title_gap['height'] = 0
             else:
                 window.title_bar.extends_content_into_title_bar = True
+                title_gap['height'] = window.title_bar.height
 
             if theme == self.THEME_TRANSPARENT:
                 win32gui.SetWindowLong(hwnd, win32con.GWL_EXSTYLE,
