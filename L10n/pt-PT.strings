@@ -1,3 +1,15 @@
+/* prefs.py: Catch & Record Profiler Errors; */
+"Error in System Profiler" = "Erro nas Informações do Sistema";
+
+/* EDMarketConnector.py: We didn't have the Fleet Carrier callsign when we should have; In files: EDMarketConnector.py:1223; */
+"CAPI: Fleet Carrier data incomplete" = "CAPI: Dados de Transportador de Frota incompletos";
+
+/* EDMarketConnector.py: No data was returned for the Fleet Carrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
+"CAPI: No Fleet Carrier data returned" = "CAPI: Sem dados de Transportador de Frota";
+
+/* prefs.py: Configuration - Enable or disable the Fleet Carrier CAPI calls; In files: prefs.py:475; */
+"Enable Fleet Carrier CAPI Queries" = "Ligar Consultas CAPI de Transportador de Frota";
+
 /* edsm.py:Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:316; */
 "Send flight log and CMDR status to EDSM" = "Enviar registos de voo e estado de CMDR para o EDSM";
 
@@ -125,6 +137,15 @@
 
 /* EDMarketConnector.py: Label for 'Copy' as in 'Copy and Paste'; ttkHyperlinkLabel.py: Label for 'Copy' as in 'Copy and Paste'; In files: EDMarketConnector.py:962; ttkHyperlinkLabel.py:53; */
 "Copy" = "Copiar";
+
+/* myNotebook.py: Label for 'Cut' as in 'Cut and Paste'; */
+"Cut" = "Cortar";
+
+/* myNotebook.py: Label for 'Paste' as in 'Copy and Paste'; */
+"Paste" = "Colar";
+
+/* myNotebook.py: Label for 'Select All'; */
+"Select All" = "Selecionar Tudo";
 
 /* EDMarketConnector.py: CAPI auth aborted because of killswitch; EDMarketConnector.py: CAPI auth query aborted because of killswitch; In files: EDMarketConnector.py:973; EDMarketConnector.py:1067; */
 "CAPI auth disabled by killswitch" = "Autenticação CAPI desligada por botão";
@@ -782,6 +803,19 @@
 
 /* update.py: Update Available Text; In files: update.py:229; */
 "{NEWVER} is available" = "{NEWVER} disponível.";
+
+/* prefs.py: Stable Version of EDMC; */
+"Stable" = "Estável";
+
+/* prefs.py: Select the Update Track (Beta, Stable); */
+"Update Track" = "Caminho de Actualizações";
+
+/* EDMarketConnector.py: Inform the user the Update Track has changed; */
+"Update Track Changed to {TRACK}" = "Caminho de Actualizações alterado para {TRACK}";
+
+
+/* EDMarketConnector.py: Inform User of Beta -> Stable Transition Risks; */
+"Update track changed to Stable from Beta. You will no longer receive Beta updates. You will stay on your current Beta version until the next Stable release.\r\n\r\nYou can manually revert to the latest Stable version. To do so, you must download and install the latest Stable version manually. Note that this may introduce bugs or break completely if downgrading between major versions with significant changes.\r\n\r\nDo you want to open GitHub to download the latest release?" = "Caminho de Actualizações alterado de Estável para Beta. Deixará de receber actualizações Beta. Irá continuar na versão Beta até à próxima actualização Estável.\n\nPode, manualmente, reverter para a última versão Estável. Para isso, faça download e instale a última versão Estável manualmente. Note que o retrocesso para versões anteriores com diferenças significativas poderá introduzir bugs ou danificar a instalação.\n\nDeseja abrir o GitHub para fazer download da última versão?";
 
 /* myNotebook.py: Can't Paste Images or Files in Text; */
 "Cannot paste non-text content." = "Só é possível colar conteúdo texto.";
