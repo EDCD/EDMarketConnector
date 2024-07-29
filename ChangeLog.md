@@ -6,6 +6,27 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
       in the source (not distributed with the Windows installer) for the
       currently used version.
 ---
+Release 5.11.3-beta0
+===
+This is a release candidate for 5.11.3.
+
+This release fixes a bug where an incomplete hand-over from ordereddict to dict types would cause a sender failure.
+
+**Changes and Enhancements**
+* Updated Translations
+
+**Bug Fixes**
+* Fixed a bug where two senders might fail due to improper data formats
+
+**Plugin Developers**
+* nb.Entry is deprecated, and is slated for removal in 6.0 or later. Please migrate to nb.EntryMenu
+* nb.ColoredButton is deprecated, and is slated for removal in 6.0 or later. Please migrate to tk.Button
+* Calling internal translations with `_()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to importing `translations` and calling `translations.translate` or `translations.tl` directly
+* `Translations` as the translate system singleton is deprecated, and is slated for removal in 6.0 or later. Please migrate to the `translations` singleton
+* `help_open_log_folder()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to open_folder()
+* `update_feed` is deprecated, and is slated for removal in 6.0 or later. Please migrate to `get_update_feed()`.
+* FDevID files (`commodity.csv` and `rare_commodity.csv`) have moved their preferred location to the app dir (same location as default Plugins folder). Please migrate to use `config.app_dir_path`.
+
 Release 5.11.2
 ===
 
@@ -17,6 +38,15 @@ This release fixes a bug where minimizing to the system tray could cause the pro
 
 **Bug Fixes**
 * Fixed a bug where minimizing to the system tray could cause the program to not un-minimize.
+
+**Plugin Developers**
+* nb.Entry is deprecated, and is slated for removal in 6.0 or later. Please migrate to nb.EntryMenu
+* nb.ColoredButton is deprecated, and is slated for removal in 6.0 or later. Please migrate to tk.Button
+* Calling internal translations with `_()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to importing `translations` and calling `translations.translate` or `translations.tl` directly
+* `Translations` as the translate system singleton is deprecated, and is slated for removal in 6.0 or later. Please migrate to the `translations` singleton
+* `help_open_log_folder()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to open_folder()
+* `update_feed` is deprecated, and is slated for removal in 6.0 or later. Please migrate to `get_update_feed()`.
+* FDevID files (`commodity.csv` and `rare_commodity.csv`) have moved their preferred location to the app dir (same location as default Plugins folder). Please migrate to use `config.app_dir_path`.
 
 Release 5.11.1
 ===
