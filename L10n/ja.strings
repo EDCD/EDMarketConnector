@@ -1,3 +1,15 @@
+/* prefs.py: Catch & Record Profiler Errors; */
+"Error in System Profiler" = "システムプロファイラーでエラー";
+
+/* EDMarketConnector.py: We didn't have the Fleet Carrier callsign when we should have; In files: EDMarketConnector.py:1223; */
+"CAPI: Fleet Carrier data incomplete" = "CAPI: フリートキャリアデータが不完全";
+
+/* EDMarketConnector.py: No data was returned for the Fleet Carrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
+"CAPI: No Fleet Carrier data returned" = "CAPI: フリートキャリアデータの返信なし";
+
+/* prefs.py: Configuration - Enable or disable the Fleet Carrier CAPI calls; In files: prefs.py:475; */
+"Enable Fleet Carrier CAPI Queries" = "フリートキャリアCAPIクエリを有効にする";
+
 /* edsm.py:Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:316; */
 "Send flight log and CMDR status to EDSM" = "フライトログとCMDRステータスをEDSMへ送信する";
 
@@ -35,6 +47,12 @@
 
 /* companion.py: Failed to get Access Token from Frontier Auth service; In files: companion.py:508; */
 "Error: unable to get token" = "エラー: トークンが取得できません";
+
+/* EDMarketConnector.py: EDMC Critical Error Notification; */
+"EDMC encountered a critical error, and cannot recover. EDMC is shutting down for its own protection!" = "EDMCは致命的な問題に遭遇し、復旧できません。EDMCは自身の保護のためシャットダウンします！";
+
+/* EDMarketConnector.py: EDMC Critical Error Details; */
+"Here's what EDMC Detected:\r\n\r\n{ERR}\r\n\r\nDo you want to file a Bug Report on GitHub?" = "EDMCが検知した問題は以下の通りです:\n\n{ERR}\n\nGitHubにバグレポートを作成しますか?";
 
 /* companion.py: Frontier CAPI returned 418, meaning down for maintenance; In files: companion.py:844; */
 "Frontier CAPI down for maintenance" = "Frontier CAPIがメンテナンスのため停止中";
@@ -87,6 +105,9 @@
 /* EDMarketConnector.py: Help > Check for Updates...; In files: EDMarketConnector.py:930; EDMarketConnector.py:958; */
 "Check for Updates..." = "更新の確認...";
 
+/* EDMarketConnector.py: Help > Open System Profiler; In files: EDMarketConnector.py:888; */
+"Open System Profiler" = "システムプロファイラーを開く";
+
 /* EDMarketConnector.py: File > Save Raw Data...; In files: EDMarketConnector.py:931; EDMarketConnector.py:948; */
 "Save Raw Data..." = "生データの保存...";
 
@@ -116,6 +137,15 @@
 
 /* EDMarketConnector.py: Label for 'Copy' as in 'Copy and Paste'; ttkHyperlinkLabel.py: Label for 'Copy' as in 'Copy and Paste'; In files: EDMarketConnector.py:962; ttkHyperlinkLabel.py:53; */
 "Copy" = "コピー";
+
+/* myNotebook.py: Label for 'Cut' as in 'Cut and Paste'; */
+"Cut" = "切り取り";
+
+/* myNotebook.py: Label for 'Paste' as in 'Copy and Paste'; */
+"Paste" = "貼り付け";
+
+/* myNotebook.py: Label for 'Select All'; */
+"Select All" = "全てを選択";
 
 /* EDMarketConnector.py: CAPI auth aborted because of killswitch; EDMarketConnector.py: CAPI auth query aborted because of killswitch; In files: EDMarketConnector.py:973; EDMarketConnector.py:1067; */
 "CAPI auth disabled by killswitch" = "CAPI認証はkillswitchによって無効にされています";
@@ -774,3 +804,21 @@
 /* update.py: Update Available Text; In files: update.py:229; */
 "{NEWVER} is available" = "{NEWVER} があります";
 
+/* prefs.py: Stable Version of EDMC; */
+"Stable" = "安定版";
+
+/* prefs.py: Select the Update Track (Beta, Stable); */
+"Update Track" = "アップデートトラック";
+
+/* EDMarketConnector.py: Inform the user the Update Track has changed; */
+"Update Track Changed to {TRACK}" = "アップデートトラックを {TRACK} に変更します";
+
+
+/* EDMarketConnector.py: Inform User of Beta -> Stable Transition Risks; */
+"Update track changed to Stable from Beta. You will no longer receive Beta updates. You will stay on your current Beta version until the next Stable release.\r\n\r\nYou can manually revert to the latest Stable version. To do so, you must download and install the latest Stable version manually. Note that this may introduce bugs or break completely if downgrading between major versions with significant changes.\r\n\r\nDo you want to open GitHub to download the latest release?" = "アップデートトラックをベータから安定版に変更しました。今後ベータ版のアップデートを受け取ることはありません。次の安定版がリリースされるまでこのベータ版をご利用いただけます。\n\n手動で最新の安定版に戻すことができます。そのためには、最新の安定版を手動でダウンロードしてインストールする必要があります。大きな変更を伴うメジャーバージョン間のダウングレードの場合、バグが発生したり、完全に壊れたりする可能性があることに注意してください。\n\nGitHubを開いて最新リリースをダウンロードしますか？";
+
+/* myNotebook.py: Can't Paste Images or Files in Text; */
+"Cannot paste non-text content." = "テキストではない内容は貼り付けできません";
+
+/* ttkHyperlinkLabel.py: Open Element In Selected Provider; */
+"Open in {URL}" = "{URL} で開く";

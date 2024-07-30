@@ -379,7 +379,7 @@
 "Market data in Trade Dangerous format file" = "Dados de mercado no arquivo de formato Trade Dangerous";
 
 /* prefs.py: Settings > Output option; In files: prefs.py:360; */
-"Ship loadout" = "Modulação da nave";
+"Ship loadout" = "Build da Nave";
 
 /* prefs.py: Settings > Output option; In files: prefs.py:370; */
 "Automatically update on docking" = "Atualizar automaticamente na docagem";
