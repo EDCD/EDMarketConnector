@@ -25,7 +25,7 @@ types-requests==2.32.0.20240712
 types-pkg-resources==0.1.3
 
 # Code formatting tools
-autopep8==2.2.0
+autopep8==2.3.1
 
 # Git pre-commit checking
 pre-commit==3.7.1
