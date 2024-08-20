@@ -186,7 +186,7 @@ def _load_internal_plugins():
 
 def _load_ttk_catalog_plugin():
     try:
-        plugin = Plugin('ttk_catalog', os.path.join(config.internal_plugin_dir_path, '_ttk_catalog.py'), logger)
+        plugin = Plugin('ttk_catalog', config.internal_plugin_dir_path / '_ttk_catalog.py', logger)
         plugin.folder = None
         return plugin
     except Exception:
