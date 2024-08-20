@@ -28,6 +28,11 @@ if sys.platform == 'win32':
     import win32gui
     from winrt.microsoft.ui.interop import get_window_id_from_window
     from winrt.microsoft.ui.windowing import AppWindow
+    from winrt.windows.foundation.numerics import Vector2, Vector3
+    from winrt.windows.system.interop import create_dispatcher_queue_controller
+    from winrt.windows.ui import Color
+    from winrt.windows.ui.composition import Compositor, ContainerVisual
+    from winrt.windows.ui.composition.interop import create_desktop_window_target
     from ctypes import windll
     FR_PRIVATE = 0x10
     fonts_loaded = windll.gdi32.AddFontResourceExW(str(config.respath_path / 'EUROCAPS.TTF'), FR_PRIVATE, 0)
@@ -129,6 +134,9 @@ class _Theme:
     }
     style: ttk.Style
     root: tk.Tk
+    dispatcher = None
+    compositor = None
+    compositor_target = None
 
     def __init__(self) -> None:
         self.active: int | None = None  # Starts out with no theme
@@ -152,6 +160,15 @@ class _Theme:
                 logger.info(f'loading theme package from "{theme_file}"')
             except tk.TclError:
                 logger.exception(f'Failure loading theme package "{theme_file}"')
+
+        if sys.platform == 'win32':
+            self.dispatcher = create_dispatcher_queue_controller()
+            self.compositor = Compositor()
+            self.compositor_target = create_desktop_window_target(self.compositor, self.root.winfo_id())
+            c_root = self.compositor.create_container_visual()
+            c_root.relative_size_adjustment = Vector2(1, 1)
+            c_root.offset = Vector3(0, 0, 0)
+            self.compositor_target.root = c_root
 
     def register(self, widget: tk.Widget | tk.BitmapImage) -> None:
         assert isinstance(widget, (tk.BitmapImage, tk.Widget)), widget
@@ -199,6 +216,13 @@ class _Theme:
             else:
                 window.title_bar.extends_content_into_title_bar = True
                 title_gap['height'] = window.title_bar.height
+
+                visuals = ContainerVisual._from(self.compositor_target.root).children
+                element = self.compositor.create_sprite_visual()
+                element.brush = self.compositor.create_color_brush(Color(255, 10, 10, 10))
+                element.size = Vector2(self.root.winfo_width(), 48)
+                element.offset = Vector3(0, 0, 0)
+                visuals.insert_at_top(element)
 
             if theme == self.THEME_TRANSPARENT:
                 win32gui.SetWindowLong(hwnd, win32con.GWL_EXSTYLE,

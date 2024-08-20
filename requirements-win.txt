@@ -1,0 +1,17 @@
+simplesystray==0.1.0
+pywin32==306
+
+winrt-Microsoft.UI==2.2.0
+winrt-Microsoft.UI.Interop==2.2.0
+winrt-Microsoft.UI.Windowing==2.2.0
+winrt-Microsoft.Windows.ApplicationModel.DynamicDependency==2.2.0
+winrt-Microsoft.Windows.ApplicationModel.DynamicDependency.Bootstrap==2.2.0
+winrt-Windows.Foundation.Numerics==2.2.0
+winrt-Windows.System==2.2.0
+winrt-Windows.System.Interop==2.2.0
+winrt-Windows.UI==2.2.0
+winrt-Windows.UI.Composition==2.2.0
+winrt-Windows.UI.Composition.Desktop==2.2.0
+winrt-Windows.UI.Composition.Interop==2.2.0
+
+-r requirements.txt

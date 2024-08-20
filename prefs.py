@@ -1293,7 +1293,7 @@ class PreferencesDialog(tk.Toplevel):
         config.set('dark_text', self.theme_colors[0])
         config.set('dark_highlight', self.theme_colors[1])
         theme.apply()
-        if self.plugdir.get() != config.get('plugin_dir'):
+        if self.plugdir.get() != config.get_str('plugin_dir'):
             config.set(
                 'plugin_dir',
                 str(Path(config.home_path, self.plugdir.get()[2:])) if self.plugdir.get().startswith('~') else
