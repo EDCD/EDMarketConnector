@@ -287,7 +287,7 @@ if __name__ == '__main__':  # noqa: C901
                     return None
 
                 @WINFUNCTYPE(BOOL, HWND, LPARAM)
-                def enumwindowsproc(window_handle, l_param):  # noqa: CCR001
+                def enumwindowsproc(window_handle, l_param):
                     """
                     Determine if any window for the Application exists.
 
@@ -463,7 +463,7 @@ class AppWindow:
 
         else:
             image_path = config.respath_path / 'io.edcd.EDMarketConnector.png'
-            self.w.tk.call('wm', 'iconphoto', self.w, '-default', image=tk.PhotoImage(file=image_path))
+            self.w.tk.call('wm', 'iconphoto', self.w, '-default', tk.PhotoImage(file=image_path))
 
         frame = ttk.Frame(self.w, name=appname.lower())
         frame.grid(sticky=tk.NSEW)
@@ -781,7 +781,7 @@ class AppWindow:
             )
             restart_box.show()
             if restart_box:
-                app.onexit(restart=True)
+                self.onexit(restart=True)
 
     def set_labels(self):
         """Set main window labels, e.g. after language change."""

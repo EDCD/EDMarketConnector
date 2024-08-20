@@ -2156,12 +2156,11 @@ class EDLogs(FileSystemEventHandler):
                 # Process likely expired
                 self.running_process = None
         if not self.running_process:
-            edmc_process = psutil.Process()
-            edmc_user = edmc_process.username()
             try:
-                for pid in psutil.pids():
-                    proc = psutil.Process(pid)
-                    if 'EliteDangerous' in proc.name() and proc.username() == edmc_user:
+                edmc_process = psutil.Process()
+                edmc_user = edmc_process.username()
+                for proc in psutil.process_iter(['name', 'username']):
+                    if 'EliteDangerous' in proc.info['name'] and proc.info['username'] == edmc_user:
                         self.running_process = proc
                         return True
             except psutil.NoSuchProcess:

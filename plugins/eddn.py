@@ -957,13 +957,13 @@ class EDDN:
             self.send_message(cmdr, {
                 '$schemaRef': f'https://eddn.edcd.io/schemas/outfitting/2{"/test" if is_beta else ""}',
                 'message': {
-                    ('timestamp',   entry['timestamp']),
-                    ('systemName',  entry['StarSystem']),
-                    ('stationName', entry['StationName']),
-                    ('marketId',    entry['MarketID']),
-                    ('horizons',    horizons),
-                    ('modules',     outfitting),
-                    ('odyssey',     entry['odyssey'])
+                    'timestamp':   entry['timestamp'],
+                    'systemName':  entry['StarSystem'],
+                    'stationName': entry['StationName'],
+                    'marketId':    entry['MarketID'],
+                    'horizons':    horizons,
+                    'modules':     outfitting,
+                    'odyssey':     entry['odyssey']
                 },
             })
 
@@ -991,13 +991,13 @@ class EDDN:
             self.send_message(cmdr, {
                 '$schemaRef': f'https://eddn.edcd.io/schemas/shipyard/2{"/test" if is_beta else ""}',
                 'message': {
-                    ('timestamp',   entry['timestamp']),
-                    ('systemName',  entry['StarSystem']),
-                    ('stationName', entry['StationName']),
-                    ('marketId',    entry['MarketID']),
-                    ('horizons',    horizons),
-                    ('ships',       shipyard),
-                    ('odyssey',     entry['odyssey'])
+                    'timestamp':   entry['timestamp'],
+                    'systemName':  entry['StarSystem'],
+                    'stationName': entry['StationName'],
+                    'marketId':    entry['MarketID'],
+                    'horizons':    horizons,
+                    'ships':       shipyard,
+                    'odyssey':     entry['odyssey']
                 },
             })
 
