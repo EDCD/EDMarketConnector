@@ -28,13 +28,7 @@ if sys.platform == 'win32':
     import win32gui
     from winrt.microsoft.ui.interop import get_window_id_from_window
     from winrt.microsoft.ui.windowing import AppWindow
-    from winrt.windows.foundation.numerics import Vector2, Vector3
-    from winrt.windows.system import DispatcherQueueController
-    from winrt.windows.system.interop import create_dispatcher_queue_controller
-    from winrt.windows.ui import Color
-    from winrt.windows.ui.composition import Compositor, ContainerVisual
-    from winrt.windows.ui.composition.desktop import DesktopWindowTarget
-    from winrt.windows.ui.composition.interop import create_desktop_window_target
+    from winrt.windows.ui import Color, Colors
     from ctypes import windll
     FR_PRIVATE = 0x10
     fonts_loaded = windll.gdi32.AddFontResourceExW(str(config.respath_path / 'EUROCAPS.TTF'), FR_PRIVATE, 0)
@@ -136,9 +130,7 @@ class _Theme:
     }
     style: ttk.Style
     root: tk.Tk
-    dispatcher: DispatcherQueueController
-    compositor: Compositor
-    compositor_target: DesktopWindowTarget
+    binds: dict[str, str] = {}
 
     def __init__(self) -> None:
         self.active: int | None = None  # Starts out with no theme
@@ -163,15 +155,6 @@ class _Theme:
             except tk.TclError:
                 logger.exception(f'Failure loading theme package "{theme_file}"')
 
-        if sys.platform == 'win32':
-            self.dispatcher = create_dispatcher_queue_controller()
-            self.compositor = Compositor()
-            self.compositor_target = create_desktop_window_target(self.compositor, self.root.winfo_id())
-            c_root = self.compositor.create_container_visual()
-            c_root.relative_size_adjustment = Vector2(1, 1)
-            c_root.offset = Vector3(0, 0, 0)
-            self.compositor_target.root = c_root
-
     def register(self, widget: tk.Widget | tk.BitmapImage) -> None:
         assert isinstance(widget, (tk.BitmapImage, tk.Widget)), widget
         warnings.warn('theme.register() is no longer necessary as theme attributes are set on tk level',
@@ -193,6 +176,23 @@ class _Theme:
         assert isinstance(widget, (tk.BitmapImage, tk.Widget)), widget
         warnings.warn('theme.update() is no longer necessary as theme attributes are set on tk level',
                       DeprecationWarning, stacklevel=2)
+
+    def transparent_onenter(self, event=None):
+        self.root.attributes("-transparentcolor", '')
+        if sys.platform == 'win32':
+            self.set_title_buttons_background(Color(255, 10, 10, 10))
+
+    def transparent_onleave(self, event=None):
+        if event.widget == self.root:
+            self.root.attributes("-transparentcolor", 'grey4')
+            if sys.platform == 'win32':
+                self.set_title_buttons_background(Colors.transparent)
+
+    def set_title_buttons_background(self, color: Color):
+        hwnd = win32gui.GetParent(self.root.winfo_id())
+        window = AppWindow.get_from_window_id(get_window_id_from_window(hwnd))
+        window.title_bar.button_background_color = color
+        window.title_bar.button_inactive_background_color = color
 
     def apply(self) -> None:
         theme = config.get_int('theme')
@@ -217,20 +217,22 @@ class _Theme:
                 title_gap['height'] = 0
             else:
                 window.title_bar.extends_content_into_title_bar = True
+                self.set_title_buttons_background(Color(255, 10, 10, 10))
                 title_gap['height'] = window.title_bar.height
 
-                visuals = ContainerVisual._from(self.compositor_target.root).children
-                element = self.compositor.create_sprite_visual()
-                element.brush = self.compositor.create_color_brush(Color(255, 10, 10, 10))
-                element.size = Vector2(self.root.winfo_width(), 48)
-                element.offset = Vector3(0, 0, 0)
-                visuals.insert_at_top(element)
-
             if theme == self.THEME_TRANSPARENT:
+                # TODO prevent loss of focus when hovering the title bar area
                 win32gui.SetWindowLong(hwnd, win32con.GWL_EXSTYLE,
                                        win32con.WS_EX_APPWINDOW | win32con.WS_EX_LAYERED)  # Add to taskbar
+                self.binds['<Enter>'] = self.root.bind('<Enter>', self.transparent_onenter)
+                self.binds['<FocusIn>'] = self.root.bind('<FocusIn>', self.transparent_onenter)
+                self.binds['<Leave>'] = self.root.bind('<Leave>', self.transparent_onleave)
+                self.binds['<FocusOut>'] = self.root.bind('<FocusOut>', self.transparent_onleave)
             else:
                 win32gui.SetWindowLong(hwnd, win32con.GWL_EXSTYLE, win32con.WS_EX_APPWINDOW)  # Add to taskbar
+                for event, bind in self.binds.items():
+                    self.root.unbind(event, bind)
+                self.binds.clear()
         else:
             if dpy:
                 xroot = Window()

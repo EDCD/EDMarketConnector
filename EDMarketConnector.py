@@ -644,10 +644,6 @@ class AppWindow:
 
         self.w.attributes('-topmost', config.get_int('always_ontop') and 1 or 0)
 
-        self.w.bind('<Enter>', self.onenter)  # Special handling for transparency
-        self.w.bind('<FocusIn>', self.onenter)  # Special handling for transparency
-        self.w.bind('<Leave>', self.onleave)  # Special handling for transparency
-        self.w.bind('<FocusOut>', self.onleave)  # Special handling for transparency
         self.w.bind('<Return>', self.capi_request_data)
         self.w.bind('<KP_Enter>', self.capi_request_data)
         self.w.bind_all('<<Invoke>>', self.capi_request_data)  # Ask for CAPI queries to be performed
@@ -1856,16 +1852,6 @@ class AppWindow:
             if str(event.widget) == '.':
                 self.w.withdraw()
 
-    def onenter(self, event=None) -> None:
-        """Handle when our window gains focus."""
-        if config.get_int('theme') == theme.THEME_TRANSPARENT:
-            self.w.attributes("-transparentcolor", '')
-
-    def onleave(self, event=None) -> None:
-        """Handle when our window loses focus."""
-        if config.get_int('theme') == theme.THEME_TRANSPARENT and event.widget == self.w:
-            self.w.attributes("-transparentcolor", 'grey4')
-
 
 def test_logging() -> None:
     """Simple test of top level logging."""
@@ -1892,7 +1878,7 @@ def setup_killswitches(filename: str | None):
     killswitch.setup_main_list(filename)
 
 
-def show_killswitch_poppup(root=None):
+def show_killswitch_poppup(root: tk.Tk):
     """Show a warning popup if there are any killswitches that match the current version."""
     if len(kills := killswitch.kills_for_version()) == 0:
         return
@@ -1928,7 +1914,7 @@ def show_killswitch_poppup(root=None):
     ok_button.grid(columnspan=2, sticky=tk.EW)
 
 
-def validate_providers(root):
+def validate_providers(root: tk.Tk):
     """Check if Config has an invalid provider set, and reset to default if we do."""
     reset_providers = {}
     station_provider: str = config.get_str("station_provider")
