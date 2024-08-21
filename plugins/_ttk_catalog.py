@@ -312,21 +312,6 @@ class Catalog(ttk.Frame):
         tk_button = tk.Button(tk_widgets_frame, text="tk.Button")
         tk_button.grid(row=6, column=0, padx=5, pady=10, sticky="nsew")
 
-        tk_hyperlink_frame = tk.LabelFrame(self, text="HyperlinkLabel (legacy)", padx=20, pady=10)
-        tk_hyperlink_frame.grid(row=2, column=4, padx=10, pady=10, sticky="nsew")
-
-        tk_hyperlink_1 = HyperlinkLabel(tk_hyperlink_frame, text="Default", url=URL)
-        tk_hyperlink_1.grid(row=0, column=0, sticky="nsew")
-
-        tk_hyperlink_2 = HyperlinkLabel(tk_hyperlink_frame, text="Underline", url=URL, underline=True)
-        tk_hyperlink_2.grid(row=1, column=0, sticky="nsew")
-
-        tk_hyperlink_3 = HyperlinkLabel(tk_hyperlink_frame, text="No underline", url=URL, underline=False)
-        tk_hyperlink_3.grid(row=2, column=0, sticky="nsew")
-
-        tk_hyperlink_4 = HyperlinkLabel(tk_hyperlink_frame, text="Disabled", url=URL, state=tk.DISABLED)
-        tk_hyperlink_4.grid(row=3, column=0, sticky="nsew")
-
 
 def plugin_start3(path: str) -> str:
     """Plugin initialization."""

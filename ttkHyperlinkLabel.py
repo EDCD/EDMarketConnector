@@ -78,15 +78,10 @@ class HyperlinkLabel(ttk.Button):
             else:
                 font_n = ttk.Style().lookup('Link.TLabel', 'font')
                 font_u = ttk.Style().lookup('Link.TLabel', 'font', ['active'])
-                if self.underline is None:
-                    ttk.Style().configure(self._legacy_style, font=font_n)
-                    ttk.Style().map(self._legacy_style, font=[('active', font_u)])
-                elif self.underline:
-                    ttk.Style().configure(self._legacy_style, font=font_u)
-                    ttk.Style().map(self._legacy_style, font=[('active', font_u)])
-                else:
-                    ttk.Style().configure(self._legacy_style, font=font_n)
-                    ttk.Style().map(self._legacy_style, font=[('active', font_n)])
+                font_default = font_u if self.underline else font_n
+                font_active = font_n if self.underline is False else font_u
+                ttk.Style().configure(self._legacy_style, font=font_default)
+                ttk.Style().map(self._legacy_style, font=[('active', font_active)])
             # TODO emulate justify and wraplength
             options['style'] = self._legacy_style
         return options
@@ -230,4 +225,4 @@ class HyperlinkLabel(ttk.Button):
     def copy_slef(self) -> None:
         """Copy the current text to the clipboard."""
         self.clipboard_clear()
-        self.clipboard_append(monitor.slef)
+        self.clipboard_append(monitor.slef or '')

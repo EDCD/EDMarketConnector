@@ -29,9 +29,11 @@ if sys.platform == 'win32':
     from winrt.microsoft.ui.interop import get_window_id_from_window
     from winrt.microsoft.ui.windowing import AppWindow
     from winrt.windows.foundation.numerics import Vector2, Vector3
+    from winrt.windows.system import DispatcherQueueController
     from winrt.windows.system.interop import create_dispatcher_queue_controller
     from winrt.windows.ui import Color
     from winrt.windows.ui.composition import Compositor, ContainerVisual
+    from winrt.windows.ui.composition.desktop import DesktopWindowTarget
     from winrt.windows.ui.composition.interop import create_desktop_window_target
     from ctypes import windll
     FR_PRIVATE = 0x10
@@ -134,9 +136,9 @@ class _Theme:
     }
     style: ttk.Style
     root: tk.Tk
-    dispatcher = None
-    compositor = None
-    compositor_target = None
+    dispatcher: DispatcherQueueController
+    compositor: Compositor
+    compositor_target: DesktopWindowTarget
 
     def __init__(self) -> None:
         self.active: int | None = None  # Starts out with no theme
