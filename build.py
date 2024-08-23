@@ -65,6 +65,7 @@ def generate_data_files(
     """Create the required datafiles to build."""
     l10n_dir = "L10n"
     fdevids_dir = pathlib.Path("FDevIDs")
+    license_dir = pathlib.Path("docs/Licenses")
     data_files = [
         (
             "",
@@ -98,6 +99,12 @@ def generate_data_files(
         ),
         ("plugins", plugins),
     ]
+    # Add all files recursively from license directories
+    for root, dirs, files in os.walk(license_dir):
+        file_list = [os.path.join(root, f) for f in files]
+        dest_dir = os.path.join(license_dir, os.path.relpath(root, license_dir))
+        data_files.append((dest_dir, file_list))
+
     return data_files
 
 
