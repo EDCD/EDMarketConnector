@@ -6,6 +6,39 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
       in the source (not distributed with the Windows installer) for the
       currently used version.
 ---
+Release 5.12.0-beta1
+===
+
+This public beta is designed to allow for volunteer testing of coming updates and allow plugin 
+developers to prepare for upcoming code changes. **BUGS ARE EXPECTED** in this build, as under-the-hood 
+inline code changes have been made in this update which may have unintended consequences.
+
+**Changes and Enhancements**
+* Added the ability to export a ship's loadout to Inara SLEF notation
+* Added the ability for EDMC to restart itself if required after settings changes
+* Added the ability to change the custom plugins directory to allow for multiple plugin profiles
+* Added Basic Type 8 Support
+* Updated the default logging directory from $TEMPDIR or %TEMP% and to the current app data directory
+* Updated a number of direct win32API calls to use proper prototyped library calls
+* Updated a number of translations
+* Updated a number of dependencies
+* Updated included and bundled licenses to comply with dependency requirements
+* Updated the game_running check to be more efficient on Windows to reduce program hangs
+* Minor logic enhancements
+* Retired most usages of os.path in favor of the preferred PathLib
+
+**Bug Fixes**
+* Fixed a bug that would result in Horizons and Odyssey flags not being passed to EDDN
+
+**Plugin Developers**
+* nb.Entry is deprecated, and is slated for removal in 6.0 or later. Please migrate to nb.EntryMenu
+* nb.ColoredButton is deprecated, and is slated for removal in 6.0 or later. Please migrate to tk.Button
+* Calling internal translations with `_()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to importing `translations` and calling `translations.translate` or `translations.tl` directly
+* `Translations` as the translate system singleton is deprecated, and is slated for removal in 6.0 or later. Please migrate to the `translations` singleton
+* `help_open_log_folder()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to open_folder()
+* `update_feed` is deprecated, and is slated for removal in 6.0 or later. Please migrate to `get_update_feed()`.
+
+
 Release 5.11.3
 ===
 
