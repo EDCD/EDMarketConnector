@@ -6,9 +6,8 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
       in the source (not distributed with the Windows installer) for the
       currently used version.
 ---
-Release 5.11.3-beta0
+Release 5.11.3
 ===
-This is a release candidate for 5.11.3.
 
 This release fixes a bug where an incomplete hand-over from ordereddict to dict types would cause a sender failure.
 
