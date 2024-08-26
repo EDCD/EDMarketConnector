@@ -1,15 +1,3 @@
-/* prefs.py: Catch & Record Profiler Errors; */
-"Error in System Profiler" = "Ошибка в системном профайлере";
-
-/* EDMarketConnector.py: We didn't have the Fleet Carrier callsign when we should have; In files: EDMarketConnector.py:1223; */
-"CAPI: Fleet Carrier data incomplete" = "CAPI: Неполная информация о корабле-носителе";
-
-/* EDMarketConnector.py: No data was returned for the Fleet Carrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
-"CAPI: No Fleet Carrier data returned" = "CAPI: Нет данных о корабле-носителе";
-
-/* prefs.py: Configuration - Enable or disable the Fleet Carrier CAPI calls; In files: prefs.py:475; */
-"Enable Fleet Carrier CAPI Queries" = "Включить запросы к CAPI о корабле-носителе";
-
 /* edsm.py:Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:316; */
 "Send flight log and CMDR status to EDSM" = "Отправить журнал полетов и статус командира в EDSM";
 
@@ -189,12 +177,12 @@
 /* EDMarketConnector.py: CAPI fleetcarrier query aborted because of killswitch; In files: EDMarketConnector.py:1157; */
 "CAPI fleetcarrier disabled by killswitch" = "CAPI кораблей-носителей отключен с помощью killswitch";
 
+/* EDMarketConnector.py: No data was returned for the Fleet Carrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
+"CAPI: No Fleet Carrier data returned" = "CAPI: Нет данных о корабле-носителе";
 
-/* EDMarketConnector.py: No data was returned for the fleetcarrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
-"CAPI: No fleetcarrier data returned" = "CAPI: Нет данных о флотоносце";
+/* EDMarketConnector.py: We didn't have the Fleet Carrier callsign when we should have; In files: EDMarketConnector.py:1223; */
+"CAPI: Fleet Carrier data incomplete" = "CAPI: Неполная информация о корабле-носителе";
 
-/* EDMarketConnector.py: We didn't have the fleetcarrier callsign when we should have; In files: EDMarketConnector.py:1223; */
-"CAPI: Fleetcarrier data incomplete" = "CAPI: Неполная информация о флотоносце";
 /* EDMarketConnector.py: No data was returned for the commander from the Frontier CAPI; In files: EDMarketConnector.py:1242; */
 "CAPI: No commander data returned" = "CAPI: Нет данных пилота";
 
@@ -399,9 +387,9 @@
 /* prefs.py: Settings > Configuration - Label for CAPI section; In files: prefs.py:469; */
 "CAPI Settings" = "Настройки CAPI";
 
-
 /* prefs.py: Configuration - Enable or disable the Fleet Carrier CAPI calls; In files: prefs.py:475; */
-"Enable Fleetcarrier CAPI Queries" = "Включить запросы к CAPI о флотоносце";
+"Enable Fleet Carrier CAPI Queries" = "Включить запросы к CAPI о корабле-носителе";
+
 /* prefs.py: Hotkey/Shortcut settings prompt on Windows; In files: prefs.py:492; */
 "Hotkey" = "Горячая клавиша";
 
@@ -480,9 +468,6 @@
 /* prefs.py: Label for location of third-party plugins folder; In files: prefs.py:908; */
 "Plugins folder" = "Папка плагинов";
 
-/* prefs.py: Label on button used to open a filesystem folder; In files: prefs.py:915; */
-"Open" = "Открыть";
-
 /* prefs.py: Tip/label about how to disable plugins; In files: prefs.py:923; */
 "Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "Подсказка: Отключить конкретный плагин можно {CR} добавив '{EXT}' к названию папки";
 
@@ -500,6 +485,9 @@
 
 /* prefs.py: Lable on list of user-disabled plugins; In files: prefs.py:977; */
 "Disabled Plugins" = "Отключенные плагины";
+
+/* prefs.py: Catch & Record Profiler Errors; */
+"Error in System Profiler" = "Ошибка в системном профайлере";
 
 /* stats.py: Cmdr stats; In files: stats.py:58; */
 "Balance" = "Баланс";
@@ -813,7 +801,6 @@
 /* EDMarketConnector.py: Inform the user the Update Track has changed; */
 "Update Track Changed to {TRACK}" = "Обновить маршрут. Изменено на {TRACK}";
 
-
 /* EDMarketConnector.py: Inform User of Beta -> Stable Transition Risks; */
 "Update track changed to Stable from Beta. You will no longer receive Beta updates. You will stay on your current Beta version until the next Stable release.\r\n\r\nYou can manually revert to the latest Stable version. To do so, you must download and install the latest Stable version manually. Note that this may introduce bugs or break completely if downgrading between major versions with significant changes.\r\n\r\nDo you want to open GitHub to download the latest release?" = "Изменен путь обновления с \"Бета\" на \"Стабильный\". Вы больше не будете получать обновления \"Бета\". Вы останетесь на текущей бета-версии до следующего стабильного релиза.\n\nВы можете вручную вернуться к последней версии \"Стабильная\". Для этого необходимо загрузить и установить последнюю версию \"Стабильная\" вручную. Обратите внимание, что при переходе между основными версиями со значительными изменениями могут возникнуть ошибки или полная поломка.\n\nХотите открыть GitHub, чтобы загрузить последнюю версию?";
 
@@ -822,3 +809,4 @@
 
 /* ttkHyperlinkLabel.py: Open Element In Selected Provider; */
 "Open in {URL}" = "Открыть через {URL}";
+

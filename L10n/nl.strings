@@ -1,6 +1,3 @@
-/* prefs.py: Catch & Record Profiler Errors; */
-"Error in System Profiler" = "Fout in systeemprofiler";
-
 /* edsm.py:Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:316; */
 "Send flight log and CMDR status to EDSM" = "Stuur logboek en CMDR-status naar EDSM";
 
@@ -162,12 +159,6 @@
 /* EDMarketConnector.py: CAPI fleetcarrier query aborted because of killswitch; In files: EDMarketConnector.py:1157; */
 "CAPI fleetcarrier disabled by killswitch" = "CAPI fleetcarrier uitgeschakeld door killswitch";
 
-
-/* EDMarketConnector.py: No data was returned for the fleetcarrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
-"CAPI: No fleetcarrier data returned" = "CAPI: geen fleet carrier data verkregen";
-
-/* EDMarketConnector.py: We didn't have the fleetcarrier callsign when we should have; In files: EDMarketConnector.py:1223; */
-"CAPI: Fleetcarrier data incomplete" = "CAPI: data fleet carrier incompleet";
 /* EDMarketConnector.py: No data was returned for the commander from the Frontier CAPI; In files: EDMarketConnector.py:1242; */
 "CAPI: No commander data returned" = "CAPI: geen commander data verkregen";
 
@@ -375,9 +366,6 @@
 /* prefs.py: Label for location of third-party plugins folder; In files: prefs.py:908; */
 "Plugins folder" = "Plugins map";
 
-/* prefs.py: Label on button used to open a filesystem folder; In files: prefs.py:915; */
-"Open" = "Openen";
-
 /* prefs.py: Tip/label about how to disable plugins; In files: prefs.py:923; */
 "Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "Tip: Je kan een plugin deactiveren door '{EXT}'{CR}toe te voegen aan de map naam";
 
@@ -392,6 +380,9 @@
 
 /* prefs.py: Lable on list of user-disabled plugins; In files: prefs.py:977; */
 "Disabled Plugins" = "Gedeactiveerde plugins";
+
+/* prefs.py: Catch & Record Profiler Errors; */
+"Error in System Profiler" = "Fout in systeemprofiler";
 
 /* stats.py: Cmdr stats; In files: stats.py:58; */
 "Balance" = "Balans";

@@ -1,15 +1,3 @@
-/* prefs.py: Catch & Record Profiler Errors; */
-"Error in System Profiler" = "Sistem Profilcisinde Hata oluştu";
-
-/* EDMarketConnector.py: We didn't have the Fleet Carrier callsign when we should have; In files: EDMarketConnector.py:1223; */
-"CAPI: Fleet Carrier data incomplete" = "CAPI: Filo Taşıyıcısı verileri eksik";
-
-/* EDMarketConnector.py: No data was returned for the Fleet Carrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
-"CAPI: No Fleet Carrier data returned" = "CAPI: Filo Taşıyıcısı verisi bulunamadı";
-
-/* prefs.py: Configuration - Enable or disable the Fleet Carrier CAPI calls; In files: prefs.py:475; */
-"Enable Fleet Carrier CAPI Queries" = "Filo Taşıyıcı CAPI Sorgularını Etkinleştir";
-
 /* edsm.py:Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:316; */
 "Send flight log and CMDR status to EDSM" = "Uçuş günlüğünü ve CMDR durumunu EDSM'e gönder";
 
@@ -189,12 +177,12 @@
 /* EDMarketConnector.py: CAPI fleetcarrier query aborted because of killswitch; In files: EDMarketConnector.py:1157; */
 "CAPI fleetcarrier disabled by killswitch" = "CAPI filo taşıyıcısı killswitch tarafından devre dışı bırakıldı";
 
+/* EDMarketConnector.py: No data was returned for the Fleet Carrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
+"CAPI: No Fleet Carrier data returned" = "CAPI: Filo Taşıyıcısı verisi bulunamadı";
 
-/* EDMarketConnector.py: No data was returned for the fleetcarrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
-"CAPI: No fleetcarrier data returned" = "CAPI: Filo taşıyıcı verisi gelmedi.";
+/* EDMarketConnector.py: We didn't have the Fleet Carrier callsign when we should have; In files: EDMarketConnector.py:1223; */
+"CAPI: Fleet Carrier data incomplete" = "CAPI: Filo Taşıyıcısı verileri eksik";
 
-/* EDMarketConnector.py: We didn't have the fleetcarrier callsign when we should have; In files: EDMarketConnector.py:1223; */
-"CAPI: Fleetcarrier data incomplete" = "CAPI: Filo taşıyıcı verileri eksik";
 /* EDMarketConnector.py: No data was returned for the commander from the Frontier CAPI; In files: EDMarketConnector.py:1242; */
 "CAPI: No commander data returned" = "CAPI: Cmdr verisi döndürülmedi";
 
@@ -399,9 +387,9 @@
 /* prefs.py: Settings > Configuration - Label for CAPI section; In files: prefs.py:469; */
 "CAPI Settings" = "CAPI ayarları";
 
-
 /* prefs.py: Configuration - Enable or disable the Fleet Carrier CAPI calls; In files: prefs.py:475; */
-"Enable Fleetcarrier CAPI Queries" = "Filo Taşıyıcı CAPI sorgulamalarını etkinleştir";
+"Enable Fleet Carrier CAPI Queries" = "Filo Taşıyıcı CAPI Sorgularını Etkinleştir";
+
 /* prefs.py: Hotkey/Shortcut settings prompt on Windows; In files: prefs.py:492; */
 "Hotkey" = "Kısayoltuşu";
 
@@ -480,9 +468,6 @@
 /* prefs.py: Label for location of third-party plugins folder; In files: prefs.py:908; */
 "Plugins folder" = "Eklentiler klasörü";
 
-/* prefs.py: Label on button used to open a filesystem folder; In files: prefs.py:915; */
-"Open" = "Aç";
-
 /* prefs.py: Tip/label about how to disable plugins; In files: prefs.py:923; */
 "Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "İpucu: Bir eklentiyi, klasör adına{CR}'{EXT}' ekleyerek devre dışı bırakabilirsiniz";
 
@@ -500,6 +485,9 @@
 
 /* prefs.py: Lable on list of user-disabled plugins; In files: prefs.py:977; */
 "Disabled Plugins" = "Devre Dışı Eklentiler";
+
+/* prefs.py: Catch & Record Profiler Errors; */
+"Error in System Profiler" = "Sistem Profilcisinde Hata oluştu";
 
 /* stats.py: Cmdr stats; In files: stats.py:58; */
 "Balance" = "Bakiye";
@@ -813,7 +801,6 @@
 /* EDMarketConnector.py: Inform the user the Update Track has changed; */
 "Update Track Changed to {TRACK}" = "Aktif Takip {TRACK} olarak güncellendi.";
 
-
 /* EDMarketConnector.py: Inform User of Beta -> Stable Transition Risks; */
 "Update track changed to Stable from Beta. You will no longer receive Beta updates. You will stay on your current Beta version until the next Stable release.\r\n\r\nYou can manually revert to the latest Stable version. To do so, you must download and install the latest Stable version manually. Note that this may introduce bugs or break completely if downgrading between major versions with significant changes.\r\n\r\nDo you want to open GitHub to download the latest release?" = "Güncelleme takibi Beta'dan Kararlı olarak değiştirildi. Artık Beta güncellemelerini almayacaksınız. Bir sonraki Kararlı sürüme kadar mevcut Beta sürümünüzde kalacaksınız.\n\nEn son Stabil sürüme manuel olarak geri dönebilirsiniz. Bunu yapmak için en son Stabil sürümünü manuel olarak indirip yüklemeniz gerekir. Önemli değişiklikler içeren ana sürümler arasında sürüm düşürme durumunda bunun hatalara yol açabileceğini veya tamamen bozulabileceğini unutmayın.\n\nEn son sürümü indirmek için GitHub'u açmak istiyor musunuz?";
 
@@ -822,3 +809,4 @@
 
 /* ttkHyperlinkLabel.py: Open Element In Selected Provider; */
 "Open in {URL}" = "Şurada aç {URL}";
+

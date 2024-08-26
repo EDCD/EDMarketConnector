@@ -1,15 +1,3 @@
-/* prefs.py: Catch & Record Profiler Errors; */
-"Error in System Profiler" = "Erro no Perfil de Sistema";
-
-/* EDMarketConnector.py: We didn't have the Fleet Carrier callsign when we should have; In files: EDMarketConnector.py:1223; */
-"CAPI: Fleet Carrier data incomplete" = "CAPI: Dados de porta-frotas incompletos";
-
-/* EDMarketConnector.py: No data was returned for the Fleet Carrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
-"CAPI: No Fleet Carrier data returned" = "CAPI: Nenhum dado de porta-frotas retornado";
-
-/* prefs.py: Configuration - Enable or disable the Fleet Carrier CAPI calls; In files: prefs.py:475; */
-"Enable Fleet Carrier CAPI Queries" = "Ativar requisições CAPI para porta-frotas";
-
 /* edsm.py:Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:316; */
 "Send flight log and CMDR status to EDSM" = "Enviar registro de voo e status do CMDT para o EDSM";
 
@@ -189,12 +177,12 @@
 /* EDMarketConnector.py: CAPI fleetcarrier query aborted because of killswitch; In files: EDMarketConnector.py:1157; */
 "CAPI fleetcarrier disabled by killswitch" = "CAPI para porta-frotas desativado pelo botão de interrupção.";
 
+/* EDMarketConnector.py: No data was returned for the Fleet Carrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
+"CAPI: No Fleet Carrier data returned" = "CAPI: Nenhum dado de porta-frotas retornado";
 
-/* EDMarketConnector.py: No data was returned for the fleetcarrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
-"CAPI: No fleetcarrier data returned" = "CAPI: Nenhum dado de porta-fortas retornado";
+/* EDMarketConnector.py: We didn't have the Fleet Carrier callsign when we should have; In files: EDMarketConnector.py:1223; */
+"CAPI: Fleet Carrier data incomplete" = "CAPI: Dados de porta-frotas incompletos";
 
-/* EDMarketConnector.py: We didn't have the fleetcarrier callsign when we should have; In files: EDMarketConnector.py:1223; */
-"CAPI: Fleetcarrier data incomplete" = "CAPI: Dados de porta-frota incompletos";
 /* EDMarketConnector.py: No data was returned for the commander from the Frontier CAPI; In files: EDMarketConnector.py:1242; */
 "CAPI: No commander data returned" = "CAPI: Nenhum dado de comandante retornado";
 
@@ -399,9 +387,9 @@
 /* prefs.py: Settings > Configuration - Label for CAPI section; In files: prefs.py:469; */
 "CAPI Settings" = "Configurações de CAPI";
 
-
 /* prefs.py: Configuration - Enable or disable the Fleet Carrier CAPI calls; In files: prefs.py:475; */
-"Enable Fleetcarrier CAPI Queries" = "Ativar requisições CAPI para porta-frotas";
+"Enable Fleet Carrier CAPI Queries" = "Ativar requisições CAPI para porta-frotas";
+
 /* prefs.py: Hotkey/Shortcut settings prompt on Windows; In files: prefs.py:492; */
 "Hotkey" = "Tecla de atalho";
 
@@ -480,9 +468,6 @@
 /* prefs.py: Label for location of third-party plugins folder; In files: prefs.py:908; */
 "Plugins folder" = "Pasta dos plugins";
 
-/* prefs.py: Label on button used to open a filesystem folder; In files: prefs.py:915; */
-"Open" = "Abrir";
-
 /* prefs.py: Tip/label about how to disable plugins; In files: prefs.py:923; */
 "Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "Dica: Você pode desativar um plugin{CR}adicionando '{EXT}' ao nome da pasta";
 
@@ -500,6 +485,9 @@
 
 /* prefs.py: Lable on list of user-disabled plugins; In files: prefs.py:977; */
 "Disabled Plugins" = "Plugins desabilitados";
+
+/* prefs.py: Catch & Record Profiler Errors; */
+"Error in System Profiler" = "Erro no Perfil de Sistema";
 
 /* stats.py: Cmdr stats; In files: stats.py:58; */
 "Balance" = "Balanço";
@@ -813,7 +801,6 @@
 /* EDMarketConnector.py: Inform the user the Update Track has changed; */
 "Update Track Changed to {TRACK}" = "Caminho de Atualizações modificado para {TRACK}";
 
-
 /* EDMarketConnector.py: Inform User of Beta -> Stable Transition Risks; */
 "Update track changed to Stable from Beta. You will no longer receive Beta updates. You will stay on your current Beta version until the next Stable release.\r\n\r\nYou can manually revert to the latest Stable version. To do so, you must download and install the latest Stable version manually. Note that this may introduce bugs or break completely if downgrading between major versions with significant changes.\r\n\r\nDo you want to open GitHub to download the latest release?" = "Caminho de atualizações modificado de Estável para Beta. Você não receberá mais atualizações Beta. Você seguirá na versão Beta atual até a próxima atualização Estável.\n\nVocê pode reverter manualmente para a última versão Estável. Para fazer isso, faça download e instale a última versão Estável manualmente. Fique atento: isto pode introduzir bugs ou quebrar completamente a aplicação caso você o retorno volte para uma versão principal com mudanças significativas.\n\nGostaria de abrir o GitHub para fazer download da última versão?";
 
@@ -822,3 +809,4 @@
 
 /* ttkHyperlinkLabel.py: Open Element In Selected Provider; */
 "Open in {URL}" = "Abrir em {URL}";
+

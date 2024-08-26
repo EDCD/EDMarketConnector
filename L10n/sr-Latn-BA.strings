@@ -1,15 +1,3 @@
-/* prefs.py: Catch & Record Profiler Errors; */
-"Error in System Profiler" = "Greša u System Profileru";
-
-/* EDMarketConnector.py: We didn't have the Fleet Carrier callsign when we should have; In files: EDMarketConnector.py:1223; */
-"CAPI: Fleet Carrier data incomplete" = "CAPI: Fleet Carrier podaci nisu kompletni";
-
-/* EDMarketConnector.py: No data was returned for the Fleet Carrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
-"CAPI: No Fleet Carrier data returned" = "CAPI: Fleet Carrier podaci nisu dobijeni";
-
-/* prefs.py: Configuration - Enable or disable the Fleet Carrier CAPI calls; In files: prefs.py:475; */
-"Enable Fleet Carrier CAPI Queries" = "Omogući Fleet Carrier CAPI upite";
-
 /* edsm.py:Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:316; */
 "Send flight log and CMDR status to EDSM" = "Pošalji log leta i CMDR status na EDSM";
 
@@ -189,12 +177,12 @@
 /* EDMarketConnector.py: CAPI fleetcarrier query aborted because of killswitch; In files: EDMarketConnector.py:1157; */
 "CAPI fleetcarrier disabled by killswitch" = "CAPI fleetcarrier onemogućen putem sistemskog prekidača";
 
+/* EDMarketConnector.py: No data was returned for the Fleet Carrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
+"CAPI: No Fleet Carrier data returned" = "CAPI: Fleet Carrier podaci nisu dobijeni";
 
-/* EDMarketConnector.py: No data was returned for the fleetcarrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
-"CAPI: No fleetcarrier data returned" = "CAPI: Fleetcarrier podaci nisu dobijeni";
+/* EDMarketConnector.py: We didn't have the Fleet Carrier callsign when we should have; In files: EDMarketConnector.py:1223; */
+"CAPI: Fleet Carrier data incomplete" = "CAPI: Fleet Carrier podaci nisu kompletni";
 
-/* EDMarketConnector.py: We didn't have the fleetcarrier callsign when we should have; In files: EDMarketConnector.py:1223; */
-"CAPI: Fleetcarrier data incomplete" = "CAPI: Fleetcarrier podaci nisu potpuni";
 /* EDMarketConnector.py: No data was returned for the commander from the Frontier CAPI; In files: EDMarketConnector.py:1242; */
 "CAPI: No commander data returned" = "CAPI: Nema podataka o komandantu";
 
@@ -399,9 +387,9 @@
 /* prefs.py: Settings > Configuration - Label for CAPI section; In files: prefs.py:469; */
 "CAPI Settings" = "CAPI Podešavanja";
 
-
 /* prefs.py: Configuration - Enable or disable the Fleet Carrier CAPI calls; In files: prefs.py:475; */
-"Enable Fleetcarrier CAPI Queries" = "Omogući Fleetcarrier CAPI Upite";
+"Enable Fleet Carrier CAPI Queries" = "Omogući Fleet Carrier CAPI upite";
+
 /* prefs.py: Hotkey/Shortcut settings prompt on Windows; In files: prefs.py:492; */
 "Hotkey" = "Prečica";
 
@@ -480,9 +468,6 @@
 /* prefs.py: Label for location of third-party plugins folder; In files: prefs.py:908; */
 "Plugins folder" = "Folder za dodatke (plugins)";
 
-/* prefs.py: Label on button used to open a filesystem folder; In files: prefs.py:915; */
-"Open" = "Otvori";
-
 /* prefs.py: Tip/label about how to disable plugins; In files: prefs.py:923; */
 "Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "Savjet: Možete da deaktivirate dodatak (plugin){CR}dodavanjem '{EXT}' na ime njegovog foldera";
 
@@ -500,6 +485,9 @@
 
 /* prefs.py: Lable on list of user-disabled plugins; In files: prefs.py:977; */
 "Disabled Plugins" = "Deaktivirani dodaci (plugins)";
+
+/* prefs.py: Catch & Record Profiler Errors; */
+"Error in System Profiler" = "Greša u System Profileru";
 
 /* stats.py: Cmdr stats; In files: stats.py:58; */
 "Balance" = "Balans";
@@ -813,7 +801,6 @@
 /* EDMarketConnector.py: Inform the user the Update Track has changed; */
 "Update Track Changed to {TRACK}" = "Kanal za osvježavanje je promijenjen u {TRACK}";
 
-
 /* EDMarketConnector.py: Inform User of Beta -> Stable Transition Risks; */
 "Update track changed to Stable from Beta. You will no longer receive Beta updates. You will stay on your current Beta version until the next Stable release.\r\n\r\nYou can manually revert to the latest Stable version. To do so, you must download and install the latest Stable version manually. Note that this may introduce bugs or break completely if downgrading between major versions with significant changes.\r\n\r\nDo you want to open GitHub to download the latest release?" = "Kanal za osvježavanje je promijenjen iz Beta u Stabilni. Više nećete primati Beta osvježavanja. Ostaćete na trenutnoj Beta verziji do sljedeće Stabilne verzije.\n\nMožete se ručno vratiti na posljednju Stabilnu verziju. Da biste to učinili morate da skinete i ručno instališete posljednju Stabilnu verziju. Ova procedura može da uvede nove bugove ili da potpuno onesposobi program ako prelazite između verzija sa mnogo značajnih promjena.\n\nDa li želite da otvorite GitHub stranicu za download posljednje verzije?";
 
@@ -822,3 +809,4 @@
 
 /* ttkHyperlinkLabel.py: Open Element In Selected Provider; */
 "Open in {URL}" = "Otvori u {URL}";
+
