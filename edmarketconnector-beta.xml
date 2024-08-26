@@ -6,10 +6,43 @@
       <description>Most recent changes with links to updates.</description>
       <!-- Windows -->
       <item>
-         <title>Release 5.11.3</title>
+         <title>Release 5.12.0-beta1</title>
          <description><![CDATA[<style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
 <p>We now test against, and package with, Python 3.11.9.</p>
 <p><strong>As a result, we do not support Windows 7, 8, or 8.1.</strong><br>
+<h2>Release 5.12.0-beta1</h2>
+<p>This public beta is designed to allow for volunteer testing of coming updates and allow plugin
+developers to prepare for upcoming code changes. <strong>BUGS ARE EXPECTED</strong> in this build, as under-the-hood
+inline code changes have been made in this update which may have unintended consequences.</p>
+<p><strong>Changes and Enhancements</strong></p>
+<ul>
+<li>Added the ability to export a ship's loadout to Inara SLEF notation</li>
+<li>Added the ability for EDMC to restart itself if required after settings changes</li>
+<li>Added the ability to change the custom plugins directory to allow for multiple plugin profiles</li>
+<li>Added Basic Type 8 Support</li>
+<li>Updated the default logging directory from $TEMPDIR or %TEMP% and to the current app data directory</li>
+<li>Updated a number of direct win32API calls to use proper prototyped library calls</li>
+<li>Updated a number of translations</li>
+<li>Updated a number of dependencies</li>
+<li>Updated included and bundled licenses to comply with dependency requirements</li>
+<li>Updated the game_running check to be more efficient on Windows to reduce program hangs</li>
+<li>Minor logic enhancements</li>
+<li>Retired most usages of os.path in favor of the preferred PathLib</li>
+</ul>
+<p><strong>Bug Fixes</strong></p>
+<ul>
+<li>Fixed a bug that would result in Horizons and Odyssey flags not being passed to EDDN</li>
+</ul>
+<p><strong>Plugin Developers</strong></p>
+<ul>
+<li>nb.Entry is deprecated, and is slated for removal in 6.0 or later. Please migrate to nb.EntryMenu</li>
+<li>nb.ColoredButton is deprecated, and is slated for removal in 6.0 or later. Please migrate to tk.Button</li>
+<li>Calling internal translations with <code>_()</code> is deprecated, and is slated for removal in 6.0 or later. Please migrate to importing <code>translations</code> and calling <code>translations.translate</code> or <code>translations.tl</code> directly</li>
+<li><code>Translations</code> as the translate system singleton is deprecated, and is slated for removal in 6.0 or later. Please migrate to the <code>translations</code> singleton</li>
+<li><code>help_open_log_folder()</code> is deprecated, and is slated for removal in 6.0 or later. Please migrate to open_folder()</li>
+<li><code>update_feed</code> is deprecated, and is slated for removal in 6.0 or later. Please migrate to <code>get_update_feed()</code>.</li>
+</ul>
+<hr>
 <h2>Release 5.11.3</h2>
 <p>This release fixes a bug where an incomplete hand-over from ordereddict to dict types would cause a sender failure.</p>
 <p><strong>Changes and Enhancements</strong></p>
@@ -2505,7 +2538,7 @@ about this:
 <a href="https://issues.frontierstore.net/issue-detail/28638" rel="nofollow">PTS CAPI saying Commander is Docked after jumping to new system</a>.</p>
 </li>
 </ul>]]></description>
-         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F5.11.3/EDMarketConnector_Installer_5.11.3.exe" sparkle:os="windows" sparkle:version="5.11.3" length="0" type="application/x-ms-dos-executable" />
+         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F5.12.0-beta1/EDMarketConnector_Installer_5.12.0-beta1.exe" sparkle:os="windows" sparkle:version="5.12.0-beta1" length="0" type="application/x-ms-dos-executable" />
       </item>
    </channel>
 </rss>
