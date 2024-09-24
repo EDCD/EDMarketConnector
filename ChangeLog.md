@@ -6,12 +6,14 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
       in the source (not distributed with the Windows installer) for the
       currently used version.
 ---
-Release 5.12.0-beta1
+Release 5.12.0
 ===
 
-This public beta is designed to allow for volunteer testing of coming updates and allow plugin 
-developers to prepare for upcoming code changes. **BUGS ARE EXPECTED** in this build, as under-the-hood 
-inline code changes have been made in this update which may have unintended consequences.
+This release brings a number of performance enhancements and functionality updates requested by the community to EDMC.
+Notably, integration with Inara's SLEF notation, custom pugin directories, streamlined logging locations, and 
+performance enhancements are included.
+
+This release also fixes a few administrative issues regarding licenses to ensure compliance with included libraries.
 
 **Changes and Enhancements**
 * Added the ability to export a ship's loadout to Inara SLEF notation
