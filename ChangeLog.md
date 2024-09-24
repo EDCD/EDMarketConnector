@@ -10,7 +10,7 @@ Release 5.12.0
 ===
 
 This release brings a number of performance enhancements and functionality updates requested by the community to EDMC.
-Notably, integration with Inara's SLEF notation, custom pugin directories, streamlined logging locations, and 
+Notably, integration with Inara's SLEF notation, custom plugin directories, streamlined logging locations, and 
 performance enhancements are included.
 
 This release also fixes a few administrative issues regarding licenses to ensure compliance with included libraries.
