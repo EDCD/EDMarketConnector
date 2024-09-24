@@ -52,7 +52,7 @@ appcmdname = 'EDMC'
 # <https://semver.org/#semantic-versioning-specification-semver>
 # Major.Minor.Patch(-prerelease)(+buildmetadata)
 # NB: Do *not* import this, use the functions appversion() and appversion_nobuild()
-_static_appversion = '5.11.3'
+_static_appversion = '5.12.0'
 _cached_version: semantic_version.Version | None = None
 copyright = '© 2015-2019 Jonathan Harris, 2020-2024 EDCD'
 
@@ -189,6 +189,7 @@ class AbstractConfig(abc.ABC):
 
     app_dir_path: pathlib.Path
     plugin_dir_path: pathlib.Path
+    default_plugin_dir_path: pathlib.Path
     internal_plugin_dir_path: pathlib.Path
     respath_path: pathlib.Path
     home_path: pathlib.Path
@@ -278,6 +279,11 @@ class AbstractConfig(abc.ABC):
     def plugin_dir(self) -> str:
         """Return a string version of plugin_dir."""
         return str(self.plugin_dir_path)
+
+    @property
+    def default_plugin_dir(self) -> str:
+        """Return a string version of plugin_dir."""
+        return str(self.default_plugin_dir_path)
 
     @property
     def internal_plugin_dir(self) -> str:

@@ -4,14 +4,13 @@ from __future__ import annotations
 
 import contextlib
 import logging
-import pathlib
+from os.path import expandvars
+from pathlib import Path
 import subprocess
 import sys
-import tempfile
 import tkinter as tk
 import warnings
 from os import system
-from os.path import expanduser, expandvars, join, normpath
 from tkinter import colorchooser as tkColorChooser  # type: ignore # noqa: N812
 from tkinter import ttk
 from types import TracebackType
@@ -20,7 +19,6 @@ import myNotebook as nb  # noqa: N813
 import plug
 from config import appversion_nobuild, config
 from EDMCLogging import edmclogger, get_main_logger
-from constants import appname
 from hotkey import hotkeymgr
 from l10n import translations as tr
 from monitor import monitor
@@ -43,10 +41,10 @@ def help_open_log_folder() -> None:
     """Open the folder logs are stored in."""
     warnings.warn('prefs.help_open_log_folder is deprecated, use open_log_folder instead. '
                   'This function will be removed in 6.0 or later', DeprecationWarning, stacklevel=2)
-    open_folder(pathlib.Path(tempfile.gettempdir()) / appname)
+    open_folder(Path(config.app_dir_path / 'logs'))
 
 
-def open_folder(file: pathlib.Path) -> None:
+def open_folder(file: Path) -> None:
     """Open the given file in the OS file explorer."""
     if sys.platform.startswith('win'):
         # On Windows, use the "start" command to open the folder
@@ -58,7 +56,7 @@ def open_folder(file: pathlib.Path) -> None:
 
 def help_open_system_profiler(parent) -> None:
     """Open the EDMC System Profiler."""
-    profiler_path = pathlib.Path(config.respath_path)
+    profiler_path = config.respath_path
     try:
         if getattr(sys, 'frozen', False):
             profiler_path /= 'EDMCSystemProfiler.exe'
@@ -188,7 +186,9 @@ class AutoInc(contextlib.AbstractContextManager):
 if sys.platform == 'win32':
     import ctypes
     import winreg
-    from ctypes.wintypes import HINSTANCE, HWND, LPCWSTR, LPWSTR, MAX_PATH, POINT, RECT, SIZE, UINT
+    from ctypes.wintypes import LPCWSTR, LPWSTR, MAX_PATH, POINT, RECT, SIZE, UINT, BOOL
+    import win32gui
+    import win32api
     is_wine = False
     try:
         WINE_REGISTRY_KEY = r'HKEY_LOCAL_MACHINE\Software\Wine'
@@ -203,6 +203,8 @@ if sys.platform == 'win32':
     if not is_wine:
         try:
             CalculatePopupWindowPosition = ctypes.windll.user32.CalculatePopupWindowPosition
+            CalculatePopupWindowPosition.argtypes = [POINT, SIZE, UINT, RECT, RECT]
+            CalculatePopupWindowPosition.restype = BOOL
 
         except AttributeError as e:
             logger.error(
@@ -219,16 +221,8 @@ if sys.platform == 'win32':
                 ctypes.POINTER(RECT)
             ]
 
-            GetParent = ctypes.windll.user32.GetParent
-            GetParent.argtypes = [HWND]
-            GetWindowRect = ctypes.windll.user32.GetWindowRect
-            GetWindowRect.argtypes = [HWND, ctypes.POINTER(RECT)]
-
     SHGetLocalizedName = ctypes.windll.shell32.SHGetLocalizedName
     SHGetLocalizedName.argtypes = [LPCWSTR, LPWSTR, UINT, ctypes.POINTER(ctypes.c_int)]
-
-    LoadString = ctypes.windll.user32.LoadStringW
-    LoadString.argtypes = [HINSTANCE, UINT, LPWSTR, ctypes.c_int]
 
 
 class PreferencesDialog(tk.Toplevel):
@@ -239,6 +233,7 @@ class PreferencesDialog(tk.Toplevel):
 
         self.parent = parent
         self.callback = callback
+        self.req_restart = False
         # LANG: File > Settings (macOS)
         self.title(tr.tl('Settings'))
 
@@ -314,7 +309,7 @@ class PreferencesDialog(tk.Toplevel):
         # Ensure fully on-screen
         if sys.platform == 'win32' and CalculatePopupWindowPosition:
             position = RECT()
-            GetWindowRect(GetParent(self.winfo_id()), position)
+            win32gui.GetWindowRect(win32gui.GetParent(self.winfo_id()))
             if CalculatePopupWindowPosition(
                 POINT(parent.winfo_rootx(), parent.winfo_rooty()),
                 SIZE(position.right - position.left, position.bottom - position.top),  # type: ignore
@@ -323,7 +318,7 @@ class PreferencesDialog(tk.Toplevel):
                 self.geometry(f"+{position.left}+{position.top}")
 
         # Set Log Directory
-        self.logfile_loc = pathlib.Path(tempfile.gettempdir()) / appname
+        self.logfile_loc = Path(config.app_dir_path / 'logs')
 
         # Set minimum size to prevent content cut-off
         self.update_idletasks()  # Update "requested size" from geometry manager
@@ -911,20 +906,15 @@ class PreferencesDialog(tk.Toplevel):
         # Plugin settings and info
         plugins_frame = nb.Frame(notebook)
         plugins_frame.columnconfigure(0, weight=1)
-        plugdir = tk.StringVar()
-        plugdir.set(config.plugin_dir)
         row = AutoInc(start=0)
-
-        # Section heading in settings
+        self.plugdir = tk.StringVar()
+        self.plugdir.set(str(config.get_str('plugin_dir')))
         # LANG: Label for location of third-party plugins folder
-        nb.Label(plugins_frame, text=tr.tl('Plugins folder') + ':').grid(
-            padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get()
-        )
-
-        plugdirentry = ttk.Entry(plugins_frame, justify=tk.LEFT)
-        self.displaypath(plugdir, plugdirentry)
-        plugdirentry.grid(columnspan=2, padx=self.PADX, pady=self.BOXY, sticky=tk.EW, row=row.get())
-
+        self.plugdir_label = nb.Label(plugins_frame, text=tr.tl('Plugins folder') + ':')
+        self.plugdir_label.grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get())
+        self.plugdir_entry = ttk.Entry(plugins_frame, takefocus=False,
+                                       textvariable=self.plugdir)  # Link StringVar to Entry widget
+        self.plugdir_entry.grid(columnspan=4, padx=self.PADX, pady=self.BOXY, sticky=tk.EW, row=row.get())
         with row as cur_row:
             nb.Label(
                 plugins_frame,
@@ -932,19 +922,41 @@ class PreferencesDialog(tk.Toplevel):
                 # LANG: Tip/label about how to disable plugins
                 text=tr.tl(
                     "Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name").format(EXT='.disabled')
-            ).grid(columnspan=2, padx=self.PADX, pady=self.PADY, sticky=tk.EW, row=cur_row)
+            ).grid(columnspan=1, padx=self.PADX, pady=self.PADY, sticky=tk.EW, row=cur_row)
 
-            ttk.Button(
+            # Open Plugin Folder Button
+            self.open_plug_folder_btn = ttk.Button(
                 plugins_frame,
-                # LANG: Label on button used to open a filesystem folder
-                text=tr.tl('Open'),  # Button that opens a folder in Explorer/Finder
+                # LANG: Label on button used to open the Plugin Folder
+                text=tr.tl('Open Plugins Folder'),
                 command=lambda: open_folder(config.plugin_dir_path)
-            ).grid(column=1, padx=self.PADX, pady=self.PADY, sticky=tk.N, row=cur_row)
+            )
+            self.open_plug_folder_btn.grid(column=1, padx=self.PADX, pady=self.PADY, sticky=tk.EW, row=cur_row)
+
+            # Browse Button
+            text = tr.tl('Browse...')  # LANG: NOT-macOS Settings - files location selection button
+            self.plugbutton = ttk.Button(
+                plugins_frame,
+                text=text,
+                # LANG: Selecting the Location of the Plugin Directory on the Filesystem
+                command=lambda: self.filebrowse(tr.tl('Plugin Directory Location'), self.plugdir)
+            )
+            self.plugbutton.grid(column=2, padx=self.PADX, pady=self.PADY, sticky=tk.EW, row=cur_row)
+
+            if config.default_journal_dir_path:
+                # Appearance theme and language setting
+                ttk.Button(
+                    plugins_frame,
+                    # LANG: Settings > Configuration - Label on 'reset journal files location to default' button
+                    text=tr.tl('Default'),
+                    command=self.plugdir_reset,
+                    state=tk.NORMAL if config.get_str('plugin_dir') else tk.DISABLED
+                ).grid(column=3, padx=self.PADX, pady=self.PADY, sticky=tk.EW, row=cur_row)
 
         enabled_plugins = list(filter(lambda x: x.folder and x.module, plug.PLUGINS))
         if enabled_plugins:
             ttk.Separator(plugins_frame, orient=tk.HORIZONTAL).grid(
-                columnspan=3, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=row.get()
+                columnspan=4, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=row.get()
             )
             nb.Label(
                 plugins_frame,
@@ -1066,7 +1078,7 @@ class PreferencesDialog(tk.Toplevel):
         import tkinter.filedialog
         directory = tkinter.filedialog.askdirectory(
             parent=self,
-            initialdir=expanduser(pathvar.get()),
+            initialdir=Path(pathvar.get()).expanduser(),
             title=title,
             mustexist=tk.TRUE
         )
@@ -1088,13 +1100,14 @@ class PreferencesDialog(tk.Toplevel):
         if sys.platform == 'win32':
             start = len(config.home.split('\\')) if pathvar.get().lower().startswith(config.home.lower()) else 0
             display = []
-            components = normpath(pathvar.get()).split('\\')
+            components = Path(pathvar.get()).resolve().parts
             buf = ctypes.create_unicode_buffer(MAX_PATH)
             pidsRes = ctypes.c_int()  # noqa: N806 # Windows convention
             for i in range(start, len(components)):
                 try:
                     if (not SHGetLocalizedName('\\'.join(components[:i+1]), buf, MAX_PATH, ctypes.byref(pidsRes)) and
-                            LoadString(ctypes.WinDLL(expandvars(buf.value))._handle, pidsRes.value, buf, MAX_PATH)):
+                            win32api.LoadString(ctypes.WinDLL(expandvars(buf.value))._handle,
+                                                pidsRes.value, buf, MAX_PATH)):
                         display.append(buf.value)
 
                     else:
@@ -1119,6 +1132,13 @@ class PreferencesDialog(tk.Toplevel):
         """Reset the log dir to the default."""
         if config.default_journal_dir_path:
             self.logdir.set(config.default_journal_dir)
+
+        self.outvarchanged()
+
+    def plugdir_reset(self) -> None:
+        """Reset the log dir to the default."""
+        if config.default_plugin_dir_path:
+            self.plugdir.set(config.default_plugin_dir)
 
         self.outvarchanged()
 
@@ -1217,7 +1237,7 @@ class PreferencesDialog(tk.Toplevel):
 
         return 'break'  # stops further processing - insertion, Tab traversal etc
 
-    def apply(self) -> None:
+    def apply(self) -> None:  # noqa: CCR001
         """Update the config with the options set on the dialog."""
         config.set('PrefsVersion', prefsVersion.stringToSerial(appversion_nobuild()))
         config.set(
@@ -1233,7 +1253,7 @@ class PreferencesDialog(tk.Toplevel):
 
         config.set(
             'outdir',
-            join(config.home_path, self.outdir.get()[2:]) if self.outdir.get().startswith('~') else self.outdir.get()
+            str(config.home_path / self.outdir.get()[2:]) if self.outdir.get().startswith('~') else self.outdir.get()
         )
 
         logdir = self.logdir.get()
@@ -1273,20 +1293,30 @@ class PreferencesDialog(tk.Toplevel):
         config.set('dark_text', self.theme_colors[0])
         config.set('dark_highlight', self.theme_colors[1])
         theme.apply(self.parent)
+        if self.plugdir.get() != config.get('plugin_dir'):
+            config.set(
+                'plugin_dir',
+                str(Path(config.home_path, self.plugdir.get()[2:])) if self.plugdir.get().startswith('~') else
+                str(Path(self.plugdir.get()))
+            )
+            self.req_restart = True
 
-        # Send to the Post Config if we updated the update branch
-        post_flags = {
-            'Update': True if self.curr_update_track != self.update_paths.get() else False,
-            'Track': self.update_paths.get(),
-            'Parent': self
-        }
         # Notify
         if self.callback:
-            self.callback(**post_flags)
+            self.callback()
 
         plug.notify_prefs_changed(monitor.cmdr, monitor.is_beta)
 
         self._destroy()
+        # Send to the Post Config if we updated the update branch or need to restart
+        post_flags = {
+            'Update': True if self.curr_update_track != self.update_paths.get() else False,
+            'Track': self.update_paths.get(),
+            'Parent': self,
+            'Restart_Req': True if self.req_restart else False
+        }
+        if self.callback:
+            self.callback(**post_flags)
 
     def _destroy(self) -> None:
         """widget.destroy wrapper that does some extra cleanup."""

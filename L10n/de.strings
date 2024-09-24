@@ -1,15 +1,3 @@
-/* prefs.py: Catch & Record Profiler Errors; */
-"Error in System Profiler" = "Fehler im System Profiler";
-
-/* EDMarketConnector.py: We didn't have the Fleet Carrier callsign when we should have; In files: EDMarketConnector.py:1223; */
-"CAPI: Fleet Carrier data incomplete" = "CAPI: Carrier-Daten unvollständig";
-
-/* EDMarketConnector.py: No data was returned for the Fleet Carrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
-"CAPI: No Fleet Carrier data returned" = "CAPI: Keine Carrier-Daten erhalten";
-
-/* prefs.py: Configuration - Enable or disable the Fleet Carrier CAPI calls; In files: prefs.py:475; */
-"Enable Fleet Carrier CAPI Queries" = "Carrier-CAPI-Anfragen aktivieren";
-
 /* edsm.py:Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:316; */
 "Send flight log and CMDR status to EDSM" = "Sende Fluglog und CMDR-Status an EDSM";
 
@@ -189,12 +177,12 @@
 /* EDMarketConnector.py: CAPI fleetcarrier query aborted because of killswitch; In files: EDMarketConnector.py:1157; */
 "CAPI fleetcarrier disabled by killswitch" = "CAPI Fleet Carrier durch Killswitch deaktiviert";
 
+/* EDMarketConnector.py: No data was returned for the Fleet Carrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
+"CAPI: No Fleet Carrier data returned" = "CAPI: Keine Carrier-Daten erhalten";
 
-/* EDMarketConnector.py: No data was returned for the fleetcarrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
-"CAPI: No fleetcarrier data returned" = "CAPI: Keine Fleet Carrier-Daten erhalten";
+/* EDMarketConnector.py: We didn't have the Fleet Carrier callsign when we should have; In files: EDMarketConnector.py:1223; */
+"CAPI: Fleet Carrier data incomplete" = "CAPI: Carrier-Daten unvollständig";
 
-/* EDMarketConnector.py: We didn't have the fleetcarrier callsign when we should have; In files: EDMarketConnector.py:1223; */
-"CAPI: Fleetcarrier data incomplete" = "CAPI: Fleet Carrier-Daten unvollständig";
 /* EDMarketConnector.py: No data was returned for the commander from the Frontier CAPI; In files: EDMarketConnector.py:1242; */
 "CAPI: No commander data returned" = "CAPI: Keine Kommandanten-Daten erhalten";
 
@@ -399,9 +387,9 @@
 /* prefs.py: Settings > Configuration - Label for CAPI section; In files: prefs.py:469; */
 "CAPI Settings" = "CAPI-Einstellungen";
 
-
 /* prefs.py: Configuration - Enable or disable the Fleet Carrier CAPI calls; In files: prefs.py:475; */
-"Enable Fleetcarrier CAPI Queries" = "Fleet Carrier CAPI-Anfragen aktivieren";
+"Enable Fleet Carrier CAPI Queries" = "Carrier-CAPI-Anfragen aktivieren";
+
 /* prefs.py: Hotkey/Shortcut settings prompt on Windows; In files: prefs.py:492; */
 "Hotkey" = "Hotkey";
 
@@ -480,9 +468,6 @@
 /* prefs.py: Label for location of third-party plugins folder; In files: prefs.py:908; */
 "Plugins folder" = "Plugin-Ordner";
 
-/* prefs.py: Label on button used to open a filesystem folder; In files: prefs.py:915; */
-"Open" = "Öffnen";
-
 /* prefs.py: Tip/label about how to disable plugins; In files: prefs.py:923; */
 "Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "Tipp: Du kannst ein Plugin deaktivieren, indem{CR}du '{EXT}' zu seinem Ordnernamen hinzufügst";
 
@@ -500,6 +485,9 @@
 
 /* prefs.py: Lable on list of user-disabled plugins; In files: prefs.py:977; */
 "Disabled Plugins" = "Deaktivierte Plugins";
+
+/* prefs.py: Catch & Record Profiler Errors; */
+"Error in System Profiler" = "Fehler im System Profiler";
 
 /* stats.py: Cmdr stats; In files: stats.py:58; */
 "Balance" = "Kontostand";
@@ -792,7 +780,6 @@
 /* EDMarketConnector.py: Inform the user the Update Track has changed; */
 "Update Track Changed to {TRACK}" = "Update-Kanal geändert auf {TRACK}";
 
-
 /* EDMarketConnector.py: Inform User of Beta -> Stable Transition Risks; */
 "Update track changed to Stable from Beta. You will no longer receive Beta updates. You will stay on your current Beta version until the next Stable release.\r\n\r\nYou can manually revert to the latest Stable version. To do so, you must download and install the latest Stable version manually. Note that this may introduce bugs or break completely if downgrading between major versions with significant changes.\r\n\r\nDo you want to open GitHub to download the latest release?" = "Update-Kanal von Beta auf Stabil geändert. Du wirst keine weiteren Beta-Updates erhalten. Du wirst bis zum nächsten stabilen Release auf der aktuellen Beta-Version bleiben.\n\nDu kannst manuell zur aktuellen stabilen Version zurückkehren. Um dies zu tun, musst du die aktuelle stabile Version manuell herunterladen und installieren. Beachte, dass dies Fehler verursachen oder gar nicht funktionieren könnte, wenn du von einem größeren Versionssprung mit signifikanten Änderungen downgradest.\n\nMöchtest du GitHub öffnen, um den neuesten Release herunterzuladen?";
 
@@ -801,3 +788,4 @@
 
 /* ttkHyperlinkLabel.py: Open Element In Selected Provider; */
 "Open in {URL}" = "Öffnen in {URL}";
+

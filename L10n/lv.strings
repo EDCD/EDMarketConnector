@@ -220,9 +220,6 @@
 /* prefs.py: Label for location of third-party plugins folder; In files: prefs.py:908; */
 "Plugins folder" = "Spraudņu mape";
 
-/* prefs.py: Label on button used to open a filesystem folder; In files: prefs.py:915; */
-"Open" = "Atvērt";
-
 /* prefs.py: Label on list of enabled plugins; In files: prefs.py:934; */
 "Enabled Plugins" = "Iespējoti Spraudņi";
 

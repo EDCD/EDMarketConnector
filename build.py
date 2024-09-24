@@ -10,7 +10,6 @@ import shutil
 import sys
 import pathlib
 from string import Template
-from os.path import join, isdir
 import py2exe
 from config import (
     appcmdname,
@@ -37,7 +36,7 @@ def iss_build(template_path: str, output_file: str) -> None:
         new_file.write(newfile)
 
 
-def system_check(dist_dir: str) -> str:
+def system_check(dist_dir: pathlib.Path) -> str:
     """Check if the system is able to build."""
     if sys.version_info < (3, 11):
         sys.exit(f"Unexpected Python version {sys.version}")
@@ -55,17 +54,18 @@ def system_check(dist_dir: str) -> str:
 
     print(f"Git short hash: {git_shorthash}")
 
-    if dist_dir and len(dist_dir) > 1 and isdir(dist_dir):
+    if dist_dir and pathlib.Path.is_dir(dist_dir):
         shutil.rmtree(dist_dir)
     return gitversion_file
 
 
 def generate_data_files(
     app_name: str, gitversion_file: str, plugins: list[str]
-) -> list[tuple[str, list[str]]]:
+) -> list[tuple[object, object]]:
     """Create the required datafiles to build."""
     l10n_dir = "L10n"
-    fdevids_dir = "FDevIDs"
+    fdevids_dir = pathlib.Path("FDevIDs")
+    license_dir = pathlib.Path("docs/Licenses")
     data_files = [
         (
             "",
@@ -88,23 +88,29 @@ def generate_data_files(
         ),
         (
             l10n_dir,
-            [join(l10n_dir, x) for x in os.listdir(l10n_dir) if x.endswith(".strings")],
+            [pathlib.Path(l10n_dir) / x for x in os.listdir(l10n_dir) if x.endswith(".strings")]
         ),
         (
             fdevids_dir,
             [
-                join(fdevids_dir, "commodity.csv"),
-                join(fdevids_dir, "rare_commodity.csv"),
+                pathlib.Path(fdevids_dir / "commodity.csv"),
+                pathlib.Path(fdevids_dir / "rare_commodity.csv"),
             ],
         ),
         ("plugins", plugins),
     ]
+    # Add all files recursively from license directories
+    for root, dirs, files in os.walk(license_dir):
+        file_list = [os.path.join(root, f) for f in files]
+        dest_dir = os.path.join(license_dir, os.path.relpath(root, license_dir))
+        data_files.append((dest_dir, file_list))
+
     return data_files
 
 
 def build() -> None:
     """Build EDMarketConnector using Py2Exe."""
-    dist_dir: str = "dist.win32"
+    dist_dir: pathlib.Path = pathlib.Path("dist.win32")
     gitversion_filename: str = system_check(dist_dir)
 
     # Constants
@@ -142,7 +148,7 @@ def build() -> None:
     }
 
     # Function to generate DATA_FILES list
-    data_files: list[tuple[str, list[str]]] = generate_data_files(
+    data_files: list[tuple[object, object]] = generate_data_files(
         appname, gitversion_filename, plugins
     )
 

@@ -13,7 +13,6 @@ from __future__ import annotations
 import os
 import sys
 import tkinter as tk
-from os.path import join
 from tkinter import font as tk_font
 from tkinter import ttk
 from typing import Callable
@@ -34,11 +33,13 @@ if sys.platform == "linux":
 if sys.platform == 'win32':
     import ctypes
     from ctypes.wintypes import DWORD, LPCVOID, LPCWSTR
+    import win32gui
     AddFontResourceEx = ctypes.windll.gdi32.AddFontResourceExW
     AddFontResourceEx.restypes = [LPCWSTR, DWORD, LPCVOID]  # type: ignore
     FR_PRIVATE = 0x10
     FR_NOT_ENUM = 0x20
-    AddFontResourceEx(join(config.respath, 'EUROCAPS.TTF'), FR_PRIVATE, 0)
+    font_path = config.respath_path / 'EUROCAPS.TTF'
+    AddFontResourceEx(str(font_path), FR_PRIVATE, 0)
 
 elif sys.platform == 'linux':
     # pyright: reportUnboundVariable=false
@@ -421,14 +422,7 @@ class _Theme:
         self.active = theme
 
         if sys.platform == 'win32':
-            GWL_STYLE = -16  # noqa: N806 # ctypes
-            WS_MAXIMIZEBOX = 0x00010000  # noqa: N806 # ctypes
-            # tk8.5.9/win/tkWinWm.c:342
-            GWL_EXSTYLE = -20  # noqa: N806 # ctypes
-            WS_EX_APPWINDOW = 0x00040000  # noqa: N806 # ctypes
-            WS_EX_LAYERED = 0x00080000  # noqa: N806 # ctypes
-            GetWindowLongW = ctypes.windll.user32.GetWindowLongW  # noqa: N806 # ctypes
-            SetWindowLongW = ctypes.windll.user32.SetWindowLongW  # noqa: N806 # ctypes
+            import win32con
 
             # FIXME: Lose the "treat this like a boolean" bullshit
             if theme == self.THEME_DEFAULT:
@@ -445,14 +439,17 @@ class _Theme:
 
             root.withdraw()
             root.update_idletasks()  # Size and windows styles get recalculated here
-            hwnd = ctypes.windll.user32.GetParent(root.winfo_id())
-            SetWindowLongW(hwnd, GWL_STYLE, GetWindowLongW(hwnd, GWL_STYLE) & ~WS_MAXIMIZEBOX)  # disable maximize
+            hwnd = win32gui.GetParent(root.winfo_id())
+            win32gui.SetWindowLong(hwnd, win32con.GWL_STYLE,
+                                   win32gui.GetWindowLong(hwnd, win32con.GWL_STYLE)
+                                   & ~win32con.WS_MAXIMIZEBOX)  # disable maximize
 
             if theme == self.THEME_TRANSPARENT:
-                SetWindowLongW(hwnd, GWL_EXSTYLE, WS_EX_APPWINDOW | WS_EX_LAYERED)  # Add to taskbar
+                win32gui.SetWindowLong(hwnd, win32con.GWL_EXSTYLE,
+                                       win32con.WS_EX_APPWINDOW | win32con.WS_EX_LAYERED)  # Add to taskbar
 
             else:
-                SetWindowLongW(hwnd, GWL_EXSTYLE, WS_EX_APPWINDOW)  # Add to taskbar
+                win32gui.SetWindowLong(hwnd, win32con.GWL_EXSTYLE, win32con.WS_EX_APPWINDOW)  # Add to taskbar
 
             root.deiconify()
             root.wait_visibility()  # need main window to be displayed before returning

@@ -1,15 +1,3 @@
-/* prefs.py: Catch & Record Profiler Errors; */
-"Error in System Profiler" = "Errore nel Sistema di Profilazione";
-
-/* EDMarketConnector.py: We didn't have the Fleet Carrier callsign when we should have; In files: EDMarketConnector.py:1223; */
-"CAPI: Fleet Carrier data incomplete" = "CAPI: dati della Fleet Carrier incompleti";
-
-/* EDMarketConnector.py: No data was returned for the Fleet Carrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
-"CAPI: No Fleet Carrier data returned" = "CAPI: nessun dato della Fleet Carrier ottenuto";
-
-/* prefs.py: Configuration - Enable or disable the Fleet Carrier CAPI calls; In files: prefs.py:475; */
-"Enable Fleet Carrier CAPI Queries" = "Abilita le query CAPI per le Fleet Carrier";
-
 /* edsm.py:Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:316; */
 "Send flight log and CMDR status to EDSM" = "Invia il registro di volo e lo stato del CMDR a EDSM";
 
@@ -189,12 +177,12 @@
 /* EDMarketConnector.py: CAPI fleetcarrier query aborted because of killswitch; In files: EDMarketConnector.py:1157; */
 "CAPI fleetcarrier disabled by killswitch" = "Fleetcarrier CAPI disabilitato dal killswitch";
 
+/* EDMarketConnector.py: No data was returned for the Fleet Carrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
+"CAPI: No Fleet Carrier data returned" = "CAPI: nessun dato della Fleet Carrier ottenuto";
 
-/* EDMarketConnector.py: No data was returned for the fleetcarrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
-"CAPI: No fleetcarrier data returned" = "CAPI: Nessun dato della fleetcarrier ricevuto";
+/* EDMarketConnector.py: We didn't have the Fleet Carrier callsign when we should have; In files: EDMarketConnector.py:1223; */
+"CAPI: Fleet Carrier data incomplete" = "CAPI: dati della Fleet Carrier incompleti";
 
-/* EDMarketConnector.py: We didn't have the fleetcarrier callsign when we should have; In files: EDMarketConnector.py:1223; */
-"CAPI: Fleetcarrier data incomplete" = "CAPI: Dati della Fleetcarrier incompleti";
 /* EDMarketConnector.py: No data was returned for the commander from the Frontier CAPI; In files: EDMarketConnector.py:1242; */
 "CAPI: No commander data returned" = "CAPI: Nessun dato sul commandante";
 
@@ -399,9 +387,9 @@
 /* prefs.py: Settings > Configuration - Label for CAPI section; In files: prefs.py:469; */
 "CAPI Settings" = "Impostazioni CAPI";
 
-
 /* prefs.py: Configuration - Enable or disable the Fleet Carrier CAPI calls; In files: prefs.py:475; */
-"Enable Fleetcarrier CAPI Queries" = "Abilita le query CAPI della Fleetcarrier";
+"Enable Fleet Carrier CAPI Queries" = "Abilita le query CAPI per le Fleet Carrier";
+
 /* prefs.py: Hotkey/Shortcut settings prompt on Windows; In files: prefs.py:492; */
 "Hotkey" = "Hotkey";
 
@@ -480,8 +468,11 @@
 /* prefs.py: Label for location of third-party plugins folder; In files: prefs.py:908; */
 "Plugins folder" = "Cartella dei plugins";
 
-/* prefs.py: Label on button used to open a filesystem folder; In files: prefs.py:915; */
-"Open" = "Sfoglia";
+/* prefs.py: Label on button used to open the Plugin Folder; */
+"Open Plugins Folder" = "Apri la cartella dei plugin";
+
+/* prefs.py: Selecting the Location of the Plugin Directory on the Filesystem; */
+"Plugin Directory Location" = "Posizione della Cartella del Plugin";
 
 /* prefs.py: Tip/label about how to disable plugins; In files: prefs.py:923; */
 "Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "Suggerimento: è possibile disabilitare un plugin {CR}aggiungendo '{EXT}' nel nome della sua cartella";
@@ -500,6 +491,9 @@
 
 /* prefs.py: Lable on list of user-disabled plugins; In files: prefs.py:977; */
 "Disabled Plugins" = "Plugin disabilitati";
+
+/* prefs.py: Catch & Record Profiler Errors; */
+"Error in System Profiler" = "Errore nel Sistema di Profilazione";
 
 /* stats.py: Cmdr stats; In files: stats.py:58; */
 "Balance" = "Saldo";
@@ -813,12 +807,20 @@
 /* EDMarketConnector.py: Inform the user the Update Track has changed; */
 "Update Track Changed to {TRACK}" = "Canale di aggiornamento cambiato in {TRACK}";
 
-
 /* EDMarketConnector.py: Inform User of Beta -> Stable Transition Risks; */
 "Update track changed to Stable from Beta. You will no longer receive Beta updates. You will stay on your current Beta version until the next Stable release.\r\n\r\nYou can manually revert to the latest Stable version. To do so, you must download and install the latest Stable version manually. Note that this may introduce bugs or break completely if downgrading between major versions with significant changes.\r\n\r\nDo you want to open GitHub to download the latest release?" = "Il canale di aggiornamento è cambiato da Beta a Stabile. Non riceverai più aggiornamenti Beta. Rimarrai sulla tua attuale versione Beta fino alla prossima release Stabile.\n\nPuoi tornare manualmente all'ultima versione Stabile. Per farlo, devi scaricare e installare manualmente l'ultima versione Stabile. Nota che questo potrebbe introdurre bug o causare malfunzionamenti se si esegue il downgrade tra versioni principali con cambiamenti significativi.\n\nVuoi aprire GitHub per scaricare l'ultima release?";
+
+/* EDMarketConnector.py: Title of Notification Popup for EDMC Restart; */
+"Restart Required" = "Riavvio necessario";
+
+/* EDMarketConnector.py: Text of Notification Popup for EDMC Restart; */
+"A restart of EDMC is required. EDMC will now restart." = "È necessario riavviare EDMC. EDMC si riavvierà ora.";
 
 /* myNotebook.py: Can't Paste Images or Files in Text; */
 "Cannot paste non-text content." = "Non si può incollare contenuto non testuale";
 
 /* ttkHyperlinkLabel.py: Open Element In Selected Provider; */
 "Open in {URL}" = "Apri {URL}";
+
+/* ttkHyperlinkLabel.py: Copy the Inara SLEF Format of the active ship to the clipboard; */
+"Copy Inara SLEF" = "Copia Inara SLEF";

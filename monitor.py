@@ -8,7 +8,7 @@ See LICENSE file.
 from __future__ import annotations
 
 import json
-import pathlib
+from pathlib import Path
 import queue
 import re
 import sys
@@ -16,14 +16,15 @@ import threading
 from calendar import timegm
 from collections import defaultdict
 from os import SEEK_END, SEEK_SET, listdir
-from os.path import basename, expanduser, getctime, isdir, join
 from time import gmtime, localtime, mktime, sleep, strftime, strptime, time
 from typing import TYPE_CHECKING, Any, BinaryIO, MutableMapping
+import psutil
 import semantic_version
 import util_ships
-from config import config
-from edmc_data import edmc_suit_shortnames, edmc_suit_symbol_localised
+from config import config, appname, appversion
+from edmc_data import edmc_suit_shortnames, edmc_suit_symbol_localised, ship_name_map
 from EDMCLogging import get_main_logger
+from edshipyard import ships
 
 if TYPE_CHECKING:
     import tkinter
@@ -35,25 +36,9 @@ MAX_NAVROUTE_DISCREPANCY = 5  # Timestamp difference in seconds
 MAX_FCMATERIALS_DISCREPANCY = 5  # Timestamp difference in seconds
 
 if sys.platform == 'win32':
-    import ctypes
-    from ctypes.wintypes import BOOL, HWND, LPARAM, LPWSTR
-
     from watchdog.events import FileSystemEventHandler, FileSystemEvent
     from watchdog.observers import Observer
     from watchdog.observers.api import BaseObserver
-
-    EnumWindows = ctypes.windll.user32.EnumWindows
-    EnumWindowsProc = ctypes.WINFUNCTYPE(BOOL, HWND, LPARAM)
-
-    CloseHandle = ctypes.windll.kernel32.CloseHandle
-
-    GetWindowText = ctypes.windll.user32.GetWindowTextW
-    GetWindowText.argtypes = [HWND, LPWSTR, ctypes.c_int]
-    GetWindowTextLength = ctypes.windll.user32.GetWindowTextLengthW
-    GetWindowTextLength.argtypes = [ctypes.wintypes.HWND]
-    GetWindowTextLength.restype = ctypes.c_int
-
-    GetProcessHandleFromHwnd = ctypes.windll.oleacc.GetProcessHandleFromHwnd
 
 else:
     # Linux's inotify doesn't work over CIFS or NFS, so poll
@@ -70,7 +55,8 @@ class EDLogs(FileSystemEventHandler):
     """Monitoring of Journal files."""
 
     # Magic with FileSystemEventHandler can confuse type checkers when they do not have access to every import
-    _POLL = 1		# Polling is cheap, so do it often
+    _POLL = 1		# Polling while running is cheap, so do it often
+    _INACTIVE_POLL = 10		# Polling while not running isn't as cheap, so do it less often
     _RE_CANONICALISE = re.compile(r'\$(.+)_name;')
     _RE_CATEGORY = re.compile(r'\$MICRORESOURCE_CATEGORY_(.+);')
     _RE_LOGFILE = re.compile(r'^Journal(Alpha|Beta)?\.[0-9]{2,4}(-)?[0-9]{2}(-)?[0-9]{2}(T)?[0-9]{2}[0-9]{2}[0-9]{2}'
@@ -81,7 +67,7 @@ class EDLogs(FileSystemEventHandler):
         # TODO(A_D): A bunch of these should be switched to default values (eg '' for strings) and no longer be Optional
         FileSystemEventHandler.__init__(self)  # futureproofing - not need for current version of watchdog
         self.root: 'tkinter.Tk' = None  # type: ignore # Don't use Optional[] - mypy thinks no methods
-        self.currentdir: str | None = None  # The actual logdir that we're monitoring
+        self.currentdir: Path | None = None  # The actual logdir that we're monitoring
         self.logfile: str | None = None
         self.observer: BaseObserver | None = None
         self.observed = None  # a watchdog ObservedWatch, or None if polling
@@ -100,6 +86,7 @@ class EDLogs(FileSystemEventHandler):
         self.catching_up = False
 
         self.game_was_running = False  # For generation of the "ShutDown" event
+        self.running_process = None
 
         # Context for journal handling
         self.version: str | None = None
@@ -109,6 +96,7 @@ class EDLogs(FileSystemEventHandler):
         self.group: str | None = None
         self.cmdr: str | None = None
         self.started: int | None = None  # Timestamp of the LoadGame event
+        self.slef: str | None = None
 
         self._navroute_retries_remaining = 0
         self._last_navroute_journal_timestamp: float | None = None
@@ -202,9 +190,9 @@ class EDLogs(FileSystemEventHandler):
         if journal_dir == '' or journal_dir is None:
             journal_dir = config.default_journal_dir
 
-        logdir = expanduser(journal_dir)
+        logdir = Path(journal_dir).expanduser()
 
-        if not logdir or not isdir(logdir):
+        if not logdir or not Path.is_dir(logdir):
             logger.error(f'Journal Directory is invalid: "{logdir}"')
             self.stop()
             return False
@@ -277,9 +265,10 @@ class EDLogs(FileSystemEventHandler):
             # Odyssey Update 11 has, e.g.    Journal.2022-03-15T152503.01.log
             # Horizons Update 11 equivalent: Journal.220315152335.01.log
             # So we can no longer use a naive sort.
-            journals_dir_path = pathlib.Path(journals_dir)
-            journal_files = (journals_dir_path / pathlib.Path(x) for x in journal_files)
-            return str(max(journal_files, key=getctime))
+            journals_dir_path = Path(journals_dir)
+            journal_files = (journals_dir_path / Path(x) for x in journal_files)
+            latest_file = max(journal_files, key=lambda f: Path(f).stat().st_ctime)
+            return str(latest_file)
 
         return None
 
@@ -348,7 +337,7 @@ class EDLogs(FileSystemEventHandler):
 
     def on_created(self, event: 'FileSystemEvent') -> None:
         """Watchdog callback when, e.g. client (re)started."""
-        if not event.is_directory and self._RE_LOGFILE.search(basename(event.src_path)):
+        if not event.is_directory and self._RE_LOGFILE.search(Path(event.src_path).name):
 
             self.logfile = event.src_path
 
@@ -472,7 +461,10 @@ class EDLogs(FileSystemEventHandler):
                     loghandle = open(logfile, 'rb', 0)  # unbuffered
                     log_pos = 0
 
-            sleep(self._POLL)
+            if self.game_was_running:
+                sleep(self._POLL)
+            else:
+                sleep(self._INACTIVE_POLL)
 
             # Check whether we're still supposed to be running
             if threading.current_thread() != self.thread:
@@ -701,6 +693,34 @@ class EDLogs(FileSystemEventHandler):
                         module.pop('AmmoInHopper')
 
                     self.state['Modules'][module['Slot']] = module
+                # SLEF
+                initial_dict: dict[str, dict[str, Any]] = {
+                    "header": {"appName": appname, "appVersion": str(appversion())}
+                }
+                data_dict = {}
+                for module in entry['Modules']:
+                    if module.get('Slot') == 'FuelTank':
+                        cap = module['Item'].split('size')
+                        cap = cap[1].split('_')
+                        cap = 2 ** int(cap[0])
+                        ship = ship_name_map[entry["Ship"]]
+                        fuel = {'Main': cap, 'Reserve': ships[ship]['reserveFuelCapacity']}
+                        data_dict.update({"FuelCapacity": fuel})
+                data_dict.update({
+                    'Ship': entry["Ship"],
+                    'ShipName': entry['ShipName'],
+                    'ShipIdent': entry['ShipIdent'],
+                    'HullValue': entry['HullValue'],
+                    'ModulesValue': entry['ModulesValue'],
+                    'Rebuy': entry['Rebuy'],
+                    'MaxJumpRange': entry['MaxJumpRange'],
+                    'UnladenMass': entry['UnladenMass'],
+                    'CargoCapacity': entry['CargoCapacity'],
+                    'Modules': entry['Modules'],
+                })
+                initial_dict.update({'data': data_dict})
+                output = json.dumps(initial_dict, indent=4)
+                self.slef = str(f"[{output}]")
 
             elif event_type == 'modulebuy':
                 self.state['Modules'][entry['Slot']] = {
@@ -1056,7 +1076,7 @@ class EDLogs(FileSystemEventHandler):
                 self.state['Cargo'] = defaultdict(int)
                 # From 3.3 full Cargo event (after the first one) is written to a separate file
                 if 'Inventory' not in entry:
-                    with open(join(self.currentdir, 'Cargo.json'), 'rb') as h:  # type: ignore
+                    with open(self.currentdir / 'Cargo.json', 'rb') as h:  # type: ignore
                         entry = json.load(h)
                         self.state['CargoJSON'] = entry
 
@@ -1083,7 +1103,7 @@ class EDLogs(FileSystemEventHandler):
                 # Always attempt loading of this, but if it fails we'll hope this was
                 # a startup/boarding version and thus `entry` contains
                 # the data anyway.
-                currentdir_path = pathlib.Path(str(self.currentdir))
+                currentdir_path = Path(str(self.currentdir))
                 shiplocker_filename = currentdir_path / 'ShipLocker.json'
                 shiplocker_max_attempts = 5
                 shiplocker_fail_sleep = 0.01
@@ -1152,7 +1172,7 @@ class EDLogs(FileSystemEventHandler):
 
                 # TODO: v31 doc says this is`backpack.json` ... but Howard Chalkley
                 #       said it's `Backpack.json`
-                backpack_file = pathlib.Path(str(self.currentdir)) / 'Backpack.json'
+                backpack_file = Path(str(self.currentdir)) / 'Backpack.json'
                 backpack_data = None
 
                 if not backpack_file.exists():
@@ -1528,7 +1548,7 @@ class EDLogs(FileSystemEventHandler):
                     entry = fcmaterials
 
             elif event_type == 'moduleinfo':
-                with open(join(self.currentdir, 'ModulesInfo.json'), 'rb') as mf:  # type: ignore
+                with open(self.currentdir / 'ModulesInfo.json', 'rb') as mf:  # type: ignore
                     try:
                         entry = json.load(mf)
 
@@ -2120,36 +2140,33 @@ class EDLogs(FileSystemEventHandler):
 
         return entry
 
-    def game_running(self) -> bool:  # noqa: CCR001
+    def game_running(self) -> bool:
         """
         Determine if the game is currently running.
 
-        TODO: Implement on Linux
-
         :return: bool - True if the game is running.
         """
-        if sys.platform == 'win32':
-            def WindowTitle(h):  # noqa: N802
-                if h:
-                    length = GetWindowTextLength(h) + 1
-                    buf = ctypes.create_unicode_buffer(length)
-                    if GetWindowText(h, buf, length):
-                        return buf.value
-                return None
-
-            def callback(hWnd, lParam):  # noqa: N803
-                name = WindowTitle(hWnd)
-                if name and name.startswith('Elite - Dangerous'):
-                    handle = GetProcessHandleFromHwnd(hWnd)
-                    if handle:  # If GetProcessHandleFromHwnd succeeds then the app is already running as this user
-                        CloseHandle(handle)
-                        return False  # stop enumeration
-
-                return True
-
-            return not EnumWindows(EnumWindowsProc(callback), 0)
-
-        return False
+        if self.running_process:
+            p = self.running_process
+            try:
+                with p.oneshot():
+                    if p.status() not in [psutil.STATUS_RUNNING, psutil.STATUS_SLEEPING]:
+                        raise psutil.NoSuchProcess
+            except psutil.NoSuchProcess:
+                # Process likely expired
+                self.running_process = None
+        if not self.running_process:
+            try:
+                edmc_process = psutil.Process()
+                edmc_user = edmc_process.username()
+                for proc in psutil.process_iter(['name', 'username']):
+                    if 'EliteDangerous' in proc.info['name'] and proc.info['username'] == edmc_user:
+                        self.running_process = proc
+                        return True
+            except psutil.NoSuchProcess:
+                pass
+            return False
+        return bool(self.running_process)
 
     def ship(self, timestamped=True) -> MutableMapping[str, Any] | None:
         """
@@ -2242,14 +2259,14 @@ class EDLogs(FileSystemEventHandler):
         oldfiles = sorted((x for x in listdir(config.get_str('outdir')) if regexp.match(x)))
         if oldfiles:
             try:
-                with open(join(config.get_str('outdir'), oldfiles[-1]), encoding='utf-8') as h:
+                with open(config.get_str('outdir') / Path(oldfiles[-1]), encoding='utf-8') as h:
                     if h.read() == string:
                         return  # same as last time - don't write
 
             except UnicodeError:
                 logger.exception("UnicodeError reading old ship loadout with utf-8 encoding, trying without...")
                 try:
-                    with open(join(config.get_str('outdir'), oldfiles[-1])) as h:
+                    with open(config.get_str('outdir') / Path(oldfiles[-1])) as h:
                         if h.read() == string:
                             return  # same as last time - don't write
 
@@ -2268,7 +2285,7 @@ class EDLogs(FileSystemEventHandler):
 
         # Write
         ts = strftime('%Y-%m-%dT%H.%M.%S', localtime(time()))
-        filename = join(config.get_str('outdir'), f'{ship}.{ts}.txt')
+        filename = config.get_str('outdir') / Path(f'{ship}.{ts}.txt')
 
         try:
             with open(filename, 'wt', encoding='utf-8') as h:
@@ -2355,7 +2372,7 @@ class EDLogs(FileSystemEventHandler):
 
         try:
 
-            with open(join(self.currentdir, 'NavRoute.json')) as f:
+            with open(self.currentdir / 'NavRoute.json') as f:
                 raw = f.read()
 
         except Exception as e:
@@ -2381,7 +2398,7 @@ class EDLogs(FileSystemEventHandler):
 
         try:
 
-            with open(join(self.currentdir, 'FCMaterials.json')) as f:
+            with open(self.currentdir / 'FCMaterials.json') as f:
                 raw = f.read()
 
         except Exception as e:

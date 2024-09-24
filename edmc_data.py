@@ -507,6 +507,7 @@ ship_name_map = {
     'testbuggy':                    'Scarab',
     'type6':                        'Type-6 Transporter',
     'type7':                        'Type-7 Transporter',
+    'type8':                        'Type-8 Transporter',
     'type9':                        'Type-9 Heavy',
     'type9_military':               'Type-10 Defender',
     'typex':                        'Alliance Chieftain',

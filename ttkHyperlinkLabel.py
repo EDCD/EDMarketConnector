@@ -28,7 +28,6 @@ from tkinter import font as tk_font
 from tkinter import ttk
 from typing import Any
 import plug
-from os import path
 from config import config, logger
 from l10n import translations as tr
 from monitor import monitor
@@ -96,7 +95,7 @@ class HyperlinkLabel(tk.Label or ttk.Label):  # type: ignore
         else:
             # Avoid file length limits if possible
             target = plug.invoke(url, 'EDSY', 'shipyard_url', loadout, monitor.is_beta)
-            file_name = path.join(config.app_dir_path, "last_shipyard.html")
+            file_name = config.app_dir_path / "last_shipyard.html"
 
             with open(file_name, 'w') as f:
                 f.write(SHIPYARD_HTML_TEMPLATE.format(
@@ -194,6 +193,10 @@ class HyperlinkLabel(tk.Label or ttk.Label):  # type: ignore
         menu.add_command(label=tr.tl('Copy'), command=self.copy)  # As in Copy and Paste
 
         if self.name == 'ship':
+            # LANG: Copy the Inara SLEF Format of the active ship to the clipboard
+            menu.add_command(label=tr.tl('Copy Inara SLEF'), command=self.copy_slef, state=tk.DISABLED)
+            menu.entryconfigure(1, state=monitor.slef and tk.NORMAL or tk.DISABLED)
+
             menu.add_separator()
             for url in plug.provides('shipyard_url'):
                 menu.add_command(
@@ -224,3 +227,8 @@ class HyperlinkLabel(tk.Label or ttk.Label):  # type: ignore
         """Copy the current text to the clipboard."""
         self.clipboard_clear()
         self.clipboard_append(self['text'])
+
+    def copy_slef(self) -> None:
+        """Copy the current text to the clipboard."""
+        self.clipboard_clear()
+        self.clipboard_append(monitor.slef)

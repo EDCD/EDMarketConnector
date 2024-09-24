@@ -20,8 +20,7 @@ import subprocess
 import sys
 import threading
 import webbrowser
-import tempfile
-from os import chdir, environ, path
+from os import chdir, environ
 from time import localtime, strftime, time
 from typing import TYPE_CHECKING, Any, Literal
 from constants import applongname, appname, protocolhandler_redirect
@@ -32,16 +31,15 @@ from constants import applongname, appname, protocolhandler_redirect
 if getattr(sys, 'frozen', False):
     # Under py2exe sys.path[0] is the executable name
     if sys.platform == 'win32':
-        chdir(path.dirname(sys.path[0]))
+        os.chdir(pathlib.Path(sys.path[0]).parent)
         # Allow executable to be invoked from any cwd
-        environ['TCL_LIBRARY'] = path.join(path.dirname(sys.path[0]), 'lib', 'tcl')
-        environ['TK_LIBRARY'] = path.join(path.dirname(sys.path[0]), 'lib', 'tk')
+        environ['TCL_LIBRARY'] = str(pathlib.Path(sys.path[0]).parent / 'lib' / 'tcl')
+        environ['TK_LIBRARY'] = str(pathlib.Path(sys.path[0]).parent / 'lib' / 'tk')
 
 else:
     # We still want to *try* to have CWD be where the main script is, even if
     # not frozen.
     chdir(pathlib.Path(__file__).parent)
-
 
 # config will now cause an appname logger to be set up, so we need the
 # console redirect before this
@@ -49,9 +47,13 @@ if __name__ == '__main__':
     # Keep this as the very first code run to be as sure as possible of no
     # output until after this redirect is done, if needed.
     if getattr(sys, 'frozen', False):
+        from config import config
         # By default py2exe tries to write log to dirname(sys.executable) which fails when installed
         # unbuffered not allowed for text in python3, so use `1 for line buffering
-        log_file_path = path.join(tempfile.gettempdir(), f'{appname}.log')
+        log_file_path = pathlib.Path(config.app_dir_path / 'logs')
+        log_file_path.mkdir(exist_ok=True)
+        log_file_path /= f'{appname}.log'
+
         sys.stdout = sys.stderr = open(log_file_path, mode='wt', buffering=1)  # Do NOT use WITH here.
     # TODO: Test: Make *sure* this redirect is working, else py2exe is going to cause an exit popup
 
@@ -253,24 +255,16 @@ if __name__ == '__main__':  # noqa: C901
         logger.trace_if('frontier-auth.windows', 'Begin...')
 
         if sys.platform == 'win32':
-
             # If *this* instance hasn't locked, then another already has and we
             # now need to do the edmc:// checks for auth callback
             if locked != JournalLockResult.LOCKED:
-                from ctypes import windll, c_int, create_unicode_buffer, WINFUNCTYPE
-                from ctypes.wintypes import BOOL, HWND, INT, LPARAM, LPCWSTR, LPWSTR
+                from ctypes import windll, create_unicode_buffer, WINFUNCTYPE
+                from ctypes.wintypes import BOOL, HWND, LPARAM
+                import win32gui
+                import win32api
+                import win32con
 
-                EnumWindows = windll.user32.EnumWindows  # noqa: N806
-                GetClassName = windll.user32.GetClassNameW  # noqa: N806
-                GetClassName.argtypes = [HWND, LPWSTR, c_int]
-                GetWindowText = windll.user32.GetWindowTextW  # noqa: N806
-                GetWindowText.argtypes = [HWND, LPWSTR, c_int]
-                GetWindowTextLength = windll.user32.GetWindowTextLengthW  # noqa: N806
                 GetProcessHandleFromHwnd = windll.oleacc.GetProcessHandleFromHwnd  # noqa: N806
-
-                SW_RESTORE = 9  # noqa: N806
-                SetForegroundWindow = windll.user32.SetForegroundWindow  # noqa: N806
-                ShowWindow = windll.user32.ShowWindow  # noqa: N806
                 ShowWindowAsync = windll.user32.ShowWindowAsync  # noqa: N806
 
                 COINIT_MULTITHREADED = 0  # noqa: N806,F841
@@ -278,16 +272,9 @@ if __name__ == '__main__':  # noqa: C901
                 COINIT_DISABLE_OLE1DDE = 0x4  # noqa: N806
                 CoInitializeEx = windll.ole32.CoInitializeEx  # noqa: N806
 
-                ShellExecute = windll.shell32.ShellExecuteW  # noqa: N806
-                ShellExecute.argtypes = [HWND, LPCWSTR, LPCWSTR, LPCWSTR, LPCWSTR, INT]
-
                 def window_title(h: int) -> str | None:
                     if h:
-                        text_length = GetWindowTextLength(h) + 1
-                        buf = create_unicode_buffer(text_length)
-                        if GetWindowText(h, buf, text_length):
-                            return buf.value
-
+                        return win32gui.GetWindowText(h)
                     return None
 
                 @WINFUNCTYPE(BOOL, HWND, LPARAM)
@@ -309,7 +296,7 @@ if __name__ == '__main__':  # noqa: C901
                     # class name limited to 256 - https://msdn.microsoft.com/en-us/library/windows/desktop/ms633576
                     cls = create_unicode_buffer(257)
                     # This conditional is exploded to make debugging slightly easier
-                    if GetClassName(window_handle, cls, 257):
+                    if win32gui.GetClassName(window_handle):
                         if cls.value == 'TkTopLevel':
                             if window_title(window_handle) == applongname:
                                 if GetProcessHandleFromHwnd(window_handle):
@@ -317,12 +304,12 @@ if __name__ == '__main__':  # noqa: C901
                                     if len(sys.argv) > 1 and sys.argv[1].startswith(protocolhandler_redirect):
                                         CoInitializeEx(0, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)
                                         # Wait for it to be responsive to avoid ShellExecute recursing
-                                        ShowWindow(window_handle, SW_RESTORE)
-                                        ShellExecute(0, None, sys.argv[1], None, None, SW_RESTORE)
+                                        win32gui.ShowWindow(window_handle, win32con.SW_RESTORE)
+                                        win32api.ShellExecute(0, None, sys.argv[1], None, None, win32con.SW_RESTORE)
 
                                     else:
-                                        ShowWindowAsync(window_handle, SW_RESTORE)
-                                        SetForegroundWindow(window_handle)
+                                        ShowWindowAsync(window_handle, win32con.SW_RESTORE)
+                                        win32gui.SetForegroundWindow(window_handle)
 
                             return False  # Indicate window found, so stop iterating
 
@@ -334,7 +321,7 @@ if __name__ == '__main__':  # noqa: C901
                 # enumwindwsproc() on each.  When an invocation returns False it
                 # stops iterating.
                 # Ref: <https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-enumwindows>
-                EnumWindows(enumwindowsproc, 0)
+                win32gui.EnumWindows(enumwindowsproc, 0)
 
     def already_running_popup():
         """Create the "already running" popup."""
@@ -468,8 +455,8 @@ class AppWindow:
             self.w.wm_iconbitmap(default='EDMarketConnector.ico')
 
         else:
-            self.w.tk.call('wm', 'iconphoto', self.w, '-default',
-                           tk.PhotoImage(file=path.join(config.respath_path, 'io.edcd.EDMarketConnector.png')))
+            image_path = config.respath_path / 'io.edcd.EDMarketConnector.png'
+            self.w.tk.call('wm', 'iconphoto', self.w, '-default', tk.PhotoImage(file=image_path))
 
         # TODO: Export to files and merge from them in future ?
         self.theme_icon = tk.PhotoImage(
@@ -619,7 +606,7 @@ class AppWindow:
         self.help_menu.add_command(command=lambda: self.updater.check_for_updates())  # Check for Updates...
         # About E:D Market Connector
         self.help_menu.add_command(command=lambda: not self.HelpAbout.showing and self.HelpAbout(self.w))
-        logfile_loc = pathlib.Path(tempfile.gettempdir()) / appname
+        logfile_loc = pathlib.Path(config.app_dir_path / 'logs')
         self.help_menu.add_command(command=lambda: prefs.open_folder(logfile_loc))  # Open Log Folder
         self.help_menu.add_command(command=lambda: prefs.help_open_system_profiler(self))  # Open Log Folde
 
@@ -701,13 +688,14 @@ class AppWindow:
             if match:
                 if sys.platform == 'win32':
                     # Check that the titlebar will be at least partly on screen
-                    import ctypes
-                    from ctypes.wintypes import POINT
+                    import win32api
+                    import win32con
 
+                    x = int(match.group(1)) + 16
+                    y = int(match.group(2)) + 16
+                    point = (x, y)
                     # https://msdn.microsoft.com/en-us/library/dd145064
-                    MONITOR_DEFAULTTONULL = 0  # noqa: N806
-                    if ctypes.windll.user32.MonitorFromPoint(POINT(int(match.group(1)) + 16, int(match.group(2)) + 16),
-                                                             MONITOR_DEFAULTTONULL):
+                    if win32api.MonitorFromPoint(point, win32con.MONITOR_DEFAULTTONULL):
                         self.w.geometry(config.get_str('geometry'))
                 else:
                     self.w.geometry(config.get_str('geometry'))
@@ -845,9 +833,20 @@ class AppWindow:
                 )
                 update_msg = update_msg.replace('\\n', '\n')
                 update_msg = update_msg.replace('\\r', '\r')
-                stable_popup = tk.messagebox.askyesno(title=title, message=update_msg, parent=postargs.get('Parent'))
+                stable_popup = tk.messagebox.askyesno(title=title, message=update_msg)
                 if stable_popup:
-                    webbrowser.open("https://github.com/edCD/eDMarketConnector/releases/latest")
+                    webbrowser.open("https://github.com/EDCD/eDMarketConnector/releases/latest")
+        if postargs.get('Restart_Req'):
+            # LANG: Text of Notification Popup for EDMC Restart
+            restart_msg = tr.tl('A restart of EDMC is required. EDMC will now restart.')
+            restart_box = tk.messagebox.Message(
+                title=tr.tl('Restart Required'),  # LANG: Title of Notification Popup for EDMC Restart
+                message=restart_msg,
+                type=tk.messagebox.OK
+            )
+            restart_box.show()
+            if restart_box:
+                app.onexit(restart=True)
 
     def set_labels(self):
         """Set main window labels, e.g. after language change."""
@@ -1639,7 +1638,7 @@ class AppWindow:
         # Avoid file length limits if possible
         provider = config.get_str('shipyard_provider', default='EDSY')
         target = plug.invoke(provider, 'EDSY', 'shipyard_url', loadout, monitor.is_beta)
-        file_name = path.join(config.app_dir_path, "last_shipyard.html")
+        file_name = config.app_dir_path / "last_shipyard.html"
 
         with open(file_name, 'w') as f:
             f.write(SHIPYARD_HTML_TEMPLATE.format(
@@ -1851,7 +1850,7 @@ class AppWindow:
             )
             exit_thread.start()
 
-    def onexit(self, event=None) -> None:
+    def onexit(self, event=None, restart: bool = False) -> None:
         """Application shutdown procedure."""
         if sys.platform == 'win32':
             shutdown_thread = threading.Thread(
@@ -1914,6 +1913,8 @@ class AppWindow:
         self.w.destroy()
 
         logger.info('Done.')
+        if restart:
+            os.execv(sys.executable, ['python'] + sys.argv)
 
     def drag_start(self, event) -> None:
         """Initiate dragging the window."""
