@@ -228,9 +228,9 @@ def main():  # noqa: C901, CCR001
             # Get state from latest Journal file
             logger.debug('Getting state from latest journal file')
             try:
-                monitor.currentdir = Path(config.get_str('journaldir', default=config.default_journal_dir))
+                monitor.currentdir = config.get_str('journaldir', default=config.default_journal_dir)
                 if not monitor.currentdir:
-                    monitor.currentdir = config.default_journal_dir_path
+                    monitor.currentdir = config.default_journal_dir
 
                 logger.debug(f'logdir = "{monitor.currentdir}"')
                 logfile = monitor.journal_newest_filename(monitor.currentdir)
