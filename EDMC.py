@@ -14,7 +14,6 @@ import locale
 import os
 import queue
 import sys
-from pathlib import Path
 from time import sleep, time
 from typing import TYPE_CHECKING, Any
 
@@ -213,16 +212,14 @@ def main():  # noqa: C901, CCR001
             # system, chances are its the current locale, and not utf-8. Otherwise if it was copied, its probably
             # utf8. Either way, try the system FIRST because reading something like cp1251 in UTF-8 results in garbage
             # but the reverse results in an exception.
-            json_file = Path(args.j).resolve()
+            json_file = os.path.abspath(args.j)
             try:
                 with open(json_file) as file_handle:
                     data = json.load(file_handle)
             except UnicodeDecodeError:
                 with open(json_file, encoding='utf-8') as file_handle:
                     data = json.load(file_handle)
-            file_path = Path(args.j)
-            modification_time = file_path.stat().st_mtime
-            config.set('querytime', int(modification_time))
+            config.set('querytime', int(os.path.getmtime(args.j)))
 
         else:
             # Get state from latest Journal file

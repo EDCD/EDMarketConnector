@@ -8,7 +8,7 @@ See LICENSE file.
 from __future__ import annotations
 
 import json
-from pathlib import Path
+import pathlib
 import queue
 import re
 import sys
@@ -16,6 +16,7 @@ import threading
 from calendar import timegm
 from collections import defaultdict
 from os import SEEK_END, SEEK_SET, listdir
+from os.path import basename, expanduser, getctime, isdir, join
 from time import gmtime, localtime, mktime, sleep, strftime, strptime, time
 from typing import TYPE_CHECKING, Any, BinaryIO, MutableMapping
 import psutil
@@ -67,7 +68,7 @@ class EDLogs(FileSystemEventHandler):
         # TODO(A_D): A bunch of these should be switched to default values (eg '' for strings) and no longer be Optional
         FileSystemEventHandler.__init__(self)  # futureproofing - not need for current version of watchdog
         self.root: 'tkinter.Tk' = None  # type: ignore # Don't use Optional[] - mypy thinks no methods
-        self.currentdir: Path | None = None  # The actual logdir that we're monitoring
+        self.currentdir: str | None = None  # The actual logdir that we're monitoring
         self.logfile: str | None = None
         self.observer: BaseObserver | None = None
         self.observed = None  # a watchdog ObservedWatch, or None if polling
@@ -190,9 +191,9 @@ class EDLogs(FileSystemEventHandler):
         if journal_dir == '' or journal_dir is None:
             journal_dir = config.default_journal_dir
 
-        logdir = Path(journal_dir).expanduser()
+        logdir = expanduser(journal_dir)
 
-        if not logdir or not Path.is_dir(logdir):
+        if not logdir or not isdir(logdir):
             logger.error(f'Journal Directory is invalid: "{logdir}"')
             self.stop()
             return False
@@ -265,10 +266,9 @@ class EDLogs(FileSystemEventHandler):
             # Odyssey Update 11 has, e.g.    Journal.2022-03-15T152503.01.log
             # Horizons Update 11 equivalent: Journal.220315152335.01.log
             # So we can no longer use a naive sort.
-            journals_dir_path = Path(journals_dir)
-            journal_files = (journals_dir_path / Path(x) for x in journal_files)
-            latest_file = max(journal_files, key=lambda f: Path(f).stat().st_ctime)
-            return str(latest_file)
+            journals_dir_path = pathlib.Path(journals_dir)
+            journal_files = (journals_dir_path / pathlib.Path(x) for x in journal_files)
+            return str(max(journal_files, key=getctime))
 
         return None
 
@@ -337,7 +337,7 @@ class EDLogs(FileSystemEventHandler):
 
     def on_created(self, event: 'FileSystemEvent') -> None:
         """Watchdog callback when, e.g. client (re)started."""
-        if not event.is_directory and self._RE_LOGFILE.search(Path(event.src_path).name):
+        if not event.is_directory and self._RE_LOGFILE.search(basename(event.src_path)):
 
             self.logfile = event.src_path
 
@@ -1076,7 +1076,7 @@ class EDLogs(FileSystemEventHandler):
                 self.state['Cargo'] = defaultdict(int)
                 # From 3.3 full Cargo event (after the first one) is written to a separate file
                 if 'Inventory' not in entry:
-                    with open(self.currentdir / 'Cargo.json', 'rb') as h:  # type: ignore
+                    with open(join(self.currentdir, 'Cargo.json'), 'rb') as h:  # type: ignore
                         entry = json.load(h)
                         self.state['CargoJSON'] = entry
 
@@ -1103,7 +1103,7 @@ class EDLogs(FileSystemEventHandler):
                 # Always attempt loading of this, but if it fails we'll hope this was
                 # a startup/boarding version and thus `entry` contains
                 # the data anyway.
-                currentdir_path = Path(str(self.currentdir))
+                currentdir_path = pathlib.Path(str(self.currentdir))
                 shiplocker_filename = currentdir_path / 'ShipLocker.json'
                 shiplocker_max_attempts = 5
                 shiplocker_fail_sleep = 0.01
@@ -1172,7 +1172,7 @@ class EDLogs(FileSystemEventHandler):
 
                 # TODO: v31 doc says this is`backpack.json` ... but Howard Chalkley
                 #       said it's `Backpack.json`
-                backpack_file = Path(str(self.currentdir)) / 'Backpack.json'
+                backpack_file = pathlib.Path(str(self.currentdir)) / 'Backpack.json'
                 backpack_data = None
 
                 if not backpack_file.exists():
@@ -1548,7 +1548,7 @@ class EDLogs(FileSystemEventHandler):
                     entry = fcmaterials
 
             elif event_type == 'moduleinfo':
-                with open(self.currentdir / 'ModulesInfo.json', 'rb') as mf:  # type: ignore
+                with open(join(self.currentdir, 'ModulesInfo.json'), 'rb') as mf:  # type: ignore
                     try:
                         entry = json.load(mf)
 
@@ -2259,14 +2259,14 @@ class EDLogs(FileSystemEventHandler):
         oldfiles = sorted((x for x in listdir(config.get_str('outdir')) if regexp.match(x)))
         if oldfiles:
             try:
-                with open(config.get_str('outdir') / Path(oldfiles[-1]), encoding='utf-8') as h:
+                with open(join(config.get_str('outdir'), oldfiles[-1]), encoding='utf-8') as h:
                     if h.read() == string:
                         return  # same as last time - don't write
 
             except UnicodeError:
                 logger.exception("UnicodeError reading old ship loadout with utf-8 encoding, trying without...")
                 try:
-                    with open(config.get_str('outdir') / Path(oldfiles[-1])) as h:
+                    with open(join(config.get_str('outdir'), oldfiles[-1])) as h:
                         if h.read() == string:
                             return  # same as last time - don't write
 
@@ -2285,7 +2285,7 @@ class EDLogs(FileSystemEventHandler):
 
         # Write
         ts = strftime('%Y-%m-%dT%H.%M.%S', localtime(time()))
-        filename = config.get_str('outdir') / Path(f'{ship}.{ts}.txt')
+        filename = join(config.get_str('outdir'), f'{ship}.{ts}.txt')
 
         try:
             with open(filename, 'wt', encoding='utf-8') as h:
@@ -2372,7 +2372,7 @@ class EDLogs(FileSystemEventHandler):
 
         try:
 
-            with open(self.currentdir / 'NavRoute.json') as f:
+            with open(join(self.currentdir, 'NavRoute.json')) as f:
                 raw = f.read()
 
         except Exception as e:
@@ -2398,7 +2398,7 @@ class EDLogs(FileSystemEventHandler):
 
         try:
 
-            with open(self.currentdir / 'FCMaterials.json') as f:
+            with open(join(self.currentdir, 'FCMaterials.json')) as f:
                 raw = f.read()
 
         except Exception as e:
