@@ -1,24 +1,15 @@
 """
 Custom `ttk.Notebook` to fix various display issues.
 
-Hacks to fix various display issues with notebooks and their child widgets on Windows.
-
-- Windows: page background should be White, not SystemButtonFace
-
-Entire file may be imported by plugins.
+This is mostly no longer necessary, with ttk themes applying consistent behaviour across the board.
 """
 from __future__ import annotations
 
-import sys
 import tkinter as tk
 import warnings
 from tkinter import ttk, messagebox
 from PIL import ImageGrab
 from l10n import translations as tr
-
-if sys.platform == 'win32':
-    PAGEFG = 'SystemWindowText'
-    PAGEBG = 'SystemWindow'  # typically white
 
 
 class Notebook(ttk.Notebook):
@@ -27,13 +18,7 @@ class Notebook(ttk.Notebook):
     def __init__(self, master: ttk.Frame | None = None, **kw):
 
         super().__init__(master, **kw)
-        style = ttk.Style()
-        if sys.platform == 'win32':
-            style.configure('nb.TFrame',                          background=PAGEBG)
-            style.configure('nb.TButton',                         background=PAGEBG)
-            style.configure('nb.TCheckbutton', foreground=PAGEFG, background=PAGEBG)
-            style.configure('nb.TMenubutton',  foreground=PAGEFG, background=PAGEBG)
-            style.configure('nb.TRadiobutton', foreground=PAGEFG, background=PAGEBG)
+        warnings.warn('Migrate to ttk.Notebook. Will be removed in 6.0 or later', DeprecationWarning, stacklevel=2)
         self.grid(padx=10, pady=10, sticky=tk.NSEW)
 
 
@@ -41,24 +26,18 @@ class Frame(ttk.Frame):
     """Custom ttk.Frame class to fix some display issues."""
 
     def __init__(self, master: ttk.Notebook | None = None, **kw):
-        if sys.platform == 'win32':
-            ttk.Frame.__init__(self, master, style='nb.TFrame', **kw)
-            ttk.Frame(self).grid(pady=5)  # top spacer
-        else:
-            ttk.Frame.__init__(self, master, **kw)
-            ttk.Frame(self).grid(pady=5)  # top spacer
+        ttk.Frame.__init__(self, master, **kw)
+        ttk.Frame(self).grid(pady=5)  # top spacer
         self.configure(takefocus=1)		# let the frame take focus so that no particular child is focused
+        warnings.warn('Migrate to ttk.Frame. Will be removed in 6.0 or later', DeprecationWarning, stacklevel=2)
 
 
 class Label(tk.Label):
     """Custom tk.Label class to fix some display issues."""
 
     def __init__(self, master: ttk.Frame | None = None, **kw):
-        kw['foreground'] = kw.pop('foreground', PAGEFG if sys.platform == 'win32'
-                                  else ttk.Style().lookup('TLabel', 'foreground'))
-        kw['background'] = kw.pop('background', PAGEBG if sys.platform == 'win32'
-                                  else ttk.Style().lookup('TLabel', 'background'))
         super().__init__(master, **kw)
+        warnings.warn('Migrate to ttk.Label. Will be removed in 6.0 or later', DeprecationWarning, stacklevel=2)
 
 
 class EntryMenu(ttk.Entry):
@@ -135,18 +114,16 @@ class Button(ttk.Button):
     """Custom ttk.Button class to fix some display issues."""
 
     def __init__(self, master: ttk.Frame | None = None, **kw):
-        if sys.platform == 'win32':
-            ttk.Button.__init__(self, master, style='nb.TButton', **kw)
-        else:
-            ttk.Button.__init__(self, master, **kw)
+        warnings.warn('Migrate to ttk.Button. Will remove in 6.0 or later', DeprecationWarning, stacklevel=2)
+        ttk.Button.__init__(self, master, **kw)
 
 
 class ColoredButton(tk.Button):
     """Custom tk.Button class to fix some display issues."""
 
-    # DEPRECATED: Migrate to tk.Button. Will remove in 6.0 or later.
+    # DEPRECATED: Migrate to ttk.Button. Will remove in 6.0 or later.
     def __init__(self, master: ttk.Frame | None = None, **kw):
-        warnings.warn('Migrate to tk.Button. Will remove in 6.0 or later.', DeprecationWarning, stacklevel=2)
+        warnings.warn('Migrate to ttk.Button. Will remove in 6.0 or later.', DeprecationWarning, stacklevel=2)
         tk.Button.__init__(self, master, **kw)
 
 
@@ -154,30 +131,21 @@ class Checkbutton(ttk.Checkbutton):
     """Custom ttk.Checkbutton class to fix some display issues."""
 
     def __init__(self, master: ttk.Frame | None = None, **kw):
-        style = 'nb.TCheckbutton' if sys.platform == 'win32' else None
-        super().__init__(master, style=style, **kw)  # type: ignore
+        super().__init__(master, **kw)  # type: ignore
+        warnings.warn('Migrate to ttk.Checkbutton. Will be removed in 6.0 or later', DeprecationWarning, stacklevel=2)
 
 
 class Radiobutton(ttk.Radiobutton):
     """Custom ttk.Radiobutton class to fix some display issues."""
 
     def __init__(self, master: ttk.Frame | None = None, **kw):
-        style = 'nb.TRadiobutton' if sys.platform == 'win32' else None
-        super().__init__(master, style=style, **kw)  # type: ignore
+        super().__init__(master, **kw)  # type: ignore
+        warnings.warn('Migrate to ttk.Radiobutton. Will be removed in 6.0 or later', DeprecationWarning, stacklevel=2)
 
 
 class OptionMenu(ttk.OptionMenu):
     """Custom ttk.OptionMenu class to fix some display issues."""
 
     def __init__(self, master, variable, default=None, *values, **kw):
-        if sys.platform == 'win32':
-            # OptionMenu derives from Menubutton at the Python level, so uses Menubutton's style
-            ttk.OptionMenu.__init__(self, master, variable, default, *values, style='nb.TMenubutton', **kw)
-            self['menu'].configure(background=PAGEBG)
-        else:
-            ttk.OptionMenu.__init__(self, master, variable, default, *values, **kw)
-            self['menu'].configure(background=ttk.Style().lookup('TMenu', 'background'))
-
-        # Workaround for https://bugs.python.org/issue25684
-        for i in range(0, self['menu'].index('end') + 1):
-            self['menu'].entryconfig(i, variable=variable)
+        ttk.OptionMenu.__init__(self, master, variable, default, *values, **kw)
+        warnings.warn('Migrate to ttk.OptionMenu. Will be removed in 6.0 or later', DeprecationWarning, stacklevel=2)
