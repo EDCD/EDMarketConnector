@@ -6,6 +6,29 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
       in the source (not distributed with the Windows installer) for the
       currently used version.
 ---
+Pre-Release 5.12.1-rc1
+===
+
+This is a release candidate for 5.12.1. It has been pushed to the "Beta" track for updates!
+
+This release fixes a pair of widely-reported bugs with EDMC authentication.
+
+**Changes and Enhancements**
+* Fixed a typo in the prior release notes
+
+**Bug Fixes**
+* Fixed a bug where the EDMC System Profiler wouldn't load details properly
+* Reverted a number of usages of Pathlib back to os.path for further validation testing
+* Fixed a bug where EDMC would error out with a max() ValueError
+
+**Plugin Developers**
+* nb.Entry is deprecated, and is slated for removal in 6.0 or later. Please migrate to nb.EntryMenu
+* nb.ColoredButton is deprecated, and is slated for removal in 6.0 or later. Please migrate to tk.Button
+* Calling internal translations with `_()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to importing `translations` and calling `translations.translate` or `translations.tl` directly
+* `Translations` as the translate system singleton is deprecated, and is slated for removal in 6.0 or later. Please migrate to the `translations` singleton
+* `help_open_log_folder()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to open_folder()
+* `update_feed` is deprecated, and is slated for removal in 6.0 or later. Please migrate to `get_update_feed()`.
+
 Release 5.12.0
 ===
 
