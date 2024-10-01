@@ -77,8 +77,6 @@ if (config.auth_force_edmc_protocol  # noqa: C901
         MSG, UINT, WPARAM
     )
     import win32gui
-    import win32con
-    import win32api
 
     class WNDCLASS(Structure):
         """
@@ -108,13 +106,6 @@ if (config.auth_force_edmc_protocol  # noqa: C901
     CreateWindowExW.restype = HWND
     RegisterClassW = windll.user32.RegisterClassW
     RegisterClassW.argtypes = [POINTER(WNDCLASS)]
-    # DefWindowProcW
-    # Ref: <https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-defwindowprocw>
-    # LRESULT DefWindowProcW([in] HWND   hWnd,[in] UINT   Msg,[in] WPARAM wParam,[in] LPARAM lParam);
-    # As per example at <https://docs.python.org/3/library/ctypes.html#ctypes.WINFUNCTYPE>
-
-    prototype = WINFUNCTYPE(c_long, HWND, UINT, WPARAM, LPARAM)
-    paramflags = (1, "hWnd"), (1, "Msg"), (1, "wParam"), (1, "lParam")
 
     GetParent = windll.user32.GetParent
     SetForegroundWindow = windll.user32.SetForegroundWindow
@@ -385,7 +376,7 @@ else:  # Linux / Run from source
             if self.parse():
                 self.send_header('Content-Type', 'text/html')
                 self.end_headers()
-                self.wfile.write(self._generate_auth_response().encode('utf-8'))
+                self.wfile.write(self._generate_auth_response().encode())
             else:
                 self.send_response(404)
                 self.end_headers()
