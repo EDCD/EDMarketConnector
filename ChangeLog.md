@@ -6,7 +6,7 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
       in the source (not distributed with the Windows installer) for the
       currently used version.
 ---
-Pre-Release 5.12.1-rc1
+Pre-Release 5.12.1-rc2
 ===
 
 This is a release candidate for 5.12.1. It has been pushed to the "Beta" track for updates!
