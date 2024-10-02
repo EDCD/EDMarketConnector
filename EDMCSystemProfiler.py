@@ -11,7 +11,7 @@ import locale
 import webbrowser
 import platform
 import sys
-from os import chdir, environ
+from os import chdir, environ, path
 import pathlib
 import logging
 from journal_lock import JournalLock
@@ -19,10 +19,10 @@ from journal_lock import JournalLock
 if getattr(sys, "frozen", False):
     # Under py2exe sys.path[0] is the executable name
     if sys.platform == "win32":
-        chdir(pathlib.Path(sys.path[0]).parent)
+        chdir(path.dirname(sys.path[0]))
         # Allow executable to be invoked from any cwd
-        environ['TCL_LIBRARY'] = str(pathlib.Path(sys.path[0]).parent / 'lib' / 'tcl')
-        environ['TK_LIBRARY'] = str(pathlib.Path(sys.path[0]).parent / 'lib' / 'tk')
+        environ["TCL_LIBRARY"] = path.join(path.dirname(sys.path[0]), "lib", "tcl")
+        environ["TK_LIBRARY"] = path.join(path.dirname(sys.path[0]), "lib", "tk")
 
 else:
     # We still want to *try* to have CWD be where the main script is, even if
@@ -44,12 +44,11 @@ def get_sys_report(config: config.AbstractConfig) -> str:
     plt = platform.uname()
     locale.setlocale(locale.LC_ALL, "")
     lcl = locale.getlocale()
-    monitor.currentdir = pathlib.Path(config.get_str(
+    monitor.currentdir = config.get_str(
         "journaldir", default=config.default_journal_dir
-        )
     )
     if not monitor.currentdir:
-        monitor.currentdir = config.default_journal_dir_path
+        monitor.currentdir = config.default_journal_dir
     try:
         logfile = monitor.journal_newest_filename(monitor.currentdir)
         if logfile is None:
@@ -116,12 +115,12 @@ def main() -> None:
     root.withdraw()  # Hide the window initially to calculate the dimensions
     try:
         icon_image = tk.PhotoImage(
-            file=cur_config.respath_path / "io.edcd.EDMarketConnector.png"
+            file=path.join(cur_config.respath_path, "io.edcd.EDMarketConnector.png")
         )
 
         root.iconphoto(True, icon_image)
     except tk.TclError:
-        root.iconbitmap(cur_config.respath_path / "EDMarketConnector.ico")
+        root.iconbitmap(path.join(cur_config.respath_path, "EDMarketConnector.ico"))
 
     sys_report = get_sys_report(cur_config)
 

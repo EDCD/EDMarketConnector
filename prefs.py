@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import contextlib
 import logging
-from os.path import expandvars
+from os.path import expandvars, join, normpath
 from pathlib import Path
 import subprocess
 import sys
@@ -1100,7 +1100,7 @@ class PreferencesDialog(tk.Toplevel):
         if sys.platform == 'win32':
             start = len(config.home.split('\\')) if pathvar.get().lower().startswith(config.home.lower()) else 0
             display = []
-            components = Path(pathvar.get()).resolve().parts
+            components = normpath(pathvar.get()).split('\\')
             buf = ctypes.create_unicode_buffer(MAX_PATH)
             pidsRes = ctypes.c_int()  # noqa: N806 # Windows convention
             for i in range(start, len(components)):
@@ -1253,7 +1253,7 @@ class PreferencesDialog(tk.Toplevel):
 
         config.set(
             'outdir',
-            str(config.home_path / self.outdir.get()[2:]) if self.outdir.get().startswith('~') else self.outdir.get()
+            join(config.home_path, self.outdir.get()[2:]) if self.outdir.get().startswith('~') else self.outdir.get()
         )
 
         logdir = self.logdir.get()
@@ -1296,8 +1296,8 @@ class PreferencesDialog(tk.Toplevel):
         if self.plugdir.get() != config.get('plugin_dir'):
             config.set(
                 'plugin_dir',
-                str(Path(config.home_path, self.plugdir.get()[2:])) if self.plugdir.get().startswith('~') else
-                str(Path(self.plugdir.get()))
+                join(config.home_path, self.plugdir.get()[2:]) if self.plugdir.get().startswith(
+                    '~') else self.plugdir.get()
             )
             self.req_restart = True
 

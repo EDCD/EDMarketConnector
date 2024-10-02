@@ -69,16 +69,14 @@ if (config.auth_force_edmc_protocol  # noqa: C901
     # This could be false if you use auth_force_edmc_protocol, but then you get to keep the pieces
     assert sys.platform == 'win32'
     # spell-checker: words HBRUSH HICON WPARAM wstring WNDCLASS HMENU HGLOBAL
-    from ctypes import (
-        windll, WINFUNCTYPE, Structure, byref, c_long, c_void_p, create_unicode_buffer, wstring_at
+    from ctypes import (  # type: ignore
+        windll, POINTER, WINFUNCTYPE, Structure, byref, c_long, c_void_p, create_unicode_buffer, wstring_at
     )
     from ctypes.wintypes import (
-        ATOM, HBRUSH, HICON, HINSTANCE, HWND, INT, LPARAM, LPCWSTR, LPWSTR,
+        ATOM, BOOL, DWORD, HBRUSH, HGLOBAL, HICON, HINSTANCE, HMENU, HWND, INT, LPARAM, LPCWSTR, LPMSG, LPVOID, LPWSTR,
         MSG, UINT, WPARAM
     )
     import win32gui
-    import win32con
-    import win32api
 
     class WNDCLASS(Structure):
         """
@@ -101,8 +99,33 @@ if (config.auth_force_edmc_protocol  # noqa: C901
             ('lpszClassName', LPCWSTR)
         ]
 
-    TranslateMessage = windll.user32.TranslateMessage
+    CW_USEDEFAULT = 0x80000000
 
+    CreateWindowExW = windll.user32.CreateWindowExW
+    CreateWindowExW.argtypes = [DWORD, LPCWSTR, LPCWSTR, DWORD, INT, INT, INT, INT, HWND, HMENU, HINSTANCE, LPVOID]
+    CreateWindowExW.restype = HWND
+    RegisterClassW = windll.user32.RegisterClassW
+    RegisterClassW.argtypes = [POINTER(WNDCLASS)]
+
+    GetParent = windll.user32.GetParent
+    SetForegroundWindow = windll.user32.SetForegroundWindow
+
+    # <https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getmessagew>
+    # NB: Despite 'BOOL' return type, it *can* be >0, 0 or -1, so is actually
+    #     c_long
+    prototype = WINFUNCTYPE(c_long, LPMSG, HWND, UINT, UINT)
+    paramflags = (1, "lpMsg"), (1, "hWnd"), (1, "wMsgFilterMin"), (1, "wMsgFilterMax")
+    GetMessageW = prototype(("GetMessageW", windll.user32), paramflags)
+
+    TranslateMessage = windll.user32.TranslateMessage
+    DispatchMessageW = windll.user32.DispatchMessageW
+    PostThreadMessageW = windll.user32.PostThreadMessageW
+    SendMessageW = windll.user32.SendMessageW
+    SendMessageW.argtypes = [HWND, UINT, WPARAM, LPARAM]
+    PostMessageW = windll.user32.PostMessageW
+    PostMessageW.argtypes = [HWND, UINT, WPARAM, LPARAM]
+
+    WM_QUIT = 0x0012
     # https://docs.microsoft.com/en-us/windows/win32/dataxchg/wm-dde-initiate
     WM_DDE_INITIATE = 0x03E0
     WM_DDE_TERMINATE = 0x03E1
@@ -118,6 +141,12 @@ if (config.auth_force_edmc_protocol  # noqa: C901
     GlobalGetAtomNameW = windll.kernel32.GlobalGetAtomNameW
     GlobalGetAtomNameW.argtypes = [ATOM, LPWSTR, INT]
     GlobalGetAtomNameW.restype = UINT
+    GlobalLock = windll.kernel32.GlobalLock
+    GlobalLock.argtypes = [HGLOBAL]
+    GlobalLock.restype = LPVOID
+    GlobalUnlock = windll.kernel32.GlobalUnlock
+    GlobalUnlock.argtypes = [HGLOBAL]
+    GlobalUnlock.restype = BOOL
 
     # Windows Message handler stuff (IPC)
     # https://docs.microsoft.com/en-us/previous-versions/windows/desktop/legacy/ms633573(v=vs.85)
@@ -160,7 +189,7 @@ if (config.auth_force_edmc_protocol  # noqa: C901
 
         if target_is_valid and topic_is_valid:
             # if everything is happy, send an acknowledgement of the DDE request
-            win32gui.SendMessage(
+            SendMessageW(
                 wParam, WM_DDE_ACK, hwnd, PackDDElParam(WM_DDE_ACK, GlobalAddAtomW(appname), GlobalAddAtomW('System'))
             )
 
@@ -193,7 +222,7 @@ if (config.auth_force_edmc_protocol  # noqa: C901
             thread = self.thread
             if thread:
                 self.thread = None
-                win32api.PostThreadMessage(thread.ident, win32con.WM_QUIT, 0, 0)
+                PostThreadMessageW(thread.ident, WM_QUIT, 0, 0)
                 thread.join()  # Wait for it to quit
 
         def worker(self) -> None:
@@ -203,25 +232,24 @@ if (config.auth_force_edmc_protocol  # noqa: C901
             wndclass.lpfnWndProc = WndProc
             wndclass.cbClsExtra = 0
             wndclass.cbWndExtra = 0
-            wndclass.hInstance = win32gui.GetModuleHandle(0)
+            wndclass.hInstance = windll.kernel32.GetModuleHandleW(0)
             wndclass.hIcon = None
             wndclass.hCursor = None
             wndclass.hbrBackground = None
             wndclass.lpszMenuName = None
             wndclass.lpszClassName = 'DDEServer'
 
-            if not win32gui.RegisterClass(byref(wndclass)):
+            if not RegisterClassW(byref(wndclass)):
                 print('Failed to register Dynamic Data Exchange for cAPI')
                 return
 
             # https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-createwindowexw
-            hwnd = win32gui.CreateWindowEx(
+            hwnd = CreateWindowExW(
                 0,                       # dwExStyle
                 wndclass.lpszClassName,  # lpClassName
                 "DDE Server",            # lpWindowName
                 0,                       # dwStyle
-                # X, Y, nWidth, nHeight
-                win32con.CW_USEDEFAULT, win32con.CW_USEDEFAULT, win32con.CW_USEDEFAULT, win32con.CW_USEDEFAULT,
+                CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,  # X, Y, nWidth, nHeight
                 self.master.winfo_id(),  # hWndParent # Don't use HWND_MESSAGE since the window won't get DDE broadcasts
                 None,                    # hMenu
                 wndclass.hInstance,      # hInstance
@@ -241,13 +269,13 @@ if (config.auth_force_edmc_protocol  # noqa: C901
             #
             # But it does actually work.  Either getting a non-0 value and
             # entering the loop, or getting 0 and exiting it.
-            while win32gui.GetMessage(byref(msg), None, 0, 0) != 0:
+            while GetMessageW(byref(msg), None, 0, 0) != 0:
                 logger.trace_if('frontier-auth.windows', f'DDE message of type: {msg.message}')
                 if msg.message == WM_DDE_EXECUTE:
                     # GlobalLock does some sort of "please dont move this?"
                     # https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-globallock
-                    args = wstring_at(win32gui.GlobalLock(msg.lParam)).strip()
-                    win32gui.GlobalUnlock(msg.lParam)  # Unlocks the GlobalLock-ed object
+                    args = wstring_at(GlobalLock(msg.lParam)).strip()
+                    GlobalUnlock(msg.lParam)  # Unlocks the GlobalLock-ed object
 
                     if args.lower().startswith('open("') and args.endswith('")'):
                         logger.trace_if('frontier-auth.windows', f'args are: {args}')
@@ -256,20 +284,20 @@ if (config.auth_force_edmc_protocol  # noqa: C901
                             logger.debug(f'Message starts with {self.redirect}')
                             self.event(url)
 
-                        win32gui.SetForegroundWindow(win32gui.GetParent(self.master.winfo_id()))  # raise app window
+                        SetForegroundWindow(GetParent(self.master.winfo_id()))  # raise app window
                         # Send back a WM_DDE_ACK. this is _required_ with WM_DDE_EXECUTE
-                        win32gui.PostMessage(msg.wParam, WM_DDE_ACK, hwnd, PackDDElParam(WM_DDE_ACK, 0x80, msg.lParam))
+                        PostMessageW(msg.wParam, WM_DDE_ACK, hwnd, PackDDElParam(WM_DDE_ACK, 0x80, msg.lParam))
 
                     else:
                         # Send back a WM_DDE_ACK. this is _required_ with WM_DDE_EXECUTE
-                        win32gui.PostMessage(msg.wParam, WM_DDE_ACK, hwnd, PackDDElParam(WM_DDE_ACK, 0, msg.lParam))
+                        PostMessageW(msg.wParam, WM_DDE_ACK, hwnd, PackDDElParam(WM_DDE_ACK, 0, msg.lParam))
 
                 elif msg.message == WM_DDE_TERMINATE:
-                    win32gui.PostMessage(msg.wParam, WM_DDE_TERMINATE, hwnd, 0)
+                    PostMessageW(msg.wParam, WM_DDE_TERMINATE, hwnd, 0)
 
                 else:
                     TranslateMessage(byref(msg))  # "Translates virtual key messages into character messages" ???
-                    win32gui.DispatchMessage(byref(msg))
+                    DispatchMessageW(byref(msg))
 
 
 else:  # Linux / Run from source
@@ -348,7 +376,7 @@ else:  # Linux / Run from source
             if self.parse():
                 self.send_header('Content-Type', 'text/html')
                 self.end_headers()
-                self.wfile.write(self._generate_auth_response().encode('utf-8'))
+                self.wfile.write(self._generate_auth_response().encode())
             else:
                 self.send_response(404)
                 self.end_headers()
