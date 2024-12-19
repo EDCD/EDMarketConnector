@@ -43,7 +43,7 @@ jobs:
       env:
         ROOT_SHA: ${{github.base_ref}}
       run: |
-        DATA=$(jq --raw-output .before $GITHUB_EVENT_PATH)
+        DATA=$(jq --raw-output .before "$GITHUB_EVENT_PATH")
 
         echo "DATA: ${DATA}"
         #######################################################################

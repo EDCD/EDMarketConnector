@@ -54,7 +54,7 @@ jobs:
       - name: Create submodules changes branch
         if: steps.check_for_changes.outputs.changes == 'true'
         run: |
-          git checkout -b "submodule-change/$GITHUB_RUN_ID" $CHECKOUT_BRANCH
+          git checkout -b "submodule-change/$GITHUB_RUN_ID" "$CHECKOUT_BRANCH"
           git commit -am "updating submodules"
           git push --set-upstream origin "submodule-change/$GITHUB_RUN_ID"
 
