@@ -332,26 +332,62 @@
     "hpt_atdumbfiremissile_fixed_large": {
         "mass": 8
     },
+    "hpt_atdumbfiremissile_fixed_large_v2": {
+        "mass": 8
+    },
     "hpt_atdumbfiremissile_fixed_medium": {
+        "mass": 4
+    },
+    "hpt_atdumbfiremissile_fixed_medium_v2": {
         "mass": 4
     },
     "hpt_atdumbfiremissile_turret_large": {
         "mass": 8
     },
+    "hpt_atdumbfiremissile_turret_large_v2": {
+        "mass": 8
+    },
     "hpt_atdumbfiremissile_turret_medium": {
+        "mass": 4
+    },
+    "hpt_atdumbfiremissile_turret_medium_v2": {
         "mass": 4
     },
     "hpt_atmulticannon_fixed_large": {
         "mass": 8
     },
+    "hpt_atmulticannon_fixed_large_v2": {
+        "mass": 8
+    },
     "hpt_atmulticannon_fixed_medium": {
+        "mass": 4
+    },
+    "hpt_atmulticannon_fixed_medium_v2": {
+        "mass": 4
+    },
+    "hpt_atmulticannon_gimbal_large": {
+        "mass": 8
+    },
+    "hpt_atmulticannon_gimbal_medium": {
         "mass": 4
     },
     "hpt_atmulticannon_turret_large": {
         "mass": 8
     },
+    "hpt_atmulticannon_turret_large_v2": {
+        "mass": 8
+    },
     "hpt_atmulticannon_turret_medium": {
         "mass": 4
+    },
+    "hpt_atmulticannon_turret_medium_v2": {
+        "mass": 4
+    },
+    "hpt_atventdisruptorpylon_fixed_large": {
+        "mass": 5
+    },
+    "hpt_atventdisruptorpylon_fixed_medium": {
+        "mass": 3
     },
     "hpt_basicmissilerack_fixed_large": {
         "mass": 8
@@ -417,6 +453,9 @@
         "mass": 8
     },
     "hpt_cannon_gimbal_medium": {
+        "mass": 4
+    },
+    "hpt_cannon_gimbal_medium_burst": {
         "mass": 4
     },
     "hpt_cannon_gimbal_small": {
@@ -613,6 +652,12 @@
     },
     "hpt_mininglaser_turret_small": {
         "mass": 2
+    },
+    "hpt_missing_hardpoint": {
+        "mass": 0
+    },
+    "hpt_missing_utility": {
+        "mass": 0
     },
     "hpt_mrascanner_size0_class1": {
         "mass": 1.3
@@ -912,6 +957,12 @@
         "mass": 0
     },
     "int_corrosionproofcargorack_size4_class1": {
+        "mass": 0
+    },
+    "int_corrosionproofcargorack_size5_class1": {
+        "mass": 0
+    },
+    "int_corrosionproofcargorack_size6_class1": {
         "mass": 0
     },
     "int_detailedsurfacescanner_tiny": {
@@ -2370,6 +2421,34 @@
     "int_metaalloyhullreinforcement_size5_class2": {
         "mass": 16
     },
+    "int_missing_engine": {
+        "mass": 0
+    },
+    "int_missing_fueltank": {
+        "mass": 0
+    },
+    "int_missing_hyperdrive": {
+        "mass": 0,
+        "optmass": 0,
+        "maxfuel": 0,
+        "fuelmul": 0,
+        "fuelpower": 0
+    },
+    "int_missing_lifesupport": {
+        "mass": 0
+    },
+    "int_missing_module": {
+        "mass": 0
+    },
+    "int_missing_powerdistributor": {
+        "mass": 0
+    },
+    "int_missing_powerplant": {
+        "mass": 0
+    },
+    "int_missing_sensors": {
+        "mass": 0
+    },
     "int_modulereinforcement_size1_class1": {
         "mass": 2
     },
@@ -2473,6 +2552,9 @@
         "mass": 40
     },
     "int_planetapproachsuite": {
+        "mass": 0
+    },
+    "int_planetapproachsuite_advanced": {
         "mass": 0
     },
     "int_powerdistributor_size1_class1": {
@@ -3120,6 +3202,15 @@
     "int_shieldcellbank_size8_class5": {
         "mass": 160
     },
+    "int_shieldgenerator_size1_class1": {
+        "mass": 1.3
+    },
+    "int_shieldgenerator_size1_class2": {
+        "mass": 0.5
+    },
+    "int_shieldgenerator_size1_class3": {
+        "mass": 1.3
+    },
     "int_shieldgenerator_size1_class3_fast": {
         "mass": 1.3
     },
@@ -3333,6 +3424,21 @@
     "mamba_armour_reactive": {
         "mass": 38
     },
+    "mandalay_armour_grade1": {
+        "mass": 0
+    },
+    "mandalay_armour_grade2": {
+        "mass": 32
+    },
+    "mandalay_armour_grade3": {
+        "mass": 63
+    },
+    "mandalay_armour_mirrored": {
+        "mass": 63
+    },
+    "mandalay_armour_reactive": {
+        "mass": 63
+    },
     "orca_armour_grade1": {
         "mass": 0
     },
@@ -3421,6 +3527,21 @@
         "mass": 63
     },
     "type7_armour_reactive": {
+        "mass": 63
+    },
+    "type8_armour_grade1": {
+        "mass": 0
+    },
+    "type8_armour_grade2": {
+        "mass": 32
+    },
+    "type8_armour_grade3": {
+        "mass": 63
+    },
+    "type8_armour_mirrored": {
+        "mass": 63
+    },
+    "type8_armour_reactive": {
         "mass": 63
     },
     "type9_armour_grade1": {
