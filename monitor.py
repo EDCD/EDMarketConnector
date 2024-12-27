@@ -141,6 +141,10 @@ class EDLogs(FileSystemEventHandler):
             'ShipType':           None,
             'HullValue':          None,
             'ModulesValue':       None,
+            'UnladenMass':        None,
+            'CargoCapacity':      None,
+            'MaxJumpRange':       None,
+            'FuelCapacity':       None,
             'Rebuy':              None,
             'Modules':            None,
             'CargoJSON':          None,  # The raw data from the last time cargo.json was read
@@ -680,6 +684,12 @@ class EDLogs(FileSystemEventHandler):
                 self.state['ShipType'] = self.canonicalise(entry['Ship'])
                 self.state['HullValue'] = entry.get('HullValue')  # not present on exiting Outfitting
                 self.state['ModulesValue'] = entry.get('ModulesValue')  # not present on exiting Outfitting
+                self.state['UnladenMass'] = entry.get('UnladenMass')
+                self.state['CargoCapacity'] = entry.get('CargoCapacity')
+                self.state['MaxJumpRange'] = entry.get('MaxJumpRange')
+                self.state['FuelCapacity'] = {}
+                self.state['FuelCapacity']['Main'] = entry.get('FuelCapacity')['Main']
+                self.state['FuelCapacity']['Reserve'] = entry.get('FuelCapacity')['Reserve']
                 self.state['Rebuy'] = entry.get('Rebuy')
                 # Remove spurious differences between initial Loadout event and subsequent
                 self.state['Modules'] = {}
