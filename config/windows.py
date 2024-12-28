@@ -59,10 +59,10 @@ class WinConfig(AbstractConfig):
 
         if getattr(sys, 'frozen', False):
             self.respath_path = pathlib.Path(sys.executable).parent
-            self.internal_plugin_dir_path = self.respath_path / 'plugins'
         else:
             self.respath_path = pathlib.Path(__file__).parent.parent
-            self.internal_plugin_dir_path = self.respath_path / 'plugins'
+        self.internal_plugin_dir_path = self.respath_path / 'plugins'
+        self.internal_theme_dir_path = self.respath_path / 'themes'
 
         self.home_path = pathlib.Path.home()
 

@@ -7,9 +7,10 @@ from __future__ import annotations
 
 import logging
 import tkinter as tk
+from tkinter import ttk
 
-import myNotebook as nb  # noqa: N813
 from config import appname, config
+from myNotebook import EntryMenu
 
 # This **MUST** match the name of the folder the plugin is in.
 PLUGIN_NAME = "click_counter"
@@ -48,7 +49,7 @@ class ClickCounter:
         """
         self.on_preferences_closed("", False)  # Save our prefs
 
-    def setup_preferences(self, parent: nb.Notebook, cmdr: str, is_beta: bool) -> nb.Frame | None:
+    def setup_preferences(self, parent: ttk.Notebook, cmdr: str, is_beta: bool) -> ttk.Frame | None:
         """
         setup_preferences is called by plugin_prefs below.
 
@@ -60,11 +61,11 @@ class ClickCounter:
         :return: The frame to add to the settings window
         """
         current_row = 0
-        frame = nb.Frame(parent)
+        frame = ttk.Frame(parent)
 
         # setup our config in a "Click Count: number"
-        nb.Label(frame, text='Click Count').grid(row=current_row)
-        nb.EntryMenu(frame, textvariable=self.click_count).grid(row=current_row, column=1)
+        ttk.Label(frame, text='Click Count').grid(row=current_row)
+        EntryMenu(frame, textvariable=self.click_count).grid(row=current_row, column=1)
         current_row += 1  # Always increment our row counter, makes for far easier tkinter design.
         return frame
 
@@ -81,7 +82,7 @@ class ClickCounter:
         # `config.get_int()` will work for re-loading the value.
         config.set('click_counter_count', int(self.click_count.get()))
 
-    def setup_main_ui(self, parent: tk.Frame) -> tk.Frame:
+    def setup_main_ui(self, parent: ttk.Frame) -> ttk.Frame:
         """
         Create our entry on the main EDMC UI.
 
@@ -91,16 +92,16 @@ class ClickCounter:
         :return: Our frame
         """
         current_row = 0
-        frame = tk.Frame(parent)
-        button = tk.Button(
+        frame = ttk.Frame(parent)
+        button = ttk.Button(
             frame,
             text="Count me",
             command=lambda: self.click_count.set(str(int(self.click_count.get()) + 1))
         )
         button.grid(row=current_row)
         current_row += 1
-        tk.Label(frame, text="Count:").grid(row=current_row, sticky=tk.W)
-        tk.Label(frame, textvariable=self.click_count).grid(row=current_row, column=1)
+        ttk.Label(frame, text="Count:").grid(row=current_row, sticky=tk.W)
+        ttk.Label(frame, textvariable=self.click_count).grid(row=current_row, column=1)
         return frame
 
 
@@ -127,7 +128,7 @@ def plugin_stop() -> None:
     return cc.on_unload()
 
 
-def plugin_prefs(parent: nb.Notebook, cmdr: str, is_beta: bool) -> nb.Frame | None:
+def plugin_prefs(parent: ttk.Notebook, cmdr: str, is_beta: bool) -> ttk.Frame | None:
     """
     Handle preferences tab for the plugin.
 
@@ -145,7 +146,7 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
     return cc.on_preferences_closed(cmdr, is_beta)
 
 
-def plugin_app(parent: tk.Frame) -> tk.Frame | None:
+def plugin_app(parent: ttk.Frame) -> ttk.Frame | None:
     """
     Set up the UI of the plugin.
 

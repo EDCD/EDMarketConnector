@@ -31,18 +31,17 @@ import tkinter as tk
 from platform import system
 from textwrap import dedent
 from threading import Lock
+from tkinter import ttk
 from typing import Any, Iterator, Mapping, MutableMapping
 import requests
 import companion
 import edmc_data
 import killswitch
-import myNotebook as nb  # noqa: N813
 import plug
 from companion import CAPIData, category_map
 from config import applongname, appname, appversion_nobuild, config, debug_senders, user_agent
 from EDMCLogging import get_main_logger
 from monitor import monitor
-from myNotebook import Frame
 from prefs import prefsVersion
 from ttkHyperlinkLabel import HyperlinkLabel
 from util import text
@@ -102,25 +101,25 @@ class This:
 
         # tkinter UI bits.
         self.eddn_station: tk.IntVar
-        self.eddn_station_button: nb.Checkbutton
+        self.eddn_station_button: ttk.Checkbutton
 
         self.eddn_system: tk.IntVar
-        self.eddn_system_button: nb.Checkbutton
+        self.eddn_system_button: ttk.Checkbutton
 
         self.eddn_delay: tk.IntVar
-        self.eddn_delay_button: nb.Checkbutton
+        self.eddn_delay_button: ttk.Checkbutton
 
         # Tracking UI
-        self.ui: tk.Frame
-        self.ui_system_name: tk.Label
-        self.ui_system_address: tk.Label
-        self.ui_j_body_name: tk.Label
-        self.ui_j_body_id: tk.Label
-        self.ui_j_body_type: tk.Label
-        self.ui_s_body_name: tk.Label
-        self.ui_station_name: tk.Label
-        self.ui_station_type: tk.Label
-        self.ui_station_marketid: tk.Label
+        self.ui: ttk.Frame
+        self.ui_system_name: ttk.Label
+        self.ui_system_address: ttk.Label
+        self.ui_j_body_name: ttk.Label
+        self.ui_j_body_id: ttk.Label
+        self.ui_j_body_type: ttk.Label
+        self.ui_s_body_name: ttk.Label
+        self.ui_station_name: ttk.Label
+        self.ui_station_type: ttk.Label
+        self.ui_station_marketid: ttk.Label
 
 
 this = This()
@@ -2000,7 +1999,7 @@ def plugin_start3(plugin_dir: str) -> str:
     return 'EDDN'
 
 
-def plugin_app(parent: tk.Tk) -> tk.Frame | None:
+def plugin_app(parent: tk.Tk) -> ttk.Frame | None:
     """
     Set up any plugin-specific UI.
 
@@ -2014,7 +2013,7 @@ def plugin_app(parent: tk.Tk) -> tk.Frame | None:
     this.eddn = EDDN(parent)
 
     if config.eddn_tracking_ui:
-        this.ui = tk.Frame(parent)
+        this.ui = ttk.Frame(parent)
 
         row = this.ui.grid_size()[1]
 
@@ -2022,15 +2021,15 @@ def plugin_app(parent: tk.Tk) -> tk.Frame | None:
         # System
         #######################################################################
         # SystemName
-        system_name_label = tk.Label(this.ui, text="J:SystemName:")
+        system_name_label = ttk.Label(this.ui, text="J:SystemName:")
         system_name_label.grid(row=row, column=0, sticky=tk.W)
-        this.ui_system_name = tk.Label(this.ui, name='eddn_track_system_name', anchor=tk.W)
+        this.ui_system_name = ttk.Label(this.ui, name='eddn_track_system_name', anchor=tk.W)
         this.ui_system_name.grid(row=row, column=1, sticky=tk.E)
         row += 1
         # SystemAddress
-        system_address_label = tk.Label(this.ui, text="J:SystemAddress:")
+        system_address_label = ttk.Label(this.ui, text="J:SystemAddress:")
         system_address_label.grid(row=row, column=0, sticky=tk.W)
-        this.ui_system_address = tk.Label(this.ui, name='eddn_track_system_address', anchor=tk.W)
+        this.ui_system_address = ttk.Label(this.ui, name='eddn_track_system_address', anchor=tk.W)
         this.ui_system_address.grid(row=row, column=1, sticky=tk.E)
         row += 1
         #######################################################################
@@ -2039,27 +2038,27 @@ def plugin_app(parent: tk.Tk) -> tk.Frame | None:
         # Body
         #######################################################################
         # Body Name from Journal
-        journal_body_name_label = tk.Label(this.ui, text="J:BodyName:")
+        journal_body_name_label = ttk.Label(this.ui, text="J:BodyName:")
         journal_body_name_label.grid(row=row, column=0, sticky=tk.W)
-        this.ui_j_body_name = tk.Label(this.ui, name='eddn_track_j_body_name', anchor=tk.W)
+        this.ui_j_body_name = ttk.Label(this.ui, name='eddn_track_j_body_name', anchor=tk.W)
         this.ui_j_body_name.grid(row=row, column=1, sticky=tk.E)
         row += 1
         # Body ID from Journal
-        journal_body_id_label = tk.Label(this.ui, text="J:BodyID:")
+        journal_body_id_label = ttk.Label(this.ui, text="J:BodyID:")
         journal_body_id_label.grid(row=row, column=0, sticky=tk.W)
-        this.ui_j_body_id = tk.Label(this.ui, name='eddn_track_j_body_id', anchor=tk.W)
+        this.ui_j_body_id = ttk.Label(this.ui, name='eddn_track_j_body_id', anchor=tk.W)
         this.ui_j_body_id.grid(row=row, column=1, sticky=tk.E)
         row += 1
         # Body Type from Journal
-        journal_body_type_label = tk.Label(this.ui, text="J:BodyType:")
+        journal_body_type_label = ttk.Label(this.ui, text="J:BodyType:")
         journal_body_type_label.grid(row=row, column=0, sticky=tk.W)
-        this.ui_j_body_type = tk.Label(this.ui, name='eddn_track_j_body_type', anchor=tk.W)
+        this.ui_j_body_type = ttk.Label(this.ui, name='eddn_track_j_body_type', anchor=tk.W)
         this.ui_j_body_type.grid(row=row, column=1, sticky=tk.E)
         row += 1
         # Body Name from Status.json
-        status_body_name_label = tk.Label(this.ui, text="S:BodyName:")
+        status_body_name_label = ttk.Label(this.ui, text="S:BodyName:")
         status_body_name_label.grid(row=row, column=0, sticky=tk.W)
-        this.ui_s_body_name = tk.Label(this.ui, name='eddn_track_s_body_name', anchor=tk.W)
+        this.ui_s_body_name = ttk.Label(this.ui, name='eddn_track_s_body_name', anchor=tk.W)
         this.ui_s_body_name.grid(row=row, column=1, sticky=tk.E)
         row += 1
         #######################################################################
@@ -2068,21 +2067,21 @@ def plugin_app(parent: tk.Tk) -> tk.Frame | None:
         # Station
         #######################################################################
         # Name
-        status_station_name_label = tk.Label(this.ui, text="J:StationName:")
+        status_station_name_label = ttk.Label(this.ui, text="J:StationName:")
         status_station_name_label.grid(row=row, column=0, sticky=tk.W)
-        this.ui_station_name = tk.Label(this.ui, name='eddn_track_station_name', anchor=tk.W)
+        this.ui_station_name = ttk.Label(this.ui, name='eddn_track_station_name', anchor=tk.W)
         this.ui_station_name.grid(row=row, column=1, sticky=tk.E)
         row += 1
         # Type
-        status_station_type_label = tk.Label(this.ui, text="J:StationType:")
+        status_station_type_label = ttk.Label(this.ui, text="J:StationType:")
         status_station_type_label.grid(row=row, column=0, sticky=tk.W)
-        this.ui_station_type = tk.Label(this.ui, name='eddn_track_station_type', anchor=tk.W)
+        this.ui_station_type = ttk.Label(this.ui, name='eddn_track_station_type', anchor=tk.W)
         this.ui_station_type.grid(row=row, column=1, sticky=tk.E)
         row += 1
         # MarketID
-        status_station_marketid_label = tk.Label(this.ui, text="J:StationID:")
+        status_station_marketid_label = ttk.Label(this.ui, text="J:StationID:")
         status_station_marketid_label.grid(row=row, column=0, sticky=tk.W)
-        this.ui_station_marketid = tk.Label(this.ui, name='eddn_track_station_id', anchor=tk.W)
+        this.ui_station_marketid = ttk.Label(this.ui, name='eddn_track_station_id', anchor=tk.W)
         this.ui_station_marketid.grid(row=row, column=1, sticky=tk.E)
         row += 1
         #######################################################################
@@ -2098,11 +2097,11 @@ def tracking_ui_update() -> None:
         return
 
     this.ui_system_name['text'] = '≪None≫'
-    if this.ui_system_name is not None:
+    if this.system_name is not None:
         this.ui_system_name['text'] = this.system_name
 
     this.ui_system_address['text'] = '≪None≫'
-    if this.ui_system_address is not None:
+    if this.system_address is not None:
         this.ui_system_address['text'] = this.system_address
 
     this.ui_j_body_name['text'] = '≪None≫'
@@ -2136,7 +2135,7 @@ def tracking_ui_update() -> None:
     this.ui.update_idletasks()
 
 
-def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:
+def plugin_prefs(parent, cmdr: str, is_beta: bool) -> ttk.Frame:
     """
     Set up Preferences pane for this plugin.
 
@@ -2155,20 +2154,19 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:
     else:
         output = config.get_int('output')
 
-    eddnframe = nb.Frame(parent)
+    eddnframe = ttk.Frame(parent)
 
     cur_row = 0
     HyperlinkLabel(
         eddnframe,
         text='Elite Dangerous Data Network',
-        background=nb.Label().cget('background'),
         url='https://github.com/EDCD/EDDN#eddn---elite-dangerous-data-network',
         underline=True
     ).grid(row=cur_row, padx=PADX, pady=PADY, sticky=tk.W)  # Don't translate
     cur_row += 1
 
     this.eddn_station = tk.IntVar(value=(output & config.OUT_EDDN_SEND_STATION_DATA) and 1)
-    this.eddn_station_button = nb.Checkbutton(
+    this.eddn_station_button = ttk.Checkbutton(
         eddnframe,
         # LANG: Enable EDDN support for station data checkbox label
         text=tr.tl('Send station data to the Elite Dangerous Data Network'),
@@ -2180,7 +2178,7 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:
 
     this.eddn_system = tk.IntVar(value=(output & config.OUT_EDDN_SEND_NON_STATION) and 1)
     # Output setting new in E:D 2.2
-    this.eddn_system_button = nb.Checkbutton(
+    this.eddn_system_button = ttk.Checkbutton(
         eddnframe,
         # LANG: Enable EDDN support for system and other scan data checkbox label
         text=tr.tl('Send system and scan data to the Elite Dangerous Data Network'),
@@ -2192,7 +2190,7 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:
 
     this.eddn_delay = tk.IntVar(value=(output & config.OUT_EDDN_DELAY) and 1)
     # Output setting under 'Send system and scan data to the Elite Dangerous Data Network' new in E:D 2.2
-    this.eddn_delay_button = nb.Checkbutton(
+    this.eddn_delay_button = ttk.Checkbutton(
         eddnframe,
         # LANG: EDDN delay sending until docked option is on, this message notes that a send was skipped due to this
         text=tr.tl('Delay sending until docked'),

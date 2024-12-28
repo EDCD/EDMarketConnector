@@ -191,6 +191,7 @@ class AbstractConfig(abc.ABC):
     plugin_dir_path: pathlib.Path
     default_plugin_dir_path: pathlib.Path
     internal_plugin_dir_path: pathlib.Path
+    internal_theme_dir_path: pathlib.Path
     respath_path: pathlib.Path
     home_path: pathlib.Path
     default_journal_dir_path: pathlib.Path
@@ -201,6 +202,7 @@ class AbstractConfig(abc.ABC):
     __auth_force_edmc_protocol = False  # Should we force edmc:// protocol ?
     __eddn_url = None  # Non-default EDDN URL
     __eddn_tracking_ui = False  # Show EDDN tracking UI ?
+    __ttk_catalog = False  # Load Ttk catalog plugin ?
 
     def __init__(self) -> None:
         self.home_path = pathlib.Path.home()
@@ -243,6 +245,19 @@ class AbstractConfig(abc.ABC):
         :return: bool - True if we should use localhost web server.
         """
         return self.__auth_force_edmc_protocol
+
+    def set_ttk_catalog(self):
+        """Set flag to load the Ttk widget catalog plugin."""
+        self.__ttk_catalog = True
+
+    @property
+    def ttk_catalog(self) -> bool:
+        """
+        Determine if the Ttk widget catalog plugin is loaded.
+
+        :return: bool - Should the Ttk catalog plugin be loaded?
+        """
+        return self.__ttk_catalog
 
     def set_eddn_url(self, eddn_url: str):
         """Set the specified eddn URL."""

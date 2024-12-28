@@ -187,6 +187,12 @@ if __name__ == '__main__':  # noqa: C901
         '--killswitches-file',
         help='Specify a custom killswitches file',
     )
+
+    parser.add_argument(
+        '--ttk-catalog',
+        help='Replace plugins with a catalog of Ttk widgets',
+        action='store_true',
+    )
     ###########################################################################
 
     args: argparse.Namespace = parser.parse_args()
@@ -223,6 +229,9 @@ if __name__ == '__main__':  # noqa: C901
     if args.eddn_tracking_ui:
         config.set_eddn_tracking_ui()
 
+    if args.ttk_catalog:
+        config.set_ttk_catalog()
+
     if args.force_edmc_protocol:
         if sys.platform == 'win32':
             config.set_auth_force_edmc_protocol()
@@ -258,7 +267,7 @@ if __name__ == '__main__':  # noqa: C901
             # If *this* instance hasn't locked, then another already has and we
             # now need to do the edmc:// checks for auth callback
             if locked != JournalLockResult.LOCKED:
-                from ctypes import windll, create_unicode_buffer, WINFUNCTYPE
+                from ctypes import windll, WINFUNCTYPE
                 from ctypes.wintypes import BOOL, HWND, LPARAM
                 import win32gui
                 import win32api
@@ -278,7 +287,7 @@ if __name__ == '__main__':  # noqa: C901
                     return None
 
                 @WINFUNCTYPE(BOOL, HWND, LPARAM)
-                def enumwindowsproc(window_handle, l_param):  # noqa: CCR001
+                def enumwindowsproc(window_handle, l_param):
                     """
                     Determine if any window for the Application exists.
 
@@ -293,25 +302,22 @@ if __name__ == '__main__':  # noqa: C901
                     :param l_param: The second parameter to the EnumWindows() call.
                     :return: False if we found a match, else True to continue iteration
                     """
-                    # class name limited to 256 - https://msdn.microsoft.com/en-us/library/windows/desktop/ms633576
-                    cls = create_unicode_buffer(257)
                     # This conditional is exploded to make debugging slightly easier
-                    if win32gui.GetClassName(window_handle):
-                        if cls.value == 'TkTopLevel':
-                            if window_title(window_handle) == applongname:
-                                if GetProcessHandleFromHwnd(window_handle):
-                                    # If GetProcessHandleFromHwnd succeeds then the app is already running as this user
-                                    if len(sys.argv) > 1 and sys.argv[1].startswith(protocolhandler_redirect):
-                                        CoInitializeEx(0, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)
-                                        # Wait for it to be responsive to avoid ShellExecute recursing
-                                        win32gui.ShowWindow(window_handle, win32con.SW_RESTORE)
-                                        win32api.ShellExecute(0, None, sys.argv[1], None, None, win32con.SW_RESTORE)
+                    if win32gui.GetClassName(window_handle) == 'TkTopLevel':
+                        if window_title(window_handle) == applongname:
+                            if GetProcessHandleFromHwnd(window_handle):
+                                # If GetProcessHandleFromHwnd succeeds then the app is already running as this user
+                                if len(sys.argv) > 1 and sys.argv[1].startswith(protocolhandler_redirect):
+                                    CoInitializeEx(0, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)
+                                    # Wait for it to be responsive to avoid ShellExecute recursing
+                                    win32gui.ShowWindow(window_handle, win32con.SW_RESTORE)
+                                    win32api.ShellExecute(0, None, sys.argv[1], None, None, win32con.SW_RESTORE)
 
-                                    else:
-                                        ShowWindowAsync(window_handle, win32con.SW_RESTORE)
-                                        win32gui.SetForegroundWindow(window_handle)
+                                else:
+                                    ShowWindowAsync(window_handle, win32con.SW_RESTORE)
+                                    win32gui.SetForegroundWindow(window_handle)
 
-                            return False  # Indicate window found, so stop iterating
+                        return False  # Indicate window found, so stop iterating
 
                     # Indicate that EnumWindows() needs to continue iterating
                     return True  # Do not remove, else this function as a callback breaks
@@ -393,12 +399,12 @@ import tkinter.font
 import tkinter.messagebox
 from tkinter import ttk
 import commodity
+import companion
 import plug
 import prefs
 import protocol
 import stats
 import td
-from commodity import COMMODITY_CSV
 from dashboard import dashboard
 from edmc_data import ship_name_map
 from hotkey import hotkeymgr
@@ -432,6 +438,7 @@ class AppWindow:
         self.minimizing = False
         self.w.rowconfigure(0, weight=1)
         self.w.columnconfigure(0, weight=1)
+        theme.initialize(self.w)
 
         # companion needs to be able to send <<CAPIResponse>> events
         companion.session.set_tk_master(self.w)
@@ -458,27 +465,19 @@ class AppWindow:
             image_path = config.respath_path / 'io.edcd.EDMarketConnector.png'
             self.w.tk.call('wm', 'iconphoto', self.w, '-default', tk.PhotoImage(file=image_path))
 
-        # TODO: Export to files and merge from them in future ?
-        self.theme_icon = tk.PhotoImage(
-            data='R0lGODlhFAAQAMZQAAoKCQoKCgsKCQwKCQsLCgwLCg4LCQ4LCg0MCg8MCRAMCRANChINCREOChIOChQPChgQChgRCxwTCyYVCSoXCS0YCTkdCTseCT0fCTsjDU0jB0EnDU8lB1ElB1MnCFIoCFMoCEkrDlkqCFwrCGEuCWIuCGQvCFs0D1w1D2wyCG0yCF82D182EHE0CHM0CHQ1CGQ5EHU2CHc3CHs4CH45CIA6CIE7CJdECIdLEolMEohQE5BQE41SFJBTE5lUE5pVE5RXFKNaFKVbFLVjFbZkFrxnFr9oFsNqFsVrF8RsFshtF89xF9NzGNh1GNl2GP+KG////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////yH5BAEKAH8ALAAAAAAUABAAAAeegAGCgiGDhoeIRDiIjIZGKzmNiAQBQxkRTU6am0tPCJSGShuSAUcLoIIbRYMFra4FAUgQAQCGJz6CDQ67vAFJJBi0hjBBD0w9PMnJOkAiJhaIKEI7HRoc19ceNAolwbWDLD8uAQnl5ga1I9CHEjEBAvDxAoMtFIYCBy+kFDKHAgM3ZtgYSLAGgwkp3pEyBOJCC2ELB31QATGioAoVAwEAOw==')  # noqa: E501
-        self.theme_minimize = tk.BitmapImage(
-            data='#define im_width 16\n#define im_height 16\nstatic unsigned char im_bits[] = {\n   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,\n   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfc, 0x3f,\n   0xfc, 0x3f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };\n')  # noqa: E501
-        self.theme_close = tk.BitmapImage(
-            data='#define im_width 16\n#define im_height 16\nstatic unsigned char im_bits[] = {\n   0x00, 0x00, 0x00, 0x00, 0x0c, 0x30, 0x1c, 0x38, 0x38, 0x1c, 0x70, 0x0e,\n   0xe0, 0x07, 0xc0, 0x03, 0xc0, 0x03, 0xe0, 0x07, 0x70, 0x0e, 0x38, 0x1c,\n   0x1c, 0x38, 0x0c, 0x30, 0x00, 0x00, 0x00, 0x00 };\n')  # noqa: E501
-
-        frame = tk.Frame(self.w, name=appname.lower())
+        frame = ttk.Frame(self.w, name=appname.lower())
         frame.grid(sticky=tk.NSEW)
         frame.columnconfigure(1, weight=1)
 
-        self.cmdr_label = tk.Label(frame, name='cmdr_label')
-        self.cmdr = tk.Label(frame, compound=tk.RIGHT, anchor=tk.W, name='cmdr')
-        self.ship_label = tk.Label(frame, name='ship_label')
+        self.cmdr_label = ttk.Label(frame, name='cmdr_label')
+        self.cmdr = ttk.Label(frame, compound=tk.RIGHT, anchor=tk.W, name='cmdr')
+        self.ship_label = ttk.Label(frame, name='ship_label')
         self.ship = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.shipyard_url, name='ship', popup_copy=True)
-        self.suit_label = tk.Label(frame, name='suit_label')
-        self.suit = tk.Label(frame, compound=tk.RIGHT, anchor=tk.W, name='suit')
-        self.system_label = tk.Label(frame, name='system_label')
+        self.suit_label = ttk.Label(frame, name='suit_label')
+        self.suit = ttk.Label(frame, compound=tk.RIGHT, anchor=tk.W, name='suit')
+        self.system_label = ttk.Label(frame, name='system_label')
         self.system = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.system_url, popup_copy=True, name='system')
-        self.station_label = tk.Label(frame, name='station_label')
+        self.station_label = ttk.Label(frame, name='station_label')
         self.station = HyperlinkLabel(frame, compound=tk.RIGHT, url=self.station_url, name='station', popup_copy=True)
         # system and station text is set/updated by the 'provider' plugins
         # edsm and inara.  Look for:
@@ -511,11 +510,9 @@ class AppWindow:
         plugin_no = 0
         for plugin in plug.PLUGINS:
             # Per plugin separator
-            plugin_sep = tk.Frame(
-                frame, highlightthickness=1, name=f"plugin_hr_{plugin_no + 1}"
-            )
+            plugin_sep = ttk.Separator(frame, name=f"plugin_hr_{plugin_no + 1}")
             # Per plugin frame, for it to use as its parent for own widgets
-            plugin_frame = tk.Frame(
+            plugin_frame = ttk.Frame(
                 frame,
                 name=f"plugin_{plugin_no + 1}"
             )
@@ -550,30 +547,18 @@ class AppWindow:
             default=tk.ACTIVE,
             state=tk.DISABLED
         )
-        self.theme_button = tk.Label(
-            frame,
-            name='themed_update_button',
-            width=28,
-            state=tk.DISABLED
-        )
 
         ui_row = frame.grid_size()[1]
         self.button.grid(row=ui_row, columnspan=2, sticky=tk.NSEW)
-        self.theme_button.grid(row=ui_row, columnspan=2, sticky=tk.NSEW)
-        theme.register_alternate((self.button, self.theme_button, self.theme_button),
-                                 {'row': ui_row, 'columnspan': 2, 'sticky': tk.NSEW})
         self.button.bind('<Button-1>', self.capi_request_data)
-        theme.button_bind(self.theme_button, self.capi_request_data)
 
         # Bottom 'status' line.
-        self.status = tk.Label(frame, name='status', anchor=tk.W)
+        self.status = ttk.Label(frame, name='status', anchor=tk.W)
         self.status.grid(columnspan=2, sticky=tk.EW)
 
         for child in frame.winfo_children():
             child.grid_configure(padx=self.PADX, pady=(
-                sys.platform != 'win32' or isinstance(child, tk.Frame)) and 2 or 0)
-
-        self.menubar = tk.Menu()
+                sys.platform != 'win32' or isinstance(child, ttk.Frame)) and 2 or 0)
 
         # This used to be *after* the menu setup for some reason, but is testing
         # as working (both internal and external) like this. -Ath
@@ -587,17 +572,15 @@ class AppWindow:
             self.updater = update.Updater(tkroot=self.w)
             self.updater.check_for_updates()  # Sparkle / WinSparkle does this automatically for packaged apps
 
-        self.file_menu = self.view_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)
+        self.file_menu = self.view_menu = tk.Menu(self.w, tearoff=tk.FALSE)
         self.file_menu.add_command(command=lambda: stats.StatsDialog(self.w, self.status))
         self.file_menu.add_command(command=self.save_raw)
         self.file_menu.add_command(command=lambda: prefs.PreferencesDialog(self.w, self.postprefs))
         self.file_menu.add_separator()
         self.file_menu.add_command(command=self.onexit)
-        self.menubar.add_cascade(menu=self.file_menu)
-        self.edit_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)
+        self.edit_menu = tk.Menu(self.w, tearoff=tk.FALSE)
         self.edit_menu.add_command(accelerator='Ctrl+C', state=tk.DISABLED, command=self.copy)
-        self.menubar.add_cascade(menu=self.edit_menu)
-        self.help_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)  # type: ignore
+        self.help_menu = tk.Menu(self.w, tearoff=tk.FALSE)
         self.help_menu.add_command(command=self.help_general)  # Documentation
         self.help_menu.add_command(command=self.help_troubleshooting)  # Troubleshooting
         self.help_menu.add_command(command=self.help_report_a_bug)  # Report A Bug
@@ -610,77 +593,36 @@ class AppWindow:
         self.help_menu.add_command(command=lambda: prefs.open_folder(logfile_loc))  # Open Log Folder
         self.help_menu.add_command(command=lambda: prefs.help_open_system_profiler(self))  # Open Log Folde
 
-        self.menubar.add_cascade(menu=self.help_menu)
         if sys.platform == 'win32':
             # Must be added after at least one "real" menu entry
             self.always_ontop = tk.BooleanVar(value=bool(config.get_int('always_ontop')))
-            self.system_menu = tk.Menu(self.menubar, name='system', tearoff=tk.FALSE)
+            self.system_menu = tk.Menu(self.w, name='system', tearoff=tk.FALSE)
             self.system_menu.add_separator()
             # LANG: Appearance - Label for checkbox to select if application always on top
             self.system_menu.add_checkbutton(label=tr.tl('Always on top'),
                                              variable=self.always_ontop,
                                              command=self.ontop_changed)  # Appearance setting
-            self.menubar.add_cascade(menu=self.system_menu)
         self.w.bind('<Control-c>', self.copy)
 
         # Bind to the Default theme minimise button
         self.w.bind("<Unmap>", self.default_iconify)
 
         self.w.protocol("WM_DELETE_WINDOW", self.onexit)
-        theme.register(self.menubar)  # menus and children aren't automatically registered
-        theme.register(self.file_menu)
-        theme.register(self.edit_menu)
-        theme.register(self.help_menu)
 
-        # Alternate title bar and menu for dark theme
-        self.theme_menubar = tk.Frame(frame, name="alternate_menubar")
+        self.theme_menubar = ttk.Frame(frame, name="alternate_menubar")
         self.theme_menubar.columnconfigure(2, weight=1)
-        theme_titlebar = tk.Label(
-            self.theme_menubar,
-            name="alternate_titlebar",
-            text=applongname,
-            image=self.theme_icon, cursor='fleur',
-            anchor=tk.W, compound=tk.LEFT
-        )
-        theme_titlebar.grid(columnspan=3, padx=2, sticky=tk.NSEW)
-        self.drag_offset: tuple[int | None, int | None] = (None, None)
-        theme_titlebar.bind('<Button-1>', self.drag_start)
-        theme_titlebar.bind('<B1-Motion>', self.drag_continue)
-        theme_titlebar.bind('<ButtonRelease-1>', self.drag_end)
-        theme_minimize = tk.Label(self.theme_menubar, image=self.theme_minimize)
-        theme_minimize.grid(row=0, column=3, padx=2)
-        theme.button_bind(theme_minimize, self.oniconify, image=self.theme_minimize)
-        theme_close = tk.Label(self.theme_menubar, image=self.theme_close)
-        theme_close.grid(row=0, column=4, padx=2)
-        theme.button_bind(theme_close, self.onexit, image=self.theme_close)
-        self.theme_file_menu = tk.Label(self.theme_menubar, anchor=tk.W)
+        self.title_gap = ttk.Frame(self.theme_menubar, name='title_gap')
+        self.title_gap.grid(row=0, columnspan=3)
+        self.theme_file_menu = ttk.Menubutton(self.theme_menubar, menu=self.file_menu, style='Menubar.TMenubutton')
         self.theme_file_menu.grid(row=1, column=0, padx=self.PADX, sticky=tk.W)
-        theme.button_bind(self.theme_file_menu,
-                          lambda e: self.file_menu.tk_popup(e.widget.winfo_rootx(),
-                                                            e.widget.winfo_rooty()
-                                                            + e.widget.winfo_height()))
-        self.theme_edit_menu = tk.Label(self.theme_menubar, anchor=tk.W)
+        self.theme_edit_menu = ttk.Menubutton(self.theme_menubar, menu=self.edit_menu, style='Menubar.TMenubutton')
         self.theme_edit_menu.grid(row=1, column=1, sticky=tk.W)
-        theme.button_bind(self.theme_edit_menu,
-                          lambda e: self.edit_menu.tk_popup(e.widget.winfo_rootx(),
-                                                            e.widget.winfo_rooty()
-                                                            + e.widget.winfo_height()))
-        self.theme_help_menu = tk.Label(self.theme_menubar, anchor=tk.W)
+        self.theme_help_menu = ttk.Menubutton(self.theme_menubar, menu=self.help_menu, style='Menubar.TMenubutton')
         self.theme_help_menu.grid(row=1, column=2, sticky=tk.W)
-        theme.button_bind(self.theme_help_menu,
-                          lambda e: self.help_menu.tk_popup(e.widget.winfo_rootx(),
-                                                            e.widget.winfo_rooty()
-                                                            + e.widget.winfo_height()))
-        tk.Frame(self.theme_menubar, highlightthickness=1).grid(columnspan=5, padx=self.PADX, sticky=tk.EW)
-        theme.register(self.theme_minimize)  # images aren't automatically registered
-        theme.register(self.theme_close)
-        self.blank_menubar = tk.Frame(frame, name="blank_menubar")
-        tk.Label(self.blank_menubar).grid()
-        tk.Label(self.blank_menubar).grid()
-        tk.Frame(self.blank_menubar, height=2).grid()
-        theme.register_alternate((self.menubar, self.theme_menubar, self.blank_menubar),
-                                 {'row': 0, 'columnspan': 2, 'sticky': tk.NSEW})
-        self.w.resizable(tk.TRUE, tk.FALSE)
+        ttk.Separator(self.theme_menubar).grid(columnspan=5, padx=self.PADX, sticky=tk.EW)
+        self.theme_menubar.grid(row=0, columnspan=2, sticky=tk.NSEW)
+        self.w.resizable(tk.FALSE, tk.FALSE)
+        theme.apply()
 
         # update geometry
         if config.get_str('geometry'):
@@ -702,14 +644,6 @@ class AppWindow:
 
         self.w.attributes('-topmost', config.get_int('always_ontop') and 1 or 0)
 
-        theme.register(frame)
-        theme.apply(self.w)
-
-        self.w.bind('<Map>', self.onmap)  # Special handling for overrideredict
-        self.w.bind('<Enter>', self.onenter)  # Special handling for transparency
-        self.w.bind('<FocusIn>', self.onenter)  # Special handling for transparency
-        self.w.bind('<Leave>', self.onleave)  # Special handling for transparency
-        self.w.bind('<FocusOut>', self.onleave)  # Special handling for transparency
         self.w.bind('<Return>', self.capi_request_data)
         self.w.bind('<KP_Enter>', self.capi_request_data)
         self.w.bind_all('<<Invoke>>', self.capi_request_data)  # Ask for CAPI queries to be performed
@@ -721,7 +655,7 @@ class AppWindow:
         self.w.bind_all('<<Quit>>', self.onexit)  # Updater
 
         # Check for Valid Providers
-        validate_providers()
+        validate_providers(self.w)
         if monitor.cmdr is None:
             self.status['text'] = tr.tl("Awaiting Full CMDR Login")  # LANG: Await Full CMDR Login to Game
 
@@ -739,10 +673,7 @@ class AppWindow:
         self.toggle_suit_row(visible=False)
         if args.start_min:
             logger.warning("Trying to start minimized")
-            if root.overrideredirect():
-                self.oniconify()
-            else:
-                self.w.wm_iconify()
+            self.w.wm_iconify()
 
     def update_suit_text(self) -> None:
         """Update the suit text for current type and loadout."""
@@ -846,7 +777,7 @@ class AppWindow:
             )
             restart_box.show()
             if restart_box:
-                app.onexit(restart=True)
+                self.onexit(restart=True)
 
     def set_labels(self):
         """Set main window labels, e.g. after language change."""
@@ -856,10 +787,7 @@ class AppWindow:
         self.suit_label['text'] = tr.tl('Suit') + ':'  # LANG: Label for 'Suit' line in main UI
         self.system_label['text'] = tr.tl('System') + ':'  # LANG: Label for 'System' line in main UI
         self.station_label['text'] = tr.tl('Station') + ':'  # LANG: Label for 'Station' line in main UI
-        self.button['text'] = self.theme_button['text'] = tr.tl('Update')  # LANG: Update button in main window
-        self.menubar.entryconfigure(1, label=tr.tl('File'))  # LANG: 'File' menu title
-        self.menubar.entryconfigure(2, label=tr.tl('Edit'))  # LANG: 'Edit' menu title
-        self.menubar.entryconfigure(3, label=tr.tl('Help'))  # LANG: 'Help' menu title
+        self.button['text'] = tr.tl('Update')  # LANG: Update button in main window
         self.theme_file_menu['text'] = tr.tl('File')  # LANG: 'File' menu title
         self.theme_edit_menu['text'] = tr.tl('Edit')  # LANG: 'Edit' menu title
         self.theme_help_menu['text'] = tr.tl('Help')  # LANG: 'Help' menu title
@@ -900,7 +828,7 @@ class AppWindow:
             # LANG: Status - Attempting to get a Frontier Auth Access Token
             self.status['text'] = tr.tl('Logging in...')
 
-        self.button['state'] = self.theme_button['state'] = tk.DISABLED
+        self.button['state'] = tk.DISABLED
 
         self.file_menu.entryconfigure(0, state=tk.DISABLED)  # Status
         self.file_menu.entryconfigure(1, state=tk.DISABLED)  # Save Raw Data
@@ -923,7 +851,7 @@ class AppWindow:
 
         self.cooldown()
 
-    def export_market_data(self, data: 'CAPIData') -> bool:  # noqa: CCR001
+    def export_market_data(self, data: 'companion.CAPIData') -> bool:  # noqa: CCR001
         """
         Export CAPI market data.
 
@@ -956,7 +884,7 @@ class AppWindow:
                 # Fixup anomalies in the comodity data
                 fixed = companion.fixup(data)
                 if output_flags & config.OUT_MKT_CSV:
-                    commodity.export(fixed, COMMODITY_CSV)
+                    commodity.export(fixed, commodity.COMMODITY_CSV)
 
                 if output_flags & config.OUT_MKT_TD:
                     td.export(fixed)
@@ -1050,7 +978,7 @@ class AppWindow:
 
             # LANG: Status - Attempting to retrieve data from Frontier CAPI
             self.status['text'] = tr.tl('Fetching data...')
-            self.button['state'] = self.theme_button['state'] = tk.DISABLED
+            self.button['state'] = tk.DISABLED
             self.w.update_idletasks()
 
         query_time = int(time())
@@ -1269,7 +1197,7 @@ class AppWindow:
                         if (suit := loadout.get('suit')) is not None:
                             if (suitname := suit.get('edmcName')) is not None:
                                 # We've been paranoid about loadout->suit->suitname, now just assume loadouts is there
-                                loadout_name = index_possibly_sparse_list(
+                                loadout_name = companion.index_possibly_sparse_list(
                                     capi_response.capi_data['loadouts'], loadout['loadoutSlotId']
                                 )['name']
 
@@ -1668,11 +1596,11 @@ class AppWindow:
             # Update button in main window
             cooldown_time = int(self.capi_query_holdoff_time - time())
             # LANG: Cooldown on 'Update' button
-            self.button['text'] = self.theme_button['text'] = tr.tl('cooldown {SS}s').format(SS=cooldown_time)
+            self.button['text'] = tr.tl('cooldown {SS}s').format(SS=cooldown_time)
             self.w.after(1000, self.cooldown)
         else:
-            self.button['text'] = self.theme_button['text'] = tr.tl('Update')  # LANG: Update button in main window
-            self.button['state'] = self.theme_button['state'] = (
+            self.button['text'] = tr.tl('Update')  # LANG: Update button in main window
+            self.button['state'] = (
                 monitor.cmdr and
                 monitor.mode and
                 monitor.mode != 'CQC' and
@@ -1916,56 +1844,13 @@ class AppWindow:
         if restart:
             os.execv(sys.executable, ['python'] + sys.argv)
 
-    def drag_start(self, event) -> None:
-        """Initiate dragging the window."""
-        self.drag_offset = (event.x_root - self.w.winfo_rootx(), event.y_root - self.w.winfo_rooty())
-
-    def drag_continue(self, event) -> None:
-        """Continued handling of window drag."""
-        if self.drag_offset[0]:
-            offset_x = event.x_root - self.drag_offset[0]
-            offset_y = event.y_root - self.drag_offset[1]
-            self.w.geometry(f'+{offset_x:d}+{offset_y:d}')
-
-    def drag_end(self, event) -> None:
-        """Handle end of window dragging."""
-        self.drag_offset = (None, None)
-
     def default_iconify(self, event=None) -> None:
-        """Handle the Windows default theme 'minimise' button."""
+        """Handle the Windows 'minimize' button."""
         # If we're meant to "minimize to system tray" then hide the window so no taskbar icon is seen
         if sys.platform == 'win32' and config.get_bool('minimize_system_tray'):
             # This gets called for more than the root widget, so only react to that
             if str(event.widget) == '.':
                 self.w.withdraw()
-
-    def oniconify(self, event=None) -> None:
-        """Handle the minimize button on non-Default theme main window."""
-        self.w.overrideredirect(False)  # Can't iconize while overrideredirect
-        self.w.iconify()
-        self.w.update_idletasks()  # Size and windows styles get recalculated here
-        self.w.wait_visibility()  # Need main window to be re-created before returning
-        theme.active = None  # So theme will be re-applied on map
-
-    # TODO: Confirm this is unused and remove.
-    def onmap(self, event=None) -> None:
-        """Perform a now unused function."""
-        if event.widget == self.w:
-            theme.apply(self.w)
-
-    def onenter(self, event=None) -> None:
-        """Handle when our window gains focus."""
-        if config.get_int('theme') == theme.THEME_TRANSPARENT:
-            self.w.attributes("-transparentcolor", '')
-            self.blank_menubar.grid_remove()
-            self.theme_menubar.grid(row=0, columnspan=2, sticky=tk.NSEW)
-
-    def onleave(self, event=None) -> None:
-        """Handle when our window loses focus."""
-        if config.get_int('theme') == theme.THEME_TRANSPARENT and event.widget == self.w:
-            self.w.attributes("-transparentcolor", 'grey4')
-            self.theme_menubar.grid_remove()
-            self.blank_menubar.grid(row=0, columnspan=2, sticky=tk.NSEW)
 
 
 def test_logging() -> None:
@@ -1993,7 +1878,7 @@ def setup_killswitches(filename: str | None):
     killswitch.setup_main_list(filename)
 
 
-def show_killswitch_poppup(root=None):
+def show_killswitch_poppup(root: tk.Tk):
     """Show a warning popup if there are any killswitches that match the current version."""
     if len(kills := killswitch.kills_for_version()) == 0:
         return
@@ -2029,7 +1914,7 @@ def show_killswitch_poppup(root=None):
     ok_button.grid(columnspan=2, sticky=tk.EW)
 
 
-def validate_providers():
+def validate_providers(root: tk.Tk):
     """Check if Config has an invalid provider set, and reset to default if we do."""
     reset_providers = {}
     station_provider: str = config.get_str("station_provider")
@@ -2076,7 +1961,8 @@ def validate_providers():
 
 
 # Run the app
-if __name__ == "__main__":  # noqa: C901
+def main():  # noqa: C901, CCR001
+    """Run the main code of the program."""
     logger.info(f'Startup v{appversion()} : Running on Python v{sys.version}')
     logger.debug(f'''Platform: {sys.platform} {sys.platform == "win32" and sys.getwindowsversion()}
 argv[0]: {sys.argv[0]}
@@ -2153,11 +2039,6 @@ sys.path: {sys.path}'''
 
             else:
                 log_locale('After switching to UTF-8 encoding (same language)')
-
-    # HACK: n/a | 2021-11-24: --force-localserver-auth does not work if companion is imported early -cont.
-    # HACK: n/a | 2021-11-24: as we modify config before this is used.
-    import companion
-    from companion import CAPIData, index_possibly_sparse_list
 
     # Do this after locale silliness, just in case
     if args.forget_frontier_auth:
@@ -2331,3 +2212,13 @@ sys.path: {sys.path}'''
         logger.info("Ctrl+C Detected, Attempting Clean Shutdown")
         app.onexit()
     logger.info('Exiting')
+
+
+if __name__ == '__main__':
+    if sys.platform == 'win32':
+        from winrt.microsoft.windows.applicationmodel.dynamicdependency import bootstrap
+
+        with bootstrap.initialize(options=bootstrap.InitializeOptions.ON_NO_MATCH_SHOW_UI):
+            main()
+    else:
+        main()

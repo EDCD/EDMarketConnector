@@ -8,7 +8,7 @@ See LICENSE file.
 from __future__ import annotations
 
 import copy
-import importlib
+import importlib.util
 import logging
 import operator
 import os
@@ -19,7 +19,6 @@ from tkinter import ttk
 from typing import Any, Mapping, MutableMapping
 
 import companion
-import myNotebook as nb  # noqa: N813
 from config import config
 from EDMCLogging import get_main_logger
 
@@ -131,7 +130,7 @@ class Plugin:
 
         return None
 
-    def get_prefs(self, parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> nb.Frame | None:
+    def get_prefs(self, parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> ttk.Frame | None:
         """
         If the plugin provides a prefs frame, create and return it.
 
@@ -139,13 +138,13 @@ class Plugin:
         :param cmdr: current Cmdr name (or None). Relevant if you want to have
            different settings for different user accounts.
         :param is_beta: whether the player is in a Beta universe.
-        :returns: a myNotebook Frame
+        :returns: a ttk Frame
         """
         plugin_prefs = self._get_func('plugin_prefs')
         if plugin_prefs:
             try:
                 frame = plugin_prefs(parent, cmdr, is_beta)
-                if isinstance(frame, nb.Frame):
+                if isinstance(frame, ttk.Frame):
                     return frame
                 raise AssertionError
             except Exception:
@@ -163,8 +162,11 @@ def load_plugins(master: tk.Tk) -> None:
     # Add plugin folder to load path so packages can be loaded from plugin folder
     sys.path.append(config.plugin_dir)
 
-    found = _load_found_plugins()
-    PLUGINS.extend(sorted(found, key=lambda p: operator.attrgetter('name')(p).lower()))
+    if config.ttk_catalog:
+        PLUGINS.append(_load_ttk_catalog_plugin())
+    else:
+        found = _load_found_plugins()
+        PLUGINS.extend(sorted(found, key=lambda p: operator.attrgetter('name')(p).lower()))
 
 
 def _load_internal_plugins():
@@ -180,6 +182,15 @@ def _load_internal_plugins():
             except Exception:
                 logger.exception(f'Failure loading internal Plugin "{name}"')
     return internal
+
+
+def _load_ttk_catalog_plugin():
+    try:
+        plugin = Plugin('ttk_catalog', config.internal_plugin_dir_path / '_ttk_catalog.py', logger)
+        plugin.folder = None
+        return plugin
+    except Exception:
+        logger.exception('Failure loading internal Plugin "ttk_catalog"')
 
 
 def _load_found_plugins():
