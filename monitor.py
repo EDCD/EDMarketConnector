@@ -337,9 +337,9 @@ class EDLogs(FileSystemEventHandler):
 
     def on_created(self, event: 'FileSystemEvent') -> None:
         """Watchdog callback when, e.g. client (re)started."""
-        if not event.is_directory and self._RE_LOGFILE.search(basename(event.src_path)):
+        if not event.is_directory and self._RE_LOGFILE.search(str(basename(event.src_path))):
 
-            self.logfile = event.src_path
+            self.logfile = event.src_path  # type: ignore
 
     def worker(self) -> None:  # noqa: C901, CCR001
         """
