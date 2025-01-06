@@ -149,7 +149,7 @@ def main() -> None:
     # Buttons
     sys_report_btn = ttk.Button(
         root,
-        text="Copy System Report",
+        text="Copy System Report \U0001F5D0",
         command=lambda: copy_sys_report(root, sys_report),
     )
     sys_report_btn.grid(row=3, column=0, padx=20, pady=10, sticky="w")
