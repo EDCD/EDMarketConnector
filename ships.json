@@ -111,6 +111,10 @@
         "hullMass": 250,
         "reserveFuelCapacity": 0.5
     },
+    "Mandalay": {
+        "hullMass": 230,
+        "reserveFuelCapacity": 0.52
+    },
     "Orca": {
         "hullMass": 290,
         "reserveFuelCapacity": 0.79
@@ -137,6 +141,10 @@
     },
     "Type-7 Transporter": {
         "hullMass": 350,
+        "reserveFuelCapacity": 0.52
+    },
+    "Type-8 Transporter": {
+        "hullMass": 400,
         "reserveFuelCapacity": 0.52
     },
     "Type-9 Heavy": {
