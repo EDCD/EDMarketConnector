@@ -710,8 +710,8 @@ class EDLogs(FileSystemEventHandler):
                     'Ship': entry["Ship"],
                     'ShipName': entry['ShipName'],
                     'ShipIdent': entry['ShipIdent'],
-                    'HullValue': entry['HullValue'],
-                    'ModulesValue': entry['ModulesValue'],
+                    'HullValue': entry.get('HullValue'),
+                    'ModulesValue': entry.get('ModulesValue'),
                     'Rebuy': entry['Rebuy'],
                     'MaxJumpRange': entry['MaxJumpRange'],
                     'UnladenMass': entry['UnladenMass'],
@@ -2151,7 +2151,7 @@ class EDLogs(FileSystemEventHandler):
             try:
                 with p.oneshot():
                     if p.status() not in [psutil.STATUS_RUNNING, psutil.STATUS_SLEEPING]:
-                        raise psutil.NoSuchProcess
+                        raise psutil.NoSuchProcess(p.pid)
             except psutil.NoSuchProcess:
                 # Process likely expired
                 self.running_process = None
