@@ -13,14 +13,14 @@
 #######################################################
 # Determine where edmarketconnector.sh needs to go
 #######################################################
-# Really we need this to be "${HOME}/bin", so check that is in $PATH
-if [[ ":$PATH:" != *":$HOME/bin:"* ]];
+# Really we need this to be "${HOME}/.local/bin", so check that is in $PATH
+if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]];
 then
-        echo "You need to have '${HOME}/bin' in your PATH"
+        echo "You need to have '${HOME}/.local/bin' in your PATH"
         echo "Please fix this (might require relogging) and try again"
         exit 1
 fi
-EDMC_BIN_PATH="${HOME}/bin"
+EDMC_BIN_PATH="${HOME}/.local/bin"
 if [ ! -d "${EDMC_BIN_PATH}" ];
 then
         echo "'${EDMC_BIN_PATH}' must exist and be a directory!"
