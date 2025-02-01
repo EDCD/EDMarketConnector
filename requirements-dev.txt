@@ -35,7 +35,7 @@ mistune==3.0.2
 
 # Packaging
 # We only need py2exe on windows.
-py2exe==0.13.0.1; sys_platform == 'win32'
+py2exe==0.13.0.2; sys_platform == 'win32'
 
 # Testing
 pytest==8.3.2
