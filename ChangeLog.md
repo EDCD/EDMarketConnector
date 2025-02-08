@@ -6,6 +6,32 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
       in the source (not distributed with the Windows installer) for the
       currently used version.
 ---
+
+Pre-Release 5.12.2-rc1
+===
+This is a pre-release to test a number of bugfixes and security improvements in EDMC. 
+
+**Changes and Enhancements**
+* Adds a guard against workflow shell execution vulnerabilities in GitHub Actions
+* Adds a "Copy" icon in the EDMC System Profiler
+* Includes additional Loadout event properties in the "State" context
+* Updates Dependencies and Submodules
+
+**Bug Fixes**
+* Removes Duplicate Coriolis Definitions Included In Submodules
+* Adds Context Support for Mandalay and Cobra Mk IV, and Type-8 Transporter
+* Adds a number of missing modules to modules.json
+* Fixes a widely-reported bug where missing HullValue or ModuleValue entries would cause parsing to crash
+* Fixes a bug where PSUtils exception handling was not processed
+
+**Plugin Developers**
+* nb.Entry is deprecated, and is slated for removal in 6.0 or later. Please migrate to nb.EntryMenu
+* nb.ColoredButton is deprecated, and is slated for removal in 6.0 or later. Please migrate to tk.Button
+* Calling internal translations with `_()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to importing `translations` and calling `translations.translate` or `translations.tl` directly
+* `Translations` as the translate system singleton is deprecated, and is slated for removal in 6.0 or later. Please migrate to the `translations` singleton
+* `help_open_log_folder()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to open_folder()
+* `update_feed` is deprecated, and is slated for removal in 6.0 or later. Please migrate to `get_update_feed()`.
+
 Release 5.12.1
 ===
 
