@@ -710,8 +710,8 @@ class EDLogs(FileSystemEventHandler):
                     'Ship': entry["Ship"],
                     'ShipName': entry['ShipName'],
                     'ShipIdent': entry['ShipIdent'],
-                    'HullValue': entry.get('HullValue'),
-                    'ModulesValue': entry.get('ModulesValue'),
+                    'HullValue': entry.get('HullValue'),  # type: ignore
+                    'ModulesValue': entry.get('ModulesValue'),  # type: ignore
                     'Rebuy': entry['Rebuy'],
                     'MaxJumpRange': entry['MaxJumpRange'],
                     'UnladenMass': entry['UnladenMass'],
