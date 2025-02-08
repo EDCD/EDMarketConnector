@@ -688,8 +688,8 @@ class EDLogs(FileSystemEventHandler):
                 self.state['CargoCapacity'] = entry.get('CargoCapacity')
                 self.state['MaxJumpRange'] = entry.get('MaxJumpRange')
                 self.state['FuelCapacity'] = {}
-                self.state['FuelCapacity']['Main'] = entry.get('FuelCapacity')['Main']
-                self.state['FuelCapacity']['Reserve'] = entry.get('FuelCapacity')['Reserve']
+                self.state['FuelCapacity']['Main'] = entry.get('FuelCapacity')['Main']  # type: ignore
+                self.state['FuelCapacity']['Reserve'] = entry.get('FuelCapacity')['Reserve']  # type: ignore
                 self.state['Rebuy'] = entry.get('Rebuy')
                 # Remove spurious differences between initial Loadout event and subsequent
                 self.state['Modules'] = {}
