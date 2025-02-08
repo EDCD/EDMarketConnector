@@ -19,7 +19,7 @@ This is a pre-release to test a number of bugfixes and security improvements in 
 
 **Bug Fixes**
 * Removes Duplicate Coriolis Definitions Included In Submodules
-* Adds Context Support for Mandalay and Cobra Mk IV, and Type-8 Transporter
+* Adds Context Support for Mandalay and Cobra Mk V, and Type-8 Transporter
 * Adds a number of missing modules to modules.json
 * Fixes a widely-reported bug where missing HullValue or ModuleValue entries would cause parsing to crash
 * Fixes a bug where PSUtils exception handling was not processed
