@@ -51,7 +51,7 @@ repos:
       - id: mypy
         # verbose: true
         # log_file: 'pre-commit_mypy.log'
-        additional_dependencies: [ types-pkg-resources, types-requests, types-urllib3 ]
+        additional_dependencies: [ types-setuptools, types-requests, types-urllib3 ]
         # args: [ "--follow-imports", "skip", "--ignore-missing-imports", "--scripts-are-modules" ]
 
 ### # pydocstyle.exe <file>

@@ -129,7 +129,6 @@ def build() -> None:
             "packages": [
                 "asyncio",
                 "multiprocessing",
-                "pkg_resources._vendor.platformdirs",
                 "sqlite3",
                 "util",
             ],
