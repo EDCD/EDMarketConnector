@@ -6,11 +6,40 @@
       <description>Most recent changes with links to updates.</description>
       <!-- Windows -->
       <item>
-         <title>Release 5.12.2-rc1</title>
+         <title>Release 5.12.2</title>
          <description><![CDATA[<style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
 <p>We now test against, and package with, Python 3.11.9.</p>
 <p><strong>As a result, we do not support Windows 7, 8, or 8.1.</strong><br>
-<h2>Release 5.12.2-rc1</h2>
+<h2>Release 5.12.2</h2>
+<p>This release fixes a number of bugs and handles some security improvements in EDMC.</p>
+<p><strong>Changes and Enhancements</strong></p>
+<ul>
+<li>Adds a guard against workflow shell execution vulnerabilities in GitHub Actions</li>
+<li>Adds a &quot;Copy&quot; icon in the EDMC System Profiler</li>
+<li>Includes additional Loadout event properties in the &quot;State&quot; context</li>
+<li>Updates Dependencies and Submodules</li>
+<li>Removes an outdated development script that was no longer in use and prevented dependency updates</li>
+<li>Replaces types-pkg-resources with types-setuptools per PyPi documentation</li>
+</ul>
+<p><strong>Bug Fixes</strong></p>
+<ul>
+<li>Removes Duplicate Coriolis Definitions Included In Submodules</li>
+<li>Adds Context Support for Mandalay and Cobra Mk V, and Type-8 Transporter</li>
+<li>Adds a number of missing modules to modules.json</li>
+<li>Fixes a widely-reported bug where missing HullValue or ModuleValue entries would cause parsing to crash</li>
+<li>Fixes a bug where PSUtils exception handling was not processed</li>
+</ul>
+<p><strong>Plugin Developers</strong></p>
+<ul>
+<li>nb.Entry is deprecated, and is slated for removal in 6.0 or later. Please migrate to nb.EntryMenu</li>
+<li>nb.ColoredButton is deprecated, and is slated for removal in 6.0 or later. Please migrate to tk.Button</li>
+<li>Calling internal translations with <code>_()</code> is deprecated, and is slated for removal in 6.0 or later. Please migrate to importing <code>translations</code> and calling <code>translations.translate</code> or <code>translations.tl</code> directly</li>
+<li><code>Translations</code> as the translate system singleton is deprecated, and is slated for removal in 6.0 or later. Please migrate to the <code>translations</code> singleton</li>
+<li><code>help_open_log_folder()</code> is deprecated, and is slated for removal in 6.0 or later. Please migrate to open_folder()</li>
+<li><code>update_feed</code> is deprecated, and is slated for removal in 6.0 or later. Please migrate to <code>get_update_feed()</code>.</li>
+</ul>
+<hr>
+<h2>Pre-Release 5.12.2-rc1</h2>
 <p>This is a pre-release to test a number of bugfixes and security improvements in EDMC.</p>
 <p><em>NOTE: Only an UNSIGNED installer is provided for this pre-release.</em></p>
 <p><strong>Changes and Enhancements</strong></p>
@@ -2670,7 +2699,7 @@ about this:
 <a href="https://issues.frontierstore.net/issue-detail/28638" rel="nofollow">PTS CAPI saying Commander is Docked after jumping to new system</a>.</p>
 </li>
 </ul>]]></description>
-         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F5.12.2-rc1/EDMarketConnector_Installer_Unsigned_5.12.2-rc1.exe" sparkle:os="windows" sparkle:version="5.12.2-rc1" length="0" type="application/x-ms-dos-executable" />
+         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F5.12.2/EDMarketConnector_Installer_5.12.2.exe" sparkle:os="windows" sparkle:version="5.12.2" length="0" type="application/x-ms-dos-executable" />
       </item>
    </channel>
 </rss>
