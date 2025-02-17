@@ -14,6 +14,7 @@ import operator
 import os
 import sys
 import tkinter as tk
+from datetime import datetime, timedelta
 from pathlib import Path
 from tkinter import ttk
 from typing import Any, Mapping, MutableMapping
@@ -331,6 +332,14 @@ def notify_journal_entry(
         logger.trace_if('journal.locations', 'Notifying plugins of "Location" event')
 
     error = None
+
+    if "timestamp" in entry and not config.skip_timecheck:
+        # Check that timestamp is recent enough
+        dt = datetime.strptime(entry["timestamp"], "%Y-%m-%dT%H:%M:%SZ")
+        if dt > datetime.utcnow() - timedelta(minutes=60):
+            error = f"Event at {entry['timestamp']} beyond Time Delta of 60 minutes. Skipping."
+            return error
+
     for plugin in PLUGINS:
         journal_entry = plugin._get_func('journal_entry')
         if journal_entry:
