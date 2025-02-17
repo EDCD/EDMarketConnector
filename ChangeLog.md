@@ -1,6 +1,6 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
-* We currently test against, and package with, Python 3.11.9, 32-bit.
+* We currently test against, and package with, Python 3.11, 32-bit.
   * As a result, we do not support Windows 7, 8, or 8.1.
   * Developers can check the contents of the `.python-version` file
       in the source (not distributed with the Windows installer) for the

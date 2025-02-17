@@ -187,6 +187,12 @@ if __name__ == '__main__':  # noqa: C901
         '--killswitches-file',
         help='Specify a custom killswitches file',
     )
+
+    parser.add_argument(
+        '--skip-timecheck',
+        help='Skips the Time Delta check for processed events',
+        action='store_true'
+    )
     ###########################################################################
 
     args: argparse.Namespace = parser.parse_args()
@@ -249,6 +255,9 @@ if __name__ == '__main__':  # noqa: C901
         conf_module.trace_on = [x.casefold() for x in args.trace_on]  # duplicate the list just in case
         for d in conf_module.trace_on:
             logger.info(f'marked {d} for TRACE')
+
+    if args.skip_timecheck:
+        config.set_skip_timecheck()
 
     def handle_edmc_callback_or_foregrounding() -> None:  # noqa: CCR001
         """Handle any edmc:// auth callback, else foreground an existing window."""
