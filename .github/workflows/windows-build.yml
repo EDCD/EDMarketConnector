@@ -109,7 +109,6 @@ jobs:
 
       - name: Install python tools
         run: |
-          pip install wheel
           pip install -r requirements-dev.txt
 
       - name: Download winsparkle
