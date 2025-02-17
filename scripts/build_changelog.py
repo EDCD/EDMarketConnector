@@ -42,7 +42,7 @@ def get_changelog() -> tuple[str, str]:
 def build_html(md_changelog: str, version: str) -> str:
     """Convert markdown changelog to HTML."""
     html_out = f"<h2>Release {version}</h2>\n"
-    html_out += mistune.html(md_changelog)
+    html_out += mistune.html(md_changelog)  # type: ignore
     html_out = re.sub(r"h1", "h2", html_out) + "\n<hr>"
 
     with open("script_output/html_changelog.txt", "w", encoding="utf-8") as html_file:

@@ -19,7 +19,7 @@ jobs:
 
     # Debug show the info we have to work with
     - name: Show github context
-      run: cat $GITHUB_EVENT_PATH
+      run: cat "$GITHUB_EVENT_PATH"
 
     ####################################################################
     # Checkout the necessary commits
@@ -44,9 +44,9 @@ jobs:
         echo "BASE_REPO_URL: ${BASE_REPO_URL}"
         echo "BASE_REPO_OWNER: ${BASE_REPO_OWNER}"
         # Add the 'base' repo as a new remote
-        git remote add ${BASE_REPO_OWNER} ${BASE_REPO_URL}
+        git remote add "${BASE_REPO_OWNER}" "${BASE_REPO_URL}"
         # And then fetch its references
-        git fetch ${BASE_REPO_OWNER}
+        git fetch "${BASE_REPO_OWNER}"
     ####################################################################
     
     ####################################################################
@@ -60,7 +60,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install wheel flake8
+        pip install flake8
         if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; elif [ -f requirements.txt ]; then pip install -r requirements.txt ; fi
     ####################################################################
 

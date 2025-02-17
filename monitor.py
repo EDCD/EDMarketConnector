@@ -141,6 +141,10 @@ class EDLogs(FileSystemEventHandler):
             'ShipType':           None,
             'HullValue':          None,
             'ModulesValue':       None,
+            'UnladenMass':        None,
+            'CargoCapacity':      None,
+            'MaxJumpRange':       None,
+            'FuelCapacity':       None,
             'Rebuy':              None,
             'Modules':            None,
             'CargoJSON':          None,  # The raw data from the last time cargo.json was read
@@ -337,9 +341,9 @@ class EDLogs(FileSystemEventHandler):
 
     def on_created(self, event: 'FileSystemEvent') -> None:
         """Watchdog callback when, e.g. client (re)started."""
-        if not event.is_directory and self._RE_LOGFILE.search(basename(event.src_path)):
+        if not event.is_directory and self._RE_LOGFILE.search(str(basename(event.src_path))):
 
-            self.logfile = event.src_path
+            self.logfile = event.src_path  # type: ignore
 
     def worker(self) -> None:  # noqa: C901, CCR001
         """
@@ -680,6 +684,11 @@ class EDLogs(FileSystemEventHandler):
                 self.state['ShipType'] = self.canonicalise(entry['Ship'])
                 self.state['HullValue'] = entry.get('HullValue')  # not present on exiting Outfitting
                 self.state['ModulesValue'] = entry.get('ModulesValue')  # not present on exiting Outfitting
+                self.state['UnladenMass'] = entry.get('UnladenMass')
+                self.state['CargoCapacity'] = entry.get('CargoCapacity')
+                self.state['MaxJumpRange'] = entry.get('MaxJumpRange')
+                self.state["FuelCapacity"] = {name: entry.get("FuelCapacity", {}).get(name) for name in
+                                              ("Main", "Reserve")}
                 self.state['Rebuy'] = entry.get('Rebuy')
                 # Remove spurious differences between initial Loadout event and subsequent
                 self.state['Modules'] = {}
@@ -710,8 +719,8 @@ class EDLogs(FileSystemEventHandler):
                     'Ship': entry["Ship"],
                     'ShipName': entry['ShipName'],
                     'ShipIdent': entry['ShipIdent'],
-                    'HullValue': entry['HullValue'],
-                    'ModulesValue': entry['ModulesValue'],
+                    'HullValue': entry.get('HullValue'),  # type: ignore
+                    'ModulesValue': entry.get('ModulesValue'),  # type: ignore
                     'Rebuy': entry['Rebuy'],
                     'MaxJumpRange': entry['MaxJumpRange'],
                     'UnladenMass': entry['UnladenMass'],
@@ -2151,7 +2160,7 @@ class EDLogs(FileSystemEventHandler):
             try:
                 with p.oneshot():
                     if p.status() not in [psutil.STATUS_RUNNING, psutil.STATUS_SLEEPING]:
-                        raise psutil.NoSuchProcess
+                        raise psutil.NoSuchProcess(p.pid)
             except psutil.NoSuchProcess:
                 # Process likely expired
                 self.running_process = None

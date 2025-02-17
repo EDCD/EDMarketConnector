@@ -1,14 +1,10 @@
-# So that you don't get warnings like:
-# Using legacy 'setup.py install' for flake8-annotations-coverage, since package 'wheel' is not installed.
-wheel
-
 # We can't rely on just picking this up from either the base (not venv),
 # or venv-init-time version.  Specify here so that dependabot will prod us
 # about new versions.
-setuptools==70.0.0
+setuptools==75.8.0
 
 # Static analysis tools
-flake8==7.1.0
+flake8==7.1.1
 flake8-annotations-coverage==0.0.6
 flake8-cognitive-complexity==0.1.0
 flake8-comprehensions==3.15.0
@@ -18,28 +14,28 @@ flake8-noqa==1.4.0
 flake8-polyfill==1.0.2
 flake8-use-fstring==1.4
 
-mypy==1.10.0
+mypy==1.14.1
 pep8-naming==0.14.1
-safety==3.2.5
-types-requests==2.32.0.20240712
-types-pkg-resources==0.1.3
+safety==3.2.14
+types-requests==2.32.0.20241016
+types-setuptools==75.8.0.20250210
 
 # Code formatting tools
-autopep8==2.3.1
+autopep8==2.3.2
 
 # Git pre-commit checking
 pre-commit==3.8.0
 
 # HTML changelogs
-mistune==3.0.2
+mistune==3.1.1
 
 # Packaging
 # We only need py2exe on windows.
-py2exe==0.13.0.1; sys_platform == 'win32'
+py2exe==0.13.0.2; sys_platform == 'win32'
 
 # Testing
 pytest==8.3.2
-pytest-cov==5.0.0  # Pytest code coverage support
+pytest-cov==6.0.0  # Pytest code coverage support
 coverage[toml]==7.6.1 # pytest-cov dep. This is here to ensure that it includes TOML support for pyproject.toml configs
 coverage-conditional-plugin==0.9.0
 

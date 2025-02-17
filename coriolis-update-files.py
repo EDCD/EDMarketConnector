@@ -87,10 +87,6 @@ if __name__ == "__main__":
     add(modules, 'int_stellarbodydiscoveryscanner_intermediate',  {'mass': 2})
     add(modules, 'int_stellarbodydiscoveryscanner_advanced',      {'mass': 2})
 
-    # Missing
-    add(modules, 'hpt_multicannon_fixed_small_advanced',          {'mass': 2})
-    add(modules, 'hpt_multicannon_fixed_medium_advanced',         {'mass': 4})
-
     modules = {k: modules[k] for k in sorted(modules)}
     with open("modules.json", "w") as modules_file:
         json.dump(modules, modules_file, indent=4)

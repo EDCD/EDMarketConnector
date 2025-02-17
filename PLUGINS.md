@@ -655,6 +655,10 @@ Content of `state` (updated to the current journal entry):
 | `ShipType`            |            `str`            | Internal name for the current ship type                                                                         |
 | `HullValue`           |            `int`            | Current ship value, excluding modules                                                                           |
 | `ModulesValue`        |            `int`            | Value of the current ship's modules                                                                             |
+| `UnladenMass`         |           `float`           | Unladen mass of current ship                                                                                    |
+| `CargoCapacity`       |            `int`            | Max cargo capacity of current ship                                                                              |
+| `MaxJumpRange`        |           `float`           | Unladen jump range of current ship                                                                              |
+| `FuelCapacity`        |      `dict[str,float]`      | Current max capacity of Main & Reserve tanks                                                                    |
 | `Rebuy`               |            `int`            | Current ship's rebuy cost                                                                                       |
 | `Modules`             |           `dict`            | Currently fitted modules                                                                                        |
 | `NavRoute`            |           `dict`            | Last plotted multi-hop route[1]                                                                                 |
