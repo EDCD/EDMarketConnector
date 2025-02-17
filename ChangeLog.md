@@ -7,7 +7,7 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
       currently used version.
 ---
 
-Pre-Release 5.12.2-rc1
+Release 5.12.2
 ===
 This is a pre-release to test a number of bugfixes and security improvements in EDMC. 
 
@@ -16,6 +16,8 @@ This is a pre-release to test a number of bugfixes and security improvements in 
 * Adds a "Copy" icon in the EDMC System Profiler
 * Includes additional Loadout event properties in the "State" context
 * Updates Dependencies and Submodules
+* Removes an outdated development script that was no longer in use and prevented dependency updates
+* Replaces types-pkg-resources with types-setuptools per PyPi documentation
 
 **Bug Fixes**
 * Removes Duplicate Coriolis Definitions Included In Submodules
