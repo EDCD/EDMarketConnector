@@ -9,7 +9,7 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
 
 Release 5.12.2
 ===
-This is a pre-release to test a number of bugfixes and security improvements in EDMC. 
+This is a release to test a number of bugfixes and security improvements in EDMC. 
 
 **Changes and Enhancements**
 * Adds a guard against workflow shell execution vulnerabilities in GitHub Actions
