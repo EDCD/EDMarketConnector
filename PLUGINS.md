@@ -688,6 +688,7 @@ Content of `state` (updated to the current journal entry):
 | `StationName`[3]      |       `Optional[str]`       | Name of the station we're docked at, if applicable                                                              |
 | `MarketID`[3]         |       `Optional[str]`       | MarketID of the station we're docked at, if applicable                                                          |
 | `StationType`[3]      |       `Optional[str]`       | Type of the station we're docked at, if applicable                                                              |
+| `Powerplay`           |           `dict`            | `dict` of information on Powerplay
 
 [1] - Contents of `NavRoute` not changed if a `NavRouteClear` event is seen,
 but plugins will see the `NavRouteClear` event.
@@ -835,6 +836,12 @@ documentation above for some caveats.  Do not just blindly use this data, or
 the 'Body' name value.
 
 `StationName`, `MarketID`, and `StationType` added to the `state` dictionary.
+
+New in version 5.13.0:
+
+`state` now has `Powerplay`, a `dict` including `Rank`, `Merits`, `Power`,
+`TimePledged`, and `Votes`. `Votes` should only be populated if playing in
+legacy mode, as it is no longer a concept in the current version of the game.
 
 ___
 
