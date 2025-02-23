@@ -842,7 +842,6 @@ New in version 5.13.0:
 `state` now has `Powerplay`, a `dict` including `Rank`, `Merits`, `Power`,
 `TimePledged`, and `Votes`. `Votes` should only be populated if playing in
 legacy mode, as it is no longer a concept in the current version of the game.
-
 ___
 
 ##### Synthetic Events
