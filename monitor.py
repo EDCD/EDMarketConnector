@@ -179,6 +179,13 @@ class EDLogs(FileSystemEventHandler):
             'StationName':        None,
 
             'NavRoute':           None,
+            'Powerplay':      {
+                'Power':          None,
+                'Rank':           None,
+                'Merits':         None,
+                'Votes':          None,
+                'TimePledged':    None,
+            },
         }
 
     def start(self, root: 'tkinter.Tk') -> bool:  # noqa: CCR001
@@ -1838,6 +1845,13 @@ class EDLogs(FileSystemEventHandler):
 
                 # There should be a `Backpack` event as you 'come to' in the
                 # new location, so no need to zero out BackPack here.
+
+            elif event_type == 'powerplay':
+                self.state['Powerplay']['Power'] = entry.get('Power', '')
+                self.state['Powerplay']['Rank'] = entry.get('Rank', 0)
+                self.state['Powerplay']['Merits'] = entry.get('Merits', 0)
+                self.state['Powerplay']['Votes'] = entry.get('Votes', 0)
+                self.state['Powerplay']['TimePledged'] = entry.get('TimePledged', 0)
 
             return entry
 
