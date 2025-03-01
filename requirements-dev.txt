@@ -14,7 +14,7 @@ flake8-noqa==1.4.0
 flake8-polyfill==1.0.2
 flake8-use-fstring==1.4
 
-mypy==1.14.1
+mypy==1.15.0
 pep8-naming==0.14.1
 safety==3.2.14
 types-requests==2.32.0.20241016
