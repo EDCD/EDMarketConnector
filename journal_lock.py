@@ -51,7 +51,7 @@ class JournalLock:
 
         else:
             try:
-                self.journal_dir_path = pathlib.Path(self.journal_dir)
+                self.journal_dir_path = pathlib.Path.expanduser(pathlib.Path(self.journal_dir))
 
             except Exception:  # pragma: no cover
                 logger.exception("Couldn't make pathlib.Path from journal_dir")
