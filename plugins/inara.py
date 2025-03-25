@@ -552,6 +552,14 @@ def journal_entry(  # noqa: C901, CCR001
                 power_data = {'powerName': entry["Power"], 'rankValue': entry["Rank"], 'meritsValue': entry["Merits"]}
                 new_add_event('setCommanderRankPower', entry['timestamp'], power_data)
 
+            elif event_name == 'PowerplayMerits':
+                power_data = {'powerName': state["Powerplay"]["Power"], 'rankValue': state["Powerplay"]["Rank"], 'meritsValue': entry["TotalMerits"]}
+                new_add_event('setCommanderRankPower', entry['timestamp'], power_data)
+
+            elif event_name == 'PowerplayRank':
+                power_data = {'powerName': entry["Power"], 'rankValue': entry["Rank"]}
+                new_add_event('setCommanderRankPower', entry['timestamp'], power_data)
+
             # Ship change
             if event_name == 'Loadout' and this.shipswap:
                 this.loadout = make_loadout(state)

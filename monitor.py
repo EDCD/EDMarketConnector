@@ -1852,6 +1852,12 @@ class EDLogs(FileSystemEventHandler):
                 self.state['Powerplay']['Merits'] = entry.get('Merits', 0)
                 self.state['Powerplay']['Votes'] = entry.get('Votes', 0)
                 self.state['Powerplay']['TimePledged'] = entry.get('TimePledged', 0)
+            
+            elif event_type == 'powerplaymerits':
+                self.state['Powerplay']['Merits'] = entry.get('TotalMerits', 0)
+
+            elif event_type == 'powerplayrank':
+                self.state['Powerplay']['Rank'] = entry.get('Rank', 0)
 
             return entry
 
