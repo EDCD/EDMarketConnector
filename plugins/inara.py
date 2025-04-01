@@ -553,7 +553,8 @@ def journal_entry(  # noqa: C901, CCR001
                 new_add_event('setCommanderRankPower', entry['timestamp'], power_data)
 
             elif event_name == 'PowerplayMerits':
-                power_data = {'powerName': state["Powerplay"]["Power"], 'rankValue': state["Powerplay"]["Rank"], 'meritsValue': entry["TotalMerits"]}
+                power_data = {'powerName': state["Powerplay"]["Power"], 'rankValue': state["Powerplay"]["Rank"],
+                              'meritsValue': entry["TotalMerits"]}
                 new_add_event('setCommanderRankPower', entry['timestamp'], power_data)
 
             elif event_name == 'PowerplayRank':
