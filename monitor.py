@@ -1688,6 +1688,8 @@ class EDLogs(FileSystemEventHandler):
                     if 'Category' in reward:  # Category not present in E:D 3.0
                         category = self.category(reward['Category'])
                         material = self.canonicalise(reward['Name'])
+                        if category == 'Elements':
+                            category = 'Raw'
                         self.state[category][material] += reward.get('Count', 1)
 
             elif event_type == 'engineercontribution':
