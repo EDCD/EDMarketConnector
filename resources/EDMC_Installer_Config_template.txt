@@ -80,7 +80,7 @@ begin
   begin
   PowerShellOutputFile := ExpandConstant('{tmp}\PowershellOutput.txt');
   // Construct the PowerShell command and capture output to a file
-  Exec('powershell.exe', '-NoProfile -ExecutionPolicy Bypass -Command "Get-WmiObject -Class Win32_Product | where Name -eq ''Elite Dangerous Market Connector'' | select-object -expandproperty IdentifyingNumber" | Out-File -Encoding ASCII "' + PowerShellOutputFile + '"', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  Exec('powershell.exe', '-NoProfile -Command "Get-WmiObject -Class Win32_Product | where Name -eq ''Elite Dangerous Market Connector'' | select-object -expandproperty IdentifyingNumber" | Out-File -Encoding ASCII "' + PowerShellOutputFile + '"', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
     begin
     if LoadStringFromFile(PowerShellOutputFile, S) then
     S:= Trim(S);
