@@ -1,15 +1,40 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
-* We currently test against, and package with, Python 3.11.9, 32-bit.
+* We currently test against, and package with, Python 3.11, 32-bit.
   * As a result, we do not support Windows 7, 8, or 8.1.
   * Developers can check the contents of the `.python-version` file
       in the source (not distributed with the Windows installer) for the
       currently used version.
 ---
 
+Release 5.12.3
+===
+This is a wewease update a nyumbew of dependencies, twanswations, and fix a bug with misnyamed ewements.
+
+**_Happy Apwiw 1st UwU_**
+
+**Changes and Enhancements**
+* Updates Python Vewsion to the wastest buiwd of 3.11 (Updates Python Version to the lastest build of 3.11)
+* Updates a nyumbew of twanswation fiwes (Updates a number of Translation Files)
+* Updates a nyumbew of devewopment dependencies (Updates a number of Development Dependencies)
+* Wemuvs an unnyeeded Execution Powicy change by the instawwew (Removes an unneeded Execution Policy change by the installer)
+
+**Bug Fixes**
+* Fixes a bug whewe a misnyamed categowy of matewiaws c-couwd bweak cewtain twansactions (Fixes a bug where a misnamed category of materials could break certain transactions)
+
+This hurt me to type. I'm sorry.
+
+**Plugin Developers**
+* nb.Entry is deprecated, and is slated for removal in 6.0 or later. Please migrate to nb.EntryMenu
+* nb.ColoredButton is deprecated, and is slated for removal in 6.0 or later. Please migrate to tk.Button
+* Calling internal translations with `_()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to importing `translations` and calling `translations.translate` or `translations.tl` directly
+* `Translations` as the translate system singleton is deprecated, and is slated for removal in 6.0 or later. Please migrate to the `translations` singleton
+* `help_open_log_folder()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to open_folder()
+* `update_feed` is deprecated, and is slated for removal in 6.0 or later. Please migrate to `get_update_feed()`.
+
 Release 5.12.2
 ===
-This is a pre-release to test a number of bugfixes and security improvements in EDMC. 
+This is a release to test a number of bugfixes and security improvements in EDMC. 
 
 **Changes and Enhancements**
 * Adds a guard against workflow shell execution vulnerabilities in GitHub Actions
