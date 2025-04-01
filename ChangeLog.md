@@ -7,7 +7,7 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
       currently used version.
 ---
 
-Release 5.12.3
+Release 5.12.4
 ===
 This is a wewease update a nyumbew of dependencies, twanswations, and fix a bug with misnyamed ewements.
 
