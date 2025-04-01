@@ -468,6 +468,12 @@
 /* prefs.py: Label for location of third-party plugins folder; In files: prefs.py:908; */
 "Plugins folder" = "Pasta dos Plugins";
 
+/* prefs.py: Label on button used to open the Plugin Folder; */
+"Open Plugins Folder" = "Abrir pasta dos Plugins";
+
+/* prefs.py: Selecting the Location of the Plugin Directory on the Filesystem; */
+"Plugin Directory Location" = "Localização da pasta dos Plugins";
+
 /* prefs.py: Tip/label about how to disable plugins; In files: prefs.py:923; */
 "Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "Dica: Pode desactivar um plugin{CR}ao adicionar '{EXT}' ao nome da sua pasta";
 
@@ -804,9 +810,17 @@
 /* EDMarketConnector.py: Inform User of Beta -> Stable Transition Risks; */
 "Update track changed to Stable from Beta. You will no longer receive Beta updates. You will stay on your current Beta version until the next Stable release.\r\n\r\nYou can manually revert to the latest Stable version. To do so, you must download and install the latest Stable version manually. Note that this may introduce bugs or break completely if downgrading between major versions with significant changes.\r\n\r\nDo you want to open GitHub to download the latest release?" = "Caminho de Actualizações alterado de Estável para Beta. Deixará de receber actualizações Beta. Irá continuar na versão Beta até à próxima actualização Estável.\n\nPode, manualmente, reverter para a última versão Estável. Para isso, faça download e instale a última versão Estável manualmente. Note que o retrocesso para versões anteriores com diferenças significativas poderá introduzir bugs ou danificar a instalação.\n\nDeseja abrir o GitHub para fazer download da última versão?";
 
+/* EDMarketConnector.py: Title of Notification Popup for EDMC Restart; */
+"Restart Required" = "Reinício Necessário";
+
+/* EDMarketConnector.py: Text of Notification Popup for EDMC Restart; */
+"A restart of EDMC is required. EDMC will now restart." = "Um reinício do EDMC é necessário. O EDMC irá reiniciar agora.";
+
 /* myNotebook.py: Can't Paste Images or Files in Text; */
 "Cannot paste non-text content." = "Só é possível colar conteúdo texto.";
 
 /* ttkHyperlinkLabel.py: Open Element In Selected Provider; */
 "Open in {URL}" = "Abrir em {URL}";
 
+/* ttkHyperlinkLabel.py: Copy the Inara SLEF Format of the active ship to the clipboard; */
+"Copy Inara SLEF" = "Copiar SLEF do Inara";
