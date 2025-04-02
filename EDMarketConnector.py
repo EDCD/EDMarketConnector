@@ -2196,11 +2196,7 @@ sys.path: {sys.path}'''
     # Plain, not via `logger`
     print(f'{applongname} {appversion()}')
 
-    fools_lang = config.get_str('language')  # Happy April 1st, 2025!
-    if not config.get('2025_apr1_fooled'):
-        fools_lang = "uwu"
-        config.set('2025_apr1_fooled', True)
-    tr.install(fools_lang)  # Can generate errors so wait til log set up
+    tr.install(config.get_str('language'))  # Can generate errors so wait til log set up
 
     setup_killswitches(args.killswitches_file)
 

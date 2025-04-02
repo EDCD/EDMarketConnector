@@ -20,20 +20,10 @@ repos:
         #    hooks:
         #      - id: autopep8
 
-### # flake8 --show-source <file>
-### -   repo: https://github.com/PyCQA/flake8
-###     rev: ''
-###     hooks:
-###       - id: flake8
-#
-# Try using local flake8
-- repo: local
-  hooks:
-    - id: flake8
-      name: flake8
-      entry: flake8
-      language: system
-      types: [ python ]
+-   repo: https://github.com/PyCQA/flake8
+    rev: 7.1.2
+    hooks:
+    -   id: flake8
 
 -   repo: https://github.com/pre-commit/pygrep-hooks
     rev: 'v1.10.0'
@@ -51,7 +41,7 @@ repos:
       - id: mypy
         # verbose: true
         # log_file: 'pre-commit_mypy.log'
-        additional_dependencies: [ types-setuptools, types-requests, types-urllib3 ]
+        additional_dependencies: [ types-setuptools, types-requests ]
         # args: [ "--follow-imports", "skip", "--ignore-missing-imports", "--scripts-are-modules" ]
 
 ### # pydocstyle.exe <file>
