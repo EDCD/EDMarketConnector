@@ -8,7 +8,7 @@ See LICENSE file.
 from __future__ import annotations
 
 import copy
-import importlib
+import importlib.util
 import logging
 import operator
 import os
