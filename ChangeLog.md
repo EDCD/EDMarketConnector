@@ -7,6 +7,30 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
       currently used version.
 ---
 
+Release 5.12.5
+===
+Well that was certainly something. Happy April! This release removes the April 1 UwUification of EDMC
+ as well as updating WinSparkle versions, updated requirements, and fixes a minor bug in the plugin system.
+
+**Changes and Enhancements**
+* Updates WinSparkle Updater 
+* Updated a number of development pre-commit hooks
+* Removes the One-Time-UwU
+* Adds UwU as an additional supported language
+* Updated a number of dependencies
+
+**Bug Fixes**
+* Fixes a minor bug that could cause importlib in plug.py to not think it was loaded
+
+**Plugin Developers**
+* nb.Entry is deprecated, and is slated for removal in 6.0 or later. Please migrate to nb.EntryMenu
+* nb.ColoredButton is deprecated, and is slated for removal in 6.0 or later. Please migrate to tk.Button
+* Calling internal translations with `_()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to importing `translations` and calling `translations.translate` or `translations.tl` directly
+* `Translations` as the translate system singleton is deprecated, and is slated for removal in 6.0 or later. Please migrate to the `translations` singleton
+* `help_open_log_folder()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to open_folder()
+* `update_feed` is deprecated, and is slated for removal in 6.0 or later. Please migrate to `get_update_feed()`.
+
+
 Release 5.12.4
 ===
 This is a wewease update a nyumbew of dependencies, twanswations, and fix a bug with misnyamed ewements.
