@@ -16,9 +16,9 @@ flake8-use-fstring==1.4
 
 mypy==1.15.0
 pep8-naming==0.14.1
-safety==3.2.14
-types-requests==2.32.0.20241016
-types-setuptools==75.8.0.20250210
+safety==3.3.1
+types-requests==2.32.0.20250328
+types-setuptools==78.1.0.20250329
 
 # Code formatting tools
 autopep8==2.3.2
@@ -34,8 +34,8 @@ mistune==3.1.1
 py2exe==0.13.0.2; sys_platform == 'win32'
 
 # Testing
-pytest==8.3.4
-pytest-cov==6.0.0  # Pytest code coverage support
+pytest==8.3.5
+pytest-cov==6.1.0  # Pytest code coverage support
 coverage[toml]==7.6.1 # pytest-cov dep. This is here to ensure that it includes TOML support for pyproject.toml configs
 coverage-conditional-plugin==0.9.0
 

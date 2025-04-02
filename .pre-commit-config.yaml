@@ -20,38 +20,28 @@ repos:
         #    hooks:
         #      - id: autopep8
 
-### # flake8 --show-source <file>
-### -   repo: https://github.com/PyCQA/flake8
-###     rev: ''
-###     hooks:
-###       - id: flake8
-#
-# Try using local flake8
-- repo: local
-  hooks:
-    - id: flake8
-      name: flake8
-      entry: flake8
-      language: system
-      types: [ python ]
+-   repo: https://github.com/PyCQA/flake8
+    rev: 7.1.2
+    hooks:
+    -   id: flake8
 
 -   repo: https://github.com/pre-commit/pygrep-hooks
-    rev: 'v1.9.0'
+    rev: 'v1.10.0'
     hooks:
-      - id: python-no-eval 
-      - id: python-no-log-warn 
+      - id: python-no-eval
+      - id: python-no-log-warn
 # This is a pain where a comment begins with the word 'type' otherwise
-#      - id: python-use-type-annotations 
+#      - id: python-use-type-annotations
 
 # mypy - static type checking
 # mypy --follow-imports skip <file>
 -   repo: https://github.com/pre-commit/mirrors-mypy
-    rev: 'v0.991'
+    rev: 'v1.15.0'
     hooks:
       - id: mypy
         # verbose: true
         # log_file: 'pre-commit_mypy.log'
-        additional_dependencies: [ types-setuptools, types-requests, types-urllib3 ]
+        additional_dependencies: [ types-setuptools, types-requests ]
         # args: [ "--follow-imports", "skip", "--ignore-missing-imports", "--scripts-are-modules" ]
 
 ### # pydocstyle.exe <file>
@@ -64,11 +54,11 @@ repos:
 # -   repo: https://github.com/digitalpulp/pre-commit-php
 #     rev: ''
 #     hooks:
-#       -id: php-unit 
+#       -id: php-unit
 
 # safety.exe check -r requirements.txt
 -   repo: https://github.com/Lucas-C/pre-commit-hooks-safety
-    rev: 'v1.2.3'
+    rev: 'v1.4.0'
     hooks:
       - id: python-safety-dependencies-check 
         entry: safety
@@ -89,6 +79,6 @@ repos:
 default_language_version:
     python: python3.11
 
-default_stages: [ commit, push ]
+default_stages: [ pre-commit, pre-push ]
 
 #files: '([^\.].+/)*.py'
