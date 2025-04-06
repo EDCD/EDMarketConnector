@@ -440,6 +440,7 @@ class AppWindow:
         self.minimizing = False
         self.w.rowconfigure(0, weight=1)
         self.w.columnconfigure(0, weight=1)
+        self.plugin_id = 0
 
         # companion needs to be able to send <<CAPIResponse>> events
         companion.session.set_tk_master(self.w)
@@ -477,6 +478,7 @@ class AppWindow:
         frame = tk.Frame(self.w, name=appname.lower())
         frame.grid(sticky=tk.NSEW)
         frame.columnconfigure(1, weight=1)
+        self.frame = frame
 
         self.cmdr_label = tk.Label(frame, name='cmdr_label')
         self.cmdr = tk.Label(frame, compound=tk.RIGHT, anchor=tk.W, name='cmdr')
@@ -516,38 +518,11 @@ class AppWindow:
         self.station.grid(row=ui_row, column=1, sticky=tk.EW)
         ui_row += 1
 
-        plugin_no = 0
+        self.all_plugin_frame = tk.Frame(frame, name="all_plugin_frame")
+        self.all_plugin_frame.grid(row=ui_row, columnspan=2, sticky=tk.NSEW)
+        self.insert_no_plugins_label()
         for plugin in plug.PLUGINS:
-            # Per plugin separator
-            plugin_sep = tk.Frame(
-                frame, highlightthickness=1, name=f"plugin_hr_{plugin_no + 1}"
-            )
-            # Per plugin frame, for it to use as its parent for own widgets
-            plugin_frame = tk.Frame(
-                frame,
-                name=f"plugin_{plugin_no + 1}"
-            )
-            appitem = plugin.get_app(plugin_frame)
-            if appitem:
-                plugin_no += 1
-                plugin_sep.grid(columnspan=2, sticky=tk.EW)
-                ui_row = frame.grid_size()[1]
-                plugin_frame.grid(
-                    row=ui_row, columnspan=2, sticky=tk.NSEW
-                )
-                plugin_frame.columnconfigure(1, weight=1)
-                if isinstance(appitem, tuple) and len(appitem) == 2:
-                    ui_row = frame.grid_size()[1]
-                    appitem[0].grid(row=ui_row, column=0, sticky=tk.W)
-                    appitem[1].grid(row=ui_row, column=1, sticky=tk.EW)
-
-                else:
-                    appitem.grid(columnspan=2, sticky=tk.EW)
-
-            else:
-                # This plugin didn't provide any UI, so drop the frames
-                plugin_frame.destroy()
-                plugin_sep.destroy()
+            self.show_plugin(plugin)
 
         # LANG: Update button in main window
         self.button = ttk.Button(
@@ -598,7 +573,7 @@ class AppWindow:
         self.file_menu = self.view_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)
         self.file_menu.add_command(command=lambda: stats.StatsDialog(self.w, self.status))
         self.file_menu.add_command(command=self.save_raw)
-        self.file_menu.add_command(command=lambda: prefs.PreferencesDialog(self.w, self.postprefs))
+        self.file_menu.add_command(command=lambda: prefs.PreferencesDialog(self, self.w, self.postprefs))
         self.file_menu.add_separator()
         self.file_menu.add_command(command=self.onexit)
         self.menubar.add_cascade(menu=self.file_menu)
@@ -748,6 +723,69 @@ class AppWindow:
         if args.start_min:
             logger.warning("Trying to start minimized")
             self.oniconify() if root.overrideredirect() else self.w.wm_iconify()
+
+    def show_plugin(self, plugin: plug.Plugin):
+        self.remove_no_plugins_label()
+        plugin_id = self.plugin_id + 1
+        # Per plugin separator
+        plugin_sep = tk.Frame(
+            self.all_plugin_frame, highlightthickness=1, name=f"plugin_hr_{plugin_id}"
+        )
+        # Per plugin frame, for it to use as its parent for own widgets
+        plugin_frame = tk.Frame(self.all_plugin_frame, name=f"plugin_{plugin_id}")
+        appitem = plugin.get_app(plugin_frame)
+        if appitem:
+            self.plugin_id = plugin_id
+            plugin.frame_id = plugin_id
+            ui_row = self.all_plugin_frame.grid_size()[1]
+            plugin_sep.grid(row=ui_row, columnspan=2, sticky=tk.EW)
+            ui_row = self.all_plugin_frame.grid_size()[1]
+            plugin_frame.grid(row=ui_row, columnspan=2, sticky=tk.NSEW)
+            plugin_frame.columnconfigure(1, weight=1)
+            if isinstance(appitem, tuple) and len(appitem) == 2:
+                ui_row = self.all_plugin_frame.grid_size()[1]
+                appitem[0].grid(row=ui_row, column=0, sticky=tk.W)
+                appitem[1].grid(row=ui_row, column=1, sticky=tk.EW)
+            else:
+                appitem.grid(row=ui_row, columnspan=2, sticky=tk.EW)
+        else:
+            # This plugin didn't provide any UI, so drop the frames
+            plugin_frame.destroy()
+            plugin_sep.destroy()
+            self.insert_no_plugins_label()
+
+    def hide_plugin(self, plugin: plug.Plugin):
+        if plugin and plugin.frame_id > 0:
+            if widget := self.all_plugin_frame.nametowidget(f"plugin_hr_{plugin.frame_id}"):
+                widget.grid_forget()
+                widget.destroy()
+            if widget := self.all_plugin_frame.nametowidget(f"plugin_{plugin.frame_id}"):
+                widget.grid_forget()
+                widget.destroy()
+            plugin.frame_id = 0
+        self.insert_no_plugins_label()
+        self.frame.pack()
+
+    def remove_no_plugins_label(self):
+        try:
+            if label := self.all_plugin_frame.nametowidget("no_plugins_label"):
+                label.grid_forget()
+                label.destroy()
+        except Exception:
+            pass
+
+    def insert_no_plugins_label(self):
+        try:
+            if self.all_plugin_frame.nametowidget("no_plugins_label"):
+                return
+        except Exception:
+            pass
+        children = self.all_plugin_frame.winfo_children()
+        if len(children) == 0:
+            label = tk.Label(self.all_plugin_frame, text="No plugins", name="no_plugins_label", anchor=tk.CENTER)
+            pady = 2 if sys.platform != 'win32' else 0
+            label.grid(row=0, columnspan=2, sticky=tk.NSEW, padx=self.PADX, pady=pady)
+            return
 
     def update_suit_text(self) -> None:
         """Update the suit text for current type and loadout."""
@@ -2242,7 +2280,7 @@ sys.path: {sys.path}'''
 
     def messagebox_broken_plugins():
         """Display message about 'broken' plugins that failed to load."""
-        if plug.PLUGINS_broken:
+        if [x for x in plug.PLUGINS if x.broken]:
             # LANG: Popup-text about 'broken' plugins that failed to load
             popup_text = tr.tl(
                 "One or more of your enabled plugins failed to load. Please see the list on the '{PLUGINS}' "
@@ -2268,37 +2306,6 @@ sys.path: {sys.path}'''
                 parent=root
             )
 
-    def messagebox_not_py3():
-        """Display message about plugins not updated for Python 3.x."""
-        plugins_not_py3_last = config.get_int('plugins_not_py3_last', default=0)
-        if (plugins_not_py3_last + 86400) < int(time()) and plug.PLUGINS_not_py3:
-            # LANG: Popup-text about 'active' plugins without Python 3.x support
-            popup_text = tr.tl(
-                "One or more of your enabled plugins do not yet have support for Python 3.x. Please see the "
-                "list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an "
-                "updated version available, else alert the developer that they need to update the code for "
-                r"Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on "
-                "the end of the name."
-            )
-
-            # Substitute in the other words.
-            popup_text = popup_text.format(
-                PLUGINS=tr.tl('Plugins'),  # LANG: Settings > Plugins tab
-                FILE=tr.tl('File'),  # LANG: 'File' menu
-                SETTINGS=tr.tl('Settings'),  # LANG: File > Settings
-                DISABLED='.disabled'
-            )
-            # And now we do need these to be actual \r\n
-            popup_text = popup_text.replace('\\n', '\n').replace('\\r', '\r')
-
-            tk.messagebox.showinfo(
-                # LANG: Popup window title for list of 'enabled' plugins that don't work with Python 3.x
-                tr.tl('EDMC: Plugins Without Python 3.x Support'),
-                popup_text,
-                parent=root
-            )
-            config.set('plugins_not_py3_last', int(time()))
-
     # UI Transparency
     ui_transparency = config.get_int('ui_transparency')
     if ui_transparency == 0:
@@ -2307,8 +2314,6 @@ sys.path: {sys.path}'''
     root.wm_attributes('-alpha', ui_transparency / 100)
     # Display message box about plugins that failed to load
     root.after(0, messagebox_broken_plugins)
-    # Display message box about plugins without Python 3.x support
-    root.after(1, messagebox_not_py3)
     # Show warning popup for killswitches matching current version
     root.after(2, show_killswitch_poppup, root)
     # Start the main event loop

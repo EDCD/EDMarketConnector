@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import contextlib
 import logging
+import os.path
+import zipfile
 from os.path import expandvars, join, normpath
 from pathlib import Path
 import subprocess
@@ -12,7 +14,7 @@ import tkinter as tk
 import warnings
 from os import system
 from tkinter import colorchooser as tkColorChooser  # type: ignore # noqa: N812
-from tkinter import ttk
+from tkinter import ttk, messagebox
 from types import TracebackType
 from typing import Any, Callable, Optional, Type
 import myNotebook as nb  # noqa: N813
@@ -23,7 +25,6 @@ from hotkey import hotkeymgr
 from l10n import translations as tr
 from monitor import monitor
 from theme import theme
-from ttkHyperlinkLabel import HyperlinkLabel
 from common_utils import ensure_on_screen
 logger = get_main_logger()
 
@@ -228,9 +229,10 @@ if sys.platform == 'win32':
 class PreferencesDialog(tk.Toplevel):
     """The EDMC preferences dialog."""
 
-    def __init__(self, parent: tk.Tk, callback: Optional[Callable]):
+    def __init__(self, app, parent: tk.Tk, callback: Optional[Callable]):
         super().__init__(parent)
 
+        self.theApp = app
         self.parent = parent
         self.callback = callback
         self.req_restart = False
@@ -265,6 +267,7 @@ class PreferencesDialog(tk.Toplevel):
 
         notebook: nb.Notebook = nb.Notebook(frame)
         notebook.bind('<<NotebookTabChanged>>', self.tabchanged)  # Recompute on tab change
+        self.notebook = notebook
 
         self.PADX = 10
         self.BUTTONX = 12  # indent Checkbuttons and Radiobuttons
@@ -401,6 +404,7 @@ class PreferencesDialog(tk.Toplevel):
         for plugin in plug.PLUGINS:
             plugin_frame = plugin.get_prefs(notebook, monitor.cmdr, monitor.is_beta)
             if plugin_frame:
+                plugin.notebook_frame = plugin_frame
                 notebook.add(plugin_frame, text=plugin.name)
 
     def __setup_config_tab(self, notebook: ttk.Notebook) -> None:  # noqa: CCR001
@@ -895,10 +899,13 @@ class PreferencesDialog(tk.Toplevel):
         # LANG: Label for Settings > Appearance tab
         notebook.add(appearance_frame, text=tr.tl('Appearance'))  # Tab heading in settings
 
-    def __setup_plugin_tab(self, notebook: ttk.Notebook) -> None:  # noqa: CCR001
+    def __setup_plugin_tab(self, notebook: ttk.Notebook) -> None:
         # Plugin settings and info
         plugins_frame = nb.Frame(notebook)
-        plugins_frame.columnconfigure(0, weight=1)
+        plugins_frame.columnconfigure(0, weight=2)
+        plugins_frame.columnconfigure(1, weight=1)
+        plugins_frame.columnconfigure(2, weight=1)
+        plugins_frame.columnconfigure(3, weight=1)
         row = AutoInc(start=0)
         self.plugdir = tk.StringVar()
         self.plugdir.set(str(config.get_str('plugin_dir')))
@@ -909,13 +916,14 @@ class PreferencesDialog(tk.Toplevel):
                                        textvariable=self.plugdir)  # Link StringVar to Entry widget
         self.plugdir_entry.grid(columnspan=4, padx=self.PADX, pady=self.BOXY, sticky=tk.EW, row=row.get())
         with row as cur_row:
-            nb.Label(
+            # Install Plugin Button
+            self.install_plugin_btn = ttk.Button(
                 plugins_frame,
-                # Help text in settings
-                # LANG: Tip/label about how to disable plugins
-                text=tr.tl(
-                    "Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name").format(EXT='.disabled')
-            ).grid(columnspan=1, padx=self.PADX, pady=self.PADY, sticky=tk.EW, row=cur_row)
+                # LANG: Label on button used to Install Plugin
+                text=tr.tl('Install Plugin'),
+                command=lambda: self.installbrowse(config.plugin_dir_path, plugins_frame)
+            )
+            self.install_plugin_btn.grid(column=0, padx=self.PADX, pady=self.PADY, sticky=tk.EW, row=cur_row)
 
             # Open Plugin Folder Button
             self.open_plug_folder_btn = ttk.Button(
@@ -946,87 +954,106 @@ class PreferencesDialog(tk.Toplevel):
                     state=tk.NORMAL if config.get_str('plugin_dir') else tk.DISABLED
                 ).grid(column=3, padx=self.PADX, pady=self.PADY, sticky=tk.EW, row=cur_row)
 
-        enabled_plugins = list(filter(lambda x: x.folder and x.module, plug.PLUGINS))
-        if enabled_plugins:
-            ttk.Separator(plugins_frame, orient=tk.HORIZONTAL).grid(
-                columnspan=4, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=row.get()
-            )
-            nb.Label(
-                plugins_frame,
-                # LANG: Label on list of enabled plugins
-                text=tr.tl('Enabled Plugins')+':'  # List of plugins in settings
-            ).grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get())
+        ttk.Separator(plugins_frame, orient=tk.HORIZONTAL).grid(
+            columnspan=4, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=row.get()
+        )
+        nb.Label(
+            plugins_frame,
+            # LANG: Label on list of enabled plugins
+            text=tr.tl('Enabled Plugins')+':'  # List of plugins in settings
+        ).grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get())
 
-            for plugin in enabled_plugins:
-                label = nb.Label(plugins_frame,
-                                 text=plugin.name if plugin.name == plugin.folder
-                                 else f'{plugin.folder} ({plugin.name})')
-
-                label.grid(columnspan=2, padx=self.LISTX, pady=self.PADY, sticky=tk.W, row=row.get())
-
-        ############################################################
-        # Show which plugins don't have Python 3.x support
-        ############################################################
-        if plug.PLUGINS_not_py3:
-            ttk.Separator(plugins_frame, orient=tk.HORIZONTAL).grid(
-                columnspan=3, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=row.get()
-            )
-            # LANG: Plugins - Label for list of 'enabled' plugins that don't work with Python 3.x
-            nb.Label(plugins_frame, text=tr.tl('Plugins Without Python 3.x Support')+':').grid(
-                padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get()
-            )
-
-            HyperlinkLabel(
-                # LANG: Plugins - Label on URL to documentation about migrating plugins from Python 2.7
-                plugins_frame, text=tr.tl('Information on migrating plugins'),
-                background=nb.Label().cget('background'),
-                url='https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#migration-from-python-27',
-                underline=True
-            ).grid(columnspan=2, padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get())
-
-            for plugin in plug.PLUGINS_not_py3:
-                if plugin.folder:  # 'system' ones have this set to None to suppress listing in Plugins prefs tab
-                    nb.Label(plugins_frame, text=plugin.name).grid(
-                        columnspan=2, padx=self.LISTX, pady=self.PADY, sticky=tk.W, row=row.get()
-                    )
-        ############################################################
-        # Show disabled plugins
-        ############################################################
-        disabled_plugins = list(filter(lambda x: x.folder and not x.module, plug.PLUGINS))
-        if disabled_plugins:
-            ttk.Separator(plugins_frame, orient=tk.HORIZONTAL).grid(
-                columnspan=3, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=row.get()
-            )
-            nb.Label(
-                plugins_frame,
-                # LANG: Label on list of user-disabled plugins
-                text=tr.tl('Disabled Plugins')+':'  # List of plugins in settings
-            ).grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get())
-
-            for plugin in disabled_plugins:
-                nb.Label(plugins_frame, text=plugin.name).grid(
-                    columnspan=2, padx=self.LISTX, pady=self.PADY, sticky=tk.W, row=row.get()
-                )
-        ############################################################
-        # Show plugins that failed to load
-        ############################################################
-        if plug.PLUGINS_broken:
-            ttk.Separator(plugins_frame, orient=tk.HORIZONTAL).grid(
-                columnspan=3, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=row.get()
-            )
-            # LANG: Plugins - Label for list of 'broken' plugins that failed to load
-            nb.Label(plugins_frame, text=tr.tl('Broken Plugins')+':').grid(
-                padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get()
-            )
-
-            for plugin in plug.PLUGINS_broken:
-                if plugin.folder:  # 'system' ones have this set to None to suppress listing in Plugins prefs tab
-                    nb.Label(plugins_frame, text=plugin.name).grid(
-                        columnspan=2, padx=self.LISTX, pady=self.PADY, sticky=tk.W, row=row.get()
-                    )
+        self.sync_all_plugin_rows(plugins_frame)
 
         # LANG: Label on Settings > Plugins tab
         notebook.add(plugins_frame, text=tr.tl('Plugins'))		# Tab heading in settings
+
+    def _cleanup_plugin_widgets(self, plugins_frame: nb.Frame):
+        # remove rows for plugins that were deleted or duplicated rows
+        for widget in list(plugins_frame.children.values()):
+            if hasattr(widget, "plugin_folder"):
+                folder = widget.plugin_folder
+                if not plug.get_plugin_by_folder(folder):
+                    widget.grid_forget()
+                    widget.destroy()
+
+    def sync_all_plugin_rows(self, plugins_frame: nb.Frame):
+        self._cleanup_plugin_widgets(plugins_frame)
+        user_plugins = list(filter(lambda p: p.folder, plug.PLUGINS))
+        for plugin in user_plugins:
+            found = False
+            assert plugin.folder
+            for widget in plugins_frame.children.values():
+                if isinstance(widget, nb.Checkbutton) and hasattr(widget, "plugin_folder"):
+                    cb: nb.Checkbutton = widget
+                    if getattr(cb, 'plugin_folder') == plugin.folder:
+                        found = True
+                        self._update_plugin_state(plugin, cb)
+                        break
+            if not found:
+                cb = nb.Checkbutton(plugins_frame)
+                setattr(cb, 'plugin_folder', plugin.folder)
+                ui_row = plugins_frame.grid_size()[1]
+                cb.grid(column=0, row=ui_row, padx=self.PADX, pady=self.PADY, sticky=tk.W)
+                self._update_plugin_state(plugin, cb)
+
+    def _update_plugin_state(self, plugin: plug.Plugin, cb: nb.Checkbutton):
+        ui_row = cb.grid_info()["row"]
+        assert plugin.folder
+        if not plugin.name == plugin.folder and not cb.master.grid_slaves(ui_row, 1):
+            label = tk.Label(cb.master, text=plugin.folder+"/")
+            label.grid(column=1, row=ui_row, padx=self.PADX, pady=self.PADY, sticky=tk.W)
+            setattr(label, 'plugin_folder', plugin.folder)
+        status = next(iter(cb.master.grid_slaves(ui_row, 2)), None)
+        if not status:
+            status = tk.Label(cb.master)
+            status.grid(column=2, row=ui_row, padx=self.PADX, pady=self.PADY, sticky=tk.W)
+            setattr(status, 'plugin_folder', plugin.folder)
+        assert isinstance(status, tk.Label)
+        state = tk.NORMAL
+        if plugin.folder:
+            if not hasattr(cb, "cb_var"):
+                setattr(cb, "cb_var", tk.IntVar())
+                cb.configure(variable=getattr(cb, "cb_var"))
+            getattr(cb, "cb_var").set(1 if plugin.module else 0)
+            if plugin.folder.endswith('.disabled'):
+                state = tk.DISABLED
+        if plugin.broken:
+            state = tk.DISABLED
+            cb.configure(text=plugin.name, state=state,
+                         command=lambda p=plugin, c=cb: self._broken_plugin(p, c))  # type: ignore
+            status.configure(text=plugin.broken, fg="red")
+        elif state == tk.NORMAL and plugin.module:
+            cb.configure(text=plugin.name, state=state,
+                         command=lambda p=plugin, c=cb: self._disable_plugin(p, c))  # type: ignore
+            status.configure(text="running", fg="green")
+        else:
+            cb.configure(text=plugin.name, state=state,
+                         command=lambda p=plugin, c=cb: self._enable_plugin(p, c))  # type: ignore
+            status.configure(text="disabled", fg="gray")
+
+    def _broken_plugin(self, plugin: plug.Plugin, cb: nb.Checkbutton | None):
+        pass
+
+    def _disable_plugin(self, plugin: plug.Plugin, cb: nb.Checkbutton | None, add_to_config: bool = True):
+        self.theApp.hide_plugin(plugin)
+        if plugin.module:
+            plugin = plug.disable_plugin(plugin, add_to_config)
+        if plugin.notebook_frame:
+            self.notebook.forget(plugin.notebook_frame)
+            plugin.notebook_frame.destroy()
+            plugin.notebook_frame = None
+        if cb:
+            self._update_plugin_state(plugin, cb)
+
+    def _enable_plugin(self, plugin: plug.Plugin, cb: nb.Checkbutton | None, add_to_config: bool = True):
+        plugin = plug.enable_plugin(plugin, add_to_config)
+        self.theApp.show_plugin(plugin)
+        plugin.notebook_frame = plugin.get_prefs(self.notebook, monitor.cmdr, monitor.is_beta)
+        if plugin.notebook_frame:
+            self.notebook.add(plugin.notebook_frame, text=plugin.name)
+        if cb:
+            self._update_plugin_state(plugin, cb)
 
     def cmdrchanged(self, event=None):
         """
@@ -1077,6 +1104,60 @@ class PreferencesDialog(tk.Toplevel):
         if directory:
             pathvar.set(directory)
             self.outvarchanged()
+
+    def _install(self, initial_dir: Path, file: str):
+        if not zipfile.is_zipfile(file):
+            messagebox.showwarning(
+                tr.tl('Error'),  # LANG: Generic error prefix - following text is from Frontier auth service;
+                tr.tl('Invalid ZIP archive.'),  # LANG: Invalid ZIP archive
+                parent=self.master
+            )
+            return
+        name = os.path.splitext(os.path.basename(file))[0]
+        with zipfile.ZipFile(file, 'r') as myzip:
+            has_load = "load.py" in myzip.NameToInfo
+            has_dir_load = name+"/load.py" in myzip.NameToInfo
+            if not (has_load or has_dir_load):
+                messagebox.showwarning(
+                    tr.tl('Error'),  # LANG: Generic error prefix - following text is from Frontier auth service;
+                    tr.tl('Not a valid plugin ZIP archive'),  # LANG: Not a valid plugin ZIP archive
+                    parent=self.master
+                )
+                return
+            old_plugin = plug.get_plugin_by_folder(name)
+            if old_plugin:
+                if not messagebox.askokcancel(
+                    tr.tl('Error'),  # LANG: Generic error prefix - following text is from Frontier auth service;
+                    tr.tl('Plugin already installed. Upgrade?'),  # LANG: Plugin already installed
+                    parent=self.master
+                ):
+                    return
+                self._disable_plugin(old_plugin, None, False)
+                plug.PLUGINS.remove(old_plugin)
+            myzip.extractall(path=initial_dir if has_dir_load else os.path.join(initial_dir, name))
+
+    def installbrowse(self, plugin_dir_path: Path, plugins_frame: nb.Frame):
+        import tkinter.filedialog
+        initial_dir = Path(plugin_dir_path).expanduser()
+        file = tkinter.filedialog.askopenfilename(
+            parent=self,
+            initialdir=initial_dir,
+            filetypes=(("Zip files", "*.zip"), ("All files", "*.*")),
+            title=tr.tl("Select plugin ZIP file")  # LANG: Select plugin ZIP file
+        )
+        user_plugins = list(filter(lambda p: p.folder, plug.PLUGINS))
+        disabled_list = config.get_list('disabled_plugins', default=[])
+        if file:
+            self._install(initial_dir, file)
+        plug.sync_all_plugins()
+        for plugin in user_plugins:
+            if plugin.broken:
+                self._disable_plugin(plugin, None, False)
+        user_plugins = list(filter(lambda p: p.folder, plug.PLUGINS))
+        for plugin in user_plugins:
+            if not plugin.broken and plugin.frame_id == 0 and disabled_list.count(plugin.folder) == 0:
+                self._enable_plugin(plugin, None, False)
+        self.sync_all_plugin_rows(plugins_frame)
 
     def displaypath(self, pathvar: tk.StringVar, entryfield: tk.Entry) -> None:
         """
