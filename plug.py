@@ -28,8 +28,6 @@ logger = get_main_logger()
 
 # List of loaded Plugins
 PLUGINS = []
-PLUGINS_not_py3 = []
-PLUGINS_broken = []
 
 
 # For asynchronous error display
@@ -49,7 +47,7 @@ last_error = LastError()
 class Plugin:
     """An EDMC plugin."""
 
-    def __init__(self, name: str, loadfile: Path | None, plugin_logger: logging.Logger | None):  # noqa: CCR001
+    def __init__(self, name: str, folder: str, loadfile: Path | None, plugin_logger: logging.Logger | None):  # noqa: CCR001
         """
         Load a single plugin.
 
@@ -59,9 +57,11 @@ class Plugin:
         :raises Exception: Typically, ImportError or OSError
         """
         self.name: str = name  # Display name.
-        self.folder: str | None = name  # basename of plugin folder. None for internal plugins.
+        self.folder: str | None = folder  # basename of plugin folder. None for internal plugins.
         self.module = None  # None for disabled plugins.
         self.logger: logging.Logger | None = plugin_logger
+        self.frame_id = 0   # Not 0 is shown in main window
+        self.broken: str = None  # Error message
 
         if loadfile:
             logger.info(f'loading plugin "{name.replace(".", "_")}" from "{loadfile}"')
@@ -78,14 +78,18 @@ class Plugin:
                         newname = module.plugin_start3(Path(loadfile).resolve().parent)
                         self.name = str(newname) if newname else self.name
                         self.module = module
+                        self.broken = None
                     elif getattr(module, 'plugin_start', None):
+                        self.broken = f'plugin {name} needs migrating'
                         logger.warning(f'plugin {name} needs migrating\n')
-                        PLUGINS_not_py3.append(self)
                     else:
+                        self.broken = 'needs python 3 migration'
                         logger.error(f'plugin {name} has no plugin_start3() function')
                 else:
+                    self.broken = 'Failed to load from load.py'
                     logger.error(f'Failed to load Plugin "{name}" from file "{loadfile}"')
-            except Exception:
+            except Exception as e:
+                self.broken = f'Error: {e}'
                 logger.exception(f': Failed for Plugin "{name}"')
                 raise
         else:
@@ -164,8 +168,7 @@ def load_plugins(master: tk.Tk) -> None:
     # Add plugin folder to load path so packages can be loaded from plugin folder
     sys.path.append(config.plugin_dir)
 
-    found = _load_found_plugins()
-    PLUGINS.extend(sorted(found, key=lambda p: operator.attrgetter('name')(p).lower()))
+    sync_all_plugins()
 
 
 def _load_internal_plugins():
@@ -175,16 +178,42 @@ def _load_internal_plugins():
             try:
                 plugin_name = name[:-3]
                 plugin_path = config.internal_plugin_dir_path / name
-                plugin = Plugin(plugin_name, plugin_path, logger)
-                plugin.folder = None
+                plugin = Plugin(plugin_name, None, plugin_path, logger)
                 internal.append(plugin)
             except Exception:
                 logger.exception(f'Failure loading internal Plugin "{name}"')
     return internal
 
 
-def _load_found_plugins():
-    found = []
+def load_plugin(folder: str):
+    if not (config.plugin_dir_path / folder).is_dir() or folder.startswith(('.', '_')):
+        return None
+    if folder.endswith('.disabled'):
+        return None
+
+    disabled_list = config.get_list('disabled_plugins', default=[])
+    if disabled_list.count(folder) > 0:
+        plugin = Plugin(folder, folder, None, logger)
+    else:
+        try:
+            # Add plugin's folder to load path in case plugin has internal package dependencies
+            sys.path.append(str(config.plugin_dir_path / folder))
+            import EDMCLogging
+            # Create a logger for this 'found' plugin.  Must be before the load.py is loaded.
+            plugin_logger = EDMCLogging.get_plugin_logger(folder)
+            plugin = Plugin(folder, folder, config.plugin_dir_path / folder / 'load.py', plugin_logger)
+        except Exception as e:
+            plugin = Plugin(folder, folder, None, logger)
+            plugin.broken = f'Error: {e}'
+            logger.exception(f'Failure loading found Plugin "{folder}"')
+    old = get_plugin_by_folder(folder)
+    if old:
+        disable_plugin(old, False)
+        PLUGINS.remove(old)
+    PLUGINS.append(plugin)
+    return plugin
+
+def sync_all_plugins():
     # Load any plugins that are also packages first, but note it's *still*
     # 100% relying on there being a `load.py`, as only that will be loaded.
     # The intent here is to e.g. have EDMC-Overlay load before any plugins
@@ -194,27 +223,14 @@ def _load_found_plugins():
         not (p / '__init__.py').is_file(), p.name.lower()))
 
     for plugin_file in plugin_files:
-        name = plugin_file.name
-        if not (config.plugin_dir_path / name).is_dir() or name.startswith(('.', '_')):
-            pass
-        elif name.endswith('.disabled'):
-            name, discard = name.rsplit('.', 1)
-            found.append(Plugin(name, None, logger))
-        else:
-            try:
-                # Add plugin's folder to load path in case plugin has internal package dependencies
-                sys.path.append(str(config.plugin_dir_path / name))
+        if not get_plugin_by_folder(plugin_file.name):
+            load_plugin(plugin_file.name)
 
-                import EDMCLogging
-                # Create a logger for this 'found' plugin.  Must be before the load.py is loaded.
-                plugin_logger = EDMCLogging.get_plugin_logger(name)
-                found.append(Plugin(name, config.plugin_dir_path / name / 'load.py', plugin_logger))
-            except Exception:
-                PLUGINS_broken.append(Plugin(name, None, logger))
-                logger.exception(f'Failure loading found Plugin "{name}"')
-                pass
-    return found
-
+    for plugin in list(PLUGINS):
+        if plugin.folder and not os.path.exists(os.path.join(config.plugin_dir_path, plugin.folder)):
+            disable_plugin(plugin, False)
+            plugin.broken = f'Missing folder: {plugin.folder}'
+            PLUGINS.remove(plugin)
 
 def provides(fn_name: str) -> list[str]:
     """
@@ -381,7 +397,7 @@ def notify_journal_entry_cqc(
     return error
 
 
-def notify_dashboard_entry(cmdr: str, is_beta: bool, entry: MutableMapping[str, Any],) -> str | None:
+def notify_dashboard_entry(cmdr: str, is_beta: bool, entry: MutableMapping[str, Any], ) -> str | None:
     """
     Send a status entry to each plugin.
 
@@ -468,3 +484,41 @@ def show_error(err: str) -> None:
     if err and last_error.root:
         last_error.msg = str(err)
         last_error.root.event_generate('<<PluginError>>', when="tail")
+
+
+def enable_plugin(plugin: Plugin, add_to_config = True) -> Plugin:
+    if add_to_config:
+        disabled_list = config.get_list('disabled_plugins', default=[])
+        if disabled_list.count(plugin.folder) > 0:
+            disabled_list.remove(plugin.folder)
+            config.set('disabled_plugins', disabled_list)
+    if loaded := load_plugin(plugin.folder):
+        if PLUGINS.count(plugin):
+            PLUGINS.remove(plugin)
+        PLUGINS.append(loaded)
+        return loaded
+    return plugin
+
+
+def disable_plugin(plugin: Plugin, add_to_config = True) -> Plugin:
+    if add_to_config:
+        disabled_list = config.get_list('disabled_plugins', default=[])
+        if disabled_list.count(plugin.folder) == 0:
+            disabled_list.append(plugin.folder)
+            config.set('disabled_plugins', disabled_list)
+    if plugin.module:
+        plugin_stop = plugin._get_func('plugin_stop')
+        if plugin_stop:
+            try:
+                logger.info(f'Asking plugin "{plugin.name}" to stop...')
+                plugin_stop()
+            except Exception:
+                logger.exception(f'Plugin "{plugin.name}" failed')
+        plugin.module = None
+    return plugin
+
+def get_plugin_by_folder(folder: str) -> Plugin | None:
+    for plugin in PLUGINS:
+        if plugin.folder == folder:
+            return plugin
+    return None
