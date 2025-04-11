@@ -965,11 +965,9 @@ class PreferencesDialog(tk.Toplevel):
             ).grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get())
 
             for plugin in enabled_plugins:
-                if plugin.name == plugin.folder:
-                    label = nb.Label(plugins_frame, text=plugin.name)
-
-                else:
-                    label = nb.Label(plugins_frame, text=f'{plugin.folder} ({plugin.name})')
+                label = nb.Label(plugins_frame,
+                                 text=plugin.name if plugin.name == plugin.folder
+                                 else f'{plugin.folder} ({plugin.name})')
 
                 label.grid(columnspan=2, padx=self.LISTX, pady=self.PADY, sticky=tk.W, row=row.get())
 

@@ -234,20 +234,8 @@ if __name__ == "__main__":
             print('No starport!')
             continue
 
-        if data['lastStarport'].get('commodities'):
-            addcommodities(data)
+        addcommodities(data) if data['lastStarport'].get('commodities') else print('No market')
 
-        else:
-            print('No market')
+        addmodules(data) if data['lastStarport'].get('modules') else print('No outfitting')
 
-        if data['lastStarport'].get('modules'):
-            addmodules(data)
-
-        else:
-            print('No outfitting')
-
-        if data['lastStarport'].get('ships'):
-            addships(data)
-
-        else:
-            print('No shipyard')
+        addships(data) if data['lastStarport'].get('ships') else print('No shipyard')

@@ -414,11 +414,7 @@ def notify_capidata(data: companion.CAPIData, is_beta: bool) -> str | None:
     error = None
     for plugin in PLUGINS:
         # TODO: Handle it being Legacy data
-        if data.source_host == companion.SERVER_LEGACY:
-            cmdr_data = plugin._get_func('cmdr_data_legacy')
-
-        else:
-            cmdr_data = plugin._get_func('cmdr_data')
+        cmdr_data = plugin._get_func('cmdr_data_legacy' if data.source_host == companion.SERVER_LEGACY else 'cmdr_data')
 
         if cmdr_data:
             try:
