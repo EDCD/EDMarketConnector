@@ -54,50 +54,6 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: de
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 
-;Check if a WiX-based installation exists. If so, kill it with fire.
-[Code]
-function EndsWith(SubText, Text: AnsiString): Boolean;
-var
-  EndStr: string;
-begin
-  Log('Starting');
-  EndStr := Copy(Text, Length(Text) - Length(SubText) + 1, Length(SubText));
-  Log(EndStr);
-  { Use SameStr, if you need a case-sensitive comparison }
-  Result := SameText(SubText, EndStr);
-end;
-
-// EDMC didn't keep a consistant GUID during previous history. Due to that, we have to do this tomfoolery.
-procedure CurStepChanged(CurStep: TSetupStep);
-var
-  ResultCode: Integer;
-  Uninstall: String;
-  OldWiX: Boolean;
-  S: AnsiString;
-  PowerShellOutputFile: String;
-begin
-  if (CurStep = ssInstall) then
-  begin
-  PowerShellOutputFile := ExpandConstant('{tmp}\PowershellOutput.txt');
-  // Construct the PowerShell command and capture output to a file
-  Exec('powershell.exe', '-NoProfile -Command "Get-WmiObject -Class Win32_Product | where Name -eq ''Elite Dangerous Market Connector'' | select-object -expandproperty IdentifyingNumber" | Out-File -Encoding ASCII "' + PowerShellOutputFile + '"', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
-    begin
-    if LoadStringFromFile(PowerShellOutputFile, S) then
-    S:= Trim(S);
-    Log(S);
-      begin
-      OldWiX:=EndsWith('}', S);
-      if (OldWiX = True) then
-        begin
-        MsgBox('Warning: an old version of EDMC is installed! Please close EDMC while we remove the old version!', mbInformation, MB_OK);
-        Uninstall := '/x ' + S;
-        Exec('MsiExec.exe', Uninstall, '', SW_SHOW, ewWaitUntilTerminated, ResultCode);
-        end;
-      end;
-    end;
-  end;
-end;
-
 [Registry]
 ; Create the main registry key under HKCR
 Root: HKCR; Subkey: "edmc"; Flags: uninsdeletekey
