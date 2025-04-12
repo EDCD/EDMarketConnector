@@ -285,3 +285,4 @@ class Updater:
             and *it* might have asked this whole application to quit, in
             which case we don't want to ask *it* to quit
         """
+        pass
