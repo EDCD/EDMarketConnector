@@ -733,7 +733,7 @@ class AppWindow:
         plugin_id = self.plugin_id + 1
         # Per plugin separator
         plugin_sep = tk.Frame(
-            self.all_plugin_frame, highlightthickness=1, name=f"plugin_hr_{plugin_id}"
+            self.all_plugin_frame, highlightthickness=1, name=f"plugin_hr_{plugin_id}", bg="#000", height=3
         )
         # Per plugin frame, for it to use as its parent for own widgets
         plugin_frame = tk.Frame(self.all_plugin_frame, name=f"plugin_{plugin_id}")
@@ -786,7 +786,7 @@ class AppWindow:
             pass
         children = self.all_plugin_frame.winfo_children()
         if len(children) == 0:
-            label = tk.Label(self.all_plugin_frame, text="No plugins", name="no_plugins_label", anchor=tk.CENTER)
+            label = tk.Frame(self.all_plugin_frame, highlightthickness=1, name="no_plugins_label")
             pady = 2 if sys.platform != 'win32' else 0
             label.grid(row=0, columnspan=2, sticky=tk.NSEW, padx=self.PADX, pady=pady)
             return
