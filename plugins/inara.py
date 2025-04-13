@@ -153,8 +153,6 @@ LAST_UPDATE_CONF_KEY = 'inara_last_update'
 EVENT_COLLECT_TIME = 31  # Minimum time to take collecting events before requesting a send
 WORKER_WAIT_TIME = 35  # Minimum time for worker to wait between sends
 
-STATION_UNDOCKED: str = '×'  # "Station" name to display when not docked = U+00D7
-
 
 TARGET_URL = 'https://inara.cz/inapi/v1/'
 DEBUG = 'inara' in debug_senders

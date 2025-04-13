@@ -34,6 +34,7 @@ from companion import CAPIData
 from l10n import translations as tr
 
 logger = get_main_logger()
+show_password_var = tk.BooleanVar()
 
 # Global Padding Preferences
 PADX = 10
@@ -185,6 +186,3 @@ def cmdr_data_initial_common(this, data: CAPIData):
         this.system_name = data['lastSystem']['name']
     if not this.station_name and data['commander']['docked']:
         this.station_name = data['lastStarport']['name']
-
-
-show_password_var = tk.BooleanVar()

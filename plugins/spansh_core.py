@@ -50,7 +50,6 @@ class This:
 
 
 this = This()
-STATION_UNDOCKED: str = '×'  # "Station" name to display when not docked = U+00D7
 
 
 def plugin_start3(plugin_dir: str) -> str:
