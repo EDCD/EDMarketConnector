@@ -18,14 +18,17 @@ referenced in this file (or only in any other core plugin), and if so...
     `build.py` TO ENSURE THE FILES ARE ACTUALLY PRESENT
     IN AN END-USER INSTALLATION ON WINDOWS.
 """
+# pylint: disable=import-error
 from __future__ import annotations
 
 import tkinter as tk
-from typing import Any, cast
+from typing import Any
 import requests
 from companion import CAPIData
 from config import appname, config
 from EDMCLogging import get_main_logger
+from plugins.common_coreutils import (station_link_common, this_format_common,
+                                      cmdr_data_initial_common, station_name_setter_common)
 
 logger = get_main_logger()
 
@@ -91,12 +94,7 @@ def journal_entry(
     :param state: `monitor.state`
     :return: None if no error, else an error string.
     """
-    this.on_foot = state['OnFoot']
-    this.system_address = state['SystemAddress']
-    this.system_name = state['SystemName']
-    this.system_population = state['SystemPopulation']
-    this.station_name = state['StationName']
-    this.station_marketid = state['MarketID']
+    this_format_common(this, state)
 
     # Only actually change URLs if we are current provider.
     if config.get_str('system_provider') == 'spansh':
@@ -106,14 +104,7 @@ def journal_entry(
         this.system_link.update_idletasks()
 
     if config.get_str('station_provider') == 'spansh':
-        to_set: str = cast(str, this.station_name)
-        if not to_set:
-            if this.system_population is not None and this.system_population > 0:
-                to_set = STATION_UNDOCKED
-            else:
-                to_set = ''
-
-        this.station_link['text'] = to_set
+        station_name_setter_common(this)
         # Do *NOT* set 'url' here, as it's set to a function that will call
         # through correctly.  We don't want a static string.
         this.station_link.update_idletasks()
@@ -129,15 +120,7 @@ def cmdr_data(data: CAPIData, is_beta: bool) -> str | None:
     :param is_beta: Whether game beta was detected.
     :return: Optional error string.
     """
-    # Always store initially, even if we're not the *current* system provider.
-    if not this.station_marketid and data['commander']['docked']:
-        this.station_marketid = data['lastStarport']['id']
-
-    # Only trust CAPI if these aren't yet set
-    if not this.system_name:
-        this.system_name = data['lastSystem']['name']
-    if not this.station_name and data['commander']['docked']:
-        this.station_name = data['lastStarport']['name']
+    cmdr_data_initial_common(this, data)
 
     # Override standard URL functions
     if config.get_str('system_provider') == 'spansh':
@@ -146,12 +129,7 @@ def cmdr_data(data: CAPIData, is_beta: bool) -> str | None:
         # through correctly.  We don't want a static string.
         this.system_link.update_idletasks()
     if config.get_str('station_provider') == 'spansh':
-        if data['commander']['docked'] or this.on_foot and this.station_name:
-            this.station_link['text'] = this.station_name
-        elif data['lastStarport']['name'] and data['lastStarport']['name'] != "":
-            this.station_link['text'] = STATION_UNDOCKED
-        else:
-            this.station_link['text'] = ''
+        station_link_common(data, this)
         # Do *NOT* set 'url' here, as it's set to a function that will call
         # through correctly.  We don't want a static string.
         this.station_link.update_idletasks()
