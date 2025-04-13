@@ -829,7 +829,8 @@ class PreferencesDialog(tk.Toplevel):
                 appearance_frame,
                 # LANG: Appearance - Help/hint text for UI scaling selection
                 text=tr.tl('100 means Default{CR}Restart Required for{CR}changes to take effect!')
-            ).grid(column=3, padx=self.PADX, pady=self.PADY, sticky=tk.E, row=cur_row)
+            )  # E1111
+            self.ui_scaling_defaultis.grid(column=3, padx=self.PADX, pady=self.PADY, sticky=tk.E, row=cur_row)
 
         # Transparency slider
         ttk.Separator(appearance_frame, orient=tk.HORIZONTAL).grid(
@@ -1310,10 +1311,10 @@ class PreferencesDialog(tk.Toplevel):
         self._destroy()
         # Send to the Post Config if we updated the update branch or need to restart
         post_flags = {
-            'Update': True if self.curr_update_track != self.update_paths.get() else False,
+            'Update': self.curr_update_track != self.update_paths.get(),  # Just needs bool not true if else false
             'Track': self.update_paths.get(),
             'Parent': self,
-            'Restart_Req': True if self.req_restart else False
+            'Restart_Req': self.req_restart  # Sipmle Bool Needed
         }
         if self.callback:
             self.callback(**post_flags)

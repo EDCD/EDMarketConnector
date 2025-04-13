@@ -840,8 +840,7 @@ class AppWindow:
                     r' if downgrading between major versions with significant changes.\r\n\r\n'
                     'Do you want to open GitHub to download the latest release?'
                 )
-                update_msg = update_msg.replace('\\n', '\n')
-                update_msg = update_msg.replace('\\r', '\r')
+                update_msg = update_msg.replace('\\n', '\n').replace('\\r', '\r')
                 stable_popup = tk.messagebox.askyesno(title=title, message=update_msg)
                 if stable_popup:
                     webbrowser.open("https://github.com/EDCD/eDMarketConnector/releases/latest")
@@ -2064,17 +2063,15 @@ def validate_providers():
 
     # LANG: Popup-text about Reset Providers
     popup_text = tr.tl(r'One or more of your URL Providers were invalid, and have been reset:\r\n\r\n')
-    for provider in reset_providers:
+    for provider, (old_prov, new_prov) in reset_providers.items():
         # LANG: Text About What Provider Was Reset
-        popup_text += tr.tl(r'{PROVIDER} was set to {OLDPROV}, and has been reset to {NEWPROV}\r\n')
-        popup_text = popup_text.format(
+        popup_text += tr.tl(r'{PROVIDER} was set to {OLDPROV}, and has been reset to {NEWPROV}\r\n').format(
             PROVIDER=provider,
-            OLDPROV=reset_providers[provider][0],
-            NEWPROV=reset_providers[provider][1]
+            OLDPROV=old_prov,
+            NEWPROV=new_prov
         )
     # And now we do need these to be actual \r\n
-    popup_text = popup_text.replace('\\n', '\n')
-    popup_text = popup_text.replace('\\r', '\r')
+    popup_text = popup_text.replace('\\n', '\n').replace('\\r', '\r')
 
     tk.messagebox.showinfo(
         # LANG: Popup window title for Reset Providers
@@ -2246,8 +2243,7 @@ sys.path: {sys.path}'''
         detail = tr.tl(  # LANG: EDMC Critical Error Details
             r"Here's what EDMC Detected:\r\n\r\n{ERR}\r\n\r\nDo you want to file a Bug Report on GitHub?"
         ).format(ERR=err)
-        detail = detail.replace('\\n', '\n')
-        detail = detail.replace('\\r', '\r')
+        detail = detail.replace('\\n', '\n').replace('\\r', '\r')
         msg = tk.messagebox.askyesno(
             title=title, message=message, detail=detail, icon=tkinter.messagebox.ERROR, type=tkinter.messagebox.YESNO,
             parent=root
@@ -2278,8 +2274,7 @@ sys.path: {sys.path}'''
                 DISABLED='.disabled'
             )
             # And now we do need these to be actual \r\n
-            popup_text = popup_text.replace('\\n', '\n')
-            popup_text = popup_text.replace('\\r', '\r')
+            popup_text = popup_text.replace('\\n', '\n').replace('\\r', '\r')
 
             tk.messagebox.showinfo(
                 # LANG: Popup window title for list of 'broken' plugins that failed to load
@@ -2309,8 +2304,7 @@ sys.path: {sys.path}'''
                 DISABLED='.disabled'
             )
             # And now we do need these to be actual \r\n
-            popup_text = popup_text.replace('\\n', '\n')
-            popup_text = popup_text.replace('\\r', '\r')
+            popup_text = popup_text.replace('\\n', '\n').replace('\\r', '\r')
 
             tk.messagebox.showinfo(
                 # LANG: Popup window title for list of 'enabled' plugins that don't work with Python 3.x
