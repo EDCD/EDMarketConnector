@@ -24,6 +24,7 @@ from l10n import translations as tr
 from monitor import monitor
 from theme import theme
 from ttkHyperlinkLabel import HyperlinkLabel
+from common_utils import ensure_on_screen
 logger = get_main_logger()
 
 
@@ -187,7 +188,6 @@ if sys.platform == 'win32':
     import ctypes
     import winreg
     from ctypes.wintypes import LPCWSTR, LPWSTR, MAX_PATH, POINT, RECT, SIZE, UINT, BOOL
-    import win32gui
     import win32api
     is_wine = False
     try:
@@ -307,15 +307,7 @@ class PreferencesDialog(tk.Toplevel):
         self.grab_set()
 
         # Ensure fully on-screen
-        if sys.platform == 'win32' and CalculatePopupWindowPosition:
-            position = RECT()
-            win32gui.GetWindowRect(win32gui.GetParent(self.winfo_id()))
-            if CalculatePopupWindowPosition(
-                POINT(parent.winfo_rootx(), parent.winfo_rooty()),
-                SIZE(position.right - position.left, position.bottom - position.top),  # type: ignore
-                0x10000, None, position
-            ):
-                self.geometry(f"+{position.left}+{position.top}")
+        ensure_on_screen(self, parent)
 
         # Set Log Directory
         self.logfile_loc = Path(config.app_dir_path / 'logs')

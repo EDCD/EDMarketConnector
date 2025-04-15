@@ -68,6 +68,7 @@ from config import appversion, appversion_nobuild, config, copyright
 from EDMCLogging import edmclogger, logger, logging
 from journal_lock import JournalLock, JournalLockResult
 from update import check_for_fdev_updates
+from common_utils import log_locale, SERVER_RETRY
 
 if __name__ == '__main__':  # noqa: C901
     # Command-line arguments
@@ -415,8 +416,6 @@ from l10n import translations as tr
 from monitor import monitor
 from theme import theme
 from ttkHyperlinkLabel import HyperlinkLabel, SHIPYARD_HTML_TEMPLATE
-
-SERVER_RETRY = 5  # retry pause for Companion servers [s]
 
 
 class AppWindow:
@@ -1979,17 +1978,6 @@ class AppWindow:
 def test_logging() -> None:
     """Simple test of top level logging."""
     logger.debug('Test from EDMarketConnector.py top-level test_logging()')
-
-
-def log_locale(prefix: str) -> None:
-    """Log all of the current local settings."""
-    logger.debug(f'''Locale: {prefix}
-Locale LC_COLLATE: {locale.getlocale(locale.LC_COLLATE)}
-Locale LC_CTYPE: {locale.getlocale(locale.LC_CTYPE)}
-Locale LC_MONETARY: {locale.getlocale(locale.LC_MONETARY)}
-Locale LC_NUMERIC: {locale.getlocale(locale.LC_NUMERIC)}
-Locale LC_TIME: {locale.getlocale(locale.LC_TIME)}'''
-                 )
 
 
 def setup_killswitches(filename: str | None):
