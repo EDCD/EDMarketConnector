@@ -28,13 +28,15 @@ import base64
 import gzip
 import io
 import json
+import os
 import myNotebook as nb  # noqa: N813
 from EDMCLogging import get_main_logger
 from companion import CAPIData
 from l10n import translations as tr
 
 logger = get_main_logger()
-show_password_var = tk.BooleanVar()
+if not os.getenv('EDMC_NO_UI'):  # Functions using show_password_var MUST have TK set up
+    show_password_var = tk.BooleanVar()
 
 # Global Padding Preferences
 PADX = 10
