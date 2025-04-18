@@ -110,11 +110,8 @@ class CAPIData(UserDict):
                 logger.debug('modules was None.  FC or Damaged Station?')
 
             elif isinstance(modules, list):
-                if not modules:
-                    logger.debug('modules is empty list. Damaged Station?')
-
-                else:
-                    logger.error(f'modules is non-empty list: {modules!r}')
+                logger.debug('modules is empty list. Damaged Station?') if not modules \
+                    else logger.error(f'modules is non-empty list: {modules!r}')
 
             else:
                 logger.error(f'modules was not None, a list, or a dict! type: {type(modules)}, content: {modules}')
@@ -543,11 +540,11 @@ class Auth:
     # noinspection PyMethodMayBeStatic
     def dump(self, r: requests.Response) -> None:
         """Dump details of HTTP failure from oAuth attempt."""
-        if r:
-            logger.debug(f'Frontier CAPI Auth: {r.url} {r.status_code} {r.reason if r.reason else "None"} {r.text}')
-
-        else:
-            logger.debug(f'Frontier CAPI Auth: failed with `r` False: {r!r}')
+        logger.debug(
+            f'Frontier CAPI Auth: {r.url} {r.status_code} {r.reason or "None"} {r.text}'
+            if r else
+            f'Frontier CAPI Auth: failed with `r` False: {r!r}'
+        )
 
     # noinspection PyMethodMayBeStatic
     def base64_url_encode(self, text: bytes) -> str:

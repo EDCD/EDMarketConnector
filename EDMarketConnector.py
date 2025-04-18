@@ -723,10 +723,7 @@ class AppWindow:
         self.toggle_suit_row(visible=False)
         if args.start_min:
             logger.warning("Trying to start minimized")
-            if root.overrideredirect():
-                self.oniconify()
-            else:
-                self.w.wm_iconify()
+            self.oniconify() if root.overrideredirect() else self.w.wm_iconify()
 
     def show_plugin(self, plugin: plug.Plugin):
         self.remove_no_plugins_label()
