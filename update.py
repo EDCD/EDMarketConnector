@@ -11,6 +11,8 @@ import pathlib
 import shutil
 import sys
 import threading
+import os
+from tkinter import messagebox
 from traceback import print_exc
 from typing import TYPE_CHECKING
 from xml.etree import ElementTree
@@ -29,10 +31,7 @@ logger = get_main_logger()
 
 def check_for_fdev_updates(silent: bool = False, local: bool = False) -> None:  # noqa: CCR001
     """Check for and download FDEV ID file updates."""
-    if local:
-        pathway = config.respath_path
-    else:
-        pathway = config.app_dir_path
+    pathway = config.respath_path if local else config.app_dir_path
 
     files_urls = [
         ('commodity.csv', 'https://raw.githubusercontent.com/EDCD/FDevIDs/master/commodity.csv'),
@@ -60,8 +59,10 @@ def check_for_fdev_updates(silent: bool = False, local: bool = False) -> None:  
             except FileNotFoundError:
                 local_content = None
 
-        response = requests.get(url, timeout=20)
-        if response.status_code != 200:
+        try:
+            response = requests.get(url, timeout=20)
+            response.raise_for_status()
+        except requests.RequestException:
             if not silent:
                 logger.error(f'Failed to download {file}! Unable to continue.')
             continue
@@ -161,6 +162,13 @@ class Updater:
             except Exception:
                 print_exc()
                 self.updater = None
+                if not os.getenv("EDMC_NO_UI"):
+                    messagebox.showerror(
+                        title=appname,
+                        message="Updater Failed to Initialize. Please file a bug report!"
+                    )
+                else:
+                    logger.error("Updater Failed to Initialize. Please file a bug report!")
 
             return
 

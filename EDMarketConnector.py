@@ -748,10 +748,7 @@ class AppWindow:
         self.toggle_suit_row(visible=False)
         if args.start_min:
             logger.warning("Trying to start minimized")
-            if root.overrideredirect():
-                self.oniconify()
-            else:
-                self.w.wm_iconify()
+            self.oniconify() if root.overrideredirect() else self.w.wm_iconify()
 
     def update_suit_text(self) -> None:
         """Update the suit text for current type and loadout."""
