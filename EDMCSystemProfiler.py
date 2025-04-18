@@ -38,17 +38,17 @@ from monitor import monitor
 from EDMCLogging import get_main_logger
 
 
-def get_sys_report(config: config.AbstractConfig) -> str:
+def get_sys_report(active_config: config.AbstractConfig) -> str:
     """Gather system information about Elite, the Host Computer, and EDMC."""
     # Calculate Requested Information
     plt = platform.uname()
     locale.setlocale(locale.LC_ALL, "")
     lcl = locale.getlocale()
-    monitor.currentdir = config.get_str(
-        "journaldir", default=config.default_journal_dir
+    monitor.currentdir = active_config.get_str(
+        "journaldir", default=active_config.default_journal_dir
     )
     if not monitor.currentdir:
-        monitor.currentdir = config.default_journal_dir
+        monitor.currentdir = active_config.default_journal_dir
     try:
         logfile = monitor.journal_newest_filename(monitor.currentdir)
         if logfile is None:
@@ -108,21 +108,21 @@ def copy_sys_report(root: tk.Tk, report: str) -> None:
     messagebox.showinfo("System Profiler", "System Report copied to Clipboard", parent=root)
 
 
-def main() -> None:
+def main(active_config: config.AbstractConfig) -> None:
     """Entry Point for the System Profiler."""
     # Now Let's Begin
     root: tk.Tk = tk.Tk()
     root.withdraw()  # Hide the window initially to calculate the dimensions
     try:
         icon_image = tk.PhotoImage(
-            file=path.join(cur_config.respath_path, "io.edcd.EDMarketConnector.png")
+            file=path.join(active_config.respath_path, "io.edcd.EDMarketConnector.png")
         )
 
         root.iconphoto(True, icon_image)
     except tk.TclError:
-        root.iconbitmap(path.join(cur_config.respath_path, "EDMarketConnector.ico"))
+        root.iconbitmap(path.join(active_config.respath_path, "EDMarketConnector.ico"))
 
-    sys_report = get_sys_report(cur_config)
+    sys_report = get_sys_report(active_config)
 
     # Set up styling
     style = ttk.Style(root)
@@ -182,7 +182,8 @@ if __name__ == "__main__":
     # Args: Only work if not frozen
     parser = argparse.ArgumentParser(
         prog=appname,
-        description="Prints diagnostic and debugging information about the current EDMC configuration.",
+        description="Prints diagnostic and debugging information "
+                    "about the current EDMC configuration.",
     )
     parser.add_argument(
         "--out-console",
@@ -203,4 +204,4 @@ if __name__ == "__main__":
         print(sys_report)
         sys.exit(0)
 
-    main()
+    main(cur_config)

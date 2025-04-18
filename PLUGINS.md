@@ -153,6 +153,16 @@ See [#1327 - ModuleNotFound when creating a new plugin.](https://github.com/EDCD
 for some discussion.
 
 
+## Common Resources
+
+Some plugins may wish to use resources available in a different plugin, or use 
+common assets across plugins. This is possible, however care must be taken to 
+ensure that the plugins do not attempt to load non-existent data or create 
+circular imports. 
+
+For an example of how this is done, look at the code in `plugins/common_coreutils.py`
+and the usage of these functions in other core plugins. 
+
 ---
 
 ## Logging

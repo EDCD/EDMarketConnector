@@ -121,6 +121,7 @@ def build() -> None:
         "plugins/edsy.py",
         "plugins/inara.py",
         "plugins/spansh_core.py",
+        "plugins/common_coreutils.py"
     ]
     options: dict = {
         "py2exe": {

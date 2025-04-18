@@ -19,12 +19,10 @@ referenced in this file (or only in any other core plugin), and if so...
     `build.py` TO ENSURE THE FILES ARE ACTUALLY PRESENT
     IN AN END-USER INSTALLATION ON WINDOWS.
 """
+# pylint: disable=import-error
 from __future__ import annotations
 
-import base64
-import gzip
-import io
-import json
+from typing import Any, Mapping
 import tkinter as tk
 from tkinter import ttk
 import myNotebook as nb  # noqa: N813 # its not my fault.
@@ -32,6 +30,7 @@ from EDMCLogging import get_main_logger
 from plug import show_error
 from config import config
 from l10n import translations as tr
+from plugins.common_coreutils import PADX, PADY, BOXY, shipyard_url_common
 
 
 class CoriolisConfig:
@@ -82,10 +81,6 @@ def plugin_start3(path: str) -> str:
 
 def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> nb.Frame:
     """Set up plugin preferences."""
-    PADX = 10  # noqa: N806
-    PADY = 1  # noqa: N806
-    BOXY = 2  # noqa: N806  # box spacing
-
     # Save the old text values for the override mode, so we can update them if the language is changed
     coriolis_config.override_text_old_auto = tr.tl('Auto')  # LANG: Coriolis normal/beta selection - auto
     coriolis_config.override_text_old_normal = tr.tl('Normal')  # LANG: Coriolis normal/beta selection - normal
@@ -207,14 +202,14 @@ def _get_target_url(is_beta: bool) -> str:
     return coriolis_config.normal_url
 
 
-def shipyard_url(loadout, is_beta) -> str | bool:
-    """Return a URL for the current ship."""
-    # most compact representation
-    string = json.dumps(loadout, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode('utf-8')
-    if not string:
-        return False
-    out = io.BytesIO()
-    with gzip.GzipFile(fileobj=out, mode='w') as f:
-        f.write(string)
-    encoded = base64.urlsafe_b64encode(out.getvalue()).decode().replace('=', '%3D')
-    return _get_target_url(is_beta) + encoded
+# Return a URL for the current ship
+def shipyard_url(loadout: Mapping[str, Any], is_beta: bool) -> bool | str:
+    """
+    Construct a URL for ship loadout.
+
+    :param loadout: The ship loadout data.
+    :param is_beta: Whether the game is in beta.
+    :return: The constructed URL for the ship loadout.
+    """
+    encoded_data = shipyard_url_common(loadout)
+    return _get_target_url(is_beta) + encoded_data if encoded_data else False

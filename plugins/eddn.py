@@ -18,6 +18,7 @@ referenced in this file (or only in any other core plugin), and if so...
     `build.py` TO ENSURE THE FILES ARE ACTUALLY PRESENT
     IN AN END-USER INSTALLATION ON WINDOWS.
 """
+# pylint: disable=import-error
 from __future__ import annotations
 
 import http
@@ -47,6 +48,7 @@ from prefs import prefsVersion
 from ttkHyperlinkLabel import HyperlinkLabel
 from util import text
 from l10n import translations as tr
+from plugins.common_coreutils import PADX, PADY, BUTTONX, this_format_common
 
 logger = get_main_logger()
 
@@ -2145,10 +2147,6 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:
     :param is_beta: `bool` - True if this is a beta version of the Game.
     :return: The tkinter frame we created.
     """
-    PADX = 10  # noqa: N806
-    BUTTONX = 12  # noqa: N806 # indent Checkbuttons and Radiobuttons
-    PADY = 1  # noqa: N806
-
     if prefsVersion.shouldSetDefaults('0.0.0.0', not bool(config.get_int('output'))):
         output: int = config.OUT_EDDN_SEND_STATION_DATA | config.OUT_EDDN_SEND_NON_STATION  # default settings
 
@@ -2349,11 +2347,7 @@ def journal_entry(  # noqa: C901, CCR001
     this.body_id = state['BodyID']
     this.body_type = state['BodyType']
     this.coordinates = state['StarPos']
-    this.system_address = state['SystemAddress']
-    this.system_name = state['SystemName']
-    this.station_name = state['StationName']
-    this.station_type = state['StationType']
-    this.station_marketid = state['MarketID']
+    this_format_common(this, state)
 
     if event_name == 'docked':
         # Trigger a send/retry of pending EDDN messages
