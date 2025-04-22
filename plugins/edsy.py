@@ -20,11 +20,8 @@ referenced in this file (or only in any other core plugin), and if so...
 """
 from __future__ import annotations
 
-import base64
-import gzip
-import io
-import json
 from typing import Any, Mapping
+from plugins.common_coreutils import shipyard_url_common  # pylint: disable=E0401
 
 
 def plugin_start3(plugin_dir: str) -> str:
@@ -46,17 +43,7 @@ def shipyard_url(loadout: Mapping[str, Any], is_beta: bool) -> bool | str:
     :param is_beta: Whether the game is in beta.
     :return: The constructed URL for the ship loadout.
     """
-    # Convert loadout to JSON and gzip compress it
-    string = json.dumps(loadout, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode('utf-8')
-    if not string:
-        return False
-
-    out = io.BytesIO()
-    with gzip.GzipFile(fileobj=out, mode='w') as f:
-        f.write(string)
-
+    encoded_data = shipyard_url_common(loadout)
     # Construct the URL using the appropriate base URL based on is_beta
     base_url = 'https://edsy.org/beta/#/I=' if is_beta else 'https://edsy.org/#/I='
-    encoded_data = base64.urlsafe_b64encode(out.getvalue()).decode().replace('=', '%3D')
-
-    return base_url + encoded_data
+    return base_url + encoded_data if encoded_data else False
