@@ -429,7 +429,7 @@ class AppWindow:
 
     PADX = 5
 
-    def __init__(self, master: tk.Tk):  # noqa: C901, CCR001 # TODO - can possibly factor something out
+    def __init__(self, master: tk.Tk):  # noqa: CCR001 # TODO - can possibly factor something out
 
         self.capi_query_holdoff_time = config.get_int('querytime', default=0) + companion.capi_query_cooldown
         self.capi_fleetcarrier_query_holdoff_time = config.get_int('fleetcarrierquerytime', default=0) \

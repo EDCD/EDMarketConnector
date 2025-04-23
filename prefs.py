@@ -1026,11 +1026,13 @@ class PreferencesDialog(tk.Toplevel):
         elif state == tk.NORMAL and plugin.module:
             cb.configure(text=plugin.name, state=state,
                          command=lambda p=plugin, c=cb: self._disable_plugin(p, c))  # type: ignore
-            status.configure(text="running", fg="green")
+            # LANG: running
+            status.configure(text=tr.tl("running"), fg="green")
         else:
             cb.configure(text=plugin.name, state=state,
                          command=lambda p=plugin, c=cb: self._enable_plugin(p, c))  # type: ignore
-            status.configure(text="disabled", fg="gray")
+            # LANG: disabled
+            status.configure(text=tr.tl("disabled"), fg="gray")
 
     def _broken_plugin(self, plugin: plug.Plugin, cb: nb.Checkbutton | None):
         pass
