@@ -26,6 +26,7 @@ from l10n import translations as tr
 from monitor import monitor
 from theme import theme
 from ttkHyperlinkLabel import HyperlinkLabel
+from common_utils import ensure_on_screen
 logger = get_main_logger()
 
 
@@ -189,7 +190,6 @@ if sys.platform == 'win32':
     import ctypes
     import winreg
     from ctypes.wintypes import LPCWSTR, LPWSTR, MAX_PATH, POINT, RECT, SIZE, UINT, BOOL
-    import win32gui
     import win32api
     is_wine = False
     try:
@@ -311,15 +311,7 @@ class PreferencesDialog(tk.Toplevel):
         self.grab_set()
 
         # Ensure fully on-screen
-        if sys.platform == 'win32' and CalculatePopupWindowPosition:
-            position = RECT()
-            win32gui.GetWindowRect(win32gui.GetParent(self.winfo_id()))
-            if CalculatePopupWindowPosition(
-                POINT(parent.winfo_rootx(), parent.winfo_rooty()),
-                SIZE(position.right - position.left, position.bottom - position.top),  # type: ignore
-                0x10000, None, position
-            ):
-                self.geometry(f"+{position.left}+{position.top}")
+        ensure_on_screen(self, parent)
 
         # Set Log Directory
         self.logfile_loc = Path(config.app_dir_path / 'logs')
@@ -834,7 +826,8 @@ class PreferencesDialog(tk.Toplevel):
                 appearance_frame,
                 # LANG: Appearance - Help/hint text for UI scaling selection
                 text=tr.tl('100 means Default{CR}Restart Required for{CR}changes to take effect!')
-            ).grid(column=3, padx=self.PADX, pady=self.PADY, sticky=tk.E, row=cur_row)
+            )  # E1111
+            self.ui_scaling_defaultis.grid(column=3, padx=self.PADX, pady=self.PADY, sticky=tk.E, row=cur_row)
 
         # Transparency slider
         ttk.Separator(appearance_frame, orient=tk.HORIZONTAL).grid(
@@ -1391,10 +1384,10 @@ class PreferencesDialog(tk.Toplevel):
         self._destroy()
         # Send to the Post Config if we updated the update branch or need to restart
         post_flags = {
-            'Update': True if self.curr_update_track != self.update_paths.get() else False,
+            'Update': self.curr_update_track != self.update_paths.get(),  # Just needs bool not true if else false
             'Track': self.update_paths.get(),
             'Parent': self,
-            'Restart_Req': True if self.req_restart else False
+            'Restart_Req': self.req_restart  # Sipmle Bool Needed
         }
         if self.callback:
             self.callback(**post_flags)

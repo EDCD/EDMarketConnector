@@ -68,6 +68,7 @@ from config import appversion, appversion_nobuild, config, copyright
 from EDMCLogging import edmclogger, logger, logging
 from journal_lock import JournalLock, JournalLockResult
 from update import check_for_fdev_updates
+from common_utils import log_locale, SERVER_RETRY
 
 if __name__ == '__main__':  # noqa: C901
     # Command-line arguments
@@ -415,8 +416,6 @@ from l10n import translations as tr
 from monitor import monitor
 from theme import theme
 from ttkHyperlinkLabel import HyperlinkLabel, SHIPYARD_HTML_TEMPLATE
-
-SERVER_RETRY = 5  # retry pause for Companion servers [s]
 
 
 class AppWindow:
@@ -875,8 +874,7 @@ class AppWindow:
                     r' if downgrading between major versions with significant changes.\r\n\r\n'
                     'Do you want to open GitHub to download the latest release?'
                 )
-                update_msg = update_msg.replace('\\n', '\n')
-                update_msg = update_msg.replace('\\r', '\r')
+                update_msg = update_msg.replace('\\n', '\n').replace('\\r', '\r')
                 stable_popup = tk.messagebox.askyesno(title=title, message=update_msg)
                 if stable_popup:
                     webbrowser.open("https://github.com/EDCD/eDMarketConnector/releases/latest")
@@ -2017,17 +2015,6 @@ def test_logging() -> None:
     logger.debug('Test from EDMarketConnector.py top-level test_logging()')
 
 
-def log_locale(prefix: str) -> None:
-    """Log all of the current local settings."""
-    logger.debug(f'''Locale: {prefix}
-Locale LC_COLLATE: {locale.getlocale(locale.LC_COLLATE)}
-Locale LC_CTYPE: {locale.getlocale(locale.LC_CTYPE)}
-Locale LC_MONETARY: {locale.getlocale(locale.LC_MONETARY)}
-Locale LC_NUMERIC: {locale.getlocale(locale.LC_NUMERIC)}
-Locale LC_TIME: {locale.getlocale(locale.LC_TIME)}'''
-                 )
-
-
 def setup_killswitches(filename: str | None):
     """Download and setup the main killswitch list."""
     logger.debug('fetching killswitches...')
@@ -2099,17 +2086,15 @@ def validate_providers():
 
     # LANG: Popup-text about Reset Providers
     popup_text = tr.tl(r'One or more of your URL Providers were invalid, and have been reset:\r\n\r\n')
-    for provider in reset_providers:
+    for provider, (old_prov, new_prov) in reset_providers.items():
         # LANG: Text About What Provider Was Reset
-        popup_text += tr.tl(r'{PROVIDER} was set to {OLDPROV}, and has been reset to {NEWPROV}\r\n')
-        popup_text = popup_text.format(
+        popup_text += tr.tl(r'{PROVIDER} was set to {OLDPROV}, and has been reset to {NEWPROV}\r\n').format(
             PROVIDER=provider,
-            OLDPROV=reset_providers[provider][0],
-            NEWPROV=reset_providers[provider][1]
+            OLDPROV=old_prov,
+            NEWPROV=new_prov
         )
     # And now we do need these to be actual \r\n
-    popup_text = popup_text.replace('\\n', '\n')
-    popup_text = popup_text.replace('\\r', '\r')
+    popup_text = popup_text.replace('\\n', '\n').replace('\\r', '\r')
 
     tk.messagebox.showinfo(
         # LANG: Popup window title for Reset Providers
@@ -2281,8 +2266,7 @@ sys.path: {sys.path}'''
         detail = tr.tl(  # LANG: EDMC Critical Error Details
             r"Here's what EDMC Detected:\r\n\r\n{ERR}\r\n\r\nDo you want to file a Bug Report on GitHub?"
         ).format(ERR=err)
-        detail = detail.replace('\\n', '\n')
-        detail = detail.replace('\\r', '\r')
+        detail = detail.replace('\\n', '\n').replace('\\r', '\r')
         msg = tk.messagebox.askyesno(
             title=title, message=message, detail=detail, icon=tkinter.messagebox.ERROR, type=tkinter.messagebox.YESNO,
             parent=root
@@ -2313,8 +2297,7 @@ sys.path: {sys.path}'''
                 DISABLED='.disabled'
             )
             # And now we do need these to be actual \r\n
-            popup_text = popup_text.replace('\\n', '\n')
-            popup_text = popup_text.replace('\\r', '\r')
+            popup_text = popup_text.replace('\\n', '\n').replace('\\r', '\r')
 
             tk.messagebox.showinfo(
                 # LANG: Popup window title for list of 'broken' plugins that failed to load

@@ -335,8 +335,6 @@ class EDMCContextFilter(logging.Filter):
             # <https://stackoverflow.com/questions/2203424/python-how-to-retrieve-class-information-from-a-frame-object#2220759>
             try:
                 frame_info = inspect.getframeinfo(frame)
-                # raise(IndexError)  # TODO: Remove, only for testing
-
             except Exception:
                 # Separate from the print below to guarantee we see at least this much.
                 print('EDMCLogging:EDMCContextFilter:caller_attributes(): Failed in `inspect.getframinfo(frame)`')
