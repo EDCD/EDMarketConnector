@@ -78,6 +78,9 @@
 /* EDMarketConnector.py: Label for 'Station' line in main UI; prefs.py: Configuration - Label for selection of 'Station' provider website; prefs.py: Appearance - Example 'Normal' text; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:918; prefs.py:632; prefs.py:770; stats.py:408; */
 "Station" = "Station";
 
+/* prefs.py: Appearance option for Windows "Disable Systray"; */
+"Disable Systray" = "Disable Systray";
+
 /* EDMarketConnector.py: 'File' menu title on OSX; EDMarketConnector.py: 'File' menu title; EDMarketConnector.py: 'File' menu; In files: EDMarketConnector.py:921; EDMarketConnector.py:939; EDMarketConnector.py:942; EDMarketConnector.py:2264; */
 "File" = "File";
 
