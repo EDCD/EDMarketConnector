@@ -132,6 +132,7 @@ def build() -> None:
                 "multiprocessing",
                 "sqlite3",
                 "util",
+                "plugins"
             ],
             "includes": ["dataclasses", "shutil", "timeout_session", "zipfile"],
             "excludes": [
