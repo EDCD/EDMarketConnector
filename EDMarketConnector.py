@@ -1869,10 +1869,9 @@ class AppWindow:
                     target=self.systray.shutdown,
                     daemon=True,
                 )
+                shutdown_thread.start()
             except AttributeError:  # No SysTray
-                shutdown_thread = threading.Thread(daemon=True)
-
-            shutdown_thread.start()
+                logger.info("No Systray, No Thread to Shutdown")
 
         config.set_shutdown()  # Signal we're in shutdown now.
 
