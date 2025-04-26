@@ -18,7 +18,7 @@ import sys
 import warnings
 from contextlib import suppress
 from os import listdir, sep
-from typing import TYPE_CHECKING, Iterable, TextIO, cast
+from typing import Iterable, TextIO, cast
 import pathlib
 from config import config
 from EDMCLogging import get_main_logger
@@ -38,23 +38,7 @@ LOCALISATION_DIR: pathlib.Path = pathlib.Path('L10n')
 
 if sys.platform == 'win32':
     import ctypes
-    from ctypes.wintypes import BOOL, DWORD, LPCVOID, LPCWSTR, LPWSTR
-    if TYPE_CHECKING:
-        import ctypes.windll  # type: ignore # Magic to make linters not complain that windll is special
-
-    # https://msdn.microsoft.com/en-us/library/windows/desktop/dd318124%28v=vs.85%29.aspx
-    MUI_LANGUAGE_ID = 4
-    MUI_LANGUAGE_NAME = 8
-    GetUserPreferredUILanguages = ctypes.windll.kernel32.GetUserPreferredUILanguages
-    GetUserPreferredUILanguages.argtypes = [
-        DWORD, ctypes.POINTER(ctypes.c_ulong), LPCVOID, ctypes.POINTER(ctypes.c_ulong)
-    ]
-    GetUserPreferredUILanguages.restype = BOOL
-
-    LOCALE_NAME_USER_DEFAULT = None
-    GetNumberFormatEx = ctypes.windll.kernel32.GetNumberFormatEx
-    GetNumberFormatEx.argtypes = [LPCWSTR, DWORD, LPCWSTR, LPCVOID, LPWSTR, ctypes.c_int]
-    GetNumberFormatEx.restype = ctypes.c_int
+    import win32api
 
 
 class Translations:
@@ -332,28 +316,17 @@ class _Locale:
         if sys.platform != 'win32':
             # POSIX
             lang = locale.getlocale()[0]
-            languages = [lang.replace('_', '-')] if lang else []
-
         else:
-            num = ctypes.c_ulong()
-            size = ctypes.c_ulong(0)
-            languages = []
-            if GetUserPreferredUILanguages(
-                MUI_LANGUAGE_NAME, ctypes.byref(num), None, ctypes.byref(size)
-            ) and size.value:
-                buf = ctypes.create_unicode_buffer(size.value)
-
-                if GetUserPreferredUILanguages(
-                    MUI_LANGUAGE_NAME, ctypes.byref(num), ctypes.byref(buf), ctypes.byref(size)
-                ):
-                    languages = self.wszarray_to_list(buf)
-
+            current_locale = win32api.GetUserDefaultLangID()
+            lang = locale.windows_locale[current_locale]
+            print(lang)
         # HACK: <n/a> | 2021-12-11: OneSky calls "Chinese Simplified" "zh-Hans"
         #    in the name of the file, but that will be zh-CN in terms of
         #    locale.  So map zh-CN -> zh-Hans
+        languages = [lang.replace('_', '-')] if lang else []
         languages = ['zh-Hans' if lang == 'zh-CN' else lang for lang in languages]
-
-        return languages
+        print(languages)
+        return ['en-US']
 
 
 # singletons

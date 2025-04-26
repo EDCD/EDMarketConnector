@@ -268,19 +268,22 @@ if __name__ == '__main__':  # noqa: C901
             # If *this* instance hasn't locked, then another already has and we
             # now need to do the edmc:// checks for auth callback
             if locked != JournalLockResult.LOCKED:
-                from ctypes import windll, create_unicode_buffer, WINFUNCTYPE
+                from ctypes import create_unicode_buffer, WINFUNCTYPE
                 from ctypes.wintypes import BOOL, HWND, LPARAM
                 import win32gui
                 import win32api
                 import win32con
+                import win32process
+                import pythoncom
 
-                GetProcessHandleFromHwnd = windll.oleacc.GetProcessHandleFromHwnd  # noqa: N806
-                ShowWindowAsync = windll.user32.ShowWindowAsync  # noqa: N806
+                def get_process_handle_from_hwnd(hwnd):
+                    # Get thread and process IDs
+                    thread_id, process_id = win32process.GetWindowThreadProcessId(hwnd)
+                    # Get the process handle
+                    process_handle = win32api.OpenProcess(win32con.PROCESS_ALL_ACCESS, False, process_id)
+                    return process_handle
 
                 COINIT_MULTITHREADED = 0  # noqa: N806,F841
-                COINIT_APARTMENTTHREADED = 0x2  # noqa: N806
-                COINIT_DISABLE_OLE1DDE = 0x4  # noqa: N806
-                CoInitializeEx = windll.ole32.CoInitializeEx  # noqa: N806
 
                 def window_title(h: int) -> str | None:
                     if h:
@@ -309,16 +312,16 @@ if __name__ == '__main__':  # noqa: C901
                     if win32gui.GetClassName(window_handle):
                         if cls.value == 'TkTopLevel':
                             if window_title(window_handle) == applongname:
-                                if GetProcessHandleFromHwnd(window_handle):
+                                if get_process_handle_from_hwnd(window_handle):
                                     # If GetProcessHandleFromHwnd succeeds then the app is already running as this user
                                     if len(sys.argv) > 1 and sys.argv[1].startswith(protocolhandler_redirect):
-                                        CoInitializeEx(0, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)
+                                        pythoncom.CoInitializeEx(0)
                                         # Wait for it to be responsive to avoid ShellExecute recursing
                                         win32gui.ShowWindow(window_handle, win32con.SW_RESTORE)
                                         win32api.ShellExecute(0, None, sys.argv[1], None, None, win32con.SW_RESTORE)
 
                                     else:
-                                        ShowWindowAsync(window_handle, win32con.SW_RESTORE)
+                                        win32gui.ShowWindow(window_handle, win32con.SW_RESTORE)
                                         win32gui.SetForegroundWindow(window_handle)
 
                             return False  # Indicate window found, so stop iterating

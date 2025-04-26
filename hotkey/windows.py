@@ -8,7 +8,7 @@ import sys
 import threading
 import tkinter as tk
 import winsound
-from ctypes.wintypes import DWORD, LONG, MSG, ULONG, WORD, HWND, BOOL, UINT
+from ctypes.wintypes import DWORD, LONG, MSG, ULONG, WORD, UINT
 import pywintypes
 import win32api
 import win32gui
@@ -20,10 +20,6 @@ from hotkey import AbstractHotkeyMgr
 assert sys.platform == 'win32'
 
 logger = get_main_logger()
-
-UnregisterHotKey = ctypes.windll.user32.UnregisterHotKey  # TODO: Coming Soon
-UnregisterHotKey.argtypes = [HWND, ctypes.c_int]
-UnregisterHotKey.restype = BOOL
 
 MOD_NOREPEAT = 0x4000
 WM_SND_GOOD = win32con.WM_APP + 1
@@ -191,7 +187,7 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
 
         msg = MSG()
         logger.debug('Entering GetMessage() loop...')
-        while win32gui.GetMessage(ctypes.byref(msg), None, 0, 0) != 0:
+        while win32gui.GetMessage(None, 0, 0) != 0:
             logger.debug('Got message')
             if msg.message == win32con.WM_HOTKEY:
                 logger.debug('WM_HOTKEY')
@@ -206,7 +202,7 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
 
                 else:
                     logger.debug('Passing key on')
-                    UnregisterHotKey(None, 1)
+                    win32gui.UnregisterHotKey(None, 1)
                     SendInput(1, fake, ctypes.sizeof(INPUT))
                     try:
                         win32gui.RegisterHotKey(None, 1, modifiers | MOD_NOREPEAT, keycode)
@@ -228,7 +224,7 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
                 win32gui.DispatchMessage(ctypes.byref(msg))
 
         logger.debug('Exited GetMessage() loop.')
-        UnregisterHotKey(None, 1)
+        win32gui.UnregisterHotKey(None, 1)
         self.thread = None  # type: ignore
         logger.debug('Done.')
 
@@ -282,7 +278,7 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
         # See if the keycode is usable and available
         try:
             win32gui.RegisterHotKey(None, 2, modifiers | MOD_NOREPEAT, keycode)
-            UnregisterHotKey(None, 2)
+            win32gui.UnregisterHotKey(None, 2)
             return keycode, modifiers
         except pywintypes.error:
             winsound.MessageBeep()
