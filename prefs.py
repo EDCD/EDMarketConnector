@@ -704,6 +704,7 @@ class PreferencesDialog(tk.Toplevel):
         self.lang = tk.StringVar(value=self.languages.get(config.get_str('language'), tr.tl('Default')))
         self.always_ontop = tk.BooleanVar(value=bool(config.get_int('always_ontop')))
         self.minimize_system_tray = tk.BooleanVar(value=config.get_bool('minimize_system_tray'))
+        self.disable_system_tray = tk.BooleanVar(value=config.get_bool('no_systray'))
         self.theme = tk.IntVar(value=config.get_int('theme'))
         self.theme_colors = [config.get_str('dark_text'), config.get_str('dark_highlight')]
         self.theme_prompts = [
@@ -881,13 +882,22 @@ class PreferencesDialog(tk.Toplevel):
             columnspan=3, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=row.get()
         )  # Appearance setting
 
-        if sys.platform == 'win32':
+        if sys.platform == 'win32' and not bool(config.get_int('no_systray')):
             nb.Checkbutton(
                 appearance_frame,
                 # LANG: Appearance option for Windows "minimize to system tray"
                 text=tr.tl('Minimize to system tray'),
                 variable=self.minimize_system_tray,
                 command=self.themevarchanged
+            ).grid(columnspan=3, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=row.get())  # Appearance setting
+
+        if sys.platform == 'win32':
+            nb.Checkbutton(
+                appearance_frame,
+                # LANG: Appearance option for Windows "Disable Systray"
+                text=tr.tl('Disable Systray'),
+                variable=self.disable_system_tray,
+                command=self.themevarchanged,
             ).grid(columnspan=3, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=row.get())  # Appearance setting
 
         nb.Label(appearance_frame).grid(sticky=tk.W)  # big spacer
@@ -1280,6 +1290,9 @@ class PreferencesDialog(tk.Toplevel):
         config.set('ui_transparency', self.transparency.get())
         config.set('always_ontop', self.always_ontop.get())
         config.set('minimize_system_tray', self.minimize_system_tray.get())
+        if self.disable_system_tray.get() != config.get('no_systray'):
+            self.req_restart = True
+        config.set('no_systray', self.disable_system_tray.get())
         config.set('theme', self.theme.get())
         config.set('dark_text', self.theme_colors[0])
         config.set('dark_highlight', self.theme_colors[1])

@@ -446,13 +446,20 @@ class AppWindow:
 
         self.prefsdialog = None
 
-        if sys.platform == 'win32':
+        if sys.platform == 'win32' and not bool(config.get_int('no_systray')):
             from simplesystray import SysTrayIcon
 
             def open_window(systray: 'SysTrayIcon', *args) -> None:
                 self.w.deiconify()
 
-            menu_options = (("Open", None, open_window),)
+            logfile_loc = pathlib.Path(config.app_dir_path / 'logs')
+            menu_options = (
+                ("Open", None, open_window),
+                ("Report a Bug", None, self.help_report_a_bug),
+                ("About EDMC", None, lambda: not self.HelpAbout.showing and self.HelpAbout(self.w)),
+                ("Open Log Folder", None, lambda: prefs.open_folder(logfile_loc)),
+                ("Open System Profiler", None, lambda: prefs.help_open_system_profiler(self)),
+            )
             # Method associated with on_quit is called whenever the systray is closing
             self.systray = SysTrayIcon("EDMarketConnector.ico", applongname, menu_options, on_quit=self.exit_tray)
             self.systray.start()
@@ -616,7 +623,7 @@ class AppWindow:
         self.help_menu.add_command(command=lambda: not self.HelpAbout.showing and self.HelpAbout(self.w))
         logfile_loc = pathlib.Path(config.app_dir_path / 'logs')
         self.help_menu.add_command(command=lambda: prefs.open_folder(logfile_loc))  # Open Log Folder
-        self.help_menu.add_command(command=lambda: prefs.help_open_system_profiler(self))  # Open Log Folde
+        self.help_menu.add_command(command=lambda: prefs.help_open_system_profiler(self))  # Open System Profiler
 
         self.menubar.add_cascade(menu=self.help_menu)
         if sys.platform == 'win32':
@@ -1857,11 +1864,14 @@ class AppWindow:
     def onexit(self, event=None, restart: bool = False) -> None:
         """Application shutdown procedure."""
         if sys.platform == 'win32':
-            shutdown_thread = threading.Thread(
-                target=self.systray.shutdown,
-                daemon=True,
-            )
-            shutdown_thread.start()
+            try:
+                shutdown_thread = threading.Thread(
+                    target=self.systray.shutdown,
+                    daemon=True,
+                )
+                shutdown_thread.start()
+            except AttributeError:  # No SysTray
+                logger.info("No Systray, No Thread to Shutdown")
 
         config.set_shutdown()  # Signal we're in shutdown now.
 
@@ -1938,7 +1948,9 @@ class AppWindow:
     def default_iconify(self, event=None) -> None:
         """Handle the Windows default theme 'minimise' button."""
         # If we're meant to "minimize to system tray" then hide the window so no taskbar icon is seen
-        if sys.platform == 'win32' and config.get_bool('minimize_system_tray'):
+        if (sys.platform == 'win32'
+                and config.get_bool('minimize_system_tray')
+                and not bool(config.get_int('no_systray'))):
             # This gets called for more than the root widget, so only react to that
             if str(event.widget) == '.':
                 self.w.withdraw()
