@@ -12,7 +12,6 @@ import sys
 import threading
 from urllib import parse
 from typing import TYPE_CHECKING, Type
-
 from config import config
 from constants import appname, protocolhandler_redirect
 from EDMCLogging import get_main_logger
@@ -25,13 +24,7 @@ logger = get_main_logger()
 is_wine = False
 
 if sys.platform == 'win32':
-    from ctypes import windll  # type: ignore
-
-    try:
-        if windll.ntdll.wine_get_version:
-            is_wine = True
-    except Exception:
-        pass
+    is_wine = bool(os.getenv('WINEPREFIX'))
 
 
 class GenericProtocolHandler:
