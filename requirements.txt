@@ -1,5 +1,5 @@
 requests==2.32.3
-pillow==11.1.0
+pillow==11.2.1
 watchdog==6.0.0
 simplesystray==0.1.0; sys_platform == 'win32'
 semantic-version==2.10.0
