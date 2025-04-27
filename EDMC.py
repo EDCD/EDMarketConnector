@@ -191,10 +191,11 @@ def main() -> None:  # noqa: C901, CCR001
 
         log_locale('Initial Locale')
         if args.refresh_all:
-            logger.info("Refreshing all known CMDRs")
+            # Attempt to refresh all known CMDRs. This MAY cause additional output if a token is invalid.
+            logger.debug("Refreshing all known CMDRs")
             cmdrs = config.get_list('cmdrs', default=[])
             for cmdr in cmdrs:
-                logger.info(f'Attempting to use commander "{cmdr}"')
+                logger.debug(f'Attempting to use commander "{cmdr}"')
                 try:
                     companion.session.login(cmdr, monitor.is_beta)
                     logger.debug("Succeeded!")
