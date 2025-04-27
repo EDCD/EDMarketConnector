@@ -37,7 +37,6 @@ LANGUAGE_ID = '!Language'
 LOCALISATION_DIR: pathlib.Path = pathlib.Path('L10n')
 
 if sys.platform == 'win32':
-    import ctypes
     import win32api
 
 
@@ -165,14 +164,13 @@ class Translations:
         if lang:
             contents: dict[str, str] = self.contents(lang=lang, plugin_path=plugin_path)
 
-            if not contents or type(contents) is not dict:
+            if not contents or not isinstance(contents, dict):
                 logger.debug(f'Failure loading translations for overridden language {lang!r}')
                 return self.translate(x)
-            elif x not in contents.keys():
+            if x not in contents:
                 logger.debug(f'Missing translation: {x!r} for overridden language {lang!r}')
                 return self.translate(x)
-            else:
-                return contents.get(x) or self.translate(x)
+            return contents.get(x) or self.translate(x)
 
         if plugin_name:
             if self.translations[None] and plugin_name not in self.translations:
@@ -289,16 +287,6 @@ class _Locale:
             return locale.atof(string)
 
         return None
-
-    def wszarray_to_list(self, array):
-        offset = 0
-        while offset < len(array):
-            sz = ctypes.wstring_at(ctypes.addressof(array) + offset * 2)  # type: ignore
-            if sz:
-                yield sz
-                offset += len(sz) + 1
-            else:
-                break
 
     def preferred_languages(self) -> Iterable[str]:
         """
