@@ -307,14 +307,12 @@ class _Locale:
         else:
             current_locale = win32api.GetUserDefaultLangID()
             lang = locale.windows_locale[current_locale]
-            print(lang)
         # HACK: <n/a> | 2021-12-11: OneSky calls "Chinese Simplified" "zh-Hans"
         #    in the name of the file, but that will be zh-CN in terms of
         #    locale.  So map zh-CN -> zh-Hans
         languages = [lang.replace('_', '-')] if lang else []
         languages = ['zh-Hans' if lang == 'zh-CN' else lang for lang in languages]
-        print(languages)
-        return ['en-US']
+        return languages
 
 
 # singletons
