@@ -1317,7 +1317,7 @@ class PreferencesDialog(tk.Toplevel):
             'Update': self.curr_update_track != self.update_paths.get(),  # Just needs bool not true if else false
             'Track': self.update_paths.get(),
             'Parent': self,
-            'Restart_Req': self.req_restart  # Sipmle Bool Needed
+            'Restart_Req': self.req_restart  # Simple Bool Needed
         }
         if self.callback:
             self.callback(**post_flags)
