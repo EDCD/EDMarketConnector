@@ -268,7 +268,7 @@ if __name__ == '__main__':  # noqa: C901
             # If *this* instance hasn't locked, then another already has and we
             # now need to do the edmc:// checks for auth callback
             if locked != JournalLockResult.LOCKED:
-                from ctypes import create_unicode_buffer, WINFUNCTYPE
+                from ctypes import WINFUNCTYPE
                 from ctypes.wintypes import BOOL, HWND, LPARAM
                 import win32gui
                 import win32api
@@ -277,19 +277,27 @@ if __name__ == '__main__':  # noqa: C901
                 import pythoncom
 
                 def get_process_handle_from_hwnd(hwnd):
-                    # Get thread and process IDs
-                    thread_id, process_id = win32process.GetWindowThreadProcessId(hwnd)
+                    try:
+                        # Get thread and process IDs
+                        _, process_id = win32process.GetWindowThreadProcessId(hwnd)
                     # Get the process handle
-                    process_handle = win32api.OpenProcess(win32con.PROCESS_ALL_ACCESS, False, process_id)
-                    return process_handle
+                        return win32api.OpenProcess(win32con.PROCESS_ALL_ACCESS, False, process_id)
+                    except Exception:
+                        return None
 
-                COINIT_MULTITHREADED = 0  # noqa: N806,F841
+                def window_title(hwnd: int) -> str | None:
+                    try:
+                        return win32gui.GetWindowText(hwnd) if hwnd else None
+                    except Exception:
+                        return None
 
-                def window_title(h: int) -> str | None:
-                    if h:
-                        return win32gui.GetWindowText(h)
-                    return None
+                def get_window_class(hwnd: int) -> str:
+                    try:
+                        return win32gui.GetClassName(hwnd)
+                    except Exception:
+                        return ""
 
+                # We still need WINFUNCTYPE for the callback as win32gui doesn't provide an alternative
                 @WINFUNCTYPE(BOOL, HWND, LPARAM)
                 def enumwindowsproc(window_handle, l_param):  # noqa: CCR001
                     """
@@ -306,11 +314,8 @@ if __name__ == '__main__':  # noqa: C901
                     :param l_param: The second parameter to the EnumWindows() call.
                     :return: False if we found a match, else True to continue iteration
                     """
-                    # class name limited to 256 - https://msdn.microsoft.com/en-us/library/windows/desktop/ms633576
-                    cls = create_unicode_buffer(257)
-                    # This conditional is exploded to make debugging slightly easier
-                    if win32gui.GetClassName(window_handle):
-                        if cls.value == 'TkTopLevel':
+                    if window_class := get_window_class(window_handle):
+                        if window_class == 'TkTopLevel':
                             if window_title(window_handle) == applongname:
                                 if get_process_handle_from_hwnd(window_handle):
                                     # If GetProcessHandleFromHwnd succeeds then the app is already running as this user
@@ -319,16 +324,12 @@ if __name__ == '__main__':  # noqa: C901
                                         # Wait for it to be responsive to avoid ShellExecute recursing
                                         win32gui.ShowWindow(window_handle, win32con.SW_RESTORE)
                                         win32api.ShellExecute(0, None, sys.argv[1], None, None, win32con.SW_RESTORE)
-
                                     else:
                                         win32gui.ShowWindow(window_handle, win32con.SW_RESTORE)
                                         win32gui.SetForegroundWindow(window_handle)
-
                             return False  # Indicate window found, so stop iterating
-
                     # Indicate that EnumWindows() needs to continue iterating
                     return True  # Do not remove, else this function as a callback breaks
-
                 # This performs the edmc://auth check and forward
                 # EnumWindows() will iterate through all open windows, calling
                 # enumwindwsproc() on each.  When an invocation returns False it
