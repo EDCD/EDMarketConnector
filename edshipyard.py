@@ -128,7 +128,7 @@ def export(data, filename=None) -> None:  # noqa: C901, CCR001
                 elif not slot.lower().startswith('planetaryapproachsuite'):
                     logger.debug(f'EDShipyard: Unknown slot {slot}')
 
-        except AssertionError as e:
+        except ValueError as e:
             logger.debug(f'EDShipyard: {e!r}')
             continue  # Silently skip unrecognized modules
 
@@ -161,8 +161,11 @@ def export(data, filename=None) -> None:  # noqa: C901, CCR001
     string += f'---\nCargo : {cargo} T\nFuel  : {fuel} T\n'
 
     # Add mass and range
-    assert data['ship']['name'].lower() in ship_name_map, data['ship']['name']
-    assert ship_name_map[data['ship']['name'].lower()] in ships, ship_name_map[data['ship']['name'].lower()]
+    ship_name = data['ship']['name'].lower()
+    if ship_name not in ship_name_map:
+        raise ValueError(f"Ship name '{data['ship']['name']}' not found in ship_name_map")
+    if ship_name_map[ship_name] not in ships:
+        raise ValueError(f"Mapped ship name '{ship_name_map[ship_name]}' not found in ships")
 
     try:
         mass += ships[ship_name_map[data['ship']['name'].lower()]]['hullMass']

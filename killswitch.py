@@ -275,7 +275,8 @@ class KillSwitchSet:
             return True, data
 
         if TYPE_CHECKING:  # pyright, mypy, please -_-
-            assert res.kill is not None
+            if res.kill is None:
+                raise ValueError('Killswitch has rules but no kill data')
 
         try:
             new_data = res.kill.apply_rules(deepcopy(data))

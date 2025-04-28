@@ -67,7 +67,8 @@ if (config.auth_force_edmc_protocol  # noqa: C901
                 and not config.auth_force_localserver
         )):
     # This could be false if you use auth_force_edmc_protocol, but then you get to keep the pieces
-    assert sys.platform == 'win32'
+    if sys.platform != 'win32':
+        raise EnvironmentError("This code is for Windows only.")
     # spell-checker: words HBRUSH HICON WPARAM wstring WNDCLASS HMENU HGLOBAL
     from ctypes import (  # type: ignore
         windll, POINTER, WINFUNCTYPE, Structure, byref, c_long, c_void_p, create_unicode_buffer, wstring_at

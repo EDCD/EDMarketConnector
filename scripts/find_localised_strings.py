@@ -260,7 +260,8 @@ def generate_lang_template(data: dict[pathlib.Path, list[ast.Call]]) -> str:
 """
     print(f"Done Deduping entries {len(entries)=}  {len(deduped)=}", file=sys.stderr)
     for entry in deduped:
-        assert len(entry.comments) == len(entry.locations)
+        if len(entry.comments) != len(entry.locations):
+            raise ValueError("Mismatch: 'comments' and 'locations' must have the same length.")
 
         comment_set = set()
         for comment, loc in zip(entry.comments, entry.locations):
