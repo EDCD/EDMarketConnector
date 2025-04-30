@@ -59,7 +59,7 @@ def lookup(module, ship_map, entitled=False) -> dict | None:  # noqa: C901, CCR0
         moduledata.update(json.loads(modules_path.read_text()))
 
     if not module.get('name'):
-        raise AssertionError(f'{module["id"]}')
+        raise ValueError(f"Module with ID {module['id']} is missing a 'name' field")
 
     name = module['name'].lower().split('_')
     new = {'id': module['id'], 'symbol': module['name']}
@@ -69,7 +69,7 @@ def lookup(module, ship_map, entitled=False) -> dict | None:  # noqa: C901, CCR0
         # Armour is ship-specific, and ship names can have underscores
         ship_name, armour, armour_grade = module["name"].lower().rsplit("_", 2)[0:3]
         if ship_name not in ship_map:
-            raise AssertionError(f"Unknown ship: {ship_name}")
+            raise ValueError(f"Unknown ship: {ship_name}")
         new['category'] = 'standard'
         new["name"] = armour_map[armour_grade]
         new["ship"] = ship_map[ship_name]
@@ -115,7 +115,7 @@ def lookup(module, ship_map, entitled=False) -> dict | None:  # noqa: C901, CCR0
         new['category'] = 'utility'
         new['name'] = utility_map[name[1]]
         if not name[2].startswith('size') or not name[3].startswith('class'):
-            raise AssertionError(f'{module["id"]}: Unknown class/rating "{name[2]}/{name[3]}"')
+            raise ValueError(f'{module["id"]}: Unknown class/rating "{name[2]}/{name[3]}"')
 
         new['class'] = str(name[2][4:])
         new['rating'] = rating_map[name[3][5:]]
@@ -128,13 +128,13 @@ def lookup(module, ship_map, entitled=False) -> dict | None:  # noqa: C901, CCR0
             name[1] = f'{prefix}_{name[1]}'
 
         if name[1] not in weapon_map:
-            raise AssertionError(f'{module["id"]}: Unknown weapon "{name[0]}"')
+            raise ValueError(f'{module["id"]}: Unknown weapon "{name[0]}"')
 
         if name[2] not in weaponmount_map:
-            raise AssertionError(f'{module["id"]}: Unknown weapon mount "{name[2]}"')
+            raise ValueError(f'{module["id"]}: Unknown weapon mount "{name[2]}"')
 
         if name[3] not in weaponclass_map:
-            raise AssertionError(f'{module["id"]}: Unknown weapon class "{name[3]}"')
+            raise ValueError(f'{module["id"]}: Unknown weapon class "{name[3]}"')
 
         new['category'] = 'hardpoint'
         if len(name) > 4:
@@ -143,7 +143,7 @@ def lookup(module, ship_map, entitled=False) -> dict | None:  # noqa: C901, CCR0
                 new['rating'] = '?'
 
             elif '_'.join(name[:4]) not in weaponrating_map:
-                raise AssertionError(f'{module["id"]}: Unknown weapon rating "{module["name"]}"')
+                raise ValueError(f'{module["id"]}: Unknown weapon rating "{module["name"]}"')
 
             else:
                 # PP faction-specific weapons e.g. Hpt_Slugshot_Fixed_Large_Range
@@ -151,7 +151,7 @@ def lookup(module, ship_map, entitled=False) -> dict | None:  # noqa: C901, CCR0
                 new['rating'] = weaponrating_map['_'.join(name[:4])]  # assumes same rating as base weapon
 
         elif module['name'].lower() not in weaponrating_map:
-            raise AssertionError(f'{module["id"]}: Unknown weapon rating "{module["name"]}"')
+            raise ValueError(f'{module["id"]}: Unknown weapon rating "{module["name"]}"')
 
         else:
             new['name'] = weapon_map[name[1]]
@@ -165,7 +165,7 @@ def lookup(module, ship_map, entitled=False) -> dict | None:  # noqa: C901, CCR0
         new['class'] = weaponclass_map[name[3]]
 
     elif name[0] != 'int':
-        raise AssertionError(f'{module["id"]}: Unknown prefix "{name[0]}"')
+        raise ValueError(f'{module["id"]}: Unknown prefix "{name[0]}"')
 
     # Miscellaneous Class 1
     # e.g. Int_PlanetApproachSuite, Int_StellarBodyDiscoveryScanner_Advanced, Int_DockingComputer_Standard
@@ -207,7 +207,7 @@ def lookup(module, ship_map, entitled=False) -> dict | None:  # noqa: C901, CCR0
                 new['name'] = internal_map[len(name) > 4 and (name[1], name[4]) or name[1]]
 
         else:
-            raise AssertionError(f'{module["id"]}: Unknown module "{name[1]}"')
+            raise ValueError(f'{module["id"]}: Unknown module "{name[1]}"')
 
         if len(name) < 4 and name[1] == 'unkvesselresearch':  # Hack! No size or class.
             (new['class'], new['rating']) = ('1', 'E')
@@ -226,10 +226,10 @@ def lookup(module, ship_map, entitled=False) -> dict | None:  # noqa: C901, CCR0
 
         else:
             if len(name) < 3:
-                raise AssertionError(f'{name}: length < 3]')
+                raise ValueError(f'{name}: length < 3]')
 
             if not name[2].startswith('size') or not name[3].startswith('class'):
-                raise AssertionError(f'{module["id"]}: Unknown class/rating "{name[2]}/{name[3]}"')
+                raise ValueError(f'{module["id"]}: Unknown class/rating "{name[2]}/{name[3]}"')
 
             new['class'] = str(name[2][4:])
             new['rating'] = (name[1] == 'buggybay' and planet_rating_map or
@@ -258,10 +258,14 @@ def lookup(module, ship_map, entitled=False) -> dict | None:  # noqa: C901, CCR0
             print(f'No data for module {key}')
 
         elif new['name'] == 'Frame Shift Drive' or new['name'] == 'Frame Shift Drive (SCO)':
-            assert 'mass' in m and 'optmass' in m and 'maxfuel' in m and 'fuelmul' in m and 'fuelpower' in m, m
+            required_keys = ['mass', 'optmass', 'maxfuel', 'fuelmul', 'fuelpower']
+            missing_keys = [key for key in required_keys if key not in m]
 
+            if missing_keys:
+                raise KeyError(f"Missing keys: {', '.join(missing_keys)} in {m}")
         else:
-            assert 'mass' in m, m
+            if 'mass' not in m:
+                raise KeyError(f"Missing key 'mass' in {m}")
 
     new.update(moduledata.get(module['name'].lower(), {}))
 
@@ -269,10 +273,10 @@ def lookup(module, ship_map, entitled=False) -> dict | None:  # noqa: C901, CCR0
     mandatory_fields = ["id", "symbol", "category", "name", "class", "rating"]
     for field in mandatory_fields:
         if not new.get(field):
-            raise AssertionError(f'{module["id"]}: failed to set {field}')
+            raise ValueError(f'{module["id"]}: failed to set {field}')
 
     if new['category'] == 'hardpoint' and not new.get('mount'):
-        raise AssertionError(f'{module["id"]}: failed to set mount')
+        raise ValueError(f'{module["id"]}: failed to set mount')
 
     return new
 
@@ -284,8 +288,10 @@ def export(data, filename) -> None:
     :param data: CAPI data to export.
     :param filename: Filename to export into.
     """
-    assert "name" in data["lastSystem"]
-    assert "name" in data["lastStarport"]
+    if "name" not in data["lastSystem"]:
+        raise KeyError("Missing 'name' key in 'lastSystem'")
+    if "name" not in data["lastStarport"]:
+        raise KeyError("Missing 'name' key in 'lastStarport'")
 
     header = 'System,Station,Category,Name,Mount,Guidance,Ship,Class,Rating,FDevID,Date\n'
     rowheader = f'{data["lastSystem"]["name"]},{data["lastStarport"]["name"]}'
@@ -300,6 +306,6 @@ def export(data, filename) -> None:
                             f'{m.get("guidance","")}, {m.get("ship","")}, {m["class"]}, {m["rating"]},'
                             f'{m["id"]}, {data["timestamp"]}\n')
 
-            except AssertionError as e:
+            except ValueError as e:
                 # Log unrecognised modules
                 logger.debug('Outfitting', exc_info=e)

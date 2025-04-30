@@ -13,9 +13,12 @@ def export(data: companion.CAPIData, filename: str) -> None:
     :param filename: Optional filename to write to.
     :return:
     """
-    assert data['lastSystem'].get('name')
-    assert data['lastStarport'].get('name')
-    assert data['lastStarport'].get('ships')
+    if not data['lastSystem'].get('name'):
+        raise ValueError("Missing 'name' in 'lastSystem'")
+    if not data['lastStarport'].get('name'):
+        raise ValueError("Missing 'name' in 'lastStarport'")
+    if not data['lastStarport'].get('ships'):
+        raise ValueError("Missing 'ships' in 'lastStarport'")
 
     with open(filename, 'w', newline='') as f:
         c = csv.writer(f)

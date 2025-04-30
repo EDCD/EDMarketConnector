@@ -5,7 +5,8 @@ import sys
 from EDMCLogging import get_main_logger
 from hotkey import AbstractHotkeyMgr
 
-assert sys.platform == 'linux'
+if sys.platform != 'linux':
+    raise EnvironmentError("This file is for Linux only.")
 
 logger = get_main_logger()
 

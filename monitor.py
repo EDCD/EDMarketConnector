@@ -311,7 +311,8 @@ class EDLogs(FileSystemEventHandler):
         if self.observed:
             logger.debug('self.observed: Calling unschedule_all()')
             self.observed = None
-            assert self.observer is not None, 'Observer was none but it is in use?'
+            if self.observer is None:
+                raise RuntimeError("Observer was None but it is in use?")
             self.observer.unschedule_all()
             logger.debug('Done')
 
@@ -416,7 +417,8 @@ class EDLogs(FileSystemEventHandler):
         # Watchdog thread -- there is a way to get this by using self.observer.emitters and checking for an attribute:
         # watch, but that may have unforseen differences in behaviour.
         if self.observed:
-            assert self.observer is not None, 'self.observer is None but also in use?'
+            if self.observer is None:
+                raise RuntimeError("Observer was None but is it in use?")
             # Note: Uses undocumented attribute
             emitter = self.observed and self.observer._emitter_for_watch[self.observed]
 
@@ -555,7 +557,8 @@ class EDLogs(FileSystemEventHandler):
         try:
             # Preserve property order because why not?
             entry: MutableMapping[str, Any] = json.loads(line)
-            assert 'timestamp' in entry, "Timestamp does not exist in the entry"
+            if 'timestamp' not in entry:
+                raise KeyError("Timestamp does not exist in the entry")
 
             self.__navroute_retry()
 
@@ -1658,7 +1661,8 @@ class EDLogs(FileSystemEventHandler):
                                 self.state[category].pop(material)
 
                 module = self.state['Modules'][entry['Slot']]
-                assert module['Item'] == self.canonicalise(entry['Module'])
+                if module['Item'] != self.canonicalise(entry['Module']):
+                    raise ValueError(f"Module {entry['Slot']} is not {entry['Module']}")
                 module['Engineering'] = {
                     'Engineer':      entry['Engineer'],
                     'EngineerID':    entry['EngineerID'],
