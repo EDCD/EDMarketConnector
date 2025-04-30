@@ -2,17 +2,15 @@
 from __future__ import annotations
 
 import atexit
-import ctypes
 import pathlib
 import sys
 import threading
 import tkinter as tk
 import winsound
-from ctypes.wintypes import DWORD, LONG, MSG, ULONG, WORD, HWND, BOOL, UINT
-import pywintypes
 import win32api
-import win32gui
 import win32con
+import win32gui
+import pywintypes
 from config import config
 from EDMCLogging import get_main_logger
 from hotkey import AbstractHotkeyMgr
@@ -22,22 +20,14 @@ if sys.platform != 'win32':
 
 logger = get_main_logger()
 
-UnregisterHotKey = ctypes.windll.user32.UnregisterHotKey  # TODO: Coming Soon
-UnregisterHotKey.argtypes = [HWND, ctypes.c_int]
-UnregisterHotKey.restype = BOOL
-
+# Constants
 MOD_NOREPEAT = 0x4000
 WM_SND_GOOD = win32con.WM_APP + 1
 WM_SND_BAD = win32con.WM_APP + 2
 VK_OEM_MINUS = 0xbd
 
 # VirtualKey mapping values
-# <https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-mapvirtualkeyexa>
-MAPVK_VK_TO_VSC = 0
-MAPVK_VSC_TO_VK = 1
 MAPVK_VK_TO_CHAR = 2
-MAPVK_VSC_TO_VK_EX = 3
-MAPVK_VK_TO_VSC_EX = 4
 
 
 def window_title(h) -> str:
@@ -50,69 +40,6 @@ def window_title(h) -> str:
     if h:
         return win32gui.GetWindowText(h)
     return ''
-
-
-class MOUSEINPUT(ctypes.Structure):
-    """Mouse Input structure."""
-
-    _fields_ = [
-        ('dx', LONG),
-        ('dy', LONG),
-        ('mouseData', DWORD),
-        ('dwFlags', DWORD),
-        ('time', DWORD),
-        ('dwExtraInfo', ctypes.POINTER(ULONG))
-    ]
-
-
-class KEYBDINPUT(ctypes.Structure):
-    """Keyboard Input structure."""
-
-    _fields_ = [
-        ('wVk', WORD),
-        ('wScan', WORD),
-        ('dwFlags', DWORD),
-        ('time', DWORD),
-        ('dwExtraInfo', ctypes.POINTER(ULONG))
-    ]
-
-
-class HARDWAREINPUT(ctypes.Structure):
-    """Hardware Input structure."""
-
-    _fields_ = [
-        ('uMsg', DWORD),
-        ('wParamL', WORD),
-        ('wParamH', WORD)
-    ]
-
-
-class INPUTUNION(ctypes.Union):
-    """Input union."""
-
-    _fields_ = [
-        ('mi', MOUSEINPUT),
-        ('ki', KEYBDINPUT),
-        ('hi', HARDWAREINPUT)
-    ]
-
-
-class INPUT(ctypes.Structure):
-    """Input structure."""
-
-    _fields_ = [
-        ('type', DWORD),
-        ('union', INPUTUNION)
-    ]
-
-
-SendInput = ctypes.windll.user32.SendInput
-SendInput.argtypes = [ctypes.c_uint, ctypes.POINTER(INPUT), ctypes.c_int]
-SendInput.restype = UINT
-
-INPUT_MOUSE = 0
-INPUT_KEYBOARD = 1
-INPUT_HARDWARE = 2
 
 
 class WindowsHotkeyMgr(AbstractHotkeyMgr):
@@ -163,7 +90,6 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
     def unregister(self) -> None:
         """Unregister the hotkey handling."""
         thread = self.thread
-
         if thread:
             logger.debug('Thread is/was running')
             self.thread = None  # type: ignore
@@ -174,13 +100,11 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
 
         else:
             logger.debug('No thread')
-
         logger.debug('Done.')
 
     def worker(self, keycode, modifiers) -> None:  # noqa: CCR001
         """Handle hotkeys."""
         logger.debug('Begin...')
-        # Hotkey must be registered by the thread that handles it
         try:
             win32gui.RegisterHotKey(None, 1, modifiers | MOD_NOREPEAT, keycode)
         except pywintypes.error:
@@ -188,48 +112,66 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
             self.thread = None  # type: ignore
             return
 
-        fake = INPUT(INPUT_KEYBOARD, INPUTUNION(ki=KEYBDINPUT(keycode, keycode, 0, 0, None)))
-
-        msg = MSG()
         logger.debug('Entering GetMessage() loop...')
-        while win32gui.GetMessage(ctypes.byref(msg), None, 0, 0) != 0:
-            logger.debug('Got message')
-            if msg.message == win32con.WM_HOTKEY:
-                logger.debug('WM_HOTKEY')
+        while True:
+            try:
+                result = win32gui.GetMessage(None, 0, 0)
+                if result[0] == 0:  # WM_QUIT
+                    break
 
-                if (
-                        config.get_int('hotkey_always')
-                        or window_title(win32gui.GetForegroundWindow()).startswith('Elite - Dangerous')
-                ):
-                    if not config.shutting_down:
-                        logger.debug('Sending event <<Invoke>>')
-                        self.root.event_generate('<<Invoke>>', when="tail")
+                msg_hwnd, msg_id, wparam, lparam, msg_time, msg_point = result[1]
+
+                if msg_id == win32con.WM_HOTKEY:
+                    logger.debug('WM_HOTKEY')
+                    if (config.get_int('hotkey_always') or
+                            window_title(win32gui.GetForegroundWindow()).startswith('Elite - Dangerous')):
+                        if not config.shutting_down:
+                            logger.debug('Sending event <<Invoke>>')
+                            self.root.event_generate('<<Invoke>>', when="tail")
+                    else:
+                        logger.debug('Passing key on')
+                        win32gui.UnregisterHotKey(None, 1)
+
+                        # Simulate key press
+                        win32api.keybd_event(
+                            keycode,
+                            win32api.MapVirtualKey(keycode, 0),
+                            0,
+                            0
+                        )
+                        # Simulate key release
+                        win32api.keybd_event(
+                            keycode,
+                            win32api.MapVirtualKey(keycode, 0),
+                            win32con.KEYEVENTF_KEYUP,
+                            0
+                        )
+
+                        try:
+                            win32gui.RegisterHotKey(None, 1, modifiers | MOD_NOREPEAT, keycode)
+                        except pywintypes.error:
+                            logger.exception("Failed to re-register hotkey")
+                            break
+
+                elif msg_id == WM_SND_GOOD:
+                    logger.debug('WM_SND_GOOD')
+                    winsound.PlaySound(self.snd_good, winsound.SND_MEMORY)
+
+                elif msg_id == WM_SND_BAD:
+                    logger.debug('WM_SND_BAD')
+                    winsound.PlaySound(self.snd_bad, winsound.SND_MEMORY)
 
                 else:
-                    logger.debug('Passing key on')
-                    UnregisterHotKey(None, 1)
-                    SendInput(1, fake, ctypes.sizeof(INPUT))
-                    try:
-                        win32gui.RegisterHotKey(None, 1, modifiers | MOD_NOREPEAT, keycode)
-                    except pywintypes.error:
-                        logger.exception("We aren't registered for this ?")
-                        break
+                    # Use win32gui for message processing
+                    win32gui.TranslateMessage(result[1])
+                    win32gui.DispatchMessage(result[1])
 
-            elif msg.message == WM_SND_GOOD:
-                logger.debug('WM_SND_GOOD')
-                winsound.PlaySound(self.snd_good, winsound.SND_MEMORY)  # synchronous
-
-            elif msg.message == WM_SND_BAD:
-                logger.debug('WM_SND_BAD')
-                winsound.PlaySound(self.snd_bad, winsound.SND_MEMORY)  # synchronous
-
-            else:
-                logger.debug('Something else')
-                win32gui.TranslateMessage(ctypes.byref(msg))
-                win32gui.DispatchMessage(ctypes.byref(msg))
+            except Exception as e:
+                logger.exception(f"Error in message loop: {e}")
+                break
 
         logger.debug('Exited GetMessage() loop.')
-        UnregisterHotKey(None, 1)
+        win32gui.UnregisterHotKey(None, 1)
         self.thread = None  # type: ignore
         logger.debug('Done.')
 
@@ -259,31 +201,30 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
             | ((win32api.GetKeyState(win32con.VK_RWIN) & 0x8000) and win32con.MOD_WIN)
         keycode = event.keycode
 
-        if keycode in (win32con.VK_SHIFT, win32con.VK_CONTROL, win32con.VK_MENU, win32con.VK_LWIN, win32con.VK_RWIN):
+        if keycode in (win32con.VK_SHIFT, win32con.VK_CONTROL, win32con.VK_MENU,
+                       win32con.VK_LWIN, win32con.VK_RWIN):
             return 0, modifiers
 
         if not modifiers:
             if keycode == win32con.VK_ESCAPE:  # Esc = retain previous
                 return False
 
-            if keycode in (win32con.VK_BACK, win32con.VK_DELETE,
-                           win32con.VK_CLEAR, win32con.VK_OEM_CLEAR):  # BkSp, Del, Clear = clear hotkey
+            if (keycode in (win32con.VK_BACK, win32con.VK_DELETE, win32con.VK_CLEAR, win32con.VK_OEM_CLEAR) or
+                    keycode in (win32con.VK_RETURN, win32con.VK_SPACE, VK_OEM_MINUS) or
+                    ord('A') <= keycode <= ord(
+                        'Z')):  # BkSp, Del, Clear = clear hotkey, or don't allow keys needed for typing
+                if keycode not in (win32con.VK_BACK, win32con.VK_DELETE, win32con.VK_CLEAR, win32con.VK_OEM_CLEAR):
+                    winsound.MessageBeep()  # Only beep for typing keys, not for clear hotkey
                 return None
 
-            if (
-                    keycode in (win32con.VK_RETURN, win32con.VK_SPACE, VK_OEM_MINUS) or ord('A') <= keycode <= ord('Z')
-            ):  # don't allow keys needed for typing in System Map
-                winsound.MessageBeep()
-                return None
-
-            if (keycode in (win32con.VK_NUMLOCK, win32con.VK_SCROLL, win32con.VK_PROCESSKEY)
-                    or win32con.VK_CAPITAL <= keycode <= win32con.VK_MODECHANGE):  # ignore unmodified mode switch keys
+            if (keycode in (win32con.VK_NUMLOCK, win32con.VK_SCROLL, win32con.VK_PROCESSKEY) or
+                    win32con.VK_CAPITAL <= keycode <= win32con.VK_MODECHANGE):  # ignore unmodified mode switch keys
                 return 0, modifiers
 
         # See if the keycode is usable and available
         try:
             win32gui.RegisterHotKey(None, 2, modifiers | MOD_NOREPEAT, keycode)
-            UnregisterHotKey(None, 2)
+            win32gui.UnregisterHotKey(None, 2)
             return keycode, modifiers
         except pywintypes.error:
             winsound.MessageBeep()
@@ -300,13 +241,10 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
         text = ''
         if modifiers & win32con.MOD_WIN:
             text += '❖+'
-
         if modifiers & win32con.MOD_CONTROL:
             text += 'Ctrl+'
-
         if modifiers & win32con.MOD_ALT:
             text += 'Alt+'
-
         if modifiers & win32con.MOD_SHIFT:
             text += '⇧+'
 
@@ -315,21 +253,16 @@ class WindowsHotkeyMgr(AbstractHotkeyMgr):
 
         if not keycode:
             pass
-
         elif win32con.VK_F1 <= keycode <= win32con.VK_F24:
             text += f'F{keycode + 1 - win32con.VK_F1}'
-
-        elif keycode in WindowsHotkeyMgr.DISPLAY:  # specials
-            text += WindowsHotkeyMgr.DISPLAY[keycode]
-
+        elif keycode in self.DISPLAY:
+            text += self.DISPLAY[keycode]
         else:
             c = win32api.MapVirtualKey(keycode, MAPVK_VK_TO_CHAR)
             if not c:  # oops not printable
                 text += '⁈'
-
             elif c < 0x20:  # control keys
                 text += chr(c + 0x40)
-
             else:
                 text += chr(c).upper()
 

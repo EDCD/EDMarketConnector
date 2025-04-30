@@ -18,17 +18,8 @@ logger = get_main_logger()
 SERVER_RETRY = 5  # retry pause for Companion servers [s]
 
 if sys.platform == 'win32':
-    import ctypes
-    from ctypes.wintypes import POINT, RECT, SIZE, UINT, BOOL
-    import win32gui
-    try:
-        CalculatePopupWindowPosition = ctypes.windll.user32.CalculatePopupWindowPosition
-        CalculatePopupWindowPosition.argtypes = [
-            ctypes.POINTER(POINT), ctypes.POINTER(SIZE), UINT, ctypes.POINTER(RECT), ctypes.POINTER(RECT)
-        ]
-        CalculatePopupWindowPosition.restype = BOOL
-    except Exception:  # Not supported under Wine 4.0
-        CalculatePopupWindowPosition = None  # type: ignore
+    import win32api
+    import win32con
 
 
 def ensure_on_screen(self, parent: tk.Tk):
@@ -38,16 +29,23 @@ def ensure_on_screen(self, parent: tk.Tk):
     :param self: The calling class instance of tk.TopLevel
     :param parent: The parent window
     """
-    # Ensure fully on-screen
-    if sys.platform == 'win32' and CalculatePopupWindowPosition:
-        position = RECT()
-        win32gui.GetWindowRect(win32gui.GetParent(self.winfo_id()))
-        if CalculatePopupWindowPosition(
-                POINT(parent.winfo_rootx(), parent.winfo_rooty()),
-                SIZE(position.right - position.left, position.bottom - position.top),  # type: ignore
-                0x10000, None, position
-        ):
-            self.geometry(f"+{position.left}+{position.top}")
+    if sys.platform != 'win32':
+        return
+    try:
+        # Get monitor info for the monitor containing the parent window
+        monitor = win32api.MonitorFromWindow(parent.winfo_id(), win32con.MONITOR_DEFAULTTONEAREST)
+        monitor_info = win32api.GetMonitorInfo(monitor)
+        work_area = monitor_info['Work']  # Gets the working area (excludes taskbar)
+
+        # Calculate optimal position
+        x = max(work_area[0], min(parent.winfo_rootx(), work_area[2] - self.winfo_width()))
+        y = max(work_area[1], min(parent.winfo_rooty(), work_area[3] - self.winfo_height()))
+
+        # Update window position
+        self.geometry(f"+{x}+{y}")
+
+    except Exception as e:
+        logger.debug(f"Failed to ensure window is on screen: {e}")
 
 
 def log_locale(prefix: str) -> None:
