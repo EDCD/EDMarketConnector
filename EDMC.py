@@ -126,6 +126,12 @@ def main() -> None:  # noqa: C901, CCR001
             action='store_true'
         )
 
+        parser.add_argument(
+            '--refresh-all',
+            help='Iterate over all known CMDRs to try and refresh access tokens',
+            action='store_true',
+        )
+
         parser.add_argument('-a', metavar='FILE', help='write ship loadout to FILE in Companion API json format')
         parser.add_argument('-e', metavar='FILE', help='write ship loadout to FILE in E:D Shipyard plain text format')
         parser.add_argument('-l', metavar='FILE', help='write ship locations to FILE in CSV format')
@@ -184,6 +190,17 @@ def main() -> None:  # noqa: C901, CCR001
                 logger.info(f'marked {d} for TRACE')
 
         log_locale('Initial Locale')
+        if args.refresh_all:
+            # Attempt to refresh all known CMDRs. This MAY cause additional output if a token is invalid.
+            logger.debug("Refreshing all known CMDRs")
+            cmdrs = config.get_list('cmdrs', default=[])
+            for cmdr in cmdrs:
+                logger.debug(f'Attempting to use commander "{cmdr}"')
+                try:
+                    companion.session.login(cmdr, monitor.is_beta)
+                    logger.debug("Succeeded!")
+                except AttributeError:
+                    logger.debug(f"Unable to refresh CMDR {cmdr}.")
 
         if args.j:
             logger.debug('Import and collate from JSON dump')
