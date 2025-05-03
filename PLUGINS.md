@@ -612,9 +612,14 @@ for an example of these techniques.
 #### Journal Entry
 
 ```python
+from __future__ import annotations
+from typing import Any
+from EDMCLogging import get_main_logger
+
+logger = get_main_logger()
 def journal_entry(
-    cmdr: str, is_beta: bool, system: str, station: str, entry: Dict[str, Any], state: Dict[str, Any]
-) -> Optional[str]:
+    cmdr: str, is_beta: bool, system: str, station: str, entry: dict[str, Any], state: dict[str, Any]
+) -> str | None:
     if entry['event'] == 'FSDJump':
         # We arrived at a new system!
         if 'StarPos' in entry:
