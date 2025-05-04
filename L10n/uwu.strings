@@ -13,7 +13,7 @@
 "Error: Frontier CAPI didn't respond" = "Ewwow: fwontiew capi didn't wespond";
 
 /* companion.py: Frontier CAPI data doesn't agree with latest Journal game location; In files: companion.py:245; */
-"Error: Frontier server is lagging" = "Ewwow: fwontiew sewvew iws wagging";
+"Error: Frontier CAPI data out of sync" = "Error: Fwontiew CAPI data out of sinwk";
 
 /* companion.py: Commander is docked at an EDO settlement, got out and back in, we forgot the station; In files: companion.py:261; */
 "Docked but unknown station: EDO Settlement?" = "Docked but unknown station: edo settwement?";

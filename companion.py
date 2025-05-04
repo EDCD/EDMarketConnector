@@ -240,7 +240,7 @@ class ServerLagging(Exception):
         self.args = args
         if not args:
             # LANG: Frontier CAPI data doesn't agree with latest Journal game location
-            self.args = (tr.tl('Error: Frontier server is lagging'),)
+            self.args = (tr.tl('Error: Frontier CAPI data out of sync'),)
 
 
 class NoMonitorStation(Exception):
