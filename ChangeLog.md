@@ -6,9 +6,9 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
       in the source (not distributed with the Windows installer) for the
       currently used version.
 ---
-Pre-Release 5.13.0-alpha0
+Pre-Release 5.13.0-rc1
 ===
-This is the Changelog-In-Progress for the next release of EDMarketConnector. This is subject to change.
+This is a release candidate for 5.13.0. It has been pushed to the "Beta" track for updates!
 
 This release contains a significant refactoring away from ctypes code for interating with the Windows API,
 establishment of a Common Code file and plugin, adds a timestamp check to discovered events, and more!
@@ -19,8 +19,9 @@ can use this as an example of how to call one plugin from another.
 This release also removes the check for WiX-based installer versions of EDMC prior to 5.9.1. 
 
 **Changes and Enhancements**
-* Adds a check to the timestamp of all events before passing to Plugins. 
+* Adds a check to the timestamp of all events before passing to Plugins
 * Adds the new `--skip-timecheck` argument to disable the new timestamp checker
+* Adds the ability to have EDMC iterate over all known CMDRs to keep Frontier Auth valid
 * Adds the option to disable the Windows SysTray
 * Adds some new options to the SysTray right-click menu
 * Adds PowerPlayMerits and PowerPlayRank event support
@@ -28,20 +29,24 @@ This release also removes the check for WiX-based installer versions of EDMC pri
 * Updates the WinSparkle Updater
 * Updates a number of type hints
 * Updates a number of dependencies
+* Updates a few internal references for stations for consistency
+* Updates a confusing error when the CAPI API is out of date
+* Updates the example journal_entry function in PLUGINS.md for current type hints
 * Improves the detection of Wine for program compatibilty
 * Improves the detection of the current language for translation compatibilty
+* Minor efficiency and readability updates
+* Reduces duplicate code by refactoring to common code files
+* Removes the old check for WiX based installers to improve performance
+* Removes a few unused functions that aren't part of the public API
+* Refactors a significant amount of ctypes code to utilize pywin32
+* Removes a number of assert statements for future compatibilty
+
+**Bug Fixes**
+* Fixes a bug where Inara Station and System links were broken
 * Fixes a bug where directory paths starting with `~` would not be processed by the journal lock
 * Fixes (and redoes) the Hotkey functionality on Windows
 * Fixes a few typos
-* Fixes a few calls from `config.get()` to their proper `get_x()`
-* Minor efficiency and readability updates
-* Reduces duplicate code by refactoring to common code files
-* Removes the old check for WiX based installers to improve performance.
-* Removes a few unused functions that aren't part of the public API
-* Refactors a significant amount of ctypes code to utilize pywin32
-
-**Bug Fixes**
-
+* Fixes a few calls from `config.get()` to their proper `get_x()
 
 **Plugin Developers**
 * nb.Entry is deprecated, and is slated for removal in 6.0 or later. Please migrate to nb.EntryMenu
@@ -49,7 +54,7 @@ This release also removes the check for WiX-based installer versions of EDMC pri
 * Calling internal translations with `_()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to importing `translations` and calling `translations.translate` or `translations.tl` directly
 * `Translations` as the translate system singleton is deprecated, and is slated for removal in 6.0 or later. Please migrate to the `translations` singleton
 * `help_open_log_folder()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to open_folder()
-* `update_feed` is deprecated, and is slated for removal in 6.0 or later. Please migrate to `get_update_feed()`.
+* `update_feed` is deprecated, and is slated for removal in 6.0 or later. Please migrate to `get_update_feed()`
 
 Release 5.12.5
 ===
