@@ -10,7 +10,7 @@ Pre-Release 5.13.0-rc1
 ===
 This is a release candidate for 5.13.0. It has been pushed to the "Beta" track for updates!
 
-This release contains a significant refactoring away from ctypes code for interating with the Windows API,
+This release contains a significant refactoring away from ctypes code for interacting with the Windows API,
 establishment of a Common Code file and plugin, adds a timestamp check to discovered events, and more!
 
 This release adds the new `plugins/common_coreutils.py` plugin and `common_utils.py` core file. Developers 
@@ -32,14 +32,14 @@ This release also removes the check for WiX-based installer versions of EDMC pri
 * Updates a few internal references for stations for consistency
 * Updates a confusing error when the CAPI API is out of date
 * Updates the example journal_entry function in PLUGINS.md for current type hints
-* Improves the detection of Wine for program compatibilty
-* Improves the detection of the current language for translation compatibilty
+* Improves the detection of Wine for program compatibility
+* Improves the detection of the current language for translation compatibility
 * Minor efficiency and readability updates
 * Reduces duplicate code by refactoring to common code files
 * Removes the old check for WiX based installers to improve performance
 * Removes a few unused functions that aren't part of the public API
 * Refactors a significant amount of ctypes code to utilize pywin32
-* Removes a number of assert statements for future compatibilty
+* Removes a number of assert statements for future compatibility
 
 **Bug Fixes**
 * Fixes a bug where Inara Station and System links were broken
