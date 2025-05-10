@@ -6,7 +6,7 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
       in the source (not distributed with the Windows installer) for the
       currently used version.
 ---
-Release 5.13.0-rc1
+Release 5.13.0
 ===
 This release contains a significant refactoring away from ctypes code for interacting with the Windows API,
 establishment of a Common Code file and plugin, adds a timestamp check to discovered events, and more!
