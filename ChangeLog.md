@@ -6,10 +6,8 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
       in the source (not distributed with the Windows installer) for the
       currently used version.
 ---
-Pre-Release 5.13.0-rc1
+Release 5.13.0-rc1
 ===
-This is a release candidate for 5.13.0. It has been pushed to the "Beta" track for updates!
-
 This release contains a significant refactoring away from ctypes code for interacting with the Windows API,
 establishment of a Common Code file and plugin, adds a timestamp check to discovered events, and more!
 
@@ -55,6 +53,7 @@ This release also removes the check for WiX-based installer versions of EDMC pri
 * `Translations` as the translate system singleton is deprecated, and is slated for removal in 6.0 or later. Please migrate to the `translations` singleton
 * `help_open_log_folder()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to open_folder()
 * `update_feed` is deprecated, and is slated for removal in 6.0 or later. Please migrate to `get_update_feed()`
+
 
 Release 5.12.5
 ===
