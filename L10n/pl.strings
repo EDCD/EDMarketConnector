@@ -12,9 +12,9 @@
 /* companion.py: Frontier CAPI didn't respond; In files: companion.py:226; */
 "Error: Frontier CAPI didn't respond" = "Błąd: Brak odpowiedzi od CAPI Frontier";
 
+
 /* companion.py: Frontier CAPI data doesn't agree with latest Journal game location; In files: companion.py:245; */
 "Error: Frontier server is lagging" = "Błąd: Serwer Frontiera laguje";
-
 /* companion.py: Commander is docked at an EDO settlement, got out and back in, we forgot the station; In files: companion.py:261; */
 "Docked but unknown station: EDO Settlement?" = "Zadokowany na nieznanej stacji: czyżby kolonia EDO?";
 

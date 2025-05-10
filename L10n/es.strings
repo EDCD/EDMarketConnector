@@ -4,9 +4,9 @@
 /* companion.py: Frontier CAPI didn't respond; In files: companion.py:226; */
 "Error: Frontier CAPI didn't respond" = "Error: El CAPI de Frontier no respondió";
 
+
 /* companion.py: Frontier CAPI data doesn't agree with latest Journal game location; In files: companion.py:245; */
 "Error: Frontier server is lagging" = "Error: El servidor de Frontier está retrasado";
-
 /* companion.py: Commander is docked at an EDO settlement, got out and back in, we forgot the station; In files: companion.py:261; */
 "Docked but unknown station: EDO Settlement?" = "Atracado pero estación desconocida: ¿Asentamiento EDO?";
 
@@ -603,4 +603,3 @@
 
 /* stats.py: Status dialog title; In files: stats.py:418; */
 "Ships" = "Naves";
-

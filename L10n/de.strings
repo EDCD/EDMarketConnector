@@ -1,3 +1,9 @@
+/* companion.py: Frontier CAPI data doesn't agree with latest Journal game location; In files: companion.py:245; */
+"Error: Frontier CAPI data out of sync" = "Fehler: Frontier CAPI-Daten nicht synchron";
+
+/* prefs.py: Appearance option for Windows "Disable Systray"; */
+"Disable Systray" = "Infobereich-Icon deaktivieren";
+
 /* edsm.py:Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:316; */
 "Send flight log and CMDR status to EDSM" = "Sende Fluglog und CMDR-Status an EDSM";
 
@@ -12,9 +18,9 @@
 /* companion.py: Frontier CAPI didn't respond; In files: companion.py:226; */
 "Error: Frontier CAPI didn't respond" = "Fehler: Frontier CAPI antwortet nicht";
 
+
 /* companion.py: Frontier CAPI data doesn't agree with latest Journal game location; In files: companion.py:245; */
 "Error: Frontier server is lagging" = "Fehler: Frontier-Server ist überlastet";
-
 /* companion.py: Commander is docked at an EDO settlement, got out and back in, we forgot the station; In files: companion.py:261; */
 "Docked but unknown station: EDO Settlement?" = "Angedockt aber unbekannte Station: EDO-Siedlung?";
 
@@ -788,4 +794,3 @@
 
 /* ttkHyperlinkLabel.py: Open Element In Selected Provider; */
 "Open in {URL}" = "Öffnen in {URL}";
-
