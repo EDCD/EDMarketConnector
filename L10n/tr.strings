@@ -2,8 +2,7 @@
 "Error: Frontier CAPI data out of sync" = "Frontier CAPI datası senkronize değil";
 
 /* prefs.py: Appearance option for Windows "Disable Systray"; */
-"Disable Systray" = "Sistem tepsisi ikonunu devre dışı bırak
-";
+"Disable Systray" = "Sistem tepsisi ikonunu devre dışı bırak";
 
 /* edsm.py:Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:316; */
 "Send flight log and CMDR status to EDSM" = "Uçuş günlüğünü ve CMDR durumunu EDSM'e gönder";

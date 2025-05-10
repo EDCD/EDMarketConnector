@@ -37,7 +37,17 @@ LANGUAGE_ID = '!Language'
 LOCALISATION_DIR: pathlib.Path = pathlib.Path('L10n')
 
 if sys.platform == 'win32':
-    import win32api
+    import ctypes
+    from ctypes.wintypes import BOOL, DWORD, LPCVOID
+
+    MUI_LANGUAGE_NAME = 0x8  # Use language names like "en-US"
+
+    # Load function from kernel32
+    GetUserPreferredUILanguages = ctypes.windll.kernel32.GetUserPreferredUILanguages
+    GetUserPreferredUILanguages.argtypes = [
+        DWORD, ctypes.POINTER(ctypes.c_ulong), LPCVOID, ctypes.POINTER(ctypes.c_ulong)
+    ]
+    GetUserPreferredUILanguages.restype = BOOL
 
 
 class Translations:
@@ -238,6 +248,17 @@ class Translations:
         return open(res_path, encoding='utf-8')
 
 
+def _wszarray_to_list(array):
+    offset = 0
+    while offset < len(array):
+        sz = ctypes.wstring_at(ctypes.addressof(array) + offset * 2)  # type: ignore
+        if sz:
+            yield sz
+            offset += len(sz) + 1
+        else:
+            break
+
+
 class _Locale:
     """Locale holds a few utility methods to convert data to and from localized versions."""
 
@@ -301,17 +322,29 @@ class _Locale:
         :return: The preferred language list
         """
         languages: Iterable[str]
-
         if sys.platform != 'win32':
             # POSIX
             lang = locale.getlocale()[0]
+            languages = [lang.replace('_', '-')] if lang else []
         else:
-            current_locale = win32api.GetUserDefaultLangID()
-            lang = locale.windows_locale[current_locale]
+            num_langs = ctypes.c_ulong()
+            buffer_size = ctypes.c_ulong(0)
+            # First call to get buffer size
+            if not GetUserPreferredUILanguages(
+                    MUI_LANGUAGE_NAME, ctypes.byref(num_langs), None, ctypes.byref(buffer_size)
+            ):
+                raise ctypes.WinError()
+            # Allocate buffer
+            buf = ctypes.create_unicode_buffer(buffer_size.value)
+            # Second call to get languages
+            if not GetUserPreferredUILanguages(
+                    MUI_LANGUAGE_NAME, ctypes.byref(num_langs), buf, ctypes.byref(buffer_size)
+            ):
+                raise ctypes.WinError()
+            languages = _wszarray_to_list(buf)
         # HACK: <n/a> | 2021-12-11: OneSky calls "Chinese Simplified" "zh-Hans"
         #    in the name of the file, but that will be zh-CN in terms of
         #    locale.  So map zh-CN -> zh-Hans
-        languages = [lang.replace('_', '-')] if lang else []
         languages = ['zh-Hans' if lang == 'zh-CN' else lang for lang in languages]
         return languages
 
