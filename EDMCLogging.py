@@ -258,10 +258,7 @@ def get_plugin_logger(plugin_name: str, loglevel: int = _default_loglevel) -> 'L
     :param loglevel: Optional logLevel for this Logger.
     :return: logging.Logger instance, all set up.
     """
-    if not os.getenv('EDMC_NO_UI'):
-        base_logger_name = appname
-    else:
-        base_logger_name = appcmdname
+    base_logger_name = appcmdname if os.getenv('EDMC_NO_UI') else appname
 
     plugin_logger = logging.getLogger(f'{base_logger_name}.{plugin_name}')
     plugin_logger.setLevel(loglevel)
@@ -338,8 +335,6 @@ class EDMCContextFilter(logging.Filter):
             # <https://stackoverflow.com/questions/2203424/python-how-to-retrieve-class-information-from-a-frame-object#2220759>
             try:
                 frame_info = inspect.getframeinfo(frame)
-                # raise(IndexError)  # TODO: Remove, only for testing
-
             except Exception:
                 # Separate from the print below to guarantee we see at least this much.
                 print('EDMCLogging:EDMCContextFilter:caller_attributes(): Failed in `inspect.getframinfo(frame)`')
@@ -537,10 +532,7 @@ loglevel: str | int = config.get_str('loglevel')
 if not loglevel:
     loglevel = logging.INFO
 
-if not os.getenv('EDMC_NO_UI'):
-    base_logger_name = appname
-else:
-    base_logger_name = appcmdname
+base_logger_name = appcmdname if os.getenv('EDMC_NO_UI') else appname
 
 edmclogger = Logger(base_logger_name, loglevel=loglevel)
 logger: 'LoggerMixin' = edmclogger.get_logger()

@@ -52,7 +52,7 @@ appcmdname = 'EDMC'
 # <https://semver.org/#semantic-versioning-specification-semver>
 # Major.Minor.Patch(-prerelease)(+buildmetadata)
 # NB: Do *not* import this, use the functions appversion() and appversion_nobuild()
-_static_appversion = '5.12.5'
+_static_appversion = '5.13.0'
 _cached_version: semantic_version.Version | None = None
 copyright = '© 2015-2019 Jonathan Harris, 2020-2024 EDCD'
 
@@ -201,6 +201,7 @@ class AbstractConfig(abc.ABC):
     __auth_force_edmc_protocol = False  # Should we force edmc:// protocol ?
     __eddn_url = None  # Non-default EDDN URL
     __eddn_tracking_ui = False  # Show EDDN tracking UI ?
+    __skip_timecheck = False  # Skip checking event timestamps?
 
     def __init__(self) -> None:
         self.home_path = pathlib.Path.home()
@@ -269,6 +270,19 @@ class AbstractConfig(abc.ABC):
         :return: bool - Should tracking UI be active?
         """
         return self.__eddn_tracking_ui
+
+    def set_skip_timecheck(self):
+        """Set the Event Timecheck bool."""
+        self.__skip_timecheck = True
+
+    @property
+    def skip_timecheck(self) -> bool:
+        """
+        Determine if the Event Timecheck bool is enabled.
+
+        :return: bool - Should EDMC check event timechecks?
+        """
+        return self.__skip_timecheck
 
     @property
     def app_dir(self) -> str:

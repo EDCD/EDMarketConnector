@@ -1,12 +1,20 @@
+/* edsm.py:Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:316; */
+"Send flight log and CMDR status to EDSM" = "将飞行日志和指挥官状态发送到 EDSM";
+
+/* prefs.py:Label on button used to open a filesystem folder; In files: prefs.py:706; */
+"Open Log Folder" = "打开日志文件夹";
+
+/* inara.py:Text Inara Show API key; In files: inara.py:305; */
+"Show API Key" = "显示 API 密钥";
 /* Language name */
 "!Language" = "简体中文";
 
 /* companion.py: Frontier CAPI didn't respond; In files: companion.py:226; */
 "Error: Frontier CAPI didn't respond" = "错误：Frontier CAPI 无响应";
 
+
 /* companion.py: Frontier CAPI data doesn't agree with latest Journal game location; In files: companion.py:245; */
 "Error: Frontier server is lagging" = "错误：Frontier 服务器繁忙";
-
 /* companion.py: Commander is docked at an EDO settlement, got out and back in, we forgot the station; In files: companion.py:261; */
 "Docked but unknown station: EDO Settlement?" = "已靠站但站点未知：可能是 ED: Odyssey 的地面设施？";
 
@@ -27,6 +35,12 @@
 
 /* companion.py: Failed to get Access Token from Frontier Auth service; In files: companion.py:508; */
 "Error: unable to get token" = "错误：无法获取令牌";
+
+/* EDMarketConnector.py: EDMC Critical Error Notification; */
+"EDMC encountered a critical error, and cannot recover. EDMC is shutting down for its own protection!" = "EDMC 遇到严重错误，无法恢复。 EDMC 正在关闭以保护自身！";
+
+/* EDMarketConnector.py: EDMC Critical Error Details; */
+"Here's what EDMC Detected:\r\n\r\n{ERR}\r\n\r\nDo you want to file a Bug Report on GitHub?" = "以下是 EDMC 检测到的错误:\n\n{ERR}\n\n您是否希望在 GitHub 上提交错误报告？";
 
 /* companion.py: Frontier CAPI returned 418, meaning down for maintenance; In files: companion.py:844; */
 "Frontier CAPI down for maintenance" = "Frontier CAPI 下线维护";
@@ -79,6 +93,9 @@
 /* EDMarketConnector.py: Help > Check for Updates...; In files: EDMarketConnector.py:930; EDMarketConnector.py:958; */
 "Check for Updates..." = "检查版本更新…";
 
+/* EDMarketConnector.py: Help > Open System Profiler; In files: EDMarketConnector.py:888; */
+"Open System Profiler" = "打开系统分析器";
+
 /* EDMarketConnector.py: File > Save Raw Data...; In files: EDMarketConnector.py:931; EDMarketConnector.py:948; */
 "Save Raw Data..." = "保存原始数据…";
 
@@ -108,6 +125,15 @@
 
 /* EDMarketConnector.py: Label for 'Copy' as in 'Copy and Paste'; ttkHyperlinkLabel.py: Label for 'Copy' as in 'Copy and Paste'; In files: EDMarketConnector.py:962; ttkHyperlinkLabel.py:53; */
 "Copy" = "复制";
+
+/* myNotebook.py: Label for 'Cut' as in 'Cut and Paste'; */
+"Cut" = "剪切";
+
+/* myNotebook.py: Label for 'Paste' as in 'Copy and Paste'; */
+"Paste" = "粘贴";
+
+/* myNotebook.py: Label for 'Select All'; */
+"Select All" = "选择全部";
 
 /* EDMarketConnector.py: CAPI auth aborted because of killswitch; EDMarketConnector.py: CAPI auth query aborted because of killswitch; In files: EDMarketConnector.py:973; EDMarketConnector.py:1067; */
 "CAPI auth disabled by killswitch" = "CAPI 验证被 killswitch 禁用";
@@ -150,6 +176,12 @@
 
 /* EDMarketConnector.py: CAPI fleetcarrier query aborted because of killswitch; In files: EDMarketConnector.py:1157; */
 "CAPI fleetcarrier disabled by killswitch" = "CAPI 舰队母舰 (fleet carrier) 被 killswitch 禁用";
+
+/* EDMarketConnector.py: No data was returned for the Fleet Carrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
+"CAPI: No Fleet Carrier data returned" = "CAPI: 未接收到舰队母舰的数据";
+
+/* EDMarketConnector.py: We didn't have the Fleet Carrier callsign when we should have; In files: EDMarketConnector.py:1223; */
+"CAPI: Fleet Carrier data incomplete" = "CAPI: 舰队航母数据不完整";
 
 /* EDMarketConnector.py: No data was returned for the commander from the Frontier CAPI; In files: EDMarketConnector.py:1242; */
 "CAPI: No commander data returned" = "CAPI：没有指挥官数据";
@@ -198,6 +230,24 @@
 
 /* EDMarketConnector.py: Popup window title for list of 'enabled' plugins that don't work with Python 3.x; In files: EDMarketConnector.py:2274; */
 "EDMC: Plugins Without Python 3.x Support" = "EDMC：不支持 Python 3.x 的插件";
+
+/* EDMarketConnector.py: Popup window title for list of 'broken' plugins that failed to load; In files: EDMarketConnector.py:2285; */
+"EDMC: Broken Plugins" = "EDMC: 损坏的插件";
+
+/* EDMarketConnector.py: Popup-text about 'broken' plugins that failed to load; In files: EDMarketConnector.py:2266; */
+"One or more of your enabled plugins failed to load. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. This could be caused by a wrong folder structure. The load.py file should be located under plugins/PLUGIN_NAME/load.py.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "您启用的一个或多个插件未能加载。请查看 '{FILE}' > '{SETTINGS}' 中的 '{PLUGINS}' 选项卡上的列表。这可能是由于文件夹结构错误导致的。load.py 文件应位于 plugins/插件名称/load.py 路径下。\n\n您可以通过在插件文件夹名称末尾添加 '{DISABLED}' 来禁用该插件。";
+
+/* EDMarketConnector.py: Popup-text about Reset Providers; In files: EDMarketConnector.py:2146; */
+"One or more of your URL Providers were invalid, and have been reset:\r\n\r\n" = "您的一个或多个 URL 提供程序无效，已被重置:\n\n";
+
+/* EDMarketConnector.py: Text About What Provider Was Reset; In files: EDMarketConnector.py:2148; */
+"{PROVIDER} was set to {OLDPROV}, and has been reset to {NEWPROV}\r\n" = "{PROVIDER} 原设置为 {OLDPROV}，现已被重置为 {NEWPROV}\n";
+
+/* EDMarketConnector.py: Popup window title for Reset Providers; In files: EDMarketConnector.py:2161; */
+"EDMC: Default Providers Reset" = "EDMC: 默认提供程序已重置";
+
+/* EDMarketConnector.py: Await Full CMDR Login to Game; In files: EDMarketConnector.py:813; */
+"Awaiting Full CMDR Login" = "等待指挥官完整登录";
 
 /* journal_lock.py: Title text on popup when Journal directory already locked; In files: journal_lock.py:208; */
 "Journal directory already locked" = "日志目录已被锁定";
@@ -337,6 +387,9 @@
 /* prefs.py: Settings > Configuration - Label for CAPI section; In files: prefs.py:469; */
 "CAPI Settings" = "CAPI 设置";
 
+/* prefs.py: Configuration - Enable or disable the Fleet Carrier CAPI calls; In files: prefs.py:475; */
+"Enable Fleet Carrier CAPI Queries" = "启用舰队航母 CAPI 查询";
+
 /* prefs.py: Hotkey/Shortcut settings prompt on Windows; In files: prefs.py:492; */
 "Hotkey" = "快捷键";
 
@@ -415,6 +468,12 @@
 /* prefs.py: Label for location of third-party plugins folder; In files: prefs.py:908; */
 "Plugins folder" = "插件文件夹";
 
+/* prefs.py: Label on button used to open the Plugin Folder; */
+"Open Plugins Folder" = "打开插件目录";
+
+/* prefs.py: Selecting the Location of the Plugin Directory on the Filesystem; */
+"Plugin Directory Location" = "插件目录的位置";
+
 /* prefs.py: Tip/label about how to disable plugins; In files: prefs.py:923; */
 "Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "提示：想要禁用某一项插件，{CR}你可以添加 {EXT} 到其文件夹名称中";
 
@@ -427,8 +486,14 @@
 /* prefs.py: Plugins - Label on URL to documentation about migrating plugins from Python 2.7; In files: prefs.py:962; */
 "Information on migrating plugins" = "关于插件迁移";
 
+/* prefs.py: Plugins - Label for list of 'broken' plugins that failed to load; In files: prefs.py:1039; */
+"Broken Plugins" = "损坏的插件";
+
 /* prefs.py: Lable on list of user-disabled plugins; In files: prefs.py:977; */
 "Disabled Plugins" = "已禁用插件";
+
+/* prefs.py: Catch & Record Profiler Errors; */
+"Error in System Profiler" = "系统分析器中有错误";
 
 /* stats.py: Cmdr stats; In files: stats.py:58; */
 "Balance" = "资金结余";
@@ -730,3 +795,32 @@
 /* stats.py: Status dialog title; In files: stats.py:418; */
 "Ships" = "所有飞船";
 
+/* update.py: Update Available Text; In files: update.py:229; */
+"{NEWVER} is available" = "有新的 {NEWVER} 版本可用";
+
+/* prefs.py: Stable Version of EDMC; */
+"Stable" = "稳定版";
+
+/* prefs.py: Select the Update Track (Beta, Stable); */
+"Update Track" = "更新通道";
+
+/* EDMarketConnector.py: Inform the user the Update Track has changed; */
+"Update Track Changed to {TRACK}" = "更新通道已更改为 {TRACK}";
+
+/* EDMarketConnector.py: Inform User of Beta -> Stable Transition Risks; */
+"Update track changed to Stable from Beta. You will no longer receive Beta updates. You will stay on your current Beta version until the next Stable release.\r\n\r\nYou can manually revert to the latest Stable version. To do so, you must download and install the latest Stable version manually. Note that this may introduce bugs or break completely if downgrading between major versions with significant changes.\r\n\r\nDo you want to open GitHub to download the latest release?" = "更新通道已从 \\"测试版\\" 更改为 \\"稳定版\\"。您将不再收到 \\"测试版\\" 更新。您将保持在当前的 \\"测试版\\" 版本，直到下一个 \\"稳定版\\" 版本发布。\n\n您可以手动恢复到最新的 \\"稳定版\\" 版本。为此，您必须手动下载并安装最新的 \\"稳定版\\" 版本。请注意，如果在有重大更改的主要版本之间降级，可能会引入错误或完全无法使用。\n\n您是否要打开 GitHub 以下载最新版本？";
+
+/* EDMarketConnector.py: Title of Notification Popup for EDMC Restart; */
+"Restart Required" = "需要重新启动";
+
+/* EDMarketConnector.py: Text of Notification Popup for EDMC Restart; */
+"A restart of EDMC is required. EDMC will now restart." = "需要重新启动EDMC。EDMC现在将重新启动。";
+
+/* myNotebook.py: Can't Paste Images or Files in Text; */
+"Cannot paste non-text content." = "无法添加非文本内容。";
+
+/* ttkHyperlinkLabel.py: Open Element In Selected Provider; */
+"Open in {URL}" = "在 {URL} 中打开";
+
+/* ttkHyperlinkLabel.py: Copy the Inara SLEF Format of the active ship to the clipboard; */
+"Copy Inara SLEF" = "复制 Inara SLEF 数据";

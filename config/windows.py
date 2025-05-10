@@ -16,7 +16,8 @@ from typing import Literal
 from config import AbstractConfig, applongname, appname, logger
 from win32comext.shell import shell
 
-assert sys.platform == 'win32'
+if sys.platform != 'win32':
+    raise EnvironmentError("This file is for Windows only.")
 
 REG_RESERVED_ALWAYS_ZERO = 0
 

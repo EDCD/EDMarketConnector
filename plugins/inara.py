@@ -18,6 +18,7 @@ referenced in this file (or only in any other core plugin), and if so...
     `build.py` TO ENSURE THE FILES ARE ACTUALLY PRESENT
     IN AN END-USER INSTALLATION ON WINDOWS.
 """
+# pylint: disable=import-error
 from __future__ import annotations
 
 import json
@@ -43,6 +44,8 @@ from EDMCLogging import get_main_logger
 from monitor import monitor
 from ttkHyperlinkLabel import HyperlinkLabel
 from l10n import translations as tr
+from plugins.common_coreutils import (api_keys_label_common, PADX, PADY, BUTTONX, SEPY, station_name_setter_common,
+                                      show_pwd_var_common, station_link_common, this_format_common)
 
 logger = get_main_logger()
 
@@ -115,7 +118,7 @@ class This:
         self.system_address: str | None = None  # type: ignore
         self.system_population: int | None = None
         self.station_link: tk.Widget = None  # type: ignore
-        self.station = None
+        self.station_name = None
         self.station_marketid = None
 
         # Prefs UI
@@ -144,14 +147,11 @@ class This:
 
 
 this = This()
-show_password_var = tk.BooleanVar()
 
 # last time we updated, if unset in config this is 0, which means an instant update
 LAST_UPDATE_CONF_KEY = 'inara_last_update'
 EVENT_COLLECT_TIME = 31  # Minimum time to take collecting events before requesting a send
 WORKER_WAIT_TIME = 35  # Minimum time for worker to wait between sends
-
-STATION_UNDOCKED: str = '×'  # "Station" name to display when not docked = U+00D7
 
 
 TARGET_URL = 'https://inara.cz/inapi/v1/'
@@ -164,11 +164,11 @@ if DEBUG:
 def system_url(system_name: str) -> str:
     """Get a URL for the current system."""
     if this.system_address:
-        return requests.utils.requote_uri(f'https://inara.cz/galaxy-starsystem/'
+        return requests.utils.requote_uri(f'https://inara.cz/elite/starsystem/'
                                           f'?search={this.system_address}')
 
     if system_name:
-        return requests.utils.requote_uri(f'https://inara.cz/galaxy-starsystem/'
+        return requests.utils.requote_uri(f'https://inara.cz/elite/starsystem/'
                                           f'?search={system_name}')
 
     return ''
@@ -185,11 +185,11 @@ def station_url(system_name: str, station_name: str) -> str:
     :return: A URL to inara for the given system and station
     """
     if system_name and station_name:
-        return requests.utils.requote_uri(f'https://inara.cz/galaxy-station/?search={system_name}%20[{station_name}]')
+        return requests.utils.requote_uri(f'https://inara.cz/elite/station/?search={station_name}%20[{system_name}]')
 
-    if this.system_name and this.station:
+    if this.system_name and this.station_name:
         return requests.utils.requote_uri(
-            f'https://inara.cz/galaxy-station/?search={this.system_name}%20[{this.station}]')
+            f'https://inara.cz/elite/station/?search={this.station_name}%20[{this.system_name}]')
 
     if system_name:
         return system_url(system_name)
@@ -233,21 +233,8 @@ def plugin_stop() -> None:
     logger.debug('Done.')
 
 
-def toggle_password_visibility():
-    """Toggle if the API Key is visible or not."""
-    if show_password_var.get():
-        this.apikey.config(show="")
-    else:
-        this.apikey.config(show="*")
-
-
 def plugin_prefs(parent: ttk.Notebook, cmdr: str, is_beta: bool) -> nb.Frame:
     """Plugin Preferences UI hook."""
-    PADX = 10  # noqa: N806
-    BUTTONX = 12  # noqa: N806  # indent Checkbuttons and Radiobuttons
-    PADY = 1  # noqa: N806  # close spacing
-    BOXY = 2  # noqa: N806  # box spacing
-    SEPY = 10  # noqa: N806  # seperator line spacing
     cur_row = 0
 
     frame = nb.Frame(parent)
@@ -287,22 +274,10 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str, is_beta: bool) -> nb.Frame:
     cur_row += 1
 
     # LANG: Inara API key label
-    this.apikey_label = nb.Label(frame, text=tr.tl('API Key'))  # Inara setting
-    this.apikey_label.grid(row=cur_row, padx=PADX, pady=PADY, sticky=tk.W)
-    this.apikey = nb.EntryMenu(frame, show="*", width=50)
-    this.apikey.grid(row=cur_row, column=1, padx=PADX, pady=BOXY, sticky=tk.EW)
+    api_keys_label_common(this, cur_row, frame)
     cur_row += 1
-
     prefs_cmdr_changed(cmdr, is_beta)
-
-    show_password_var.set(False)  # Password is initially masked
-    show_password_checkbox = nb.Checkbutton(
-        frame,
-        text=tr.tl('Show API Key'),  # LANG: Text Inara Show API key
-        variable=show_password_var,
-        command=toggle_password_visibility,
-    )
-    show_password_checkbox.grid(row=cur_row, columnspan=2, padx=BUTTONX, pady=PADY, sticky=tk.W)
+    show_pwd_var_common(frame, cur_row, this)
 
     return frame
 
@@ -411,15 +386,11 @@ def journal_entry(  # noqa: C901, CCR001
     # But then we update all the tracking copies before any other checks,
     # because they're relevant for URL providing even if *sending* isn't
     # appropriate.
-    this.on_foot = state['OnFoot']
     event_name: str = entry['event']
     this.cmdr = cmdr
     this.FID = state['FID']
     this.multicrew = bool(state['Role'])
-    this.system_name = state['SystemName']
-    this.system_address = state['SystemAddress']
-    this.station = state['StationName']
-    this.station_marketid = state['MarketID']
+    this_format_common(this, state)
 
     if not monitor.is_live_galaxy():
         # Since Update 14 on 2022-11-29 Inara only accepts Live data.
@@ -552,6 +523,15 @@ def journal_entry(  # noqa: C901, CCR001
                 power_data = {'powerName': entry["Power"], 'rankValue': entry["Rank"], 'meritsValue': entry["Merits"]}
                 new_add_event('setCommanderRankPower', entry['timestamp'], power_data)
 
+            elif event_name == 'PowerplayMerits':
+                power_data = {'powerName': state["Powerplay"]["Power"], 'rankValue': state["Powerplay"]["Rank"],
+                              'meritsValue': entry["TotalMerits"]}
+                new_add_event('setCommanderRankPower', entry['timestamp'], power_data)
+
+            elif event_name == 'PowerplayRank':
+                power_data = {'powerName': entry["Power"], 'rankValue': entry["Rank"]}
+                new_add_event('setCommanderRankPower', entry['timestamp'], power_data)
+
             # Ship change
             if event_name == 'Loadout' and this.shipswap:
                 this.loadout = make_loadout(state)
@@ -604,7 +584,7 @@ def journal_entry(  # noqa: C901, CCR001
 
             elif event_name == 'Undocked':
                 this.undocked = True
-                this.station = None
+                this.station_name = None
 
             elif event_name == 'SupercruiseEntry':
                 this.undocked = False
@@ -1359,14 +1339,7 @@ def journal_entry(  # noqa: C901, CCR001
         this.system_link.update_idletasks()
 
     if config.get_str('station_provider') == 'Inara':
-        to_set: str = cast(str, this.station)
-        if not to_set:
-            if this.system_population is not None and this.system_population > 0:
-                to_set = STATION_UNDOCKED
-            else:
-                to_set = ''
-
-        this.station_link['text'] = to_set
+        station_name_setter_common(this)
         # Do *NOT* set 'url' here, as it's set to a function that will call
         # through correctly.  We don't want a static string.
         this.station_link.update_idletasks()
@@ -1374,7 +1347,7 @@ def journal_entry(  # noqa: C901, CCR001
     return ''  # No error
 
 
-def cmdr_data(data: CAPIData, is_beta):  # noqa: CCR001, reanalyze me later
+def cmdr_data(data: CAPIData, is_beta):
     """CAPI event hook."""
     this.cmdr = data['commander']['name']
 
@@ -1385,8 +1358,8 @@ def cmdr_data(data: CAPIData, is_beta):  # noqa: CCR001, reanalyze me later
     # Only trust CAPI if these aren't yet set
     this.system_name = this.system_name if this.system_name else data['lastSystem']['name']
 
-    if not this.station and data['commander']['docked']:
-        this.station = data['lastStarport']['name']
+    if not this.station_name and data['commander']['docked']:
+        this.station_name = data['lastStarport']['name']
 
     # Override standard URL functions
     if config.get_str('system_provider') == 'Inara':
@@ -1396,14 +1369,7 @@ def cmdr_data(data: CAPIData, is_beta):  # noqa: CCR001, reanalyze me later
         this.system_link.update_idletasks()
 
     if config.get_str('station_provider') == 'Inara':
-        if data['commander']['docked'] or this.on_foot and this.station:
-            this.station_link['text'] = this.station
-
-        elif data['lastStarport']['name'] and data['lastStarport']['name'] != "":
-            this.station_link['text'] = STATION_UNDOCKED
-
-        else:
-            this.station_link['text'] = ''
+        station_link_common(data, this)
 
         # Do *NOT* set 'url' here, as it's set to a function that will call
         # through correctly.  We don't want a static string.

@@ -12,7 +12,6 @@ import sys
 import threading
 from urllib import parse
 from typing import TYPE_CHECKING, Type
-
 from config import config
 from constants import appname, protocolhandler_redirect
 from EDMCLogging import get_main_logger
@@ -25,13 +24,7 @@ logger = get_main_logger()
 is_wine = False
 
 if sys.platform == 'win32':
-    from ctypes import windll  # type: ignore
-
-    try:
-        if windll.ntdll.wine_get_version:
-            is_wine = True
-    except Exception:
-        pass
+    is_wine = bool(os.getenv('WINEPREFIX'))
 
 
 class GenericProtocolHandler:
@@ -67,16 +60,19 @@ if (config.auth_force_edmc_protocol  # noqa: C901
                 and not config.auth_force_localserver
         )):
     # This could be false if you use auth_force_edmc_protocol, but then you get to keep the pieces
-    assert sys.platform == 'win32'
+    if sys.platform != 'win32':
+        raise EnvironmentError("This code is for Windows only.")
     # spell-checker: words HBRUSH HICON WPARAM wstring WNDCLASS HMENU HGLOBAL
     from ctypes import (  # type: ignore
         windll, POINTER, WINFUNCTYPE, Structure, byref, c_long, c_void_p, create_unicode_buffer, wstring_at
     )
     from ctypes.wintypes import (
-        ATOM, BOOL, DWORD, HBRUSH, HGLOBAL, HICON, HINSTANCE, HMENU, HWND, INT, LPARAM, LPCWSTR, LPMSG, LPVOID, LPWSTR,
+        ATOM, BOOL, HBRUSH, HGLOBAL, HICON, HINSTANCE, HWND, INT, LPARAM, LPCWSTR, LPMSG, LPVOID, LPWSTR,
         MSG, UINT, WPARAM
     )
     import win32gui
+    import win32api
+    import win32con
 
     class WNDCLASS(Structure):
         """
@@ -101,14 +97,8 @@ if (config.auth_force_edmc_protocol  # noqa: C901
 
     CW_USEDEFAULT = 0x80000000
 
-    CreateWindowExW = windll.user32.CreateWindowExW
-    CreateWindowExW.argtypes = [DWORD, LPCWSTR, LPCWSTR, DWORD, INT, INT, INT, INT, HWND, HMENU, HINSTANCE, LPVOID]
-    CreateWindowExW.restype = HWND
     RegisterClassW = windll.user32.RegisterClassW
     RegisterClassW.argtypes = [POINTER(WNDCLASS)]
-
-    GetParent = windll.user32.GetParent
-    SetForegroundWindow = windll.user32.SetForegroundWindow
 
     # <https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getmessagew>
     # NB: Despite 'BOOL' return type, it *can* be >0, 0 or -1, so is actually
@@ -119,7 +109,6 @@ if (config.auth_force_edmc_protocol  # noqa: C901
 
     TranslateMessage = windll.user32.TranslateMessage
     DispatchMessageW = windll.user32.DispatchMessageW
-    PostThreadMessageW = windll.user32.PostThreadMessageW
     SendMessageW = windll.user32.SendMessageW
     SendMessageW.argtypes = [HWND, UINT, WPARAM, LPARAM]
     PostMessageW = windll.user32.PostMessageW
@@ -222,7 +211,7 @@ if (config.auth_force_edmc_protocol  # noqa: C901
             thread = self.thread
             if thread:
                 self.thread = None
-                PostThreadMessageW(thread.ident, WM_QUIT, 0, 0)
+                win32gui.PostThreadMessage(thread.ident, WM_QUIT, 0, 0)
                 thread.join()  # Wait for it to quit
 
         def worker(self) -> None:
@@ -232,7 +221,7 @@ if (config.auth_force_edmc_protocol  # noqa: C901
             wndclass.lpfnWndProc = WndProc
             wndclass.cbClsExtra = 0
             wndclass.cbWndExtra = 0
-            wndclass.hInstance = windll.kernel32.GetModuleHandleW(0)
+            wndclass.hInstance = win32api.GetModuleHandle(None)
             wndclass.hIcon = None
             wndclass.hCursor = None
             wndclass.hbrBackground = None
@@ -244,16 +233,17 @@ if (config.auth_force_edmc_protocol  # noqa: C901
                 return
 
             # https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-createwindowexw
-            hwnd = CreateWindowExW(
+            hwnd = win32gui.CreateWindowEx(
                 0,                       # dwExStyle
-                wndclass.lpszClassName,  # lpClassName
-                "DDE Server",            # lpWindowName
-                0,                       # dwStyle
-                CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,  # X, Y, nWidth, nHeight
-                self.master.winfo_id(),  # hWndParent # Don't use HWND_MESSAGE since the window won't get DDE broadcasts
-                None,                    # hMenu
-                wndclass.hInstance,      # hInstance
-                None                     # lpParam
+                'DDEServer',            # lpClassName (use string directly as win32gui expects it)
+                "DDE Server",           # lpWindowName
+                0,                      # dwStyle
+                win32con.CW_USEDEFAULT, win32con.CW_USEDEFAULT,
+                win32con.CW_USEDEFAULT, win32con.CW_USEDEFAULT,  # X, Y, nWidth, nHeight
+                self.master.winfo_id(),  # hWndParent
+                0,                      # hMenu (use 0 instead of None for win32gui)
+                wndclass.hInstance,     # hInstance
+                None                    # lpParam
             )
 
             msg = MSG()
@@ -284,8 +274,8 @@ if (config.auth_force_edmc_protocol  # noqa: C901
                             logger.debug(f'Message starts with {self.redirect}')
                             self.event(url)
 
-                        SetForegroundWindow(GetParent(self.master.winfo_id()))  # raise app window
                         # Send back a WM_DDE_ACK. this is _required_ with WM_DDE_EXECUTE
+                        win32gui.SetForegroundWindow(win32gui.GetParent(self.master.winfo_id()))
                         PostMessageW(msg.wParam, WM_DDE_ACK, hwnd, PackDDElParam(WM_DDE_ACK, 0x80, msg.lParam))
 
                     else:
@@ -293,7 +283,7 @@ if (config.auth_force_edmc_protocol  # noqa: C901
                         PostMessageW(msg.wParam, WM_DDE_ACK, hwnd, PackDDElParam(WM_DDE_ACK, 0, msg.lParam))
 
                 elif msg.message == WM_DDE_TERMINATE:
-                    PostMessageW(msg.wParam, WM_DDE_TERMINATE, hwnd, 0)
+                    win32gui.PostMessage(msg.wParam, WM_DDE_TERMINATE, hwnd, 0)
 
                 else:
                     TranslateMessage(byref(msg))  # "Translates virtual key messages into character messages" ???

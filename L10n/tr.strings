@@ -1,3 +1,10 @@
+/* companion.py: Frontier CAPI data doesn't agree with latest Journal game location; In files: companion.py:245; */
+"Error: Frontier CAPI data out of sync" = "Frontier CAPI datası senkronize değil";
+
+/* prefs.py: Appearance option for Windows "Disable Systray"; */
+"Disable Systray" = "Sistem tepsisi ikonunu devre dışı bırak
+";
+
 /* edsm.py:Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:316; */
 "Send flight log and CMDR status to EDSM" = "Uçuş günlüğünü ve CMDR durumunu EDSM'e gönder";
 
@@ -12,9 +19,9 @@
 /* companion.py: Frontier CAPI didn't respond; In files: companion.py:226; */
 "Error: Frontier CAPI didn't respond" = "Hata: Frontier CAPI yanıt vermedi";
 
+
 /* companion.py: Frontier CAPI data doesn't agree with latest Journal game location; In files: companion.py:245; */
 "Error: Frontier server is lagging" = "Hata: Frontier sunucusu gecikmesi";
-
 /* companion.py: Commander is docked at an EDO settlement, got out and back in, we forgot the station; In files: companion.py:261; */
 "Docked but unknown station: EDO Settlement?" = "Kenetlendi ancak bilinmeyen istasyon: EDO yerleşimi?";
 

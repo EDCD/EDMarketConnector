@@ -13,7 +13,8 @@ import sys
 from configparser import ConfigParser
 from config import AbstractConfig, appname, logger
 
-assert sys.platform == 'linux'
+if sys.platform != 'linux':
+    raise EnvironmentError("This file is for Linux only.")
 
 
 class LinuxConfig(AbstractConfig):

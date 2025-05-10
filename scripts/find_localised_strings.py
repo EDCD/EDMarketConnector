@@ -64,9 +64,19 @@ COMMENT_SAME_LINE_RE = re.compile(r"^.*?(#.*)$")
 COMMENT_OWN_LINE_RE = re.compile(r"^\s*?(#.*)$")
 
 
-def extract_comments(  # noqa: CCR001
-    call: ast.Call, lines: list[str], file: pathlib.Path
-) -> str | None:
+def _extract_lang_comment(line: str, pattern: re.Pattern, file: pathlib.Path,
+                          lineno: int) -> tuple[str | None, str | None]:
+    """Attempt to extract a LANG comment from a line using a given regex pattern."""
+    match = pattern.match(line)
+    if match:
+        comment = match.group(1).strip()
+        if comment.startswith("# LANG:"):
+            return comment.replace("# LANG:", "").strip(), None
+        return None, f"Unknown comment for {file}:{lineno} {line}"
+    return None, None
+
+
+def extract_comments(call: ast.Call, lines: list[str], file: pathlib.Path) -> str | None:
     """
     Extract comments from source code based on the given call.
 
@@ -86,29 +96,13 @@ def extract_comments(  # noqa: CCR001
     above_comment: str | None = None
     current_line = lines[current].strip()
     current_comment: str | None = None
-
     bad_comment: str | None = None
-    if above_line is not None:
-        match = COMMENT_OWN_LINE_RE.match(above_line)
-        if match:
-            above_comment = match.group(1).strip()
-            if not above_comment.startswith("# LANG:"):
-                bad_comment = f"Unknown comment for {file}:{call.lineno} {above_line}"
-                above_comment = None
 
-            else:
-                above_comment = above_comment.replace("# LANG:", "").strip()
+    if above_line:
+        above_comment, bad_comment = _extract_lang_comment(above_line, COMMENT_OWN_LINE_RE, file, call.lineno)
 
-    if current_line is not None:
-        match = COMMENT_SAME_LINE_RE.match(current_line)
-        if match:
-            current_comment = match.group(1).strip()
-            if not current_comment.startswith("# LANG:"):
-                bad_comment = f"Unknown comment for {file}:{call.lineno} {current_line}"
-                current_comment = None
-
-            else:
-                current_comment = current_comment.replace("# LANG:", "").strip()
+    if current_line:
+        current_comment, bad_comment = _extract_lang_comment(current_line, COMMENT_SAME_LINE_RE, file, call.lineno)
 
     if current_comment is not None:
         out = current_comment
@@ -266,7 +260,8 @@ def generate_lang_template(data: dict[pathlib.Path, list[ast.Call]]) -> str:
 """
     print(f"Done Deduping entries {len(entries)=}  {len(deduped)=}", file=sys.stderr)
     for entry in deduped:
-        assert len(entry.comments) == len(entry.locations)
+        if len(entry.comments) != len(entry.locations):
+            raise ValueError("Mismatch: 'comments' and 'locations' must have the same length.")
 
         comment_set = set()
         for comment, loc in zip(entry.comments, entry.locations):

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import contextlib
 import logging
-from os.path import expandvars, join, normpath
+from os.path import join, normpath
 from pathlib import Path
 import subprocess
 import sys
@@ -24,6 +24,7 @@ from l10n import translations as tr
 from monitor import monitor
 from theme import theme
 from ttkHyperlinkLabel import HyperlinkLabel
+from common_utils import ensure_on_screen
 logger = get_main_logger()
 
 
@@ -184,11 +185,10 @@ class AutoInc(contextlib.AbstractContextManager):
 
 
 if sys.platform == 'win32':
-    import ctypes
     import winreg
-    from ctypes.wintypes import LPCWSTR, LPWSTR, MAX_PATH, POINT, RECT, SIZE, UINT, BOOL
-    import win32gui
     import win32api
+    from win32com.shell import shell, shellcon
+    import pythoncom
     is_wine = False
     try:
         WINE_REGISTRY_KEY = r'HKEY_LOCAL_MACHINE\Software\Wine'
@@ -199,30 +199,51 @@ if sys.platform == 'win32':
     except OSError:  # Assumed to be 'path not found', i.e. not-wine
         pass
 
-    CalculatePopupWindowPosition = None
-    if not is_wine:
-        try:
-            CalculatePopupWindowPosition = ctypes.windll.user32.CalculatePopupWindowPosition
-            CalculatePopupWindowPosition.argtypes = [POINT, SIZE, UINT, RECT, RECT]
-            CalculatePopupWindowPosition.restype = BOOL
+    def get_localized_path(path: str, config_home: str) -> str:
+        """
+        Get the localized display path for a Windows file system path.
+        Shows only drive letters without labels.
 
-        except AttributeError as e:
-            logger.error(
-                'win32 and not is_wine, but ctypes.windll.user32.CalculatePopupWindowPosition invalid',
-                exc_info=e
-            )
+        Args:
+            path: The path to localize
+            config_home: The home directory path
+        Returns:
+            Localized path as string
+        """
+        if not path:
+            return path
 
-        else:
-            CalculatePopupWindowPosition.argtypes = [
-                ctypes.POINTER(POINT),
-                ctypes.POINTER(SIZE),
-                UINT,
-                ctypes.POINTER(RECT),
-                ctypes.POINTER(RECT)
-            ]
+        # Determine start index based on if path starts with home directory
+        start_idx = len(config_home.split('\\')) if path.lower().startswith(config_home.lower()) else 0
 
-    SHGetLocalizedName = ctypes.windll.shell32.SHGetLocalizedName
-    SHGetLocalizedName.argtypes = [LPCWSTR, LPWSTR, UINT, ctypes.POINTER(ctypes.c_int)]
+        # Split path into components
+        components = normpath(path).split('\\')
+        display_components = []
+
+        # Process each path component
+        for i in range(start_idx, len(components)):
+            current_path = '\\'.join(components[:i + 1])
+
+            # Handle drive letter specially
+            if i == 0 and ':' in components[i]:
+                display_components.append(components[i])
+                continue
+
+            try:
+                # Get localized name info using shell API
+                pidl = shell.SHParseDisplayName(current_path, 0)[0]
+                name_info = shell.SHGetNameFromIDList(pidl, shellcon.SIGDN_NORMALDISPLAY)
+
+                if name_info:
+                    display_components.append(name_info)
+                else:
+                    display_components.append(components[i])
+
+            except (pythoncom.com_error, win32api.error):
+                # Fall back to original component name if localization fails
+                display_components.append(components[i])
+
+        return '\\'.join(display_components)
 
 
 class PreferencesDialog(tk.Toplevel):
@@ -307,15 +328,7 @@ class PreferencesDialog(tk.Toplevel):
         self.grab_set()
 
         # Ensure fully on-screen
-        if sys.platform == 'win32' and CalculatePopupWindowPosition:
-            position = RECT()
-            win32gui.GetWindowRect(win32gui.GetParent(self.winfo_id()))
-            if CalculatePopupWindowPosition(
-                POINT(parent.winfo_rootx(), parent.winfo_rooty()),
-                SIZE(position.right - position.left, position.bottom - position.top),  # type: ignore
-                0x10000, None, position
-            ):
-                self.geometry(f"+{position.left}+{position.top}")
+        ensure_on_screen(self, parent)
 
         # Set Log Directory
         self.logfile_loc = Path(config.app_dir_path / 'logs')
@@ -712,6 +725,7 @@ class PreferencesDialog(tk.Toplevel):
         self.lang = tk.StringVar(value=self.languages.get(config.get_str('language'), tr.tl('Default')))
         self.always_ontop = tk.BooleanVar(value=bool(config.get_int('always_ontop')))
         self.minimize_system_tray = tk.BooleanVar(value=config.get_bool('minimize_system_tray'))
+        self.disable_system_tray = tk.BooleanVar(value=config.get_bool('no_systray'))
         self.theme = tk.IntVar(value=config.get_int('theme'))
         self.theme_colors = [config.get_str('dark_text'), config.get_str('dark_highlight')]
         self.theme_prompts = [
@@ -829,7 +843,8 @@ class PreferencesDialog(tk.Toplevel):
                 appearance_frame,
                 # LANG: Appearance - Help/hint text for UI scaling selection
                 text=tr.tl('100 means Default{CR}Restart Required for{CR}changes to take effect!')
-            ).grid(column=3, padx=self.PADX, pady=self.PADY, sticky=tk.E, row=cur_row)
+            )  # E1111
+            self.ui_scaling_defaultis.grid(column=3, padx=self.PADX, pady=self.PADY, sticky=tk.E, row=cur_row)
 
         # Transparency slider
         ttk.Separator(appearance_frame, orient=tk.HORIZONTAL).grid(
@@ -888,13 +903,22 @@ class PreferencesDialog(tk.Toplevel):
             columnspan=3, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=row.get()
         )  # Appearance setting
 
-        if sys.platform == 'win32':
+        if sys.platform == 'win32' and not bool(config.get_int('no_systray')):
             nb.Checkbutton(
                 appearance_frame,
                 # LANG: Appearance option for Windows "minimize to system tray"
                 text=tr.tl('Minimize to system tray'),
                 variable=self.minimize_system_tray,
                 command=self.themevarchanged
+            ).grid(columnspan=3, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=row.get())  # Appearance setting
+
+        if sys.platform == 'win32':
+            nb.Checkbutton(
+                appearance_frame,
+                # LANG: Appearance option for Windows "Disable Systray"
+                text=tr.tl('Disable Systray'),
+                variable=self.disable_system_tray,
+                command=self.themevarchanged,
             ).grid(columnspan=3, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=row.get())  # Appearance setting
 
         nb.Label(appearance_frame).grid(sticky=tk.W)  # big spacer
@@ -965,11 +989,9 @@ class PreferencesDialog(tk.Toplevel):
             ).grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get())
 
             for plugin in enabled_plugins:
-                if plugin.name == plugin.folder:
-                    label = nb.Label(plugins_frame, text=plugin.name)
-
-                else:
-                    label = nb.Label(plugins_frame, text=f'{plugin.folder} ({plugin.name})')
+                label = nb.Label(plugins_frame,
+                                 text=plugin.name if plugin.name == plugin.folder
+                                 else f'{plugin.folder} ({plugin.name})')
 
                 label.grid(columnspan=2, padx=self.LISTX, pady=self.PADY, sticky=tk.W, row=row.get())
 
@@ -1098,27 +1120,9 @@ class PreferencesDialog(tk.Toplevel):
         entryfield['state'] = tk.NORMAL  # must be writable to update
         entryfield.delete(0, tk.END)
         if sys.platform == 'win32':
-            start = len(config.home.split('\\')) if pathvar.get().lower().startswith(config.home.lower()) else 0
-            display = []
-            components = normpath(pathvar.get()).split('\\')
-            buf = ctypes.create_unicode_buffer(MAX_PATH)
-            pidsRes = ctypes.c_int()  # noqa: N806 # Windows convention
-            for i in range(start, len(components)):
-                try:
-                    if (not SHGetLocalizedName('\\'.join(components[:i+1]), buf, MAX_PATH, ctypes.byref(pidsRes)) and
-                            win32api.LoadString(ctypes.WinDLL(expandvars(buf.value))._handle,
-                                                pidsRes.value, buf, MAX_PATH)):
-                        display.append(buf.value)
-
-                    else:
-                        display.append(components[i])
-
-                except Exception:
-                    display.append(components[i])
-
-            entryfield.insert(0, '\\'.join(display))
-
-        #                                                   None if path doesn't exist
+            localized_path = get_localized_path(pathvar.get(), config.home)
+            entryfield.insert(0, localized_path)
+        # None if path doesn't exist
         else:
             if pathvar.get().startswith(config.home):
                 entryfield.insert(0, '~' + pathvar.get()[len(config.home):])
@@ -1289,11 +1293,14 @@ class PreferencesDialog(tk.Toplevel):
         config.set('ui_transparency', self.transparency.get())
         config.set('always_ontop', self.always_ontop.get())
         config.set('minimize_system_tray', self.minimize_system_tray.get())
+        if self.disable_system_tray.get() != config.get_int('no_systray'):
+            self.req_restart = True
+        config.set('no_systray', self.disable_system_tray.get())
         config.set('theme', self.theme.get())
         config.set('dark_text', self.theme_colors[0])
         config.set('dark_highlight', self.theme_colors[1])
         theme.apply(self.parent)
-        if self.plugdir.get() != config.get('plugin_dir'):
+        if self.plugdir.get() != config.get_str('plugin_dir'):
             config.set(
                 'plugin_dir',
                 join(config.home_path, self.plugdir.get()[2:]) if self.plugdir.get().startswith(
@@ -1310,10 +1317,10 @@ class PreferencesDialog(tk.Toplevel):
         self._destroy()
         # Send to the Post Config if we updated the update branch or need to restart
         post_flags = {
-            'Update': True if self.curr_update_track != self.update_paths.get() else False,
+            'Update': self.curr_update_track != self.update_paths.get(),  # Just needs bool not true if else false
             'Track': self.update_paths.get(),
             'Parent': self,
-            'Restart_Req': True if self.req_restart else False
+            'Restart_Req': self.req_restart  # Simple Bool Needed
         }
         if self.callback:
             self.callback(**post_flags)
