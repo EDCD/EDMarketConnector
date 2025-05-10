@@ -6,10 +6,58 @@
       <description>Most recent changes with links to updates.</description>
       <!-- Windows -->
       <item>
-         <title>Pre-Release 5.13.0-rc1</title>
+         <title>Release 5.13.0</title>
          <description><![CDATA[<style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
 <p>We now test against, and package with, Python 3.11.</p>
 <p><strong>As a result, we do not support Windows 7, 8, or 8.1.</strong><br>
+<h2>Release 5.13.0</h2>
+<p>This release contains a significant refactoring away from ctypes code for interacting with the Windows API,
+establishment of a Common Code file and plugin, adds a timestamp check to discovered events, and more!</p>
+<p>This release adds the new <code>plugins/common_coreutils.py</code> plugin and <code>common_utils.py</code> core file. Developers
+can use this as an example of how to call one plugin from another.</p>
+<p>This release also removes the check for WiX-based installer versions of EDMC prior to 5.9.1.</p>
+<p><strong>Changes and Enhancements</strong></p>
+<ul>
+<li>Adds a check to the timestamp of all events before passing to Plugins</li>
+<li>Adds the new <code>--skip-timecheck</code> argument to disable the new timestamp checker</li>
+<li>Adds the ability to have EDMC iterate over all known CMDRs to keep Frontier Auth valid</li>
+<li>Adds the option to disable the Windows SysTray</li>
+<li>Adds some new options to the SysTray right-click menu</li>
+<li>Adds PowerPlayMerits and PowerPlayRank event support</li>
+<li>Adds a warning if the updater fails to initialize</li>
+<li>Updates the WinSparkle Updater</li>
+<li>Updates a number of type hints</li>
+<li>Updates a number of dependencies</li>
+<li>Updates a few internal references for stations for consistency</li>
+<li>Updates a confusing error when the CAPI API is out of date</li>
+<li>Updates the example journal_entry function in PLUGINS.md for current type hints</li>
+<li>Improves the detection of Wine for program compatibility</li>
+<li>Improves the detection of the current language for translation compatibility</li>
+<li>Minor efficiency and readability updates</li>
+<li>Reduces duplicate code by refactoring to common code files</li>
+<li>Removes the old check for WiX based installers to improve performance</li>
+<li>Removes a few unused functions that aren't part of the public API</li>
+<li>Refactors a significant amount of ctypes code to utilize pywin32</li>
+<li>Removes a number of assert statements for future compatibility</li>
+</ul>
+<p><strong>Bug Fixes</strong></p>
+<ul>
+<li>Fixes a bug where Inara Station and System links were broken</li>
+<li>Fixes a bug where directory paths starting with <code>~</code> would not be processed by the journal lock</li>
+<li>Fixes (and redoes) the Hotkey functionality on Windows</li>
+<li>Fixes a few typos</li>
+<li>Fixes a few calls from <code>config.get()</code> to their proper `get_x()</li>
+</ul>
+<p><strong>Plugin Developers</strong></p>
+<ul>
+<li>nb.Entry is deprecated, and is slated for removal in 6.0 or later. Please migrate to nb.EntryMenu</li>
+<li>nb.ColoredButton is deprecated, and is slated for removal in 6.0 or later. Please migrate to tk.Button</li>
+<li>Calling internal translations with <code>_()</code> is deprecated, and is slated for removal in 6.0 or later. Please migrate to importing <code>translations</code> and calling <code>translations.translate</code> or <code>translations.tl</code> directly</li>
+<li><code>Translations</code> as the translate system singleton is deprecated, and is slated for removal in 6.0 or later. Please migrate to the <code>translations</code> singleton</li>
+<li><code>help_open_log_folder()</code> is deprecated, and is slated for removal in 6.0 or later. Please migrate to open_folder()</li>
+<li><code>update_feed</code> is deprecated, and is slated for removal in 6.0 or later. Please migrate to <code>get_update_feed()</code></li>
+</ul>
+<hr>
 <h2>Release 5.13.0-rc1</h2>
 <p>This is a release candidate for 5.13.0. It has been pushed to the &quot;Beta&quot; track for updates!</p>
 <p>This release contains a significant refactoring away from ctypes code for interacting with the Windows API,
@@ -2798,7 +2846,7 @@ about this:
 <a href="https://issues.frontierstore.net/issue-detail/28638" rel="nofollow">PTS CAPI saying Commander is Docked after jumping to new system</a>.</p>
 </li>
 </ul>]]></description>
-         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F5.13.0-rc1/EDMarketConnector_Installer_5.13.0-rc1.exe" sparkle:os="windows" sparkle:version="5.13.0-rc1" length="0" type="application/x-ms-dos-executable" />
+         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F5.13.0/EDMarketConnector_Installer_5.13.0.exe" sparkle:os="windows" sparkle:version="5.13.0" length="0" type="application/x-ms-dos-executable" />
       </item>
    </channel>
 </rss>
