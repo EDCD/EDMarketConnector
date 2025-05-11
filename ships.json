@@ -39,6 +39,10 @@
         "hullMass": 210,
         "reserveFuelCapacity": 0.51
     },
+    "Cobra MkV": {
+        "hullMass": 150,
+        "reserveFuelCapacity": 0.49
+    },
     "Diamondback Explorer": {
         "hullMass": 260,
         "reserveFuelCapacity": 0.52
