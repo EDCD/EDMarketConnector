@@ -6,10 +6,30 @@
       <description>Most recent changes with links to updates.</description>
       <!-- Windows -->
       <item>
-         <title>Release 5.13.0</title>
+         <title>Release 5.13.1</title>
          <description><![CDATA[<style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
 <p>We now test against, and package with, Python 3.11.</p>
 <p><strong>As a result, we do not support Windows 7, 8, or 8.1.</strong><br>
+<h2>Release 5.13.1</h2>
+<p>This release fixes a bug with 5.13.0 that could cause the program to fail to launch if a non-English locale and English language pack were selected on Windows.</p>
+<p>This release also includes information for Cobra Mk V armor and modules, as well as the Human Extraction module.</p>
+<p><strong>Changes and Enhancements</strong></p>
+<ul>
+<li>Adds Cobra Mk V information</li>
+<li>Updates Translations</li>
+</ul>
+<p><strong>Bug Fixes</strong>
+Fixes a widely reported bug with 5.13.0 that could cause English-Language non-English locales to crash on start.</p>
+<p><strong>Plugin Developers</strong></p>
+<ul>
+<li>nb.Entry is deprecated, and is slated for removal in 6.0 or later. Please migrate to nb.EntryMenu</li>
+<li>nb.ColoredButton is deprecated, and is slated for removal in 6.0 or later. Please migrate to tk.Button</li>
+<li>Calling internal translations with <code>_()</code> is deprecated, and is slated for removal in 6.0 or later. Please migrate to importing <code>translations</code> and calling <code>translations.translate</code> or <code>translations.tl</code> directly</li>
+<li><code>Translations</code> as the translate system singleton is deprecated, and is slated for removal in 6.0 or later. Please migrate to the <code>translations</code> singleton</li>
+<li><code>help_open_log_folder()</code> is deprecated, and is slated for removal in 6.0 or later. Please migrate to open_folder()</li>
+<li><code>update_feed</code> is deprecated, and is slated for removal in 6.0 or later. Please migrate to <code>get_update_feed()</code></li>
+</ul>
+<hr>
 <h2>Release 5.13.0</h2>
 <p>This release contains a significant refactoring away from ctypes code for interacting with the Windows API,
 establishment of a Common Code file and plugin, adds a timestamp check to discovered events, and more!</p>
@@ -2846,7 +2866,7 @@ about this:
 <a href="https://issues.frontierstore.net/issue-detail/28638" rel="nofollow">PTS CAPI saying Commander is Docked after jumping to new system</a>.</p>
 </li>
 </ul>]]></description>
-         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F5.13.0/EDMarketConnector_Installer_5.13.0.exe" sparkle:os="windows" sparkle:version="5.13.0" length="0" type="application/x-ms-dos-executable" />
+         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F5.13.1/EDMarketConnector_Installer_5.13.1.exe" sparkle:os="windows" sparkle:version="5.13.1" length="0" type="application/x-ms-dos-executable" />
       </item>
    </channel>
 </rss>
