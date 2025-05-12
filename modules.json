@@ -104,6 +104,21 @@
     "cobramkiv_armour_reactive": {
         "mass": 27
     },
+    "cobramkv_armour_grade1": {
+        "mass": 0
+    },
+    "cobramkv_armour_grade2": {
+        "mass": 14
+    },
+    "cobramkv_armour_grade3": {
+        "mass": 27
+    },
+    "cobramkv_armour_mirrored": {
+        "mass": 27
+    },
+    "cobramkv_armour_reactive": {
+        "mass": 27
+    },
     "cutter_armour_grade1": {
         "mass": 0
     },
@@ -604,6 +619,9 @@
     },
     "hpt_heatsinklauncher_turret_tiny": {
         "mass": 1.3
+    },
+    "hpt_human_extraction_fixed_medium": {
+        "mass": 4
     },
     "hpt_minelauncher_fixed_medium": {
         "mass": 4
