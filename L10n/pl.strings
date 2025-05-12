@@ -1,3 +1,9 @@
+/* companion.py: Frontier CAPI data doesn't agree with latest Journal game location; In files: companion.py:245; */
+"Error: Frontier CAPI data out of sync" = "Błąd: Dane Frontier CAPI nie są zsynchronizowane";
+
+/* prefs.py: Appearance option for Windows "Disable Systray"; */
+"Disable Systray" = "Wyłącz zasobnik systemowy";
+
 /* edsm.py:Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:316; */
 "Send flight log and CMDR status to EDSM" = "Wyślij flight log i status gracza do EDSM";
 
