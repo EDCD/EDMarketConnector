@@ -636,11 +636,13 @@ class EDDN:
             return
 
         modules, ships = self.safe_modules_and_ships(data)
-        horizons: bool = capi_is_horizons(
+        horizons_1 = bool(data['commander']['capabilities']['Horizons'])
+        horizons_2: bool = capi_is_horizons(
             data['lastStarport'].get('economies', {}),
             modules,
             ships
         )
+        horizons = bool(horizons_1 or horizons_2)
         commodities: list[dict[str, Any]] = []
         for commodity in data['lastStarport'].get('commodities') or []:
             # Check 'marketable' and 'not prohibited'
@@ -771,13 +773,14 @@ class EDDN:
         modules, ships = self.safe_modules_and_ships(data)
 
         # Horizons flag - will hit at least Int_PlanetApproachSuite other than at engineer bases ("Colony"),
-        # prison or rescue Megaships, or under Pirate Attack etc
-        horizons: bool = capi_is_horizons(
+        # prison or rescue Megaships, or under Pirate Attack etc)
+        horizons_1 = bool(data['commander']['capabilities']['Horizons'])
+        horizons_2: bool = capi_is_horizons(
             data['lastStarport'].get('economies', {}),
             modules,
             ships
         )
-
+        horizons = bool(horizons_1 or horizons_2)
         to_search: Iterator[Mapping[str, Any]] = filter(
             lambda m: self.MODULE_RE.search(m['name']) and m.get('sku') in (None, HORIZONS_SKU)
                                                        and m['name'] != 'Int_PlanetApproachSuite',  # noqa: E131
@@ -837,13 +840,13 @@ class EDDN:
             return
 
         modules, ships = self.safe_modules_and_ships(data)
-
-        horizons: bool = capi_is_horizons(
+        horizons_1 = bool(data['commander']['capabilities']['Horizons'])
+        horizons_2: bool = capi_is_horizons(
             data['lastStarport'].get('economies', {}),
             modules,
             ships
         )
-
+        horizons = bool(horizons_1 or horizons_2)
         shipyard: list[Mapping[str, Any]] = sorted(
             itertools.chain(
                 (ship['name'].lower() for ship in (ships['shipyard_list'] or {}).values()),
