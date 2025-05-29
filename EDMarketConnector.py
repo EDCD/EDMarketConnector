@@ -1664,17 +1664,20 @@ class AppWindow:
 
         return f'file://localhost/{file_name}'
 
-    def system_url(self, system: str) -> str | None:
+    def system_url(self, system: str | None = None) -> str | None:
         """Dispatch a system URL to the configured handler."""
+        system_name = system if system else monitor.state['SystemName']
         return plug.invoke(
-            config.get_str('system_provider', default='EDSM'), 'EDSM', 'system_url', monitor.state['SystemName']
+            config.get_str('system_provider', default='EDSM'), 'EDSM', 'system_url', system_name
         )
 
-    def station_url(self, station: str) -> str | None:
+    def station_url(self, system: str | None = None, station: str | None = None) -> str | None:
         """Dispatch a station URL to the configured handler."""
+        station_name = station if station else monitor.state['StationName']
+        system_name = system if system else monitor.state['SystemName']
         return plug.invoke(
             config.get_str('station_provider', default='EDSM'), 'EDSM', 'station_url',
-            monitor.state['SystemName'], monitor.state['StationName']
+            system_name, station_name
         )
 
     def cooldown(self) -> None:

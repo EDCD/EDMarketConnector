@@ -151,19 +151,18 @@ plEAADs=
 
 
 # Main window clicks
-def system_url(system_name: str) -> str:
+def system_url(system_name: str | None = None) -> str:
     """
     Construct an appropriate EDSM URL for the provided system.
 
-    :param system_name: Will be overridden with `this.system_address` if that
-      is set.
+    :param system_name: Will use `this.system_address` if not set.
     :return: The URL, empty if no data was available to construct it.
     """
-    if this.system_address:
-        return requests.utils.requote_uri(f'https://www.edsm.net/en/system?systemID64={this.system_address}')
-
     if system_name:
         return requests.utils.requote_uri(f'https://www.edsm.net/en/system?systemName={system_name}')
+
+    if this.system_address:
+        return requests.utils.requote_uri(f'https://www.edsm.net/en/system?systemID64={this.system_address}')
 
     return ''
 

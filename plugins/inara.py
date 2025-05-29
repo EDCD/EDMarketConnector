@@ -160,18 +160,10 @@ if DEBUG:
     TARGET_URL = f'http://{edmc_data.DEBUG_WEBSERVER_HOST}:{edmc_data.DEBUG_WEBSERVER_PORT}/inara'
 
 
-# noinspection PyUnresolvedReferences
-def system_url(system_name: str) -> str:
-    """Get a URL for the current system."""
-    if this.system_address:
-        return requests.utils.requote_uri(f'https://inara.cz/elite/starsystem/'
-                                          f'?search={this.system_address}')
-
-    if system_name:
-        return requests.utils.requote_uri(f'https://inara.cz/elite/starsystem/'
-                                          f'?search={system_name}')
-
-    return ''
+def system_url(system_name: str | None = None) -> str:
+    """Get a URL for the current system or a provided system name."""
+    system = system_name if system_name else this.system_name
+    return requests.utils.requote_uri(f'https://inara.cz/elite/starsystem/?search={system}')
 
 
 def station_url(system_name: str, station_name: str) -> str:

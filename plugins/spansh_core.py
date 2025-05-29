@@ -140,17 +140,11 @@ def system_url(system_name: str) -> str:
     """
     Construct an appropriate spansh URL for the provided system.
 
-    :param system_name: Will be overridden with `this.system_address` if that
-      is set.
+    :param system_name: Will use `this.system_address` if not set.
     :return: The URL, empty if no data was available to construct it.
     """
-    if this.system_address:
-        return requests.utils.requote_uri(f'https://www.spansh.co.uk/system/{this.system_address}')
-
-    if system_name:
-        return requests.utils.requote_uri(f'https://www.spansh.co.uk/search/{system_name}')
-
-    return ''
+    system = system_name if system_name else this.system_name
+    return requests.utils.requote_uri(f'https://www.spansh.co.uk/search/{system}')
 
 
 def station_url(system_name: str, station_name: str) -> str:
