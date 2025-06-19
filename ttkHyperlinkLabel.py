@@ -106,23 +106,21 @@ class HyperlinkLabel(tk.Label or ttk.Label):  # type: ignore
 
             webbrowser.open(f'file://localhost/{file_name}')
 
-    def open_system(self, url: str):
-        """Open the Current System in the Selected Provider."""
-        opener = plug.invoke(url, 'EDSM', 'system_url', monitor.state['SystemName'])
-        if opener:
-            return webbrowser.open(opener)
+    def open_system(self, url: str, system: str | None = None):
+        """Open a System in the Selected Provider. Defaults to the current System."""
+        system_name = system if system else monitor.state['SystemName']
+        opener = plug.invoke(url, 'EDSM', 'system_url', system_name)
+        return webbrowser.open(opener) if opener else None
 
-    def open_station(self, url: str):
-        """Open the Current Station in the Selected Provider."""
-        opener = plug.invoke(
-            url, 'EDSM', 'station_url',
-            monitor.state['SystemName'], monitor.state['StationName']
-        )
-        if opener:
-            return webbrowser.open(opener)
+    def open_station(self, url: str, system: str | None = None, station: str | None = None, ):
+        """Open a Station in the Selected Provider. Defaults to the current Station."""
+        system_name = system if system else monitor.state['SystemName']
+        station_name = station if station else monitor.state['StationName']
+        opener = plug.invoke(url, 'EDSM', 'station_url', system_name, station_name)
+        return webbrowser.open(opener) if opener else None
 
     def configure(  # noqa: CCR001
-        self, cnf: dict[str, Any] | None = None, **kw: Any
+            self, cnf: dict[str, Any] | None = None, **kw: Any
     ) -> dict[str, tuple[str, str, str, Any, Any]] | None:
         """Change cursor and appearance depending on state and text."""
         # This class' state
