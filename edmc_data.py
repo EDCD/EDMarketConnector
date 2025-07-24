@@ -504,6 +504,7 @@ ship_name_map = {
     'mamba':                        'Mamba',
     'mandalay':                     'Mandalay',
     'orca':                         'Orca',
+    'panthermkii':                  'Panther Clipper Mk II',
     'python':                       'Python',
     'python_nx':                    'Python Mk II',
     'scout':                        'Taipan Fighter',
