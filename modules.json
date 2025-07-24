@@ -3476,16 +3476,16 @@
         "mass": 0
     },
     "panthermkii_armour_grade2": {
-        "mass": 14
+        "mass": 75
     },
     "panthermkii_armour_grade3": {
-        "mass": 27
+        "mass": 150
     },
     "panthermkii_armour_mirrored": {
-        "mass": 27
+        "mass": 150
     },
     "panthermkii_armour_reactive": {
-        "mass": 27
+        "mass": 150
     },
     "python_armour_grade1": {
         "mass": 0
