@@ -15,7 +15,7 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - name: Setting global variables
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         id: var
         with:
           script: |
