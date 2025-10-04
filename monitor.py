@@ -720,11 +720,18 @@ class EDLogs(FileSystemEventHandler):
                 data_dict = {}
                 for module in entry['Modules']:
                     if module.get('Slot') == 'FuelTank':
-                        cap = module['Item'].split('size')
-                        cap = cap[1].split('_')
-                        cap = 2 ** int(cap[0])
-                        ship = ship_name_map.get(entry["Ship"], entry["Ship"])
-                        fuel = {'Main': cap, 'Reserve': ships[ship]['reserveFuelCapacity']}
+                        fuel = self.state["FuelCapacity"]
+
+                        if fuel["Main"] is None or fuel["Reserve"] is None:
+                            cap = module['Item'].split('size')
+                            cap = cap[1].split('_')
+                            cap = 2 ** int(cap[0])
+                            ship = ship_name_map.get(entry["Ship"], entry["Ship"])
+                            fuel = {
+                                'Main': cap,
+                                'Reserve': ships.get(ship, {}).get('reserveFuelCapacity', 0.25)
+                            }
+
                         data_dict.update({"FuelCapacity": fuel})
                 data_dict.update({
                     'Ship': entry["Ship"],
