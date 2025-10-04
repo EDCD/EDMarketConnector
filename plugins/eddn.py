@@ -183,7 +183,7 @@ class EDDNSender:
             f"First queue run scheduled for {self.eddn.REPLAY_STARTUP_DELAY}ms from now"
         )
         if not os.getenv("EDMC_NO_UI"):
-            self.eddn.parent.after(self.eddn.REPLAY_STARTUP_DELAY, self.queue_check_and_send, True)
+            self.eddn.parent.winfo_toplevel().after(self.eddn.REPLAY_STARTUP_DELAY, self.queue_check_and_send, True)
 
     def sqlite_queue_v1(self) -> sqlite3.Connection:
         """
