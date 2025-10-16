@@ -28,7 +28,7 @@ def get_arg(call: ast.Call) -> str:
 
     arg = call.args[0]
     if isinstance(arg, ast.Constant):
-        return arg.value
+        return str(arg.value)
     if isinstance(arg, ast.Name):
         return f"VARIABLE! CHECK CODE! {arg.id}"
     return f"Unknown! {type(arg)=} {ast.dump(arg)} ||| {ast.unparse(arg)}"
