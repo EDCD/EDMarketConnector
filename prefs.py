@@ -209,7 +209,7 @@ if sys.platform == 'win32':
             config_home: The home directory path
         Returns:
             Localized path as string
-        """
+        """  # noqa: D205, D407
         if not path:
             return path
 

@@ -123,12 +123,12 @@ class Dashboard(FileSystemEventHandler):
 
         if self.observer:
             logger.debug('Calling self.observer.stop()')
-            self.observer.stop()
+            self.observer.stop()  # type: ignore
             logger.debug('Done')
 
         if self.observer:
             logger.debug('Joining self.observer...')
-            self.observer.join()
+            self.observer.join()  # type: ignore
             logger.debug('Done')
             self.observer = None  # type: ignore
 
