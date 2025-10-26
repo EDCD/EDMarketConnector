@@ -6,6 +6,24 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
       in the source (not distributed with the Windows installer) for the
       currently used version.
 ---
+Release 5.13.2
+===
+This release contains an update to a series of behind-the-scenes tools, as well as adding Corsair, Cobra Mk V, 
+Type-11, and Panther CLipper Mk II information.
+
+**Changes and Enhancements**
+* Adds Missing Ship Information
+* Updates Dependencies
+* Minor Logic Improvements for Journal Monitoring
+
+**Plugin Developers**
+* nb.Entry is deprecated, and is slated for removal in 6.0 or later. Please migrate to nb.EntryMenu
+* nb.ColoredButton is deprecated, and is slated for removal in 6.0 or later. Please migrate to tk.Button
+* Calling internal translations with `_()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to importing `translations` and calling `translations.translate` or `translations.tl` directly
+* `Translations` as the translate system singleton is deprecated, and is slated for removal in 6.0 or later. Please migrate to the `translations` singleton
+* `help_open_log_folder()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to open_folder()
+* `update_feed` is deprecated, and is slated for removal in 6.0 or later. Please migrate to `get_update_feed()`
+
 Release 5.13.1
 ===
 This release fixes a bug with 5.13.0 that could cause the program to fail to launch if a non-English locale 
