@@ -2248,7 +2248,7 @@ sys.path: {sys.path}'''
         msg = tk.messagebox.askyesno(
             title=title, message=message, detail=detail, icon=tkinter.messagebox.ERROR, type=tkinter.messagebox.YESNO,
             parent=root
-        )
+        )  # type: ignore
         if msg:
             webbrowser.open(
                 "https://github.com/EDCD/EDMarketConnector/issues/new?"
