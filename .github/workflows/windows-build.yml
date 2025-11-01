@@ -62,7 +62,7 @@ jobs:
             mv "../EDMarketConnector-release-${{ needs.variables.outputs.sem_ver }}.tar.gz" .
 
       - name: Upload build files
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: built-files-linux
           path: |
@@ -131,7 +131,7 @@ jobs:
             Get-ChildItem -Path . -Filter "EDMarketConnector_Installer_*.exe" | Rename-Item -NewName {"EDMarketConnector_Installer_Unsigned_$($_.Name -replace '^EDMarketConnector_Installer_', '')"}
 
       - name: Upload build files
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: built-files-windows
           path: |
@@ -142,7 +142,7 @@ jobs:
     needs: [ windows_build, linux_build ]
     steps:
       - name: Merge Artifacts
-        uses: actions/upload-artifact/merge@v4
+        uses: actions/upload-artifact/merge@v5
         with:
           name: Built files
           pattern: built-files-*
