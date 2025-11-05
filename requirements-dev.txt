@@ -17,7 +17,7 @@ flake8-use-fstring==1.4
 mypy==1.18.2
 pep8-naming==0.15.1
 safety==3.6.2
-types-requests==2.32.0.20250328
+types-requests==2.32.4.20250913
 types-setuptools==80.9.0.20250822
 
 # Code formatting tools
