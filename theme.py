@@ -35,11 +35,13 @@ if sys.platform == 'win32':
     from ctypes.wintypes import DWORD, LPCVOID, LPCWSTR
     import win32gui
     AddFontResourceEx = ctypes.windll.gdi32.AddFontResourceExW
-    AddFontResourceEx.restypes = [LPCWSTR, DWORD, LPCVOID]  # type: ignore
+    AddFontResourceEx.argtypes = [LPCWSTR, DWORD, LPCVOID]
+    AddFontResourceEx.restype = ctypes.c_int
     FR_PRIVATE = 0x10
     FR_NOT_ENUM = 0x20
-    font_path = config.respath_path / 'EUROCAPS.TTF'
-    AddFontResourceEx(str(font_path), FR_PRIVATE, 0)
+    font_path = str(config.respath_path / 'EUROCAPS.TTF')
+    if not AddFontResourceEx(font_path, FR_PRIVATE, None):
+        raise RuntimeError(f"Failed to load font {font_path}")
 
 elif sys.platform == 'linux':
     # pyright: reportUnboundVariable=false
