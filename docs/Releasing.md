@@ -389,7 +389,7 @@ When changing the Python version (Major.Minor.Patch) used:
 1. Any version change:
 
    1. `ChangeLog.md` - The `We now test against, and package with, Python
-       M.m.P.` line.
+       M.m.` line.
 
 1. Major or Minor level changes:
 
