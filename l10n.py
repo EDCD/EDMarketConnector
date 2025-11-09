@@ -262,17 +262,17 @@ def _wszarray_to_list(array):
 class _Locale:
     """Locale holds a few utility methods to convert data to and from localized versions."""
 
-    # DEPRECATED: Migrate to _Locale.string_from_number. Will remove in 6.0 or later.
+    @warnings.deprecated("Migrate to _Locale.string_from_number. Will remove in 6.0 or later.")
     def stringFromNumber(self, number: float | int, decimals: int | None = None) -> str:  # noqa: N802
         warnings.warn('use _Locale.string_from_number instead.', DeprecationWarning, stacklevel=2)
         return self.string_from_number(number, decimals)  # type: ignore
 
-    # DEPRECATED: Migrate to _Locale.number_from_string. Will remove in 6.0 or later.
+    @warnings.deprecated("Migrate to _Locale.number_from_string. Will remove in 6.0 or later.")
     def numberFromString(self, string: str) -> int | float | None:  # noqa: N802
         warnings.warn('use _Locale.number_from_string instead.', DeprecationWarning, stacklevel=2)
         return self.number_from_string(string)
 
-    # DEPRECATED: Migrate to _Locale.preferred_languages. Will remove in 6.0 or later.
+    @warnings.deprecated("Migrate to _Locale.preferred_languages. Will remove in 6.0 or later.")
     def preferredLanguages(self) -> Iterable[str]:  # noqa: N802
         warnings.warn('use _Locale.preferred_languages instead.', DeprecationWarning, stacklevel=2)
         return self.preferred_languages()
@@ -354,13 +354,10 @@ Locale = _Locale()
 translations = Translations()
 
 
-# DEPRECATED: Migrate to `translations`. Will be removed in 6.0 or later.
-# 'Translations' singleton is deprecated.
+@warnings.deprecated("Migrate to `translations`. Will be removed in 6.0 or later.")
 # Begin Deprecation Zone
 class _Translations(Translations):
     def __init__(self):
-        warnings.warn('Translations and _Translations() are deprecated. '
-                      'Please use translations and Translations() instead.', DeprecationWarning, stacklevel=2)
         super().__init__()
 
 

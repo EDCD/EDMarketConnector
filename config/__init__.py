@@ -335,6 +335,7 @@ class AbstractConfig(abc.ABC):
 
         return None
 
+    @warnings.deprecated("get() is Deprecated. use the specific getter for your type. Will remove in 6.0")
     def get(
         self, key: str,
         default: list | str | bool | int | None = None
@@ -347,9 +348,6 @@ class AbstractConfig(abc.ABC):
         :raises OSError: On Windows, if a Registry error occurs.
         :return: The data or the default.
         """
-        # DEPRECATED: Migrate to specific type getters. Will remove in 6.0 or later.
-        warnings.warn('get is Deprecated. use the specific getter for your type', DeprecationWarning, stacklevel=2)
-
         if (a_list := self._suppress_call(self.get_list, ValueError, key, default=None)) is not None:
             return a_list
 
@@ -399,6 +397,7 @@ class AbstractConfig(abc.ABC):
         """
         raise NotImplementedError
 
+    @warnings.deprecated("Migrate to get_int. Will remove in 6.0 or later.")
     def getint(self, key: str, *, default: int = 0) -> int:
         """
         Getint is a Deprecated getter method.
@@ -406,9 +405,6 @@ class AbstractConfig(abc.ABC):
         See get_int for its replacement.
         :raises OSError: On Windows, if a Registry error occurs.
         """
-        # DEPRECATED: Migrate to get_int. Will remove in 6.0 or later.
-        warnings.warn('getint is Deprecated. Use get_int instead', DeprecationWarning, stacklevel=2)
-
         return self.get_int(key, default=default)
 
     @abstractmethod
@@ -464,18 +460,20 @@ class AbstractConfig(abc.ABC):
         """Close this config and release any associated resources."""
         raise NotImplementedError
 
-# DEPRECATED: Password system doesn't do anything. Will remove in 6.0 or later.
+    @warnings.deprecated("Password system doesn't do anything. Will remove in 6.0 or later.")
     def get_password(self, account: str) -> None:
         """Legacy password retrieval."""
-        warnings.warn("password subsystem is no longer supported", DeprecationWarning, stacklevel=2)
+        pass
 
+    @warnings.deprecated("Password system doesn't do anything. Will remove in 6.0 or later.")
     def set_password(self, account: str, password: str) -> None:
         """Legacy password setting."""
-        warnings.warn("password subsystem is no longer supported", DeprecationWarning, stacklevel=2)
+        pass
 
+    @warnings.deprecated("Password system doesn't do anything. Will remove in 6.0 or later.")
     def delete_password(self, account: str) -> None:
         """Legacy password deletion."""
-        warnings.warn("password subsystem is no longer supported", DeprecationWarning, stacklevel=2)
+        pass
 # End Dep Zone
 
 
@@ -509,10 +507,8 @@ def get_update_feed() -> str:
     return 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml'
 
 
-# DEPRECATED: Migrate to get_update_feed(). Will remove in 6.0 or later.
+@warnings.deprecated("Migrate to get_update_feed(). Will remove in 6.0 or later.")
 def __getattr__(name: str):
     if name == 'update_feed':
-        warnings.warn('update_feed is deprecated, and will be removed in 6.0 or later. '
-                      'Please migrate to get_update_feed()', DeprecationWarning, stacklevel=2)
         return get_update_feed()
     raise AttributeError(name=name)
