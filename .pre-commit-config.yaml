@@ -7,7 +7,7 @@ repos:
 #   - id: identity
 
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: 'v4.1.0'
+    rev: 'v6.0.0'
     hooks:
       - id: check-merge-conflict 
       - id: debug-statements 
@@ -21,7 +21,7 @@ repos:
         #      - id: autopep8
 
 -   repo: https://github.com/PyCQA/flake8
-    rev: 7.1.2
+    rev: 7.3.0
     hooks:
     -   id: flake8
 
@@ -36,7 +36,7 @@ repos:
 # mypy - static type checking
 # mypy --follow-imports skip <file>
 -   repo: https://github.com/pre-commit/mirrors-mypy
-    rev: 'v1.15.0'
+    rev: 'v1.18.2'
     hooks:
       - id: mypy
         # verbose: true
@@ -58,7 +58,7 @@ repos:
 
 # safety.exe check -r requirements.txt
 -   repo: https://github.com/Lucas-C/pre-commit-hooks-safety
-    rev: 'v1.4.0'
+    rev: 'v1.4.2'
     hooks:
       - id: python-safety-dependencies-check 
         entry: safety

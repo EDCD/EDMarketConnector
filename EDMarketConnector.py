@@ -281,7 +281,7 @@ if __name__ == '__main__':  # noqa: C901
                         # Get thread and process IDs
                         _, process_id = win32process.GetWindowThreadProcessId(hwnd)
                     # Get the process handle
-                        return win32api.OpenProcess(win32con.PROCESS_ALL_ACCESS, False, process_id)
+                        return win32api.OpenProcess(win32con.PROCESS_QUERY_LIMITED_INFORMATION, False, process_id)
                     except Exception:
                         return None
 
