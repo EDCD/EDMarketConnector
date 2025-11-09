@@ -29,6 +29,7 @@ import pathlib
 import re
 import sqlite3
 import tkinter as tk
+import warnings
 from platform import system
 from textwrap import dedent
 from threading import Lock
@@ -221,9 +222,9 @@ class EDDNSender:
 
         return db_conn
 
+    @warnings.deprecated("Legacy files no longer used as of 5.6.0. Will remove in 6.0 or later.")
     def convert_legacy_file(self):
         """Convert a legacy file's contents into the sqlite3 db."""
-        # DEPRECATED: Legacy files no longer used as of 5.6.0. Will remove in 6.0 or later.
         filename = config.app_dir_path / 'replay.jsonl'
         if not filename.exists():
             return

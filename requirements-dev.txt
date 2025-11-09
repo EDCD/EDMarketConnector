@@ -4,39 +4,38 @@
 setuptools==80.9.0
 
 # Static analysis tools
-flake8==7.2.0
+flake8==7.3.0
 flake8-annotations-coverage==0.0.6
 flake8-cognitive-complexity==0.1.0
-flake8-comprehensions==3.16.0
+flake8-comprehensions==3.17.0
 flake8-docstrings==1.7.0
 flake8-json==24.4.0
 flake8-noqa==1.4.0
-flake8-polyfill==1.0.2
 flake8-use-fstring==1.4
 
 mypy==1.18.2
 pep8-naming==0.15.1
-safety==3.6.2
-types-requests==2.32.0.20250328
+safety==3.7.0
+types-requests==2.32.4.20250913
 types-setuptools==80.9.0.20250822
 
 # Code formatting tools
 autopep8==2.3.2
 
 # Git pre-commit checking
-pre-commit==4.3.0
+pre-commit==4.4.0
 
 # HTML changelogs
-mistune==3.1.3
+mistune==3.1.4
 
 # Packaging
 # We only need py2exe on windows.
-py2exe==0.13.0.2; sys_platform == 'win32'
+py2exe==0.14.0.0; sys_platform == 'win32'
 
 # Testing
-pytest==8.4.2
+pytest==9.0.0
 pytest-cov==7.0.0  # Pytest code coverage support
-coverage[toml]==7.11.0 # pytest-cov dep. This is here to ensure that it includes TOML support for pyproject.toml configs
+coverage[toml]==7.11.2 # pytest-cov dep. This is here to ensure that it includes TOML support for pyproject.toml configs
 coverage-conditional-plugin==0.9.0
 
 
