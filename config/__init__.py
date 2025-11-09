@@ -82,37 +82,36 @@ def git_shorthash_from_head() -> str | None:
     """
     Determine short hash for current git HEAD.
 
-    Includes `.DIRTY` if any changes have been made from HEAD
+    Includes `.DIRTY` if any changes have been made from HEAD.
 
     :return: str | None: None if we couldn't determine the short hash.
     """
-    shorthash: str | None = None
-
     try:
-        git_cmd = subprocess.Popen(
-            "git rev-parse --short HEAD".split(),
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
+        result = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            capture_output=True,
+            text=True,
+            check=True,
         )
-        out, err = git_cmd.communicate()
-
+        shorthash = result.stdout.strip()
     except (subprocess.CalledProcessError, FileNotFoundError) as e:
         logger.info(f"Couldn't run git command for short hash: {e!r}")
+        return None
 
-    else:
-        shorthash = out.decode().rstrip('\n')
-        if re.match(r'^[0-9a-f]{7,}$', shorthash) is None:
-            logger.error(f"'{shorthash}' doesn't look like a valid git short hash, forcing to None")
-            shorthash = None
+    if not re.fullmatch(r"[0-9a-f]{7,}", shorthash):
+        logger.error(f"'{shorthash}' doesn't look like a valid git short hash, forcing to None")
+        return None
 
-    if shorthash is not None:
-        with contextlib.suppress(Exception):
-            result = subprocess.run('git diff --stat HEAD'.split(), capture_output=True)
-            if len(result.stdout) > 0:
-                shorthash += '.DIRTY'
-
-            if len(result.stderr) > 0:
-                logger.warning(f'Data from git on stderr:\n{str(result.stderr)}')
+    with contextlib.suppress(Exception):
+        diff_result = subprocess.run(
+            ["git", "diff", "--stat", "HEAD"],
+            capture_output=True,
+            check=True
+        )
+        if diff_result.stdout:
+            shorthash += ".DIRTY"
+        if diff_result.stderr:
+            logger.warning(f"Data from git on stderr:\n{diff_result.stderr.decode()}")
 
     return shorthash
 
