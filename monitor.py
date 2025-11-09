@@ -67,7 +67,7 @@ class EDLogs(FileSystemEventHandler):
     def __init__(self) -> None:
         # TODO(A_D): A bunch of these should be switched to default values (eg '' for strings) and no longer be Optional
         FileSystemEventHandler.__init__(self)  # futureproofing - not need for current version of watchdog
-        self.root: 'tkinter.Tk' = None  # type: ignore # Don't use Optional[] - mypy thinks no methods
+        self.root: tkinter.Tk = None  # type: ignore # Don't use Optional[] - mypy thinks no methods
         self.currentdir: str | None = None  # The actual logdir that we're monitoring
         self.logfile: str | None = None
         self.observer: BaseObserver | None = None
@@ -188,7 +188,7 @@ class EDLogs(FileSystemEventHandler):
             },
         }
 
-    def start(self, root: 'tkinter.Tk') -> bool:  # noqa: CCR001
+    def start(self, root: tkinter.Tk) -> bool:  # noqa: CCR001
         """
         Start journal monitoring.
 

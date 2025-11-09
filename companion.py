@@ -821,7 +821,7 @@ class Session:
                 capi_data = CAPIData(capi_json, capi_host, capi_endpoint, monitor.cmdr)
                 self.capi_raw_data.record_endpoint(
                     capi_endpoint, r.content.decode(encoding='utf-8'),
-                    datetime.datetime.utcnow()
+                    datetime.datetime.now(datetime.timezone.utc)
                 )
 
             except requests.ConnectionError as e:

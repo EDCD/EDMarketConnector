@@ -1637,7 +1637,7 @@ updated to using Python 3.9.8.
     - When the new option is not active, the application will minimize to the 
       taskbar as normal.
 
-Bug Fixex
+Bug Fixes
 ---
 
 * If a CAPI query failed in such a way that no `requests.Response` object 
