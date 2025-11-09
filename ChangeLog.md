@@ -6,6 +6,30 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
       in the source (not distributed with the Windows installer) for the
       currently used version.
 ---
+Release 5.14.0
+===
+
+This is the WORK IN PROGRESS changelog for upcoming release 5.14. All features are subject to change.
+
+**Changes and Enhancements**
+* Updated Python minimum version to 3.13.
+* Updated a number of under-the-hood dependencies
+* Updated WinSparkle updater
+* Updated EDMC:// protocol handler to use process handles with least-privilege access for improved security and reliability.
+* Updated prototyping for proper 32/64-bit font loading
+* Updated WndProc callbacks for proper 32/64-bit handling
+* Changed some functions to use non-deprecated alternatives
+* Set new deprecation warnings using Python 3.13's new Deprecation decorator.
+* Fixed a bug where "en" would not be included as a valid language and raise a KeyError
+
+**Plugin Developers**
+* nb.Entry is deprecated, and is slated for removal in 6.0 or later. Please migrate to nb.EntryMenu
+* nb.ColoredButton is deprecated, and is slated for removal in 6.0 or later. Please migrate to tk.Button
+* Calling internal translations with `_()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to importing `translations` and calling `translations.translate` or `translations.tl` directly
+* `Translations` as the translate system singleton is deprecated, and is slated for removal in 6.0 or later. Please migrate to the `translations` singleton
+* `help_open_log_folder()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to open_folder()
+* `update_feed` is deprecated, and is slated for removal in 6.0 or later. Please migrate to `get_update_feed()`
+
 Release 5.13.2
 ===
 This release contains an update to a series of behind-the-scenes tools, as well as adding Corsair, Cobra Mk V, 
