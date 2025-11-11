@@ -9,7 +9,7 @@ import zlib
 from http import server
 from typing import Any, Callable, Literal
 from urllib.parse import parse_qs
-import config
+from config import config
 from EDMCLogging import get_main_logger
 
 logger = get_main_logger()
