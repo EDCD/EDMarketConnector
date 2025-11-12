@@ -827,3 +827,6 @@
 
 /* ttkHyperlinkLabel.py: Copy the Inara SLEF Format of the active ship to the clipboard; */
 "Copy Inara SLEF" = "Copy Inara SLEF";
+
+/* edastro_core.py: Settings>EDAstro - Label on checkbox for 'send data'; */
+"Send data to EDAstro" = "Send data to EDAstro";

@@ -106,7 +106,7 @@ def export(data, filename=None) -> None:  # noqa: C901, CCR001
             else:
                 name = module['name']  # type: ignore
 
-            if name == 'Frame Shift Drive' or name == 'Frame Shift Drive (SCO)':
+            if name in ['Frame Shift Drive', 'Frame Shift Drive (SCO)']:
                 fsd = module  # save for range calculation
 
                 if mods.get('OutfittingFieldType_FSDOptimalMass'):
