@@ -51,13 +51,10 @@ class Label(ttk.Label):
     """Custom ttk.Label class to fix some display issues."""
 
     def __init__(self, master: ttk.Frame | None = None, **kw):
-        style = ttk.Style()
-        if sys.platform == 'win32':
-            custom_style = 'nb.TLabel'  # Create or update a style to emulate the tk.Label colors
-            style.configure(custom_style, foreground=PAGEFG, background=PAGEBG)
-        else:
-            custom_style = 'TLabel'  # Use the platform default ttk style
-        kw.setdefault('style', custom_style)
+        kw['foreground'] = kw.pop('foreground', PAGEFG if sys.platform == 'win32'
+                                  else ttk.Style().lookup('TLabel', 'foreground'))
+        kw['background'] = kw.pop('background', PAGEBG if sys.platform == 'win32'
+                                  else ttk.Style().lookup('TLabel', 'background'))
         super().__init__(master, **kw)
 
 
