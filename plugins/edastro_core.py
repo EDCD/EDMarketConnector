@@ -52,6 +52,7 @@ class This:
             "PendingDecommission",
             "DockingAccess",
             "FuelLevel",
+            "Crew",
         ],
         "CarrierJumpRequest": [
             "timestamp",
@@ -59,7 +60,23 @@ class This:
             "SystemName",
             "SystemAddress",
             "CarrierID",
+            "Body",
+            "BodyID"
+            "DepartureTime"
         ],
+        "ScanOrganic": [
+            "timestamp",
+            "ScanType",
+            "Genus_Localised",
+            "Species_Localised",
+            "Genus",
+            "event",
+            "Body",
+            "Species",
+            "Variant",
+            "SystemAddress",
+            "Variant_Localised",
+        ]
     }
 
     def __init__(self):
@@ -207,7 +224,7 @@ def journal_entry(
     :param state: `monitor.state`
     :return: None if no error, else an error string.
     """
-    if this.log and entry["event"] in ["CarrierStats", "CarrierJumpRequest"]:
+    if this.log and entry["event"] in ["CarrierStats", "CarrierJumpRequest", "ScanOrganic"]:
         edastro_update(system, entry, state)
 
     return None
