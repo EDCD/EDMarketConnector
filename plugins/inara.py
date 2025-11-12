@@ -113,11 +113,11 @@ class This:
         self.timer_run = True
 
         # Main window clicks
-        self.system_link: tk.Widget = None  # type: ignore
+        self.system_link: ttk.Widget = None  # type: ignore
         self.system_name: str | None = None  # type: ignore
         self.system_address: str | None = None  # type: ignore
         self.system_population: int | None = None
-        self.station_link: tk.Widget = None  # type: ignore
+        self.station_link: ttk.Widget = None  # type: ignore
         self.station_name = None
         self.station_marketid = None
 

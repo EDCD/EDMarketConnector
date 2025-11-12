@@ -2052,7 +2052,7 @@ def show_killswitch_poppup(root=None):
             idx += 1
         idx += 1
 
-    ok_button = tk.Button(frame, text="Ok", command=tl.destroy)
+    ok_button = ttk.Button(frame, text="Ok", command=tl.destroy)
     ok_button.grid(columnspan=2, sticky=tk.EW)
 
 
