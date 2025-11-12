@@ -194,6 +194,12 @@ if __name__ == '__main__':  # noqa: C901
         help='Skips the Time Delta check for processed events',
         action='store_true'
     )
+
+    parser.add_argument(
+        '--skip-journallock',
+        help='Allows EDMC to continue even if journal lock could not be acquired',
+        action='store_true',
+    )
     ###########################################################################
 
     args: argparse.Namespace = parser.parse_args()
@@ -337,6 +343,12 @@ if __name__ == '__main__':  # noqa: C901
                 # Ref: <https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-enumwindows>
                 win32gui.EnumWindows(enumwindowsproc, 0)
 
+    def skip_journallock_popup():
+        """Create the "skipping Journal Lock" popup."""
+        from tkinter import messagebox
+        lockmsg = "Ignoring failed Journal Lock. Continuing at your own risk.\nConsider also using a debug sender."
+        messagebox.showwarning(title=appname, message=lockmsg)
+
     def already_running_popup():
         """Create the "already running" popup."""
         from tkinter import messagebox
@@ -352,9 +364,15 @@ if __name__ == '__main__':  # noqa: C901
 
     handle_edmc_callback_or_foregrounding()
 
-    if locked == JournalLockResult.ALREADY_LOCKED:
-        # There's a copy already running.
+    if locked == JournalLockResult.ALREADY_LOCKED and args.skip_journallock:
+        # There may be a copy already running. We are intentionally ignoring it.
+        logger.info("Intentionally skipping Journal Lock check. This may have unintended consequences")
+        # To be sure the user knows, we need a popup
+        if not args.edmc:
+            skip_journallock_popup()
 
+    if locked == JournalLockResult.ALREADY_LOCKED and not args.skip_journallock:
+        # There's a copy already running.
         logger.info("An EDMarketConnector.exe process was already running, exiting.")
 
         # To be sure the user knows, we need a popup
