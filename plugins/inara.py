@@ -122,11 +122,11 @@ class This:
         self.station_marketid = None
 
         # Prefs UI
-        self.log: 'tk.IntVar'
+        self.log: tk.IntVar
         self.log_button: nb.Checkbutton
         self.label: HyperlinkLabel
         self.apikey: nb.EntryMenu
-        self.apikey_label: tk.Label
+        self.apikey_label: ttk.Label
 
         self.events: dict[Credentials, Deque[Event]] = defaultdict(deque)
         self.event_lock: Lock = threading.Lock()  # protects events, for use when rewriting events
@@ -1610,7 +1610,7 @@ def handle_api_error(data: Mapping[str, Any], status: int, reply: dict[str, Any]
     """
     error_message = reply['header'].get('eventStatusText', "")
     logger.warning(f'Inara\t{status} {error_message}')
-    logger.debug(f'JSON data:\n{json.dumps(data, indent=2, separators = (",", ": "))}')
+    logger.debug(f'JSON data:\n{json.dumps(data, indent=2, separators=(",", ": "))}')
     # LANG: INARA API returned some kind of error (error message will be contained in {MSG})
     plug.show_error(tr.tl('Error: Inara {MSG}').format(MSG=error_message))
 

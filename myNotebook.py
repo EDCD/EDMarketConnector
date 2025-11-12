@@ -41,23 +41,23 @@ class Frame(ttk.Frame):
     """Custom ttk.Frame class to fix some display issues."""
 
     def __init__(self, master: ttk.Notebook | None = None, **kw):
-        if sys.platform == 'win32':
-            ttk.Frame.__init__(self, master, style='nb.TFrame', **kw)
-            ttk.Frame(self).grid(pady=5)  # top spacer
-        else:
-            ttk.Frame.__init__(self, master, **kw)
-            ttk.Frame(self).grid(pady=5)  # top spacer
-        self.configure(takefocus=1)		# let the frame take focus so that no particular child is focused
+        style = 'nb.TFrame' if sys.platform == 'win32' else None
+        super().__init__(master, style=style, **kw)  # type: ignore
+        ttk.Frame(self).grid(pady=5)  # Top spacer
+        self.configure(takefocus=1)  # let the frame take focus so that no particular child is focused
 
 
-class Label(tk.Label):
-    """Custom tk.Label class to fix some display issues."""
+class Label(ttk.Label):
+    """Custom ttk.Label class to fix some display issues."""
 
     def __init__(self, master: ttk.Frame | None = None, **kw):
-        kw['foreground'] = kw.pop('foreground', PAGEFG if sys.platform == 'win32'
-                                  else ttk.Style().lookup('TLabel', 'foreground'))
-        kw['background'] = kw.pop('background', PAGEBG if sys.platform == 'win32'
-                                  else ttk.Style().lookup('TLabel', 'background'))
+        style = ttk.Style()
+        if sys.platform == 'win32':
+            custom_style = 'nb.TLabel'  # Create or update a style to emulate the tk.Label colors
+            style.configure(custom_style, foreground=PAGEFG, background=PAGEBG)
+        else:
+            custom_style = 'TLabel'  # Use the platform default ttk style
+        kw.setdefault('style', custom_style)
         super().__init__(master, **kw)
 
 
@@ -134,10 +134,8 @@ class Button(ttk.Button):
     """Custom ttk.Button class to fix some display issues."""
 
     def __init__(self, master: ttk.Frame | None = None, **kw):
-        if sys.platform == 'win32':
-            ttk.Button.__init__(self, master, style='nb.TButton', **kw)
-        else:
-            ttk.Button.__init__(self, master, **kw)
+        style = 'nb.TButton' if sys.platform == 'win32' else None
+        super().__init__(master, style=style, **kw)  # type: ignore
 
 
 class ColoredButton(tk.Button):

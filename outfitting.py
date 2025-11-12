@@ -302,8 +302,8 @@ def export(data, filename) -> None:
             try:
                 m = lookup(v, ship_name_map)
                 if m:
-                    h.write(f'{rowheader}, {m["category"]}, {m["name"]}, {m.get("mount","")},'
-                            f'{m.get("guidance","")}, {m.get("ship","")}, {m["class"]}, {m["rating"]},'
+                    h.write(f'{rowheader}, {m["category"]}, {m["name"]}, {m.get("mount", "")},'
+                            f'{m.get("guidance", "")}, {m.get("ship", "")}, {m["class"]}, {m["rating"]},'
                             f'{m["id"]}, {data["timestamp"]}\n')
 
             except ValueError as e:
