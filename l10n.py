@@ -10,12 +10,10 @@ Localization with gettext is a pain on non-Unix systems.
 """
 from __future__ import annotations
 
-import builtins
 import locale
 import numbers
 import re
 import sys
-import warnings
 from contextlib import suppress
 from os import listdir, sep
 from typing import Iterable, TextIO, cast
@@ -77,8 +75,6 @@ class Translations:
         Use when translation is not desired or not available
         """
         self.translations = {None: {}}
-        # DEPRECATED: Migrate to translations.translate or tr.tl. Will remove in 6.0 or later.
-        builtins.__dict__['_'] = lambda x: str(x).replace(r'\"', '"').replace('{CR}', '\n')
 
     def install(self, lang: str | None = None) -> None:  # noqa: CCR001
         """
@@ -120,9 +116,6 @@ class Translations:
 
                 except Exception:
                     logger.exception(f'Exception occurred while parsing {lang}.strings in plugin {plugin}')
-
-        # DEPRECATED: Migrate to translations.translate or tr.tl. Will remove in 6.0 or later.
-        builtins.__dict__['_'] = self.translate
 
     def contents(self, lang: str, plugin_path: pathlib.Path | None = None) -> dict[str, str]:
         """Load all the translations from a translation file."""
@@ -262,21 +255,6 @@ def _wszarray_to_list(array):
 class _Locale:
     """Locale holds a few utility methods to convert data to and from localized versions."""
 
-    @warnings.deprecated("Migrate to _Locale.string_from_number. Will remove in 6.0 or later.")
-    def stringFromNumber(self, number: float | int, decimals: int | None = None) -> str:  # noqa: N802
-        warnings.warn('use _Locale.string_from_number instead.', DeprecationWarning, stacklevel=2)
-        return self.string_from_number(number, decimals)  # type: ignore
-
-    @warnings.deprecated("Migrate to _Locale.number_from_string. Will remove in 6.0 or later.")
-    def numberFromString(self, string: str) -> int | float | None:  # noqa: N802
-        warnings.warn('use _Locale.number_from_string instead.', DeprecationWarning, stacklevel=2)
-        return self.number_from_string(string)
-
-    @warnings.deprecated("Migrate to _Locale.preferred_languages. Will remove in 6.0 or later.")
-    def preferredLanguages(self) -> Iterable[str]:  # noqa: N802
-        warnings.warn('use _Locale.preferred_languages instead.', DeprecationWarning, stacklevel=2)
-        return self.preferred_languages()
-
     def string_from_number(self, number: float | int, decimals: int = 5) -> str:
         """
         Convert a number to a string.
@@ -352,18 +330,6 @@ class _Locale:
 # singletons
 Locale = _Locale()
 translations = Translations()
-
-
-@warnings.deprecated("Migrate to `translations`. Will be removed in 6.0 or later.")
-# Begin Deprecation Zone
-class _Translations(Translations):
-    def __init__(self):
-        super().__init__()
-
-
-# Yes, I know this is awful renaming garbage. But we need it for compat.
-Translations: Translations = translations  # type: ignore
-# End Deprecation Zone
 
 # generate template strings file - like xgettext
 # parsing is limited - only single ' or " delimited strings, and only one string per line

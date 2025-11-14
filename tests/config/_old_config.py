@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import numbers
 import sys
-import warnings
 from configparser import NoOptionError
 from os import getenv, makedirs, mkdir
 from os.path import dirname, expanduser, isdir, join
@@ -388,20 +387,6 @@ class OldConfig:
     else:
         def __init__(self):
             raise NotImplementedError('Implement me')
-
-    # Common
-
-    def get_password(self, account: str) -> None:
-        """Legacy password retrieval."""
-        warnings.warn("password subsystem is no longer supported", DeprecationWarning)
-
-    def set_password(self, account: str, password: str) -> None:
-        """Legacy password setting."""
-        warnings.warn("password subsystem is no longer supported", DeprecationWarning)
-
-    def delete_password(self, account: str) -> None:
-        """Legacy password deletion."""
-        warnings.warn("password subsystem is no longer supported", DeprecationWarning)
 
 
 old_config = OldConfig()

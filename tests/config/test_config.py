@@ -143,8 +143,7 @@ class TestNewConfig:
         config.set(name, '1337')
         config.save()
         self.__update_linuxconfig()
-        with pytest.deprecated_call():
-            res = config.get(name)
+        res = config.get_str(name)
 
         assert res == '1337'
         config.delete(name)

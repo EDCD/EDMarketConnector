@@ -765,13 +765,6 @@ class AppWindow:
         # Start a protocol handler to handle cAPI registration. Requires main loop to be running.
         self.w.after_idle(lambda: protocol.protocolhandler.start(self.w))
 
-        # Migration from <= 3.30
-        for username in config.get_list('fdev_usernames', default=[]):
-            config.delete_password(username)
-        config.delete('fdev_usernames', suppress=True)
-        config.delete('username', suppress=True)
-        config.delete('password', suppress=True)
-        config.delete('logdir', suppress=True)
         self.postprefs(False)  # Companion login happens in callback from monitor
         self.toggle_suit_row(visible=False)
         if args.start_min:

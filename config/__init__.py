@@ -40,7 +40,6 @@ import pathlib
 import re
 import subprocess
 import sys
-import warnings
 from abc import abstractmethod
 from typing import Any, Callable, Type, TypeVar
 import semantic_version
@@ -52,7 +51,7 @@ appcmdname = 'EDMC'
 # <https://semver.org/#semantic-versioning-specification-semver>
 # Major.Minor.Patch(-prerelease)(+buildmetadata)
 # NB: Do *not* import this, use the functions appversion() and appversion_nobuild()
-_static_appversion = '5.13.2'
+_static_appversion = '6.0.0-alpha0'
 _cached_version: semantic_version.Version | None = None
 copyright = '© 2015-2019 Jonathan Harris, 2020-2025 EDCD'
 
@@ -68,11 +67,7 @@ capi_pretend_down: bool = False
 capi_debug_access_token: str | None = None
 # This must be done here in order to avoid an import cycle with EDMCLogging.
 # Other code should use EDMCLogging.get_main_logger
-if os.getenv("EDMC_NO_UI"):
-    logger = logging.getLogger(appcmdname)
-
-else:
-    logger = logging.getLogger(appname)
+logger = logging.getLogger(appcmdname) if os.getenv("EDMC_NO_UI") else logging.getLogger(appname)
 
 
 _T = TypeVar('_T')
@@ -334,33 +329,6 @@ class AbstractConfig(abc.ABC):
 
         return None
 
-    @warnings.deprecated("get() is Deprecated. use the specific getter for your type. Will remove in 6.0")
-    def get(
-        self, key: str,
-        default: list | str | bool | int | None = None
-    ) -> list | str | bool | int | None:
-        """
-        Return the data for the requested key, or a default.
-
-        :param key: The key data is being requested for.
-        :param default: The default to return if the key does not exist, defaults to None.
-        :raises OSError: On Windows, if a Registry error occurs.
-        :return: The data or the default.
-        """
-        if (a_list := self._suppress_call(self.get_list, ValueError, key, default=None)) is not None:
-            return a_list
-
-        if (a_str := self._suppress_call(self.get_str, ValueError, key, default=None)) is not None:
-            return a_str
-
-        if (a_bool := self._suppress_call(self.get_bool, ValueError, key, default=None)) is not None:
-            return a_bool
-
-        if (an_int := self._suppress_call(self.get_int, ValueError, key, default=None)) is not None:
-            return an_int
-
-        return default
-
     @abstractmethod
     def get_list(self, key: str, *, default: list | None = None) -> list:
         """
@@ -395,16 +363,6 @@ class AbstractConfig(abc.ABC):
         :return: The requested data or the default
         """
         raise NotImplementedError
-
-    @warnings.deprecated("Migrate to get_int. Will remove in 6.0 or later.")
-    def getint(self, key: str, *, default: int = 0) -> int:
-        """
-        Getint is a Deprecated getter method.
-
-        See get_int for its replacement.
-        :raises OSError: On Windows, if a Registry error occurs.
-        """
-        return self.get_int(key, default=default)
 
     @abstractmethod
     def get_int(self, key: str, *, default: int = 0) -> int:
@@ -459,22 +417,6 @@ class AbstractConfig(abc.ABC):
         """Close this config and release any associated resources."""
         raise NotImplementedError
 
-    @warnings.deprecated("Password system doesn't do anything. Will remove in 6.0 or later.")
-    def get_password(self, account: str) -> None:
-        """Legacy password retrieval."""
-        pass
-
-    @warnings.deprecated("Password system doesn't do anything. Will remove in 6.0 or later.")
-    def set_password(self, account: str, password: str) -> None:
-        """Legacy password setting."""
-        pass
-
-    @warnings.deprecated("Password system doesn't do anything. Will remove in 6.0 or later.")
-    def delete_password(self, account: str) -> None:
-        """Legacy password deletion."""
-        pass
-# End Dep Zone
-
 
 def get_config(*args, **kwargs) -> AbstractConfig:
     """
@@ -496,6 +438,8 @@ def get_config(*args, **kwargs) -> AbstractConfig:
 
 
 config = get_config()
+if sys.platform == "win32":
+    config.write_registry_to_toml(f"{config.app_dir_path}/config.toml")  # type: ignore
 
 
 # Wiki: https://github.com/EDCD/EDMarketConnector/wiki/Participating-in-Open-Betas-of-EDMC
@@ -504,10 +448,3 @@ def get_update_feed() -> str:
     if config.get_bool('beta_optin'):
         return 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector-beta.xml'
     return 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml'
-
-
-@warnings.deprecated("Migrate to get_update_feed(). Will remove in 6.0 or later.")
-def __getattr__(name: str):
-    if name == 'update_feed':
-        return get_update_feed()
-    raise AttributeError(name=name)

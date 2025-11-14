@@ -30,7 +30,6 @@ import re
 import sqlite3
 import tkinter as tk
 from tkinter import ttk
-import warnings
 from platform import system
 from textwrap import dedent
 from threading import Lock
@@ -172,12 +171,6 @@ class EDDNSender:
         self.db_conn = self.sqlite_queue_v1()
         self.db = self.db_conn.cursor()
 
-        #######################################################################
-        # Queue database migration
-        #######################################################################
-        self.convert_legacy_file()
-        #######################################################################
-
         self.queue_processing = Lock()
         # Initiate retry/send-now timer
         logger.trace_if(
@@ -222,27 +215,6 @@ class EDDNSender:
                 raise e
 
         return db_conn
-
-    @warnings.deprecated("Legacy files no longer used as of 5.6.0. Will remove in 6.0 or later.")
-    def convert_legacy_file(self):
-        """Convert a legacy file's contents into the sqlite3 db."""
-        filename = config.app_dir_path / 'replay.jsonl'
-        if not filename.exists():
-            return
-        logger.info("Converting legacy `replay.jsonl` to `eddn_queue-v1.db`")
-        try:
-            with filename.open('r', encoding='utf-8') as replay_file:
-                for line in replay_file:
-                    cmdr, msg = json.loads(line)
-                    self.add_message(cmdr, msg)
-        except Exception as e:
-            logger.exception("Failed to convert legacy file: %s", e)
-            return
-        logger.info("Conversion complete, removing `replay.jsonl`")
-        try:
-            filename.unlink()
-        except Exception as e:
-            logger.warning("Could not delete legacy file: %s", e)
 
     def close(self) -> None:
         """Clean up any resources."""
