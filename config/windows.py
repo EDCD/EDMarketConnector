@@ -12,7 +12,10 @@ import pathlib
 import sys
 import uuid
 import winreg
-from typing import Literal
+import datetime
+import tomli_w
+import base64
+from typing import Literal, Any
 from config import AbstractConfig, applongname, appname, logger
 from win32comext.shell import shell
 
@@ -33,7 +36,7 @@ class WinConfig(AbstractConfig):
     def __init__(self) -> None:
         super().__init__()
 
-        REGISTRY_SUBKEY = r'Software\Marginal\EDMarketConnector'  # noqa: N806
+        self.REGISTRY_SUBKEY = r'Software\Marginal\EDMarketConnector'
         create_key_defaults = functools.partial(
             winreg.CreateKeyEx,
             key=winreg.HKEY_CURRENT_USER,
@@ -41,7 +44,7 @@ class WinConfig(AbstractConfig):
         )
 
         try:
-            self.__reg_handle: winreg.HKEYType = create_key_defaults(sub_key=REGISTRY_SUBKEY)
+            self.__reg_handle: winreg.HKEYType = create_key_defaults(sub_key=self.REGISTRY_SUBKEY)
 
         except OSError:
             logger.exception('Could not create required registry keys')
@@ -75,6 +78,73 @@ class WinConfig(AbstractConfig):
         if (outdir_str := self.get_str('outdir')) is None or not pathlib.Path(outdir_str).is_dir():
             docs = known_folder_path(shell.FOLDERID_Documents)
             self.set("outdir", docs if docs is not None else self.home)
+
+    def _convert_reg_value_for_toml(self, data, data_type):
+        """Convert Windows registry values into TOML-native types for 6.0's global config."""
+        # Plain string
+        if data_type == winreg.REG_SZ:
+            return str(data)
+
+        # Expandable string: keep as string
+        if data_type == winreg.REG_EXPAND_SZ:
+            try:
+                expanded = winreg.ExpandEnvironmentStrings(data)
+            except Exception:
+                expanded = data
+            return str(expanded)
+
+        # DWORD or QWORD: store as integer
+        if data_type in (winreg.REG_DWORD, winreg.REG_QWORD):
+            return int(data)
+
+        # Multi-string: store as list
+        if data_type == winreg.REG_MULTI_SZ:
+            return list(data)
+
+        # Binary: store as base64 string
+        if data_type == winreg.REG_BINARY:
+            return base64.b64encode(data).decode("ascii")
+
+        # Else, force to string
+        return str(data)
+
+    def write_registry_to_toml(self, toml_path: str) -> None:
+        """
+        Export all registry values under self.REGISTRY_SUBKEY into a global TOML config.
+
+        Values are normalized into TOML-native types (str, int, list, base64).
+        Booleans are left as ints (0/1) and should be interpreted adaptively by get_bool.
+        """
+        key = self.__reg_handle
+
+        try:
+            _, num_values, _ = winreg.QueryInfoKey(key)
+
+            # Write config, including writing where and when we got this from.
+            config_data: dict[str, Any] = {
+                "generated": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                "source": "windows_registry",
+                "subkey": self.REGISTRY_SUBKEY,
+                "settings": {}
+            }
+
+            settings = config_data["settings"]
+
+            for i in range(num_values):
+                name, data, data_type = winreg.EnumValue(key, i)
+                settings[name] = self._convert_reg_value_for_toml(data, data_type)
+
+            # Write TOML to file
+            path_obj = pathlib.Path(toml_path)
+            path_obj.parent.mkdir(parents=True, exist_ok=True)
+            with path_obj.open("wb") as f:
+                tomli_w.dump(config_data, f)
+
+            logger.info(f"Registry exported to TOML: {toml_path}")
+
+        except OSError:
+            logger.exception(f"Could not export registry key {self.REGISTRY_SUBKEY}")
+            raise
 
     def __get_regentry(self, key: str) -> None | list | str | int:
         """Access the Registry for the raw entry."""
