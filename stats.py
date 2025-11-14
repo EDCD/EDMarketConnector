@@ -457,7 +457,7 @@ class StatsResults(tk.Toplevel):
             # label = HyperlinkLabel(parent, text=col_content, popup_copy=True)
             label = nb.Label(parent, text=col_content)
             if with_copy:
-                label.bind('<Button-1>', self.copy_callback(label, col_content))
+                label.bind('<Button-1>', self.copy_callback(label, col_content))  # type: ignore
 
             if i == 0:
                 label.grid(padx=10, sticky=tk.W)

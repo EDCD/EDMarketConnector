@@ -41,17 +41,14 @@ class Frame(ttk.Frame):
     """Custom ttk.Frame class to fix some display issues."""
 
     def __init__(self, master: ttk.Notebook | None = None, **kw):
-        if sys.platform == 'win32':
-            ttk.Frame.__init__(self, master, style='nb.TFrame', **kw)
-            ttk.Frame(self).grid(pady=5)  # top spacer
-        else:
-            ttk.Frame.__init__(self, master, **kw)
-            ttk.Frame(self).grid(pady=5)  # top spacer
-        self.configure(takefocus=1)		# let the frame take focus so that no particular child is focused
+        style = 'nb.TFrame' if sys.platform == 'win32' else None
+        super().__init__(master, style=style, **kw)  # type: ignore
+        ttk.Frame(self).grid(pady=5)  # Top spacer
+        self.configure(takefocus=1)  # let the frame take focus so that no particular child is focused
 
 
-class Label(tk.Label):
-    """Custom tk.Label class to fix some display issues."""
+class Label(ttk.Label):
+    """Custom ttk.Label class to fix some display issues."""
 
     def __init__(self, master: ttk.Frame | None = None, **kw):
         kw['foreground'] = kw.pop('foreground', PAGEFG if sys.platform == 'win32'
@@ -134,10 +131,8 @@ class Button(ttk.Button):
     """Custom ttk.Button class to fix some display issues."""
 
     def __init__(self, master: ttk.Frame | None = None, **kw):
-        if sys.platform == 'win32':
-            ttk.Button.__init__(self, master, style='nb.TButton', **kw)
-        else:
-            ttk.Button.__init__(self, master, **kw)
+        style = 'nb.TButton' if sys.platform == 'win32' else None
+        super().__init__(master, style=style, **kw)  # type: ignore
 
 
 class ColoredButton(tk.Button):

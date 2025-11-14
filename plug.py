@@ -13,6 +13,7 @@ import logging
 import operator
 import os
 import sys
+from dataclasses import dataclass, field
 import tkinter as tk
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -33,14 +34,12 @@ PLUGINS_broken = []
 
 
 # For asynchronous error display
+@dataclass
 class LastError:
     """Holds the last plugin error."""
 
-    msg: str | None
-    root: tk.Tk
-
-    def __init__(self) -> None:
-        self.msg = None
+    msg: str | None = None
+    root: tk.Tk | None = field(default=None, repr=False)  # not initialized by default, hide in repr
 
 
 last_error = LastError()

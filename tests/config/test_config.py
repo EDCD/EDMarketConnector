@@ -117,7 +117,7 @@ class TestNewConfig:
     @mark.parametrize("lst", _build_test_list(list_tests, _get_fuzz(list)))
     def test_list(self, lst: list[str]) -> None:
         """Save a list and then ask for it back."""
-        name = f'list_test_{ hash("".join(lst)) }'
+        name = f'list_test_{hash("".join(lst))}'
         config.set(name, lst)
 
         config.save()
@@ -222,7 +222,7 @@ class TestOldNewConfig:
             # So insert those spaces here, to ensure that it works otherwise.
             lst = [e if len(e) > 0 else ' ' for e in lst]
 
-        name = self.KEY_PREFIX + f'list_test_{ hash("".join(lst)) }'
+        name = self.KEY_PREFIX + f'list_test_{hash("".join(lst))}'
         old_config.set(name, lst)
         old_config.save()
 
