@@ -89,7 +89,7 @@ this = This()
 
 def set_config_first_run() -> None:
     """Enable EDAstro if the config key does not exist."""
-    if config.get_int("edastro_send", default=None) is None:
+    if config.get_int("edastro_send") is None:
         logger.info("EDAstro First Run. Enabling")
         config.set("edastro_send", 1)
 
