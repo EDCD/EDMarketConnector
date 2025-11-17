@@ -86,7 +86,9 @@ jobs:
           submodules: true
 
       - name: Sanitize version for filenames
-        run: echo "SAFE_SEMVER=${{ needs.variables.outputs.sem_ver }}" | tr '/ ' '_' >> $GITHUB_ENV
+        run: |
+          $safe = "${{ needs.variables.outputs.sem_ver }}" -replace '[\/ ]', '_'
+          echo "SAFE_SEMVER=$safe" >> $env:GITHUB_ENV
 
       - name: Make zip archive
         uses: thedoctor0/zip-release@main
