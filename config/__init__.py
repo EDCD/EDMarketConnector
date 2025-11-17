@@ -12,27 +12,27 @@ from __future__ import annotations
 
 __all__ = [
     # defined in the order they appear in the file
-    'GITVERSION_FILE',
-    'appname',
-    'applongname',
-    'appcmdname',
-    'copyright',
-    'update_interval',
-    'debug_senders',
-    'trace_on',
-    'capi_pretend_down',
-    'capi_debug_access_token',
-    'logger',
-    'git_shorthash_from_head',
-    'appversion',
-    'user_agent',
-    'appversion_nobuild',
-    'AbstractConfig',
-    'config',
-    'get_update_feed',
+    "GITVERSION_FILE",
+    "appname",
+    "applongname",
+    "appcmdname",
+    "copyright",
+    "update_interval",
+    "debug_senders",
+    "trace_on",
+    "capi_pretend_down",
+    "capi_debug_access_token",
+    "logger",
+    "git_shorthash_from_head",
+    "appversion",
+    "user_agent",
+    "appversion_nobuild",
+    "Config",
+    "config",
+    "get_update_feed",
+    "config_logger",
 ]
 
-import abc
 import contextlib
 import logging
 import os
@@ -40,23 +40,25 @@ import pathlib
 import re
 import subprocess
 import sys
-from abc import abstractmethod
+import tomllib
+import tomli_w
+from time import gmtime
 from typing import Any, Callable, Type, TypeVar
 import semantic_version
 from constants import GITVERSION_FILE, applongname, appname
 
 # Any of these may be imported by plugins
-appcmdname = 'EDMC'
+appcmdname = "EDMC"
 # appversion **MUST** follow Semantic Versioning rules:
 # <https://semver.org/#semantic-versioning-specification-semver>
 # Major.Minor.Patch(-prerelease)(+buildmetadata)
 # NB: Do *not* import this, use the functions appversion() and appversion_nobuild()
-_static_appversion = '6.0.0-alpha0'
+_static_appversion = "6.0.0-alpha0"
 _cached_version: semantic_version.Version | None = None
-copyright = '© 2015-2019 Jonathan Harris, 2020-2025 EDCD'
+copyright = "© 2015-2019 Jonathan Harris, 2020-2025 EDCD"
 
 
-update_interval = 8*60*60  # 8 Hours
+update_interval = 8 * 60 * 60  # 8 Hours
 # Providers marked to be in debug mode. Generally this is expected to switch to sending data to a log file
 debug_senders: list[str] = []
 # TRACE logging code that should actually be used.  Means not spamming it
@@ -67,10 +69,14 @@ capi_pretend_down: bool = False
 capi_debug_access_token: str | None = None
 # This must be done here in order to avoid an import cycle with EDMCLogging.
 # Other code should use EDMCLogging.get_main_logger
-logger = logging.getLogger(appcmdname) if os.getenv("EDMC_NO_UI") else logging.getLogger(appname)
+logger = (
+    logging.getLogger(appcmdname)
+    if os.getenv("EDMC_NO_UI")
+    else logging.getLogger(appname)
+)
 
 
-_T = TypeVar('_T')
+_T = TypeVar("_T")
 
 
 def git_shorthash_from_head() -> str | None:
@@ -94,14 +100,14 @@ def git_shorthash_from_head() -> str | None:
         return None
 
     if not re.fullmatch(r"[0-9a-f]{7,}", shorthash):
-        logger.error(f"'{shorthash}' doesn't look like a valid git short hash, forcing to None")
+        logger.error(
+            f"'{shorthash}' doesn't look like a valid git short hash, forcing to None"
+        )
         return None
 
     with contextlib.suppress(Exception):
         diff_result = subprocess.run(
-            ["git", "diff", "--stat", "HEAD"],
-            capture_output=True,
-            check=True
+            ["git", "diff", "--stat", "HEAD"], capture_output=True, check=True
         )
         if diff_result.stdout:
             shorthash += ".DIRTY"
@@ -121,10 +127,12 @@ def appversion() -> semantic_version.Version:
     if _cached_version is not None:
         return _cached_version
 
-    if getattr(sys, 'frozen', False):
+    if getattr(sys, "frozen", False):
         # Running frozen, so we should have a .gitversion file
         # Yes, .parent because if frozen we're inside library.zip
-        with open(pathlib.Path(sys.path[0]).parent / GITVERSION_FILE, encoding='utf-8') as gitv:
+        with open(
+            pathlib.Path(sys.path[0]).parent / GITVERSION_FILE, encoding="utf-8"
+        ) as gitv:
             shorthash: str | None = gitv.read()
 
     else:
@@ -134,16 +142,18 @@ def appversion() -> semantic_version.Version:
         shorthash = git_shorthash_from_head()
         if shorthash is None:
             if pathlib.Path(sys.path[0] + "/" + GITVERSION_FILE).exists():
-                with open(pathlib.Path(sys.path[0] + "/" + GITVERSION_FILE), encoding='utf-8') as gitv:
+                with open(
+                    pathlib.Path(sys.path[0] + "/" + GITVERSION_FILE), encoding="utf-8"
+                ) as gitv:
                     shorthash = gitv.read()
             else:
-                shorthash = 'UNKNOWN'
+                shorthash = "UNKNOWN"
 
-    _cached_version = semantic_version.Version(f'{_static_appversion}+{shorthash}')
+    _cached_version = semantic_version.Version(f"{_static_appversion}+{shorthash}")
     return _cached_version
 
 
-user_agent = f'EDCD-{appname}-{appversion()}'
+user_agent = f"EDCD-{appname}-{appversion()}"
 
 
 def appversion_nobuild() -> semantic_version.Version:
@@ -155,12 +165,12 @@ def appversion_nobuild() -> semantic_version.Version:
 
     :return: App version without any build meta data.
     """
-    return appversion().truncate('prerelease')
+    return appversion().truncate("prerelease")
 
 
-class AbstractConfig(abc.ABC):
+class Config:
     """
-    Abstract root class of all platform specific Config implementations.
+    Platform-unified Config class for 6.0+.
 
     Commented lines are no longer supported or replaced.
     """
@@ -197,12 +207,112 @@ class AbstractConfig(abc.ABC):
     __eddn_tracking_ui = False  # Show EDDN tracking UI ?
     __skip_timecheck = False  # Skip checking event timestamps?
 
-    def __init__(self) -> None:
+    def __init__(self, app_path) -> None:
         self.home_path = pathlib.Path.home()
+        # Set Needed Platform Var for app_dir_path
+        self.app_dir_path = app_path
+
+        self.toml_path: pathlib.Path = self.app_dir_path / "config.toml"
+        self.generated: str | None = None
+        self.source: str | None = None
+        self.settings: dict[str, Any] = {}
+        self._load()
+        self.default_plugin_dir_path = self.app_dir_path / "plugins"
+        if (plugdir_str := self.get_str("plugin_dir")) is None or not pathlib.Path(
+            plugdir_str
+        ).is_dir():
+            self.set("plugin_dir", str(self.default_plugin_dir_path))
+            plugdir_str = self.default_plugin_dir
+        self.plugin_dir_path = pathlib.Path(plugdir_str)
+        self.plugin_dir_path.mkdir(exist_ok=True)
+
+        # Call the rest of the platform var helpers
+        self._init_platform()
+
+    def _init_platform(self):
+        if sys.platform == "win32":
+            from .windows import win_helper
+
+            win_helper(self)
+        elif sys.platform == "linux":
+            from .linux import linux_helper
+
+            linux_helper(self)
+        else:
+            raise RuntimeError(f"Unsupported platform: {sys.platform}")
 
     def set_shutdown(self):
         """Set flag denoting we're in the shutdown sequence."""
         self.__in_shutdown = True
+
+    def _load(self):
+        """Load TOML from disk and store fields."""
+        if not self.toml_path.exists():
+            raise FileNotFoundError(f"Config file not found: {self.toml_path}")
+
+        with self.toml_path.open("rb") as f:
+            data = tomllib.load(f)
+
+        # Capture metadata
+        self.generated = data.get("generated")
+        self.source = data.get("source")
+
+        # Settings dict created by write_registry_to_toml()
+        raw_settings = data.get("settings", {})
+        self.settings = {}
+
+        self.settings = dict(raw_settings)
+
+    def get(self, key: str, default=None):
+        """Return raw stored value."""
+        return self.settings.get(key, default)
+
+    def get_str(self, key: str, default="") -> str:
+        """Return string value."""
+        val = self.get(key, default)
+        return str(val) if val is not None else default
+
+    def get_int(self, key: str, default=0) -> int:
+        """Adaptive int (handles booleans stored as ints)."""
+        val = self.get(key)
+        if isinstance(val, int):
+            return val
+        try:
+            return int(val)
+        except (ValueError, TypeError):
+            return default
+
+    def get_bool(self, key: str, default=False) -> bool:
+        """
+        Adaptive boolean reader.
+
+          - Accepts ints 0/1
+          - Accepts strings "true"/"false"/"1"/"0"
+          - Accepts real booleans
+        """
+        val = self.get(key)
+
+        if isinstance(val, bool):
+            return val
+
+        if isinstance(val, int):
+            return val != 0
+
+        if isinstance(val, str):
+            v = val.strip().lower()
+            if v in ("1", "true", "yes", "on"):
+                return True
+            if v in ("0", "false", "no", "off"):
+                return False
+
+        return default
+
+    def get_list(self, key: str, default=None):
+        """Return the list referred to by the given key if it exists, or the default."""
+        val = self.get(key)
+        return (
+            val if isinstance(val, list) else (default if default is not None else [])
+        )
 
     @property
     def shutting_down(self) -> bool:
@@ -315,8 +425,10 @@ class AbstractConfig(abc.ABC):
 
     @staticmethod
     def _suppress_call(
-        func: Callable[..., _T], exceptions: Type[BaseException] | list[Type[BaseException]] = Exception,
-        *args: Any, **kwargs: Any
+        func: Callable[..., _T],
+        exceptions: Type[BaseException] | list[Type[BaseException]] = Exception,
+        *args: Any,
+        **kwargs: Any,
     ) -> _T | None:
         if exceptions is None:
             exceptions = [Exception]
@@ -329,96 +441,54 @@ class AbstractConfig(abc.ABC):
 
         return None
 
-    @abstractmethod
-    def get_list(self, key: str, *, default: list | None = None) -> list:
-        """
-        Return the list referred to by the given key if it exists, or the default.
-
-        Implements :meth:`AbstractConfig.get_list`.
-        """
-        raise NotImplementedError
-
-    @abstractmethod
-    def get_str(self, key: str, *, default: str | None = None) -> str:
-        """
-        Return the string referred to by the given key if it exists, or the default.
-
-        :param key: The key data is being requested for.
-        :param default: Default to return if the key does not exist, defaults to None.
-        :raises ValueError: If an internal error occurs getting or converting a value.
-        :raises OSError: On Windows, if a Registry error occurs.
-        :return: The requested data or the default.
-        """
-        raise NotImplementedError
-
-    @abstractmethod
-    def get_bool(self, key: str, *, default: bool | None = None) -> bool:
-        """
-        Return the bool referred to by the given key if it exists, or the default.
-
-        :param key: The key data is being requested for.
-        :param default: Default to return if the key does not exist, defaults to None
-        :raises ValueError: If an internal error occurs getting or converting a value
-        :raises OSError: On Windows, if a Registry error occurs.
-        :return: The requested data or the default
-        """
-        raise NotImplementedError
-
-    @abstractmethod
-    def get_int(self, key: str, *, default: int = 0) -> int:
-        """
-        Return the int referred to by key if it exists in the config.
-
-        For legacy reasons, the default is 0 and not None.
-
-        :param key: The key data is being requested for.
-        :param default: Default to return if the key does not exist, defaults to 0.
-        :raises ValueError: If the internal representation of this key cannot be converted to an int.
-        :raises OSError: On Windows, if a Registry error occurs.
-        :return: The requested data or the default.
-        """
-        raise NotImplementedError
-
-    @abstractmethod
-    def set(self, key: str, val: int | str | list[str] | bool) -> None:
-        """
-        Set the given key's data to the given value.
-
-        :param key: The key to set the value on.
-        :param val: The value to set the key's data to.
-        :raises ValueError: On an invalid type.
-        :raises OSError: On Windows, if a Registry error occurs.
-        """
-        raise NotImplementedError
-
-    @abstractmethod
     def delete(self, key: str, *, suppress=False) -> None:
-        """
-        Delete the given key from the config.
+        """Delete the given key from the config."""
+        try:
+            self.settings.pop(key, None)
+        except (KeyError, IndexError):
+            if suppress:
+                return
+            raise
+        self.save()
 
-        :param key: The key to delete.
-        :param suppress: bool - Whether to suppress any errors.  Useful in case
-          code to migrate settings is blindly removing an old key.
-        :raises OSError: On Windows, if a registry error occurs.
-        """
-        raise NotImplementedError
+    def set(self, key: str, value: Any):
+        """Modify a setting and save to disk."""
+        self.settings[key] = value
+        self.save()
 
-    @abstractmethod
-    def save(self) -> None:
-        """
-        Save the current configuration.
+    def save(self):
+        """Write updated config back to TOML."""
+        data = {
+            "generated": self.generated,
+            "source": self.source,
+            "settings": self.settings,
+        }
 
-        :raises OSError: On Windows, if a Registry error occurs.
-        """
-        raise NotImplementedError
+        with self.toml_path.open("wb") as f:
+            tomli_w.dump(data, f)
 
-    @abstractmethod
     def close(self) -> None:
-        """Close this config and release any associated resources."""
-        raise NotImplementedError
+        """Save config changes before closing."""
+        self.save()
 
 
-def get_config(*args, **kwargs) -> AbstractConfig:
+def get_appdirpath():
+    """Grab the Application Directory early."""
+    app_dir_path = None
+    if sys.platform == "win32":
+        base = pathlib.Path(os.getenv("LOCALAPPDATA"))  # type: ignore
+        app_dir_path = base / appname
+    if sys.platform == "linux":
+        xdg_data_home = pathlib.Path(
+            os.getenv("XDG_DATA_HOME", default="~/.local/share")
+        ).expanduser()
+        app_dir_path = xdg_data_home / appname
+    if app_dir_path is None:
+        raise ValueError
+    return app_dir_path
+
+
+def get_config(*args, **kwargs) -> Config:
     """
     Get the appropriate config class for the current platform.
 
@@ -426,25 +496,45 @@ def get_config(*args, **kwargs) -> AbstractConfig:
     :param kwargs: Args to be passed through to implementation.
     :return: Instance of the implementation.
     """
+    app_dir_path = get_appdirpath()
+    config = None
+    if pathlib.Path.exists(app_dir_path / "config.toml"):
+        return Config(app_path=app_dir_path)
+
     if sys.platform == "win32":  # pragma: sys-platform-win32
-        from .windows import WinConfig
-        return WinConfig(*args, **kwargs)
+        from .windows import WinConfigMinimal
+
+        config = WinConfigMinimal()
 
     if sys.platform == "linux":  # pragma: sys-platform-linux
-        from .linux import LinuxConfig
-        return LinuxConfig(*args, **kwargs)
+        from .linux import LinuxConfigMinimal
+        config = LinuxConfigMinimal()
 
-    raise ValueError(f'Unknown platform: {sys.platform=}')
+    if config:
+        config.write_to_toml(f"{app_dir_path}/config.toml")  # type: ignore
+        return Config(app_path=app_dir_path)
+
+    raise ValueError(f"Unknown platform: {sys.platform=}")
+
+
+# Set internal Config logger, because config is set up before main logger.
+config_logger = logging.getLogger("pre_config")
+config_logger.setLevel(logging.DEBUG)  # Or INFO
+
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s")
+formatter.converter = gmtime  # Optional: match your main logger's UTC timestamps
+ch.setFormatter(formatter)
+config_logger.addHandler(ch)
 
 
 config = get_config()
-if sys.platform == "win32":
-    config.write_registry_to_toml(f"{config.app_dir_path}/config.toml")  # type: ignore
 
 
 # Wiki: https://github.com/EDCD/EDMarketConnector/wiki/Participating-in-Open-Betas-of-EDMC
 def get_update_feed() -> str:
     """Select the proper update feed for the current update track."""
-    if config.get_bool('beta_optin'):
-        return 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector-beta.xml'
-    return 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml'
+    if config.get_bool("beta_optin"):
+        return "https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector-beta.xml"
+    return "https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml"
