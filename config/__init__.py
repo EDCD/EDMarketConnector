@@ -537,7 +537,7 @@ def get_config(*args, **kwargs) -> Config:
 config_logger = logging.getLogger("pre_config")
 config_logger.setLevel(logging.DEBUG)  # Or INFO
 
-ch = logging.StreamHandler()
+ch = logging.StreamHandler(sys.stdout)
 ch.setLevel(logging.DEBUG)
 formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s")
 formatter.converter = gmtime  # Optional: match your main logger's UTC timestamps
