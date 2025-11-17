@@ -34,12 +34,15 @@ jobs:
         run: |
           echo "${{ needs.variables.outputs.short_sha }}" > .gitversion
 
+      - name: Sanitize version for filenames
+        run: echo "SAFE_SEMVER=${{ needs.variables.outputs.sem_ver }}" | tr '/ ' '_' >> $GITHUB_ENV
+
       - name: Make tar archive
         run: |
           # For 'tar' we can only specify filename/glob exclusions, not any
           # directory location
           tar -c -v -z \
-              -f "../EDMarketConnector-release-${{ needs.variables.outputs.sem_ver }}.tar.gz" \
+              -f "../EDMarketConnector-release-${SAFE_SEMVER}.tar.gz" \
               -C .. \
               --exclude=EDMarketConnector-release-*.* \
               --exclude=.editorconfig \
@@ -59,7 +62,7 @@ jobs:
               --exclude=scripts \
               --exclude=tests \
               EDMarketConnector
-            mv "../EDMarketConnector-release-${{ needs.variables.outputs.sem_ver }}.tar.gz" .
+            mv "../EDMarketConnector-release-${SAFE_SEMVER}.tar.gz" .
 
       - name: Upload build files
         uses: actions/upload-artifact@v5
@@ -68,9 +71,9 @@ jobs:
           path: |
               EDMarketConnector-release-*.tar.gz
 
-  windows_build_32:
+  windows_build_86:
     needs: [variables]
-    name: Build EDMC
+    name: Build EDMC (x86)
     runs-on: windows-latest
 
     defaults:
@@ -81,6 +84,9 @@ jobs:
       - uses: actions/checkout@v5
         with:
           submodules: true
+
+      - name: Sanitize version for filenames
+        run: echo "SAFE_SEMVER=${{ needs.variables.outputs.sem_ver }}" | tr '/ ' '_' >> $GITHUB_ENV
 
       - name: Make zip archive
         uses: thedoctor0/zip-release@main
@@ -94,7 +100,7 @@ jobs:
           path: 'EDMarketConnector'
           # 3. The .zip file has to be in the 'root' so that upload-artifact
           #   will process it.  Can't use relative paths.
-          filename: 'EDMarketConnector/EDMarketConnector-release-${{ needs.variables.outputs.sem_ver }}.zip'
+          filename: 'EDMarketConnector/EDMarketConnector-release-${SAFE_SEMVER}.zip'
           # 4. And all the exclusions need to be prefixed with the 'root'
           #   directory.
           # NB: If this gets too long it can cause zip 'Command Line Error',
@@ -136,13 +142,13 @@ jobs:
       - name: Upload build files
         uses: actions/upload-artifact@v5
         with:
-          name: built-files-windows
+          name: built-files-windows-x86
           path: |
               EDMarketConnector_Installer_*.exe
               EDMarketConnector-release-*.zip
   windows_build_64:
     needs: [variables]
-    name: Build EDMC
+    name: Build EDMC (x64)
     runs-on: windows-latest
 
     defaults:
@@ -166,7 +172,7 @@ jobs:
           path: 'EDMarketConnector'
           # 3. The .zip file has to be in the 'root' so that upload-artifact
           #   will process it.  Can't use relative paths.
-          filename: 'EDMarketConnector/EDMarketConnector-release-${{ needs.variables.outputs.sem_ver }}.zip'
+          filename: 'EDMarketConnector/EDMarketConnector-release-${SAFE_SEMVER}.zip'
           # 4. And all the exclusions need to be prefixed with the 'root'
           #   directory.
           # NB: If this gets too long it can cause zip 'Command Line Error',
@@ -209,7 +215,7 @@ jobs:
       - name: Upload build files
         uses: actions/upload-artifact@v5
         with:
-          name: built-files-windows
+          name: built-files-windows-64
           path: |
               EDMarketConnector_Installer_*.exe
               EDMarketConnector-release-*.zip
