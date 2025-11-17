@@ -68,7 +68,7 @@ jobs:
           path: |
               EDMarketConnector-release-*.tar.gz
 
-  windows_build:
+  windows_build_32:
     needs: [variables]
     name: Build EDMC
     runs-on: windows-latest
@@ -128,7 +128,83 @@ jobs:
 
       - name: Rename Installer
         run: |
-            Get-ChildItem -Path . -Filter "EDMarketConnector_Installer_*.exe" | Rename-Item -NewName {"EDMarketConnector_Installer_Unsigned_$($_.Name -replace '^EDMarketConnector_Installer_', '')"}
+            Get-ChildItem -Path . -Filter "EDMarketConnector_Installer_*.exe" |
+              Rename-Item -NewName {
+                  $rest = $_.Name -replace '^EDMarketConnector_Installer_', ''
+                  "EDMarketConnector_Installer_Unsigned_${rest}_x86.exe"
+              }
+      - name: Upload build files
+        uses: actions/upload-artifact@v5
+        with:
+          name: built-files-windows
+          path: |
+              EDMarketConnector_Installer_*.exe
+              EDMarketConnector-release-*.zip
+  windows_build_64:
+    needs: [variables]
+    name: Build EDMC
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        shell: powershell
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: true
+
+      - name: Make zip archive
+        uses: thedoctor0/zip-release@main
+        with:
+          type: 'zip'
+          # We want an in-zip prefix of `EDMarketConnector/` for all files, so
+          # we specify that:
+          # 1. We work from the parent directory
+          directory: '..'
+          # 2. The path we're using is the 'root' directory
+          path: 'EDMarketConnector'
+          # 3. The .zip file has to be in the 'root' so that upload-artifact
+          #   will process it.  Can't use relative paths.
+          filename: 'EDMarketConnector/EDMarketConnector-release-${{ needs.variables.outputs.sem_ver }}.zip'
+          # 4. And all the exclusions need to be prefixed with the 'root'
+          #   directory.
+          # NB: If this gets too long it can cause zip 'Command Line Error',
+          #   presumably due to a Windows CL length limit.
+          exclusions: 'EDMarketConnector/EDMarketConnector-release-*.* EDMarketConnector/.editorconfig EDMarketConnector/.flake8 EDMarketConnector/.git* EDMarketConnector/.mypy.ini EDMarketConnector/.pre-commit-config.yaml EDMarketConnector/build.py EDMarketConnector/*.manifest EDMarketConnector/coriolis-data/ EDMarketConnector/img/ EDMarketConnector/pyproject.toml EDMarketConnector/scripts/ EDMarketConnector/tests/'
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version-file: '.python-version'
+          architecture: "x64"
+          cache: 'pip' # caching pip dependencies
+
+      - name: Install python tools
+        run: |
+          pip install -r requirements-dev.txt
+
+      - name: Download winsparkle
+        run: |
+          Invoke-Webrequest -UseBasicParsing https://github.com/vslavik/winsparkle/releases/download/v0.9.2/WinSparkle-0.9.2.zip -OutFile out.zip
+          Expand-Archive out.zip
+          Move-Item 'out\WinSparkle-0.9.2\x64\Release\*' '.\'
+
+      - name: Build EDMC
+        run: |
+          python build.py
+
+      - name: InnoSetup
+        uses: nadeemjazmawe/inno-setup-action-cli@v6.0.5
+        with:
+            filepath: './EDMC_Installer_Config.iss'
+
+      - name: Rename Installer
+        run: |
+            Get-ChildItem -Path . -Filter "EDMarketConnector_Installer_*.exe" |
+              Rename-Item -NewName {
+                  $rest = $_.Name -replace '^EDMarketConnector_Installer_', ''
+                  "EDMarketConnector_Installer_Unsigned_${rest}_x64.exe"
+              }
 
       - name: Upload build files
         uses: actions/upload-artifact@v5
@@ -139,7 +215,7 @@ jobs:
               EDMarketConnector-release-*.zip
   Merge:
     runs-on: ubuntu-latest
-    needs: [ windows_build, linux_build ]
+    needs: [ windows_build_64, windows_build_32, linux_build ]
     steps:
       - name: Merge Artifacts
         uses: actions/upload-artifact/merge@v5
