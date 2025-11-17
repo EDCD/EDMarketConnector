@@ -41,8 +41,7 @@ jobs:
         run: |
           # For 'tar' we can only specify filename/glob exclusions, not any
           # directory location
-          tar -c -v -z \
-              -f "../EDMarketConnector-release-${SAFE_SEMVER}.tar.gz" \
+          tar -czf "EDMarketConnector-release-${SAFE_SEMVER}.tar.gz" \
               -C .. \
               --exclude=EDMarketConnector-release-*.* \
               --exclude=.editorconfig \
@@ -62,7 +61,6 @@ jobs:
               --exclude=scripts \
               --exclude=tests \
               EDMarketConnector
-            mv "../EDMarketConnector-release-${SAFE_SEMVER}.tar.gz" .
 
       - name: Upload build files
         uses: actions/upload-artifact@v5
@@ -160,6 +158,9 @@ jobs:
         with:
           submodules: true
 
+      - name: Sanitize version for filenames
+        run: echo "SAFE_SEMVER=${{ needs.variables.outputs.sem_ver }}" | tr '/ ' '_' >> $GITHUB_ENV
+
       - name: Make zip archive
         uses: thedoctor0/zip-release@main
         with:
@@ -243,7 +244,7 @@ jobs:
           path: ./
           
       - name: Hash files
-        run: sha256sum EDMarketConnector_Installer_*.exe EDMarketConnector-release-*.{zip,tar.gz} > ./hashes.sum
+        run: find . -maxdepth 1 -type f \( -name "*.exe" -o -name "*.zip" -o -name "*.tar.gz" \) -print0 \ | xargs -0 -P 4 sha256sum > hashes.sum
 
       - name: Create Draft Release
         uses: "softprops/action-gh-release@v2"
