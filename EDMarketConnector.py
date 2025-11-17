@@ -764,8 +764,7 @@ class AppWindow:
 
         # Start a protocol handler to handle cAPI registration. Requires main loop to be running.
         self.w.after_idle(lambda: protocol.protocolhandler.start(self.w))
-
-        self.postprefs(False)  # Companion login happens in callback from monitor
+        self.w.after_idle(lambda: self.postprefs(False))  # Companion login happens in callback from monitor
         self.toggle_suit_row(visible=False)
         if args.start_min:
             logger.warning("Trying to start minimized")
