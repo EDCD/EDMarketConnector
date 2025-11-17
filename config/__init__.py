@@ -523,7 +523,7 @@ def get_config(*args, **kwargs) -> Config:
         from .linux import LinuxConfigMinimal
         try:
             config = LinuxConfigMinimal()
-        except FileNotFoundError:
+        except (FileNotFoundError, TypeError):
             return Config(app_path=app_dir_path)  # Nothing to Convert
 
     if config:

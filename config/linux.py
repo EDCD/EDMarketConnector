@@ -40,7 +40,7 @@ class LinuxConfigMinimal:
             if filename
             else xdg_config_home / "EDMarketConnector" / "EDMarketConnector.ini"
         )
-        if not pathlib.Path(filename).exists():
+        if not pathlib.Path(filename).is_file():
             raise FileNotFoundError
         # Load INI
         self.config = ConfigParser(interpolation=None)
