@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
 
 class LinuxConfigMinimal:
-    """Minimal Linux config loader that dumps existing config to TOML."""
+    """Minimal Linux config for exporting pre-6.0 config values to TOML."""
 
     SECTION = "config"
 
@@ -40,15 +40,11 @@ class LinuxConfigMinimal:
             if filename
             else xdg_config_home / "EDMarketConnector" / "EDMarketConnector.ini"
         )
-        self.filename.parent.mkdir(exist_ok=True, parents=True)
-
+        if not pathlib.Path(filename).exists():
+            raise FileNotFoundError
         # Load INI
         self.config = ConfigParser(interpolation=None)
         self.config.read(self.filename)
-
-        # Ensure section exists
-        if self.SECTION not in self.config:
-            self.config.add_section(self.SECTION)
 
     def _get_settings_dict(self) -> dict[str, Any]:
         """Return all keys/values from SECTION as a dict of strings."""

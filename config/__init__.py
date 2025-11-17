@@ -218,9 +218,12 @@ class Config:
         self.settings: dict[str, Any] = {}
         self._load()
         self.default_plugin_dir_path = self.app_dir_path / "plugins"
-        if (plugdir_str := self.get_str("plugin_dir")) is None or not pathlib.Path(
-            plugdir_str
-        ).is_dir():
+        plugdir_str = self.get_str("plugin_dir")
+        if not self.get_str("plugin_dir"):
+            plugdir_str = str(self.default_plugin_dir)
+            self.plugin_dir_path = self.default_plugin_dir_path
+            self.set("plugin_dir", plugdir_str)
+        if plugdir_str is None or not pathlib.Path(plugdir_str).is_dir():
             self.set("plugin_dir", str(self.default_plugin_dir_path))
             plugdir_str = self.default_plugin_dir
         self.plugin_dir_path = pathlib.Path(plugdir_str)
@@ -246,22 +249,30 @@ class Config:
         self.__in_shutdown = True
 
     def _load(self):
-        """Load TOML from disk and store fields."""
+        """Load TOML from disk and store fields. Create file if missing."""
         if not self.toml_path.exists():
-            raise FileNotFoundError(f"Config file not found: {self.toml_path}")
+            # Ensure parent directories exist
+            self.toml_path.parent.mkdir(parents=True, exist_ok=True)
 
+            # Replace None with TOML-serializable defaults
+            default_data = {
+                "generated": "",  # empty string instead of None
+                "source": "",  # empty string instead of None
+                "settings": {}  # empty table
+            }
+            with self.toml_path.open("wb") as f:
+                tomli_w.dump(default_data, f)
+
+        # Load the TOML file
         with self.toml_path.open("rb") as f:
             data = tomllib.load(f)
 
-        # Capture metadata
-        self.generated = data.get("generated")
-        self.source = data.get("source")
+        # Capture metadata, fallback to empty string if missing
+        self.generated = data.get("generated", "")
+        self.source = data.get("source", "")
 
         # Settings dict created by write_registry_to_toml()
-        raw_settings = data.get("settings", {})
-        self.settings = {}
-
-        self.settings = dict(raw_settings)
+        self.settings = dict(data.get("settings", {}))
 
     def get(self, key: str, default=None):
         """Return raw stored value."""
@@ -503,12 +514,17 @@ def get_config(*args, **kwargs) -> Config:
 
     if sys.platform == "win32":  # pragma: sys-platform-win32
         from .windows import WinConfigMinimal
-
-        config = WinConfigMinimal()
+        try:
+            config = WinConfigMinimal()
+        except FileNotFoundError:
+            return Config(app_path=app_dir_path)  # Nothing to Convert
 
     if sys.platform == "linux":  # pragma: sys-platform-linux
         from .linux import LinuxConfigMinimal
-        config = LinuxConfigMinimal()
+        try:
+            config = LinuxConfigMinimal()
+        except FileNotFoundError:
+            return Config(app_path=app_dir_path)  # Nothing to Convert
 
     if config:
         config.write_to_toml(f"{app_dir_path}/config.toml")  # type: ignore

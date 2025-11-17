@@ -32,11 +32,19 @@ def known_folder_path(guid: uuid.UUID) -> str | None:
 
 
 class WinConfigMinimal:
-    """Minimal Windows config for exporting registry values to TOML."""
+    """Minimal Windows config for exporting pre-6.0 config values to TOML."""
 
     REGISTRY_SUBKEY = r"Software\Marginal\EDMarketConnector"
 
     def __init__(self) -> None:
+        # Try to open the key with read access
+        with winreg.OpenKey(
+                winreg.HKEY_CURRENT_USER,
+                self.REGISTRY_SUBKEY,
+                0,
+                winreg.KEY_READ | winreg.KEY_WOW64_64KEY
+        ):
+            pass  # If this fails, key doesn't exist, nothing to convert
         # Open or create the registry key
         self.__reg_handle = winreg.CreateKeyEx(
             winreg.HKEY_CURRENT_USER,
