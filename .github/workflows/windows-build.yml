@@ -221,7 +221,7 @@ jobs:
               EDMarketConnector-release-*.zip
   Merge:
     runs-on: ubuntu-latest
-    needs: [ windows_build_64, windows_build_32, linux_build ]
+    needs: [ windows_build_64, windows_build_86, linux_build ]
     steps:
       - name: Merge Artifacts
         uses: actions/upload-artifact/merge@v5
