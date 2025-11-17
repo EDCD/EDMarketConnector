@@ -100,7 +100,7 @@ jobs:
           path: 'EDMarketConnector'
           # 3. The .zip file has to be in the 'root' so that upload-artifact
           #   will process it.  Can't use relative paths.
-          filename: 'EDMarketConnector/EDMarketConnector-release-${SAFE_SEMVER}.zip'
+          filename: ${{ format('EDMarketConnector/EDMarketConnector-release-{0}.zip', env.SAFE_SEMVER) }}
           # 4. And all the exclusions need to be prefixed with the 'root'
           #   directory.
           # NB: If this gets too long it can cause zip 'Command Line Error',
@@ -175,7 +175,7 @@ jobs:
           path: 'EDMarketConnector'
           # 3. The .zip file has to be in the 'root' so that upload-artifact
           #   will process it.  Can't use relative paths.
-          filename: 'EDMarketConnector/EDMarketConnector-release-${SAFE_SEMVER}.zip'
+          filename: ${{ format('EDMarketConnector/EDMarketConnector-release-{0}.zip', env.SAFE_SEMVER) }}
           # 4. And all the exclusions need to be prefixed with the 'root'
           #   directory.
           # NB: If this gets too long it can cause zip 'Command Line Error',
