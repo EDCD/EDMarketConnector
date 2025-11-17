@@ -41,8 +41,7 @@ jobs:
         run: |
           # For 'tar' we can only specify filename/glob exclusions, not any
           # directory location
-          tar -c -v -z \
-              -f "../EDMarketConnector-release-${SAFE_SEMVER}.tar.gz" \
+          tar -czf "EDMarketConnector-release-${SAFE_SEMVER}.tar.gz" \
               -C .. \
               --exclude=EDMarketConnector-release-*.* \
               --exclude=.editorconfig \
