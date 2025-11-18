@@ -157,3 +157,183 @@ class OptionMenu(ttk.OptionMenu):
         # Workaround for https://bugs.python.org/issue25684
         for i in range(0, self['menu'].index('end') + 1):
             self['menu'].entryconfig(i, variable=variable)
+
+
+class ScrollableNotebook(Notebook):
+    """
+    ScrollableNotebook – A tab bar that scrolls horizontally when there are too many tabs.
+
+    Based off ttkScrollableNotebook by @muhammeteminturgut.
+    https://github.com/muhammeteminturgut/ttkScrollableNotebook
+    """
+
+    def __init__(
+        self,
+        master: ttk.Frame | None = None,
+        tabmenu: bool = False,
+        *args,
+        **kwargs
+    ) -> None:
+        super().__init__(master, **kwargs)
+
+        # Sliding state
+        self.xLocation: int = 0
+        self.timer: str | None = None
+        self.menuSpace: int = 50 if tabmenu else 30
+        self.contentsManaged: list[tk.Widget] = []
+
+        # Notebook that holds the actual content widgets
+        self.notebookContent: ttk.Notebook = ttk.Notebook(self, **kwargs)
+        self.notebookContent.pack(fill="both", expand=True)
+        self.notebookContent.bind("<Configure>", self._reset_slide)
+
+        # Notebook that displays scrollable tabs
+        self.notebookTab: ttk.Notebook = ttk.Notebook(self, **kwargs)
+        self.notebookTab.place(x=0, y=0)
+        self.notebookTab.bind("<<NotebookTabChanged>>", self._tab_changer)
+
+        # Sliding frame and controls
+        slide_frame: ttk.Frame = ttk.Frame(self)
+        slide_frame.place(relx=1.0, x=0, y=1, anchor=tk.NE)
+
+        if tabmenu:
+            menu_btn = ttk.Label(slide_frame, text="\u2630")
+            menu_btn.bind("<ButtonPress-1>", self._bottom_menu)
+            menu_btn.pack(side=tk.RIGHT)
+
+        left_arrow = ttk.Label(slide_frame, text=" \u276e")
+        left_arrow.bind("<ButtonPress-1>", self._left_slide_start)
+        left_arrow.bind("<ButtonRelease-1>", self._slide_stop)
+        left_arrow.pack(side=tk.LEFT)
+        right_arrow = ttk.Label(slide_frame, text=" \u276f")
+        right_arrow.bind("<ButtonPress-1>", self._right_slide_start)
+        right_arrow.bind("<ButtonRelease-1>", self._slide_stop)
+        right_arrow.pack(side=tk.RIGHT)
+
+        # Outer Notebook geometry
+        self.grid(padx=10, pady=10, sticky=tk.NSEW)
+
+    def _bottom_menu(self, event: tk.Event) -> None:
+        menu = tk.Menu(self, tearoff=0)
+        for tab in self.notebookTab.tabs():
+            label = self.notebookTab.tab(tab, option="text")
+            menu.add_command(label=label, command=lambda t=tab: self.select(t))  # type: ignore
+        try:
+            menu.tk_popup(event.x_root, event.y_root)
+        finally:
+            menu.grab_release()
+
+    def _tab_changer(self, event: tk.Event) -> None:
+        try:
+            idx = self.notebookTab.index("current")
+            self.notebookContent.select(idx)
+        except Exception:
+            pass
+
+    def _right_slide_start(self, event: tk.Event | None = None) -> None:
+        if self._right_slide(event):
+            self.timer = self.after(100, self._right_slide_start)
+
+    def _right_slide(self, event: tk.Event | None) -> bool:
+        tabs_w = self.notebookTab.winfo_width()
+        content_w = self.notebookContent.winfo_width()
+
+        if tabs_w > content_w - self.menuSpace:
+            remaining = content_w - (tabs_w + self.notebookTab.winfo_x())
+            if remaining <= self.menuSpace + 5:
+                self.xLocation -= 20
+                self.notebookTab.place(x=self.xLocation, y=0)
+                return True
+        return False
+
+    def _left_slide_start(self, event: tk.Event | None = None) -> None:
+        if self._left_slide(event):
+            self.timer = self.after(100, self._left_slide_start)
+
+    def _left_slide(self, event: tk.Event | None) -> bool:
+        if self.notebookTab.winfo_x() != 0:
+            self.xLocation += 20
+            self.notebookTab.place(x=self.xLocation, y=0)
+            return True
+        return False
+
+    def _slide_stop(self, event: tk.Event) -> None:
+        if self.timer is not None:
+            self.after_cancel(self.timer)
+            self.timer = None
+
+    def _reset_slide(self, event: tk.Event | None = None) -> None:
+        self.notebookTab.place(x=0, y=0)
+        self.xLocation = 0
+
+    def add(self, child: tk.Widget, **kwargs) -> None:
+        """Add content + visual tab."""
+        has_tabs = len(self.notebookTab.tabs()) > 0
+
+        # Content tab properties
+        content_kwargs = kwargs.copy()
+        content_kwargs["text"] = ""  # content tabs never show text
+
+        if has_tabs:
+            content_kwargs["state"] = "hidden"
+        else:
+            content_kwargs.pop("state", None)
+
+        # Add content widget
+        self.notebookContent.add(child, **content_kwargs)
+
+        # Add visible tab
+        self.notebookTab.add(ttk.Frame(self.notebookTab), **kwargs)
+        self.contentsManaged.append(child)
+
+    def __content_tab_id(self, tab_id: str) -> str:
+        idx = self.notebookTab.tabs().index(tab_id)
+        return self.notebookContent.tabs()[idx]
+
+    def forget(self, tab_id: str) -> None:  # type: ignore
+        """Remove a tab from both the visible tab strip and the hidden content notebook."""
+        idx = self.notebookTab.index(tab_id)
+        content_tab = self.__content_tab_id(tab_id)
+
+        self.notebookContent.forget(content_tab)
+        self.notebookTab.forget(tab_id)
+        self.contentsManaged[idx].destroy()
+        self.contentsManaged.pop(idx)
+
+    def hide(self, tab_id: str) -> None:
+        """Hide a tab without destroying it."""
+        self.notebookContent.hide(self.__content_tab_id(tab_id))
+        self.notebookTab.hide(tab_id)
+
+    def identify(self, x: int, y: int) -> str | None:  # type: ignore
+        """Identify the visible tab at a given x/y coord."""
+        return self.notebookTab.identify(x, y)
+
+    def index(self, tab_id: str) -> int:
+        """Return the index of a visible tab."""
+        return self.notebookTab.index(tab_id)
+
+    def insert(self, pos: int, child: tk.Widget, **kwargs) -> None:
+        """Insert a new tab at a specified position."""
+        self.notebookContent.insert(pos, child, **kwargs)
+        self.notebookTab.insert(pos, ttk.Frame(self.notebookTab), **kwargs)
+
+    def select(self, tab_id: str) -> None:  # type: ignore
+        """Select a tab."""
+        self.notebookTab.select(tab_id)
+
+    def tab(self, tab_id: str, option: str | None = None, **kwargs):
+        """Get/Set Options for tabs."""
+        c_kwargs = kwargs.copy()
+        c_kwargs["text"] = ""  # content tabs never show text
+        self.notebookContent.tab(self.__content_tab_id(tab_id), **c_kwargs)
+        return self.notebookTab.tab(tab_id, option=option, **kwargs)
+
+    def tabs(self) -> tuple[str, ...]:
+        """Tuple of all tabs."""
+        return self.notebookTab.tabs()
+
+    def enable_traversal(self) -> None:
+        """Enable keyboard shortcuts for tabs."""
+        self.notebookContent.enable_traversal()
+        self.notebookTab.enable_traversal()

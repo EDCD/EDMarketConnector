@@ -498,6 +498,15 @@
 /* prefs.py: Catch & Record Profiler Errors; */
 "Error in System Profiler" = "Error in System Profiler";
 
+/* prefs.py: Disabling a Plugin. */
+"Disabling plugin {PLUGIN}. This will cause a restart. Click OK to continue..." = "Disabling plugin {PLUGIN}. This will cause a restart. Click OK to continue...";
+
+/* prefs.py: Enable a Disabled Plugin */
+"Enable" = "Enable";
+
+/* prefs.py: Disable an Enabled Plugin */
+"Disable" = "Disable";
+
 /* stats.py: Cmdr stats; In files: stats.py:58; */
 "Balance" = "Balance";
 

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import contextlib
 import logging
+import time
 from os.path import join, normpath
 from pathlib import Path
 import subprocess
@@ -275,7 +276,7 @@ class PreferencesDialog(tk.Toplevel):
         frame.rowconfigure(0, weight=1)
         frame.rowconfigure(1, weight=0)
 
-        notebook: nb.Notebook = nb.Notebook(frame)
+        notebook: nb.ScrollableNotebook = nb.ScrollableNotebook(frame, tabmenu=True)
         notebook.bind('<<NotebookTabChanged>>', self.tabchanged)  # Recompute on tab change
 
         self.PADX = 10
@@ -323,12 +324,6 @@ class PreferencesDialog(tk.Toplevel):
 
         # Set Log Directory
         self.logfile_loc = Path(config.app_dir_path / 'logs')
-
-        # Set minimum size to prevent content cut-off
-        self.update_idletasks()  # Update "requested size" from geometry manager
-        min_width = self.winfo_reqwidth()
-        min_height = self.winfo_reqheight()
-        self.wm_minsize(min_width, min_height)
 
     def __setup_output_tab(self, root_notebook: ttk.Notebook) -> None:
         output_frame = nb.Frame(root_notebook)
@@ -980,11 +975,19 @@ class PreferencesDialog(tk.Toplevel):
             ).grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get())
 
             for plugin in enabled_plugins:
+                curr_row = row.get()
                 label = nb.Label(plugins_frame,
                                  text=plugin.name if plugin.name == plugin.folder
                                  else f'{plugin.folder} ({plugin.name})')
 
-                label.grid(columnspan=2, padx=self.LISTX, pady=self.PADY, sticky=tk.W, row=row.get())
+                label.grid(column=0, columnspan=2, padx=self.LISTX, pady=self.PADY, sticky=tk.W, row=curr_row)
+
+                btn = ttk.Button(
+                    plugins_frame,
+                    text=tr.tl("Disable"),  # LANG: Disable an Enabled Plugin
+                    command=lambda plugin=plugin: self.disable_plugin(plugin)  # type: ignore
+                )
+                btn.grid(column=3, padx=self.LISTX, pady=self.PADY, sticky=tk.W, row=curr_row)
 
         ############################################################
         # Show which plugins don't have Python 3.x support
@@ -1026,9 +1029,18 @@ class PreferencesDialog(tk.Toplevel):
             ).grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get())
 
             for plugin in disabled_plugins:
+                curr_row = row.get()
                 nb.Label(plugins_frame, text=plugin.name).grid(
-                    columnspan=2, padx=self.LISTX, pady=self.PADY, sticky=tk.W, row=row.get()
+                    column=0, columnspan=2, padx=self.LISTX, pady=self.PADY, sticky=tk.W, row=curr_row
                 )
+
+                btn = ttk.Button(
+                    plugins_frame,
+                    text=tr.tl("Enable"),  # LANG: Enable a Disabled Plugin
+                    command=lambda plugin=plugin: self.enable_plugin(plugin)  # type: ignore
+                )
+                btn.grid(column=3, padx=self.LISTX, pady=self.PADY, sticky=tk.W, row=curr_row)
+
         ############################################################
         # Show plugins that failed to load
         ############################################################
@@ -1049,6 +1061,55 @@ class PreferencesDialog(tk.Toplevel):
 
         # LANG: Label on Settings > Plugins tab
         notebook.add(plugins_frame, text=tr.tl('Plugins'))		# Tab heading in settings
+
+    def disable_plugin(self, plugin):
+        """Disable an existing plugin and restart."""
+        logger.debug(f"Calling plugin_stop() for {plugin.name}")
+        if plugin._get_func('plugin_stop'):  # Try to stop cleanly. We're going regardless...
+            plugin.module.plugin_stop()
+        # LANG: Text of Notification Popup for EDMC Restart
+        restart_msg = tr.tl(  # LANG: Disabling a Plugin
+            r"Disabling plugin {PLUGIN}. This will cause a restart. Click OK to continue..."
+        ).format(PLUGIN=plugin.name)
+        restart_box = tk.messagebox.Message(
+            title=tr.tl('Restart Required'),  # LANG: Title of Notification Popup for EDMC Restart
+            message=restart_msg,
+            type=tk.messagebox.OK
+        )
+        restart_box.show()
+        time.sleep(2)  # Give plugin stop time to work.
+        plug.PLUGINS.remove(plugin)  # Remove PLugin from active list
+        try:
+            folder = Path(config.plugin_dir_path / plugin.folder)
+            new_name = f"{folder}.disabled"
+            folder.rename(new_name)
+            logger.info(f"Disabled {plugin.name}.")
+        except FileExistsError:
+            logger.warning("Unable to disable the plugin!")
+            return
+        self.req_restart = True
+        self.apply()
+
+    def enable_plugin(self, plugin):
+        """Enable an existing plugin and restart."""
+        logger.debug(f"Attempting to enable {plugin.name}")
+        localfolder = plugin.folder + ".disabled"
+        folder = Path(config.plugin_dir_path) / localfolder
+        if not folder.exists():
+            logger.warning(f"Folder does not exist: {folder}")
+            return
+        new_folder = folder.with_name(plugin.folder.replace(".disabled", ""))
+        if new_folder.exists():
+            logger.warning(f"Target folder already exists: {new_folder}")
+            return
+        try:
+            folder.rename(new_folder)
+            logger.info(f"Enabled {plugin.name}.")
+        except Exception as e:
+            logger.error(f"Failed to enable plugin {plugin.name}: {e}")
+            return
+        self.req_restart = True
+        self.apply()
 
     def cmdrchanged(self, event=None):
         """

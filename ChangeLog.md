@@ -6,7 +6,7 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
       in the source (not distributed with the Windows installer) for the
       currently used version.
 ---
-Release 5.14.0
+Release 6.0.0
 ===
 
 This is the WORK IN PROGRESS changelog for upcoming release 5.14. All features are subject to change.
@@ -21,6 +21,17 @@ This is the WORK IN PROGRESS changelog for upcoming release 5.14. All features a
 * Changed some functions to use non-deprecated alternatives
 * Set new deprecation warnings using Python 3.13's new Deprecation decorator.
 * Fixed a bug where "en" would not be included as a valid language and raise a KeyError
+
+Release 5.13.3
+===
+This release contains a bugfix for a race condition that could occur if plugin setup took too long for the journal monitor thread.
+
+This often resulted in users seeing "Awaiting CMDR Login" even when already in the game.
+
+This will likely be the last release before 6.0.0.
+
+**Changes and Enhancements**
+* Fixes a race condition in journal reading.
 
 **Plugin Developers**
 * nb.Entry is deprecated, and is slated for removal in 6.0 or later. Please migrate to nb.EntryMenu
