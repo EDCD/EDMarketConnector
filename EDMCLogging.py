@@ -51,7 +51,7 @@ from threading import get_native_id as thread_native_id
 from time import gmtime
 from traceback import print_exc
 from typing import TYPE_CHECKING, cast
-from config import appcmdname, appname, config, trace_on
+from config import appcmdname, appname, config, trace_on, config_logger
 
 # TODO: Tests:
 #
@@ -535,4 +535,6 @@ if not loglevel:
 base_logger_name = appcmdname if os.getenv('EDMC_NO_UI') else appname
 
 edmclogger = Logger(base_logger_name, loglevel=loglevel)
+for h in config_logger.handlers[:]:
+    config_logger.removeHandler(h)
 logger: 'LoggerMixin' = edmclogger.get_logger()

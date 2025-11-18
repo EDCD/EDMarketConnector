@@ -38,7 +38,7 @@ from monitor import monitor
 from EDMCLogging import get_main_logger
 
 
-def get_sys_report(active_config: config.AbstractConfig) -> str:
+def get_sys_report(active_config: config.Config) -> str:
     """Gather system information about Elite, the Host Computer, and EDMC."""
     # Calculate Requested Information
     plt = platform.uname()
@@ -108,7 +108,7 @@ def copy_sys_report(root: tk.Tk, report: str) -> None:
     messagebox.showinfo("System Profiler", "System Report copied to Clipboard", parent=root)
 
 
-def main(active_config: config.AbstractConfig) -> None:
+def main(active_config: config.Config) -> None:
     """Entry Point for the System Profiler."""
     # Now Let's Begin
     root: tk.Tk = tk.Tk()

@@ -9,7 +9,6 @@ from pathlib import Path
 import subprocess
 import sys
 import tkinter as tk
-import warnings
 from os import system
 from tkinter import colorchooser as tkColorChooser  # type: ignore # noqa: N812
 from tkinter import ttk
@@ -36,12 +35,6 @@ logger = get_main_logger()
 ###########################################################################
 
 # May be imported by plugins
-
-@warnings.deprecated("Migrate to open_log_folder. Will remove in 6.0 or later.")
-def help_open_log_folder() -> None:
-    """Open the folder logs are stored in."""
-    open_folder(Path(config.app_dir_path / 'logs'))
-
 
 def open_folder(file: Path) -> None:
     """Open the given file in the OS file explorer."""

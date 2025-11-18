@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import sys
 import tkinter as tk
-import warnings
 from tkinter import ttk, messagebox
 from PIL import ImageGrab
 from l10n import translations as tr
@@ -119,28 +118,12 @@ class EntryMenu(ttk.Entry):
             pass
 
 
-class Entry(EntryMenu):
-    """Custom ttk.Entry class to fix some display issues."""
-
-    @warnings.deprecated("Migrate to EntryMenu. Will remove in 6.0 or later.")
-    def __init__(self, master: ttk.Frame | None = None, **kw):
-        EntryMenu.__init__(self, master, **kw)
-
-
 class Button(ttk.Button):
     """Custom ttk.Button class to fix some display issues."""
 
     def __init__(self, master: ttk.Frame | None = None, **kw):
         style = 'nb.TButton' if sys.platform == 'win32' else None
         super().__init__(master, style=style, **kw)  # type: ignore
-
-
-class ColoredButton(tk.Button):
-    """Custom tk.Button class to fix some display issues."""
-
-    @warnings.deprecated("Migrate to tk.Button. Will remove in 6.0 or later.")
-    def __init__(self, master: ttk.Frame | None = None, **kw):
-        tk.Button.__init__(self, master, **kw)
 
 
 class Checkbutton(ttk.Checkbutton):
