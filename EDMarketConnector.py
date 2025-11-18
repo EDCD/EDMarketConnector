@@ -2054,20 +2054,23 @@ def validate_providers():
     station_provider: str = config.get_str("station_provider")
     if station_provider not in plug.provides('station_url'):
         logger.error("Station Provider Not Valid. Setting to Default.")
+        if config.get_str('station_provider'):  # Only generate a pop-up if an invalid entry exists, not no value.
+            reset_providers["Station"] = (station_provider, "EDSM")
         config.set('station_provider', 'EDSM')
-        reset_providers["Station"] = (station_provider, "EDSM")
 
     shipyard_provider: str = config.get_str("shipyard_provider")
     if shipyard_provider not in plug.provides('shipyard_url'):
         logger.error("Shipyard Provider Not Valid. Setting to Default.")
+        if config.get_str('shipyard_provider'):  # Only generate a pop-up if an invalid entry exists, not no value.
+            reset_providers["Shipyard"] = (shipyard_provider, "EDSY")
         config.set('shipyard_provider', 'EDSY')
-        reset_providers["Shipyard"] = (shipyard_provider, "EDSY")
 
     system_provider: str = config.get_str("system_provider")
     if system_provider not in plug.provides('system_url'):
         logger.error("System Provider Not Valid. Setting to Default.")
+        if config.get_str('system_provider'):  # Only generate a pop-up if an invalid entry exists, not no value.
+            reset_providers["System"] = (system_provider, "EDSM")
         config.set('system_provider', 'EDSM')
-        reset_providers["System"] = (system_provider, "EDSM")
 
     if not reset_providers:
         return
