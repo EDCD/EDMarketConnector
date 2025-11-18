@@ -146,7 +146,8 @@ class _Theme:
     def register(self, widget: tk.Widget | tk.BitmapImage) -> None:  # noqa: CCR001, C901
         # Note widget and children for later application of a theme. Note if
         # the widget has explicit fg or bg attributes.
-        assert isinstance(widget, (tk.BitmapImage, tk.Widget)), widget
+        if not isinstance(widget, (tk.Widget, tk.BitmapImage)):
+            raise TypeError(f'Expected widget, got {type(widget)}')
         if not self.defaults:
             # Can't initialise this til window is created       # Windows
             self.defaults = {
@@ -221,7 +222,7 @@ class _Theme:
         widget = event.widget
         if widget and widget['state'] != tk.DISABLED:
             try:
-                widget.configure(state=tk.ACTIVE)
+                widget.configure(state=tk.ACTIVE)  # type: ignore
 
             except Exception:
                 logger.exception(f'Failure setting widget active: {widget=}')
@@ -238,7 +239,7 @@ class _Theme:
         widget = event.widget
         if widget and widget['state'] != tk.DISABLED:
             try:
-                widget.configure(state=tk.NORMAL)
+                widget.configure(state=tk.NORMAL)  # type: ignore
 
             except Exception:
                 logger.exception(f'Failure setting widget normal: {widget=}')
@@ -301,7 +302,8 @@ class _Theme:
         Also, register it for future updates.
         :param widget: Target widget.
         """
-        assert isinstance(widget, (tk.BitmapImage, tk.Widget)), widget
+        if not isinstance(widget, (tk.Widget, tk.BitmapImage)):
+            raise TypeError(f'Expected widget, got {type(widget)}')
         if not self.current:
             return  # No need to call this for widgets created in plugin_app()
 
@@ -325,7 +327,7 @@ class _Theme:
                 w_keys = []
 
             assert_str = f'{w_class} {widget} "{"text" in w_keys and widget["text"]}"'
-            raise AssertionError(assert_str)
+            raise ValueError(assert_str)
 
         attribs: set = self.widgets.get(widget, set())
 

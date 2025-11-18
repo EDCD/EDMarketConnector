@@ -1,9 +1,9 @@
 /* Language name */
 "!Language" = "Magyar";
 
+
 /* companion.py: Frontier CAPI data doesn't agree with latest Journal game location; In files: companion.py:245; */
 "Error: Frontier server is lagging" = "Hiba:Frontier szerver laggol";
-
 /* companion.py: Generic "something went wrong with Frontier Auth" error; In files: companion.py:271; */
 "Error: Invalid Credentials" = "Hiba:Érvénytelen hitelesítő adatok";
 
@@ -471,4 +471,3 @@
 
 /* stats.py: Status dialog title; In files: stats.py:418; */
 "Ships" = "Hajók";
-

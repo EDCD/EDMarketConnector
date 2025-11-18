@@ -153,6 +153,16 @@ See [#1327 - ModuleNotFound when creating a new plugin.](https://github.com/EDCD
 for some discussion.
 
 
+## Common Resources
+
+Some plugins may wish to use resources available in a different plugin, or use 
+common assets across plugins. This is possible, however care must be taken to 
+ensure that the plugins do not attempt to load non-existent data or create 
+circular imports. 
+
+For an example of how this is done, look at the code in `plugins/common_coreutils.py`
+and the usage of these functions in other core plugins. 
+
 ---
 
 ## Logging
@@ -602,9 +612,14 @@ for an example of these techniques.
 #### Journal Entry
 
 ```python
+from __future__ import annotations
+from typing import Any
+from EDMCLogging import get_main_logger
+
+logger = get_main_logger()
 def journal_entry(
-    cmdr: str, is_beta: bool, system: str, station: str, entry: Dict[str, Any], state: Dict[str, Any]
-) -> Optional[str]:
+    cmdr: str, is_beta: bool, system: str, station: str, entry: dict[str, Any], state: dict[str, Any]
+) -> str | None:
     if entry['event'] == 'FSDJump':
         # We arrived at a new system!
         if 'StarPos' in entry:
@@ -655,6 +670,10 @@ Content of `state` (updated to the current journal entry):
 | `ShipType`            |            `str`            | Internal name for the current ship type                                                                         |
 | `HullValue`           |            `int`            | Current ship value, excluding modules                                                                           |
 | `ModulesValue`        |            `int`            | Value of the current ship's modules                                                                             |
+| `UnladenMass`         |           `float`           | Unladen mass of current ship                                                                                    |
+| `CargoCapacity`       |            `int`            | Max cargo capacity of current ship                                                                              |
+| `MaxJumpRange`        |           `float`           | Unladen jump range of current ship                                                                              |
+| `FuelCapacity`        |      `dict[str,float]`      | Current max capacity of Main & Reserve tanks                                                                    |
 | `Rebuy`               |            `int`            | Current ship's rebuy cost                                                                                       |
 | `Modules`             |           `dict`            | Currently fitted modules                                                                                        |
 | `NavRoute`            |           `dict`            | Last plotted multi-hop route[1]                                                                                 |
@@ -684,6 +703,7 @@ Content of `state` (updated to the current journal entry):
 | `StationName`[3]      |       `Optional[str]`       | Name of the station we're docked at, if applicable                                                              |
 | `MarketID`[3]         |       `Optional[str]`       | MarketID of the station we're docked at, if applicable                                                          |
 | `StationType`[3]      |       `Optional[str]`       | Type of the station we're docked at, if applicable                                                              |
+| `Powerplay`           |           `dict`            | `dict` of information on Powerplay
 
 [1] - Contents of `NavRoute` not changed if a `NavRouteClear` event is seen,
 but plugins will see the `NavRouteClear` event.
@@ -831,6 +851,12 @@ documentation above for some caveats.  Do not just blindly use this data, or
 the 'Body' name value.
 
 `StationName`, `MarketID`, and `StationType` added to the `state` dictionary.
+
+New in version 5.13.0:
+
+`state` now has `Powerplay`, a `dict` including `Rank`, `Merits`, `Power`,
+`TimePledged`, and `Votes`. `Votes` should only be populated if playing in
+legacy mode, as it is no longer a concept in the current version of the game.
 
 ___
 

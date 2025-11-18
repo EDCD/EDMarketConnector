@@ -20,12 +20,15 @@ import sys
 import outfitting
 from edmc_data import coriolis_ship_map, ship_name_map
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # noqa: C901
 
     def add(modules, name, attributes) -> None:
         """Add the given module to the modules dict."""
-        assert name not in modules or modules[name] == attributes, f'{name}: {modules.get(name)} != {attributes}'
-        assert name not in modules, name
+        if name in modules and modules[name] != attributes:
+            raise ValueError(f'{name}: {modules.get(name)} != {attributes}')
+        if name in modules:
+            raise ValueError(f'{name} already exists in modules')
+
         modules[name] = attributes
 
     try:
@@ -50,7 +53,8 @@ if __name__ == "__main__":
     # Ship and armour masses
     for m in list(data['Ships'].values()):
         name = coriolis_ship_map.get(m['properties']['name'], str(m['properties']['name']))
-        assert name in reverse_ship_map, name
+        if name not in reverse_ship_map:
+            raise ValueError(f'Unknown ship: {name}')
         ships[name] = {'hullMass': m['properties']['hullMass'],
                        'reserveFuelCapacity': m['properties']['reserveFuelCapacity']}
         for i, bulkhead in enumerate(bulkheads):
@@ -64,7 +68,8 @@ if __name__ == "__main__":
     for cat in list(data['Modules'].values()):
         for grp, mlist in list(cat.items()):
             for m in mlist:
-                assert 'symbol' in m, m
+                if 'symbol' not in m:
+                    raise ValueError(f'No symbol in {m}')
                 key = str(m['symbol'].lower())
                 if grp == 'fsd':
                     modules[key] = {
@@ -86,10 +91,6 @@ if __name__ == "__main__":
     add(modules, 'int_stellarbodydiscoveryscanner_standard',      {'mass': 2})
     add(modules, 'int_stellarbodydiscoveryscanner_intermediate',  {'mass': 2})
     add(modules, 'int_stellarbodydiscoveryscanner_advanced',      {'mass': 2})
-
-    # Missing
-    add(modules, 'hpt_multicannon_fixed_small_advanced',          {'mass': 2})
-    add(modules, 'hpt_multicannon_fixed_medium_advanced',         {'mass': 4})
 
     modules = {k: modules[k] for k in sorted(modules)}
     with open("modules.json", "w") as modules_file:

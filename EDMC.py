@@ -10,12 +10,12 @@ from __future__ import annotations
 
 import argparse
 import json
-import locale
 import os
 import queue
 import sys
 from time import sleep, time
 from typing import TYPE_CHECKING, Any
+from common_utils import log_locale, SERVER_RETRY
 
 # isort: off
 os.environ["EDMC_NO_UI"] = "1"
@@ -52,29 +52,10 @@ import eddn  # noqa: E402
 
 
 # isort: on
-
-
-def log_locale(prefix: str) -> None:
-    """Log the current state of locale settings."""
-    logger.debug(f'''Locale: {prefix}
-Locale LC_COLLATE: {locale.getlocale(locale.LC_COLLATE)}
-Locale LC_CTYPE: {locale.getlocale(locale.LC_CTYPE)}
-Locale LC_MONETARY: {locale.getlocale(locale.LC_MONETARY)}
-Locale LC_NUMERIC: {locale.getlocale(locale.LC_NUMERIC)}
-Locale LC_TIME: {locale.getlocale(locale.LC_TIME)}'''
-                 )
-
-
 tr.install_dummy()
 
-SERVER_RETRY = 5  # retry pause for Companion servers [s]
 EXIT_SUCCESS, EXIT_SERVER, EXIT_CREDENTIALS, EXIT_VERIFICATION, EXIT_LAGGING, EXIT_SYS_ERR, EXIT_ARGS, \
     EXIT_JOURNAL_READ_ERR, EXIT_COMMANDER_UNKNOWN = range(9)
-
-
-def versioncmp(versionstring) -> list:
-    """Quick and dirty version comparison assuming "strict" numeric only version numbers."""
-    return list(map(int, versionstring.split('.')))
 
 
 def deep_get(target: dict | companion.CAPIData, *args: str, default=None) -> Any:
@@ -108,7 +89,7 @@ def deep_get(target: dict | companion.CAPIData, *args: str, default=None) -> Any
     return current
 
 
-def main():  # noqa: C901, CCR001
+def main() -> None:  # noqa: C901, CCR001
     """Run the main code of the program."""
     try:
         # arg parsing
@@ -143,6 +124,12 @@ def main():  # noqa: C901, CCR001
             "--trace-all",
             help='Force trace level logging, with all possible --trace-on values active.',
             action='store_true'
+        )
+
+        parser.add_argument(
+            '--refresh-all',
+            help='Iterate over all known CMDRs to try and refresh access tokens',
+            action='store_true',
         )
 
         parser.add_argument('-a', metavar='FILE', help='write ship loadout to FILE in Companion API json format')
@@ -203,6 +190,17 @@ def main():  # noqa: C901, CCR001
                 logger.info(f'marked {d} for TRACE')
 
         log_locale('Initial Locale')
+        if args.refresh_all:
+            # Attempt to refresh all known CMDRs. This MAY cause additional output if a token is invalid.
+            logger.debug("Refreshing all known CMDRs")
+            cmdrs = config.get_list('cmdrs', default=[])
+            for cmdr in cmdrs:
+                logger.debug(f'Attempting to use commander "{cmdr}"')
+                try:
+                    companion.session.login(cmdr, monitor.is_beta)
+                    logger.debug("Succeeded!")
+                except AttributeError:
+                    logger.debug(f"Unable to refresh CMDR {cmdr}.")
 
         if args.j:
             logger.debug('Import and collate from JSON dump')

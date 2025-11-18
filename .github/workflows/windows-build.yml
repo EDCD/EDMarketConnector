@@ -15,7 +15,7 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - name: Setting global variables
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         id: var
         with:
           script: |
@@ -27,7 +27,7 @@ jobs:
     name: Linux environment build steps
     runs-on: "ubuntu-latest"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: true
       - name: Create .gitversion
@@ -39,7 +39,7 @@ jobs:
           # For 'tar' we can only specify filename/glob exclusions, not any
           # directory location
           tar -c -v -z \
-              -f ../EDMarketConnector-release-${{ needs.variables.outputs.sem_ver }}.tar.gz \
+              -f "../EDMarketConnector-release-${{ needs.variables.outputs.sem_ver }}.tar.gz" \
               -C .. \
               --exclude=EDMarketConnector-release-*.* \
               --exclude=.editorconfig \
@@ -59,7 +59,7 @@ jobs:
               --exclude=scripts \
               --exclude=tests \
               EDMarketConnector
-            mv ../EDMarketConnector-release-${{ needs.variables.outputs.sem_ver }}.tar.gz .
+            mv "../EDMarketConnector-release-${{ needs.variables.outputs.sem_ver }}.tar.gz" .
 
       - name: Upload build files
         uses: actions/upload-artifact@v4
@@ -78,7 +78,7 @@ jobs:
         shell: powershell
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: true
 
@@ -101,7 +101,7 @@ jobs:
           #   presumably due to a Windows CL length limit.
           exclusions: 'EDMarketConnector/EDMarketConnector-release-*.* EDMarketConnector/.editorconfig EDMarketConnector/.flake8 EDMarketConnector/.git* EDMarketConnector/.mypy.ini EDMarketConnector/.pre-commit-config.yaml EDMarketConnector/build.py EDMarketConnector/*.manifest EDMarketConnector/coriolis-data/ EDMarketConnector/img/ EDMarketConnector/pyproject.toml EDMarketConnector/scripts/ EDMarketConnector/tests/'
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version-file: '.python-version'
           architecture: "x86"
@@ -109,14 +109,13 @@ jobs:
 
       - name: Install python tools
         run: |
-          pip install wheel
           pip install -r requirements-dev.txt
 
       - name: Download winsparkle
         run: |
-          Invoke-Webrequest -UseBasicParsing https://github.com/vslavik/winsparkle/releases/download/v0.8.1/WinSparkle-0.8.1.zip -OutFile out.zip
+          Invoke-Webrequest -UseBasicParsing https://github.com/vslavik/winsparkle/releases/download/v0.9.0/WinSparkle-0.9.0.zip -OutFile out.zip
           Expand-Archive out.zip
-          Move-Item 'out\WinSparkle-0.8.1\Release\*' '.\'
+          Move-Item 'out\WinSparkle-0.9.0\Release\*' '.\'
 
       - name: Build EDMC
         run: |
@@ -156,7 +155,7 @@ jobs:
 
     steps:
       - name: Download binary
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: Built files
           path: ./

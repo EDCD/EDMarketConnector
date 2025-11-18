@@ -18,6 +18,7 @@ referenced in this file (or only in any other core plugin), and if so...
     `build.py` TO ENSURE THE FILES ARE ACTUALLY PRESENT
     IN AN END-USER INSTALLATION ON WINDOWS.
 """
+# pylint: disable=import-error
 from __future__ import annotations
 
 import http
@@ -47,6 +48,7 @@ from prefs import prefsVersion
 from ttkHyperlinkLabel import HyperlinkLabel
 from util import text
 from l10n import translations as tr
+from plugins.common_coreutils import PADX, PADY, BUTTONX, this_format_common
 
 logger = get_main_logger()
 
@@ -221,22 +223,24 @@ class EDDNSender:
 
     def convert_legacy_file(self):
         """Convert a legacy file's contents into the sqlite3 db."""
+        # DEPRECATED: Legacy files no longer used as of 5.6.0. Will remove in 6.0 or later.
         filename = config.app_dir_path / 'replay.jsonl'
+        if not filename.exists():
+            return
+        logger.info("Converting legacy `replay.jsonl` to `eddn_queue-v1.db`")
         try:
-            with open(filename, 'r+', buffering=1) as replay_file:
-                logger.info("Converting legacy `replay.jsonl` to `eddn_queue-v1.db`")
+            with filename.open('r', encoding='utf-8') as replay_file:
                 for line in replay_file:
                     cmdr, msg = json.loads(line)
                     self.add_message(cmdr, msg)
-
-        except FileNotFoundError:
+        except Exception as e:
+            logger.exception("Failed to convert legacy file: %s", e)
             return
-
-        logger.info("Conversion to `eddn_queue-v1.db` complete, removing `replay.jsonl`")
-        # Best effort at removing the file/contents
-        with open(filename, 'w') as replay_file:
-            replay_file.truncate()
-        os.unlink(filename)
+        logger.info("Conversion complete, removing `replay.jsonl`")
+        try:
+            filename.unlink()
+        except Exception as e:
+            logger.warning("Could not delete legacy file: %s", e)
 
     def close(self) -> None:
         """Clean up any resources."""
@@ -2145,10 +2149,6 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> Frame:
     :param is_beta: `bool` - True if this is a beta version of the Game.
     :return: The tkinter frame we created.
     """
-    PADX = 10  # noqa: N806
-    BUTTONX = 12  # noqa: N806 # indent Checkbuttons and Radiobuttons
-    PADY = 1  # noqa: N806
-
     if prefsVersion.shouldSetDefaults('0.0.0.0', not bool(config.get_int('output'))):
         output: int = config.OUT_EDDN_SEND_STATION_DATA | config.OUT_EDDN_SEND_NON_STATION  # default settings
 
@@ -2349,11 +2349,7 @@ def journal_entry(  # noqa: C901, CCR001
     this.body_id = state['BodyID']
     this.body_type = state['BodyType']
     this.coordinates = state['StarPos']
-    this.system_address = state['SystemAddress']
-    this.system_name = state['SystemName']
-    this.station_name = state['StationName']
-    this.station_type = state['StationType']
-    this.station_marketid = state['MarketID']
+    this_format_common(this, state)
 
     if event_name == 'docked':
         # Trigger a send/retry of pending EDDN messages

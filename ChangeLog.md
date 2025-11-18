@@ -1,11 +1,196 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
-* We currently test against, and package with, Python 3.11.9, 32-bit.
+* We currently test against, and package with, Python 3.11, 32-bit.
   * As a result, we do not support Windows 7, 8, or 8.1.
   * Developers can check the contents of the `.python-version` file
       in the source (not distributed with the Windows installer) for the
       currently used version.
 ---
+Release 5.13.3
+===
+This release contains a bugfix for a race condition that could occur if plugin setup took too long for the journal monitor thread.
+
+This often resulted in users seeing "Awaiting CMDR Login" even when already in the game.
+
+This will likely be the last release before 6.0.0.
+
+**Changes and Enhancements**
+* Fixes a race condition in journal reading.
+
+**Plugin Developers**
+* nb.Entry is deprecated, and is slated for removal in 6.0 or later. Please migrate to nb.EntryMenu
+* nb.ColoredButton is deprecated, and is slated for removal in 6.0 or later. Please migrate to tk.Button
+* Calling internal translations with `_()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to importing `translations` and calling `translations.translate` or `translations.tl` directly
+* `Translations` as the translate system singleton is deprecated, and is slated for removal in 6.0 or later. Please migrate to the `translations` singleton
+* `help_open_log_folder()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to open_folder()
+* `update_feed` is deprecated, and is slated for removal in 6.0 or later. Please migrate to `get_update_feed()`
+
+Release 5.13.2
+===
+This release contains an update to a series of behind-the-scenes tools, as well as adding Corsair, Cobra Mk V, 
+Type-11, and Panther CLipper Mk II information.
+
+**Changes and Enhancements**
+* Adds Missing Ship Information
+* Updates Dependencies
+* Minor Logic Improvements for Journal Monitoring
+
+**Plugin Developers**
+* nb.Entry is deprecated, and is slated for removal in 6.0 or later. Please migrate to nb.EntryMenu
+* nb.ColoredButton is deprecated, and is slated for removal in 6.0 or later. Please migrate to tk.Button
+* Calling internal translations with `_()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to importing `translations` and calling `translations.translate` or `translations.tl` directly
+* `Translations` as the translate system singleton is deprecated, and is slated for removal in 6.0 or later. Please migrate to the `translations` singleton
+* `help_open_log_folder()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to open_folder()
+* `update_feed` is deprecated, and is slated for removal in 6.0 or later. Please migrate to `get_update_feed()`
+
+Release 5.13.1
+===
+This release fixes a bug with 5.13.0 that could cause the program to fail to launch if a non-English locale 
+and English language pack were selected on Windows. 
+
+This release also includes information for Cobra Mk V armor and modules, as well as the Human Extraction module.
+
+**Changes and Enhancements**
+* Adds Cobra Mk V information
+* Updates Translations
+
+**Bug Fixes**
+Fixes a widely reported bug with 5.13.0 that could cause English-Language non-English locales to crash on start.
+
+**Plugin Developers**
+* nb.Entry is deprecated, and is slated for removal in 6.0 or later. Please migrate to nb.EntryMenu
+* nb.ColoredButton is deprecated, and is slated for removal in 6.0 or later. Please migrate to tk.Button
+* Calling internal translations with `_()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to importing `translations` and calling `translations.translate` or `translations.tl` directly
+* `Translations` as the translate system singleton is deprecated, and is slated for removal in 6.0 or later. Please migrate to the `translations` singleton
+* `help_open_log_folder()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to open_folder()
+* `update_feed` is deprecated, and is slated for removal in 6.0 or later. Please migrate to `get_update_feed()`
+
+
+Release 5.13.0
+===
+This release contains a significant refactoring away from ctypes code for interacting with the Windows API,
+establishment of a Common Code file and plugin, adds a timestamp check to discovered events, and more!
+
+This release adds the new `plugins/common_coreutils.py` plugin and `common_utils.py` core file. Developers 
+can use this as an example of how to call one plugin from another.
+
+This release also removes the check for WiX-based installer versions of EDMC prior to 5.9.1. 
+
+**Changes and Enhancements**
+* Adds a check to the timestamp of all events before passing to Plugins
+* Adds the new `--skip-timecheck` argument to disable the new timestamp checker
+* Adds the ability to have EDMC iterate over all known CMDRs to keep Frontier Auth valid
+* Adds the option to disable the Windows SysTray
+* Adds some new options to the SysTray right-click menu
+* Adds PowerPlayMerits and PowerPlayRank event support
+* Adds a warning if the updater fails to initialize
+* Updates the WinSparkle Updater
+* Updates a number of type hints
+* Updates a number of dependencies
+* Updates a few internal references for stations for consistency
+* Updates a confusing error when the CAPI API is out of date
+* Updates the example journal_entry function in PLUGINS.md for current type hints
+* Improves the detection of Wine for program compatibility
+* Improves the detection of the current language for translation compatibility
+* Minor efficiency and readability updates
+* Reduces duplicate code by refactoring to common code files
+* Removes the old check for WiX based installers to improve performance
+* Removes a few unused functions that aren't part of the public API
+* Refactors a significant amount of ctypes code to utilize pywin32
+* Removes a number of assert statements for future compatibility
+
+**Bug Fixes**
+* Fixes a bug where Inara Station and System links were broken
+* Fixes a bug where directory paths starting with `~` would not be processed by the journal lock
+* Fixes (and redoes) the Hotkey functionality on Windows
+* Fixes a few typos
+* Fixes a few calls from `config.get()` to their proper `get_x()
+
+**Plugin Developers**
+* nb.Entry is deprecated, and is slated for removal in 6.0 or later. Please migrate to nb.EntryMenu
+* nb.ColoredButton is deprecated, and is slated for removal in 6.0 or later. Please migrate to tk.Button
+* Calling internal translations with `_()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to importing `translations` and calling `translations.translate` or `translations.tl` directly
+* `Translations` as the translate system singleton is deprecated, and is slated for removal in 6.0 or later. Please migrate to the `translations` singleton
+* `help_open_log_folder()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to open_folder()
+* `update_feed` is deprecated, and is slated for removal in 6.0 or later. Please migrate to `get_update_feed()`
+
+
+Release 5.12.5
+===
+Well that was certainly something. Happy April! This release removes the April 1 UwUification of EDMC
+ as well as updating WinSparkle versions, updated requirements, and fixes a minor bug in the plugin system.
+
+**Changes and Enhancements**
+* Updates WinSparkle Updater 
+* Updated a number of development pre-commit hooks
+* Removes the One-Time-UwU
+* Adds UwU as an additional supported language
+* Updated a number of dependencies
+
+**Bug Fixes**
+* Fixes a minor bug that could cause importlib in plug.py to not think it was loaded
+
+**Plugin Developers**
+* nb.Entry is deprecated, and is slated for removal in 6.0 or later. Please migrate to nb.EntryMenu
+* nb.ColoredButton is deprecated, and is slated for removal in 6.0 or later. Please migrate to tk.Button
+* Calling internal translations with `_()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to importing `translations` and calling `translations.translate` or `translations.tl` directly
+* `Translations` as the translate system singleton is deprecated, and is slated for removal in 6.0 or later. Please migrate to the `translations` singleton
+* `help_open_log_folder()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to open_folder()
+* `update_feed` is deprecated, and is slated for removal in 6.0 or later. Please migrate to `get_update_feed()`.
+
+
+Release 5.12.4
+===
+This is a wewease update a nyumbew of dependencies, twanswations, and fix a bug with misnyamed ewements.
+
+**_Happy Apwiw 1st UwU_**
+
+**Changes and Enhancements**
+* Updates Python Vewsion to the wastest buiwd of 3.11 (Updates Python Version to the lastest build of 3.11)
+* Updates a nyumbew of twanswation fiwes (Updates a number of Translation Files)
+* Updates a nyumbew of devewopment dependencies (Updates a number of Development Dependencies)
+* Wemuvs an unnyeeded Execution Powicy change by the instawwew (Removes an unneeded Execution Policy change by the installer)
+
+**Bug Fixes**
+* Fixes a bug whewe a misnyamed categowy of matewiaws c-couwd bweak cewtain twansactions (Fixes a bug where a misnamed category of materials could break certain transactions)
+
+This hurt me to type. I'm sorry.
+
+**Plugin Developers**
+* nb.Entry is deprecated, and is slated for removal in 6.0 or later. Please migrate to nb.EntryMenu
+* nb.ColoredButton is deprecated, and is slated for removal in 6.0 or later. Please migrate to tk.Button
+* Calling internal translations with `_()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to importing `translations` and calling `translations.translate` or `translations.tl` directly
+* `Translations` as the translate system singleton is deprecated, and is slated for removal in 6.0 or later. Please migrate to the `translations` singleton
+* `help_open_log_folder()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to open_folder()
+* `update_feed` is deprecated, and is slated for removal in 6.0 or later. Please migrate to `get_update_feed()`.
+
+Release 5.12.2
+===
+This is a release to test a number of bugfixes and security improvements in EDMC. 
+
+**Changes and Enhancements**
+* Adds a guard against workflow shell execution vulnerabilities in GitHub Actions
+* Adds a "Copy" icon in the EDMC System Profiler
+* Includes additional Loadout event properties in the "State" context
+* Updates Dependencies and Submodules
+* Removes an outdated development script that was no longer in use and prevented dependency updates
+* Replaces types-pkg-resources with types-setuptools per PyPi documentation
+
+**Bug Fixes**
+* Removes Duplicate Coriolis Definitions Included In Submodules
+* Adds Context Support for Mandalay and Cobra Mk V, and Type-8 Transporter
+* Adds a number of missing modules to modules.json
+* Fixes a widely-reported bug where missing HullValue or ModuleValue entries would cause parsing to crash
+* Fixes a bug where PSUtils exception handling was not processed
+
+**Plugin Developers**
+* nb.Entry is deprecated, and is slated for removal in 6.0 or later. Please migrate to nb.EntryMenu
+* nb.ColoredButton is deprecated, and is slated for removal in 6.0 or later. Please migrate to tk.Button
+* Calling internal translations with `_()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to importing `translations` and calling `translations.translate` or `translations.tl` directly
+* `Translations` as the translate system singleton is deprecated, and is slated for removal in 6.0 or later. Please migrate to the `translations` singleton
+* `help_open_log_folder()` is deprecated, and is slated for removal in 6.0 or later. Please migrate to open_folder()
+* `update_feed` is deprecated, and is slated for removal in 6.0 or later. Please migrate to `get_update_feed()`.
+
 Release 5.12.1
 ===
 

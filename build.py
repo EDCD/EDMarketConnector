@@ -121,6 +121,7 @@ def build() -> None:
         "plugins/edsy.py",
         "plugins/inara.py",
         "plugins/spansh_core.py",
+        "plugins/common_coreutils.py"
     ]
     options: dict = {
         "py2exe": {
@@ -129,9 +130,9 @@ def build() -> None:
             "packages": [
                 "asyncio",
                 "multiprocessing",
-                "pkg_resources._vendor.platformdirs",
                 "sqlite3",
                 "util",
+                "plugins"
             ],
             "includes": ["dataclasses", "shutil", "timeout_session", "zipfile"],
             "excludes": [

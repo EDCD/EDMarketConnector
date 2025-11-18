@@ -141,6 +141,10 @@ class EDLogs(FileSystemEventHandler):
             'ShipType':           None,
             'HullValue':          None,
             'ModulesValue':       None,
+            'UnladenMass':        None,
+            'CargoCapacity':      None,
+            'MaxJumpRange':       None,
+            'FuelCapacity':       None,
             'Rebuy':              None,
             'Modules':            None,
             'CargoJSON':          None,  # The raw data from the last time cargo.json was read
@@ -175,6 +179,13 @@ class EDLogs(FileSystemEventHandler):
             'StationName':        None,
 
             'NavRoute':           None,
+            'Powerplay':      {
+                'Power':          None,
+                'Rank':           None,
+                'Merits':         None,
+                'Votes':          None,
+                'TimePledged':    None,
+            },
         }
 
     def start(self, root: 'tkinter.Tk') -> bool:  # noqa: CCR001
@@ -300,7 +311,8 @@ class EDLogs(FileSystemEventHandler):
         if self.observed:
             logger.debug('self.observed: Calling unschedule_all()')
             self.observed = None
-            assert self.observer is not None, 'Observer was none but it is in use?'
+            if self.observer is None:
+                raise RuntimeError("Observer was None but it is in use?")
             self.observer.unschedule_all()
             logger.debug('Done')
 
@@ -337,9 +349,9 @@ class EDLogs(FileSystemEventHandler):
 
     def on_created(self, event: 'FileSystemEvent') -> None:
         """Watchdog callback when, e.g. client (re)started."""
-        if not event.is_directory and self._RE_LOGFILE.search(basename(event.src_path)):
+        if not event.is_directory and self._RE_LOGFILE.search(str(basename(event.src_path))):
 
-            self.logfile = event.src_path
+            self.logfile = event.src_path  # type: ignore
 
     def worker(self) -> None:  # noqa: C901, CCR001
         """
@@ -405,7 +417,8 @@ class EDLogs(FileSystemEventHandler):
         # Watchdog thread -- there is a way to get this by using self.observer.emitters and checking for an attribute:
         # watch, but that may have unforseen differences in behaviour.
         if self.observed:
-            assert self.observer is not None, 'self.observer is None but also in use?'
+            if self.observer is None:
+                raise RuntimeError("Observer was None but is it in use?")
             # Note: Uses undocumented attribute
             emitter = self.observed and self.observer._emitter_for_watch[self.observed]
 
@@ -544,7 +557,8 @@ class EDLogs(FileSystemEventHandler):
         try:
             # Preserve property order because why not?
             entry: MutableMapping[str, Any] = json.loads(line)
-            assert 'timestamp' in entry, "Timestamp does not exist in the entry"
+            if 'timestamp' not in entry:
+                raise KeyError("Timestamp does not exist in the entry")
 
             self.__navroute_retry()
 
@@ -680,6 +694,11 @@ class EDLogs(FileSystemEventHandler):
                 self.state['ShipType'] = self.canonicalise(entry['Ship'])
                 self.state['HullValue'] = entry.get('HullValue')  # not present on exiting Outfitting
                 self.state['ModulesValue'] = entry.get('ModulesValue')  # not present on exiting Outfitting
+                self.state['UnladenMass'] = entry.get('UnladenMass')
+                self.state['CargoCapacity'] = entry.get('CargoCapacity')
+                self.state['MaxJumpRange'] = entry.get('MaxJumpRange')
+                self.state["FuelCapacity"] = {name: entry.get("FuelCapacity", {}).get(name) for name in
+                                              ("Main", "Reserve")}
                 self.state['Rebuy'] = entry.get('Rebuy')
                 # Remove spurious differences between initial Loadout event and subsequent
                 self.state['Modules'] = {}
@@ -703,15 +722,15 @@ class EDLogs(FileSystemEventHandler):
                         cap = module['Item'].split('size')
                         cap = cap[1].split('_')
                         cap = 2 ** int(cap[0])
-                        ship = ship_name_map[entry["Ship"]]
+                        ship = ship_name_map.get(entry["Ship"], entry["Ship"])
                         fuel = {'Main': cap, 'Reserve': ships[ship]['reserveFuelCapacity']}
                         data_dict.update({"FuelCapacity": fuel})
                 data_dict.update({
                     'Ship': entry["Ship"],
                     'ShipName': entry['ShipName'],
                     'ShipIdent': entry['ShipIdent'],
-                    'HullValue': entry['HullValue'],
-                    'ModulesValue': entry['ModulesValue'],
+                    'HullValue': entry.get('HullValue'),  # type: ignore
+                    'ModulesValue': entry.get('ModulesValue'),  # type: ignore
                     'Rebuy': entry['Rebuy'],
                     'MaxJumpRange': entry['MaxJumpRange'],
                     'UnladenMass': entry['UnladenMass'],
@@ -1642,7 +1661,8 @@ class EDLogs(FileSystemEventHandler):
                                 self.state[category].pop(material)
 
                 module = self.state['Modules'][entry['Slot']]
-                assert module['Item'] == self.canonicalise(entry['Module'])
+                if module['Item'] != self.canonicalise(entry['Module']):
+                    raise ValueError(f"Module {entry['Slot']} is not {entry['Module']}")
                 module['Engineering'] = {
                     'Engineer':      entry['Engineer'],
                     'EngineerID':    entry['EngineerID'],
@@ -1672,6 +1692,8 @@ class EDLogs(FileSystemEventHandler):
                     if 'Category' in reward:  # Category not present in E:D 3.0
                         category = self.category(reward['Category'])
                         material = self.canonicalise(reward['Name'])
+                        if category == 'Elements':
+                            category = 'Raw'
                         self.state[category][material] += reward.get('Count', 1)
 
             elif event_type == 'engineercontribution':
@@ -1829,6 +1851,19 @@ class EDLogs(FileSystemEventHandler):
 
                 # There should be a `Backpack` event as you 'come to' in the
                 # new location, so no need to zero out BackPack here.
+
+            elif event_type == 'powerplay':
+                self.state['Powerplay']['Power'] = entry.get('Power', '')
+                self.state['Powerplay']['Rank'] = entry.get('Rank', 0)
+                self.state['Powerplay']['Merits'] = entry.get('Merits', 0)
+                self.state['Powerplay']['Votes'] = entry.get('Votes', 0)
+                self.state['Powerplay']['TimePledged'] = entry.get('TimePledged', 0)
+
+            elif event_type == 'powerplaymerits':
+                self.state['Powerplay']['Merits'] = entry.get('TotalMerits', 0)
+
+            elif event_type == 'powerplayrank':
+                self.state['Powerplay']['Rank'] = entry.get('Rank', 0)
 
             return entry
 
@@ -2151,7 +2186,7 @@ class EDLogs(FileSystemEventHandler):
             try:
                 with p.oneshot():
                     if p.status() not in [psutil.STATUS_RUNNING, psutil.STATUS_SLEEPING]:
-                        raise psutil.NoSuchProcess
+                        raise psutil.NoSuchProcess(p.pid)
             except psutil.NoSuchProcess:
                 # Process likely expired
                 self.running_process = None

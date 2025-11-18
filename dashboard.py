@@ -87,7 +87,7 @@ class Dashboard(FileSystemEventHandler):
 
         if not self.observed and sys.platform == 'win32':
             logger.debug('Starting observer...')
-            self.observed = cast(BaseObserver, self.observer).schedule(self, self.currentdir)
+            self.observed = cast(BaseObserver, self.observer).schedule(self, self.currentdir)  # type: ignore
             logger.debug('Done')
 
         logger.info(f'{(sys.platform != "win32") and "Polling" or "Monitoring"} Dashboard "{self.currentdir}"')
@@ -123,12 +123,12 @@ class Dashboard(FileSystemEventHandler):
 
         if self.observer:
             logger.debug('Calling self.observer.stop()')
-            self.observer.stop()
+            self.observer.stop()  # type: ignore
             logger.debug('Done')
 
         if self.observer:
             logger.debug('Joining self.observer...')
-            self.observer.join()
+            self.observer.join()  # type: ignore
             logger.debug('Done')
             self.observer = None  # type: ignore
 

@@ -1,3 +1,9 @@
+/* companion.py: Frontier CAPI data doesn't agree with latest Journal game location; In files: companion.py:245; */
+"Error: Frontier CAPI data out of sync" = "Błąd: Dane Frontier CAPI nie są zsynchronizowane";
+
+/* prefs.py: Appearance option for Windows "Disable Systray"; */
+"Disable Systray" = "Wyłącz zasobnik systemowy";
+
 /* edsm.py:Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:316; */
 "Send flight log and CMDR status to EDSM" = "Wyślij flight log i status gracza do EDSM";
 
@@ -12,9 +18,9 @@
 /* companion.py: Frontier CAPI didn't respond; In files: companion.py:226; */
 "Error: Frontier CAPI didn't respond" = "Błąd: Brak odpowiedzi od CAPI Frontier";
 
+
 /* companion.py: Frontier CAPI data doesn't agree with latest Journal game location; In files: companion.py:245; */
 "Error: Frontier server is lagging" = "Błąd: Serwer Frontiera laguje";
-
 /* companion.py: Commander is docked at an EDO settlement, got out and back in, we forgot the station; In files: companion.py:261; */
 "Docked but unknown station: EDO Settlement?" = "Zadokowany na nieznanej stacji: czyżby kolonia EDO?";
 
@@ -35,6 +41,12 @@
 
 /* companion.py: Failed to get Access Token from Frontier Auth service; In files: companion.py:508; */
 "Error: unable to get token" = "Błąd: Nie można pobrać tokenu";
+
+/* EDMarketConnector.py: EDMC Critical Error Notification; */
+"EDMC encountered a critical error, and cannot recover. EDMC is shutting down for its own protection!" = "Program EDMC napotkał błąd krytyczny i nie może odzyskać sprawności. EDMC zamyka się dla własnego bezpieczeństwa!";
+
+/* EDMarketConnector.py: EDMC Critical Error Details; */
+"Here's what EDMC Detected:\r\n\r\n{ERR}\r\n\r\nDo you want to file a Bug Report on GitHub?" = "Oto co wykryło EDMC:\n\n{ERR}\n\nCzy chcesz zgłosić błąd w GitHubie?";
 
 /* companion.py: Frontier CAPI returned 418, meaning down for maintenance; In files: companion.py:844; */
 "Frontier CAPI down for maintenance" = "CAPI w trakcie prac serwisowych";
@@ -87,6 +99,9 @@
 /* EDMarketConnector.py: Help > Check for Updates...; In files: EDMarketConnector.py:930; EDMarketConnector.py:958; */
 "Check for Updates..." = "Sprawdź aktualizacje...";
 
+/* EDMarketConnector.py: Help > Open System Profiler; In files: EDMarketConnector.py:888; */
+"Open System Profiler" = "Otwórz Profiler Systemu";
+
 /* EDMarketConnector.py: File > Save Raw Data...; In files: EDMarketConnector.py:931; EDMarketConnector.py:948; */
 "Save Raw Data..." = "Zapisz Nieprzetworzone Dane...";
 
@@ -116,6 +131,15 @@
 
 /* EDMarketConnector.py: Label for 'Copy' as in 'Copy and Paste'; ttkHyperlinkLabel.py: Label for 'Copy' as in 'Copy and Paste'; In files: EDMarketConnector.py:962; ttkHyperlinkLabel.py:53; */
 "Copy" = "Kopiuj";
+
+/* myNotebook.py: Label for 'Cut' as in 'Cut and Paste'; */
+"Cut" = "Wytnij";
+
+/* myNotebook.py: Label for 'Paste' as in 'Copy and Paste'; */
+"Paste" = "Wklej";
+
+/* myNotebook.py: Label for 'Select All'; */
+"Select All" = "Zaznacz wszystko";
 
 /* EDMarketConnector.py: CAPI auth aborted because of killswitch; EDMarketConnector.py: CAPI auth query aborted because of killswitch; In files: EDMarketConnector.py:973; EDMarketConnector.py:1067; */
 "CAPI auth disabled by killswitch" = "Autoryzacja CAPI wyłączona \"kill switchem\".";
@@ -158,6 +182,12 @@
 
 /* EDMarketConnector.py: CAPI fleetcarrier query aborted because of killswitch; In files: EDMarketConnector.py:1157; */
 "CAPI fleetcarrier disabled by killswitch" = "Fleetcarier CAPI wyłączony \"kill switchem\"";
+
+/* EDMarketConnector.py: No data was returned for the Fleet Carrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
+"CAPI: No Fleet Carrier data returned" = "CAPI: Nie zwrócono danych dotyczących lotniskowca";
+
+/* EDMarketConnector.py: We didn't have the Fleet Carrier callsign when we should have; In files: EDMarketConnector.py:1223; */
+"CAPI: Fleet Carrier data incomplete" = "CAPI: Niekompletne dane lotniskowca";
 
 /* EDMarketConnector.py: No data was returned for the commander from the Frontier CAPI; In files: EDMarketConnector.py:1242; */
 "CAPI: No commander data returned" = "CAPI: Nie zwrócono danych dowódcy";
@@ -363,6 +393,9 @@
 /* prefs.py: Settings > Configuration - Label for CAPI section; In files: prefs.py:469; */
 "CAPI Settings" = "Ustawienia CAPI";
 
+/* prefs.py: Configuration - Enable or disable the Fleet Carrier CAPI calls; In files: prefs.py:475; */
+"Enable Fleet Carrier CAPI Queries" = "Włącz zapytania CAPI dla lotniskowca";
+
 /* prefs.py: Hotkey/Shortcut settings prompt on Windows; In files: prefs.py:492; */
 "Hotkey" = "Skr. Klaw.";
 
@@ -441,6 +474,12 @@
 /* prefs.py: Label for location of third-party plugins folder; In files: prefs.py:908; */
 "Plugins folder" = "Folder pluginów";
 
+/* prefs.py: Label on button used to open the Plugin Folder; */
+"Open Plugins Folder" = "Otwórz Folder pluginów";
+
+/* prefs.py: Selecting the Location of the Plugin Directory on the Filesystem; */
+"Plugin Directory Location" = "Lokalizacja katalagu Pluginów";
+
 /* prefs.py: Tip/label about how to disable plugins; In files: prefs.py:923; */
 "Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "Wskazówka: Możesz wyłączyć pluginy{CR}dodając '{EXT}' do nazwy folderu";
 
@@ -458,6 +497,9 @@
 
 /* prefs.py: Lable on list of user-disabled plugins; In files: prefs.py:977; */
 "Disabled Plugins" = "Pluginy wyłączone";
+
+/* prefs.py: Catch & Record Profiler Errors; */
+"Error in System Profiler" = "Błąd w Profilerze Systemu";
 
 /* stats.py: Cmdr stats; In files: stats.py:58; */
 "Balance" = "Saldo";
@@ -762,3 +804,29 @@
 /* update.py: Update Available Text; In files: update.py:229; */
 "{NEWVER} is available" = "Dostępna nowa wersja {NEWVER}";
 
+/* prefs.py: Stable Version of EDMC; */
+"Stable" = "Stabilna";
+
+/* prefs.py: Select the Update Track (Beta, Stable); */
+"Update Track" = "Ścieżka Aktualizacji";
+
+/* EDMarketConnector.py: Inform the user the Update Track has changed; */
+"Update Track Changed to {TRACK}" = "Ścieżka Aktualizacji zmieniona na {TRACK}";
+
+/* EDMarketConnector.py: Inform User of Beta -> Stable Transition Risks; */
+"Update track changed to Stable from Beta. You will no longer receive Beta updates. You will stay on your current Beta version until the next Stable release.\r\n\r\nYou can manually revert to the latest Stable version. To do so, you must download and install the latest Stable version manually. Note that this may introduce bugs or break completely if downgrading between major versions with significant changes.\r\n\r\nDo you want to open GitHub to download the latest release?" = "Ścieżka aktualizacji zmieniona na stabilną z wersji beta. Nie będziesz już otrzymywać aktualizacji wersji beta. Pozostaniesz przy obecnej wersji Beta aż do następnej wersji stabilnej.\n\nMożesz ręcznie powrócić do najnowszej wersji stabilnej. Aby to zrobić, musisz ręcznie pobrać i zainstalować najnowszą wersję stabilną. Należy pamiętać, że może to spowodować wprowadzenie błędów lub całkowite uszkodzenie w przypadku przejścia na niższą wersję między wersjami głównymi ze znaczącymi zmianami.\n\nCzy chcesz otworzyć GitHub, aby pobrać najnowszą wersję?";
+
+/* EDMarketConnector.py: Title of Notification Popup for EDMC Restart; */
+"Restart Required" = "Wymagany Restart";
+
+/* EDMarketConnector.py: Text of Notification Popup for EDMC Restart; */
+"A restart of EDMC is required. EDMC will now restart." = "Wymagany Restart EDMC. EDMC zostanie teraz zrestartowany";
+
+/* myNotebook.py: Can't Paste Images or Files in Text; */
+"Cannot paste non-text content." = "Nie można wkleić innej zawartości niż tekst";
+
+/* ttkHyperlinkLabel.py: Open Element In Selected Provider; */
+"Open in {URL}" = "Otwórz w {URL}";
+
+/* ttkHyperlinkLabel.py: Copy the Inara SLEF Format of the active ship to the clipboard; */
+"Copy Inara SLEF" = "Skopiuj Inara SLEF";

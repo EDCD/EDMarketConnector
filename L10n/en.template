@@ -13,7 +13,7 @@
 "Error: Frontier CAPI didn't respond" = "Error: Frontier CAPI didn't respond";
 
 /* companion.py: Frontier CAPI data doesn't agree with latest Journal game location; In files: companion.py:245; */
-"Error: Frontier server is lagging" = "Error: Frontier server is lagging";
+"Error: Frontier CAPI data out of sync" = "Error: Frontier CAPI data out of sync";
 
 /* companion.py: Commander is docked at an EDO settlement, got out and back in, we forgot the station; In files: companion.py:261; */
 "Docked but unknown station: EDO Settlement?" = "Docked but unknown station: EDO Settlement?";
@@ -77,6 +77,9 @@
 
 /* EDMarketConnector.py: Label for 'Station' line in main UI; prefs.py: Configuration - Label for selection of 'Station' provider website; prefs.py: Appearance - Example 'Normal' text; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:918; prefs.py:632; prefs.py:770; stats.py:408; */
 "Station" = "Station";
+
+/* prefs.py: Appearance option for Windows "Disable Systray"; */
+"Disable Systray" = "Disable Systray";
 
 /* EDMarketConnector.py: 'File' menu title on OSX; EDMarketConnector.py: 'File' menu title; EDMarketConnector.py: 'File' menu; In files: EDMarketConnector.py:921; EDMarketConnector.py:939; EDMarketConnector.py:942; EDMarketConnector.py:2264; */
 "File" = "File";

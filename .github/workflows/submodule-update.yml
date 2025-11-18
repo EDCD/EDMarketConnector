@@ -24,7 +24,7 @@ jobs:
       OWNER: 'EDCD'
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: '${{ env.CHECKOUT_BRANCH }}'
           submodules: true
@@ -54,13 +54,13 @@ jobs:
       - name: Create submodules changes branch
         if: steps.check_for_changes.outputs.changes == 'true'
         run: |
-          git checkout -b "submodule-change/$GITHUB_RUN_ID" $CHECKOUT_BRANCH
+          git checkout -b "submodule-change/$GITHUB_RUN_ID" "$CHECKOUT_BRANCH"
           git commit -am "updating submodules"
           git push --set-upstream origin "submodule-change/$GITHUB_RUN_ID"
 
       - name: Create pull request against target branch
         if: steps.check_for_changes.outputs.changes == 'true'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
           script: |

@@ -4,9 +4,9 @@
 /* companion.py: Frontier CAPI didn't respond; In files: companion.py:226; */
 "Error: Frontier CAPI didn't respond" = "Virhe: Frontier CAPI ei vastaa.";
 
+
 /* companion.py: Frontier CAPI data doesn't agree with latest Journal game location; In files: companion.py:245; */
 "Error: Frontier server is lagging" = "Virhe: Frontierin palvelin vastaa vanhoilla tiedoilla";
-
 /* companion.py: Generic "something went wrong with Frontier Auth" error; In files: companion.py:271; */
 "Error: Invalid Credentials" = "Virhe: kirjautuminen ei kelpaa";
 
@@ -561,4 +561,3 @@
 
 /* stats.py: Status dialog title; In files: stats.py:418; */
 "Ships" = "Alukset";
-

@@ -39,6 +39,14 @@
         "hullMass": 210,
         "reserveFuelCapacity": 0.51
     },
+    "Cobra Mk V": {
+        "hullMass": 150,
+        "reserveFuelCapacity": 0.49
+    },
+    "Corsair": {
+        "hullMass": 265,
+        "reserveFuelCapacity": 0.41
+    },
     "Diamondback Explorer": {
         "hullMass": 260,
         "reserveFuelCapacity": 0.52
@@ -111,9 +119,17 @@
         "hullMass": 250,
         "reserveFuelCapacity": 0.5
     },
+    "Mandalay": {
+        "hullMass": 230,
+        "reserveFuelCapacity": 0.52
+    },
     "Orca": {
         "hullMass": 290,
         "reserveFuelCapacity": 0.79
+    },
+    "Panther Clipper Mk II": {
+        "hullMass": 1200,
+        "reserveFuelCapacity": 1.11
     },
     "Python": {
         "hullMass": 350,
@@ -131,12 +147,20 @@
         "hullMass": 1200,
         "reserveFuelCapacity": 0.77
     },
+    "Type-11 Prospector": {
+        "hullMass": 320,
+        "reserveFuelCapacity": 0.6
+    },
     "Type-6 Transporter": {
         "hullMass": 155,
         "reserveFuelCapacity": 0.39
     },
     "Type-7 Transporter": {
         "hullMass": 350,
+        "reserveFuelCapacity": 0.52
+    },
+    "Type-8 Transporter": {
+        "hullMass": 400,
         "reserveFuelCapacity": 0.52
     },
     "Type-9 Heavy": {
