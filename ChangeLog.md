@@ -7,7 +7,7 @@ Pre-Release 6.0.0-Beta1
 This is a PUBLIC BETA for EDMC 6.0.0, now available on the Beta update track!
 
 This build represents one of the most significant internal updates to EDMC in recent memory. 
-It includes a complete overhaul of the configuration system, full x64-bit build support, major plugin-system 
+It includes a complete overhaul of the configuration system, full x64-bit build support, major plugin system 
 enhancements (including enable/disable support), new core plugins, and additional updates across the codebase.
 
 Because of the scale of these changes, existing workflows, plugins, and user configurations may behave differently. 
@@ -18,22 +18,22 @@ This is a BETA release – BUGS ARE EXPECTED. Please report any issues on GitHub
 
 **Changes and Enhancements**
 * Enables building of x64-bit builds.
-* Added a new unified config system and migrates both Linux and Windows configuration files to a new config.toml format at the program root directory.
+* Added a new unified config system and migrated both Linux and Windows configuration files to a new config.toml format at the program root directory.
 * Added a new EDAstro core plugin to send specific events to EDAstro.
-* Added a new plugin Enable/Disable system in Preferences -> Plugins.
-* Added a new logger into the Config module prior to the default logger.
+* Added a new plugin Enable/Disable system, in Preferences -> Plugins.
+* Added a new logger to the Config module prior to the default logger.
 * Added a new --skip-journallock argument to allow EDMC to start even if the journal lock was not acquired.
 * Added a new ScrollableNotebook class to enable horizontal scrolling of tabs in a Notebook.
 * Updated the Plugins settings window to use the new ScrollableNotebook class. 
 * Updated a number of GitHub workflow dependencies.
 * Updated the default Python version to 3.13.
 * Updated EDMC:// protocol handler to use process handles with least-privilege access for improved security and reliability.
-* Updated a number of Tkinter TK elements to use the updated TTK equivelents. 
+* Updated a number of Tkinter TK elements to use the updated TTK equivalents. 
 * Updated some internal function calls to use non-deprecated alternatives.
 * Updated the LastError class to a Python Dataclass. 
 * Updated a number of dependencies.
 * Updated a number of Win32 calls with proper prototyping for x64-bit builds.
-* Updated the WIndows WinSparkle updater to be more maintainable. 
+* Updated the Windows WinSparkle updater to be more maintainable. 
 * Updated the Windows DDE Request handler for the EDMC Protocol, specifically callbacks and internal stability.
 * Simplified some internal logic calls. 
 * Simplified the git shorthash function call.
