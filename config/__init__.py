@@ -211,7 +211,6 @@ class Config:
         self.home_path = pathlib.Path.home()
         # Set Needed Platform Var for app_dir_path
         self.app_dir_path = app_path
-
         self.toml_path: pathlib.Path = self.app_dir_path / "config.toml"
         self.generated: str | None = None
         self.source: str | None = None
@@ -226,7 +225,7 @@ class Config:
         if plugdir_str is None or not pathlib.Path(plugdir_str).is_dir():
             self.set("plugin_dir", str(self.default_plugin_dir_path))
             plugdir_str = self.default_plugin_dir
-        self.plugin_dir_path = pathlib.Path(plugdir_str)
+        self.plugin_dir_path = pathlib.Path(self.get('plugin_dir'))
         self.plugin_dir_path.mkdir(exist_ok=True)
 
         # Call the rest of the platform var helpers
@@ -434,6 +433,44 @@ class Config:
         """Return a string version of default_journal_dir."""
         return str(self.default_journal_dir_path)
 
+    def reload_from_path(self, new_config_path: str | pathlib.Path) -> None:
+        """
+        Replace the active config TOML file path and reload all settings.
+
+        This allows the main application (after argparse) to override the
+        config file used without needing to recreate the Config instance.
+        """
+        new_path = pathlib.Path(new_config_path)
+
+        if not new_path.is_file():
+            logger.error(f"Config file not found: {new_config_path}")
+            return  # Use the default config.
+
+        logger.info(f"Reloading config from alternate path: {new_path}")
+
+        # Update path and reload
+        self.toml_path = new_path
+        self.generated = None
+        self.source = None
+        self.settings = {}
+
+        # Load TOML content from the new file and setup system.
+        self._load()
+        self._init_platform()
+
+        # Re-run plugin_dir logic
+        plugdir_str = self.get_str("plugin_dir")
+        if not plugdir_str:
+            plugdir_str = str(self.default_plugin_dir)
+            self.plugin_dir_path = self.default_plugin_dir_path
+            self.set("plugin_dir", plugdir_str)
+        elif not pathlib.Path(plugdir_str).is_dir():
+            self.set("plugin_dir", str(self.default_plugin_dir_path))
+            plugdir_str = self.default_plugin_dir
+
+        self.plugin_dir_path = pathlib.Path(plugdir_str)
+        self.plugin_dir_path.mkdir(exist_ok=True)
+
     @staticmethod
     def _suppress_call(
         func: Callable[..., _T],
@@ -517,6 +554,7 @@ def get_config(*args, **kwargs) -> Config:
         try:
             config = WinConfigMinimal()
         except FileNotFoundError:
+            logger.error("No Config TOML found, no Windows Registry entry found.")
             return Config(app_path=app_dir_path)  # Nothing to Convert
 
     if sys.platform == "linux":  # pragma: sys-platform-linux
@@ -524,9 +562,11 @@ def get_config(*args, **kwargs) -> Config:
         try:
             config = LinuxConfigMinimal()
         except (FileNotFoundError, TypeError):
+            logger.error("No Config TOML found, no Linux ini file found.")
             return Config(app_path=app_dir_path)  # Nothing to Convert
 
     if config:
+        logger.info("Oldstyle config found. Converting...")
         config.write_to_toml(f"{app_dir_path}/config.toml")  # type: ignore
         return Config(app_path=app_dir_path)
 

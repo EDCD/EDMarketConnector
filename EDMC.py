@@ -132,6 +132,8 @@ def main() -> None:  # noqa: C901, CCR001
             action='store_true',
         )
 
+        parser.add_argument('--config', help="Define a custom config to load EDMC from")
+
         parser.add_argument('-a', metavar='FILE', help='write ship loadout to FILE in Companion API json format')
         parser.add_argument('-e', metavar='FILE', help='write ship loadout to FILE in E:D Shipyard plain text format')
         parser.add_argument('-l', metavar='FILE', help='write ship locations to FILE in CSV format')
@@ -174,6 +176,9 @@ def main() -> None:  # noqa: C901, CCR001
                 print('loglevel must be one of: CRITICAL, ERROR, WARNING, INFO, DEBUG, TRACE', file=sys.stderr)
                 sys.exit(EXIT_ARGS)
             edmclogger.set_channels_loglevel(args.loglevel)
+
+        if args.config:
+            config.reload_from_path(args.config)
 
         logger.debug(f'Startup v{appversion()} : Running on Python v{sys.version}')
         logger.debug(f'''Platform: {sys.platform}

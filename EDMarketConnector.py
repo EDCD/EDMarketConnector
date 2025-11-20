@@ -102,6 +102,8 @@ if __name__ == '__main__':  # noqa: C901
                         help="Start the application minimized",
                         action="store_true"
                         )
+
+    parser.add_argument('--config', help="Define a custom config to load EDMC from")
     ###########################################################################
 
     ###########################################################################
@@ -203,6 +205,9 @@ if __name__ == '__main__':  # noqa: C901
     ###########################################################################
 
     args: argparse.Namespace = parser.parse_args()
+
+    if args.config:
+        config.reload_from_path(args.config)
 
     if args.capi_pretend_down:
         import config as conf_module
