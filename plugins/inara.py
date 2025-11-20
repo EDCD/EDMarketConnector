@@ -536,9 +536,11 @@ def journal_entry(  # noqa: C901, CCR001
             # Handle Embark/Disembark Events
             if event_name == 'Embark':
                 this.embarked = True
+                this.multicrew = True
 
             if event_name == 'Disembark':
                 this.embarked = False
+                this.multicrew = False
 
             # Ship change
             if event_name == 'Loadout' and this.shipswap:
