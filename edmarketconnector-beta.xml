@@ -6,9 +6,25 @@
       <description>Most recent changes with links to updates.</description>
       <!-- Windows -->
       <item>
-         <title>Pre-Release 6.0.0-beta1</title>
+         <title>Pre-Release 6.0.0-beta2</title>
          <description><![CDATA[<style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
 <p>We now test against, and package with, Python 3.13.</p>
+<h2>Release 6.0.0-Beta2</h2>
+<p>This is a PUBLIC BETA for EDMC 6.0.0, now available on the Beta update track!</p>
+<p>This build contains everything in Beta1, with a few fixes identified in testing and a new --config option.</p>
+<p>This is a BETA release – BUGS ARE EXPECTED. Please report any issues on GitHub so we can stabilize the final 6.0.0 release.</p>
+<p><strong>Changes and Enhancements</strong></p>
+<ul>
+<li>Added a new --config option to EDMC to allow users to specify a different config file.</li>
+<li>Added additional notes about 64-bit builds to the changelog generator.</li>
+</ul>
+<p><strong>Bug Fixes</strong></p>
+<ul>
+<li>Fixed a bug where the release hashes.sum would not have content populate.</li>
+<li>Fixed a bug where .ini config files would not be read during file conversion on Linux static builds like Flatpak.</li>
+<li>Fixed a bug where Embarked crew would send erroneous events to Inara.</li>
+</ul>
+<hr>
 <h2>Release 6.0.0-Beta1</h2>
 <p>This is a PUBLIC BETA for EDMC 6.0.0, now available on the Beta update track!</p>
 <p>This build represents one of the most significant internal updates to EDMC in recent memory.
@@ -2961,7 +2977,7 @@ about this:
 <a href="https://issues.frontierstore.net/issue-detail/28638" rel="nofollow">PTS CAPI saying Commander is Docked after jumping to new system</a>.</p>
 </li>
 </ul>]]></description>
-         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F6.0.0-beta1/EDMarketConnector_Installer_6.0.0-beta1.exe_x64.exe" sparkle:os="windows" sparkle:version="6.0.0-beta1" length="0" type="application/x-ms-dos-executable" />
+         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F6.0.0-beta2/EDMarketConnector_Installer_6.0.0-beta2.exe_x64.exe" sparkle:os="windows" sparkle:version="6.0.0-beta2" length="0" type="application/x-ms-dos-executable" />
       </item>
    </channel>
 </rss>
