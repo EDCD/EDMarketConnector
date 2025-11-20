@@ -17,7 +17,7 @@ This is a BETA release – BUGS ARE EXPECTED. Please report any issues on GitHub
 **Bug Fixes**
 * Fixed a bug where the release hashes.sum would not have content populate. 
 * Fixed a bug where .ini config files would not be read during file conversion on Linux static builds like Flatpak.
-* Fixed a bug where Embarked crew would send erronious events to Inara. 
+* Fixed a bug where Embarked crew would send erroneous events to Inara. 
 
 Pre-Release 6.0.0-Beta1
 ===
