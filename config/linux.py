@@ -40,11 +40,16 @@ class LinuxConfigMinimal:
             if filename
             else xdg_config_home / "EDMarketConnector" / "EDMarketConnector.ini"
         )
-        if not pathlib.Path(filename).is_file():
+        if not pathlib.Path(self.filename).is_file():
             raise FileNotFoundError
         # Load INI
         self.config = ConfigParser(interpolation=None)
-        self.config.read(self.filename)
+        try:
+            read_files = self.config.read(self.filename)
+            config_logger.debug("ConfigParser.read returned: %s", read_files)
+        except Exception as e:
+            config_logger.exception("Failed to read INI file %s: %s", self.filename, e)
+            raise
 
     def _get_settings_dict(self) -> dict[str, Any]:
         """Return all keys/values from SECTION as a dict of strings."""
@@ -64,7 +69,7 @@ class LinuxConfigMinimal:
 
         path_obj = pathlib.Path(toml_path)
         path_obj.parent.mkdir(parents=True, exist_ok=True)
-        config_logger.debug("Writing Config File")
+        config_logger.debug("Writing Config File to %s", path_obj)
         with path_obj.open("wb") as f:
             tomli_w.dump(config_data, f)
 
