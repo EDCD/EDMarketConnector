@@ -105,6 +105,7 @@ class This:
         self.materials: list[dict[str, Any]] | None = None
         self.last_credits: int = 0  # Send credit update soon after Startup / new game
         self.storedmodules: list[dict[str, Any]] | None = None
+        self.embarked: bool = False  # Boarded Someone Else's Ship? Should always start as False.
         self.loadout: dict[str, Any] | None = None
         self.fleet: list[dict[str, Any]] | None = None
         self.shipswap: bool = False  # just swapped ship
@@ -532,6 +533,13 @@ def journal_entry(  # noqa: C901, CCR001
                 power_data = {'powerName': entry["Power"], 'rankValue': entry["Rank"]}
                 new_add_event('setCommanderRankPower', entry['timestamp'], power_data)
 
+            # Handle Embark/Disembark Events
+            if event_name == 'Embark':
+                this.embarked = True
+
+            if event_name == 'Disembark':
+                this.embarked = False
+
             # Ship change
             if event_name == 'Loadout' and this.shipswap:
                 this.loadout = make_loadout(state)
@@ -821,7 +829,7 @@ def journal_entry(  # noqa: C901, CCR001
                 for ship in this.fleet:
                     new_add_event('setCommanderShip', entry['timestamp'], ship)
         # Loadout
-        if event_name == 'Loadout':
+        if event_name == 'Loadout' and not this.embarked:  # Ignore Loadout Events if Embarked
             loadout = make_loadout(state)
             if this.loadout != loadout:
                 this.loadout = loadout
