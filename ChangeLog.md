@@ -2,6 +2,23 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
 ---
 * We currently test against, and package with, Python 3.13, 64-bit.
 ---
+Pre-Release 6.0.0-Beta2
+===
+This is a PUBLIC BETA for EDMC 6.0.0, now available on the Beta update track!
+
+This build contains everything in Beta1, with a few fixes identified in testing and a new --config option.
+
+This is a BETA release – BUGS ARE EXPECTED. Please report any issues on GitHub so we can stabilize the final 6.0.0 release.
+
+**Changes and Enhancements**
+* Added a new --config option to EDMC to allow users to specify a different config file.
+* Added additional notes about 64-bit builds to the changelog generator.
+
+**Bug Fixes**
+* Fixed a bug where the release hashes.sum would not have content populate. 
+* Fixed a bug where .ini config files would not be read during file conversion on Linux static builds like Flatpak.
+* Fixed a bug where Embarked crew would send erronious events to Inara. 
+
 Pre-Release 6.0.0-Beta1
 ===
 This is a PUBLIC BETA for EDMC 6.0.0, now available on the Beta update track!
@@ -18,7 +35,7 @@ This is a BETA release – BUGS ARE EXPECTED. Please report any issues on GitHub
 
 **Changes and Enhancements**
 * Enables building of x64-bit builds.
-* Added a new unified config system and migrated both Linux and Windows configuration files to a new config.toml format at the program root directory.
+* Added a new unified config system and migrated both Linux and Windows configuration files to a new config.toml format. This config file is placed by default in EDMC's LocalAppData folder on Windows or the XDG_DATA_HOME/EDMarketConnector path on Linux.
 * Added a new EDAstro core plugin to send specific events to EDAstro.
 * Added a new plugin Enable/Disable system, in Preferences -> Plugins.
 * Added a new logger to the Config module prior to the default logger.
