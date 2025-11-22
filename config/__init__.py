@@ -275,16 +275,16 @@ class Config:
 
     def get(self, key: str, default=None):
         """Return raw stored value."""
-        return self.settings.get(key, default)
+        return self.settings.get(key.lower(), default)
 
     def get_str(self, key: str, default="") -> str:
         """Return string value."""
-        val = self.get(key, default)
+        val = self.get(key.lower(), default)
         return str(val) if val is not None else default
 
     def get_int(self, key: str, default=0) -> int:
         """Adaptive int (handles booleans stored as ints)."""
-        val = self.get(key)
+        val = self.get(key.lower())
         if isinstance(val, int):
             return val
         try:
@@ -300,7 +300,7 @@ class Config:
           - Accepts strings "true"/"false"/"1"/"0"
           - Accepts real booleans
         """
-        val = self.get(key)
+        val = self.get(key.lower())
 
         if isinstance(val, bool):
             return val
@@ -319,7 +319,7 @@ class Config:
 
     def get_list(self, key: str, default=None):
         """Return the list referred to by the given key if it exists, or the default."""
-        val = self.get(key)
+        val = self.get(key.lower())
         return (
             val if isinstance(val, list) else (default if default is not None else [])
         )
@@ -492,7 +492,7 @@ class Config:
     def delete(self, key: str, *, suppress=False) -> None:
         """Delete the given key from the config."""
         try:
-            self.settings.pop(key, None)
+            self.settings.pop(key.lower(), None)
         except (KeyError, IndexError):
             if suppress:
                 return
@@ -501,7 +501,7 @@ class Config:
 
     def set(self, key: str, value: Any):
         """Modify a setting and save to disk."""
-        self.settings[key] = value
+        self.settings[key.lower()] = value
         self.save()
 
     def save(self):

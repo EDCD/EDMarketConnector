@@ -82,7 +82,7 @@ class WinConfigMinimal:
 
         for i in range(num_values):
             name, data, data_type = winreg.EnumValue(key, i)
-            config_data["settings"][name] = self._convert_reg_value_for_toml(
+            config_data["settings"][str(name).lower()] = self._convert_reg_value_for_toml(
                 data, data_type
             )
 
