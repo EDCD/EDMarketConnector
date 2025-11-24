@@ -163,6 +163,19 @@ circular imports.
 For an example of how this is done, look at the code in `plugins/common_coreutils.py`
 and the usage of these functions in other core plugins. 
 
+Plugins may import additional code modules from `load.py` in the usual way. Note
+that using an import statement like `import my_module` or `from my_module import
+foo` will only import one module with that name **across all plugins**. This can
+be used to create a shared library used by several plugins if used carefully,
+but may create a conflict if another plugin also has a module of the same name
+containing different code. For example if two plugins both contain a
+`widgets.py` file and both do `import widgets`, only one of the two modules will
+actually be imported.
+
+To avoid this issue, use a relative import statement such as `import .widgets`
+or `from .widgets import foo` to ensure that the module is loaded from the
+current plugin, even if the name conflicts with another plugin's code.
+
 ---
 
 ## Logging
