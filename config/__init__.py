@@ -279,7 +279,7 @@ class Config:
 
     def get_str(self, key: str, default="") -> str:
         """Return string value."""
-        val = self.get(key.lower(), default)
+        val = self.get(key.lower(), None)
         return str(val) if val is not None else default
 
     def get_int(self, key: str, default=0) -> int:
@@ -501,7 +501,7 @@ class Config:
 
     def set(self, key: str, value: Any):
         """Modify a setting and save to disk."""
-        self.settings[key.lower()] = value
+        self.settings[key.lower()] = str(value)
         self.save()
 
     def save(self):
