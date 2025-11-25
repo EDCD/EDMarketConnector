@@ -310,6 +310,11 @@ class PreferencesDialog(tk.Toplevel):
         self.cmdrchanged()
         self.themevarchanged()
 
+        # Init hotkey attributes to avoid linter errors
+        self.hotkey_text: ttk.Entry
+        self.hotkey_only_btn: nb.Checkbutton
+        self.hotkey_play_btn: nb.Checkbutton
+
         # disable hotkey for the duration
         hotkeymgr.unregister()
 
