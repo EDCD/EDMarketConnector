@@ -501,7 +501,10 @@ class Config:
 
     def set(self, key: str, value: Any):
         """Modify a setting and save to disk."""
-        self.settings[key.lower()] = str(value)
+        if isinstance(value, list):
+            self.settings[key.lower()] = value
+        else:
+            self.settings[key.lower()] = str(value)
         self.save()
 
     def save(self):
