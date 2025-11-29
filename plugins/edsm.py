@@ -43,7 +43,7 @@ from ttkHyperlinkLabel import HyperlinkLabel
 from l10n import translations as tr
 from plugins.common_coreutils import (api_keys_label_common, PADX, PADY, BUTTONX, SEPY, BOXY, STATION_UNDOCKED,
                                       show_pwd_var_common, station_link_common, this_format_common,
-                                      cmdr_data_initial_common)
+                                      cmdr_data_initial_common, localised_name)
 
 
 # TODO:
@@ -543,7 +543,7 @@ entry: {entry!r}'''
                 to_set = ''
 
         if this.station_link:
-            this.station_link['text'] = to_set
+            this.station_link['text'] = localised_name(to_set)
             this.station_link['url'] = station_url(str(this.system_name), str(this.station_name))
             this.station_link.update_idletasks()
 
