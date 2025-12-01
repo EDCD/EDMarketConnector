@@ -276,8 +276,7 @@ class PreferencesDialog(tk.Toplevel):
         frame.rowconfigure(0, weight=1)
         frame.rowconfigure(1, weight=0)
 
-        notebook: nb.ScrollableNotebook = nb.ScrollableNotebook(frame, tabmenu=True)
-        notebook.bind('<<NotebookTabChanged>>', self.tabchanged)  # Recompute on tab change
+        notebook: nb.ScrollableNotebook = nb.ScrollableNotebook(frame, tabmenu=True, on_tab_change=self.tabchanged)
 
         self.PADX = 10
         self.BUTTONX = 12  # indent Checkbuttons and Radiobuttons
