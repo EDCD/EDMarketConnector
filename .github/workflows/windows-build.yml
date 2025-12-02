@@ -27,7 +27,7 @@ jobs:
     name: Linux environment build steps
     runs-on: "ubuntu-latest"
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           submodules: true
       - name: Create .gitversion
@@ -81,7 +81,7 @@ jobs:
         shell: powershell
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           submodules: true
 
@@ -158,7 +158,7 @@ jobs:
         shell: powershell
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           submodules: true
 
