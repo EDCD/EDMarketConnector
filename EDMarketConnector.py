@@ -612,7 +612,7 @@ class AppWindow:
         self.status.grid(columnspan=2, sticky=tk.EW)
 
         for child in frame.winfo_children():
-            child.grid_configure(padx=self.PADX, pady=(
+            child.grid_configure(padx=self.PADX, pady=(  # type: ignore
                 sys.platform != 'win32' or isinstance(child, tk.Frame)) and 2 or 0)
 
         self.menubar = tk.Menu()
