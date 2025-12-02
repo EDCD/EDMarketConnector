@@ -75,7 +75,7 @@ class LinuxConfigMinimal:
 
     def close(self) -> None:
         """Release resources (stub)."""
-        self.config = None
+        del self.config
 
 
 def linux_helper(config: Config) -> Config:

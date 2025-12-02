@@ -6,6 +6,7 @@ Licensed under the GNU General Public License.
 See LICENSE file.
 """
 import os
+import sys
 from pathlib import Path
 from edmc_data import ship_name_map
 
@@ -18,7 +19,7 @@ def ship_file_name(ship_name: str, ship_type: str) -> str:
     name = Path(name).with_suffix("").name
 
     # Check if the name is a reserved filename
-    if os.path.isreserved(name):
+    if sys.platform == 'win32' and os.path.isreserved(name):
         name += "_"
 
     return name.translate(
