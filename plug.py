@@ -48,13 +48,13 @@ last_error = LastError()
 class Plugin:
     """An EDMC plugin."""
 
-    def __init__(
+    def __init__(  # noqa: CCR001
         self,
         name: str,
         loadfile: Path | None,
         plugin_logger: logging.Logger | None,
         internal: bool = False
-    ):  # noqa: CCR001
+    ):
         """
         Load a single plugin.
 
