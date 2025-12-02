@@ -14,6 +14,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from PIL import ImageGrab
 from l10n import translations as tr
+from typing import Callable
 
 if sys.platform == 'win32':
     PAGEFG = 'SystemWindowText'
@@ -171,6 +172,7 @@ class ScrollableNotebook(Notebook):
         self,
         master: ttk.Frame | None = None,
         tabmenu: bool = False,
+        on_tab_change: Callable | None = None,
         *args,
         **kwargs
     ) -> None:
@@ -191,6 +193,8 @@ class ScrollableNotebook(Notebook):
         self.notebookTab: ttk.Notebook = ttk.Notebook(self, **kwargs)
         self.notebookTab.place(x=0, y=0)
         self.notebookTab.bind("<<NotebookTabChanged>>", self._tab_changer)
+        if on_tab_change:
+            self.notebookTab.bind("<<NotebookTabChanged>>", on_tab_change, add='+')
 
         # Sliding frame and controls
         slide_frame: ttk.Frame = ttk.Frame(self)

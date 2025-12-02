@@ -208,7 +208,7 @@ class _Theme:
 
         if isinstance(widget, (tk.Frame, ttk.Frame)):
             for child in widget.winfo_children():
-                self.register(child)
+                self.register(child)  # type: ignore
 
     def register_alternate(self, pair: tuple, gridopts: dict) -> None:
         self.widgets_pair.append((pair, gridopts))
@@ -313,7 +313,7 @@ class _Theme:
         self._update_widget(widget)
         if isinstance(widget, (tk.Frame, ttk.Frame)):
             for child in widget.winfo_children():
-                self._update_widget(child)
+                self._update_widget(child)  # type: ignore
 
     # Apply current theme to a single widget
     def _update_widget(self, widget: tk.Widget | tk.BitmapImage) -> None:  # noqa: CCR001, C901
