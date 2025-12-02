@@ -12,7 +12,7 @@ import os
 import sys
 import threading
 from urllib import parse
-from typing import TYPE_CHECKING, Type
+from typing import TYPE_CHECKING
 from config import config
 from constants import appname, protocolhandler_redirect
 from EDMCLogging import get_main_logger
@@ -61,7 +61,7 @@ if config.auth_force_edmc_protocol or (  # noqa: C901
 ):
     # This could be false if you use auth_force_edmc_protocol, but then you get to keep the pieces
     if sys.platform != "win32":
-        raise EnvironmentError("This code is for Windows only.")
+        raise OSError("This code is for Windows only.")
     # spell-checker: words HBRUSH HICON WPARAM wstring WNDCLASS HMENU HGLOBAL
     from ctypes import (  # type: ignore
         windll,
@@ -434,7 +434,7 @@ else:  # Linux / Run from source
             )
 
 
-def get_handler_impl() -> Type[GenericProtocolHandler]:
+def get_handler_impl() -> type[GenericProtocolHandler]:
     """
     Get the appropriate GenericProtocolHandler for the current system and config.
 

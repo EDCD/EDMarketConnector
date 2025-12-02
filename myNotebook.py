@@ -14,7 +14,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from PIL import ImageGrab
 from l10n import translations as tr
-from typing import Callable
+from collections.abc import Callable
 
 if sys.platform == 'win32':
     PAGEFG = 'SystemWindowText'

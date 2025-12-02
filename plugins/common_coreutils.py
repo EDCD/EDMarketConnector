@@ -22,7 +22,8 @@ referenced in this file (or only in any other core plugin), and if so...
 # pylint: disable=import-error
 from __future__ import annotations
 
-from typing import Any, Mapping, cast
+from typing import Any, cast
+from collections.abc import Mapping
 import tkinter as tk
 import base64
 import gzip

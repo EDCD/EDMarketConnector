@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """EDMC preferences library."""
 from __future__ import annotations
 
@@ -14,7 +13,8 @@ from os import system
 from tkinter import colorchooser as tkColorChooser  # type: ignore # noqa: N812
 from tkinter import ttk
 from types import TracebackType
-from typing import Any, Callable, Optional, Type
+from typing import Any
+from collections.abc import Callable
 import myNotebook as nb  # noqa: N813
 import plug
 from config import appversion_nobuild, config
@@ -170,8 +170,8 @@ class AutoInc(contextlib.AbstractContextManager):
 
     def __exit__(
         self,
-        exc_type: Optional[Type[BaseException]], exc_value: Optional[BaseException], traceback: Optional[TracebackType]
-    ) -> Optional[bool]:
+        exc_type: type[BaseException] | None, exc_value: BaseException | None, traceback: TracebackType | None
+    ) -> bool | None:
         """Do nothing."""
         return None
 
@@ -241,7 +241,7 @@ if sys.platform == 'win32':
 class PreferencesDialog(tk.Toplevel):
     """The EDMC preferences dialog."""
 
-    def __init__(self, parent: tk.Tk, callback: Optional[Callable]):
+    def __init__(self, parent: tk.Tk, callback: Callable | None):
         super().__init__(parent)
 
         self.parent = parent
@@ -265,7 +265,7 @@ class PreferencesDialog(tk.Toplevel):
 
         self.cmdr: str | bool | None = False  # Note if Cmdr changes in the Journal
         self.is_beta: bool = False  # Note if Beta status changes in the Journal
-        self.cmdrchanged_alarm: Optional[str] = None  # This stores an ID that can be used to cancel a scheduled call
+        self.cmdrchanged_alarm: str | None = None  # This stores an ID that can be used to cancel a scheduled call
 
         # Set up the main frame
         frame = ttk.Frame(self)
@@ -1136,7 +1136,7 @@ class PreferencesDialog(tk.Toplevel):
         """Handle preferences active tab changing."""
         self.outvarchanged()
 
-    def outvarchanged(self, event: Optional[tk.Event] = None) -> None:
+    def outvarchanged(self, event: tk.Event | None = None) -> None:
         """Handle Output tab variable changes."""
         self.displaypath(self.outdir, self.outdir_entry)
         self.displaypath(self.logdir, self.logdir_entry)
@@ -1240,14 +1240,14 @@ class PreferencesDialog(tk.Toplevel):
         self.theme_button_0['state'] = state
         self.theme_button_1['state'] = state
 
-    def hotkeystart(self, event: 'tk.Event[Any]') -> None:
+    def hotkeystart(self, event: tk.Event[Any]) -> None:
         """Start listening for hotkeys."""
         event.widget.bind('<KeyPress>', self.hotkeylisten)
         event.widget.bind('<KeyRelease>', self.hotkeylisten)
         event.widget.delete(0, tk.END)
         hotkeymgr.acquire_start()
 
-    def hotkeyend(self, event: 'tk.Event[Any]') -> None:
+    def hotkeyend(self, event: tk.Event[Any]) -> None:
         """Stop listening for hotkeys."""
         event.widget.unbind('<KeyPress>')
         event.widget.unbind('<KeyRelease>')
@@ -1258,7 +1258,7 @@ class PreferencesDialog(tk.Toplevel):
             # LANG: No hotkey/shortcut set
             hotkeymgr.display(self.hotkey_code, self.hotkey_mods) if self.hotkey_code else tr.tl('None'))
 
-    def hotkeylisten(self, event: 'tk.Event[Any]') -> str:
+    def hotkeylisten(self, event: tk.Event[Any]) -> str:
         """
         Hotkey handler.
 

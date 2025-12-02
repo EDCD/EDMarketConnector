@@ -11,9 +11,10 @@ import json
 import threading
 from copy import deepcopy
 from typing import (
-    TYPE_CHECKING, Any, Callable, Mapping, MutableMapping, MutableSequence, NamedTuple, Sequence,
+    TYPE_CHECKING, Any, NamedTuple,
     TypedDict, TypeVar, cast, Union
 )
+from collections.abc import Callable, Mapping, MutableMapping, MutableSequence, Sequence
 import requests
 import semantic_version
 from semantic_version.base import Version
@@ -217,7 +218,7 @@ class KillSwitchSet:
     def __init__(self, kill_switches: list[KillSwitches]) -> None:
         self.kill_switches = kill_switches
 
-    def get_disabled(self, id: str, *, version: Union[Version, str] = _current_version) -> DisabledResult:
+    def get_disabled(self, id: str, *, version: Version | str = _current_version) -> DisabledResult:
         """
         Return whether the given feature ID is disabled by a killswitch for the given version.
 

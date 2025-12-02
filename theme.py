@@ -15,7 +15,7 @@ import sys
 import tkinter as tk
 from tkinter import font as tk_font
 from tkinter import ttk
-from typing import Callable
+from collections.abc import Callable
 from l10n import translations as tr
 from config import config
 from EDMCLogging import get_main_logger

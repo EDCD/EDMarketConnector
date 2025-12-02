@@ -18,7 +18,8 @@ from collections import defaultdict
 from os import SEEK_END, SEEK_SET, listdir
 from os.path import basename, expanduser, getctime, isdir, join
 from time import gmtime, localtime, mktime, sleep, strftime, strptime, time
-from typing import TYPE_CHECKING, Any, BinaryIO, MutableMapping
+from typing import TYPE_CHECKING, Any, BinaryIO
+from collections.abc import MutableMapping
 import psutil
 import semantic_version
 import util_ships
@@ -347,7 +348,7 @@ class EDLogs(FileSystemEventHandler):
         """
         return bool(self.thread and self.thread.is_alive())
 
-    def on_created(self, event: 'FileSystemEvent') -> None:
+    def on_created(self, event: FileSystemEvent) -> None:
         """Watchdog callback when, e.g. client (re)started."""
         if not event.is_directory and self._RE_LOGFILE.search(str(basename(event.src_path))):
 
@@ -2267,7 +2268,7 @@ class EDLogs(FileSystemEventHandler):
         string = json.dumps(self.ship(False), ensure_ascii=False, indent=2, separators=(',', ': '))  # pretty print
         if filename:
             try:
-                with open(filename, 'wt', encoding='utf-8') as h:
+                with open(filename, 'w', encoding='utf-8') as h:
                     h.write(string)
 
             except UnicodeError:
@@ -2276,7 +2277,7 @@ class EDLogs(FileSystemEventHandler):
                                  )
 
                 try:
-                    with open(filename, 'wt') as h:
+                    with open(filename, 'w') as h:
                         h.write(string)
 
                 except OSError:
@@ -2291,7 +2292,7 @@ class EDLogs(FileSystemEventHandler):
 
         ship = util_ships.ship_file_name(self.state['ShipName'], self.state['ShipType'])
         regexp = re.compile(re.escape(ship) + r'\.\d{4}-\d\d-\d\dT\d\d\.\d\d\.\d\d\.txt')
-        oldfiles = sorted((x for x in listdir(config.get_str('outdir')) if regexp.match(x)))
+        oldfiles = sorted(x for x in listdir(config.get_str('outdir')) if regexp.match(x))
         if oldfiles:
             try:
                 with open(join(config.get_str('outdir'), oldfiles[-1]), encoding='utf-8') as h:
@@ -2323,13 +2324,13 @@ class EDLogs(FileSystemEventHandler):
         filename = join(config.get_str('outdir'), f'{ship}.{ts}.txt')
 
         try:
-            with open(filename, 'wt', encoding='utf-8') as h:
+            with open(filename, 'w', encoding='utf-8') as h:
                 h.write(string)
 
         except UnicodeError:
             logger.exception("UnicodeError writing ship loadout to new filename with utf-8 encoding, trying without...")
             try:
-                with open(filename, 'wt') as h:
+                with open(filename, 'w') as h:
                     h.write(string)
 
             except OSError:

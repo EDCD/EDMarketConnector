@@ -30,18 +30,18 @@ def export(data: CAPIData) -> None:
     # required
     with open(data_path / data_filename, 'wb') as h:
         # Format described here: https://github.com/eyeonus/Trade-Dangerous/wiki/Price-Data
-        h.write('#! trade.py import -\n'.encode('utf-8'))
+        h.write(b'#! trade.py import -\n')
         this_platform = system()
         cmdr_name = data['commander']['name'].strip()
         h.write(
-            f'# Created by {applongname} {appversion()} on {this_platform} for Cmdr {cmdr_name}.\n'.encode('utf-8')
+            f'# Created by {applongname} {appversion()} on {this_platform} for Cmdr {cmdr_name}.\n'.encode()
         )
         h.write(
-            '#\n#    <item name>             <sellCR> <buyCR>   <demand>   <stock>  <timestamp>\n\n'.encode('utf-8')
+            b'#\n#    <item name>             <sellCR> <buyCR>   <demand>   <stock>  <timestamp>\n\n'
         )
         system_name = data['lastSystem']['name'].strip()
         starport_name = data['lastStarport']['name'].strip()
-        h.write(f'@ {system_name}/{starport_name}\n'.encode('utf-8'))
+        h.write(f'@ {system_name}/{starport_name}\n'.encode())
 
         # sort commodities by category
         by_category = defaultdict(list)
@@ -50,7 +50,7 @@ def export(data: CAPIData) -> None:
 
         timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.strptime(data['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
         for category in sorted(by_category):
-            h.write(f'   + {format(category)}\n'.encode('utf-8'))
+            h.write(f'   + {format(category)}\n'.encode())
             # corrections to commodity names can change the sort order
             for commodity in sorted(by_category[category], key=itemgetter('name')):
                 h.write(
@@ -61,5 +61,5 @@ def export(data: CAPIData) -> None:
                     f"{demandbracketmap[commodity['demandBracket']]:1}"
                     f" {int(commodity['stock']) if commodity['stockBracket'] else '':8}"
                     f"{stockbracketmap[commodity['stockBracket']]:1}"
-                    f"  {timestamp}\n".encode('utf-8')
+                    f"  {timestamp}\n".encode()
                 )

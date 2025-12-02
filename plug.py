@@ -18,7 +18,8 @@ import tkinter as tk
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from tkinter import ttk
-from typing import Any, Mapping, MutableMapping
+from typing import Any
+from collections.abc import Mapping, MutableMapping
 
 import companion
 import myNotebook as nb  # noqa: N813

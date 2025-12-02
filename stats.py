@@ -12,7 +12,8 @@ import json
 import sys
 import tkinter as tk
 from tkinter import ttk
-from typing import Any, AnyStr, Callable, NamedTuple, Sequence, cast
+from typing import Any, AnyStr, NamedTuple, cast
+from collections.abc import Callable, Sequence
 import companion
 import EDMCLogging
 import myNotebook as nb  # noqa: N813

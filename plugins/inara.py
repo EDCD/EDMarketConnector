@@ -31,7 +31,8 @@ from datetime import datetime, timedelta, timezone
 from operator import itemgetter
 from threading import Lock, Thread
 from tkinter import ttk
-from typing import Any, Callable, Deque, Mapping, NamedTuple, Sequence, cast, Union
+from typing import Any, Deque, NamedTuple, cast, Union
+from collections.abc import Callable, Mapping, Sequence
 import requests
 import edmc_data
 import killswitch

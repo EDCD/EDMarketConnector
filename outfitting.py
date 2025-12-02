@@ -296,7 +296,7 @@ def export(data, filename) -> None:
     header = 'System,Station,Category,Name,Mount,Guidance,Ship,Class,Rating,FDevID,Date\n'
     rowheader = f'{data["lastSystem"]["name"]},{data["lastStarport"]["name"]}'
 
-    with open(filename, 'wt') as h:
+    with open(filename, 'w') as h:
         h.write(header)
         for v in data["lastStarport"].get("modules", {}).values():
             try:

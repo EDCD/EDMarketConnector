@@ -29,7 +29,8 @@ from queue import Queue
 from threading import Thread
 from time import sleep
 from tkinter import ttk
-from typing import Any, Literal, Mapping, MutableMapping, cast, Sequence
+from typing import Any, Literal, cast
+from collections.abc import Mapping, MutableMapping, Sequence
 import requests
 import killswitch
 import monitor

@@ -5,7 +5,7 @@ import multiprocessing as mp
 import os
 import pathlib
 import sys
-from typing import Generator
+from collections.abc import Generator
 import pytest
 from pytest import MonkeyPatch, TempdirFactory, TempPathFactory
 from config import config

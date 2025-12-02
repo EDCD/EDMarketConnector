@@ -12,7 +12,7 @@ import sys
 from config import config_logger
 
 if sys.platform != "linux":
-    raise EnvironmentError("This file is for Linux only.")
+    raise OSError("This file is for Linux only.")
 
 
 import pathlib

@@ -54,7 +54,7 @@ if __name__ == '__main__':
         log_file_path.mkdir(exist_ok=True)
         log_file_path /= f'{appname}.log'
 
-        sys.stdout = sys.stderr = open(log_file_path, mode='wt', buffering=1)  # Do NOT use WITH here.
+        sys.stdout = sys.stderr = open(log_file_path, mode='w', buffering=1)  # Do NOT use WITH here.
     # TODO: Test: Make *sure* this redirect is working, else py2exe is going to cause an exit popup
 
 
@@ -216,7 +216,7 @@ if __name__ == '__main__':  # noqa: C901
 
     if args.capi_use_debug_access_token:
         import config as conf_module
-        with open(conf_module.config.app_dir_path / 'access_token.txt', 'r') as at:
+        with open(conf_module.config.app_dir_path / 'access_token.txt') as at:
             conf_module.capi_debug_access_token = at.readline().strip()
 
     level_to_set: int | None = None
@@ -476,7 +476,7 @@ class AppWindow:
         if sys.platform == 'win32' and not bool(config.get_int('no_systray')):
             from simplesystray import SysTrayIcon
 
-            def open_window(systray: 'SysTrayIcon', *args) -> None:
+            def open_window(systray: SysTrayIcon, *args) -> None:
                 self.w.deiconify()
 
             logfile_loc = pathlib.Path(config.app_dir_path / 'logs')
@@ -953,7 +953,7 @@ class AppWindow:
 
         self.cooldown()
 
-    def export_market_data(self, data: 'CAPIData') -> bool:  # noqa: CCR001
+    def export_market_data(self, data: CAPIData) -> bool:  # noqa: CCR001
         """
         Export CAPI market data.
 
@@ -1872,7 +1872,7 @@ class AppWindow:
             h.write(str(companion.session.capi_raw_data).encode(encoding='utf-8'))
 
     if sys.platform == 'win32':
-        def exit_tray(self, systray: 'SysTrayIcon') -> None:
+        def exit_tray(self, systray: SysTrayIcon) -> None:
             """Tray icon is shutting down."""
             exit_thread = threading.Thread(
                 target=self.onexit,

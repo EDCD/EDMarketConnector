@@ -16,7 +16,8 @@ import re
 import sys
 from contextlib import suppress
 from os import listdir, sep
-from typing import Iterable, TextIO, cast
+from typing import TextIO, cast
+from collections.abc import Iterable
 import pathlib
 from config import config
 from EDMCLogging import get_main_logger
