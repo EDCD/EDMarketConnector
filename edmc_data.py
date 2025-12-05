@@ -605,7 +605,7 @@ edmc_suit_symbol_localised = {
 # This is sourced from what the game is passed by the launcher, caveat emptor. It was mentioned that / is also
 # an option
 # This is only run once when this file is imported by something, no runtime cost or repeated expansions will occur
-__keys = list(edmc_suit_symbol_localised.keys())
+__keys = list(edmc_suit_symbol_localised)
 for lang in __keys:
     new_lang = lang.replace('\\', r'\\')
     new_lang_2 = lang.replace('\\', '/')

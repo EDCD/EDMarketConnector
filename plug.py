@@ -18,7 +18,8 @@ import tkinter as tk
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from tkinter import ttk
-from typing import Any, Mapping, MutableMapping
+from typing import Any
+from collections.abc import Mapping, MutableMapping
 
 import companion
 import myNotebook as nb  # noqa: N813
@@ -48,13 +49,20 @@ last_error = LastError()
 class Plugin:
     """An EDMC plugin."""
 
-    def __init__(self, name: str, loadfile: Path | None, plugin_logger: logging.Logger | None):  # noqa: CCR001
+    def __init__(  # noqa: CCR001
+        self,
+        name: str,
+        loadfile: Path | None,
+        plugin_logger: logging.Logger | None,
+        internal: bool = False
+    ):
         """
         Load a single plugin.
 
         :param name: Base name of the file being loaded from.
         :param loadfile: Full path/filename of the plugin.
         :param plugin_logger: The logging instance for this plugin to use.
+        :param internal: True to use internal plugin loader logic. Defaults to False.
         :raises Exception: Typically, ImportError or OSError
         """
         self.name: str = name  # Display name.
@@ -65,14 +73,19 @@ class Plugin:
         if loadfile:
             logger.info(f'loading plugin "{name.replace(".", "_")}" from "{loadfile}"')
             try:
-                filename = 'plugin_'
-                filename += name.encode(encoding='ascii', errors='replace').decode('utf-8').replace('.', '_')
-                spec = importlib.util.spec_from_file_location(filename, loadfile)
-                # Replaces older load_module() code. Includes a safety check that the module name is set.
-                if spec is not None and spec.loader is not None:
-                    module = importlib.util.module_from_spec(spec)
-                    sys.modules[module.__name__] = module
-                    spec.loader.exec_module(module)
+                if internal:
+                    filename = 'plugin_'
+                    filename += name.encode(encoding='ascii', errors='replace').decode('utf-8').replace('.', '_')
+                    spec = importlib.util.spec_from_file_location(filename, loadfile)
+                    # Replaces older load_module() code. Includes a safety check that the module name is set.
+                    if spec is not None and spec.loader is not None:
+                        module = importlib.util.module_from_spec(spec)
+                        sys.modules[module.__name__] = module
+                        spec.loader.exec_module(module)
+                else:
+                    module = importlib.import_module('.load', name)
+
+                if module:
                     if getattr(module, 'plugin_start3', None):
                         newname = module.plugin_start3(Path(loadfile).resolve().parent)
                         self.name = str(newname) if newname else self.name
@@ -170,7 +183,7 @@ def _load_internal_plugins():
             try:
                 plugin_name = name[:-3]
                 plugin_path = config.internal_plugin_dir_path / name
-                plugin = Plugin(plugin_name, plugin_path, logger)
+                plugin = Plugin(plugin_name, plugin_path, logger, internal=True)
                 plugin.folder = None
                 internal.append(plugin)
             except Exception:

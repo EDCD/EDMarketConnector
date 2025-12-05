@@ -1,9 +1,10 @@
 """Export various CSV formats."""
+
 # -*- coding: utf-8 -*-
 
 import time
+import csv
 from pathlib import Path
-
 from config import config
 from edmc_data import commodity_bracketmap as bracketmap
 
@@ -12,7 +13,7 @@ from edmc_data import commodity_bracketmap as bracketmap
 (COMMODITY_DEFAULT, COMMODITY_CSV) = range(2)
 
 
-def export(data, kind=COMMODITY_DEFAULT, filename=None) -> None:
+def export(data, kind=COMMODITY_DEFAULT, filename=None) -> None:  # noqa: CCR001
     """
     Export commodity data from the given CAPI data.
 
@@ -21,55 +22,48 @@ def export(data, kind=COMMODITY_DEFAULT, filename=None) -> None:
     :param filename: Filename to write to, or None for a standard format name.
     :return:
     """
-    querytime = config.get_int('querytime', default=int(time.time()))
+    querytime = config.get_int("querytime", default=int(time.time()))
 
     if not filename:
-        filename_system = data['lastSystem']['name'].strip()
-        filename_starport = data['lastStarport']['name'].strip()
-        filename_time = time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(querytime))
-        filename_kind = 'csv'
-        filename = f'{filename_system}.{filename_starport}.{filename_time}.{filename_kind}'
-        filename = Path(config.get_str('outdir')) / filename
-
-    if kind == COMMODITY_CSV:
-        sep = ';'  # BUG: for fixing later after cleanup
-        header = sep.join(('System', 'Station', 'Commodity', 'Sell', 'Buy', 'Demand', '', 'Supply', '', 'Date', '\n'))
-        rowheader = sep.join((data['lastSystem']['name'], data['lastStarport']['name']))
-
-    else:
-        sep = ','
-        header = sep.join(
-            ('System', 'Station', 'Commodity', 'Sell', 'Buy', 'Demand', '', 'Supply', '', 'Average', 'FDevID', 'Date\n')
+        sysname = data["lastSystem"]["name"].strip()
+        station = data["lastStarport"]["name"].strip()
+        timestamp = time.strftime("%Y-%m-%dT%H.%M.%S", time.localtime(querytime))
+        ext = "csv" if kind == COMMODITY_CSV else "scsv"
+        filename = (
+            Path(config.get_str("outdir")) / f"{sysname}.{station}.{timestamp}.{ext}"
         )
 
-        rowheader = sep.join((data['lastSystem']['name'], data['lastStarport']['name']))
+    system = data["lastSystem"]["name"]
+    station = data["lastStarport"]["name"]
 
-    with open(filename, 'wt') as h:  # codecs can't automatically handle line endings, so encode manually where required
-        h.write(header)
+    if kind == COMMODITY_CSV:
+        header = ["System", "Station", "Commodity", "Sell", "Buy", "Demand",
+                  "", "Supply", "", "Date"]
+    else:
+        header = ["System", "Station", "Commodity", "Sell", "Buy", "Demand",
+                  "", "Supply", "", "Average", "FDevID", "Date"]
 
-        for commodity in data['lastStarport']['commodities']:
-            line = sep.join((
-                rowheader,
-                commodity['name'],
-                commodity['sellPrice'] and str(int(commodity['sellPrice'])) or '',
-                commodity['buyPrice'] and str(int(commodity['buyPrice'])) or '',
-                str(int(commodity['demand'])) if commodity['demandBracket'] else '',
-                bracketmap[commodity['demandBracket']],
-                str(int(commodity['stock'])) if commodity['stockBracket'] else '',
-                bracketmap[commodity['stockBracket']]
-            ))
+    with open(filename, "w", newline="", encoding="utf-8") as output_file:
+        writer = csv.writer(output_file, delimiter=";" if kind == COMMODITY_DEFAULT else ",")
+
+        writer.writerow(header)
+
+        for commodity in data["lastStarport"]["commodities"]:
+            row = [
+                system,
+                station,
+                commodity["name"],
+                int(commodity["sellPrice"]) if commodity.get("sellPrice") is not None else "",
+                int(commodity["buyPrice"]) if commodity.get("buyPrice") is not None else "",
+                int(commodity["demand"]) if commodity.get("demandBracket") is not None else "",
+                bracketmap.get(commodity.get("demandBracket"), ""),
+                int(commodity["stock"]) if commodity.get("stockBracket") is not None else "",
+                bracketmap.get(commodity.get("stockBracket"), ""),
+            ]
 
             if kind == COMMODITY_DEFAULT:
-                line = sep.join(
-                    (
-                        line,
-                        str(int(commodity['meanPrice'])),
-                        str(commodity['id']),
-                        data['timestamp'] + '\n'
-                    )
-                )
+                mean = int(commodity["meanPrice"]) if commodity.get("meanPrice") is not None else ""
+                row.extend([mean, commodity["id"]])
 
-            else:
-                line = sep.join((line, data['timestamp'] + '\n'))
-
-            h.write(line)
+            row.append(data["timestamp"])
+            writer.writerow(row)

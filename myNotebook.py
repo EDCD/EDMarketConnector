@@ -14,6 +14,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from PIL import ImageGrab
 from l10n import translations as tr
+from collections.abc import Callable
 
 if sys.platform == 'win32':
     PAGEFG = 'SystemWindowText'
@@ -50,10 +51,18 @@ class Label(ttk.Label):
     """Custom ttk.Label class to fix some display issues."""
 
     def __init__(self, master: ttk.Frame | None = None, **kw):
-        kw['foreground'] = kw.pop('foreground', PAGEFG if sys.platform == 'win32'
-                                  else ttk.Style().lookup('TLabel', 'foreground'))
-        kw['background'] = kw.pop('background', PAGEBG if sys.platform == 'win32'
-                                  else ttk.Style().lookup('TLabel', 'background'))
+        if sys.platform == 'win32':
+            fg_color = PAGEFG
+        else:
+            fg_color = ttk.Style().lookup('TLabel', 'foreground')
+
+        if sys.platform == 'win32':
+            bg_color = PAGEBG
+        else:
+            bg_color = ttk.Style().lookup('TLabel', 'background')
+
+        kw['foreground'] = kw.pop('foreground', fg_color)
+        kw['background'] = kw.pop('background', bg_color)
         super().__init__(master, **kw)
 
 
@@ -171,6 +180,7 @@ class ScrollableNotebook(Notebook):
         self,
         master: ttk.Frame | None = None,
         tabmenu: bool = False,
+        on_tab_change: Callable | None = None,
         *args,
         **kwargs
     ) -> None:
@@ -191,6 +201,8 @@ class ScrollableNotebook(Notebook):
         self.notebookTab: ttk.Notebook = ttk.Notebook(self, **kwargs)
         self.notebookTab.place(x=0, y=0)
         self.notebookTab.bind("<<NotebookTabChanged>>", self._tab_changer)
+        if on_tab_change:
+            self.notebookTab.bind("<<NotebookTabChanged>>", on_tab_change, add='+')
 
         # Sliding frame and controls
         slide_frame: ttk.Frame = ttk.Frame(self)

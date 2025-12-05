@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from . import Config
 
 if sys.platform != "win32":
-    raise EnvironmentError("This file is for Windows only.")
+    raise OSError("This file is for Windows only.")
 
 REG_RESERVED_ALWAYS_ZERO = 0
 

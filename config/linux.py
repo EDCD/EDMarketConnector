@@ -12,7 +12,7 @@ import sys
 from config import config_logger
 
 if sys.platform != "linux":
-    raise EnvironmentError("This file is for Linux only.")
+    raise OSError("This file is for Linux only.")
 
 
 import pathlib
@@ -137,7 +137,7 @@ class LinuxConfigMinimal:
 
     def close(self) -> None:
         """Release resources (stub)."""
-        self.config = None
+        del self.config
 
 
 def linux_helper(config: Config) -> Config:

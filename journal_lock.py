@@ -13,7 +13,7 @@ import tkinter as tk
 from enum import Enum
 from os import getpid as os_getpid
 from tkinter import ttk
-from typing import Callable
+from collections.abc import Callable
 from l10n import translations as tr
 from config import config
 from EDMCLogging import get_main_logger

@@ -33,7 +33,8 @@ from tkinter import ttk
 from platform import system
 from textwrap import dedent
 from threading import Lock
-from typing import Any, Iterator, Mapping, MutableMapping
+from typing import Any
+from collections.abc import Iterator, Mapping, MutableMapping
 import requests
 import companion
 import edmc_data
@@ -152,7 +153,7 @@ class EDDNSender:
         r"unable to validate.',\)]$"
     )
 
-    def __init__(self, eddn: 'EDDN', eddn_endpoint: str) -> None:
+    def __init__(self, eddn: EDDN, eddn_endpoint: str) -> None:
         """
         Prepare the system for processing messages.
 

@@ -7,7 +7,8 @@ import pathlib
 import threading
 import zlib
 from http import server
-from typing import Any, Callable, Literal
+from typing import Any, Literal
+from collections.abc import Callable
 from urllib.parse import parse_qs
 from config import config
 from EDMCLogging import get_main_logger

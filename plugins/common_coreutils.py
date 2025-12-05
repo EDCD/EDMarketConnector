@@ -22,13 +22,15 @@ referenced in this file (or only in any other core plugin), and if so...
 # pylint: disable=import-error
 from __future__ import annotations
 
-from typing import Any, Mapping, cast
+from typing import Any, cast
+from collections.abc import Mapping
 import tkinter as tk
 import base64
 import gzip
 import io
 import json
 import os
+import re
 import myNotebook as nb  # noqa: N813
 from EDMCLogging import get_main_logger
 from companion import CAPIData
@@ -45,6 +47,49 @@ PADY = 1  # close spacing
 BOXY = 2  # box spacing
 SEPY = 10  # seperator line spacing
 STATION_UNDOCKED = '×'  # "Station" name to display when not docked = U+00D7
+
+
+# Known colonisation ship names match one of the following:
+#   "$EXT_PANEL_ColonisationShip;"
+#   "$EXT_PANEL_ColonisationShip; <ship name>" with "<ship name>" being eg; "Okawara Horizons"
+#   "$EXT_PANEL_ColonisationShip:#index=<number>;"
+#   "$EXT_PANEL_ColonisationShip:#index=<number>; <ship name>"
+_RE_COLONISATION_SHIP = re.compile(r'\$EXT_PANEL_ColonisationShip(?::#index=(\d+))?;(?: (.+))?')
+
+
+def localised_name(value: str | None) -> str | None:
+    """
+    Handle localisation of strings in places like station names.
+
+    This is currently an issue for system colonisation ships that have a station name along the
+    lines of "$EXT_PANEL_ColonisationShip; Okawara Horizons" when written to the journal, but would
+    be better displayed as "System Colonisation Ship Okawara Horizona" (or other appropriately
+    localised equivalent).
+
+    If no (known) localisable strings are present, the input will be returned unmodified.
+
+    :param value: The non-localised string.
+    :return: The localised string, or None if the input was None.
+    """
+    if value is None:
+        return None
+
+    colonisation_ship_match = _RE_COLONISATION_SHIP.match(value)
+    if colonisation_ship_match:
+        ship_index = colonisation_ship_match.group(1)
+        ship_name = colonisation_ship_match.group(2)
+        # Use the ship's index as its name if no name was provided.
+        ship_id = ship_name or ship_index
+
+        if ship_id:
+            # LANG: Colonisation ship name, with title
+            value = tr.tl("System Colonisation Ship {NAME}").format(NAME=ship_id)
+
+        else:
+            # LANG: Unidentified colonisation ship
+            value = tr.tl("System Colonisation Ship")
+
+    return value
 
 
 def plugin_start3(plugin_dir: str) -> str:
@@ -121,7 +166,7 @@ def station_link_common(data: CAPIData, this):
     :param this: The module global from the calling module.
     """
     if data['commander']['docked'] or this.on_foot and this.station_name:
-        this.station_link['text'] = this.station_name
+        this.station_link['text'] = localised_name(this.station_name)
     elif data['lastStarport']['name'] and data['lastStarport']['name'] != "":
         this.station_link['text'] = STATION_UNDOCKED
     else:
@@ -163,12 +208,14 @@ def station_name_setter_common(this):
     :param this: The module global from the calling module.
     """
     to_set: str = cast(str, this.station_name)
+
     if not to_set:
         if this.system_population is not None and this.system_population > 0:
             to_set = STATION_UNDOCKED
         else:
             to_set = ''
 
+    to_set = str(localised_name(to_set))
     this.station_link['text'] = to_set
 
 

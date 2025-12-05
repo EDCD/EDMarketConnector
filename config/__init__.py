@@ -43,7 +43,8 @@ import sys
 import tomllib
 import tomli_w
 from time import gmtime
-from typing import Any, Callable, Type, TypeVar
+from typing import Any, TypeVar
+from collections.abc import Callable
 import semantic_version
 from constants import GITVERSION_FILE, applongname, appname
 
@@ -474,7 +475,7 @@ class Config:
     @staticmethod
     def _suppress_call(
         func: Callable[..., _T],
-        exceptions: Type[BaseException] | list[Type[BaseException]] = Exception,
+        exceptions: type[BaseException] | list[type[BaseException]] = Exception,
         *args: Any,
         **kwargs: Any,
     ) -> _T | None:

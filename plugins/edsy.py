@@ -20,7 +20,8 @@ referenced in this file (or only in any other core plugin), and if so...
 """
 from __future__ import annotations
 
-from typing import Any, Mapping
+from typing import Any
+from collections.abc import Mapping
 from plugins.common_coreutils import shipyard_url_common  # pylint: disable=E0401
 
 

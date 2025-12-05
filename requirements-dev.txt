@@ -13,7 +13,7 @@ flake8-json==24.4.0
 flake8-noqa==1.4.0
 flake8-use-fstring==1.4
 
-mypy==1.18.2
+mypy==1.19.0
 pep8-naming==0.15.1
 safety==3.7.0
 types-requests==2.32.4.20250913
@@ -23,7 +23,7 @@ types-setuptools==80.9.0.20250822
 autopep8==2.3.2
 
 # Git pre-commit checking
-pre-commit==4.4.0
+pre-commit==4.5.0
 
 # HTML changelogs
 mistune==3.1.4
@@ -33,9 +33,9 @@ mistune==3.1.4
 py2exe==0.14.0.0; sys_platform == 'win32'
 
 # Testing
-pytest==9.0.0
+pytest==9.0.1
 pytest-cov==7.0.0  # Pytest code coverage support
-coverage[toml]==7.11.2 # pytest-cov dep. This is here to ensure that it includes TOML support for pyproject.toml configs
+coverage[toml]==7.12.0 # pytest-cov dep. This is here to ensure that it includes TOML support for pyproject.toml configs
 coverage-conditional-plugin==0.9.0
 
 
