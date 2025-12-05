@@ -705,7 +705,7 @@ class Session:
             self.credentials = credentials
 
         self.state = Session.STATE_INIT
-        self.auth = Auth(self.credentials['cmdr'])
+        self.auth = Auth(self.credentials['cmdr'])  # type: ignore
 
         access_token = self.auth.refresh()
         if access_token:

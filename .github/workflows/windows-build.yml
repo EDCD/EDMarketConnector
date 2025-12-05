@@ -15,7 +15,7 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - name: Setting global variables
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         id: var
         with:
           script: |
@@ -27,7 +27,7 @@ jobs:
     name: Linux environment build steps
     runs-on: "ubuntu-latest"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: true
       - name: Create .gitversion
@@ -78,7 +78,7 @@ jobs:
         shell: powershell
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: true
 
@@ -101,7 +101,7 @@ jobs:
           #   presumably due to a Windows CL length limit.
           exclusions: 'EDMarketConnector/EDMarketConnector-release-*.* EDMarketConnector/.editorconfig EDMarketConnector/.flake8 EDMarketConnector/.git* EDMarketConnector/.mypy.ini EDMarketConnector/.pre-commit-config.yaml EDMarketConnector/build.py EDMarketConnector/*.manifest EDMarketConnector/coriolis-data/ EDMarketConnector/img/ EDMarketConnector/pyproject.toml EDMarketConnector/scripts/ EDMarketConnector/tests/'
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version-file: '.python-version'
           architecture: "x86"
@@ -155,7 +155,7 @@ jobs:
 
     steps:
       - name: Download binary
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: Built files
           path: ./
