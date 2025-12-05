@@ -534,7 +534,7 @@ def journal_entry(  # noqa: C901, CCR001
                 new_add_event('setCommanderRankPower', entry['timestamp'], power_data)
 
             # Ship change
-            if event_name == 'Loadout' and this.shipswap:
+            elif event_name == 'Loadout' and this.shipswap:
                 this.loadout = make_loadout(state)
                 new_add_event('setCommanderShipLoadout', entry['timestamp'], this.loadout)
                 this.shipswap = False
