@@ -63,7 +63,7 @@ def help_open_system_profiler(parent) -> None:
             profiler_path /= 'EDMCSystemProfiler.exe'
             subprocess.run(profiler_path, check=True)
         else:
-            subprocess.run(['python', "EDMCSystemProfiler.py"], shell=True, check=True)
+            subprocess.run(['python', "EDMCSystemProfiler.py"], shell=False, check=True)
     except Exception as err:
         parent.status["text"] = tr.tl("Error in System Profiler")  # LANG: Catch & Record Profiler Errors
         logger.exception(err)
@@ -209,7 +209,7 @@ if sys.platform == 'win32':
             config_home: The home directory path
         Returns:
             Localized path as string
-        """
+        """  # noqa: D205, D407
         if not path:
             return path
 

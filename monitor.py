@@ -722,7 +722,7 @@ class EDLogs(FileSystemEventHandler):
                         cap = module['Item'].split('size')
                         cap = cap[1].split('_')
                         cap = 2 ** int(cap[0])
-                        ship = ship_name_map[entry["Ship"]]
+                        ship = ship_name_map.get(entry["Ship"], entry["Ship"])
                         fuel = {'Main': cap, 'Reserve': ships[ship]['reserveFuelCapacity']}
                         data_dict.update({"FuelCapacity": fuel})
                 data_dict.update({

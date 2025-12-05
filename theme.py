@@ -222,7 +222,7 @@ class _Theme:
         widget = event.widget
         if widget and widget['state'] != tk.DISABLED:
             try:
-                widget.configure(state=tk.ACTIVE)
+                widget.configure(state=tk.ACTIVE)  # type: ignore
 
             except Exception:
                 logger.exception(f'Failure setting widget active: {widget=}')
@@ -239,7 +239,7 @@ class _Theme:
         widget = event.widget
         if widget and widget['state'] != tk.DISABLED:
             try:
-                widget.configure(state=tk.NORMAL)
+                widget.configure(state=tk.NORMAL)  # type: ignore
 
             except Exception:
                 logger.exception(f'Failure setting widget normal: {widget=}')
