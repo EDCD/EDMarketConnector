@@ -81,7 +81,7 @@ class LinuxConfigMinimal:
 
         return "".join(out)
 
-    def _get_settings_dict(self) -> dict[str, Any]:
+    def _get_settings_dict(self) -> dict[str, Any]:  #noqa: CCR001
         """
         Return all keys/values from SECTION as a dict of strings or lists.
 
