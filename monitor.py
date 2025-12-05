@@ -812,6 +812,10 @@ class EDLogs(FileSystemEventHandler):
                 self.state['OnFoot'] = False
                 self.state['Taxi'] = entry['Taxi']
 
+                if entry['Multicrew']:
+                    # Player has boarded another player's ship, but has not selected a role yet
+                    self.state['Role'] = 'Idle'
+
                 # We can't now have anything in the BackPack, it's all in the
                 # ShipLocker.
                 self.backpack_set_empty()
@@ -846,6 +850,10 @@ class EDLogs(FileSystemEventHandler):
 
                 self.state['Taxi'] = False
                 self.state['Dropship'] = False
+
+                # Since the player is now on foot, it's no longer possible to be multicrewing, so no
+                # need to actually check the multicrew parameter.
+                self.state['Role'] = None
 
             elif event_type == 'dropshipdeploy':
                 # We're definitely on-foot now
