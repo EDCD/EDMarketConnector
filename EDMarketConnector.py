@@ -1588,7 +1588,8 @@ class AppWindow:
                 if not should_return:
                     self.w.after(int(SERVER_RETRY * 1000), self.capi_request_data)
 
-            if entry['event'] in ('CarrierBuy', 'StartUp', 'CarrierLocation', 'CarrierStats', 'CargoTransfer', 'MarketBuy') and config.get_bool('capi_fleetcarrier'):
+            if entry['event'] in ('CarrierBuy', 'StartUp', 'CarrierLocation',
+             'CarrierStats', 'CargoTransfer', 'MarketBuy') and config.get_bool('capi_fleetcarrier'):
                 should_return, new_data = killswitch.check_killswitch('capi.request.fleetcarrier', {})
                 if not should_return:
                     self.w.after(int(SERVER_RETRY * 1000), self.capi_request_fleetcarrier_data)
