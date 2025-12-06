@@ -296,14 +296,14 @@ def export(data, filename) -> None:
     header = 'System,Station,Category,Name,Mount,Guidance,Ship,Class,Rating,FDevID,Date\n'
     rowheader = f'{data["lastSystem"]["name"]},{data["lastStarport"]["name"]}'
 
-    with open(filename, 'wt') as h:
+    with open(filename, 'w') as h:
         h.write(header)
         for v in data["lastStarport"].get("modules", {}).values():
             try:
                 m = lookup(v, ship_name_map)
                 if m:
-                    h.write(f'{rowheader}, {m["category"]}, {m["name"]}, {m.get("mount","")},'
-                            f'{m.get("guidance","")}, {m.get("ship","")}, {m["class"]}, {m["rating"]},'
+                    h.write(f'{rowheader}, {m["category"]}, {m["name"]}, {m.get("mount", "")},'
+                            f'{m.get("guidance", "")}, {m.get("ship", "")}, {m["class"]}, {m["rating"]},'
                             f'{m["id"]}, {data["timestamp"]}\n')
 
             except ValueError as e:

@@ -29,23 +29,22 @@ def ensure_on_screen(self, parent: tk.Tk):
     :param self: The calling class instance of tk.TopLevel
     :param parent: The parent window
     """
-    if sys.platform != 'win32':
-        return
-    try:
-        # Get monitor info for the monitor containing the parent window
-        monitor = win32api.MonitorFromWindow(parent.winfo_id(), win32con.MONITOR_DEFAULTTONEAREST)
-        monitor_info = win32api.GetMonitorInfo(monitor)
-        work_area = monitor_info['Work']  # Gets the working area (excludes taskbar)
+    if sys.platform == 'win32':
+        try:
+            # Get monitor info for the monitor containing the parent window
+            monitor = win32api.MonitorFromWindow(parent.winfo_id(), win32con.MONITOR_DEFAULTTONEAREST)
+            monitor_info = win32api.GetMonitorInfo(monitor)
+            work_area = monitor_info['Work']  # Gets the working area (excludes taskbar)
 
-        # Calculate optimal position
-        x = max(work_area[0], min(parent.winfo_rootx(), work_area[2] - self.winfo_width()))
-        y = max(work_area[1], min(parent.winfo_rooty(), work_area[3] - self.winfo_height()))
+            # Calculate optimal position
+            x = max(work_area[0], min(parent.winfo_rootx(), work_area[2] - self.winfo_width()))
+            y = max(work_area[1], min(parent.winfo_rooty(), work_area[3] - self.winfo_height()))
 
-        # Update window position
-        self.geometry(f"+{x}+{y}")
+            # Update window position
+            self.geometry(f"+{x}+{y}")
 
-    except Exception as e:
-        logger.debug(f"Failed to ensure window is on screen: {e}")
+        except Exception as e:
+            logger.debug(f"Failed to ensure window is on screen: {e}")
 
 
 def log_locale(prefix: str) -> None:

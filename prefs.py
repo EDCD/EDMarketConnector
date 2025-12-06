@@ -1,20 +1,20 @@
-# -*- coding: utf-8 -*-
 """EDMC preferences library."""
 from __future__ import annotations
 
 import contextlib
 import logging
+import time
 from os.path import join, normpath
 from pathlib import Path
 import subprocess
 import sys
 import tkinter as tk
-import warnings
 from os import system
 from tkinter import colorchooser as tkColorChooser  # type: ignore # noqa: N812
 from tkinter import ttk
 from types import TracebackType
-from typing import Any, Callable, Optional, Type
+from typing import Any
+from collections.abc import Callable
 import myNotebook as nb  # noqa: N813
 import plug
 from config import appversion_nobuild, config
@@ -36,14 +36,6 @@ logger = get_main_logger()
 ###########################################################################
 
 # May be imported by plugins
-
-# DEPRECATED: Migrate to open_log_folder. Will remove in 6.0 or later.
-def help_open_log_folder() -> None:
-    """Open the folder logs are stored in."""
-    warnings.warn('prefs.help_open_log_folder is deprecated, use open_log_folder instead. '
-                  'This function will be removed in 6.0 or later', DeprecationWarning, stacklevel=2)
-    open_folder(Path(config.app_dir_path / 'logs'))
-
 
 def open_folder(file: Path) -> None:
     """Open the given file in the OS file explorer."""
@@ -178,8 +170,8 @@ class AutoInc(contextlib.AbstractContextManager):
 
     def __exit__(
         self,
-        exc_type: Optional[Type[BaseException]], exc_value: Optional[BaseException], traceback: Optional[TracebackType]
-    ) -> Optional[bool]:
+        exc_type: type[BaseException] | None, exc_value: BaseException | None, traceback: TracebackType | None
+    ) -> bool | None:
         """Do nothing."""
         return None
 
@@ -249,7 +241,7 @@ if sys.platform == 'win32':
 class PreferencesDialog(tk.Toplevel):
     """The EDMC preferences dialog."""
 
-    def __init__(self, parent: tk.Tk, callback: Optional[Callable]):
+    def __init__(self, parent: tk.Tk, callback: Callable | None):
         super().__init__(parent)
 
         self.parent = parent
@@ -273,7 +265,7 @@ class PreferencesDialog(tk.Toplevel):
 
         self.cmdr: str | bool | None = False  # Note if Cmdr changes in the Journal
         self.is_beta: bool = False  # Note if Beta status changes in the Journal
-        self.cmdrchanged_alarm: Optional[str] = None  # This stores an ID that can be used to cancel a scheduled call
+        self.cmdrchanged_alarm: str | None = None  # This stores an ID that can be used to cancel a scheduled call
 
         # Set up the main frame
         frame = ttk.Frame(self)
@@ -284,8 +276,7 @@ class PreferencesDialog(tk.Toplevel):
         frame.rowconfigure(0, weight=1)
         frame.rowconfigure(1, weight=0)
 
-        notebook: nb.Notebook = nb.Notebook(frame)
-        notebook.bind('<<NotebookTabChanged>>', self.tabchanged)  # Recompute on tab change
+        notebook: nb.ScrollableNotebook = nb.ScrollableNotebook(frame, tabmenu=True, on_tab_change=self.tabchanged)
 
         self.PADX = 10
         self.BUTTONX = 12  # indent Checkbuttons and Radiobuttons
@@ -318,6 +309,11 @@ class PreferencesDialog(tk.Toplevel):
         self.cmdrchanged()
         self.themevarchanged()
 
+        # Init hotkey attributes to avoid linter errors
+        self.hotkey_text: ttk.Entry
+        self.hotkey_only_btn: nb.Checkbutton
+        self.hotkey_play_btn: nb.Checkbutton
+
         # disable hotkey for the duration
         hotkeymgr.unregister()
 
@@ -332,12 +328,6 @@ class PreferencesDialog(tk.Toplevel):
 
         # Set Log Directory
         self.logfile_loc = Path(config.app_dir_path / 'logs')
-
-        # Set minimum size to prevent content cut-off
-        self.update_idletasks()  # Update "requested size" from geometry manager
-        min_width = self.winfo_reqwidth()
-        min_height = self.winfo_reqheight()
-        self.wm_minsize(min_width, min_height)
 
     def __setup_output_tab(self, root_notebook: ttk.Notebook) -> None:
         output_frame = nb.Frame(root_notebook)
@@ -989,11 +979,19 @@ class PreferencesDialog(tk.Toplevel):
             ).grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get())
 
             for plugin in enabled_plugins:
+                curr_row = row.get()
                 label = nb.Label(plugins_frame,
                                  text=plugin.name if plugin.name == plugin.folder
                                  else f'{plugin.folder} ({plugin.name})')
 
-                label.grid(columnspan=2, padx=self.LISTX, pady=self.PADY, sticky=tk.W, row=row.get())
+                label.grid(column=0, columnspan=2, padx=self.LISTX, pady=self.PADY, sticky=tk.W, row=curr_row)
+
+                btn = ttk.Button(
+                    plugins_frame,
+                    text=tr.tl("Disable"),  # LANG: Disable an Enabled Plugin
+                    command=lambda plugin=plugin: self.disable_plugin(plugin)  # type: ignore
+                )
+                btn.grid(column=3, padx=self.LISTX, pady=self.PADY, sticky=tk.W, row=curr_row)
 
         ############################################################
         # Show which plugins don't have Python 3.x support
@@ -1035,9 +1033,18 @@ class PreferencesDialog(tk.Toplevel):
             ).grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get())
 
             for plugin in disabled_plugins:
+                curr_row = row.get()
                 nb.Label(plugins_frame, text=plugin.name).grid(
-                    columnspan=2, padx=self.LISTX, pady=self.PADY, sticky=tk.W, row=row.get()
+                    column=0, columnspan=2, padx=self.LISTX, pady=self.PADY, sticky=tk.W, row=curr_row
                 )
+
+                btn = ttk.Button(
+                    plugins_frame,
+                    text=tr.tl("Enable"),  # LANG: Enable a Disabled Plugin
+                    command=lambda plugin=plugin: self.enable_plugin(plugin)  # type: ignore
+                )
+                btn.grid(column=3, padx=self.LISTX, pady=self.PADY, sticky=tk.W, row=curr_row)
+
         ############################################################
         # Show plugins that failed to load
         ############################################################
@@ -1058,6 +1065,55 @@ class PreferencesDialog(tk.Toplevel):
 
         # LANG: Label on Settings > Plugins tab
         notebook.add(plugins_frame, text=tr.tl('Plugins'))		# Tab heading in settings
+
+    def disable_plugin(self, plugin):
+        """Disable an existing plugin and restart."""
+        logger.debug(f"Calling plugin_stop() for {plugin.name}")
+        if plugin._get_func('plugin_stop'):  # Try to stop cleanly. We're going regardless...
+            plugin.module.plugin_stop()
+        # LANG: Text of Notification Popup for EDMC Restart
+        restart_msg = tr.tl(  # LANG: Disabling a Plugin
+            r"Disabling plugin {PLUGIN}. This will cause a restart. Click OK to continue..."
+        ).format(PLUGIN=plugin.name)
+        restart_box = tk.messagebox.Message(
+            title=tr.tl('Restart Required'),  # LANG: Title of Notification Popup for EDMC Restart
+            message=restart_msg,
+            type=tk.messagebox.OK
+        )
+        restart_box.show()
+        time.sleep(2)  # Give plugin stop time to work.
+        plug.PLUGINS.remove(plugin)  # Remove PLugin from active list
+        try:
+            folder = Path(config.plugin_dir_path / plugin.folder)
+            new_name = f"{folder}.disabled"
+            folder.rename(new_name)
+            logger.info(f"Disabled {plugin.name}.")
+        except FileExistsError:
+            logger.warning("Unable to disable the plugin!")
+            return
+        self.req_restart = True
+        self.apply()
+
+    def enable_plugin(self, plugin):
+        """Enable an existing plugin and restart."""
+        logger.debug(f"Attempting to enable {plugin.name}")
+        localfolder = plugin.folder + ".disabled"
+        folder = Path(config.plugin_dir_path) / localfolder
+        if not folder.exists():
+            logger.warning(f"Folder does not exist: {folder}")
+            return
+        new_folder = folder.with_name(plugin.folder.replace(".disabled", ""))
+        if new_folder.exists():
+            logger.warning(f"Target folder already exists: {new_folder}")
+            return
+        try:
+            folder.rename(new_folder)
+            logger.info(f"Enabled {plugin.name}.")
+        except Exception as e:
+            logger.error(f"Failed to enable plugin {plugin.name}: {e}")
+            return
+        self.req_restart = True
+        self.apply()
 
     def cmdrchanged(self, event=None):
         """
@@ -1080,7 +1136,7 @@ class PreferencesDialog(tk.Toplevel):
         """Handle preferences active tab changing."""
         self.outvarchanged()
 
-    def outvarchanged(self, event: Optional[tk.Event] = None) -> None:
+    def outvarchanged(self, event: tk.Event | None = None) -> None:
         """Handle Output tab variable changes."""
         self.displaypath(self.outdir, self.outdir_entry)
         self.displaypath(self.logdir, self.logdir_entry)
@@ -1184,14 +1240,14 @@ class PreferencesDialog(tk.Toplevel):
         self.theme_button_0['state'] = state
         self.theme_button_1['state'] = state
 
-    def hotkeystart(self, event: 'tk.Event[Any]') -> None:
+    def hotkeystart(self, event: tk.Event[Any]) -> None:
         """Start listening for hotkeys."""
         event.widget.bind('<KeyPress>', self.hotkeylisten)
         event.widget.bind('<KeyRelease>', self.hotkeylisten)
         event.widget.delete(0, tk.END)
         hotkeymgr.acquire_start()
 
-    def hotkeyend(self, event: 'tk.Event[Any]') -> None:
+    def hotkeyend(self, event: tk.Event[Any]) -> None:
         """Stop listening for hotkeys."""
         event.widget.unbind('<KeyPress>')
         event.widget.unbind('<KeyRelease>')
@@ -1202,7 +1258,7 @@ class PreferencesDialog(tk.Toplevel):
             # LANG: No hotkey/shortcut set
             hotkeymgr.display(self.hotkey_code, self.hotkey_mods) if self.hotkey_code else tr.tl('None'))
 
-    def hotkeylisten(self, event: 'tk.Event[Any]') -> str:
+    def hotkeylisten(self, event: tk.Event[Any]) -> str:
         """
         Hotkey handler.
 

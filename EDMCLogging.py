@@ -51,7 +51,7 @@ from threading import get_native_id as thread_native_id
 from time import gmtime
 from traceback import print_exc
 from typing import TYPE_CHECKING, cast
-from config import appcmdname, appname, config, trace_on
+from config import appcmdname, appname, config, trace_on, config_logger
 
 # TODO: Tests:
 #
@@ -193,7 +193,7 @@ class Logger:
         self.logger_channel_rotating.setFormatter(self.logger_formatter)
         self.logger.addHandler(self.logger_channel_rotating)
 
-    def get_logger(self) -> 'LoggerMixin':
+    def get_logger(self) -> LoggerMixin:
         """
         Obtain the self.logger of the class instance.
 
@@ -232,7 +232,7 @@ class Logger:
             logger.trace("Not changing log level because it's TRACE")  # type: ignore
 
 
-def get_plugin_logger(plugin_name: str, loglevel: int = _default_loglevel) -> 'LoggerMixin':
+def get_plugin_logger(plugin_name: str, loglevel: int = _default_loglevel) -> LoggerMixin:
     """
     Return a logger suitable for a plugin.
 
@@ -352,7 +352,7 @@ class EDMCContextFilter(logging.Filter):
             try:
                 args, _, _, value_dict = inspect.getargvalues(frame)
                 if len(args) and args[0] in ('self', 'cls'):
-                    frame_class: 'object' = value_dict[args[0]]
+                    frame_class: object = value_dict[args[0]]
 
                     if frame_class:
                         # See https://en.wikipedia.org/wiki/Name_mangling#Python for how name mangling works.
@@ -450,7 +450,7 @@ class EDMCContextFilter(logging.Filter):
         # Go up through stack frames until we find the first with a
         # type(f_locals.self) of logging.Logger.  This should be the start
         # of the frames internal to logging.
-        frame: 'FrameType' = getframe(0)
+        frame: FrameType = getframe(0)
         while frame:
             if isinstance(frame.f_locals.get('self'), logging.Logger):
                 frame = cast('FrameType', frame.f_back)  # Want to start on the next frame below
@@ -518,7 +518,7 @@ class EDMCContextFilter(logging.Filter):
         return module_name
 
 
-def get_main_logger(sublogger_name: str = '') -> 'LoggerMixin':
+def get_main_logger(sublogger_name: str = '') -> LoggerMixin:
     """Return the correct logger for how the program is being run."""
     if not os.getenv("EDMC_NO_UI"):
         # GUI app being run
@@ -535,4 +535,6 @@ if not loglevel:
 base_logger_name = appcmdname if os.getenv('EDMC_NO_UI') else appname
 
 edmclogger = Logger(base_logger_name, loglevel=loglevel)
-logger: 'LoggerMixin' = edmclogger.get_logger()
+for h in config_logger.handlers[:]:
+    config_logger.removeHandler(h)
+logger: LoggerMixin = edmclogger.get_logger()

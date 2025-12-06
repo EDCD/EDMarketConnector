@@ -1,11 +1,83 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
-* We currently test against, and package with, Python 3.11, 32-bit.
-  * As a result, we do not support Windows 7, 8, or 8.1.
-  * Developers can check the contents of the `.python-version` file
-      in the source (not distributed with the Windows installer) for the
-      currently used version.
+* We currently test against, and package with, Python 3.13, 64-bit.
 ---
+Pre-Release 6.0.0-Beta2
+===
+This is a PUBLIC BETA for EDMC 6.0.0, now available on the Beta update track!
+
+This build contains everything in Beta1, with a few fixes identified in testing and a new --config option.
+
+This is a BETA release – BUGS ARE EXPECTED. Please report any issues on GitHub so we can stabilize the final 6.0.0 release.
+
+**Changes and Enhancements**
+* Added a new --config option to EDMC to allow users to specify a different config file.
+* Added additional notes about 64-bit builds to the changelog generator.
+
+**Bug Fixes**
+* Fixed a bug where the release hashes.sum would not have content populate. 
+* Fixed a bug where .ini config files would not be read during file conversion on Linux static builds like Flatpak.
+* Fixed a bug where Embarked crew would send erroneous events to Inara. 
+
+Pre-Release 6.0.0-Beta1
+===
+This is a PUBLIC BETA for EDMC 6.0.0, now available on the Beta update track!
+
+This build represents one of the most significant internal updates to EDMC in recent memory. 
+It includes a complete overhaul of the configuration system, full x64-bit build support, major plugin system 
+enhancements (including enable/disable support), new core plugins, and additional updates across the codebase.
+
+Because of the scale of these changes, existing workflows, plugins, and user configurations may behave differently. 
+Plugin developers must review the removal list and update their plugins promptly, as several 
+deprecated APIs and legacy behaviors have been removed.
+
+This is a BETA release – BUGS ARE EXPECTED. Please report any issues on GitHub so we can stabilize the final 6.0.0 release.
+
+**Changes and Enhancements**
+* Enables building of x64-bit builds.
+* Added a new unified config system and migrated both Linux and Windows configuration files to a new config.toml format. This config file is placed by default in EDMC's LocalAppData folder on Windows or the XDG_DATA_HOME/EDMarketConnector path on Linux.
+* Added a new EDAstro core plugin to send specific events to EDAstro.
+* Added a new plugin Enable/Disable system, in Preferences -> Plugins.
+* Added a new logger to the Config module prior to the default logger.
+* Added a new --skip-journallock argument to allow EDMC to start even if the journal lock was not acquired.
+* Added a new ScrollableNotebook class to enable horizontal scrolling of tabs in a Notebook.
+* Updated the Plugins settings window to use the new ScrollableNotebook class. 
+* Updated a number of GitHub workflow dependencies.
+* Updated the default Python version to 3.13.
+* Updated EDMC:// protocol handler to use process handles with least-privilege access for improved security and reliability.
+* Updated a number of Tkinter TK elements to use the updated TTK equivalents. 
+* Updated some internal function calls to use non-deprecated alternatives.
+* Updated the LastError class to a Python Dataclass. 
+* Updated a number of dependencies.
+* Updated a number of Win32 calls with proper prototyping for x64-bit builds.
+* Updated the Windows WinSparkle updater to be more maintainable. 
+* Updated the Windows DDE Request handler for the EDMC Protocol, specifically callbacks and internal stability.
+* Simplified some internal logic calls. 
+* Simplified the git shorthash function call.
+
+**Bug Fixes**
+* Fixes a bug where protocol handler reset popups would be generated on first runs of EDMC.
+* Fixed a bug where "en" was not present in available languages.
+* Fixed a bug where the EDMC System Profiler could not be run on Linux systems. 
+* Fixed a bug where the plugin prefs window was not resizable. 
+* Fixed a bug where EDDN's queue would not actually start processing on app launch.
+
+**Key Removals**
+* Removed the long-deprecated config 1.0 conversion calls.
+* Removed the "_" builtin translation in favor of tr.tl. 
+* Removed the stringFromNumber, numberFromString, and preferredLanguages functions.
+* Removed the _Translations singleton in favor of the more modern classes.
+* Removed the nb.Entry, nb.ColoredButton classes.
+* Removed legacy queue migration functionality from EDDN. 
+* Removed the help_open_log_folder function in favor of open_log_folder. 
+* Removed the legacy config AbstractClass and most Windows/Linux specific config functions in favor of new defaults. 
+
+**Plugin Developers**
+* Several deprecated functions have been removed. Please ensure your plugins are updated!
+* The new Plugin Disable option relies on plugins respecting plugin_stop(). Ensure that your plugins respect this call!
+* EDMC is now installed by default with x64-bit builds. 
+* EDMC will expect a minimum version of Python 3.13. While we do not currently use code incompatible with some earlier versions, we reserve the right to do so.
+
 Release 5.13.3
 ===
 This release contains a bugfix for a race condition that could occur if plugin setup took too long for the journal monitor thread.
@@ -1656,7 +1728,7 @@ updated to using Python 3.9.8.
     - When the new option is not active, the application will minimize to the 
       taskbar as normal.
 
-Bug Fixex
+Bug Fixes
 ---
 
 * If a CAPI query failed in such a way that no `requests.Response` object 

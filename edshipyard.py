@@ -106,7 +106,7 @@ def export(data, filename=None) -> None:  # noqa: C901, CCR001
             else:
                 name = module['name']  # type: ignore
 
-            if name == 'Frame Shift Drive' or name == 'Frame Shift Drive (SCO)':
+            if name in ['Frame Shift Drive', 'Frame Shift Drive (SCO)']:
                 fsd = module  # save for range calculation
 
                 if mods.get('OutfittingFieldType_FSDOptimalMass'):
@@ -189,7 +189,7 @@ def export(data, filename=None) -> None:  # noqa: C901, CCR001
             raise
 
     if filename:
-        with open(filename, 'wt') as h:
+        with open(filename, 'w') as h:
             h.write(string)
         return
 
@@ -206,5 +206,5 @@ def export(data, filename=None) -> None:  # noqa: C901, CCR001
     timestamp = time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(querytime))
     filename = pathlib.Path(config.get_str('outdir')) / f'{ship}.{timestamp}.txt'
 
-    with open(filename, 'wt') as h:
+    with open(filename, 'w') as h:
         h.write(string)

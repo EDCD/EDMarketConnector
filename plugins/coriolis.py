@@ -22,7 +22,8 @@ referenced in this file (or only in any other core plugin), and if so...
 # pylint: disable=import-error
 from __future__ import annotations
 
-from typing import Any, Mapping
+from typing import Any
+from collections.abc import Mapping
 import tkinter as tk
 from tkinter import ttk
 import myNotebook as nb  # noqa: N813 # its not my fault.

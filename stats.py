@@ -12,7 +12,8 @@ import json
 import sys
 import tkinter as tk
 from tkinter import ttk
-from typing import Any, AnyStr, Callable, NamedTuple, Sequence, cast
+from typing import Any, AnyStr, NamedTuple, cast
+from collections.abc import Callable, Sequence
 import companion
 import EDMCLogging
 import myNotebook as nb  # noqa: N813
@@ -457,7 +458,7 @@ class StatsResults(tk.Toplevel):
             # label = HyperlinkLabel(parent, text=col_content, popup_copy=True)
             label = nb.Label(parent, text=col_content)
             if with_copy:
-                label.bind('<Button-1>', self.copy_callback(label, col_content))
+                label.bind('<Button-1>', self.copy_callback(label, col_content))  # type: ignore
 
             if i == 0:
                 label.grid(padx=10, sticky=tk.W)

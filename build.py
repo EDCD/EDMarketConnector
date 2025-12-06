@@ -38,8 +38,8 @@ def iss_build(template_path: str, output_file: str) -> None:
 
 def system_check(dist_dir: pathlib.Path) -> str:
     """Check if the system is able to build."""
-    if sys.version_info < (3, 11):
-        sys.exit(f"Unexpected Python version {sys.version}")
+    if sys.version_info < (3, 13):
+        sys.exit(f"EDMC cannot build on Python {sys.version}. Minimum version: 3.13")
 
     if sys.platform != "win32":
         sys.exit(f"Unsupported platform {sys.platform}")
@@ -121,6 +121,7 @@ def build() -> None:
         "plugins/edsy.py",
         "plugins/inara.py",
         "plugins/spansh_core.py",
+        "plugins/edastro_core.py",
         "plugins/common_coreutils.py"
     ]
     options: dict = {

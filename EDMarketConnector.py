@@ -54,7 +54,7 @@ if __name__ == '__main__':
         log_file_path.mkdir(exist_ok=True)
         log_file_path /= f'{appname}.log'
 
-        sys.stdout = sys.stderr = open(log_file_path, mode='wt', buffering=1)  # Do NOT use WITH here.
+        sys.stdout = sys.stderr = open(log_file_path, mode='w', buffering=1)  # Do NOT use WITH here.
     # TODO: Test: Make *sure* this redirect is working, else py2exe is going to cause an exit popup
 
 
@@ -102,6 +102,8 @@ if __name__ == '__main__':  # noqa: C901
                         help="Start the application minimized",
                         action="store_true"
                         )
+
+    parser.add_argument('--config', help="Define a custom config to load EDMC from")
     ###########################################################################
 
     ###########################################################################
@@ -194,9 +196,18 @@ if __name__ == '__main__':  # noqa: C901
         help='Skips the Time Delta check for processed events',
         action='store_true'
     )
+
+    parser.add_argument(
+        '--skip-journallock',
+        help='Allows EDMC to continue even if journal lock could not be acquired',
+        action='store_true',
+    )
     ###########################################################################
 
     args: argparse.Namespace = parser.parse_args()
+
+    if args.config:
+        config.reload_from_path(args.config)
 
     if args.capi_pretend_down:
         import config as conf_module
@@ -205,7 +216,7 @@ if __name__ == '__main__':  # noqa: C901
 
     if args.capi_use_debug_access_token:
         import config as conf_module
-        with open(conf_module.config.app_dir_path / 'access_token.txt', 'r') as at:
+        with open(conf_module.config.app_dir_path / 'access_token.txt') as at:
             conf_module.capi_debug_access_token = at.readline().strip()
 
     level_to_set: int | None = None
@@ -281,7 +292,7 @@ if __name__ == '__main__':  # noqa: C901
                         # Get thread and process IDs
                         _, process_id = win32process.GetWindowThreadProcessId(hwnd)
                     # Get the process handle
-                        return win32api.OpenProcess(win32con.PROCESS_ALL_ACCESS, False, process_id)
+                        return win32api.OpenProcess(win32con.PROCESS_QUERY_LIMITED_INFORMATION, False, process_id)
                     except Exception:
                         return None
 
@@ -337,6 +348,12 @@ if __name__ == '__main__':  # noqa: C901
                 # Ref: <https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-enumwindows>
                 win32gui.EnumWindows(enumwindowsproc, 0)
 
+    def skip_journallock_popup():
+        """Create the "skipping Journal Lock" popup."""
+        from tkinter import messagebox
+        lockmsg = "Ignoring failed Journal Lock. Continuing at your own risk.\nConsider also using a debug sender."
+        messagebox.showwarning(title=appname, message=lockmsg)
+
     def already_running_popup():
         """Create the "already running" popup."""
         from tkinter import messagebox
@@ -352,9 +369,15 @@ if __name__ == '__main__':  # noqa: C901
 
     handle_edmc_callback_or_foregrounding()
 
-    if locked == JournalLockResult.ALREADY_LOCKED:
-        # There's a copy already running.
+    if locked == JournalLockResult.ALREADY_LOCKED and args.skip_journallock:
+        # There may be a copy already running. We are intentionally ignoring it.
+        logger.info("Intentionally skipping Journal Lock check. This may have unintended consequences")
+        # To be sure the user knows, we need a popup
+        if not args.edmc:
+            skip_journallock_popup()
 
+    if locked == JournalLockResult.ALREADY_LOCKED and not args.skip_journallock:
+        # There's a copy already running.
         logger.info("An EDMarketConnector.exe process was already running, exiting.")
 
         # To be sure the user knows, we need a popup
@@ -453,7 +476,7 @@ class AppWindow:
         if sys.platform == 'win32' and not bool(config.get_int('no_systray')):
             from simplesystray import SysTrayIcon
 
-            def open_window(systray: 'SysTrayIcon', *args) -> None:
+            def open_window(systray: SysTrayIcon, *args) -> None:
                 self.w.deiconify()
 
             logfile_loc = pathlib.Path(config.app_dir_path / 'logs')
@@ -589,7 +612,7 @@ class AppWindow:
         self.status.grid(columnspan=2, sticky=tk.EW)
 
         for child in frame.winfo_children():
-            child.grid_configure(padx=self.PADX, pady=(
+            child.grid_configure(padx=self.PADX, pady=(  # type: ignore
                 sys.platform != 'win32' or isinstance(child, tk.Frame)) and 2 or 0)
 
         self.menubar = tk.Menu()
@@ -746,14 +769,6 @@ class AppWindow:
 
         # Start a protocol handler to handle cAPI registration. Requires main loop to be running.
         self.w.after_idle(lambda: protocol.protocolhandler.start(self.w))
-
-        # Migration from <= 3.30
-        for username in config.get_list('fdev_usernames', default=[]):
-            config.delete_password(username)
-        config.delete('fdev_usernames', suppress=True)
-        config.delete('username', suppress=True)
-        config.delete('password', suppress=True)
-        config.delete('logdir', suppress=True)
         self.w.after_idle(lambda: self.postprefs(False))  # Companion login happens in callback from monitor
         self.toggle_suit_row(visible=False)
         if args.start_min:
@@ -938,7 +953,7 @@ class AppWindow:
 
         self.cooldown()
 
-    def export_market_data(self, data: 'CAPIData') -> bool:  # noqa: CCR001
+    def export_market_data(self, data: CAPIData) -> bool:  # noqa: CCR001
         """
         Export CAPI market data.
 
@@ -1857,7 +1872,7 @@ class AppWindow:
             h.write(str(companion.session.capi_raw_data).encode(encoding='utf-8'))
 
     if sys.platform == 'win32':
-        def exit_tray(self, systray: 'SysTrayIcon') -> None:
+        def exit_tray(self, systray: SysTrayIcon) -> None:
             """Tray icon is shutting down."""
             exit_thread = threading.Thread(
                 target=self.onexit,
@@ -2034,7 +2049,7 @@ def show_killswitch_poppup(root=None):
             idx += 1
         idx += 1
 
-    ok_button = tk.Button(frame, text="Ok", command=tl.destroy)
+    ok_button = ttk.Button(frame, text="Ok", command=tl.destroy)
     ok_button.grid(columnspan=2, sticky=tk.EW)
 
 
@@ -2044,20 +2059,23 @@ def validate_providers():
     station_provider: str = config.get_str("station_provider")
     if station_provider not in plug.provides('station_url'):
         logger.error("Station Provider Not Valid. Setting to Default.")
+        if config.get_str('station_provider'):  # Only generate a pop-up if an invalid entry exists, not no value.
+            reset_providers["Station"] = (station_provider, "EDSM")
         config.set('station_provider', 'EDSM')
-        reset_providers["Station"] = (station_provider, "EDSM")
 
     shipyard_provider: str = config.get_str("shipyard_provider")
     if shipyard_provider not in plug.provides('shipyard_url'):
         logger.error("Shipyard Provider Not Valid. Setting to Default.")
+        if config.get_str('shipyard_provider'):  # Only generate a pop-up if an invalid entry exists, not no value.
+            reset_providers["Shipyard"] = (shipyard_provider, "EDSY")
         config.set('shipyard_provider', 'EDSY')
-        reset_providers["Shipyard"] = (shipyard_provider, "EDSY")
 
     system_provider: str = config.get_str("system_provider")
     if system_provider not in plug.provides('system_url'):
         logger.error("System Provider Not Valid. Setting to Default.")
+        if config.get_str('system_provider'):  # Only generate a pop-up if an invalid entry exists, not no value.
+            reset_providers["System"] = (system_provider, "EDSM")
         config.set('system_provider', 'EDSM')
-        reset_providers["System"] = (system_provider, "EDSM")
 
     if not reset_providers:
         return

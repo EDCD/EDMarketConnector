@@ -29,7 +29,8 @@ from queue import Queue
 from threading import Thread
 from time import sleep
 from tkinter import ttk
-from typing import Any, Literal, Mapping, MutableMapping, cast, Sequence
+from typing import Any, Literal, cast
+from collections.abc import Mapping, MutableMapping, Sequence
 import requests
 import killswitch
 import monitor
@@ -43,7 +44,7 @@ from ttkHyperlinkLabel import HyperlinkLabel
 from l10n import translations as tr
 from plugins.common_coreutils import (api_keys_label_common, PADX, PADY, BUTTONX, SEPY, BOXY, STATION_UNDOCKED,
                                       show_pwd_var_common, station_link_common, this_format_common,
-                                      cmdr_data_initial_common)
+                                      cmdr_data_initial_common, localised_name)
 
 
 # TODO:
@@ -90,11 +91,11 @@ class This:
         self.newgame: bool = False  # starting up - batch initial burst of events
         self.newgame_docked: bool = False  # starting up while docked
         self.navbeaconscan: int = 0		# batch up burst of Scan events after NavBeaconScan
-        self.system_link: tk.Widget | None = None
+        self.system_link: ttk.Widget | None = None
         self.system_name: tk.Tk | None = None
         self.system_address: int | None = None  # Frontier SystemAddress
         self.system_population: int | None = None
-        self.station_link: tk.Widget | None = None
+        self.station_link: ttk.Widget | None = None
         self.station_name: str | None = None
         self.station_marketid: int | None = None  # Frontier MarketID
         self.on_foot = False
@@ -109,7 +110,7 @@ class This:
         self.log: tk.IntVar | None = None
         self.log_button: ttk.Checkbutton | None = None
 
-        self.label: tk.Widget | None = None
+        self.label: ttk.Widget | None = None
 
         self.cmdr_label: nb.Label | None = None
         self.cmdr_text: nb.Label | None = None
@@ -543,7 +544,7 @@ entry: {entry!r}'''
                 to_set = ''
 
         if this.station_link:
-            this.station_link['text'] = to_set
+            this.station_link['text'] = localised_name(to_set)
             this.station_link['url'] = station_url(str(this.system_name), str(this.station_name))
             this.station_link.update_idletasks()
 
@@ -729,8 +730,8 @@ def send_to_edsm(  # noqa: CCR001
         # Respect rate limits if they exist
         if remaining == 0:
             # Calculate sleep time until the rate limit reset time
-            reset_time = datetime.utcfromtimestamp(reset)
-            current_time = datetime.utcnow()
+            reset_time = datetime.fromtimestamp(reset, tz=timezone.utc)
+            current_time = datetime.now(timezone.utc)
 
             sleep_time = (reset_time - current_time).total_seconds()
 
