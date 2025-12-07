@@ -627,7 +627,8 @@ class AppWindow:
 
         else:
             self.updater = update.Updater(tkroot=self.w)
-            self.updater.check_for_updates()  # Sparkle / WinSparkle does this automatically for packaged apps
+            # Sparkle / WinSparkle does this automatically for packaged apps
+            self.w.after(1500, self.updater.start_check_thread)
 
         self.file_menu = self.view_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)
         self.file_menu.add_command(command=lambda: stats.StatsDialog(self.w, self.status))

@@ -130,6 +130,30 @@ class Updater:
         if not self.use_internal() and sys.platform == 'win32':
             self._init_winsparkle()
 
+    def start_check_thread(self) -> None:
+        """Start the background update worker thread safely."""
+        if self.use_internal():
+            self.thread = threading.Thread(
+                target=self.worker,
+                name='update worker',
+                daemon=True
+            )
+            self.thread.start()
+        else:
+            if sys.platform == 'win32' and self.updater:
+                self.updater.win_sparkle_check_update_with_ui()
+
+        # Always trigger FDEV checks here too
+        check_for_fdev_updates()
+        try:
+            check_for_fdev_updates(local=True)
+        except Exception as e:
+            logger.info(
+                "Tried to update bundle FDEV files but failed. Don't worry, "
+                "this likely isn't important and can be ignored unless "
+                f"you run into other issues. If you're curious: {e}"
+            )
+
     def shutdown_request(self) -> None:
         """Receive (Win)Sparkle shutdown request and send it to parent."""
         if not config.shutting_down and self.root:
@@ -195,7 +219,6 @@ class Updater:
             self.updater.win_sparkle_check_update_with_ui()
 
         check_for_fdev_updates()
-        # TEMP: Only include until 6.0
         try:
             check_for_fdev_updates(local=True)
         except Exception as e:
@@ -254,22 +277,24 @@ class Updater:
         # Look for any remaining version greater than appversion
         simple_spec = semantic_version.SimpleSpec(f'>{appversion_nobuild()}')
         newversion = simple_spec.select(items.keys())
-        if newversion:
-            return items[newversion]
-
-        return None
+        return items[newversion] if newversion else None
 
     def worker(self) -> None:
         """Perform internal update checking & update GUI status if needs be."""
         newversion = self.check_appcast()
 
         if newversion and self.root:
-            status = self.root.nametowidget(f'.{appname.lower()}.status')
-            # LANG: Update Available Text
-            status['text'] = tr.tl("{NEWVER} is available").format(NEWVER=newversion.title)
-            self.root.update_idletasks()
+            self.root.after(0, self._set_update_status, newversion.title)
         else:
             logger.info("No new version available at this time")
+
+    def _set_update_status(self, newver_title: str) -> None:
+        if not self.root:
+            return
+        status = self.root.nametowidget(f'.{appname.lower()}.status')
+        # LANG: Update Available Text
+        status['text'] = tr.tl("{NEWVER} is available").format(NEWVER=newver_title)
+        self.root.update_idletasks()
 
     def close(self) -> None:
         """
