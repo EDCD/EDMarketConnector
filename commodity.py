@@ -21,7 +21,7 @@ from edmc_data import commodity_bracketmap as bracketmap
 mkt_out_types = ('CSV', 'CSV_NEW', 'TAB', 'PIPE', 'SEMICOLON')
 
 
-def export(data, kind=COMMODITY_DEFAULT, filename=None) -> None:  # noqa: CCR001
+def export(data, kind=COMMODITY_SEMICOLON, filename=None) -> None:  # noqa: CCR001
     """
     Export commodity data from the given CAPI data.
 
