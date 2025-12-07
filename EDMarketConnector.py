@@ -987,7 +987,19 @@ class AppWindow:
                 # Fixup anomalies in the comodity data
                 fixed = companion.fixup(data)
                 if output_flags & config.OUT_MKT_CSV:
-                    commodity.export(fixed, COMMODITY_CSV)
+                    # Determine user-selected market export type (CSV, TAB, PIPE, SEMICOLON)
+                    mkt_type = config.get_str('mkt_export_type', default='SEMICOLON')
+                    if mkt_type == 'CSV':
+                        kind = commodity.COMMODITY_CSV
+                    elif mkt_type == 'CSV_NEW':
+                        kind = commodity.COMMODITY_CSV_NEW
+                    elif mkt_type == 'TAB':
+                        kind = commodity.COMMODITY_TAB
+                    elif mkt_type == 'PIPE':
+                        kind = commodity.COMMODITY_PIPE
+                    else:
+                        kind = commodity.COMMODITY_SEMICOLON
+                    commodity.export(fixed, kind)
 
                 if output_flags & config.OUT_MKT_TD:
                     td.export(fixed)
