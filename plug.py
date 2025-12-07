@@ -70,38 +70,54 @@ class Plugin:
         self.module = None  # None for disabled plugins.
         self.logger: logging.Logger | None = plugin_logger
 
-        if loadfile:
-            logger.info(f'loading plugin "{name.replace(".", "_")}" from "{loadfile}"')
-            try:
-                if internal:
-                    filename = 'plugin_'
-                    filename += name.encode(encoding='ascii', errors='replace').decode('utf-8').replace('.', '_')
-                    spec = importlib.util.spec_from_file_location(filename, loadfile)
-                    # Replaces older load_module() code. Includes a safety check that the module name is set.
-                    if spec is not None and spec.loader is not None:
+        if not loadfile:
+            logger.info(f'plugin {name} disabled')
+            return
+        logger.info(f'loading plugin "{name.replace(".", "_")}" from "{loadfile}"')
+        try:
+            module = None
+            if internal:
+                filename = ('plugin_' + name.encode('ascii', errors='replace').decode().
+                            replace('.', '_').replace('-', '_'))
+                spec = importlib.util.spec_from_file_location(filename, loadfile)
+                if spec and spec.loader:
+                    module = importlib.util.module_from_spec(spec)
+                    sys.modules[module.__name__] = module
+                    spec.loader.exec_module(module)
+            else:
+                # Try standard import first
+                try:
+                    module = importlib.import_module('.load', name)
+                except (ModuleNotFoundError, ValueError, ImportError):
+                    # Fallback: invalid Python identifier, load by path
+                    logger.warning(f'Plugin "{name}" failed standard import, attempting to load by file path.')
+                    safe_name = ('plugin_' + name.encode('ascii', errors='replace').decode().
+                                 replace('.', '_').replace('-', '_'))
+                    spec = importlib.util.spec_from_file_location(safe_name, loadfile)
+                    if spec and spec.loader:
                         module = importlib.util.module_from_spec(spec)
                         sys.modules[module.__name__] = module
                         spec.loader.exec_module(module)
-                else:
-                    module = importlib.import_module('.load', name)
-
-                if module:
-                    if getattr(module, 'plugin_start3', None):
-                        newname = module.plugin_start3(Path(loadfile).resolve().parent)
-                        self.name = str(newname) if newname else self.name
-                        self.module = module
-                    elif getattr(module, 'plugin_start', None):
-                        logger.warning(f'plugin {name} needs migrating\n')
-                        PLUGINS_not_py3.append(self)
+                        logger.info(f'Plugin "{name}" successfully loaded via fallback path.')
                     else:
-                        logger.error(f'plugin {name} has no plugin_start3() function')
+                        logger.error(f'Plugin "{name}" could not be loaded, even via fallback path.')
+                        raise ImportError(f"Cannot load plugin {name} from {loadfile}")
+            # Plugin startup logic
+            if module:
+                if getattr(module, 'plugin_start3', None):
+                    newname = module.plugin_start3(Path(loadfile).resolve().parent)
+                    self.name = str(newname) if newname else self.name
+                    self.module = module
+                elif getattr(module, 'plugin_start', None):
+                    logger.warning(f'plugin {name} needs migrating\n')
+                    PLUGINS_not_py3.append(self)
                 else:
-                    logger.error(f'Failed to load Plugin "{name}" from file "{loadfile}"')
-            except Exception:
-                logger.exception(f': Failed for Plugin "{name}"')
-                raise
-        else:
-            logger.info(f'plugin {name} disabled')
+                    logger.error(f'plugin {name} has no plugin_start3() function')
+            else:
+                logger.error(f'Failed to load Plugin "{name}" from file "{loadfile}"')
+        except Exception:
+            logger.exception(f': Failed for Plugin "{name}"')
+            raise
 
     def _get_func(self, funcname: str):
         """
