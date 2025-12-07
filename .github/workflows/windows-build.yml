@@ -138,7 +138,7 @@ jobs:
         run: |
             Get-ChildItem -Path . -Filter "EDMarketConnector_Installer_*.exe" |
               Rename-Item -NewName {
-                  $rest = $_.Name -replace '^EDMarketConnector_Installer_', ''
+                  $rest = $_.BaseName -replace '^EDMarketConnector_Installer_', ''
                   "EDMarketConnector_Installer_Unsigned_${rest}_x86.exe"
               }
       - name: Upload build files
@@ -215,7 +215,7 @@ jobs:
         run: |
             Get-ChildItem -Path . -Filter "EDMarketConnector_Installer_*.exe" |
               Rename-Item -NewName {
-                  $rest = $_.Name -replace '^EDMarketConnector_Installer_', ''
+                  $rest = $_.BaseName -replace '^EDMarketConnector_Installer_', ''
                   "EDMarketConnector_Installer_Unsigned_${rest}_x64.exe"
               }
 
