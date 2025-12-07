@@ -2,7 +2,7 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
 ---
 * We currently test against, and package with, Python 3.13, 64-bit.
 ---
-Pre-Release 6. 0.0-RC1
+Pre-Release 6.0.0-rc2
 ===
 This is a RELEASE CANDIDATE for EDMC 6.0.0, now available on the Beta update track! 
 
@@ -64,7 +64,11 @@ This is a RELEASE CANDIDATE – This is intended to be a stable release that inc
 * EDMC is now installed by default with x64-bit builds. 
 * EDMC will expect a minimum version of Python 3.13. While we do not currently use code incompatible with some earlier versions, we reserve the right to do so.
 
-Pre-Release 6.0.0-Beta2
+Pre-Release 6.0.0-rc1
+===
+Unreleased due to a race condition in the updater and Plugin Loading
+
+Pre-Release 6.0.0-beta2
 ===
 This is a PUBLIC BETA for EDMC 6.0.0, now available on the Beta update track!
 
