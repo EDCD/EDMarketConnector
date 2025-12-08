@@ -473,7 +473,7 @@ class AppWindow:
 
         self.prefsdialog = None
 
-        if sys.platform == 'win32' and not bool(config.get_int('no_systray')):
+        if sys.platform == 'win32' and not config.get_bool('no_systray'):
             from simplesystray import SysTrayIcon
 
             def open_window(systray: SysTrayIcon, *args) -> None:
@@ -656,7 +656,7 @@ class AppWindow:
         self.menubar.add_cascade(menu=self.help_menu)
         if sys.platform == 'win32':
             # Must be added after at least one "real" menu entry
-            self.always_ontop = tk.BooleanVar(value=bool(config.get_int('always_ontop')))
+            self.always_ontop = tk.BooleanVar(value=config.get_bool('always_ontop'))
             self.system_menu = tk.Menu(self.menubar, name='system', tearoff=tk.FALSE)
             self.system_menu.add_separator()
             # LANG: Appearance - Label for checkbox to select if application always on top
@@ -743,7 +743,7 @@ class AppWindow:
                 else:
                     self.w.geometry(config.get_str('geometry'))
 
-        self.w.attributes('-topmost', config.get_int('always_ontop') and 1 or 0)
+        self.w.attributes('-topmost', config.get_bool('always_ontop'))
 
         theme.register(frame)
         theme.apply(self.w)
@@ -1845,7 +1845,7 @@ class AppWindow:
 
         def _destroy(self) -> None:
             """Set parent window's topmost appropriately as we close."""
-            self.parent.wm_attributes('-topmost', config.get_int('always_ontop') and 1 or 0)
+            self.parent.wm_attributes('-topmost', config.get_bool('always_ontop'))
             self.destroy()
             self.__class__.showing = False
 
@@ -1971,7 +1971,7 @@ class AppWindow:
         # If we're meant to "minimize to system tray" then hide the window so no taskbar icon is seen
         if (sys.platform == 'win32'
                 and config.get_bool('minimize_system_tray')
-                and not bool(config.get_int('no_systray'))):
+                and not config.get_bool('no_systray')):
             # This gets called for more than the root widget, so only react to that
             if str(event.widget) == '.':
                 self.w.withdraw()
