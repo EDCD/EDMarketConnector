@@ -39,7 +39,7 @@ import loadout
 import outfitting
 import shipyard
 import stats
-from commodity import COMMODITY_DEFAULT
+from commodity import COMMODITY_CSV
 from config import appcmdname, appversion, config
 from monitor import monitor
 from update import EDMCVersion, Updater, check_for_fdev_updates
@@ -402,7 +402,7 @@ def main() -> None:  # noqa: C901, CCR001
             if data['lastStarport'].get('commodities'):
                 # Fixup anomalies in the commodity data
                 fixed = companion.fixup(data)
-                commodity.export(fixed, COMMODITY_DEFAULT, args.m)
+                commodity.export(fixed, COMMODITY_CSV, args.m)
 
             else:
                 logger.error("Station doesn't have a market")
