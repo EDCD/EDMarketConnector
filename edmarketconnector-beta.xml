@@ -6,9 +6,70 @@
       <description>Most recent changes with links to updates.</description>
       <!-- Windows -->
       <item>
-         <title>Pre-Release 6.0.0-rc2</title>
+         <title>Pre-Release 6.0.0</title>
          <description><![CDATA[<style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
 <p>We now test against, and package with, Python 3.13.</p>
+<h2>Release 6.0.0</h2>
+<p>Welcome to EDMC 6.0. This build represents one of the most significant internal updates to EDMC in recent memory. It includes a complete overhaul of the configuration system, full x64-bit build support, major plugin system enhancements (including enable/disable support), new core plugins, and additional updates across the codebase.</p>
+<p>Because of the scale of these changes, existing workflows, plugins, and user configurations may behave differently. Plugin developers must review the removal list and update their plugins promptly, as several deprecated APIs and legacy behaviors have been removed.</p>
+<p><strong>Changes and Enhancements</strong></p>
+<ul>
+<li>Enables building of x64-bit builds.</li>
+<li>Added a new unified config system and migrated both Linux and Windows configuration files to a new config.toml format at the program root directory.</li>
+<li>Added a new --config option to EDMC to allow users to specify a different config file.</li>
+<li>Added a new EDAstro core plugin to send specific events to EDAstro.</li>
+<li>Added a new plugin Enable/Disable system, in Preferences -&gt; Plugins.</li>
+<li>Added a new logger to the Config module prior to the default logger.</li>
+<li>Added a new --skip-journallock argument to allow EDMC to start even if the journal lock was not acquired.</li>
+<li>Added a new ScrollableNotebook class to enable horizontal scrolling of tabs in a Notebook.</li>
+<li>Added a series of new events to trigger a Carrier CAPI check.</li>
+<li>Added localization for Colonisation ships.</li>
+<li>Added Caspian Explorer Support.</li>
+<li>Added the ability for plugins to use relative imports between modules.</li>
+<li>Updated the Plugins settings window to use the new ScrollableNotebook class.</li>
+<li>Updated a number of GitHub workflow dependencies.</li>
+<li>Updated the default Python version to 3.13.</li>
+<li>Updated EDMC:// protocol handler to use process handles with least-privilege access for improved security and reliability.</li>
+<li>Updated a number of Tkinter TK elements to use the updated TTK equivalents.</li>
+<li>Updated some internal function calls to use non-deprecated alternatives.</li>
+<li>Updated the LastError class to a Python Dataclass.</li>
+<li>Updated a number of dependencies.</li>
+<li>Updated a number of Win32 calls with proper prototyping for x64-bit builds.</li>
+<li>Updated the Windows WinSparkle updater to be more maintainable.</li>
+<li>Updated the Windows DDE Request handler for the EDMC Protocol, specifically callbacks and internal stability.</li>
+<li>Updated a number of older internal functions to use Python 3 logic and hinting.</li>
+<li>Simplified some internal logic calls.</li>
+<li>Simplified the git shorthash function call.</li>
+</ul>
+<p><strong>Bug Fixes</strong></p>
+<ul>
+<li>Fixes a bug where protocol handler reset popups would be generated on first runs of EDMC.</li>
+<li>Fixed a bug where &quot;en&quot; was not present in available languages.</li>
+<li>Fixed a bug where the EDMC System Profiler could not be run on Linux systems.</li>
+<li>Fixed a bug where the plugin prefs window was not resizable.</li>
+<li>Fixed a bug where EDDN's queue would not actually start processing on app launch.</li>
+<li>Fixed a long-standing bug where commodity CSV exports weren't comma-separated.</li>
+<li>Fixed a bug where boarding another player's ship would result in the ship being uploaded to plugins.</li>
+</ul>
+<p><strong>Key Removals</strong></p>
+<ul>
+<li>Removed the long-deprecated config 1.0 conversion calls.</li>
+<li>Removed the &quot;_&quot; builtin translation in favor of tr.tl.</li>
+<li>Removed the stringFromNumber, numberFromString, and preferredLanguages functions.</li>
+<li>Removed the _Translations singleton in favor of the more modern classes.</li>
+<li>Removed the nb.Entry, nb.ColoredButton classes.</li>
+<li>Removed legacy queue migration functionality from EDDN.</li>
+<li>Removed the help_open_log_folder function in favor of open_log_folder.</li>
+<li>Removed the legacy config AbstractClass and most Windows/Linux specific config functions in favor of new defaults.</li>
+</ul>
+<p><strong>Plugin Developers</strong></p>
+<ul>
+<li>Several deprecated functions have been removed. Please ensure your plugins are updated!</li>
+<li>The new Plugin Disable option relies on plugins respecting plugin_stop(). Ensure that your plugins respect this call!</li>
+<li>EDMC is now installed by default with x64-bit builds.</li>
+<li>EDMC will expect a minimum version of Python 3.13. While we do not currently use code incompatible with some earlier versions, we reserve the right to do so.</li>
+</ul>
+<hr>
 <h2>Release 6.0.0-rc2</h2>
 <p>This is a RELEASE CANDIDATE for EDMC 6.0.0, now available on the Beta update track!</p>
 <p>This build represents one of the most significant internal updates to EDMC in recent memory. It includes a complete overhaul of the configuration system, full x64-bit build support, major plugin system enhancements (including enable/disable support), new core plugins, and additional updates across the codebase.</p>
@@ -3039,7 +3100,7 @@ about this:
 <a href="https://issues.frontierstore.net/issue-detail/28638" rel="nofollow">PTS CAPI saying Commander is Docked after jumping to new system</a>.</p>
 </li>
 </ul>]]></description>
-         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F6.0.0-rc2/EDMarketConnector_Installer_6.0.0-rc2_x64.exe" sparkle:os="windows" sparkle:version="6.0.0-rc2" length="0" type="application/x-ms-dos-executable" />
+         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F6.0.0/EDMarketConnector_Installer_6.0.0_x64.exe" sparkle:os="windows" sparkle:version="6.0.0" length="0" type="application/x-ms-dos-executable" />
       </item>
    </channel>
 </rss>
