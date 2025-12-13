@@ -29,10 +29,12 @@ import pathlib
 import re
 import sqlite3
 import tkinter as tk
+from tkinter import ttk
 from platform import system
 from textwrap import dedent
 from threading import Lock
-from typing import Any, Iterator, Mapping, MutableMapping
+from typing import Any
+from collections.abc import Iterator, Mapping, MutableMapping
 import requests
 import companion
 import edmc_data
@@ -114,15 +116,15 @@ class This:
 
         # Tracking UI
         self.ui: tk.Frame
-        self.ui_system_name: tk.Label
-        self.ui_system_address: tk.Label
-        self.ui_j_body_name: tk.Label
-        self.ui_j_body_id: tk.Label
-        self.ui_j_body_type: tk.Label
-        self.ui_s_body_name: tk.Label
-        self.ui_station_name: tk.Label
-        self.ui_station_type: tk.Label
-        self.ui_station_marketid: tk.Label
+        self.ui_system_name: ttk.Label
+        self.ui_system_address: ttk.Label
+        self.ui_j_body_name: ttk.Label
+        self.ui_j_body_id: ttk.Label
+        self.ui_j_body_type: ttk.Label
+        self.ui_s_body_name: ttk.Label
+        self.ui_station_name: ttk.Label
+        self.ui_station_type: ttk.Label
+        self.ui_station_marketid: ttk.Label
 
 
 this = This()
@@ -151,7 +153,7 @@ class EDDNSender:
         r"unable to validate.',\)]$"
     )
 
-    def __init__(self, eddn: 'EDDN', eddn_endpoint: str) -> None:
+    def __init__(self, eddn: EDDN, eddn_endpoint: str) -> None:
         """
         Prepare the system for processing messages.
 
@@ -170,12 +172,6 @@ class EDDNSender:
         self.db_conn = self.sqlite_queue_v1()
         self.db = self.db_conn.cursor()
 
-        #######################################################################
-        # Queue database migration
-        #######################################################################
-        self.convert_legacy_file()
-        #######################################################################
-
         self.queue_processing = Lock()
         # Initiate retry/send-now timer
         logger.trace_if(
@@ -183,7 +179,7 @@ class EDDNSender:
             f"First queue run scheduled for {self.eddn.REPLAY_STARTUP_DELAY}ms from now"
         )
         if not os.getenv("EDMC_NO_UI"):
-            self.eddn.parent.after(self.eddn.REPLAY_STARTUP_DELAY, self.queue_check_and_send, True)
+            self.eddn.parent.winfo_toplevel().after(self.eddn.REPLAY_STARTUP_DELAY, self.queue_check_and_send, True)
 
     def sqlite_queue_v1(self) -> sqlite3.Connection:
         """
@@ -220,27 +216,6 @@ class EDDNSender:
                 raise e
 
         return db_conn
-
-    def convert_legacy_file(self):
-        """Convert a legacy file's contents into the sqlite3 db."""
-        # DEPRECATED: Legacy files no longer used as of 5.6.0. Will remove in 6.0 or later.
-        filename = config.app_dir_path / 'replay.jsonl'
-        if not filename.exists():
-            return
-        logger.info("Converting legacy `replay.jsonl` to `eddn_queue-v1.db`")
-        try:
-            with filename.open('r', encoding='utf-8') as replay_file:
-                for line in replay_file:
-                    cmdr, msg = json.loads(line)
-                    self.add_message(cmdr, msg)
-        except Exception as e:
-            logger.exception("Failed to convert legacy file: %s", e)
-            return
-        logger.info("Conversion complete, removing `replay.jsonl`")
-        try:
-            filename.unlink()
-        except Exception as e:
-            logger.warning("Could not delete legacy file: %s", e)
 
     def close(self) -> None:
         """Clean up any resources."""
@@ -2026,15 +2001,15 @@ def plugin_app(parent: tk.Tk) -> tk.Frame | None:
         # System
         #######################################################################
         # SystemName
-        system_name_label = tk.Label(this.ui, text="J:SystemName:")
+        system_name_label = ttk.Label(this.ui, text="J:SystemName:")
         system_name_label.grid(row=row, column=0, sticky=tk.W)
-        this.ui_system_name = tk.Label(this.ui, name='eddn_track_system_name', anchor=tk.W)
+        this.ui_system_name = ttk.Label(this.ui, name='eddn_track_system_name', anchor=tk.W)
         this.ui_system_name.grid(row=row, column=1, sticky=tk.E)
         row += 1
         # SystemAddress
-        system_address_label = tk.Label(this.ui, text="J:SystemAddress:")
+        system_address_label = ttk.Label(this.ui, text="J:SystemAddress:")
         system_address_label.grid(row=row, column=0, sticky=tk.W)
-        this.ui_system_address = tk.Label(this.ui, name='eddn_track_system_address', anchor=tk.W)
+        this.ui_system_address = ttk.Label(this.ui, name='eddn_track_system_address', anchor=tk.W)
         this.ui_system_address.grid(row=row, column=1, sticky=tk.E)
         row += 1
         #######################################################################
@@ -2043,27 +2018,27 @@ def plugin_app(parent: tk.Tk) -> tk.Frame | None:
         # Body
         #######################################################################
         # Body Name from Journal
-        journal_body_name_label = tk.Label(this.ui, text="J:BodyName:")
+        journal_body_name_label = ttk.Label(this.ui, text="J:BodyName:")
         journal_body_name_label.grid(row=row, column=0, sticky=tk.W)
-        this.ui_j_body_name = tk.Label(this.ui, name='eddn_track_j_body_name', anchor=tk.W)
+        this.ui_j_body_name = ttk.Label(this.ui, name='eddn_track_j_body_name', anchor=tk.W)
         this.ui_j_body_name.grid(row=row, column=1, sticky=tk.E)
         row += 1
         # Body ID from Journal
-        journal_body_id_label = tk.Label(this.ui, text="J:BodyID:")
+        journal_body_id_label = ttk.Label(this.ui, text="J:BodyID:")
         journal_body_id_label.grid(row=row, column=0, sticky=tk.W)
-        this.ui_j_body_id = tk.Label(this.ui, name='eddn_track_j_body_id', anchor=tk.W)
+        this.ui_j_body_id = ttk.Label(this.ui, name='eddn_track_j_body_id', anchor=tk.W)
         this.ui_j_body_id.grid(row=row, column=1, sticky=tk.E)
         row += 1
         # Body Type from Journal
-        journal_body_type_label = tk.Label(this.ui, text="J:BodyType:")
+        journal_body_type_label = ttk.Label(this.ui, text="J:BodyType:")
         journal_body_type_label.grid(row=row, column=0, sticky=tk.W)
-        this.ui_j_body_type = tk.Label(this.ui, name='eddn_track_j_body_type', anchor=tk.W)
+        this.ui_j_body_type = ttk.Label(this.ui, name='eddn_track_j_body_type', anchor=tk.W)
         this.ui_j_body_type.grid(row=row, column=1, sticky=tk.E)
         row += 1
         # Body Name from Status.json
-        status_body_name_label = tk.Label(this.ui, text="S:BodyName:")
+        status_body_name_label = ttk.Label(this.ui, text="S:BodyName:")
         status_body_name_label.grid(row=row, column=0, sticky=tk.W)
-        this.ui_s_body_name = tk.Label(this.ui, name='eddn_track_s_body_name', anchor=tk.W)
+        this.ui_s_body_name = ttk.Label(this.ui, name='eddn_track_s_body_name', anchor=tk.W)
         this.ui_s_body_name.grid(row=row, column=1, sticky=tk.E)
         row += 1
         #######################################################################
@@ -2072,21 +2047,21 @@ def plugin_app(parent: tk.Tk) -> tk.Frame | None:
         # Station
         #######################################################################
         # Name
-        status_station_name_label = tk.Label(this.ui, text="J:StationName:")
+        status_station_name_label = ttk.Label(this.ui, text="J:StationName:")
         status_station_name_label.grid(row=row, column=0, sticky=tk.W)
-        this.ui_station_name = tk.Label(this.ui, name='eddn_track_station_name', anchor=tk.W)
+        this.ui_station_name = ttk.Label(this.ui, name='eddn_track_station_name', anchor=tk.W)
         this.ui_station_name.grid(row=row, column=1, sticky=tk.E)
         row += 1
         # Type
-        status_station_type_label = tk.Label(this.ui, text="J:StationType:")
+        status_station_type_label = ttk.Label(this.ui, text="J:StationType:")
         status_station_type_label.grid(row=row, column=0, sticky=tk.W)
-        this.ui_station_type = tk.Label(this.ui, name='eddn_track_station_type', anchor=tk.W)
+        this.ui_station_type = ttk.Label(this.ui, name='eddn_track_station_type', anchor=tk.W)
         this.ui_station_type.grid(row=row, column=1, sticky=tk.E)
         row += 1
         # MarketID
-        status_station_marketid_label = tk.Label(this.ui, text="J:StationID:")
+        status_station_marketid_label = ttk.Label(this.ui, text="J:StationID:")
         status_station_marketid_label.grid(row=row, column=0, sticky=tk.W)
-        this.ui_station_marketid = tk.Label(this.ui, name='eddn_track_station_id', anchor=tk.W)
+        this.ui_station_marketid = ttk.Label(this.ui, name='eddn_track_station_id', anchor=tk.W)
         this.ui_station_marketid.grid(row=row, column=1, sticky=tk.E)
         row += 1
         #######################################################################

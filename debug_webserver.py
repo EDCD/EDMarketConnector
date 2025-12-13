@@ -7,15 +7,16 @@ import pathlib
 import threading
 import zlib
 from http import server
-from typing import Any, Callable, Literal
+from typing import Any, Literal
+from collections.abc import Callable
 from urllib.parse import parse_qs
-import config
+from config import config
 from EDMCLogging import get_main_logger
 
 logger = get_main_logger()
 
 output_lock = threading.Lock()
-output_data_path = pathlib.Path(config.app_dir_path / 'logs' / 'http_debug')
+output_data_path = pathlib.Path(config.app_dir_path / 'logs' / 'http_debug')  # type: ignore
 SAFE_TRANSLATE = str.maketrans(dict.fromkeys("!@#$%^&*()./\\\r\n[]-+='\";:?<>,~`", '_'))
 
 

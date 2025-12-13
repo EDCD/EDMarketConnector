@@ -33,7 +33,7 @@ def export(data: companion.CAPIData, requested_filename: str | None = None) -> N
     )  # pretty print
 
     if requested_filename is not None and requested_filename:
-        with open(requested_filename, 'wt') as h:
+        with open(requested_filename, 'w') as h:
             h.write(string)
         return
     if not requested_filename:
@@ -45,7 +45,7 @@ def export(data: companion.CAPIData, requested_filename: str | None = None) -> N
     regexp = re.compile(re.escape(ship) + r'\.\d\d\d\d-\d\d-\d\dT\d\d\.\d\d\.\d\d\.txt')
     oldfiles = sorted([x for x in listdir(config.get_str('outdir')) if regexp.match(x)])
     if oldfiles:
-        with open(Path(config.get_str('outdir')) / Path(oldfiles[-1]), 'rU') as h:
+        with open(Path(config.get_str('outdir')) / Path(oldfiles[-1])) as h:
             if h.read() == string:
                 return  # same as last time - don't write
 
@@ -57,5 +57,5 @@ def export(data: companion.CAPIData, requested_filename: str | None = None) -> N
     ship_time = time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(query_time))
     file_path = output_directory / f"{ship}.{ship_time}.txt"
 
-    with open(file_path, 'wt') as h:
+    with open(file_path, 'w') as h:
         h.write(string)

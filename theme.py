@@ -15,7 +15,7 @@ import sys
 import tkinter as tk
 from tkinter import font as tk_font
 from tkinter import ttk
-from typing import Callable
+from collections.abc import Callable
 from l10n import translations as tr
 from config import config
 from EDMCLogging import get_main_logger
@@ -35,11 +35,13 @@ if sys.platform == 'win32':
     from ctypes.wintypes import DWORD, LPCVOID, LPCWSTR
     import win32gui
     AddFontResourceEx = ctypes.windll.gdi32.AddFontResourceExW
-    AddFontResourceEx.restypes = [LPCWSTR, DWORD, LPCVOID]  # type: ignore
+    AddFontResourceEx.argtypes = [LPCWSTR, DWORD, LPCVOID]
+    AddFontResourceEx.restype = ctypes.c_int
     FR_PRIVATE = 0x10
     FR_NOT_ENUM = 0x20
-    font_path = config.respath_path / 'EUROCAPS.TTF'
-    AddFontResourceEx(str(font_path), FR_PRIVATE, 0)
+    font_path = str(config.respath_path / 'EUROCAPS.TTF')
+    if not AddFontResourceEx(font_path, FR_PRIVATE, None):
+        raise RuntimeError(f"Failed to load font {font_path}")
 
 elif sys.platform == 'linux':
     # pyright: reportUnboundVariable=false
@@ -206,7 +208,7 @@ class _Theme:
 
         if isinstance(widget, (tk.Frame, ttk.Frame)):
             for child in widget.winfo_children():
-                self.register(child)
+                self.register(child)  # type: ignore
 
     def register_alternate(self, pair: tuple, gridopts: dict) -> None:
         self.widgets_pair.append((pair, gridopts))
@@ -311,7 +313,7 @@ class _Theme:
         self._update_widget(widget)
         if isinstance(widget, (tk.Frame, ttk.Frame)):
             for child in widget.winfo_children():
-                self._update_widget(child)
+                self._update_widget(child)  # type: ignore
 
     # Apply current theme to a single widget
     def _update_widget(self, widget: tk.Widget | tk.BitmapImage) -> None:  # noqa: CCR001, C901

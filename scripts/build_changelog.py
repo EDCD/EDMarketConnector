@@ -43,7 +43,7 @@ def build_html(md_changelog: str, version: str) -> str:
     """Convert markdown changelog to HTML."""
     html_out = f"<h2>Release {version}</h2>\n"
     html_out += mistune.html(md_changelog)  # type: ignore
-    html_out = re.sub(r"h1", "h2", html_out) + "\n<hr>"
+    html_out = re.sub(r"h1", "h2", html_out) + "<hr>"
 
     with open("script_output/html_changelog.txt", "w", encoding="utf-8") as html_file:
         html_file.write(html_out)
@@ -75,6 +75,8 @@ def build_fdev(
         f"[HEADING=2][URL='{gh_link}'][SIZE=7]Release {version}[/SIZE][/URL][/HEADING]\n"
         f"[URL='{vt_signed}']Pre-emptive upload to VirusTotal[/URL]. "
         f"([URL='{vt_unsigned}']Unsigned Installer[/URL])\n\n"
+        f"Please note: EDMC now distributes 64-bit builds by default. 32-bit (x86) builds "
+        f"are still available for download on GitHub.\n\n"
     )
 
     if version.startswith(("Pre-Release", "Beta")):
@@ -118,7 +120,7 @@ You can also view the Elite: Dangerous Forum thread [HERE](https://forums.fronti
 
 [Unsigned Installer]("""
 
-    reddit_mid_2 = """) if you don't want to use the code-signed option.
+    reddit_mid_2 = """) if you don't want to use the code-signed option. Please note: EDMC now distributes 64-bit builds by default. 32-bit (x86) builds are still available for download on GitHub.
 
 ~~----------------------------------------------------~~
 """
