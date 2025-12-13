@@ -31,6 +31,10 @@
         "hullMass": 950,
         "reserveFuelCapacity": 0.81
     },
+    "Cobra Mk V": {
+        "hullMass": 150,
+        "reserveFuelCapacity": 0.49
+    },
     "Cobra MkIII": {
         "hullMass": 180,
         "reserveFuelCapacity": 0.49
@@ -38,10 +42,6 @@
     "Cobra MkIV": {
         "hullMass": 210,
         "reserveFuelCapacity": 0.51
-    },
-    "Cobra Mk V": {
-        "hullMass": 150,
-        "reserveFuelCapacity": 0.49
     },
     "Corsair": {
         "hullMass": 265,
@@ -178,5 +178,9 @@
     "Vulture": {
         "hullMass": 230,
         "reserveFuelCapacity": 0.57
+    },
+    "Caspain Explorer": {
+        "hullMass": 950,
+        "reserveFuelCapacity": 0.77
     }
 }

@@ -2,6 +2,65 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
 ---
 * We currently test against, and package with, Python 3.13, 64-bit.
 ---
+Release 6.0.0
+===
+Welcome to EDMC 6.0. This build represents one of the most significant internal updates to EDMC in recent memory. It includes a complete overhaul of the configuration system, full x64-bit build support, major plugin system enhancements (including enable/disable support), new core plugins, and additional updates across the codebase.
+
+Because of the scale of these changes, existing workflows, plugins, and user configurations may behave differently. Plugin developers must review the removal list and update their plugins promptly, as several deprecated APIs and legacy behaviors have been removed.
+
+**Changes and Enhancements**
+* Enables building of x64-bit builds.
+* Added a new unified config system and migrated both Linux and Windows configuration files to a new config.toml format at the program root directory.
+* Added a new --config option to EDMC to allow users to specify a different config file.
+* Added a new EDAstro core plugin to send specific events to EDAstro.
+* Added a new plugin Enable/Disable system, in Preferences -> Plugins.
+* Added a new logger to the Config module prior to the default logger.
+* Added a new --skip-journallock argument to allow EDMC to start even if the journal lock was not acquired.
+* Added a new ScrollableNotebook class to enable horizontal scrolling of tabs in a Notebook.
+* Added a series of new events to trigger a Carrier CAPI check.
+* Added localization for Colonisation ships.
+* Added Caspian Explorer Support.
+* Added the ability for plugins to use relative imports between modules.
+* Updated the Plugins settings window to use the new ScrollableNotebook class. 
+* Updated a number of GitHub workflow dependencies.
+* Updated the default Python version to 3.13.
+* Updated EDMC:// protocol handler to use process handles with least-privilege access for improved security and reliability.
+* Updated a number of Tkinter TK elements to use the updated TTK equivalents. 
+* Updated some internal function calls to use non-deprecated alternatives.
+* Updated the LastError class to a Python Dataclass. 
+* Updated a number of dependencies.
+* Updated a number of Win32 calls with proper prototyping for x64-bit builds.
+* Updated the Windows WinSparkle updater to be more maintainable. 
+* Updated the Windows DDE Request handler for the EDMC Protocol, specifically callbacks and internal stability.
+* Updated a number of older internal functions to use Python 3 logic and hinting.
+* Simplified some internal logic calls. 
+* Simplified the git shorthash function call.
+
+**Bug Fixes**
+* Fixes a bug where protocol handler reset popups would be generated on first runs of EDMC.
+* Fixed a bug where "en" was not present in available languages.
+* Fixed a bug where the EDMC System Profiler could not be run on Linux systems. 
+* Fixed a bug where the plugin prefs window was not resizable. 
+* Fixed a bug where EDDN's queue would not actually start processing on app launch.
+* Fixed a long-standing bug where commodity CSV exports weren't comma-separated. 
+* Fixed a bug where boarding another player's ship would result in the ship being uploaded to plugins.
+
+**Key Removals**
+* Removed the long-deprecated config 1.0 conversion calls.
+* Removed the "_" builtin translation in favor of tr.tl. 
+* Removed the stringFromNumber, numberFromString, and preferredLanguages functions.
+* Removed the _Translations singleton in favor of the more modern classes.
+* Removed the nb.Entry, nb.ColoredButton classes.
+* Removed legacy queue migration functionality from EDDN. 
+* Removed the help_open_log_folder function in favor of open_log_folder. 
+* Removed the legacy config AbstractClass and most Windows/Linux specific config functions in favor of new defaults. 
+
+**Plugin Developers**
+* Several deprecated functions have been removed. Please ensure your plugins are updated!
+* The new Plugin Disable option relies on plugins respecting plugin_stop(). Ensure that your plugins respect this call!
+* EDMC is now installed by default with x64-bit builds. 
+* EDMC will expect a minimum version of Python 3.13. While we do not currently use code incompatible with some earlier versions, we reserve the right to do so.
+
 Pre-Release 6.0.0-rc2
 ===
 This is a RELEASE CANDIDATE for EDMC 6.0.0, now available on the Beta update track! 

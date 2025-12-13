@@ -523,6 +523,7 @@ ship_name_map = {
     'viper':                        'Viper MkIII',
     'viper_mkiv':                   'Viper MkIV',
     'vulture':                      'Vulture',
+    'explorer_nx':                  'Caspian Explorer',
 }
 
 # Odyssey Suit Names

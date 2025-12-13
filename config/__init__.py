@@ -42,9 +42,9 @@ import subprocess
 import sys
 import tomllib
 import tomli_w
-from time import gmtime
 from typing import Any, TypeVar
 from collections.abc import Callable
+from collections import defaultdict
 import semantic_version
 from constants import GITVERSION_FILE, applongname, appname
 
@@ -54,7 +54,7 @@ appcmdname = "EDMC"
 # <https://semver.org/#semantic-versioning-specification-semver>
 # Major.Minor.Patch(-prerelease)(+buildmetadata)
 # NB: Do *not* import this, use the functions appversion() and appversion_nobuild()
-_static_appversion = "6.0.0-rc2"
+_static_appversion = "6.0.0"
 _cached_version: semantic_version.Version | None = None
 copyright = "© 2015-2019 Jonathan Harris, 2020-2025 EDCD"
 
@@ -577,17 +577,33 @@ def get_config(*args, **kwargs) -> Config:
     raise ValueError(f"Unknown platform: {sys.platform=}")
 
 
+class LogBuffer(logging.Handler):
+    """Buffer log records in a dictionary until the main logger is available."""
+
+    def __init__(self):
+        super().__init__()
+        self.records: dict[str, list[logging.LogRecord]] = defaultdict(list)
+
+    def emit(self, record: logging.LogRecord) -> None:
+        """Send a given log record."""
+        self.records[record.name].append(record)
+
+    def replay_to(self, pre_logger: logging.Logger) -> None:
+        """Replay all buffered records to the given logger."""
+        for record_list in self.records.values():
+            for record in record_list:
+                pre_logger.handle(record)
+
+        self.records.clear()
+
+
 # Set internal Config logger, because config is set up before main logger.
 config_logger = logging.getLogger("pre_config")
-config_logger.setLevel(logging.DEBUG)  # Or INFO
-
-ch = logging.StreamHandler(sys.stdout)
-ch.setLevel(logging.DEBUG)
-formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s")
-formatter.converter = gmtime  # Optional: match your main logger's UTC timestamps
-ch.setFormatter(formatter)
-config_logger.addHandler(ch)
-
+config_logger.setLevel(logging.DEBUG)
+buffer_handler = LogBuffer()
+buffer_handler.setLevel(logging.DEBUG)
+config_logger.addHandler(buffer_handler)
+config_logger.propagate = False
 
 config = get_config()
 

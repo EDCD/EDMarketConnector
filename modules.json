@@ -3738,5 +3738,20 @@
     },
     "vulture_armour_reactive": {
         "mass": 35
+    },
+    "explorer_nx_armour_grade1": {
+        "mass": 0
+    },
+    "explorer_nx_armour_grade2": {
+        "mass": 26
+    },
+    "explorer_nx_armour_grade3": {
+        "mass": 53
+    },
+    "explorer_nx_armour_mirrored": {
+        "mass": 53
+    },
+    "explorer_nx_armour_reactive": {
+        "mass": 53
     }
 }

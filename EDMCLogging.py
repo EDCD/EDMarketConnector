@@ -535,6 +535,9 @@ if not loglevel:
 base_logger_name = appcmdname if os.getenv('EDMC_NO_UI') else appname
 
 edmclogger = Logger(base_logger_name, loglevel=loglevel)
-for h in config_logger.handlers[:]:
-    config_logger.removeHandler(h)
 logger: LoggerMixin = edmclogger.get_logger()
+for handler in list(config_logger.handlers):
+    if hasattr(handler, "replay_to"):
+        handler.replay_to(logger)
+        config_logger.removeHandler(handler)
+config_logger.propagate = True

@@ -39,7 +39,7 @@ import loadout
 import outfitting
 import shipyard
 import stats
-from commodity import COMMODITY_DEFAULT
+from commodity import COMMODITY_CSV
 from config import appcmdname, appversion, config
 from monitor import monitor
 from update import EDMCVersion, Updater, check_for_fdev_updates
