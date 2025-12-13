@@ -403,7 +403,7 @@ def main() -> None:  # noqa: C901, CCR001
                 # Fixup anomalies in the commodity data
                 fixed = companion.fixup(data)
                 # Determine user-selected market export type (CSV, TAB, PIPE, SEMICOLON)
-                mkt_type = config.get_str('mkt_export_type', default='SEMICOLON')
+                mkt_type = config.get_str('mkt_export_type', default='CSV')
                 if mkt_type == 'CSV':
                     kind = commodity.COMMODITY_CSV
                 elif mkt_type == 'CSV_NEW':
