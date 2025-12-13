@@ -14,7 +14,7 @@ version of Python that we've tested against.
 
 Plugins are loaded when EDMarketConnector starts up.
 
-Each plugin has it's own folder in the `plugins` directory:
+Each plugin has its own folder in the `plugins` directory:
 
 - Windows: `%LOCALAPPDATA%\EDMarketConnector\plugins`
 - Mac: `~/Library/Application Support/EDMarketConnector/plugins`
@@ -101,7 +101,7 @@ liable to change without notice.
 `from companion import CAPIData, SERVER_LIVE, SERVER_LEGACY, SERVER_BETA` -
 `CAPIData` is the actual type of `data` as passed into `cmdr_data()`,
 `cmdr_data_legacy()` and `capi_fleetcarrier()`.
-See [Commander Data from Frontier CAPI](#commander-data-from-frontier-capi))
+See [Commander Data from Frontier CAPI](#commander-data-from-frontier-capi)
 for further information.
 
 `import edmc_data` (or specific 'from' imports) - This contains various static
@@ -236,7 +236,7 @@ above will set up basic logging only to the console (and thus redirected to
 the log file).
 
 If you're certain your plugin will only be run under EDMarketConnector 4.1.0
-or newer then you can remove the `if` clause.
+or newer, then you can remove the `if` clause.
 
 Replace all `print(...)` statements with one of the following:
 
@@ -337,13 +337,22 @@ Mac, and `$TMP/EDMarketConnector.log` on Linux.
 ## Avoiding potential pitfalls
 
 There are a number of things that your code should either do or avoiding
-doing so as to play nicely with the core EDMarketConnector code and not risk
+doing to play nicely with the core EDMarketConnector code and not risk
 causing application crashes or hangs.
 
 ### Be careful about the name of your plugin directory
 
 You might want your plugin directory name to be usable in import statements.
 See the section on [packaging extra modules](#your-plugin-directory-name-must-be-importable).
+
+### Be careful about plugin names!
+
+Our Plugin Import code allows modules to "share" resources and avoid conflicts 
+between similarly named modules from other plugins. This relies on your plugin
+using a name that is valid for importlib. Do not use illegal characters in your
+plugin names for imports such as non-underscore special characters.
+
+While EDMC tries to account for these issues, it may result in reduced functionality.
 
 ### Use a thread for long-running code
 
@@ -610,7 +619,7 @@ when something happens: `journal_entry()`, `journal_entry_cqc()`,
 `dashboard_entry()`, `cmdr_data()` and `capi_fleetcarrier()`.
 
 Your events all get called on the main Tkinter loop so be sure not to block for
-very long or the app will appear to freeze. If you have a long running
+very long or the app will appear to freeze. If you have a long-running
 operation such as sending or receiving data from an external server then you
 should do this in a separate worker Thread. You can send work items to the
 worker thread over a Queue. Tkinter is not thread-safe so you should not

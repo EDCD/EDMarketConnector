@@ -714,6 +714,7 @@ class PreferencesDialog(tk.Toplevel):
         # LANG: The system default language choice in Settings > Appearance
         self.lang = tk.StringVar(value=self.languages.get(config.get_str('language'), tr.tl('Default')))
         self.always_ontop = tk.BooleanVar(value=config.get_bool('always_ontop'))
+
         self.minimize_system_tray = tk.BooleanVar(value=config.get_bool('minimize_system_tray'))
         self.disable_system_tray = tk.BooleanVar(value=config.get_bool('no_systray'))
         self.theme = tk.IntVar(value=config.get_int('theme'))
