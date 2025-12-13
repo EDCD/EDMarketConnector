@@ -713,7 +713,8 @@ class PreferencesDialog(tk.Toplevel):
         # Appearance theme and language setting
         # LANG: The system default language choice in Settings > Appearance
         self.lang = tk.StringVar(value=self.languages.get(config.get_str('language'), tr.tl('Default')))
-        self.always_ontop = tk.BooleanVar(value=bool(config.get_bool('always_ontop')))
+        self.always_ontop = tk.BooleanVar(value=config.get_bool('always_ontop'))
+
         self.minimize_system_tray = tk.BooleanVar(value=config.get_bool('minimize_system_tray'))
         self.disable_system_tray = tk.BooleanVar(value=config.get_bool('no_systray'))
         self.theme = tk.IntVar(value=config.get_int('theme'))
@@ -893,7 +894,7 @@ class PreferencesDialog(tk.Toplevel):
             columnspan=3, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=row.get()
         )  # Appearance setting
 
-        if sys.platform == 'win32' and not bool(config.get_int('no_systray')):
+        if sys.platform == 'win32' and not config.get_bool('no_systray'):
             nb.Checkbutton(
                 appearance_frame,
                 # LANG: Appearance option for Windows "minimize to system tray"
@@ -1349,7 +1350,7 @@ class PreferencesDialog(tk.Toplevel):
         config.set('ui_transparency', self.transparency.get())
         config.set('always_ontop', self.always_ontop.get())
         config.set('minimize_system_tray', self.minimize_system_tray.get())
-        if self.disable_system_tray.get() != config.get_int('no_systray'):
+        if self.disable_system_tray.get() != config.get_bool('no_systray'):
             self.req_restart = True
         config.set('no_systray', self.disable_system_tray.get())
         config.set('theme', self.theme.get())
@@ -1387,5 +1388,5 @@ class PreferencesDialog(tk.Toplevel):
             self.after_cancel(self.cmdrchanged_alarm)
             self.cmdrchanged_alarm = None
 
-        self.parent.wm_attributes('-topmost', 1 if config.get_int('always_ontop') else 0)
+        self.parent.wm_attributes('-topmost', config.get_bool('always_ontop'))
         self.destroy()
