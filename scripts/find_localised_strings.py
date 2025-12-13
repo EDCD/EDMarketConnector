@@ -188,7 +188,7 @@ class FileLocation:
     line_end_col: int | None
 
     @staticmethod
-    def from_call(path: pathlib.Path, c: ast.Call) -> "FileLocation":
+    def from_call(path: pathlib.Path, c: ast.Call) -> FileLocation:
         """
         Create a FileLocation from a Call and Path.
 

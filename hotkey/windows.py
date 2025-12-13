@@ -16,7 +16,7 @@ from EDMCLogging import get_main_logger
 from hotkey import AbstractHotkeyMgr
 
 if sys.platform != 'win32':
-    raise EnvironmentError("This file is for Windows only.")
+    raise OSError("This file is for Windows only.")
 
 logger = get_main_logger()
 

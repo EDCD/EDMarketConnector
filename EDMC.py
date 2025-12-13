@@ -39,7 +39,7 @@ import loadout
 import outfitting
 import shipyard
 import stats
-from commodity import COMMODITY_DEFAULT
+from commodity import COMMODITY_CSV
 from config import appcmdname, appversion, config
 from monitor import monitor
 from update import EDMCVersion, Updater, check_for_fdev_updates
@@ -132,6 +132,8 @@ def main() -> None:  # noqa: C901, CCR001
             action='store_true',
         )
 
+        parser.add_argument('--config', help="Define a custom config to load EDMC from")
+
         parser.add_argument('-a', metavar='FILE', help='write ship loadout to FILE in Companion API json format')
         parser.add_argument('-e', metavar='FILE', help='write ship loadout to FILE in E:D Shipyard plain text format')
         parser.add_argument('-l', metavar='FILE', help='write ship locations to FILE in CSV format')
@@ -174,6 +176,9 @@ def main() -> None:  # noqa: C901, CCR001
                 print('loglevel must be one of: CRITICAL, ERROR, WARNING, INFO, DEBUG, TRACE', file=sys.stderr)
                 sys.exit(EXIT_ARGS)
             edmclogger.set_channels_loglevel(args.loglevel)
+
+        if args.config:
+            config.reload_from_path(args.config)
 
         logger.debug(f'Startup v{appversion()} : Running on Python v{sys.version}')
         logger.debug(f'''Platform: {sys.platform}
@@ -397,7 +402,7 @@ def main() -> None:  # noqa: C901, CCR001
             if data['lastStarport'].get('commodities'):
                 # Fixup anomalies in the commodity data
                 fixed = companion.fixup(data)
-                commodity.export(fixed, COMMODITY_DEFAULT, args.m)
+                commodity.export(fixed, COMMODITY_CSV, args.m)
 
             else:
                 logger.error("Station doesn't have a market")

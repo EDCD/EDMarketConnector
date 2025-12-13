@@ -498,6 +498,15 @@
 /* prefs.py: Catch & Record Profiler Errors; */
 "Error in System Profiler" = "Error in System Profiler";
 
+/* prefs.py: Disabling a Plugin. */
+"Disabling plugin {PLUGIN}. This will cause a restart. Click OK to continue..." = "Disabling plugin {PLUGIN}. This will cause a restart. Click OK to continue...";
+
+/* prefs.py: Enable a Disabled Plugin */
+"Enable" = "Enable";
+
+/* prefs.py: Disable an Enabled Plugin */
+"Disable" = "Disable";
+
 /* stats.py: Cmdr stats; In files: stats.py:58; */
 "Balance" = "Balance";
 
@@ -827,3 +836,12 @@
 
 /* ttkHyperlinkLabel.py: Copy the Inara SLEF Format of the active ship to the clipboard; */
 "Copy Inara SLEF" = "Copy Inara SLEF";
+
+/* edastro_core.py: Settings>EDAstro - Label on checkbox for 'send data'; */
+"Send data to EDAstro" = "Send data to EDAstro";
+
+/* common_coreutils.py: Colonisation ship name, with title; In files: common_coreutils.py:81:81 */
+"System Colonisation Ship {NAME}" = "System Colonisation Ship {NAME}";
+
+/* common_coreutils.py: Unidentified colonisation ship; In files: common_coreutils.py:84:84 */
+"System Colonisation Ship" = "System Colonisation Ship";

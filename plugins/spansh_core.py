@@ -22,6 +22,7 @@ referenced in this file (or only in any other core plugin), and if so...
 from __future__ import annotations
 
 import tkinter as tk
+from tkinter import ttk
 from typing import Any
 import requests
 from companion import CAPIData
@@ -39,11 +40,11 @@ class This:
     def __init__(self):
         self.parent: tk.Tk
         self.shutting_down = False  # Plugin is shutting down.
-        self.system_link: tk.Widget = None  # type: ignore
+        self.system_link: ttk.Widget = None  # type: ignore
         self.system_name: str | None = None
         self.system_address: str | None = None
         self.system_population: int | None = None
-        self.station_link: tk.Widget = None  # type: ignore
+        self.station_link: ttk.Widget = None  # type: ignore
         self.station_name = None
         self.station_marketid = None
         self.on_foot = False

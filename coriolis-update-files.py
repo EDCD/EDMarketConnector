@@ -45,7 +45,7 @@ if __name__ == "__main__":  # noqa: C901
     # Symbolic name from in-game name
     reverse_ship_map = {v: k for k, v in list(ship_name_map.items())}
 
-    bulkheads = list(outfitting.armour_map.keys())
+    bulkheads = list(outfitting.armour_map)
 
     ships = {}
     modules = {}

@@ -12,9 +12,10 @@ import shutil
 import sys
 import threading
 import os
+from dataclasses import dataclass
 from tkinter import messagebox
 from traceback import print_exc
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast, Any
 from xml.etree import ElementTree
 import requests
 import semantic_version
@@ -25,58 +26,68 @@ from l10n import translations as tr
 if TYPE_CHECKING:
     import tkinter as tk
 
-
 logger = get_main_logger()
 
 
-def check_for_fdev_updates(silent: bool = False, local: bool = False) -> None:  # noqa: CCR001
+def read_normalized_file(path: pathlib.Path) -> str:
+    """Read a UTF-8 (with BOM-safe) file and normalize line endings and whitespace."""
+    try:
+        return path.read_bytes().decode('utf-8-sig').replace('\r\n', '\n').strip()
+    except FileNotFoundError:
+        return ''
+
+
+def copy_bundle_file(filename: str, dest_dir: pathlib.Path) -> str:
+    """Attempt to copy a missing file from the bundled FDevIDs folder."""
+    try:
+        shutil.copy(f"FDevIDs/{filename}", dest_dir)
+        return read_normalized_file(dest_dir / filename)
+    except (FileNotFoundError, shutil.SameFileError):
+        logger.info("Bundle copy failed or identical; continuing with empty content.")
+        return ''
+
+
+def fetch_remote_file(url: str) -> str | None:
+    """Fetch a remote file and normalize its content."""
+    try:
+        response = requests.get(url, timeout=20)
+        response.raise_for_status()
+        return response.text.replace('\r\n', '\n').strip()
+    except requests.RequestException:
+        return None
+
+
+def check_for_fdev_updates(silent: bool = False, local: bool = False) -> None:
     """Check for and download FDEV ID file updates."""
-    pathway = config.respath_path if local else config.app_dir_path
+    base_path = config.respath_path if local else config.app_dir_path
+    fdevid_dir = pathlib.Path(base_path, 'FDevIDs')
+    fdevid_dir.mkdir(parents=True, exist_ok=True)
 
-    files_urls = [
-        ('commodity.csv', 'https://raw.githubusercontent.com/EDCD/FDevIDs/master/commodity.csv'),
-        ('rare_commodity.csv', 'https://raw.githubusercontent.com/EDCD/FDevIDs/master/rare_commodity.csv')
-    ]
+    files_urls = {
+        'commodity.csv': 'https://raw.githubusercontent.com/EDCD/FDevIDs/master/commodity.csv',
+        'rare_commodity.csv': 'https://raw.githubusercontent.com/EDCD/FDevIDs/master/rare_commodity.csv'
+    }
 
-    for file, url in files_urls:
-        fdevid_file = pathlib.Path(pathway / 'FDevIDs' / file)
-        fdevid_file.parent.mkdir(parents=True, exist_ok=True)
-        try:
-            with open(fdevid_file, newline='', encoding='utf-8') as f:
-                local_content = f.read()
-        except FileNotFoundError:
-            logger.info(f'File {file} not found. Writing from bundle...')
-            try:
-                for localfile in files_urls:
-                    filepath = pathlib.Path(f"FDevIDs/{localfile[0]}")
-                    try:
-                        shutil.copy(filepath, pathway / 'FDevIDs')
-                    except shutil.SameFileError:
-                        logger.info("Not replacing same file...")
-                    fdevid_file = pathlib.Path(pathway / 'FDevIDs' / file)
-                    with open(fdevid_file, newline='', encoding='utf-8') as f:
-                        local_content = f.read()
-            except FileNotFoundError:
-                local_content = None
-
-        try:
-            response = requests.get(url, timeout=20)
-            response.raise_for_status()
-        except requests.RequestException:
+    for filename, url in files_urls.items():
+        file_path = fdevid_dir / filename
+        local_content = read_normalized_file(file_path) or copy_bundle_file(filename, fdevid_dir)
+        remote_content = fetch_remote_file(url)
+        if not remote_content:
             if not silent:
-                logger.error(f'Failed to download {file}! Unable to continue.')
+                logger.error(f'Failed to download {filename}! Unable to continue.')
             continue
 
-        if local_content == response.text:
+        if local_content == remote_content:
             if not silent:
-                logger.info(f'FDEV ID file {file} already up to date.')
-        else:
-            if not silent:
-                logger.info(f'FDEV ID file {file} not up to date. Downloading...')
-            with open(fdevid_file, 'w', newline='', encoding='utf-8') as csvfile:
-                csvfile.write(response.text)
+                logger.info(f'FDEV ID file {filename} already up to date.')
+            continue
+
+        if not silent:
+            logger.info(f'Updating FDEV ID file {filename}...')
+        file_path.write_text(remote_content, encoding='utf-8', newline='\n')
 
 
+@dataclass(slots=True)
 class EDMCVersion:
     """
     Hold all the information about an EDMC version.
@@ -91,10 +102,9 @@ class EDMCVersion:
         semantic_version object for this version
     """
 
-    def __init__(self, version: str, title: str, sv: semantic_version.base.Version):
-        self.version: str = version
-        self.title: str = title
-        self.sv: semantic_version.base.Version = sv
+    version: str
+    title: str
+    sv: semantic_version.Version
 
 
 class Updater:
@@ -104,6 +114,45 @@ class Updater:
     This is used whether using internal code or an external library such as
     WinSparkle on win32.
     """
+
+    def __init__(self, tkroot: tk.Tk | None = None, provider: str = 'internal'):
+        """
+        Initialise an Updater instance.
+
+        :param tkroot: reference to the root window of the GUI
+        :param provider: 'internal' or other string if not
+        """
+        self.root: tk.Tk | None = tkroot
+        self.provider: str = provider
+        self.thread: threading.Thread | None = None
+        self.updater: Any | None = None  # ensure attribute exists
+
+        if not self.use_internal() and sys.platform == 'win32':
+            self._init_winsparkle()
+
+    def start_check_thread(self) -> None:
+        """Start the background update worker thread safely."""
+        if self.use_internal():
+            self.thread = threading.Thread(
+                target=self.worker,
+                name='update worker',
+                daemon=True
+            )
+            self.thread.start()
+        else:
+            if sys.platform == 'win32' and self.updater:
+                self.updater.win_sparkle_check_update_with_ui()
+
+        # Always trigger FDEV checks here too
+        check_for_fdev_updates()
+        try:
+            check_for_fdev_updates(local=True)
+        except Exception as e:
+            logger.info(
+                "Tried to update bundle FDEV files but failed. Don't worry, "
+                "this likely isn't important and can be ignored unless "
+                f"you run into other issues. If you're curious: {e}"
+            )
 
     def shutdown_request(self) -> None:
         """Receive (Win)Sparkle shutdown request and send it to parent."""
@@ -116,61 +165,38 @@ class Updater:
 
         :return: bool
         """
-        if self.provider == 'internal':
-            return True
+        return self.provider == 'internal'
 
-        return False
+    def _init_winsparkle(self) -> None:
+        """Initialize WinSparkle updater for Windows."""
+        import ctypes
+        try:
+            self.updater = cast(ctypes.CDLL, ctypes.cdll.WinSparkle)
+            self.updater.win_sparkle_set_appcast_url(get_update_feed().encode())  # Set the appcast URL
 
-    def __init__(self, tkroot: tk.Tk | None = None, provider: str = 'internal'):
-        """
-        Initialise an Updater instance.
+            # Set the appversion *without* build metadata, as WinSparkle
+            # doesn't do proper Semantic Version checks.
+            # NB: It 'accidentally' supports pre-release due to how it
+            # splits and compares strings:
+            # <https://github.com/vslavik/winsparkle/issues/214>
+            self.updater.win_sparkle_set_app_build_version(str(appversion_nobuild()))
 
-        :param tkroot: reference to the root window of the GUI
-        :param provider: 'internal' or other string if not
-        """
-        self.root: tk.Tk | None = tkroot
-        self.provider: str = provider
-        self.thread: threading.Thread | None = None
+            # set up shutdown callback
+            self.callback_t = ctypes.CFUNCTYPE(None)  # keep reference
+            self.callback_fn = self.callback_t(self.shutdown_request)
+            self.updater.win_sparkle_set_shutdown_request_callback(self.callback_fn)
 
-        if self.use_internal():
-            return
+            # Get WinSparkle running
+            self.updater.win_sparkle_init()
 
-        if sys.platform == 'win32':
-            import ctypes
-
-            try:
-                self.updater: ctypes.CDLL | None = ctypes.cdll.WinSparkle
-
-                # Set the appcast URL
-                self.updater.win_sparkle_set_appcast_url(get_update_feed().encode())
-
-                # Set the appversion *without* build metadata, as WinSparkle
-                # doesn't do proper Semantic Version checks.
-                # NB: It 'accidentally' supports pre-release due to how it
-                # splits and compares strings:
-                # <https://github.com/vslavik/winsparkle/issues/214>
-                self.updater.win_sparkle_set_app_build_version(str(appversion_nobuild()))
-
-                # set up shutdown callback
-                self.callback_t = ctypes.CFUNCTYPE(None)  # keep reference
-                self.callback_fn = self.callback_t(self.shutdown_request)
-                self.updater.win_sparkle_set_shutdown_request_callback(self.callback_fn)
-
-                # Get WinSparkle running
-                self.updater.win_sparkle_init()
-
-            except Exception:
-                print_exc()
-                self.updater = None
-                if not os.getenv("EDMC_NO_UI"):
-                    messagebox.showerror(
-                        title=appname,
-                        message="Updater Failed to Initialize. Please file a bug report!"
-                    )
-                else:
-                    logger.error("Updater Failed to Initialize. Please file a bug report!")
-
-            return
+        except Exception:
+            print_exc()
+            self.updater = None
+            msg = "Updater Failed to Initialize. Please file a bug report!"
+            if not os.getenv("EDMC_NO_UI"):
+                messagebox.showerror(title=appname, message=msg)
+            else:
+                logger.error(msg)
 
     def set_automatic_updates_check(self, onoroff: bool) -> None:
         """
@@ -187,15 +213,12 @@ class Updater:
     def check_for_updates(self) -> None:
         """Trigger the requisite method to check for an update."""
         if self.use_internal():
-            self.thread = threading.Thread(target=self.worker, name='update worker')
-            self.thread.daemon = True
+            self.thread = threading.Thread(target=self.worker, name='update worker', daemon=True)
             self.thread.start()
-
         elif sys.platform == 'win32' and self.updater:
             self.updater.win_sparkle_check_update_with_ui()
 
         check_for_fdev_updates()
-        # TEMP: Only include until 6.0
         try:
             check_for_fdev_updates(local=True)
         except Exception as e:
@@ -218,7 +241,6 @@ class Updater:
 
         except requests.RequestException as ex:
             logger.exception(f'Error retrieving update_feed file: {ex}')
-
             return None
 
         try:
@@ -226,7 +248,6 @@ class Updater:
 
         except SyntaxError as ex:
             logger.exception(f'Syntax error in update_feed file: {ex}')
-
             return None
 
         # For *these* purposes all systems are the same as 'windows', as
@@ -256,23 +277,24 @@ class Updater:
         # Look for any remaining version greater than appversion
         simple_spec = semantic_version.SimpleSpec(f'>{appversion_nobuild()}')
         newversion = simple_spec.select(items.keys())
-        if newversion:
-            return items[newversion]
-
-        return None
+        return items[newversion] if newversion else None
 
     def worker(self) -> None:
         """Perform internal update checking & update GUI status if needs be."""
         newversion = self.check_appcast()
 
         if newversion and self.root:
-            status = self.root.nametowidget(f'.{appname.lower()}.status')
-            # LANG: Update Available Text
-            status['text'] = tr.tl("{NEWVER} is available").format(NEWVER=newversion.title)
-            self.root.update_idletasks()
-
+            self.root.after(0, self._set_update_status, newversion.title)
         else:
             logger.info("No new version available at this time")
+
+    def _set_update_status(self, newver_title: str) -> None:
+        if not self.root:
+            return
+        status = self.root.nametowidget(f'.{appname.lower()}.status')
+        # LANG: Update Available Text
+        status['text'] = tr.tl("{NEWVER} is available").format(NEWVER=newver_title)
+        self.root.update_idletasks()
 
     def close(self) -> None:
         """

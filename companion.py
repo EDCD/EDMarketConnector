@@ -29,7 +29,8 @@ import webbrowser
 from email.utils import parsedate
 from pathlib import Path
 from queue import Queue
-from typing import TYPE_CHECKING, Any, Mapping, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
+from collections.abc import Mapping
 import requests
 import config as conf_module
 import killswitch
@@ -69,7 +70,7 @@ class CAPIData(UserDict):
 
     def __init__(
             self,
-            data: str | dict[str, Any] | 'CAPIData' | None = None,
+            data: str | dict[str, Any] | CAPIData | None = None,
             source_host: str | None = None,
             source_endpoint: str | None = None,
             request_cmdr: str | None = None
@@ -821,7 +822,7 @@ class Session:
                 capi_data = CAPIData(capi_json, capi_host, capi_endpoint, monitor.cmdr)
                 self.capi_raw_data.record_endpoint(
                     capi_endpoint, r.content.decode(encoding='utf-8'),
-                    datetime.datetime.utcnow()
+                    datetime.datetime.now(datetime.timezone.utc)
                 )
 
             except requests.ConnectionError as e:
@@ -1204,7 +1205,7 @@ def fixup(data: CAPIData) -> CAPIData:  # noqa: C901, CCR001 # Can't be usefully
             if not (config.app_dir_path / 'FDevIDs' / f).is_file():
                 logger.warning(f'FDevID file {f} not found! Generating output without these commodity name rewrites.')
                 continue
-            with open(config.app_dir_path / 'FDevIDs' / f, 'r') as csvfile:
+            with open(config.app_dir_path / 'FDevIDs' / f) as csvfile:
                 reader = csv.DictReader(csvfile)
 
                 for row in reader:
@@ -1325,7 +1326,7 @@ def index_possibly_sparse_list(data: Mapping[str, V] | list[V], key: int) -> V:
     if isinstance(data, list):
         return data[key]
 
-    if isinstance(data, (dict, dict)):
+    if isinstance(data, dict):
         return data[str(key)]
 
     raise ValueError(f'Unexpected data type {type(data)}')
