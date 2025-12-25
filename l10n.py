@@ -3,7 +3,7 @@
 l10n.py - Localize using OSX-Style Strings.
 
 Copyright (c) EDCD, All Rights Reserved
-Licensed under the GNU General Public License.
+Licensed under the GNU General Public License v2 or later.
 See LICENSE file.
 
 Localization with gettext is a pain on non-Unix systems.

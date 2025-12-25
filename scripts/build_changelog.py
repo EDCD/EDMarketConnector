@@ -4,7 +4,7 @@
 build_changelog.py - Read the latest changelog file and format for the Forums and Reddit.
 
 Copyright (c) EDCD, All Rights Reserved
-Licensed under the GNU General Public License.
+Licensed under the GNU General Public License v2 or later.
 See LICENSE file.
 """
 

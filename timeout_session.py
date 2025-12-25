@@ -2,7 +2,7 @@
 timeout_session.py - requests session with timeout adapter.
 
 Copyright (c) EDCD, All Rights Reserved
-Licensed under the GNU General Public License.
+Licensed under the GNU General Public License v2 or later.
 See LICENSE file.
 """
 from __future__ import annotations
