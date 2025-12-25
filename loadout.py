@@ -2,7 +2,7 @@
 loadout.py - Export ship loadout in Companion API json format.
 
 Copyright (c) EDCD, All Rights Reserved
-Licensed under the GNU General Public License.
+Licensed under the GNU General Public License v2 or later.
 See LICENSE file.
 """
 from __future__ import annotations

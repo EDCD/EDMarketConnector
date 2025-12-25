@@ -3,7 +3,7 @@
 EDMCSystemProfiler.py - GUI or Command-Line Tool to Print Diagnostic Information about EDMC.
 
 Copyright (c) EDCD, All Rights Reserved
-Licensed under the GNU General Public License.
+Licensed under the GNU General Public License v2 or later.
 See LICENSE file.
 """
 import argparse
