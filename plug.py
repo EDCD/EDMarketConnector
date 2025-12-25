@@ -177,6 +177,16 @@ class Plugin:
                 logger.exception(f'Failed for Plugin "{self.name}"')
         return None
 
+    def get_version(self) -> str | None:
+        """
+        If the plugin provides a VERSION identifier, return it.
+
+        :returns: String with the VERSION information or None.
+        """
+
+        has_version = self._get_func('VERSION') or self._get_func('__version__')
+        return has_version if has_version else None
+
 
 def load_plugins(master: tk.Tk) -> None:
     """Find and load all plugins."""
