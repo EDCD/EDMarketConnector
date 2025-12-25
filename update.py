@@ -76,7 +76,9 @@ def check_for_datafile_updates(silent: bool = False, local: bool = False) -> Non
     base_path = config.respath_path if local else config.app_dir_path
     files_urls = {
         'modules.json': 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/refs/heads/releases/modules.json',
-        'ships.json': 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/refs/heads/releases/ships.json'
+        'ships.json': 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/refs/heads/releases/ships.json',
+        'master_plugin_list.json': 'https://raw.githubusercontent.com/Rixxan/'
+                                   'EDMC_Plugin_Registry_Dev/refs/heads/master/master_plugin_list.json'
     }
     update_files(base_path, files_urls, silent)
 

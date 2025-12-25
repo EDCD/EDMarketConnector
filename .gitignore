@@ -33,6 +33,7 @@ EDMarketConnector.wxs
 wix/components.wxs
 edmarketconnector.xml
 edmarketconnector-beta.xml
+master_plugin_list.json
 
 # Ignore Visual Elements Manifest file for Windows
 EDMarketConnector.VisualElementsManifest.xml
