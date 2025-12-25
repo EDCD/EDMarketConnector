@@ -67,7 +67,7 @@ from config import appversion, appversion_nobuild, config, copyright
 
 from EDMCLogging import edmclogger, logger, logging
 from journal_lock import JournalLock, JournalLockResult
-from update import check_for_fdev_updates
+from update import check_for_fdev_updates, check_for_datafile_updates
 from common_utils import log_locale, SERVER_RETRY
 
 if __name__ == '__main__':  # noqa: C901
@@ -2350,6 +2350,7 @@ sys.path: {sys.path}'''
     # Start the main event loop
     try:
         check_for_fdev_updates()
+        check_for_datafile_updates()
         root.mainloop()
     except KeyboardInterrupt:
         logger.info("Ctrl+C Detected, Attempting Clean Shutdown")

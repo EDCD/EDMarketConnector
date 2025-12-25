@@ -68,9 +68,24 @@ def check_for_fdev_updates(silent: bool = False, local: bool = False) -> None:
         'rare_commodity.csv': 'https://raw.githubusercontent.com/EDCD/FDevIDs/master/rare_commodity.csv'
     }
 
+    update_files(fdevid_dir, files_urls, silent)
+
+
+def check_for_datafile_updates(silent: bool = False, local: bool = False) -> None:
+    """Check for and download data file updates."""
+    base_path = config.respath_path if local else config.app_dir_path
+    files_urls = {
+        'modules.json': 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/refs/heads/releases/modules.json',
+        'ships.json': 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/refs/heads/releases/ships.json'
+    }
+    update_files(base_path, files_urls, silent)
+
+
+def update_files(directory: pathlib.Path, files_urls: dict[str, str], silent: bool = False) -> None:
+    """Update the provided files from a remote source."""
     for filename, url in files_urls.items():
-        file_path = fdevid_dir / filename
-        local_content = read_normalized_file(file_path) or copy_bundle_file(filename, fdevid_dir)
+        file_path = directory / filename
+        local_content = read_normalized_file(file_path) or copy_bundle_file(filename, directory)
         remote_content = fetch_remote_file(url)
         if not remote_content:
             if not silent:
@@ -79,11 +94,11 @@ def check_for_fdev_updates(silent: bool = False, local: bool = False) -> None:
 
         if local_content == remote_content:
             if not silent:
-                logger.info(f'FDEV ID file {filename} already up to date.')
+                logger.info(f'{filename} already up to date.')
             continue
 
         if not silent:
-            logger.info(f'Updating FDEV ID file {filename}...')
+            logger.info(f'Updating file {filename}...')
         file_path.write_text(remote_content, encoding='utf-8', newline='\n')
 
 
@@ -145,11 +160,13 @@ class Updater:
 
         # Always trigger FDEV checks here too
         check_for_fdev_updates()
+        check_for_datafile_updates()
         try:
             check_for_fdev_updates(local=True)
+            check_for_datafile_updates(local=True)
         except Exception as e:
             logger.info(
-                "Tried to update bundle FDEV files but failed. Don't worry, "
+                "Tried to update bundle files but failed. Don't worry, "
                 "this likely isn't important and can be ignored unless "
                 f"you run into other issues. If you're curious: {e}"
             )
@@ -219,10 +236,12 @@ class Updater:
             self.updater.win_sparkle_check_update_with_ui()
 
         check_for_fdev_updates()
+        check_for_datafile_updates()
         try:
             check_for_fdev_updates(local=True)
+            check_for_datafile_updates(local=True)
         except Exception as e:
-            logger.info("Tried to update bundle FDEV files but failed. Don't worry, "
+            logger.info("Tried to update bundle files but failed. Don't worry, "
                         "this likely isn't important and can be ignored unless"
                         f" you run into other issues. If you're curious: {e}")
 

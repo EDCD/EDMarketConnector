@@ -20,7 +20,7 @@ from config import (
     _static_appversion,
     update_interval
 )
-from update import check_for_fdev_updates
+from update import check_for_fdev_updates, check_for_datafile_updates
 
 
 def iss_build(template_path: str, output_file: str) -> None:
@@ -217,4 +217,5 @@ def build() -> None:
 
 if __name__ == "__main__":
     check_for_fdev_updates(local=True)
+    check_for_datafile_updates(local=True)
     build()
