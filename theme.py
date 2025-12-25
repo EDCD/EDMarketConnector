@@ -2,7 +2,7 @@
 theme.py - Theme support.
 
 Copyright (c) EDCD, All Rights Reserved
-Licensed under the GNU General Public License.
+Licensed under the GNU General Public License v2 or later.
 See LICENSE file.
 
 Because of various ttk limitations this app is an unholy mix of Tk and ttk widgets.

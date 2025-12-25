@@ -2,7 +2,7 @@
 edastro_core.py - Exporting Data to EDAstro.
 
 Copyright (c) EDCD, All Rights Reserved
-Licensed under the GNU General Public License.
+Licensed under the GNU General Public License v2 or later.
 See LICENSE file.
 
 This is an EDMC 'core' plugin.

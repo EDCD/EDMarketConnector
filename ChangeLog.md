@@ -2,6 +2,16 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
 ---
 * We currently test against, and package with, Python 3.13, 64-bit.
 ---
+Release 6.0.1
+===
+This release fixes a bug with 6.0.0 for Caspian Explorer pilots due to a typo and clarifies the license in use with EDMC.
+
+**Changes and Enhancements**
+* Clarifies docstrings to more accurately reflect EDMC's use of GPL-2.0-or-later license.
+
+**Bug Fixes**
+* Fixes a typo in the Ships record that would cause the Caspian Explorer to not be recorded poperly.
+
 Release 6.0.0
 ===
 Welcome to EDMC 6.0. This build represents one of the most significant internal updates to EDMC in recent memory. It includes a complete overhaul of the configuration system, full x64-bit build support, major plugin system enhancements (including enable/disable support), new core plugins, and additional updates across the codebase.
