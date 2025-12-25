@@ -10,7 +10,7 @@ This release fixes a bug with 6.0.0 for Caspian Explorer pilots due to a typo an
 * Clarifies docstrings to more accurately reflect EDMC's use of GPL-2.0-or-later license.
 
 **Bug Fixes**
-* Fixes a typo in the Ships record that would cause the Caspian Explorer to not be recorded poperly.
+* Fixes a typo in the Ships record that would cause the Caspian Explorer to not be recorded properly.
 
 Release 6.0.0
 ===
