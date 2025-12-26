@@ -2,6 +2,13 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
 ---
 * We currently test against, and package with, Python 3.13, 64-bit.
 ---
+Release 6.0.2
+===
+This release adds additional safety checks for the writing of the new config file on first write for Windows installs.
+
+**Bug Fixes**
+* Fixes a bug where the new config.toml file could be improperly written with all null content. 
+
 Release 6.0.1
 ===
 This release fixes a bug with 6.0.0 for Caspian Explorer pilots due to a typo and clarifies the license in use with EDMC.
