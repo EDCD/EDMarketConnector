@@ -22,7 +22,7 @@ import threading
 import webbrowser
 from os import chdir, environ
 from time import localtime, strftime, time
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, MutableMapping
 from constants import applongname, appname, protocolhandler_redirect
 
 # Have this as early as possible for people running EDMarketConnector.exe
@@ -457,6 +457,8 @@ class AppWindow:
     PADX = 5
 
     def __init__(self, master: tk.Tk):  # noqa: C901, CCR001 # TODO - can possibly factor something out
+
+        self.early_journal_events: list[MutableMapping[str, Any]] = []
 
         self.capi_query_holdoff_time = config.get_int('querytime', default=0) + companion.capi_query_cooldown
         self.capi_fleetcarrier_query_holdoff_time = config.get_int('fleetcarrierquerytime', default=0) \
@@ -1401,6 +1403,19 @@ class AppWindow:
         self.cooldown()
         logger.trace_if('capi.worker', '...done')
 
+    def handle_plugin_event_error(self, err: str | None) -> None:
+        """
+        Display a plugin's error message at the bottom of the main window.
+
+        If there was no error message passed in, nothing will be done.
+
+        :param err: Message to display, or None for no error.
+        """
+        if err:
+            self.status['text'] = err
+            if not config.get_int('hotkey_mute'):
+                hotkeymgr.play_bad()
+
     def journal_event(self, event: str):  # noqa: C901, CCR001 # Currently not easily broken up.
         """
         Handle a Journal event passed through event queue from monitor.py.
@@ -1514,15 +1529,21 @@ class AppWindow:
 
             if monitor.cmdr and monitor.mode == 'CQC' and entry['event']:
                 err = plug.notify_journal_entry_cqc(monitor.cmdr, monitor.is_beta, entry, monitor.state)
-                if err:
-                    self.status['text'] = err
-                    if not config.get_int('hotkey_mute'):
-                        hotkeymgr.play_bad()
+                self.handle_plugin_event_error(err)
 
                 return  # in CQC
 
             if not entry['event'] or not monitor.mode:
+                # Game session has not fully loaded yet. We may be receiving events from the
+                # journal, but don't know which game mode (Open/CQC/solo etc) we're running in.
                 logger.trace_if('journal.queue', 'Startup, returning')
+
+                if entry['event']:
+                    # Since we don't know which mode the game is in (and therefore whether to send
+                    # the event to a plugin's `journal_event` or `journal_event_cqc` function),
+                    # temporarily queue it so we can pass it on once the mode is known.
+                    self.early_journal_events.append(entry)
+
                 return  # Startup
 
             if entry['event'] in ('StartUp', 'LoadGame') and monitor.started:
@@ -1539,6 +1560,25 @@ class AppWindow:
                 if not dashboard.start(self.w, monitor.started):
                     logger.info("Can't start Status monitoring")
 
+            # monitor.cmdr should always be set if monitor.mode is set (and monitor.mode must be set
+            # if we reach this point in the function), but we check monitor.cmdr here so the mypy
+            # doesn't complain about passing str|None where str is required.
+            if self.early_journal_events and monitor.cmdr:
+                for early_entry in self.early_journal_events:
+                    if monitor.mode == 'CQC':
+                        err = plug.notify_journal_entry_cqc(monitor.cmdr, monitor.is_beta, early_entry, monitor.state)
+                    else:
+                        err = plug.notify_journal_entry(
+                            monitor.cmdr,
+                            monitor.is_beta,
+                            monitor.state['SystemName'],
+                            monitor.state['StationName'],
+                            early_entry,
+                            monitor.state
+                        )
+                    self.handle_plugin_event_error(err)
+                self.early_journal_events.clear()
+
             # Export loadout
             if entry['event'] == 'Loadout' and not monitor.state['Captain'] \
                     and config.get_int('output') & config.OUT_SHIP:
@@ -1554,10 +1594,7 @@ class AppWindow:
                     monitor.state
                 )
 
-                if err:
-                    self.status['text'] = err
-                    if not config.get_int('hotkey_mute'):
-                        hotkeymgr.play_bad()
+                self.handle_plugin_event_error(err)
 
             auto_update = False
             # Only if auth callback is not pending
@@ -1640,11 +1677,7 @@ class AppWindow:
         # Currently we don't do anything with these events
         if monitor.cmdr:
             err = plug.notify_dashboard_entry(monitor.cmdr, monitor.is_beta, entry)
-
-            if err:
-                self.status['text'] = err
-                if not config.get_int('hotkey_mute'):
-                    hotkeymgr.play_bad()
+            self.handle_plugin_event_error(err)
 
     def plugin_error(self, event=None) -> None:
         """Display asynchronous error from plugin."""

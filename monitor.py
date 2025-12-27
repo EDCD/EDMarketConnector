@@ -589,6 +589,7 @@ class EDLogs(FileSystemEventHandler):
             elif event_type == 'commander':
                 self.live = True  # First event in 3.0
                 self.cmdr = entry['Name']
+                self.mode = None
                 self.state['FID'] = entry['FID']
                 logger.trace_if(STARTUP, f'"Commander" event, {monitor.cmdr=}, {monitor.state["FID"]=}')
 
