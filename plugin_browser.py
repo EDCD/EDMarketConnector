@@ -22,14 +22,13 @@ import myNotebook as nb  # noqa: N813
 import plug
 from config import appversion_nobuild
 from EDMCLogging import get_main_logger
-
-# from l10n import translations as tr
+from l10n import translations as tr
 from ttkHyperlinkLabel import HyperlinkLabel
 import semantic_version
 
 logger = get_main_logger()
 
-# TODO: Translations, Install Plugin, Update Plugin, notify user update available.
+# TODO in 6.2 or later: Install/Uninstall Plugin, notify user a plugin update is available.
 
 
 def get_plugins():
@@ -59,7 +58,7 @@ def report_plugin(plugin) -> None:  # FIXME: Update to live repo.
     webbrowser.open(
         f"https://github.com/Rixxan/EDMC_Plugin_Registry_Dev/issues/new?"
         f"template=report_plugin.md&title=Plugin Report: "
-        f"{plugin.get('pluginName')} ({plugin.get('pluginHash')})"
+        f"{plugin.get('pluginName')} ({plugin.get('pluginHash')[:8]})"
     )
 
 
@@ -85,17 +84,17 @@ class PluginBrowserMixIn:
         self.selected_plugin: dict | None = None
         self._plugin_last_tested_label: nb.Label | None = None
 
-    def dev_install_plugin(self, plugin) -> None:
-        """TEMP."""
-        print("Install", plugin.get("pluginName"))
-
-    def dev_uninstall_plugin(self, plugin) -> None:
-        """TEMP."""
-        print("Uninstall", plugin.get("pluginName"))
-
-    def dev_update_plugin(self, plugin) -> None:
-        """TEMP."""
-        print("Update", plugin.get("pluginName"))
+    # def dev_install_plugin(self, plugin) -> None:
+    #     """TEMP."""
+    #     print("Install", plugin.get("pluginName"))
+    #
+    # def dev_uninstall_plugin(self, plugin) -> None:
+    #     """TEMP."""
+    #     print("Uninstall", plugin.get("pluginName"))
+    #
+    # def dev_update_plugin(self, plugin) -> None:
+    #     """TEMP."""
+    #     print("Update", plugin.get("pluginName"))
 
     def setup_browser_tab(self, notebook: nb.Notebook, row) -> None:
         """Set up the Plugin Browser tab in Preferences."""
@@ -135,7 +134,8 @@ class PluginBrowserMixIn:
         self.selected_category = tk.StringVar(value="All")
 
         # Place the dropdown on its own row (separate from the tree)
-        category_label = nb.Label(plugins_frame, text="Filter by Category:")
+        # LANG: Filter Plugin Categories
+        category_label = nb.Label(plugins_frame, text=tr.tl("Filter by Category:"))
         category_label.grid(
             row=row.get(), column=0, sticky=tk.W, padx=self.PADX, pady=(0, self.PADY)
         )
@@ -172,18 +172,31 @@ class PluginBrowserMixIn:
         )
 
         self.plugins_tree.heading(
-            "name", text="Name", command=lambda: self.__sort_plugins("pluginName")
+            "name",
+            # LANG: Plugin Browser Plug Name
+            text=tr.tl("Name"),
+            command=lambda: self.__sort_plugins("pluginName"),
         )
-        self.plugins_tree.heading("version", text="Version")
+        # LANG: Plugin Browser Plug Ver
+        self.plugins_tree.heading("version", text=tr.tl("Version"))
         self.plugins_tree.heading(
             "updated",
-            text="Last Updated",
+            text=tr.tl("Last Updated"),  # LANG: Plugin Browser Last Update
             command=lambda: self.__sort_plugins("pluginLastUpdate"),
         )
-        self.plugins_tree.heading("category", text="Category")
-        self.plugins_tree.heading("description", text="Description")
         self.plugins_tree.heading(
-            "stars", text="Stars", command=lambda: self.__sort_plugins("pluginStars")
+            "category",
+            text=tr.tl("Categories"),  # LANG: Plugin Browser Category
+        )
+        self.plugins_tree.heading(
+            "description",
+            text=tr.tl("Description"),  # LANG: Plugin Browser Description
+        )
+        self.plugins_tree.heading(
+            "stars",
+            # LANG: Plugin Browser Stars
+            text=tr.tl("Stars"),
+            command=lambda: self.__sort_plugins("pluginStars"),
         )
 
         self.plugins_tree.column("name", width=40)
@@ -244,7 +257,11 @@ class PluginBrowserMixIn:
         self.plugins_tree.bind("<<TreeviewSelect>>", self.__on_plugin_selected)
         self.__populate_plugins_tree()
 
-        notebook.add(plugins_frame, text="Plugin Browser")
+        notebook.add(
+            # LANG: Plugin Browser Title
+            plugins_frame,
+            text=tr.tl("Plugin Browser"),
+        )
 
     def __get_filtered_plugins(self) -> list[dict]:
         category = self.selected_category.get()
@@ -268,11 +285,19 @@ class PluginBrowserMixIn:
         self._plugin_action_buttons: list[nb.Button] = []
 
         actions = [
-            ("Open Plugin Repository", open_plugin_main),
+            (
+                # LANG: Open Plugin Repo
+                tr.tl("Open Plugin Repository"),
+                open_plugin_main,
+            ),
             # ("Install", self.dev_install_plugin),  # Upcoming Feature
             # ("Uninstall", self.dev_uninstall_plugin),  # Upcoming Feature
             # ("Update", self.dev_update_plugin),  # Upcoming Feature
-            ("Report Plugin", report_plugin),
+            (
+                # LANG: Report a Malfunctioning Plugin
+                tr.tl("Report Plugin"),
+                report_plugin,
+            ),
         ]
 
         for idx, (label, handler) in enumerate(actions):
@@ -400,13 +425,32 @@ class PluginBrowserMixIn:
 
     def _build_plugin_meta(self, plugin: dict) -> list[str]:
         fields = [
-            ("Version", "pluginVer"),
-            ("Last Updated", "pluginLastUpdate"),
-            ("Categories", "pluginCategory", lambda v: ", ".join(v)),
-            ("Authors", "pluginAuthors", lambda v: ", ".join(v)),
-            ("License", "pluginLicense"),
-            ("Stars", "pluginStars"),
-            ("Requirements", "pluginRequirements", lambda v: ", ".join(v)),
+            (tr.tl("Version"), "pluginVer"),  # LANG: Plugin Browser Plug Ver
+            (
+                # LANG: Plugin Browser Last Update
+                tr.tl("Last Updated"),
+                "pluginLastUpdate",
+            ),
+            (
+                # LANG: Plugin Browser Category
+                tr.tl("Categories"),
+                "pluginCategory",
+                lambda v: ", ".join(v),
+            ),
+            (
+                # LANG: Plugin Browser Authors
+                tr.tl("Authors"),
+                "pluginAuthors",
+                lambda v: ", ".join(v),
+            ),
+            (tr.tl("License"), "pluginLicense"),  # LANG: Plugin Browser License
+            (tr.tl("Stars"), "pluginStars"),  # LANG: Plugin Browser Stars
+            (
+                # LANG: Plugin Browser Reqs
+                tr.tl("Requirements"),
+                "pluginRequirements",
+                lambda v: ", ".join(v),
+            ),
         ]
 
         meta = []
@@ -440,7 +484,8 @@ class PluginBrowserMixIn:
         else:
             color = "red"
 
-        text = f"Last Tested EDMC: {last_tested}"
+        # LANG: Last Tested EDMC Version
+        text = tr.tl("Last Tested EDMC: {last_tested}").format(last_tested=last_tested)
 
         if getattr(self, "_plugin_last_tested_label", None):
             self._plugin_last_tested_label.configure(text=text, foreground=color)  # type: ignore
@@ -462,8 +507,12 @@ class PluginBrowserMixIn:
 
     def _build_plugin_links(self, plugin: dict, start_row: int) -> None:
         links = [
-            ("Main Project Link", plugin.get("pluginMainLink")),
-            ("VirusTotal Link", plugin.get("pluginVT")),
+            (
+                # LANG: Plugin Project Link
+                tr.tl("Main Project Link"),
+                plugin.get("pluginMainLink"),
+            ),
+            (tr.tl("VirusTotal Link"), plugin.get("pluginVT")),  # LANG: Plugin VT Link
         ]
 
         bg = nb.Label().cget("background")

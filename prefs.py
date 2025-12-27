@@ -983,9 +983,11 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
 
             for plugin in enabled_plugins:
                 curr_row = row.get()
-                label = nb.Label(plugins_frame,
-                                 text=plugin.name if plugin.name == plugin.folder
-                                 else f'{plugin.folder} ({plugin.name})')
+                plugin_name = plugin.name if plugin.name == plugin.folder else f'{plugin.folder} ({plugin.name})'
+                plugver = plugin.get_version()
+                if plugver:
+                    plugin_name += f" v. {plugver}"
+                label = nb.Label(plugins_frame, text=plugin_name)
 
                 label.grid(column=0, columnspan=2, padx=self.LISTX, pady=self.PADY, sticky=tk.W, row=curr_row)
 
