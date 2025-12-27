@@ -163,7 +163,8 @@ def check_for_fdev_updates(silent: bool = False, local: bool = False) -> None:
         'commodity.csv': 'https://raw.githubusercontent.com/EDCD/FDevIDs/master/commodity.csv',
         'rare_commodity.csv': 'https://raw.githubusercontent.com/EDCD/FDevIDs/master/rare_commodity.csv'
     }
-
+    if not silent:
+        logger.info(f"Checking for {'local ' if local else ''}FDEVID file updates...")
     update_files(fdevid_dir, files_urls, silent)
 
 
@@ -176,7 +177,8 @@ def check_for_datafile_updates(silent: bool = False, local: bool = False) -> Non
         'master_plugin_list.json': 'https://raw.githubusercontent.com/Rixxan/'
                                    'EDMC_Plugin_Registry_Dev/refs/heads/master/master_plugin_list.json'
     }
-
+    if not silent:
+        logger.info(f"Checking for {'local ' if local else ''}datafile file updates...")
     update_files(pathlib.Path(base_path), files_urls, silent)
 
 
