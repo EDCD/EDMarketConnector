@@ -444,6 +444,34 @@ from theme import theme
 from ttkHyperlinkLabel import HyperlinkLabel, SHIPYARD_HTML_TEMPLATE
 
 
+def _config_plugins(frame: tk.Frame, ui_row: int) -> tk.Frame:
+    for idx, plugin in enumerate(plug.PLUGINS, start=1):
+        plugin_frame = tk.Frame(frame, name=f"plugin_{idx}")
+        appitem = plugin.get_app(plugin_frame)
+        if not appitem:
+            plugin_frame.destroy()
+            continue
+
+        # Per plugin separator
+        plugin_sep = tk.Frame(frame, highlightthickness=1, name=f"plugin_hr_{idx}")
+        plugin_sep.grid(row=ui_row, columnspan=2, sticky=tk.EW)
+        ui_row += 1
+
+        # Plugin frame
+        plugin_frame.grid(row=ui_row, columnspan=2, sticky=tk.NSEW)
+        plugin_frame.columnconfigure(1, weight=1)
+        ui_row += 1
+
+        # Add plugin widgets
+        if isinstance(appitem, tuple) and len(appitem) == 2:
+            appitem[0].grid(row=ui_row - 1, column=0, sticky=tk.W)
+            appitem[1].grid(row=ui_row - 1, column=1, sticky=tk.EW)
+        else:
+            appitem.grid(row=ui_row - 1, column=0, columnspan=2, sticky=tk.EW)
+
+    return frame
+
+
 class AppWindow:
     """Define the main application window."""
 
@@ -455,11 +483,12 @@ class AppWindow:
 
     PADX = 5
 
-    def __init__(self, master: tk.Tk):  # noqa: C901, CCR001 # TODO - can possibly factor something out
+    def __init__(self, master: tk.Tk):  # noqa: CCR001 # TODO - can possibly factor something out
 
-        self.capi_query_holdoff_time = config.get_int('querytime', default=0) + companion.capi_query_cooldown
-        self.capi_fleetcarrier_query_holdoff_time = config.get_int('fleetcarrierquerytime', default=0) \
-            + companion.capi_fleetcarrier_query_cooldown
+        query_time = config.get_int('querytime', default=0)
+        fleetcarrier_time = config.get_int('fleetcarrierquerytime', default=0)
+        self.capi_query_holdoff_time = query_time + companion.capi_query_cooldown
+        self.capi_fleetcarrier_query_holdoff_time = fleetcarrier_time + companion.capi_fleetcarrier_query_cooldown
 
         self.w = master
         self.w.title(applongname)
@@ -529,58 +558,27 @@ class AppWindow:
 
         ui_row = 1
 
-        self.cmdr_label.grid(row=ui_row, column=0, sticky=tk.W)
-        self.cmdr.grid(row=ui_row, column=1, sticky=tk.EW)
-        ui_row += 1
+        label_value_pairs = [
+            (self.cmdr_label, self.cmdr),
+            (self.ship_label, self.ship),
+        ]
 
-        self.ship_label.grid(row=ui_row, column=0, sticky=tk.W)
-        self.ship.grid(row=ui_row, column=1, sticky=tk.EW)
-        ui_row += 1
-
-        self.suit_grid_row = ui_row
+        self.suit_grid_row = ui_row + len(label_value_pairs)
         self.suit_shown = False
-        ui_row += 1
+        label_value_pairs.append((self.suit_label, self.suit))
 
-        self.system_label.grid(row=ui_row, column=0, sticky=tk.W)
-        self.system.grid(row=ui_row, column=1, sticky=tk.EW)
-        ui_row += 1
+        label_value_pairs.extend([
+            (self.system_label, self.system),
+            (self.station_label, self.station),
+        ])
 
-        self.station_label.grid(row=ui_row, column=0, sticky=tk.W)
-        self.station.grid(row=ui_row, column=1, sticky=tk.EW)
-        ui_row += 1
+        for label, value in label_value_pairs:
+            label.grid(row=ui_row, column=0, sticky=tk.W)
+            value.grid(row=ui_row, column=1, sticky=tk.EW)  # type: ignore
+            ui_row += 1
 
-        plugin_no = 0
-        for plugin in plug.PLUGINS:
-            # Per plugin separator
-            plugin_sep = tk.Frame(
-                frame, highlightthickness=1, name=f"plugin_hr_{plugin_no + 1}"
-            )
-            # Per plugin frame, for it to use as its parent for own widgets
-            plugin_frame = tk.Frame(
-                frame,
-                name=f"plugin_{plugin_no + 1}"
-            )
-            appitem = plugin.get_app(plugin_frame)
-            if appitem:
-                plugin_no += 1
-                plugin_sep.grid(columnspan=2, sticky=tk.EW)
-                ui_row = frame.grid_size()[1]
-                plugin_frame.grid(
-                    row=ui_row, columnspan=2, sticky=tk.NSEW
-                )
-                plugin_frame.columnconfigure(1, weight=1)
-                if isinstance(appitem, tuple) and len(appitem) == 2:
-                    ui_row = frame.grid_size()[1]
-                    appitem[0].grid(row=ui_row, column=0, sticky=tk.W)
-                    appitem[1].grid(row=ui_row, column=1, sticky=tk.EW)
-
-                else:
-                    appitem.grid(columnspan=2, sticky=tk.EW)
-
-            else:
-                # This plugin didn't provide any UI, so drop the frames
-                plugin_frame.destroy()
-                plugin_sep.destroy()
+        ui_row = frame.grid_size()[1]  # start row
+        frame = _config_plugins(frame, ui_row)
 
         # LANG: Update button in main window
         self.button = ttk.Button(
@@ -611,8 +609,8 @@ class AppWindow:
         self.status.grid(columnspan=2, sticky=tk.EW)
 
         for child in frame.winfo_children():
-            child.grid_configure(padx=self.PADX, pady=(  # type: ignore
-                sys.platform != 'win32' or isinstance(child, tk.Frame)) and 2 or 0)
+            pad_y = 2 if sys.platform != 'win32' or isinstance(child, tk.Frame) else 0
+            child.grid_configure(padx=self.PADX, pady=pad_y)  # type: ignore
 
         self.menubar = tk.Menu()
 
@@ -695,24 +693,22 @@ class AppWindow:
         theme_close = tk.Label(self.theme_menubar, image=self.theme_close)
         theme_close.grid(row=0, column=4, padx=2)
         theme.button_bind(theme_close, self.onexit, image=self.theme_close)
-        self.theme_file_menu = tk.Label(self.theme_menubar, anchor=tk.W)
-        self.theme_file_menu.grid(row=1, column=0, padx=self.PADX, sticky=tk.W)
-        theme.button_bind(self.theme_file_menu,
-                          lambda e: self.file_menu.tk_popup(e.widget.winfo_rootx(),
-                                                            e.widget.winfo_rooty()
-                                                            + e.widget.winfo_height()))
-        self.theme_edit_menu = tk.Label(self.theme_menubar, anchor=tk.W)
-        self.theme_edit_menu.grid(row=1, column=1, sticky=tk.W)
-        theme.button_bind(self.theme_edit_menu,
-                          lambda e: self.edit_menu.tk_popup(e.widget.winfo_rootx(),
-                                                            e.widget.winfo_rooty()
-                                                            + e.widget.winfo_height()))
-        self.theme_help_menu = tk.Label(self.theme_menubar, anchor=tk.W)
-        self.theme_help_menu.grid(row=1, column=2, sticky=tk.W)
-        theme.button_bind(self.theme_help_menu,
-                          lambda e: self.help_menu.tk_popup(e.widget.winfo_rootx(),
-                                                            e.widget.winfo_rooty()
-                                                            + e.widget.winfo_height()))
+        menu_map = {
+            'file': self.file_menu,
+            'edit': self.edit_menu,
+            'help': self.help_menu,
+        }
+        self.theme_menus = {}
+
+        for col, (name, menu) in enumerate(menu_map.items()):
+            lbl = tk.Label(self.theme_menubar, anchor=tk.W)
+            lbl.grid(row=1, column=col, sticky=tk.W, padx=self.PADX)
+            theme.button_bind(lbl, lambda e, m=menu: m.tk_popup(e.widget.winfo_rootx(),
+                                                                e.widget.winfo_rooty() + e.widget.winfo_height()))
+            self.theme_menus[name] = lbl
+        self.theme_file_menu = self.theme_menus['file']
+        self.theme_edit_menu = self.theme_menus['edit']
+        self.theme_help_menu = self.theme_menus['help']
         tk.Frame(self.theme_menubar, highlightthickness=1).grid(columnspan=5, padx=self.PADX, sticky=tk.EW)
         theme.register(self.theme_minimize)  # images aren't automatically registered
         theme.register(self.theme_close)
@@ -768,12 +764,16 @@ class AppWindow:
             self.status['text'] = tr.tl("Awaiting Full CMDR Login")  # LANG: Await Full CMDR Login to Game
 
         # Start a protocol handler to handle cAPI registration. Requires main loop to be running.
-        self.w.after_idle(lambda: protocol.protocolhandler.start(self.w))
-        self.w.after_idle(lambda: self.postprefs(False))  # Companion login happens in callback from monitor
+        self.w.after_idle(self._after_idle_init)
         self.toggle_suit_row(visible=False)
         if args.start_min:
             logger.warning("Trying to start minimized")
             self.oniconify() if root.overrideredirect() else self.w.wm_iconify()
+
+    def _after_idle_init(self):
+        """Combine after_idle tasks for startup to ensure only one queue."""
+        protocol.protocolhandler.start(self.w)
+        self.postprefs(False)  # Companion login happens in callback from monitor
 
     def update_suit_text(self) -> None:
         """Update the suit text for current type and loadout."""
