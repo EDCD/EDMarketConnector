@@ -483,7 +483,7 @@ class AppWindow:
 
     PADX = 5
 
-    def __init__(self, master: tk.Tk):  # noqa: CCR001 # TODO - can possibly factor something out
+    def __init__(self, master: tk.Tk):  # noqa: CCR001, C901 # TODO - can possibly factor something out
 
         query_time = config.get_int('querytime', default=0)
         fleetcarrier_time = config.get_int('fleetcarrierquerytime', default=0)
@@ -531,9 +531,9 @@ class AppWindow:
         # TODO: Export to files and merge from them in future ?
         self.theme_icon = tk.PhotoImage(
             data='R0lGODlhFAAQAMZQAAoKCQoKCgsKCQwKCQsLCgwLCg4LCQ4LCg0MCg8MCRAMCRANChINCREOChIOChQPChgQChgRCxwTCyYVCSoXCS0YCTkdCTseCT0fCTsjDU0jB0EnDU8lB1ElB1MnCFIoCFMoCEkrDlkqCFwrCGEuCWIuCGQvCFs0D1w1D2wyCG0yCF82D182EHE0CHM0CHQ1CGQ5EHU2CHc3CHs4CH45CIA6CIE7CJdECIdLEolMEohQE5BQE41SFJBTE5lUE5pVE5RXFKNaFKVbFLVjFbZkFrxnFr9oFsNqFsVrF8RsFshtF89xF9NzGNh1GNl2GP+KG////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////yH5BAEKAH8ALAAAAAAUABAAAAeegAGCgiGDhoeIRDiIjIZGKzmNiAQBQxkRTU6am0tPCJSGShuSAUcLoIIbRYMFra4FAUgQAQCGJz6CDQ67vAFJJBi0hjBBD0w9PMnJOkAiJhaIKEI7HRoc19ceNAolwbWDLD8uAQnl5ga1I9CHEjEBAvDxAoMtFIYCBy+kFDKHAgM3ZtgYSLAGgwkp3pEyBOJCC2ELB31QATGioAoVAwEAOw==')  # noqa: E501
-        self.theme_minimize = tk.BitmapImage(
+        self.img_theme_minimize = tk.BitmapImage(
             data='#define im_width 16\n#define im_height 16\nstatic unsigned char im_bits[] = {\n   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,\n   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfc, 0x3f,\n   0xfc, 0x3f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };\n')  # noqa: E501
-        self.theme_close = tk.BitmapImage(
+        self.img_theme_close = tk.BitmapImage(
             data='#define im_width 16\n#define im_height 16\nstatic unsigned char im_bits[] = {\n   0x00, 0x00, 0x00, 0x00, 0x0c, 0x30, 0x1c, 0x38, 0x38, 0x1c, 0x70, 0x0e,\n   0xe0, 0x07, 0xc0, 0x03, 0xc0, 0x03, 0xe0, 0x07, 0x70, 0x0e, 0x38, 0x1c,\n   0x1c, 0x38, 0x0c, 0x30, 0x00, 0x00, 0x00, 0x00 };\n')  # noqa: E501
 
         frame = tk.Frame(self.w, name=appname.lower())
@@ -675,24 +675,28 @@ class AppWindow:
         # Alternate title bar and menu for dark theme
         self.theme_menubar = tk.Frame(frame, name="alternate_menubar")
         self.theme_menubar.columnconfigure(2, weight=1)
-        theme_titlebar = tk.Label(
+        self.theme_titlebar = tk.Label(
             self.theme_menubar,
             name="alternate_titlebar",
             text=applongname,
             image=self.theme_icon, cursor='fleur',
             anchor=tk.W, compound=tk.LEFT
         )
-        theme_titlebar.grid(columnspan=3, padx=2, sticky=tk.NSEW)
+        self.theme_titlebar.grid(columnspan=3, padx=2, sticky=tk.NSEW)
         self.drag_offset: tuple[int | None, int | None] = (None, None)
-        theme_titlebar.bind('<Button-1>', self.drag_start)
-        theme_titlebar.bind('<B1-Motion>', self.drag_continue)
-        theme_titlebar.bind('<ButtonRelease-1>', self.drag_end)
-        theme_minimize = tk.Label(self.theme_menubar, image=self.theme_minimize)
-        theme_minimize.grid(row=0, column=3, padx=2)
-        theme.button_bind(theme_minimize, self.oniconify, image=self.theme_minimize)
-        theme_close = tk.Label(self.theme_menubar, image=self.theme_close)
-        theme_close.grid(row=0, column=4, padx=2)
-        theme.button_bind(theme_close, self.onexit, image=self.theme_close)
+        self.theme_titlebar.bind('<Button-1>', self.drag_start)
+        self.theme_titlebar.bind('<B1-Motion>', self.drag_continue)
+        self.theme_titlebar.bind('<ButtonRelease-1>', self.drag_end)
+        self.theme_minimize = tk.Label(self.theme_menubar, image=self.img_theme_minimize)
+        self.theme_minimize.grid(row=0, column=3, padx=2)
+        theme.button_bind(self.theme_minimize, self.oniconify, image=self.img_theme_minimize)
+        self.theme_close = tk.Label(self.theme_menubar, image=self.img_theme_close)
+        self.theme_close.grid(row=0, column=4, padx=2)
+        theme.button_bind(self.theme_close, self.onexit, image=self.img_theme_close)
+        if config.get_int('theme') != theme.THEME_TRANSPARENT:
+            self.theme_titlebar.grid_remove()
+            self.theme_minimize.grid_remove()
+            self.theme_close.grid_remove()
         menu_map = {
             'file': self.file_menu,
             'edit': self.edit_menu,
@@ -718,7 +722,7 @@ class AppWindow:
         tk.Frame(self.blank_menubar, height=2).grid()
         theme.register_alternate((self.menubar, self.theme_menubar, self.blank_menubar),
                                  {'row': 0, 'columnspan': 2, 'sticky': tk.NSEW})
-        self.w.resizable(tk.TRUE, tk.FALSE)
+        self.w.resizable(True, True)
 
         # update geometry
         if config.get_str('geometry'):
@@ -1995,6 +1999,9 @@ class AppWindow:
             self.w.attributes("-transparentcolor", '')
             self.blank_menubar.grid_remove()
             self.theme_menubar.grid(row=0, columnspan=2, sticky=tk.NSEW)
+            self.theme_titlebar.grid()
+            self.theme_minimize.grid()
+            self.theme_close.grid()
 
     def onleave(self, event=None) -> None:
         """Handle when our window loses focus."""
@@ -2002,6 +2009,9 @@ class AppWindow:
             self.w.attributes("-transparentcolor", 'grey4')
             self.theme_menubar.grid_remove()
             self.blank_menubar.grid(row=0, columnspan=2, sticky=tk.NSEW)
+            self.theme_titlebar.grid_remove()
+            self.theme_minimize.grid_remove()
+            self.theme_close.grid_remove()
 
 
 def test_logging() -> None:
