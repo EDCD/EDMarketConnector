@@ -65,7 +65,7 @@ jobs:
             mv "../EDMarketConnector-release-${SAFE_SEMVER}.tar.gz" .
 
       - name: Upload build files
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: built-files-linux
           path: |
@@ -142,7 +142,7 @@ jobs:
                   "EDMarketConnector_Installer_Unsigned_${rest}_x86.exe"
               }
       - name: Upload build files
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: built-files-windows-x86
           path: |
@@ -220,7 +220,7 @@ jobs:
               }
 
       - name: Upload build files
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: built-files-windows-64
           path: |
@@ -231,7 +231,7 @@ jobs:
     needs: [ windows_build_64, windows_build_86, linux_build ]
     steps:
       - name: Merge Artifacts
-        uses: actions/upload-artifact/merge@v5
+        uses: actions/upload-artifact/merge@v6
         with:
           name: Built files
           pattern: built-files-*
