@@ -483,7 +483,7 @@ class AppWindow:
 
     PADX = 5
 
-    def __init__(self, master: tk.Tk):  # noqa: CCR001, C901 # TODO - can possibly factor something out
+    def __init__(self, master: tk.Tk):  # noqa: CCR001 TODO - can possibly factor something out
 
         query_time = config.get_int('querytime', default=0)
         fleetcarrier_time = config.get_int('fleetcarrierquerytime', default=0)
@@ -675,47 +675,45 @@ class AppWindow:
         # Alternate title bar and menu for dark theme
         self.theme_menubar = tk.Frame(frame, name="alternate_menubar")
         self.theme_menubar.columnconfigure(2, weight=1)
-        self.theme_titlebar = tk.Label(
+        theme_titlebar = tk.Label(
             self.theme_menubar,
             name="alternate_titlebar",
             text=applongname,
             image=self.theme_icon, cursor='fleur',
             anchor=tk.W, compound=tk.LEFT
         )
-        self.theme_titlebar.grid(columnspan=3, padx=2, sticky=tk.NSEW)
+        theme_titlebar.grid(columnspan=3, padx=2, sticky=tk.NSEW)
         self.drag_offset: tuple[int | None, int | None] = (None, None)
-        self.theme_titlebar.bind('<Button-1>', self.drag_start)
-        self.theme_titlebar.bind('<B1-Motion>', self.drag_continue)
-        self.theme_titlebar.bind('<ButtonRelease-1>', self.drag_end)
-        self.theme_minimize = tk.Label(self.theme_menubar, image=self.img_theme_minimize)
-        self.theme_minimize.grid(row=0, column=3, padx=2)
-        theme.button_bind(self.theme_minimize, self.oniconify, image=self.img_theme_minimize)
-        self.theme_close = tk.Label(self.theme_menubar, image=self.img_theme_close)
-        self.theme_close.grid(row=0, column=4, padx=2)
-        theme.button_bind(self.theme_close, self.onexit, image=self.img_theme_close)
-        if config.get_int('theme') != theme.THEME_TRANSPARENT:
-            self.theme_titlebar.grid_remove()
-            self.theme_minimize.grid_remove()
-            self.theme_close.grid_remove()
-        menu_map = {
-            'file': self.file_menu,
-            'edit': self.edit_menu,
-            'help': self.help_menu,
-        }
-        self.theme_menus = {}
-
-        for col, (name, menu) in enumerate(menu_map.items()):
-            lbl = tk.Label(self.theme_menubar, anchor=tk.W)
-            lbl.grid(row=1, column=col, sticky=tk.W, padx=self.PADX)
-            theme.button_bind(lbl, lambda e, m=menu: m.tk_popup(e.widget.winfo_rootx(),
-                                                                e.widget.winfo_rooty() + e.widget.winfo_height()))
-            self.theme_menus[name] = lbl
-        self.theme_file_menu = self.theme_menus['file']
-        self.theme_edit_menu = self.theme_menus['edit']
-        self.theme_help_menu = self.theme_menus['help']
+        theme_titlebar.bind('<Button-1>', self.drag_start)
+        theme_titlebar.bind('<B1-Motion>', self.drag_continue)
+        theme_titlebar.bind('<ButtonRelease-1>', self.drag_end)
+        theme_minimize = tk.Label(self.theme_menubar, image=self.img_theme_minimize)
+        theme_minimize.grid(row=0, column=3, padx=2)
+        theme.button_bind(theme_minimize, self.oniconify, image=self.img_theme_minimize)
+        theme_close = tk.Label(self.theme_menubar, image=self.img_theme_close)
+        theme_close.grid(row=0, column=4, padx=2)
+        theme.button_bind(theme_close, self.onexit, image=self.img_theme_close)
+        self.theme_file_menu = tk.Label(self.theme_menubar, anchor=tk.W)
+        self.theme_file_menu.grid(row=1, column=0, padx=self.PADX, sticky=tk.W)
+        theme.button_bind(self.theme_file_menu,
+                          lambda e: self.file_menu.tk_popup(e.widget.winfo_rootx(),
+                                                            e.widget.winfo_rooty()
+                                                            + e.widget.winfo_height()))
+        self.theme_edit_menu = tk.Label(self.theme_menubar, anchor=tk.W)
+        self.theme_edit_menu.grid(row=1, column=1, sticky=tk.W)
+        theme.button_bind(self.theme_edit_menu,
+                          lambda e: self.edit_menu.tk_popup(e.widget.winfo_rootx(),
+                                                            e.widget.winfo_rooty()
+                                                            + e.widget.winfo_height()))
+        self.theme_help_menu = tk.Label(self.theme_menubar, anchor=tk.W)
+        self.theme_help_menu.grid(row=1, column=2, sticky=tk.W)
+        theme.button_bind(self.theme_help_menu,
+                          lambda e: self.help_menu.tk_popup(e.widget.winfo_rootx(),
+                                                            e.widget.winfo_rooty()
+                                                            + e.widget.winfo_height()))
         tk.Frame(self.theme_menubar, highlightthickness=1).grid(columnspan=5, padx=self.PADX, sticky=tk.EW)
-        theme.register(self.theme_minimize)  # images aren't automatically registered
-        theme.register(self.theme_close)
+        theme.register(self.img_theme_minimize)  # images aren't automatically registered
+        theme.register(self.img_theme_close)
         self.blank_menubar = tk.Frame(frame, name="blank_menubar")
         tk.Label(self.blank_menubar).grid()
         tk.Label(self.blank_menubar).grid()
@@ -778,6 +776,56 @@ class AppWindow:
         """Combine after_idle tasks for startup to ensure only one queue."""
         protocol.protocolhandler.start(self.w)
         self.postprefs(False)  # Companion login happens in callback from monitor
+
+    def _set_grabber(self, frame: tk.Frame | ttk.Frame) -> None:
+        print(type(frame))
+        if config.get_int("theme") != theme.THEME_DEFAULT:
+            grip_size = 14
+
+            self.resize_grip = tk.Canvas(
+                self.w,
+                width=grip_size,
+                height=grip_size,
+                highlightthickness=0,
+                bg=frame.cget("background"),
+            )
+
+            # draw diagonal grip lines
+            for i in range(4, grip_size, 4):
+                self.resize_grip.create_line(i, grip_size, grip_size, i, fill="#404040")
+
+            self.resize_grip.bind(
+                "<Enter>",
+                lambda e: self.resize_grip.configure(bg=frame.cget("background")),
+            )
+            self.resize_grip.bind(
+                "<Leave>",
+                lambda e: self.resize_grip.configure(bg=frame.cget("background")),
+            )
+
+            self.resize_grip.place(relx=1.0, rely=1.0, anchor="se")
+
+            def _resize_drag(event):
+                dx = event.x_root - self._resize_start_x
+                dy = event.y_root - self._resize_start_y
+                self.w.geometry(
+                    f"{self._resize_start_w + dx}x{self._resize_start_h + dy}"
+                )
+
+            def _resize_start(event):
+                self._resize_start_x = event.x_root
+                self._resize_start_y = event.y_root
+                self._resize_start_w = self.w.winfo_width()
+                self._resize_start_h = self.w.winfo_height()
+
+            self.resize_grip.bind("<Button-1>", _resize_start)
+            self.resize_grip.bind("<B1-Motion>", _resize_drag)
+        else:
+            try:
+                if self.resize_grip:
+                    self.resize_grip.place_forget()
+            except AttributeError:
+                pass
 
     def update_suit_text(self) -> None:
         """Update the suit text for current type and loadout."""
@@ -848,6 +896,8 @@ class AppWindow:
 
         if dologin and monitor.cmdr:
             self.login()  # Login if not already logged in with this Cmdr
+
+        self._set_grabber(root.nametowidget(".edmarketconnector"))
 
         if postargs.get('Update') and postargs.get('Track'):
             track = postargs.get('Track')
@@ -1999,9 +2049,6 @@ class AppWindow:
             self.w.attributes("-transparentcolor", '')
             self.blank_menubar.grid_remove()
             self.theme_menubar.grid(row=0, columnspan=2, sticky=tk.NSEW)
-            self.theme_titlebar.grid()
-            self.theme_minimize.grid()
-            self.theme_close.grid()
 
     def onleave(self, event=None) -> None:
         """Handle when our window loses focus."""
@@ -2009,9 +2056,6 @@ class AppWindow:
             self.w.attributes("-transparentcolor", 'grey4')
             self.theme_menubar.grid_remove()
             self.blank_menubar.grid(row=0, columnspan=2, sticky=tk.NSEW)
-            self.theme_titlebar.grid_remove()
-            self.theme_minimize.grid_remove()
-            self.theme_close.grid_remove()
 
 
 def test_logging() -> None:

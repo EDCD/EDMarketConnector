@@ -32,7 +32,7 @@ if sys.platform == "linux":
 
 if sys.platform == 'win32':
     import ctypes
-    from ctypes.wintypes import DWORD, LPCVOID, LPCWSTR, BOOL
+    from ctypes.wintypes import DWORD, LPCVOID, LPCWSTR
     import win32gui
     AddFontResourceEx = ctypes.windll.gdi32.AddFontResourceExW
     AddFontResourceEx.argtypes = [LPCWSTR, DWORD, LPCVOID]
@@ -42,17 +42,6 @@ if sys.platform == 'win32':
     font_path = str(config.respath_path / 'EUROCAPS.TTF')
     if not AddFontResourceEx(font_path, FR_PRIVATE, None):
         raise RuntimeError(f"Failed to load font {font_path}")
-
-    DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1 = 19
-    DWMWA_USE_IMMERSIVE_DARK_MODE = 20
-
-    def set_dark_titlebar(hwnd: int, enable: bool = True) -> None:
-        """Use a Dark Windows Title Bar on Win10+."""
-        value = BOOL(enable)
-        dwmapi = ctypes.WinDLL("dwmapi")
-
-        for attr in (DWMWA_USE_IMMERSIVE_DARK_MODE, DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1):
-            dwmapi.DwmSetWindowAttribute(hwnd, attr, ctypes.byref(value), ctypes.sizeof(value))
 
 elif sys.platform == 'linux':
     # pyright: reportUnboundVariable=false
@@ -404,7 +393,7 @@ class _Theme:
 
     # Apply configured theme
 
-    def apply(self, root: tk.Tk) -> None:  # noqa: CCR001
+    def apply(self, root: tk.Tk) -> None:  # noqa: CCR001, C901
         theme = config.get_int('theme')
         self._colors(root, theme)
 
@@ -439,40 +428,32 @@ class _Theme:
         if sys.platform == 'win32':
             import win32con
 
-            if theme == self.THEME_TRANSPARENT:
+            # FIXME: Lose the "treat this like a boolean" bullshit
+            if theme == self.THEME_DEFAULT:
+                root.overrideredirect(False)
+
+            else:
                 root.overrideredirect(True)
+
+            if theme == self.THEME_TRANSPARENT:
                 root.attributes("-transparentcolor", 'grey4')
 
             else:
-                root.overrideredirect(False)
                 root.attributes("-transparentcolor", '')
 
             root.withdraw()
             root.update_idletasks()  # Size and windows styles get recalculated here
-            hwnd = ctypes.windll.user32.GetParent(root.winfo_id())
-            set_dark_titlebar(hwnd, theme == self.THEME_DARK)
             hwnd = win32gui.GetParent(root.winfo_id())
             win32gui.SetWindowLong(hwnd, win32con.GWL_STYLE,
                                    win32gui.GetWindowLong(hwnd, win32con.GWL_STYLE)
                                    & ~win32con.WS_MAXIMIZEBOX)  # disable maximize
-            win32gui.SetWindowPos(hwnd, None, 0, 0, 0, 0,
-                                  win32con.SWP_NOMOVE | win32con.SWP_NOSIZE |
-                                  win32con.SWP_NOZORDER | win32con.SWP_FRAMECHANGED
-                                  )
+
             if theme == self.THEME_TRANSPARENT:
                 win32gui.SetWindowLong(hwnd, win32con.GWL_EXSTYLE,
                                        win32con.WS_EX_APPWINDOW | win32con.WS_EX_LAYERED)  # Add to taskbar
-                win32gui.SetWindowPos(hwnd, None, 0, 0, 0, 0,
-                                      win32con.SWP_NOMOVE | win32con.SWP_NOSIZE |
-                                      win32con.SWP_NOZORDER | win32con.SWP_FRAMECHANGED
-                                      )
 
             else:
                 win32gui.SetWindowLong(hwnd, win32con.GWL_EXSTYLE, win32con.WS_EX_APPWINDOW)  # Add to taskbar
-                win32gui.SetWindowPos(hwnd, None, 0, 0, 0, 0,
-                                      win32con.SWP_NOMOVE | win32con.SWP_NOSIZE |
-                                      win32con.SWP_NOZORDER | win32con.SWP_FRAMECHANGED
-                                      )
 
             root.deiconify()
             root.wait_visibility()  # need main window to be displayed before returning
@@ -499,7 +480,11 @@ class _Theme:
                 XFlush(dpy)
 
             else:
-                root.overrideredirect(theme == self.THEME_TRANSPARENT)
+                if theme == self.THEME_DEFAULT:
+                    root.overrideredirect(False)
+
+                else:  # Dark *or* Transparent
+                    root.overrideredirect(True)
 
             root.deiconify()
             root.wait_visibility()  # need main window to be displayed before returning
