@@ -807,9 +807,19 @@ class AppWindow:
             def _resize_drag(event: tk.Event):
                 dx = event.x_root - self._resize_start_x
                 dy = event.y_root - self._resize_start_y
-                self.w.geometry(
-                    f"{self._resize_start_w + dx}x{self._resize_start_h + dy}"
-                )
+
+                # calculate proposed size
+                new_w = self._resize_start_w + dx
+                new_h = self._resize_start_h + dy
+
+                # enforce minimum size
+                min_w, min_h = 50, 50
+                if new_w < min_w:
+                    new_w = min_w
+                if new_h < min_h:
+                    new_h = min_h
+
+                self.w.geometry(f"{new_w}x{new_h}")
 
             def _resize_start(event: tk.Event):
                 self._resize_start_x = event.x_root
