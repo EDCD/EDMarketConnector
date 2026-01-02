@@ -183,7 +183,6 @@ class Plugin:
 
         :returns: String with the VERSION information or None.
         """
-
         has_version = self._get_func('VERSION') or self._get_func('__version__')
         return has_version if has_version else None
 

@@ -485,7 +485,7 @@ class AppWindow:
 
     def __init__(self, master: tk.Tk):  # noqa: CCR001 TODO - can possibly factor something out
 
-      self.early_journal_events: list[MutableMapping[str, Any]] = []
+        self.early_journal_events: list[MutableMapping[str, Any]] = []
         query_time = config.get_int('querytime', default=0)
         fleetcarrier_time = config.get_int('fleetcarrierquerytime', default=0)
         self.capi_query_holdoff_time = query_time + companion.capi_query_cooldown

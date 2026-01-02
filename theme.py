@@ -220,7 +220,7 @@ class _Theme:
         widget.bind('<Enter>', lambda e: self._enter(e, image))
         widget.bind('<Leave>', lambda e: self._leave(e, image))
 
-    def _enter(self, event, widget=None, image=None):
+    def _enter(self, event, widget=None, image=None):  # noqa: CCR001
         """Handle mouse entering a widget or image."""
         if widget is not None:
             # Only apply foreground/background if the widget supports them
@@ -249,7 +249,7 @@ class _Theme:
                     # silently ignore unsupported image types
                     pass
 
-    def _leave(self, event, widget=None, image=None):
+    def _leave(self, event, widget=None, image=None):  # noqa: CCR001
         """Handle mouse leaving a widget or image."""
         if widget is not None:
             config_keys = widget.keys() if hasattr(widget, 'keys') else []
