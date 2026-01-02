@@ -778,7 +778,6 @@ class AppWindow:
         self.postprefs(False)  # Companion login happens in callback from monitor
 
     def _set_grabber(self, frame: tk.Frame | ttk.Frame) -> None:
-        print(type(frame))
         if config.get_int("theme") != theme.THEME_DEFAULT:
             grip_size = 14
 
@@ -805,14 +804,14 @@ class AppWindow:
 
             self.resize_grip.place(relx=1.0, rely=1.0, anchor="se")
 
-            def _resize_drag(event):
+            def _resize_drag(event: tk.Event):
                 dx = event.x_root - self._resize_start_x
                 dy = event.y_root - self._resize_start_y
                 self.w.geometry(
                     f"{self._resize_start_w + dx}x{self._resize_start_h + dy}"
                 )
 
-            def _resize_start(event):
+            def _resize_start(event: tk.Event):
                 self._resize_start_x = event.x_root
                 self._resize_start_y = event.y_root
                 self._resize_start_w = self.w.winfo_width()
