@@ -358,10 +358,10 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
         self.out_csv_button.grid(columnspan=2, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=row.get())
 
         # Export format selection for market text exports
-        # LANG: Settings > Output - choose delimiter/format for market export files
         # Group the Label and the ComboBox for consistent layout reflow
-        mkt_frame = nb.Frame(output_frame) #, borderwidth=1, relief=tk.SOLID)
-        mkt_frame.grid(padx=self.PADX, pady=self.PADY, sticky=tk.EW, row=row.get()) # add increment row for the sub-frame
+        mkt_frame = nb.Frame(output_frame)  # type: ignore
+        # add increment row for the sub-frame
+        mkt_frame.grid(padx=self.PADX, pady=self.PADY, sticky=tk.EW, row=row.get())
 
         self.mkt_export_type = tk.StringVar()
         # Default to SEMICOLON for backward compatibility; normalise any saved value
@@ -370,9 +370,9 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
         if _mkt_saved not in commodity.mkt_out_types:  # ('CSV', 'CSV_NEW', 'TAB', 'PIPE', 'SEMICOLON'):
             _mkt_saved = 'SEMICOLON'
         self.mkt_export_type.set(_mkt_saved)
-
-        nb.Label(mkt_frame, text=tr.tl('     Market export format') + ': ').grid(
-            padx=self.PADX, pady=self.PADY, sticky=tk.W, column=0, row=0
+        # LANG: Settings > Output - choose delimiter/format for market export files
+        nb.Label(mkt_frame, text=tr.tl('Market export format:')).grid(
+            padx=self.PADX, pady=self.PADY, sticky=tk.W, column=1, row=0
         )
         # Use a read-only combobox to present options
         self.mkt_export_combobox = ttk.Combobox(
@@ -383,7 +383,7 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
             width=12
         )
         # self.mkt_export_combobox.grid(column=2, padx=self.PADX, pady=self.BOXY, sticky=tk.W, row=row.get())
-        self.mkt_export_combobox.grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, column=1, row=0)
+        self.mkt_export_combobox.grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, column=2, row=0)
 
         self.out_td = tk.IntVar(value=1 if (output & config.OUT_MKT_TD) else 0)
         self.out_td_button = nb.Checkbutton(

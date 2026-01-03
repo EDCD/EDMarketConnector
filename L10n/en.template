@@ -893,3 +893,6 @@
 
 /* plugin_browser.py: Plugin VT Link */
 "VirusTotal Link" = "VirusTotal Link";
+
+/* prefs.py: Settings > Output - choose delimiter/format for market export files */
+"Market export format:" = "Market export format:";

@@ -57,9 +57,11 @@ def export(data, kind=COMMODITY_SEMICOLON, filename=None) -> None:  # noqa: CCR0
 
     if kind == COMMODITY_CSV:
         # maintain old compatibility
-        header = ['System', 'Station', 'Commodity', 'Sell', 'Buy', 'Demand', 'demandBracket', 'Supply', 'stockBracket', 'Date']
+        header = ['System', 'Station', 'Commodity', 'Sell', 'Buy', 'Demand',
+                  'demandBracket', 'Supply', 'stockBracket', 'Date']
     else:
-        header = ['System', 'Station', 'Commodity', 'Sell', 'Buy', 'Demand', 'demandBracket', 'Supply', 'stockBracket', 'Average', 'FDevID', 'Date']
+        header = ['System', 'Station', 'Commodity', 'Sell', 'Buy', 'Demand',
+                  'demandBracket', 'Supply', 'stockBracket', 'Average', 'FDevID', 'Date']
 
     with open(filename, "w", newline="", encoding="utf-8") as output_file:
         writer = csv.writer(output_file, delimiter=mkt_out_delim)
