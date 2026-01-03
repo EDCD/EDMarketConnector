@@ -402,7 +402,19 @@ def main() -> None:  # noqa: C901, CCR001
             if data['lastStarport'].get('commodities'):
                 # Fixup anomalies in the commodity data
                 fixed = companion.fixup(data)
-                commodity.export(fixed, COMMODITY_CSV, args.m)
+                # Determine user-selected market export type (CSV, TAB, PIPE, SEMICOLON)
+                mkt_type = config.get_str('mkt_export_type', default='CSV')
+                if mkt_type == 'CSV':
+                    kind = commodity.COMMODITY_CSV
+                elif mkt_type == 'CSV_NEW':
+                    kind = commodity.COMMODITY_CSV_NEW
+                elif mkt_type == 'TAB':
+                    kind = commodity.COMMODITY_TAB
+                elif mkt_type == 'PIPE':
+                    kind = commodity.COMMODITY_PIPE
+                else:
+                    kind = commodity.COMMODITY_SEMICOLON
+                commodity.export(fixed, kind, args.m)
 
             else:
                 logger.error("Station doesn't have a market")
