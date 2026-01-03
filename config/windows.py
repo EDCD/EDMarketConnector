@@ -2,13 +2,14 @@
 windows.py - Windows config implementation.
 
 Copyright (c) EDCD, All Rights Reserved
-Licensed under the GNU General Public License.
+Licensed under the GNU General Public License v2 or later.
 See LICENSE file.
 """
 from __future__ import annotations
 
 import pathlib
 import sys
+import os
 import uuid
 import winreg
 import datetime
@@ -88,9 +89,25 @@ class WinConfigMinimal:
 
         path_obj = pathlib.Path(toml_path)
         path_obj.parent.mkdir(parents=True, exist_ok=True)
+        tmp_path = path_obj.with_suffix(path_obj.suffix + ".tmp")
         config_logger.debug("Writing Config File")
-        with path_obj.open("wb") as f:
-            tomli_w.dump(config_data, f)
+        try:
+            # Validate serialization BEFORE touching the real file
+            tomli_w.dumps(config_data)
+            with tmp_path.open("wb") as f:
+                tomli_w.dump(config_data, f)
+                f.flush()
+                os.fsync(f.fileno())
+            tmp_path.replace(path_obj)
+        except Exception:
+            config_logger.exception("Failed to write TOML config file")
+            # Ensure temp file doesn't linger
+            try:
+                if tmp_path.exists():
+                    tmp_path.unlink()
+            except Exception:
+                pass
+            raise
 
     def close(self):
         """Close registry handle."""

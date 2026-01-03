@@ -2,7 +2,7 @@
 plug.py - Plugin API.
 
 Copyright (c) EDCD, All Rights Reserved
-Licensed under the GNU General Public License.
+Licensed under the GNU General Public License v2 or later.
 See LICENSE file.
 """
 from __future__ import annotations
@@ -176,6 +176,15 @@ class Plugin:
             except Exception:
                 logger.exception(f'Failed for Plugin "{self.name}"')
         return None
+
+    def get_version(self) -> str | None:
+        """
+        If the plugin provides a VERSION identifier, return it.
+
+        :returns: String with the VERSION information or None.
+        """
+        has_version = self._get_func('VERSION') or self._get_func('__version__')
+        return has_version if has_version else None
 
 
 def load_plugins(master: tk.Tk) -> None:

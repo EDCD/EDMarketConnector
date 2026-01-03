@@ -2,7 +2,7 @@
 companion.py - Handle use of Frontier's Companion API (CAPI) service.
 
 Copyright (c) EDCD, All Rights Reserved
-Licensed under the GNU General Public License.
+Licensed under the GNU General Public License v2 or later.
 See LICENSE file.
 
 Deals with initiating authentication for, and use of, CAPI.

@@ -15,6 +15,7 @@ from tkinter import ttk
 from types import TracebackType
 from typing import Any
 from collections.abc import Callable
+import plugin_browser
 import myNotebook as nb  # noqa: N813
 import plug
 from config import appversion_nobuild, config
@@ -239,7 +240,7 @@ if sys.platform == 'win32':
         return '\\'.join(display_components)
 
 
-class PreferencesDialog(tk.Toplevel):
+class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
     """The EDMC preferences dialog."""
 
     def __init__(self, parent: tk.Tk, callback: Callable | None):
@@ -292,6 +293,7 @@ class PreferencesDialog(tk.Toplevel):
         self.__setup_output_tab(notebook)
         self.__setup_privacy_tab(notebook)
         self.__setup_plugin_tab(notebook)
+        self.setup_browser_tab(notebook, AutoInc())
         self.__setup_plugin_tabs(notebook)
 
         # Set up the button frame
@@ -1010,9 +1012,11 @@ class PreferencesDialog(tk.Toplevel):
 
             for plugin in enabled_plugins:
                 curr_row = row.get()
-                label = nb.Label(plugins_frame,
-                                 text=plugin.name if plugin.name == plugin.folder
-                                 else f'{plugin.folder} ({plugin.name})')
+                plugin_name = plugin.name if plugin.name == plugin.folder else f'{plugin.folder} ({plugin.name})'
+                plugver = plugin.get_version()
+                if plugver:
+                    plugin_name += f" v. {plugver}"
+                label = nb.Label(plugins_frame, text=plugin_name)
 
                 label.grid(column=0, columnspan=2, padx=self.LISTX, pady=self.PADY, sticky=tk.W, row=curr_row)
 
