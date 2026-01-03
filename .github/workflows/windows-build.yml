@@ -130,7 +130,7 @@ jobs:
           python build.py
 
       - name: InnoSetup
-        uses: nadeemjazmawe/inno-setup-action-cli@v6.0.5
+        uses: sharktide/iscc-cli@v1.0.0
         with:
             filepath: './EDMC_Installer_Config.iss'
 
