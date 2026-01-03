@@ -61,6 +61,16 @@ You should also keep an eye on [our GitHub Discussions](https://github.com/EDCD/
 in case there are any proposed changes to EDMC plugin functionality.  You can
 do this by ensuring 'Discussions' is also ticked when following the steps
 above to set up a 'Custom' watch on this repository.
+---
+
+## Plugin Versioning
+
+We strongly encourage the use of [Semantic Version](https://semver.org/#semantic-versioning-specification-semver)
+for plugins. This should be done by establishing a `VERSION` constant or `__version__` dunder as a string with the value `Major.Minor.Patch`.
+
+This version is used by the EDMC Plugin Browser to compare versions of plugins and allow plugins to use upcoming 
+planned features such as the Plugin Auto-Updater. While this is not a required part of the Plugin spec, it is highly 
+recommended and may become required at a later date.
 
 ---
 

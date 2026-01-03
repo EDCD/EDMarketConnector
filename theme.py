@@ -220,38 +220,61 @@ class _Theme:
         widget.bind('<Enter>', lambda e: self._enter(e, image))
         widget.bind('<Leave>', lambda e: self._leave(e, image))
 
-    def _enter(self, event: tk.Event, image: tk.BitmapImage | None) -> None:
-        widget = event.widget
-        if widget and widget['state'] != tk.DISABLED:
-            try:
-                widget.configure(state=tk.ACTIVE)  # type: ignore
+    def _enter(self, event, widget=None, image=None):  # noqa: CCR001
+        """Handle mouse entering a widget or image."""
+        if widget is not None:
+            # Only apply foreground/background if the widget supports them
+            config_keys = widget.keys() if hasattr(widget, 'keys') else []
+            kwargs = {}
+            if 'foreground' in config_keys:
+                kwargs['foreground'] = self.current.get('highlightforeground', '')
+            if 'background' in config_keys:
+                kwargs['background'] = self.current.get('highlightbackground', '')
+            if kwargs:
+                widget.configure(**kwargs)
 
-            except Exception:
-                logger.exception(f'Failure setting widget active: {widget=}')
-
-            if image:
+        if image is not None:
+            # PhotoImage cannot be configured with fg/bg, skip safely
+            if not isinstance(image, tk.PhotoImage):
                 try:
-                    image.configure(foreground=self.current['activeforeground'],
-                                    background=self.current['activebackground'])
+                    config_keys = image.keys() if hasattr(image, 'keys') else []
+                    kwargs = {}
+                    if 'foreground' in config_keys:
+                        kwargs['foreground'] = self.current.get('highlightforeground', '')
+                    if 'background' in config_keys:
+                        kwargs['background'] = self.current.get('highlightbackground', '')
+                    if kwargs:
+                        image.configure(**kwargs)
+                except tk.TclError:
+                    # silently ignore unsupported image types
+                    pass
 
-                except Exception:
-                    logger.exception(f'Failure configuring image: {image=}')
+    def _leave(self, event, widget=None, image=None):  # noqa: CCR001
+        """Handle mouse leaving a widget or image."""
+        if widget is not None:
+            config_keys = widget.keys() if hasattr(widget, 'keys') else []
+            kwargs = {}
+            if 'foreground' in config_keys:
+                kwargs['foreground'] = self.current.get('foreground', '')
+            if 'background' in config_keys:
+                kwargs['background'] = self.current.get('background', '')
+            if kwargs:
+                widget.configure(**kwargs)
 
-    def _leave(self, event: tk.Event, image: tk.BitmapImage | None) -> None:
-        widget = event.widget
-        if widget and widget['state'] != tk.DISABLED:
-            try:
-                widget.configure(state=tk.NORMAL)  # type: ignore
-
-            except Exception:
-                logger.exception(f'Failure setting widget normal: {widget=}')
-
-            if image:
+        if image is not None:
+            # Skip PhotoImage objects; safely handle other types
+            if not isinstance(image, tk.PhotoImage):
                 try:
-                    image.configure(foreground=self.current['foreground'], background=self.current['background'])
-
-                except Exception:
-                    logger.exception(f'Failure configuring image: {image=}')
+                    config_keys = image.keys() if hasattr(image, 'keys') else []
+                    kwargs = {}
+                    if 'foreground' in config_keys:
+                        kwargs['foreground'] = self.current.get('foreground', '')
+                    if 'background' in config_keys:
+                        kwargs['background'] = self.current.get('background', '')
+                    if kwargs:
+                        image.configure(**kwargs)
+                except tk.TclError:
+                    pass
 
     # Set up colors
     def _colors(self, root: tk.Tk, theme: int) -> None:
@@ -407,7 +430,7 @@ class _Theme:
         # Switch menus
         for pair, gridopts in self.widgets_pair:
             for widget in pair:
-                if isinstance(widget, tk.Widget):
+                if isinstance(widget, tk.Widget) and not widget.winfo_exists():
                     widget.grid_remove()
 
             if isinstance(pair[0], tk.Menu):
