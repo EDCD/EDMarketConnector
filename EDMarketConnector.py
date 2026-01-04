@@ -1624,6 +1624,7 @@ class AppWindow:
                 # Disable WinSparkle automatic update checks, IFF configured to do so when in-game
                 if config.get_int('disable_autoappupdatecheckingame'):
                     if self.updater is not None:
+                        config.set("core_updater_disable_in_game", self.updater.get_update_check())
                         self.updater.set_automatic_updates_check(False)
 
                     logger.info('Monitor: Disable WinSparkle automatic update checks')

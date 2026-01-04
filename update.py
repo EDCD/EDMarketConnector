@@ -224,6 +224,7 @@ class Updater:
 
         if not self.use_internal() and sys.platform == 'win32':
             self._init_winsparkle()
+            self.set_automatic_updates_check(config.get_bool("core_updater_disable_in_game", default=False))
 
     def start_check_thread(self) -> None:
         """Start the background update worker thread safely."""
@@ -394,6 +395,12 @@ class Updater:
         # LANG: Update Available Text
         status['text'] = tr.tl("{NEWVER} is available").format(NEWVER=newver_title)
         self.root.update_idletasks()
+
+    def get_update_check(self):
+        """Check the current value of the WinSparkle Registry Key."""
+        if sys.platform == 'win32' and self.updater:
+            return self.updater.win_sparkle_set_automatic_check_for_updates()
+        return None
 
     def close(self) -> None:
         """
