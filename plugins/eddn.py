@@ -28,6 +28,7 @@ import os
 import pathlib
 import re
 import sqlite3
+import gzip
 import tkinter as tk
 from tkinter import ttk
 from platform import system
@@ -48,7 +49,6 @@ from monitor import monitor
 from myNotebook import Frame
 from prefs import prefsVersion
 from ttkHyperlinkLabel import HyperlinkLabel
-from util import text
 from l10n import translations as tr
 from plugins.common_coreutils import PADX, PADY, BUTTONX, this_format_common
 
@@ -359,19 +359,16 @@ class EDDNSender:
         :return: `True` for "now remove this message from the queue"
         """
         logger.trace_if("plugin.eddn.send", "Sending message")
-        should_return: bool
-        new_data: dict[str, Any]
 
         should_return, new_data = killswitch.check_killswitch('plugins.eddn.send', json.loads(msg))
         if should_return:
             logger.warning('eddn.send has been disabled via killswitch. Returning.')
             return False
 
-        # Even the smallest possible message compresses somewhat, so always compress
-        encoded, compressed = text.gzip(json.dumps(new_data, separators=(',', ':')), max_size=0)
-        headers: dict[str, str] | None = None
-        if compressed:
-            headers = {'Content-Encoding': 'gzip'}
+        # Always compress for EDDN
+        payload = json.dumps(new_data, separators=(",", ":")).encode()
+        encoded = gzip.compress(payload)
+        headers = {"Content-Encoding": "gzip"}
 
         try:
             r = self.session.post(self.eddn_endpoint, data=encoded, timeout=self.TIMEOUT, headers=headers)
@@ -394,15 +391,14 @@ class EDDNSender:
             r.raise_for_status()
 
         except requests.exceptions.HTTPError as e:
-            if unknown_schema := self.UNKNOWN_SCHEMA_RE.match(e.response.text):  # type: ignore
-                logger.debug(f"EDDN doesn't (yet?) know about schema: {unknown_schema['schema_name']}"
-                             f"/{unknown_schema['schema_version']}")
+            response = e.response  # type: ignore[assignment]
+            if response and (m := self.UNKNOWN_SCHEMA_RE.match(response.text)):
+                logger.debug(f"EDDN doesn't (yet?) know about schema: {m['schema_name']}/{m['schema_version']}")
                 # This dropping is to cater for the time period when EDDN doesn't *yet* support a new schema.
                 return True
 
-            if e.response.status_code == http.HTTPStatus.BAD_REQUEST:  # type: ignore
-                # EDDN straight up says no, so drop the message
-                logger.debug(f"EDDN responded '400 Bad Request' to the message, dropping:\n{msg!r}")
+            if response and response.status_code == http.HTTPStatus.BAD_REQUEST:
+                logger.debug("EDDN responded '400 Bad Request' to the message, dropping:\n%r", msg)
                 return True
 
             # This should catch anything else, e.g. timeouts, gateway errors
