@@ -302,40 +302,17 @@ class Auth:
 
             self.requests_session = self._sessions[cmdr]
 
-    def close(self) -> None:
-        """Close session for this commander."""
-        with self._sessions_lock:
-            if self.cmdr in self._sessions:
-                self._sessions[self.cmdr].close()
-                del self._sessions[self.cmdr]
-
-    def __enter__(self):
-        """Allow Opening as a Context Manager."""
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        """Allow Closing as a Context Manager."""
-        self.close()
-
-    def post(self, url: str, **kwargs) -> requests.Response:
-        """POST with retry/backoff handled by requests Session."""
-        try:
-            return self.requests_session.post(url, **kwargs)
-        except requests.RequestException:
-            logger.exception(f"CAPI POST request failed for {self.cmdr} at {url}")
-            raise
-
-    def get(self, url: str, **kwargs) -> requests.Response:
-        """GET with retry/backoff handled by requests Session."""
-        try:
-            return self.requests_session.get(url, **kwargs)
-        except requests.RequestException:
-            logger.exception(f"CAPI GET request failed for {self.cmdr} at {url}")
-            raise
-
     def refresh(self) -> str | None:
-        """Attempt to use Refresh Token to get a valid Access Token, else start new authorization."""
-        logger.debug(f'Trying refresh for Commander "{self.cmdr}"')
+        """
+        Attempt use of Refresh Token to get a valid Access Token.
+
+        If the Refresh Token doesn't work, make a new authorization request.
+
+        :return: Access Token if retrieved, else None.
+        """
+        logger.debug(f'Trying for "{self.cmdr}"')
+
+        should_return: bool
 
         # Killswitch check
         should_return, _ = killswitch.check_killswitch('capi.auth', {})
@@ -645,13 +622,14 @@ class Session:
             self.credentials = credentials
 
         self.state = Session.STATE_INIT
+        self.auth = Auth(self.credentials['cmdr'])  # type: ignore
 
-        with Auth(self.credentials['cmdr']) as auth:  # type: ignore
-            access_token = auth.refresh()
-            if access_token:
-                logger.debug('We have an access_token')
-                self.start_frontier_auth(access_token)
-                return True
+        access_token = self.auth.refresh()
+        if access_token:
+            logger.debug('We have an access_token')
+            self.auth = None
+            self.start_frontier_auth(access_token)
+            return True
 
         logger.debug('We do NOT have an access_token')
         self.state = Session.STATE_AUTH
