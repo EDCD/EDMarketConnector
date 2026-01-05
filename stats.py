@@ -302,7 +302,7 @@ class StatsDialog:
             return
 
         # TODO: This needs to use cached data
-        if companion.session.FRONTIER_CAPI_PATH_PROFILE not in companion.session.capi_raw_data:
+        if companion.CAPIEndpoint.PROFILE not in companion.session.capi_raw_data:
             logger.info('No cached data, aborting...')
             hotkeymgr.play_bad()
             # LANG: No Frontier CAPI data yet when trying to use 'File' > 'Status'
@@ -310,7 +310,7 @@ class StatsDialog:
             return
 
         capi_data = json.loads(
-            companion.session.capi_raw_data[companion.session.FRONTIER_CAPI_PATH_PROFILE].raw_data
+            companion.session.capi_raw_data[companion.CAPIEndpoint.PROFILE].raw_data
         )
 
         if not capi_data.get('commander') or not capi_data['commander'].get('name', '').strip():

@@ -669,7 +669,7 @@ class EDDN:
                 'message':    message,
                 'header':     self.standard_header(
                     game_version=self.capi_gameversion_from_host_endpoint(
-                        data.source_host, companion.Session.FRONTIER_CAPI_PATH_MARKET
+                        data.source_host, companion.CAPIEndpoint.MARKET
                     ),
                     game_build=''
                 ),
@@ -780,7 +780,7 @@ class EDDN:
                 },
                 'header': self.standard_header(
                     game_version=self.capi_gameversion_from_host_endpoint(
-                        data.source_host, companion.Session.FRONTIER_CAPI_PATH_SHIPYARD
+                        data.source_host, companion.CAPIEndpoint.SHIPYARD
                     ),
                     game_build=''
                 ),
@@ -842,7 +842,7 @@ class EDDN:
                 },
                 'header': self.standard_header(
                     game_version=self.capi_gameversion_from_host_endpoint(
-                        data.source_host, companion.Session.FRONTIER_CAPI_PATH_SHIPYARD
+                        data.source_host, companion.CAPIEndpoint.SHIPYARD
                     ),
                     game_build=''
                 ),
@@ -1552,7 +1552,7 @@ class EDDN:
             'message': entry,
             'header': self.standard_header(
                 game_version=self.capi_gameversion_from_host_endpoint(
-                    data.source_host, companion.Session.FRONTIER_CAPI_PATH_MARKET
+                    data.source_host, companion.CAPIEndpoint.MARKET
                 ), game_build=''
             ),
         }
@@ -1953,10 +1953,10 @@ class EDDN:
 
         #######################################################################
         # endpoint
-        if capi_endpoint == companion.Session.FRONTIER_CAPI_PATH_MARKET:
+        if capi_endpoint == companion.CAPIEndpoint.MARKET:
             gv += 'market'
 
-        elif capi_endpoint == companion.Session.FRONTIER_CAPI_PATH_SHIPYARD:
+        elif capi_endpoint == companion.CAPIEndpoint.SHIPYARD:
             gv += 'shipyard'
 
         else:
