@@ -645,19 +645,17 @@ class Session:
             self.credentials = credentials
 
         self.state = Session.STATE_INIT
-        self.auth = Auth(self.credentials['cmdr'])  # type: ignore
 
-        access_token = self.auth.refresh()
-        if access_token:
-            logger.debug('We have an access_token')
-            self.auth = None
-            self.start_frontier_auth(access_token)
-            return True
+        with Auth(self.credentials['cmdr']) as auth:  # type: ignore
+            access_token = auth.refresh()
+            if access_token:
+                logger.debug('We have an access_token')
+                self.start_frontier_auth(access_token)
+                return True
 
         logger.debug('We do NOT have an access_token')
         self.state = Session.STATE_AUTH
-        return False
-        # Wait for callback
+        return False  # Wait for callback
 
     # Callback from protocol handler
     def auth_callback(self) -> None:
@@ -1099,7 +1097,7 @@ class Session:
                                    ensure_ascii=False,
                                    indent=2,
                                    sort_keys=True,
-                                   separators=(',', ': ')).encode('utf-8'))
+                                   separators=(',', ': ')).encode())
 
     def capi_host_for_galaxy(self) -> str:
         """
