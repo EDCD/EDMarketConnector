@@ -205,11 +205,11 @@ def export_status(data: dict[str, Any], filename: AnyStr) -> None:
     :param data: The data to generate the file from
     :param filename: The target file
     """
-    with open(filename, 'w') as f:
-        h = csv.writer(f)
-        h.writerow(('Category', 'Value'))
-        for thing in status(data):
-            h.writerow(list(thing))
+    with open(filename, 'w', newline='', encoding='utf-8') as f:
+        writer = csv.writer(f)
+        writer.writerow(('Category', 'Value'))
+        for cat, val in status(data):
+            writer.writerow((cat, val))
 
 
 class ShipRet(NamedTuple):
@@ -278,11 +278,11 @@ def export_ships(companion_data: dict[str, Any], filename: AnyStr) -> None:
     :param companion_data: Data from which to generate the ship list
     :param filename: The target file
     """
-    with open(filename, 'w') as f:
-        h = csv.writer(f)
-        h.writerow(['Id', 'Ship', 'Name', 'System', 'Station', 'Value'])
-        for thing in ships(companion_data):
-            h.writerow(list(thing))
+    with open(filename, 'w', newline='', encoding='utf-8') as f:
+        writer = csv.writer(f)
+        writer.writerow(['Id', 'Ship', 'Name', 'System', 'Station', 'Value'])
+        for ship in ships(companion_data):
+            writer.writerow(ship)
 
 
 class StatsDialog:
