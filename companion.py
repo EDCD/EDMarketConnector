@@ -26,6 +26,7 @@ import time
 import tkinter as tk
 import urllib.parse
 import webbrowser
+import requests
 from email.utils import parsedate
 from enum import StrEnum
 from pathlib import Path
@@ -33,7 +34,8 @@ from queue import Queue
 from typing import TYPE_CHECKING, Any, TypeVar, Union, Iterator
 from collections.abc import Mapping
 from dataclasses import dataclass
-import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 import config as conf_module
 import killswitch
 import protocol
@@ -219,6 +221,7 @@ class BaseCAPIException(Exception):
 
 class ServerLagging(BaseCAPIException):
     """Raised when the CAPI server is returning old or out-of-sync data."""
+
     # LANG: Frontier CAPI data doesn't agree with latest Journal game location
     DEFAULT_MSG = tr.tl('Error: Frontier CAPI data out of sync')
 
@@ -264,31 +267,71 @@ class ServerConnectionError(ServerError):
 
 
 class Auth:
-    """Handles authentication with the Frontier CAPI service via OAuth2."""
+    """Handles authentication with Frontier CAPI via OAuth2, thread-safe and resilient."""
 
-    # CLIENT_ID: Elite Dangerous Market Connector (EDCD/Athanasius)
-    CLIENT_ID: str = os.getenv('CLIENT_ID', 'fb88d428-9110-475f-a3d2-dc151c2b9c7a')
-
+    CLIENT_ID = os.getenv('CLIENT_ID') or 'fb88d428-9110-475f-a3d2-dc151c2b9c7a'
     FRONTIER_AUTH_PATH_AUTH = '/auth'
     FRONTIER_AUTH_PATH_TOKEN = '/token'
     FRONTIER_AUTH_PATH_DECODE = '/decode'
 
+    _sessions_lock = threading.Lock()
+    _sessions: dict[str, requests.Session] = {}
+
     def __init__(self, cmdr: str) -> None:
         self.cmdr: str = cmdr
-        self.requests_session = requests.Session()
-        self.requests_session.headers['User-Agent'] = user_agent
         self.verifier: bytes | None = None
         self.state: str | None = None
 
+        # Thread-safe session singleton per commander
+        with self._sessions_lock:
+            if cmdr not in self._sessions:
+                session = requests.Session()
+                session.headers['User-Agent'] = user_agent
+                session.mount(
+                    "https://",
+                    HTTPAdapter(
+                        max_retries=Retry(
+                            total=3,
+                            backoff_factor=0.5,  # Exponential backoff: 0.5s, 1s, 2s
+                            status_forcelist=[429, 500, 502, 503, 504],
+                            allowed_methods=["GET", "POST"]
+                        )
+                    )
+                )
+                self._sessions[cmdr] = session
+
+            self.requests_session = self._sessions[cmdr]
+
+    def close(self) -> None:
+        """Close session for this commander."""
+        with self._sessions_lock:
+            if self.cmdr in self._sessions:
+                self._sessions[self.cmdr].close()
+                del self._sessions[self.cmdr]
+
     def __enter__(self):
+        """Allow Opening as a Context Manager."""
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        """Allow Closing as a Context Manager."""
         self.close()
 
-    def close(self) -> None:
-        """Close the requests session."""
-        self.requests_session.close()
+    def post(self, url: str, **kwargs) -> requests.Response:
+        """POST with retry/backoff handled by requests Session."""
+        try:
+            return self.requests_session.post(url, **kwargs)
+        except requests.RequestException:
+            logger.exception(f"CAPI POST request failed for {self.cmdr} at {url}")
+            raise
+
+    def get(self, url: str, **kwargs) -> requests.Response:
+        """GET with retry/backoff handled by requests Session."""
+        try:
+            return self.requests_session.get(url, **kwargs)
+        except requests.RequestException:
+            logger.exception(f"CAPI GET request failed for {self.cmdr} at {url}")
+            raise
 
     def refresh(self) -> str | None:
         """Attempt to use Refresh Token to get a valid Access Token, else start new authorization."""
@@ -503,6 +546,7 @@ class EDMCCAPIFailedRequest(EDMCCAPIReturn):
 
 class CAPIEndpoint(StrEnum):
     """Enum to maintain known endpoints."""
+
     PROFILE = "/profile"
     MARKET = "/market"
     SHIPYARD = "/shipyard"
