@@ -258,8 +258,8 @@ class PluginBrowserMixIn:
         self.__populate_plugins_tree()
 
         notebook.add(
-            # LANG: Plugin Browser Title
             plugins_frame,
+            # LANG: Plugin Browser Title
             text=tr.tl("Plugin Browser"),
         )
 

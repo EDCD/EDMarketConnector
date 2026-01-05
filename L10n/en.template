@@ -27,9 +27,6 @@
 /* companion.py: Generic error prefix - following text is from Frontier auth service; In files: companion.py:432; companion.py:517; */
 "Error" = "Error";
 
-/* companion.py: Frontier auth, no 'usr' section in returned data; companion.py: Frontier auth, no 'customer_id' in 'usr' section in returned data; In files: companion.py:475; companion.py:480; */
-"Error: Couldn't check token customer_id" = "Error: Couldn't check token customer_id";
-
 /* companion.py: Frontier auth customer_id doesn't match game session FID; In files: companion.py:486; */
 "Error: customer_id doesn't match!" = "Error: customer_id doesn't match!";
 
