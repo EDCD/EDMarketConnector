@@ -27,6 +27,7 @@ import tkinter as tk
 import urllib.parse
 import webbrowser
 from email.utils import parsedate
+from enum import StrEnum
 from pathlib import Path
 from queue import Queue
 from typing import TYPE_CHECKING, Any, TypeVar, Union, Iterator
@@ -90,7 +91,7 @@ class CAPIData(UserDict):
         self.source_endpoint = source_endpoint
         self.request_cmdr = request_cmdr
 
-        if source_endpoint == Session.FRONTIER_CAPI_PATH_SHIPYARD and self.data.get('lastStarport'):
+        if source_endpoint == CAPIEndpoint.SHIPYARD and self.data.get('lastStarport'):
             # All the other endpoints may or may not have a lastStarport, but definitely won't have valid data
             # for this check, which means it'll just make noise for no reason while we're working on other things
             self.check_modules_ships()
@@ -278,6 +279,12 @@ class Auth:
         self.requests_session.headers['User-Agent'] = user_agent
         self.verifier: bytes | None = None
         self.state: str | None = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
 
     def close(self) -> None:
         """Close the requests session."""
@@ -494,15 +501,18 @@ class EDMCCAPIFailedRequest(EDMCCAPIReturn):
     exception: Exception | None = None  # Optional exception to raise or inspect
 
 
+class CAPIEndpoint(StrEnum):
+    """Enum to maintain known endpoints."""
+    PROFILE = "/profile"
+    MARKET = "/market"
+    SHIPYARD = "/shipyard"
+    FLEETCARRIER = "/fleetcarrier"
+
+
 class Session:
     """Methods for handling Frontier Auth and CAPI queries."""
 
     STATE_INIT, STATE_AUTH, STATE_OK = list(range(3))
-
-    FRONTIER_CAPI_PATH_PROFILE = '/profile'
-    FRONTIER_CAPI_PATH_MARKET = '/market'
-    FRONTIER_CAPI_PATH_SHIPYARD = '/shipyard'
-    FRONTIER_CAPI_PATH_FLEETCARRIER = '/fleetcarrier'
 
     # This is a dummy value, to signal to Session.capi_query_worker that we
     # the 'station' triplet of queries.
@@ -726,7 +736,7 @@ class Session:
                 # LANG: Frontier CAPI data retrieval failed
                 raise ServerError(f'{tr.tl("Frontier CAPI query failure")}: {capi_endpoint}') from e
 
-            if capi_endpoint == self.FRONTIER_CAPI_PATH_PROFILE and 'commander' not in capi_data:
+            if capi_endpoint == CAPIEndpoint.PROFILE and 'commander' not in capi_data:
                 logger.error('No commander in returned data')
 
             if 'timestamp' not in capi_data:
@@ -777,7 +787,7 @@ class Session:
             :param timeout: requests timeout to use.
             :return: CAPIData instance with what we retrieved.
             """
-            station_data = capi_single_query(capi_host, self.FRONTIER_CAPI_PATH_PROFILE, timeout=timeout)
+            station_data = capi_single_query(capi_host, CAPIEndpoint.PROFILE, timeout=timeout)
 
             if not station_data.get('commander'):
                 # If even this doesn't exist, probably killswitched.
@@ -822,7 +832,7 @@ class Session:
             last_starport_id = int(last_starport.get('id'))
 
             if services.get('commodities'):
-                market_data = capi_single_query(capi_host, self.FRONTIER_CAPI_PATH_MARKET, timeout=timeout)
+                market_data = capi_single_query(capi_host, CAPIEndpoint.MARKET, timeout=timeout)
                 if not market_data.get('id'):
                     # Probably killswitched
                     return station_data
@@ -835,7 +845,7 @@ class Session:
                 station_data['lastStarport'].update(market_data)
 
             if services.get('outfitting') or services.get('shipyard'):
-                shipyard_data = capi_single_query(capi_host, self.FRONTIER_CAPI_PATH_SHIPYARD, timeout=timeout)
+                shipyard_data = capi_single_query(capi_host, CAPIEndpoint.SHIPYARD, timeout=timeout)
                 if not shipyard_data.get('id'):
                     # Probably killswitched
                     return station_data
@@ -866,12 +876,12 @@ class Session:
                 if query.endpoint == self._CAPI_PATH_STATION:
                     capi_data = capi_station_queries(query.capi_host)
 
-                elif query.endpoint == self.FRONTIER_CAPI_PATH_FLEETCARRIER:
-                    capi_data = capi_single_query(query.capi_host, self.FRONTIER_CAPI_PATH_FLEETCARRIER,
+                elif query.endpoint == CAPIEndpoint.FLEETCARRIER:
+                    capi_data = capi_single_query(query.capi_host, CAPIEndpoint.FLEETCARRIER,
                                                   timeout=capi_fleetcarrier_requests_timeout)
 
                 else:
-                    capi_data = capi_single_query(query.capi_host, self.FRONTIER_CAPI_PATH_PROFILE)
+                    capi_data = capi_single_query(query.capi_host, CAPIEndpoint.PROFILE)
 
             except Exception as e:
                 self.capi_response_queue.put(
@@ -963,7 +973,7 @@ class Session:
         self.capi_request_queue.put(
             EDMCCAPIRequest(
                 capi_host=capi_host,
-                endpoint=self.FRONTIER_CAPI_PATH_FLEETCARRIER,
+                endpoint=CAPIEndpoint.FLEETCARRIER,
                 tk_response_event=tk_response_event,
                 query_time=query_time,
                 play_sound=play_sound,
@@ -1021,7 +1031,7 @@ class Session:
         """Dump CAPI data to file for examination."""
         if Path('dump').is_dir():
             file_name: str = ""
-            if data.source_endpoint == self.FRONTIER_CAPI_PATH_FLEETCARRIER:
+            if data.source_endpoint == CAPIEndpoint.FLEETCARRIER:
                 file_name += f"FleetCarrier.{data['name']['callsign']}"
 
             else:
