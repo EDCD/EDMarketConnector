@@ -322,6 +322,7 @@ class Auth:
 
         self.verifier = None
         cmdrs = config.get_list('cmdrs', default=[])
+        logger.trace_if('capi.auth.refresh', f"Found CMDRs: {cmdrs} in config.")
         try:
             idx = cmdrs.index(self.cmdr)
         except ValueError:
@@ -330,6 +331,7 @@ class Auth:
 
         tokens = config.get_list('fdev_apikeys', default=[])
         tokens += [''] * (len(cmdrs) - len(tokens))
+        logger.trace_if('capi.auth.refresh', f"Found tokens: {tokens} in config.")
 
         if tokens[idx]:
             # Try refresh
@@ -345,8 +347,11 @@ class Auth:
                     data=data,
                     timeout=auth_timeout
                 )
+                logger.trace_if('capi.auth.refresh', f"Session Data: {r.json()}")
+                logger.trace_if('capi.auth.refresh', f"Status Code: {r.status_code}")
                 if r.status_code == requests.codes.ok:
                     token_data = r.json()
+                    logger.trace_if("capi.auth.refresh", f"Token Data: {token_data}")
                     tokens[idx] = token_data.get('refresh_token', '')
                     config.set('fdev_apikeys', tokens)
                     config.save()
@@ -365,6 +370,7 @@ class Auth:
         self.verifier = self._generate_verifier()
         self.state = self._generate_state()
         challenge = self.base64_url_encode(hashlib.sha256(self.verifier).digest())
+        logger.trace_if('capi.auth.refresh', f"Challenge: {challenge}")
 
         webbrowser.open(
             f'{FRONTIER_AUTH_SERVER}{self.FRONTIER_AUTH_PATH_AUTH}?response_type=code'
@@ -385,6 +391,7 @@ class Auth:
             raise CredentialsError('malformed payload')
 
         data = urllib.parse.parse_qs(payload.split('?', 1)[1])
+        logger.trace_if('capi.auth.refresh', f"OAuth callback params: {data}")
         if not self.state or data.get('state', [None])[0] != self.state:
             raise CredentialsError(f'Unexpected response from authorization {payload!r}')
 
@@ -409,6 +416,7 @@ class Auth:
                 timeout=auth_timeout
             )
             data_token = r.json()
+            logger.trace_if('capi.auth.refresh', f"Token Data: {data_token}")
 
             # Decode token to validate customer_id
             r = self.requests_session.get(
@@ -420,6 +428,7 @@ class Auth:
                 timeout=auth_timeout
             )
             data_decode = r.json()
+            logger.trace_if('capi.auth.refresh', f"Decode Token: {data_decode}")
             usr = data_decode.get('usr')
             if not usr or f'F{usr.get("customer_id")}' != monitor.state.get('FID'):
                 # LANG: Frontier auth customer_id doesn't match game session FID
