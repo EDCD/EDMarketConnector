@@ -269,6 +269,9 @@ class ServerConnectionError(ServerError):
 class Auth:
     """Handles authentication with Frontier CAPI via OAuth2, thread-safe and resilient."""
 
+    # Currently the "Elite Dangerous Market Connector (EDCD/Athanasius)" one in
+    # Athanasius' Frontier account
+    # Obtain from https://auth.frontierstore.net/client/signup
     CLIENT_ID = os.getenv('CLIENT_ID') or 'fb88d428-9110-475f-a3d2-dc151c2b9c7a'
     FRONTIER_AUTH_PATH_AUTH = '/auth'
     FRONTIER_AUTH_PATH_TOKEN = '/token'
