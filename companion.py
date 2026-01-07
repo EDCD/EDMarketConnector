@@ -546,6 +546,8 @@ class Session:
     """Methods for handling Frontier Auth and CAPI queries."""
 
     STATE_INIT, STATE_AUTH, STATE_OK = list(range(3))
+    _sessions_lock = threading.Lock()
+    _sessions: dict[tuple[str, bool, str], requests.Session] = {}
 
     # This is a dummy value, to signal to Session.capi_query_worker that we
     # the 'station' triplet of queries.
@@ -554,7 +556,7 @@ class Session:
     def __init__(self) -> None:
         self.state = Session.STATE_INIT
         self.credentials: dict[str, Any] | None = None
-        self.requests_session = requests.Session()
+        self.requests_session: requests.Session | None = None
         self.auth: Auth | None = None
         self.retrying = False  # Avoid infinite loop when successful auth / unsuccessful query
         self.tk_master: tk.Tk | None = None
@@ -587,8 +589,8 @@ class Session:
     def start_frontier_auth(self, access_token: str) -> None:
         """Start an oAuth2 session."""
         logger.debug('Starting session')
+        self.requests_session = self._get_or_create_requests_session()
         self.requests_session.headers['Authorization'] = f'Bearer {access_token}'
-        self.requests_session.headers['User-Agent'] = user_agent
 
         self.state = Session.STATE_OK
 
@@ -674,8 +676,9 @@ class Session:
     def close(self) -> None:
         """Close the `request.Session()."""
         try:
-            self.requests_session.close()
-
+            if self.requests_session:
+                # Do NOT close the shared session — just detach
+                self.requests_session = None
         except Exception as e:
             logger.debug('Frontier Auth: closing', exc_info=e)
 
@@ -687,9 +690,7 @@ class Session:
         """
         self.state = Session.STATE_INIT
         self.close()
-
-        if reopen:
-            self.requests_session = requests.Session()
+        self.requests_session = None
 
     def invalidate(self) -> None:
         """Invalidate Frontier authorization credentials."""
@@ -719,6 +720,8 @@ class Session:
             :param timeout: requests query timeout to use.
             :return: The resulting CAPI data, of type CAPIData.
             """
+            if self.requests_session is None:
+                raise ServerError("CAPI session not initialized")
             capi_data: CAPIData = CAPIData()
             should_return: bool
             new_data: dict[str, Any]
@@ -1114,6 +1117,34 @@ class Session:
         return SERVER_LEGACY
 
     ######################################################################
+
+    def _get_or_create_requests_session(self) -> requests.Session:
+        if not self.credentials:
+            raise ValueError("No Credentials Provided!")
+
+        cmdr = self.credentials["cmdr"]
+        is_beta = self.credentials["beta"]
+        galaxy = "live" if monitor.is_live_galaxy() else "legacy"
+        key = (cmdr, is_beta, galaxy)
+
+        with self._sessions_lock:
+            if key not in self._sessions:
+                s = requests.Session()
+                s.headers["User-Agent"] = user_agent
+
+                retry = Retry(total=5, connect=5, read=5, status=5, backoff_factor=0.5,
+                              status_forcelist=(429, 500, 502, 503, 504), allowed_methods=frozenset(["GET"]),
+                              raise_on_status=False)
+
+                adapter = HTTPAdapter(
+                    max_retries=retry,
+                    pool_connections=4,
+                    pool_maxsize=8,
+                )
+                s.mount("https://", adapter)
+
+                self._sessions[key] = s
+            return self._sessions[key]
 
 
 ######################################################################
