@@ -164,13 +164,13 @@ if DEBUG:
 # noinspection PyUnresolvedReferences
 def system_url(system_name: str) -> str:
     """Get a URL for the current system."""
-    if this.system_address:
-        return requests.utils.requote_uri(f'https://inara.cz/elite/starsystem/'
-                                          f'?search={this.system_address}')
-
     if system_name:
         return requests.utils.requote_uri(f'https://inara.cz/elite/starsystem/'
                                           f'?search={system_name}')
+
+    if this.system_address:
+        return requests.utils.requote_uri(f'https://inara.cz/elite/starsystem/'
+                                          f'?search={this.system_address}')
 
     return ''
 
@@ -188,12 +188,12 @@ def station_url(system_name: str, station_name: str) -> str:
     if system_name and station_name:
         return requests.utils.requote_uri(f'https://inara.cz/elite/station/?search={station_name}%20[{system_name}]')
 
+    if system_name:
+        return system_url(system_name)
+
     if this.system_name and this.station_name:
         return requests.utils.requote_uri(
             f'https://inara.cz/elite/station/?search={this.station_name}%20[{this.system_name}]')
-
-    if system_name:
-        return system_url(system_name)
 
     return ''
 

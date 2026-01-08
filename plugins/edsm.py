@@ -160,11 +160,11 @@ def system_url(system_name: str) -> str:
       is set.
     :return: The URL, empty if no data was available to construct it.
     """
-    if this.system_address:
-        return requests.utils.requote_uri(f'https://www.edsm.net/en/system?systemID64={this.system_address}')
-
     if system_name:
         return requests.utils.requote_uri(f'https://www.edsm.net/en/system?systemName={system_name}')
+
+    if this.system_address:
+        return requests.utils.requote_uri(f'https://www.edsm.net/en/system?systemID64={this.system_address}')
 
     return ''
 
@@ -182,15 +182,15 @@ def station_url(system_name: str, station_name: str) -> str:
             f'https://www.edsm.net/en/system?systemName={system_name}&stationName={station_name}'
         )
 
+    if system_name:
+        return requests.utils.requote_uri(
+            f'https://www.edsm.net/en/system?systemName={system_name}&stationName=ALL'
+        )
+
     # monitor state might think these are gone, but we don't yet
     if this.system_name and this.station_name:
         return requests.utils.requote_uri(
             f'https://www.edsm.net/en/system?systemName={this.system_name}&stationName={this.station_name}'
-        )
-
-    if system_name:
-        return requests.utils.requote_uri(
-            f'https://www.edsm.net/en/system?systemName={system_name}&stationName=ALL'
         )
 
     return ''
