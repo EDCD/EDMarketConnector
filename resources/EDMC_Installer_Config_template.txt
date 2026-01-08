@@ -37,7 +37,6 @@ UninstallDisplayIcon={app}\{#MyAppExeName}
 MinVersion=6.2
 ChangesAssociations = yes
 UsedUserAreasWarning = no
-VersionInfoVersion={#MyAppVersion}
 VersionInfoCompany={#MyAppPublisher}
 VersionInfoDescription={#MyAppLongName}
 VersionInfoCopyright={#MyAppCopyright}

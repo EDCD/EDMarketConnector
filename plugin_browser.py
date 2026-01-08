@@ -119,7 +119,7 @@ class PluginBrowserMixIn:
             background=nb.Label().cget("background"),
             url="https://github.com/Rixxan/EDMC_Plugin_Registry_Dev",  # Fixme
             underline=True,
-        ).grid(row=row.get(), padx=self.PADX, pady=(self.PADY, 1), sticky=tk.W)
+        ).grid(row=next(row), padx=self.PADX, pady=(self.PADY, 1), sticky=tk.W)
 
         # Add after the "Available Plugins" label
         categories = sorted(
@@ -137,7 +137,7 @@ class PluginBrowserMixIn:
         # LANG: Filter Plugin Categories
         category_label = nb.Label(plugins_frame, text=tr.tl("Filter by Category:"))
         category_label.grid(
-            row=row.get(), column=0, sticky=tk.W, padx=self.PADX, pady=(0, self.PADY)
+            row=next(row), column=0, sticky=tk.W, padx=self.PADX, pady=(0, self.PADY)
         )
 
         category_dropdown = nb.OptionMenu(
@@ -149,14 +149,14 @@ class PluginBrowserMixIn:
         )
         category_dropdown.config(width=25)  # make the dropdown wider
         category_dropdown.grid(
-            row=row.get(), column=0, sticky=tk.W, padx=self.PADX, pady=(0, self.PADY)
+            row=next(row), column=0, sticky=tk.W, padx=self.PADX, pady=(0, self.PADY)
         )
 
         ttk.Separator(plugins_frame, orient=tk.HORIZONTAL).grid(
-            columnspan=4, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=row.get()
+            columnspan=4, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=next(row)
         )
         tree_container = nb.Frame(plugins_frame)  # type: ignore
-        tree_row = row.get()
+        tree_row = next(row)
         tree_container.grid(row=tree_row, column=0, sticky=tk.NSEW, padx=self.PADX)
 
         plugins_frame.columnconfigure(0, weight=1)
@@ -216,11 +216,11 @@ class PluginBrowserMixIn:
         tree_container.rowconfigure(0, weight=0)
 
         ttk.Separator(plugins_frame, orient=tk.HORIZONTAL).grid(
-            columnspan=4, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=row.get()
+            columnspan=4, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=next(row)
         )
 
         self.plugin_details_frame = nb.Frame(plugins_frame)  # type: ignore
-        details_row = row.get()
+        details_row = next(row)
         self.plugin_details_frame.grid(
             row=details_row, column=0, sticky=tk.NW, padx=self.PADX
         )
@@ -258,8 +258,8 @@ class PluginBrowserMixIn:
         self.__populate_plugins_tree()
 
         notebook.add(
-            # LANG: Plugin Browser Title
             plugins_frame,
+            # LANG: Plugin Browser Title
             text=tr.tl("Plugin Browser"),
         )
 

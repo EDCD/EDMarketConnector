@@ -1,38 +1,37 @@
 """Export list of ships as CSV."""
 import csv
-
+from itertools import chain
 import companion
 from edmc_data import ship_name_map
 
 
 def export(data: companion.CAPIData, filename: str) -> None:
     """
-    Write shipyard data in Companion API JSON format.
+    Write shipyard data in Companion API CSV format.
 
     :param data: The CAPI data.
-    :param filename: Optional filename to write to.
-    :return:
+    :param filename: Target CSV filename
     """
-    if not data['lastSystem'].get('name'):
+    system_name = data['lastSystem'].get('name')
+    if not system_name:
         raise ValueError("Missing 'name' in 'lastSystem'")
-    if not data['lastStarport'].get('name'):
+    starport = data['lastStarport']
+    station_name = starport.get('name')
+    ships_info = starport.get('ships')
+
+    if not station_name:
         raise ValueError("Missing 'name' in 'lastStarport'")
-    if not data['lastStarport'].get('ships'):
+    if not ships_info:
         raise ValueError("Missing 'ships' in 'lastStarport'")
 
-    with open(filename, 'w', newline='') as f:
-        c = csv.writer(f)
-        c.writerow(('System', 'Station', 'Ship', 'FDevID', 'Date'))
+    shipyard_list = ships_info.get('shipyard_list', {}).values()
+    unavailable_list = ships_info.get('unavailable_list', [])
+    all_ships = chain(shipyard_list, unavailable_list)
 
-        for (name, fdevid) in [
-            (
-                ship_name_map.get(ship['name'].lower(), ship['name']),
-                ship['id']
-            ) for ship in list(
-                (data['lastStarport']['ships'].get('shipyard_list') or {}).values()
-            ) + data['lastStarport']['ships'].get('unavailable_list')
-        ]:
-            c.writerow((
-                data['lastSystem']['name'], data['lastStarport']['name'],
-                name, fdevid, data['timestamp']
-            ))
+    with open(filename, 'w', newline='', encoding='utf-8') as f:
+        writer = csv.writer(f)
+        writer.writerow(['System', 'Station', 'Ship', 'FDevID', 'Date'])
+        for ship in all_ships:
+            name = ship_name_map.get(ship['name'].lower(), ship['name'])
+            fdevid = ship['id']
+            writer.writerow([system_name, station_name, name, fdevid, data['timestamp']])

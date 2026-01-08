@@ -1,7 +1,6 @@
 """EDMC preferences library."""
 from __future__ import annotations
 
-import contextlib
 import logging
 import time
 from os.path import join, normpath
@@ -12,7 +11,7 @@ import tkinter as tk
 from os import system
 from tkinter import colorchooser as tkColorChooser  # type: ignore # noqa: N812
 from tkinter import ttk
-from types import TracebackType
+from itertools import count
 from typing import Any
 from collections.abc import Callable
 import plugin_browser
@@ -138,46 +137,6 @@ class PrefsVersion:
 prefsVersion = PrefsVersion()  # noqa: N816 # Cannot rename as used in plugins
 
 
-class AutoInc(contextlib.AbstractContextManager):
-    """
-    Autoinc is a self incrementing int.
-
-    As a context manager, it increments on enter, and does nothing on exit.
-    """
-
-    def __init__(self, start: int = 0, step: int = 1) -> None:
-        self.current = start
-        self.step = step
-
-    def get(self, increment=True) -> int:
-        """
-        Get the current integer, optionally incrementing it.
-
-        :param increment: whether or not to increment the stored value, defaults to True
-        :return: the current value
-        """
-        current = self.current
-        if increment:
-            self.current += self.step
-
-        return current
-
-    def __enter__(self):
-        """
-        Increments once, alias to .get.
-
-        :return: the current value
-        """
-        return self.get()
-
-    def __exit__(
-        self,
-        exc_type: type[BaseException] | None, exc_value: BaseException | None, traceback: TracebackType | None
-    ) -> bool | None:
-        """Do nothing."""
-        return None
-
-
 if sys.platform == 'win32':
     import winreg
     import win32api
@@ -293,7 +252,7 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
         self.__setup_output_tab(notebook)
         self.__setup_privacy_tab(notebook)
         self.__setup_plugin_tab(notebook)
-        self.setup_browser_tab(notebook, AutoInc())
+        self.setup_browser_tab(notebook, count())
         self.__setup_plugin_tabs(notebook)
 
         # Set up the button frame
@@ -342,11 +301,11 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
         else:
             output = config.get_int('output')
 
-        row = AutoInc(start=0)
+        row = count()
 
         # LANG: Settings > Output - choosing what data to save to files
         self.out_label = nb.Label(output_frame, text=tr.tl('Please choose what data to save'))
-        self.out_label.grid(columnspan=2, padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get())
+        self.out_label.grid(columnspan=2, padx=self.PADX, pady=self.PADY, sticky=tk.W, row=next(row))
 
         self.out_csv = tk.IntVar(value=1 if (output & config.OUT_MKT_CSV) else 0)
         self.out_csv_button = nb.Checkbutton(
@@ -355,13 +314,13 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
             variable=self.out_csv,
             command=self.outvarchanged
         )
-        self.out_csv_button.grid(columnspan=2, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=row.get())
+        self.out_csv_button.grid(columnspan=2, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=next(row))
 
         # Export format selection for market text exports
         # Group the Label and the ComboBox for consistent layout reflow
         mkt_frame = nb.Frame(output_frame)  # type: ignore
         # add increment row for the sub-frame
-        mkt_frame.grid(padx=self.PADX, pady=self.PADY, sticky=tk.EW, row=row.get())
+        mkt_frame.grid(padx=self.PADX, pady=self.PADY, sticky=tk.EW, row=next(row))
 
         self.mkt_export_type = tk.StringVar()
         # Default to SEMICOLON for backward compatibility; normalise any saved value
@@ -382,7 +341,7 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
             state='readonly',
             width=12
         )
-        # self.mkt_export_combobox.grid(column=2, padx=self.PADX, pady=self.BOXY, sticky=tk.W, row=row.get())
+        # self.mkt_export_combobox.grid(column=2, padx=self.PADX, pady=self.BOXY, sticky=tk.W, row=next(row))
         self.mkt_export_combobox.grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, column=2, row=0)
 
         self.out_td = tk.IntVar(value=1 if (output & config.OUT_MKT_TD) else 0)
@@ -392,7 +351,7 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
             variable=self.out_td,
             command=self.outvarchanged
         )
-        self.out_td_button.grid(columnspan=2, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=row.get())
+        self.out_td_button.grid(columnspan=2, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=next(row))
         self.out_ship = tk.IntVar(value=1 if (output & config.OUT_SHIP) else 0)
 
         # Output setting
@@ -402,7 +361,7 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
             variable=self.out_ship,
             command=self.outvarchanged
         )
-        self.out_ship_button.grid(columnspan=2, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=row.get())
+        self.out_ship_button.grid(columnspan=2, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=next(row))
         self.out_auto = tk.IntVar(value=0 if output & config.OUT_MKT_MANUAL else 1)  # inverted
 
         # Output setting
@@ -412,17 +371,17 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
             variable=self.out_auto,
             command=self.outvarchanged
         )
-        self.out_auto_button.grid(columnspan=2, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=row.get())
+        self.out_auto_button.grid(columnspan=2, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=next(row))
 
         self.outdir = tk.StringVar()
         self.outdir.set(str(config.get_str('outdir')))
         # LANG: Settings > Output - Label for "where files are located"
         self.outdir_label = nb.Label(output_frame, text=tr.tl('File location')+':')  # Section heading in settings
         # Type ignored due to incorrect type annotation. a 2 tuple does padding for each side
-        self.outdir_label.grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get())  # type: ignore
+        self.outdir_label.grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=next(row))  # type: ignore
 
         self.outdir_entry = ttk.Entry(output_frame, takefocus=False)
-        self.outdir_entry.grid(columnspan=2, padx=self.PADX, pady=self.BOXY, sticky=tk.EW, row=row.get())
+        self.outdir_entry.grid(columnspan=2, padx=self.PADX, pady=self.BOXY, sticky=tk.EW, row=next(row))
 
         text = tr.tl('Browse...')  # LANG: NOT-macOS Settings - files location selection button
 
@@ -434,7 +393,7 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
             # LANG: Settings > Output - Label for "where files are located"
             command=lambda: self.filebrowse(tr.tl('File location'), self.outdir)
         )
-        self.outbutton.grid(column=1, padx=self.PADX, pady=self.PADY, sticky=tk.EW, row=row.get())
+        self.outbutton.grid(column=1, padx=self.PADX, pady=self.PADY, sticky=tk.EW, row=next(row))
 
         # LANG: Label for 'Output' Settings/Preferences tab
         root_notebook.add(output_frame, text=tr.tl('Output'))  # Tab heading in settings
@@ -448,7 +407,7 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
     def __setup_config_tab(self, notebook: ttk.Notebook) -> None:  # noqa: CCR001
         config_frame = nb.Frame(notebook)
         config_frame.columnconfigure(1, weight=1)
-        row = AutoInc(start=0)
+        row = count()
 
         self.logdir = tk.StringVar()
         default = config.default_journal_dir if config.default_journal_dir_path is not None else ''
@@ -464,122 +423,122 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
             config_frame,
             # LANG: Settings > Configuration - Label for Journal files location
             text=tr.tl('E:D journal file location')+':'
-        ).grid(columnspan=4, padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get())
+        ).grid(columnspan=4, padx=self.PADX, pady=self.PADY, sticky=tk.W, row=next(row))
 
-        self.logdir_entry.grid(columnspan=4, padx=self.PADX, pady=self.BOXY, sticky=tk.EW, row=row.get())
+        self.logdir_entry.grid(columnspan=4, padx=self.PADX, pady=self.BOXY, sticky=tk.EW, row=next(row))
 
         text = tr.tl('Browse...')  # LANG: NOT-macOS Setting - files location selection button
 
-        with row as cur_row:
-            self.logbutton = ttk.Button(
-                config_frame,
-                text=text,
-                # LANG: Settings > Configuration - Label for Journal files location
-                command=lambda: self.filebrowse(tr.tl('E:D journal file location'), self.logdir)
-            )
-            self.logbutton.grid(column=3, padx=self.PADX, pady=self.PADY, sticky=tk.EW, row=cur_row)
+        cur_row = next(row)
+        self.logbutton = ttk.Button(
+            config_frame,
+            text=text,
+            # LANG: Settings > Configuration - Label for Journal files location
+            command=lambda: self.filebrowse(tr.tl('E:D journal file location'), self.logdir)
+        )
+        self.logbutton.grid(column=3, padx=self.PADX, pady=self.PADY, sticky=tk.EW, row=cur_row)
 
-            if config.default_journal_dir_path:
-                # Appearance theme and language setting
-                ttk.Button(
-                    config_frame,
-                    # LANG: Settings > Configuration - Label on 'reset journal files location to default' button
-                    text=tr.tl('Default'),
-                    command=self.logdir_reset,
-                    state=tk.NORMAL if config.get_str('journaldir') else tk.DISABLED
-                ).grid(column=2, padx=self.PADX, pady=self.PADY, sticky=tk.EW, row=cur_row)
+        if config.default_journal_dir_path:
+            # Appearance theme and language setting
+            ttk.Button(
+                config_frame,
+                # LANG: Settings > Configuration - Label on 'reset journal files location to default' button
+                text=tr.tl('Default'),
+                command=self.logdir_reset,
+                state=tk.NORMAL if config.get_str('journaldir') else tk.DISABLED
+            ).grid(column=2, padx=self.PADX, pady=self.PADY, sticky=tk.EW, row=cur_row)
 
         # CAPI settings
         self.capi_fleetcarrier = tk.BooleanVar(value=config.get_bool('capi_fleetcarrier'))
 
         ttk.Separator(config_frame, orient=tk.HORIZONTAL).grid(
-                columnspan=4, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=row.get()
+                columnspan=4, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=next(row)
             )
 
         nb.Label(
                 config_frame,
                 text=tr.tl('CAPI Settings')  # LANG: Settings > Configuration - Label for CAPI section
-            ).grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get())
+            ).grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=next(row))
 
         nb.Checkbutton(
                 config_frame,
                 # LANG: Configuration - Enable or disable the Fleet Carrier CAPI calls
                 text=tr.tl('Enable Fleet Carrier CAPI Queries'),
                 variable=self.capi_fleetcarrier
-            ).grid(columnspan=4, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=row.get())
+            ).grid(columnspan=4, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=next(row))
 
         if sys.platform == 'win32':
             ttk.Separator(config_frame, orient=tk.HORIZONTAL).grid(
-                columnspan=4, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=row.get()
+                columnspan=4, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=next(row)
             )
 
             self.hotkey_code = config.get_int('hotkey_code')
             self.hotkey_mods = config.get_int('hotkey_mods')
             self.hotkey_only = tk.IntVar(value=not config.get_int('hotkey_always'))
             self.hotkey_play = tk.IntVar(value=not config.get_int('hotkey_mute'))
-            with row as cur_row:
-                nb.Label(
-                    config_frame,
-                    text=tr.tl('Hotkey')  # LANG: Hotkey/Shortcut settings prompt on Windows
-                ).grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=cur_row)
+            cur_row = next(row)
+            nb.Label(
+                config_frame,
+                text=tr.tl('Hotkey')  # LANG: Hotkey/Shortcut settings prompt on Windows
+            ).grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=cur_row)
 
-                self.hotkey_text = ttk.Entry(config_frame, width=30, justify=tk.CENTER)
-                self.hotkey_text.insert(
-                    0,
-                    # No hotkey/shortcut currently defined
-                    # TODO: display Only shows up on windows
-                    # LANG: No hotkey/shortcut set
-                    hotkeymgr.display(self.hotkey_code, self.hotkey_mods) if self.hotkey_code else tr.tl('None')
-                )
+            self.hotkey_text = ttk.Entry(config_frame, width=30, justify=tk.CENTER)
+            self.hotkey_text.insert(
+                0,
+                # No hotkey/shortcut currently defined
+                # TODO: display Only shows up on windows
+                # LANG: No hotkey/shortcut set
+                hotkeymgr.display(self.hotkey_code, self.hotkey_mods) if self.hotkey_code else tr.tl('None')
+            )
 
-                self.hotkey_text.bind('<FocusIn>', self.hotkeystart)
-                self.hotkey_text.bind('<FocusOut>', self.hotkeyend)
-                self.hotkey_text.grid(column=1, columnspan=2, pady=self.BOXY, sticky=tk.W, row=cur_row)
+            self.hotkey_text.bind('<FocusIn>', self.hotkeystart)
+            self.hotkey_text.bind('<FocusOut>', self.hotkeyend)
+            self.hotkey_text.grid(column=1, columnspan=2, pady=self.BOXY, sticky=tk.W, row=cur_row)
 
-                # Hotkey/Shortcut setting
-                self.hotkey_only_btn = nb.Checkbutton(
-                    config_frame,
-                    # LANG: Configuration - Act on hotkey only when ED is in foreground
-                    text=tr.tl('Only when Elite: Dangerous is the active app'),
-                    variable=self.hotkey_only,
-                    state=tk.NORMAL if self.hotkey_code else tk.DISABLED
-                )
+            # Hotkey/Shortcut setting
+            self.hotkey_only_btn = nb.Checkbutton(
+                config_frame,
+                # LANG: Configuration - Act on hotkey only when ED is in foreground
+                text=tr.tl('Only when Elite: Dangerous is the active app'),
+                variable=self.hotkey_only,
+                state=tk.NORMAL if self.hotkey_code else tk.DISABLED
+            )
 
-                self.hotkey_only_btn.grid(columnspan=4, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=row.get())
+            self.hotkey_only_btn.grid(columnspan=4, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=next(row))
 
-                # Hotkey/Shortcut setting
-                self.hotkey_play_btn = nb.Checkbutton(
-                    config_frame,
-                    # LANG: Configuration - play sound when hotkey used
-                    text=tr.tl('Play sound'),
-                    variable=self.hotkey_play,
-                    state=tk.NORMAL if self.hotkey_code else tk.DISABLED
-                )
+            # Hotkey/Shortcut setting
+            self.hotkey_play_btn = nb.Checkbutton(
+                config_frame,
+                # LANG: Configuration - play sound when hotkey used
+                text=tr.tl('Play sound'),
+                variable=self.hotkey_play,
+                state=tk.NORMAL if self.hotkey_code else tk.DISABLED
+            )
 
-                self.hotkey_play_btn.grid(columnspan=4, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=row.get())
+            self.hotkey_play_btn.grid(columnspan=4, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=next(row))
 
         # Options to select the Update Path and Disable Automatic Checks For Updates whilst in-game
         ttk.Separator(config_frame, orient=tk.HORIZONTAL).grid(
-            columnspan=4, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=row.get()
+            columnspan=4, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=next(row)
         )
 
-        with row as curr_row:
-            nb.Label(config_frame, text=tr.tl('Update Track')).grid(  # LANG: Select the Update Track (Beta, Stable)
-                padx=self.PADX, pady=self.PADY, sticky=tk.W, row=curr_row
-            )
-            self.curr_update_track = "Beta" if config.get_bool('beta_optin') else "Stable"
-            self.update_paths = tk.StringVar(value=self.curr_update_track)
+        curr_row = next(row)
+        nb.Label(config_frame, text=tr.tl('Update Track')).grid(  # LANG: Select the Update Track (Beta, Stable)
+            padx=self.PADX, pady=self.PADY, sticky=tk.W, row=curr_row
+        )
+        self.curr_update_track = "Beta" if config.get_bool('beta_optin') else "Stable"
+        self.update_paths = tk.StringVar(value=self.curr_update_track)
 
-            update_paths = [
-                tr.tl("Stable"),  # LANG: Stable Version of EDMC
-                tr.tl("Beta")  # LANG: Beta Version of EDMC
-            ]
-            self.update_track = nb.OptionMenu(
-                config_frame, self.update_paths, self.update_paths.get(), *update_paths
-            )
+        update_paths = [
+            tr.tl("Stable"),  # LANG: Stable Version of EDMC
+            tr.tl("Beta")  # LANG: Beta Version of EDMC
+        ]
+        self.update_track = nb.OptionMenu(
+            config_frame, self.update_paths, self.update_paths.get(), *update_paths
+        )
 
-            self.update_track.configure(width=15)
-            self.update_track.grid(column=1, pady=self.BOXY, padx=self.PADX, sticky=tk.W, row=curr_row)
+        self.update_track.configure(width=15)
+        self.update_track.grid(column=1, pady=self.BOXY, padx=self.PADX, sticky=tk.W, row=curr_row)
 
         self.disable_autoappupdatecheckingame = tk.IntVar(value=config.get_int('disable_autoappupdatecheckingame'))
         self.disable_autoappupdatecheckingame_btn = nb.Checkbutton(
@@ -591,126 +550,126 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
         )
 
         self.disable_autoappupdatecheckingame_btn.grid(
-            columnspan=4, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=row.get()
+            columnspan=4, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=next(row)
         )
 
         ttk.Separator(config_frame, orient=tk.HORIZONTAL).grid(
-            columnspan=4, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=row.get()
+            columnspan=4, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=next(row)
         )
 
         # Settings prompt for preferred ship loadout, system and station info websites
         # LANG: Label for preferred shipyard, system and station 'providers'
         nb.Label(config_frame, text=tr.tl('Preferred websites')).grid(
-            columnspan=4, padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get()
+            columnspan=4, padx=self.PADX, pady=self.PADY, sticky=tk.W, row=next(row)
         )
 
-        with row as cur_row:
-            shipyard_provider = config.get_str('shipyard_provider')
-            self.shipyard_provider = tk.StringVar(
-                value=str(shipyard_provider if shipyard_provider in plug.provides('shipyard_url') else 'EDSY')
-            )
-            # Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis
-            # LANG: Label for Shipyard provider selection
-            nb.Label(config_frame, text=tr.tl('Shipyard')).grid(
-                padx=self.PADX, pady=self.PADY, sticky=tk.W, row=cur_row
-            )
-            self.shipyard_button = nb.OptionMenu(
-                config_frame, self.shipyard_provider, self.shipyard_provider.get(), *plug.provides('shipyard_url')
-            )
+        cur_row = next(row)
+        shipyard_provider = config.get_str('shipyard_provider')
+        self.shipyard_provider = tk.StringVar(
+            value=str(shipyard_provider if shipyard_provider in plug.provides('shipyard_url') else 'EDSY')
+        )
+        # Setting to decide which ship outfitting website to link to - either E:D Shipyard or Coriolis
+        # LANG: Label for Shipyard provider selection
+        nb.Label(config_frame, text=tr.tl('Shipyard')).grid(
+            padx=self.PADX, pady=self.PADY, sticky=tk.W, row=cur_row
+        )
+        self.shipyard_button = nb.OptionMenu(
+            config_frame, self.shipyard_provider, self.shipyard_provider.get(), *plug.provides('shipyard_url')
+        )
 
-            self.shipyard_button.configure(width=15)
-            self.shipyard_button.grid(column=1, pady=self.BOXY, sticky=tk.W, row=cur_row)
-            # Option for alternate URL opening
-            self.alt_shipyard_open = tk.IntVar(value=config.get_int('use_alt_shipyard_open'))
-            self.alt_shipyard_open_btn = nb.Checkbutton(
-                config_frame,
-                # LANG: Label for checkbox to utilise alternative Coriolis URL method
-                text=tr.tl('Use alternate URL method'),
-                variable=self.alt_shipyard_open,
-                command=self.alt_shipyard_open_changed,
-            )
+        self.shipyard_button.configure(width=15)
+        self.shipyard_button.grid(column=1, pady=self.BOXY, sticky=tk.W, row=cur_row)
+        # Option for alternate URL opening
+        self.alt_shipyard_open = tk.IntVar(value=config.get_int('use_alt_shipyard_open'))
+        self.alt_shipyard_open_btn = nb.Checkbutton(
+            config_frame,
+            # LANG: Label for checkbox to utilise alternative Coriolis URL method
+            text=tr.tl('Use alternate URL method'),
+            variable=self.alt_shipyard_open,
+            command=self.alt_shipyard_open_changed,
+        )
 
-            self.alt_shipyard_open_btn.grid(column=2, padx=self.PADX, pady=self.PADY, sticky=tk.W, row=cur_row)
+        self.alt_shipyard_open_btn.grid(column=2, padx=self.PADX, pady=self.PADY, sticky=tk.W, row=cur_row)
 
-        with row as cur_row:
-            system_provider = config.get_str('system_provider')
-            self.system_provider = tk.StringVar(
-                value=str(system_provider if system_provider in plug.provides('system_url') else 'EDSM')
-            )
+        cur_row = next(row)
+        system_provider = config.get_str('system_provider')
+        self.system_provider = tk.StringVar(
+            value=str(system_provider if system_provider in plug.provides('system_url') else 'EDSM')
+        )
 
-            # LANG: Configuration - Label for selection of 'System' provider website
-            nb.Label(config_frame, text=tr.tl('System')).grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=cur_row)
-            self.system_button = nb.OptionMenu(
-                config_frame,
-                self.system_provider,
-                self.system_provider.get(),
-                *plug.provides('system_url')
-            )
+        # LANG: Configuration - Label for selection of 'System' provider website
+        nb.Label(config_frame, text=tr.tl('System')).grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=cur_row)
+        self.system_button = nb.OptionMenu(
+            config_frame,
+            self.system_provider,
+            self.system_provider.get(),
+            *plug.provides('system_url')
+        )
 
-            self.system_button.configure(width=15)
-            self.system_button.grid(column=1, pady=self.BOXY, sticky=tk.W, row=cur_row)
+        self.system_button.configure(width=15)
+        self.system_button.grid(column=1, pady=self.BOXY, sticky=tk.W, row=cur_row)
 
-        with row as cur_row:
-            station_provider = config.get_str('station_provider')
-            self.station_provider = tk.StringVar(
-                value=str(station_provider if station_provider in plug.provides('station_url') else 'EDSM')
-            )
+        cur_row = next(row)
+        station_provider = config.get_str('station_provider')
+        self.station_provider = tk.StringVar(
+            value=str(station_provider if station_provider in plug.provides('station_url') else 'EDSM')
+        )
 
-            # LANG: Configuration - Label for selection of 'Station' provider website
-            nb.Label(config_frame, text=tr.tl('Station')).grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=cur_row)
-            self.station_button = nb.OptionMenu(
-                config_frame,
-                self.station_provider,
-                self.station_provider.get(),
-                *plug.provides('station_url')
-            )
+        # LANG: Configuration - Label for selection of 'Station' provider website
+        nb.Label(config_frame, text=tr.tl('Station')).grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=cur_row)
+        self.station_button = nb.OptionMenu(
+            config_frame,
+            self.station_provider,
+            self.station_provider.get(),
+            *plug.provides('station_url')
+        )
 
-            self.station_button.configure(width=15)
-            self.station_button.grid(column=1, pady=self.BOXY, sticky=tk.W, row=cur_row)
+        self.station_button.configure(width=15)
+        self.station_button.grid(column=1, pady=self.BOXY, sticky=tk.W, row=cur_row)
 
         # Set loglevel
         ttk.Separator(config_frame, orient=tk.HORIZONTAL).grid(
-            columnspan=4, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=row.get()
+            columnspan=4, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=next(row)
         )
 
-        with row as cur_row:
-            # Set the current loglevel
-            nb.Label(
-                config_frame,
-                # LANG: Configuration - Label for selection of Log Level
-                text=tr.tl('Log Level')
-            ).grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=cur_row)
+        cur_row = next(row)
+        # Set the current loglevel
+        nb.Label(
+            config_frame,
+            # LANG: Configuration - Label for selection of Log Level
+            text=tr.tl('Log Level')
+        ).grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=cur_row)
 
-            current_loglevel = config.get_str('loglevel')
-            if not current_loglevel:
-                current_loglevel = logging.getLevelName(logging.INFO)
+        current_loglevel = config.get_str('loglevel')
+        if not current_loglevel:
+            current_loglevel = logging.getLevelName(logging.INFO)
 
-            self.select_loglevel = tk.StringVar(value=str(current_loglevel))
-            loglevels = list(
-                map(logging.getLevelName, (
-                    logging.CRITICAL, logging.ERROR, logging.WARNING, logging.INFO, logging.DEBUG
-                ))
-            )
+        self.select_loglevel = tk.StringVar(value=str(current_loglevel))
+        loglevels = list(
+            map(logging.getLevelName, (
+                logging.CRITICAL, logging.ERROR, logging.WARNING, logging.INFO, logging.DEBUG
+            ))
+        )
 
-            self.loglevel_dropdown = nb.OptionMenu(
-                config_frame,
-                self.select_loglevel,
-                self.select_loglevel.get(),
-                *loglevels
-            )
+        self.loglevel_dropdown = nb.OptionMenu(
+            config_frame,
+            self.select_loglevel,
+            self.select_loglevel.get(),
+            *loglevels
+        )
 
-            self.loglevel_dropdown.configure(width=15)
-            self.loglevel_dropdown.grid(column=1, pady=self.BOXY, sticky=tk.W, row=cur_row)
+        self.loglevel_dropdown.configure(width=15)
+        self.loglevel_dropdown.grid(column=1, pady=self.BOXY, sticky=tk.W, row=cur_row)
 
-            ttk.Button(
-                config_frame,
-                # LANG: Label on button used to open a filesystem folder
-                text=tr.tl('Open Log Folder'),  # Button that opens a folder in Explorer/Finder
-                command=lambda: open_folder(self.logfile_loc)
-            ).grid(column=2, padx=self.PADX, pady=0, sticky=tk.NSEW, row=cur_row)
+        ttk.Button(
+            config_frame,
+            # LANG: Label on button used to open a filesystem folder
+            text=tr.tl('Open Log Folder'),  # Button that opens a folder in Explorer/Finder
+            command=lambda: open_folder(self.logfile_loc)
+        ).grid(column=2, padx=self.PADX, pady=0, sticky=tk.NSEW, row=cur_row)
 
         # Big spacer
-        nb.Label(config_frame).grid(sticky=tk.W, row=row.get())
+        nb.Label(config_frame).grid(sticky=tk.W, row=next(row))
 
         # LANG: Label for 'Configuration' tab in Settings
         notebook.add(config_frame, text=tr.tl('Configuration'))
@@ -719,23 +678,23 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
         privacy_frame = nb.Frame(notebook)
         self.hide_multicrew_captain = tk.BooleanVar(value=config.get_bool('hide_multicrew_captain', default=False))
         self.hide_private_group = tk.BooleanVar(value=config.get_bool('hide_private_group', default=False))
-        row = AutoInc(start=0)
+        row = count()
 
         # LANG: UI elements privacy section header in privacy tab of preferences
         nb.Label(privacy_frame, text=tr.tl('Main UI privacy options')).grid(
-            row=row.get(), column=0, sticky=tk.W, padx=self.PADX, pady=self.PADY
+            row=next(row), column=0, sticky=tk.W, padx=self.PADX, pady=self.PADY
         )
 
         nb.Checkbutton(
             # LANG: Hide private group owner name from UI checkbox
             privacy_frame, text=tr.tl('Hide private group name in UI'),
             variable=self.hide_private_group
-        ).grid(row=row.get(), column=0, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W)
+        ).grid(row=next(row), column=0, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W)
         nb.Checkbutton(
             # LANG: Hide multicrew captain name from main UI checkbox
             privacy_frame, text=tr.tl('Hide multi-crew captain name'),
             variable=self.hide_multicrew_captain
-        ).grid(row=row.get(), column=0, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W)
+        ).grid(row=next(row), column=0, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W)
 
         notebook.add(privacy_frame, text=tr.tl('Privacy'))  # LANG: Preferences privacy tab title
 
@@ -757,26 +716,26 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
             tr.tl('Highlighted text'),  # Dark theme color setting
         ]
 
-        row = AutoInc(start=0)
+        row = count()
 
         appearance_frame = nb.Frame(notebook)
         appearance_frame.columnconfigure(2, weight=1)
-        with row as cur_row:
-            # LANG: Appearance - Label for selection of application display language
-            nb.Label(appearance_frame, text=tr.tl('Language')).grid(
-                padx=self.PADX, pady=self.PADY, sticky=tk.W, row=cur_row
-            )
-            self.lang_button = nb.OptionMenu(appearance_frame, self.lang, self.lang.get(), *self.languages.values())
-            self.lang_button.grid(column=1, columnspan=2, padx=0, pady=self.BOXY, sticky=tk.W, row=cur_row)
+        cur_row = next(row)
+        # LANG: Appearance - Label for selection of application display language
+        nb.Label(appearance_frame, text=tr.tl('Language')).grid(
+            padx=self.PADX, pady=self.PADY, sticky=tk.W, row=cur_row
+        )
+        self.lang_button = nb.OptionMenu(appearance_frame, self.lang, self.lang.get(), *self.languages.values())
+        self.lang_button.grid(column=1, columnspan=2, padx=0, pady=self.BOXY, sticky=tk.W, row=cur_row)
 
         ttk.Separator(appearance_frame, orient=tk.HORIZONTAL).grid(
-            columnspan=4, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=row.get()
+            columnspan=4, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=next(row)
         )
 
         # Appearance setting
         # LANG: Label for Settings > Appearance > Theme selection
         nb.Label(appearance_frame, text=tr.tl('Theme')).grid(
-            columnspan=3, padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get()
+            columnspan=3, padx=self.PADX, pady=self.PADY, sticky=tk.W, row=next(row)
         )
 
         # Appearance theme and language setting
@@ -784,14 +743,14 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
             # LANG: Label for 'Default' theme radio button
             appearance_frame, text=tr.tl('Default'), variable=self.theme,
             value=theme.THEME_DEFAULT, command=self.themevarchanged
-        ).grid(columnspan=3, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=row.get())
+        ).grid(columnspan=3, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=next(row))
 
         # Appearance theme setting
         nb.Radiobutton(
             # LANG: Label for 'Dark' theme radio button
             appearance_frame, text=tr.tl('Dark'), variable=self.theme,
             value=theme.THEME_DARK, command=self.themevarchanged
-        ).grid(columnspan=3, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=row.get())
+        ).grid(columnspan=3, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=next(row))
 
         if sys.platform == 'win32':
             nb.Radiobutton(
@@ -801,34 +760,34 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
                 variable=self.theme,
                 value=theme.THEME_TRANSPARENT,
                 command=self.themevarchanged
-            ).grid(columnspan=3, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=row.get())
+            ).grid(columnspan=3, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=next(row))
 
-        with row as cur_row:
-            self.theme_label_0 = nb.Label(appearance_frame, text=self.theme_prompts[0])
-            self.theme_label_0.grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=cur_row)
+        cur_row = next(row)
+        self.theme_label_0 = nb.Label(appearance_frame, text=self.theme_prompts[0])
+        self.theme_label_0.grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=cur_row)
 
-            # Main window
-            self.theme_button_0 = tk.Button(
-                appearance_frame,
-                # LANG: Appearance - Example 'Normal' text
-                text=tr.tl('Station'),
-                background='grey4',
-                command=lambda: self.themecolorbrowse(0)
-            )
+        # Main window
+        self.theme_button_0 = tk.Button(
+            appearance_frame,
+            # LANG: Appearance - Example 'Normal' text
+            text=tr.tl('Station'),
+            background='grey4',
+            command=lambda: self.themecolorbrowse(0)
+        )
 
-            self.theme_button_0.grid(column=1, padx=0, pady=self.BOXY, sticky=tk.NSEW, row=cur_row)
+        self.theme_button_0.grid(column=1, padx=0, pady=self.BOXY, sticky=tk.NSEW, row=cur_row)
 
-        with row as cur_row:
-            self.theme_label_1 = nb.Label(appearance_frame, text=self.theme_prompts[1])
-            self.theme_label_1.grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=cur_row)
-            self.theme_button_1 = tk.Button(
-                appearance_frame,
-                text='  Hutton Orbital  ',  # Do not translate
-                background='grey4',
-                command=lambda: self.themecolorbrowse(1)
-            )
+        cur_row = next(row)
+        self.theme_label_1 = nb.Label(appearance_frame, text=self.theme_prompts[1])
+        self.theme_label_1.grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=cur_row)
+        self.theme_button_1 = tk.Button(
+            appearance_frame,
+            text='  Hutton Orbital  ',  # Do not translate
+            background='grey4',
+            command=lambda: self.themecolorbrowse(1)
+        )
 
-            self.theme_button_1.grid(column=1, padx=0, pady=self.BOXY, sticky=tk.NSEW, row=cur_row)
+        self.theme_button_1.grid(column=1, padx=0, pady=self.BOXY, sticky=tk.NSEW, row=cur_row)
 
         # UI Scaling
         """
@@ -839,79 +798,79 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
         of 200 we'll end up setting 2.66 as the tk-scaling value.
         """
         ttk.Separator(appearance_frame, orient=tk.HORIZONTAL).grid(
-            columnspan=4, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=row.get()
+            columnspan=4, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=next(row)
         )
-        with row as cur_row:
-            # LANG: Appearance - Label for selection of UI scaling
-            nb.Label(appearance_frame, text=tr.tl('UI Scale Percentage')).grid(
-                padx=self.PADX, pady=self.PADY, sticky=tk.W, row=cur_row
-            )
+        cur_row = next(row)
+        # LANG: Appearance - Label for selection of UI scaling
+        nb.Label(appearance_frame, text=tr.tl('UI Scale Percentage')).grid(
+            padx=self.PADX, pady=self.PADY, sticky=tk.W, row=cur_row
+        )
 
-            self.ui_scale = tk.IntVar()
-            self.ui_scale.set(config.get_int('ui_scale'))
-            self.uiscale_bar = tk.Scale(
-                appearance_frame,
-                variable=self.ui_scale,  # type: ignore # TODO: intvar, but annotated as DoubleVar
-                orient=tk.HORIZONTAL,
-                length=300 * (float(theme.startup_ui_scale) / 100.0 * theme.default_ui_scale),  # type: ignore # runtime
-                from_=0,
-                to=400,
-                tickinterval=50,
-                resolution=10,
-            )
+        self.ui_scale = tk.IntVar()
+        self.ui_scale.set(config.get_int('ui_scale'))
+        self.uiscale_bar = tk.Scale(
+            appearance_frame,
+            variable=self.ui_scale,  # type: ignore # TODO: intvar, but annotated as DoubleVar
+            orient=tk.HORIZONTAL,
+            length=300 * (float(theme.startup_ui_scale) / 100.0 * theme.default_ui_scale),  # type: ignore # runtime
+            from_=0,
+            to=400,
+            tickinterval=50,
+            resolution=10,
+        )
 
-            self.uiscale_bar.grid(column=1, padx=0, pady=self.BOXY, sticky=tk.W, row=cur_row)
-            self.ui_scaling_defaultis = nb.Label(
-                appearance_frame,
-                # LANG: Appearance - Help/hint text for UI scaling selection
-                text=tr.tl('100 means Default{CR}Restart Required for{CR}changes to take effect!')
-            )  # E1111
-            self.ui_scaling_defaultis.grid(column=3, padx=self.PADX, pady=self.PADY, sticky=tk.E, row=cur_row)
+        self.uiscale_bar.grid(column=1, padx=0, pady=self.BOXY, sticky=tk.W, row=cur_row)
+        self.ui_scaling_defaultis = nb.Label(
+            appearance_frame,
+            # LANG: Appearance - Help/hint text for UI scaling selection
+            text=tr.tl('100 means Default{CR}Restart Required for{CR}changes to take effect!')
+        )  # E1111
+        self.ui_scaling_defaultis.grid(column=3, padx=self.PADX, pady=self.PADY, sticky=tk.E, row=cur_row)
 
         # Transparency slider
         ttk.Separator(appearance_frame, orient=tk.HORIZONTAL).grid(
-            columnspan=4, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=row.get()
+            columnspan=4, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=next(row)
         )
 
-        with row as cur_row:
-            # LANG: Appearance - Label for selection of main window transparency
-            nb.Label(appearance_frame, text=tr.tl("Main window transparency")).grid(
-                padx=self.PADX, pady=self.PADY, sticky=tk.W, row=cur_row
-            )
-            self.transparency = tk.IntVar()
-            self.transparency.set(config.get_int('ui_transparency') or 100)  # Default to 100 for users
-            self.transparency_bar = tk.Scale(
-                appearance_frame,
-                variable=self.transparency,  # type: ignore # Its accepted as an intvar
-                orient=tk.HORIZONTAL,
-                length=300 * (float(theme.startup_ui_scale) / 100.0 * theme.default_ui_scale),  # type: ignore # runtime
-                from_=100,
-                to=5,
-                tickinterval=10,
-                resolution=5,
-                command=lambda _: self.parent.wm_attributes("-alpha", self.transparency.get() / 100)
-            )
+        cur_row = next(row)
+        # LANG: Appearance - Label for selection of main window transparency
+        nb.Label(appearance_frame, text=tr.tl("Main window transparency")).grid(
+            padx=self.PADX, pady=self.PADY, sticky=tk.W, row=cur_row
+        )
+        self.transparency = tk.IntVar()
+        self.transparency.set(config.get_int('ui_transparency') or 100)  # Default to 100 for users
+        self.transparency_bar = tk.Scale(
+            appearance_frame,
+            variable=self.transparency,  # type: ignore # Its accepted as an intvar
+            orient=tk.HORIZONTAL,
+            length=300 * (float(theme.startup_ui_scale) / 100.0 * theme.default_ui_scale),  # type: ignore # runtime
+            from_=100,
+            to=5,
+            tickinterval=10,
+            resolution=5,
+            command=lambda _: self.parent.wm_attributes("-alpha", self.transparency.get() / 100)
+        )
 
-            nb.Label(
-                appearance_frame,
-                # LANG: Appearance - Help/hint text for Main window transparency selection
-                text=tr.tl(
-                    "100 means fully opaque.{CR}"
-                    "Window is updated in real time"
-                ).format(CR='\n')
-            ).grid(
-                column=3,
-                padx=self.PADX,
-                pady=self.PADY,
-                sticky=tk.E,
-                row=cur_row
-            )
+        nb.Label(
+            appearance_frame,
+            # LANG: Appearance - Help/hint text for Main window transparency selection
+            text=tr.tl(
+                "100 means fully opaque.{CR}"
+                "Window is updated in real time"
+            ).format(CR='\n')
+        ).grid(
+            column=3,
+            padx=self.PADX,
+            pady=self.PADY,
+            sticky=tk.E,
+            row=cur_row
+        )
 
-            self.transparency_bar.grid(column=1, padx=0, pady=self.BOXY, sticky=tk.W, row=cur_row)
+        self.transparency_bar.grid(column=1, padx=0, pady=self.BOXY, sticky=tk.W, row=cur_row)
 
         # Always on top
         ttk.Separator(appearance_frame, orient=tk.HORIZONTAL).grid(
-            columnspan=4, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=row.get()
+            columnspan=4, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=next(row)
         )
 
         self.ontop_button = nb.Checkbutton(
@@ -922,7 +881,7 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
             command=self.themevarchanged
         )
         self.ontop_button.grid(
-            columnspan=3, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=row.get()
+            columnspan=3, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=next(row)
         )  # Appearance setting
 
         if sys.platform == 'win32' and not config.get_bool('no_systray'):
@@ -932,7 +891,7 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
                 text=tr.tl('Minimize to system tray'),
                 variable=self.minimize_system_tray,
                 command=self.themevarchanged
-            ).grid(columnspan=3, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=row.get())  # Appearance setting
+            ).grid(columnspan=3, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=next(row))  # Appearance setting
 
         if sys.platform == 'win32':
             nb.Checkbutton(
@@ -941,7 +900,7 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
                 text=tr.tl('Disable Systray'),
                 variable=self.disable_system_tray,
                 command=self.themevarchanged,
-            ).grid(columnspan=3, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=row.get())  # Appearance setting
+            ).grid(columnspan=3, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=next(row))  # Appearance setting
 
         nb.Label(appearance_frame).grid(sticky=tk.W)  # big spacer
 
@@ -952,66 +911,66 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
         # Plugin settings and info
         plugins_frame = nb.Frame(notebook)
         plugins_frame.columnconfigure(0, weight=1)
-        row = AutoInc(start=0)
+        row = count()
         self.plugdir = tk.StringVar()
         self.plugdir.set(str(config.get_str('plugin_dir')))
         # LANG: Label for location of third-party plugins folder
         self.plugdir_label = nb.Label(plugins_frame, text=tr.tl('Plugins folder') + ':')
-        self.plugdir_label.grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get())
+        self.plugdir_label.grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=next(row))
         self.plugdir_entry = ttk.Entry(plugins_frame, takefocus=False,
                                        textvariable=self.plugdir)  # Link StringVar to Entry widget
-        self.plugdir_entry.grid(columnspan=4, padx=self.PADX, pady=self.BOXY, sticky=tk.EW, row=row.get())
-        with row as cur_row:
-            nb.Label(
-                plugins_frame,
-                # Help text in settings
-                # LANG: Tip/label about how to disable plugins
-                text=tr.tl(
-                    "Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name").format(EXT='.disabled')
-            ).grid(columnspan=1, padx=self.PADX, pady=self.PADY, sticky=tk.EW, row=cur_row)
+        self.plugdir_entry.grid(columnspan=4, padx=self.PADX, pady=self.BOXY, sticky=tk.EW, row=next(row))
+        cur_row = next(row)
+        nb.Label(
+            plugins_frame,
+            # Help text in settings
+            # LANG: Tip/label about how to disable plugins
+            text=tr.tl(
+                "Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name").format(EXT='.disabled')
+        ).grid(columnspan=1, padx=self.PADX, pady=self.PADY, sticky=tk.EW, row=cur_row)
 
-            # Open Plugin Folder Button
-            self.open_plug_folder_btn = ttk.Button(
-                plugins_frame,
-                # LANG: Label on button used to open the Plugin Folder
-                text=tr.tl('Open Plugins Folder'),
-                command=lambda: open_folder(config.plugin_dir_path)
-            )
-            self.open_plug_folder_btn.grid(column=1, padx=self.PADX, pady=self.PADY, sticky=tk.EW, row=cur_row)
+        # Open Plugin Folder Button
+        self.open_plug_folder_btn = ttk.Button(
+            plugins_frame,
+            # LANG: Label on button used to open the Plugin Folder
+            text=tr.tl('Open Plugins Folder'),
+            command=lambda: open_folder(config.plugin_dir_path)
+        )
+        self.open_plug_folder_btn.grid(column=1, padx=self.PADX, pady=self.PADY, sticky=tk.EW, row=cur_row)
 
-            # Browse Button
-            text = tr.tl('Browse...')  # LANG: NOT-macOS Settings - files location selection button
-            self.plugbutton = ttk.Button(
-                plugins_frame,
-                text=text,
-                # LANG: Selecting the Location of the Plugin Directory on the Filesystem
-                command=lambda: self.filebrowse(tr.tl('Plugin Directory Location'), self.plugdir)
-            )
-            self.plugbutton.grid(column=2, padx=self.PADX, pady=self.PADY, sticky=tk.EW, row=cur_row)
+        # Browse Button
+        text = tr.tl('Browse...')  # LANG: NOT-macOS Settings - files location selection button
+        self.plugbutton = ttk.Button(
+            plugins_frame,
+            text=text,
+            # LANG: Selecting the Location of the Plugin Directory on the Filesystem
+            command=lambda: self.filebrowse(tr.tl('Plugin Directory Location'), self.plugdir)
+        )
+        self.plugbutton.grid(column=2, padx=self.PADX, pady=self.PADY, sticky=tk.EW, row=cur_row)
 
-            if config.default_journal_dir_path:
-                # Appearance theme and language setting
-                ttk.Button(
-                    plugins_frame,
-                    # LANG: Settings > Configuration - Label on 'reset journal files location to default' button
-                    text=tr.tl('Default'),
-                    command=self.plugdir_reset,
-                    state=tk.NORMAL if config.get_str('plugin_dir') else tk.DISABLED
-                ).grid(column=3, padx=self.PADX, pady=self.PADY, sticky=tk.EW, row=cur_row)
+        if config.default_journal_dir_path:
+            # Appearance theme and language setting
+            ttk.Button(
+                plugins_frame,
+                # LANG: Settings > Configuration - Label on 'reset journal files location to default' button
+                text=tr.tl('Default'),
+                command=self.plugdir_reset,
+                state=tk.NORMAL if config.get_str('plugin_dir') else tk.DISABLED
+            ).grid(column=3, padx=self.PADX, pady=self.PADY, sticky=tk.EW, row=cur_row)
 
         enabled_plugins = list(filter(lambda x: x.folder and x.module, plug.PLUGINS))
         if enabled_plugins:
             ttk.Separator(plugins_frame, orient=tk.HORIZONTAL).grid(
-                columnspan=4, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=row.get()
+                columnspan=4, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=next(row)
             )
             nb.Label(
                 plugins_frame,
                 # LANG: Label on list of enabled plugins
                 text=tr.tl('Enabled Plugins')+':'  # List of plugins in settings
-            ).grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get())
+            ).grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=next(row))
 
             for plugin in enabled_plugins:
-                curr_row = row.get()
+                curr_row = next(row)
                 plugin_name = plugin.name if plugin.name == plugin.folder else f'{plugin.folder} ({plugin.name})'
                 plugver = plugin.get_version()
                 if plugver:
@@ -1032,11 +991,11 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
         ############################################################
         if plug.PLUGINS_not_py3:
             ttk.Separator(plugins_frame, orient=tk.HORIZONTAL).grid(
-                columnspan=3, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=row.get()
+                columnspan=3, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=next(row)
             )
             # LANG: Plugins - Label for list of 'enabled' plugins that don't work with Python 3.x
             nb.Label(plugins_frame, text=tr.tl('Plugins Without Python 3.x Support')+':').grid(
-                padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get()
+                padx=self.PADX, pady=self.PADY, sticky=tk.W, row=next(row)
             )
 
             HyperlinkLabel(
@@ -1045,12 +1004,12 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
                 background=nb.Label().cget('background'),
                 url='https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#migration-from-python-27',
                 underline=True
-            ).grid(columnspan=2, padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get())
+            ).grid(columnspan=2, padx=self.PADX, pady=self.PADY, sticky=tk.W, row=next(row))
 
             for plugin in plug.PLUGINS_not_py3:
                 if plugin.folder:  # 'system' ones have this set to None to suppress listing in Plugins prefs tab
                     nb.Label(plugins_frame, text=plugin.name).grid(
-                        columnspan=2, padx=self.LISTX, pady=self.PADY, sticky=tk.W, row=row.get()
+                        columnspan=2, padx=self.LISTX, pady=self.PADY, sticky=tk.W, row=next(row)
                     )
         ############################################################
         # Show disabled plugins
@@ -1058,16 +1017,16 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
         disabled_plugins = list(filter(lambda x: x.folder and not x.module, plug.PLUGINS))
         if disabled_plugins:
             ttk.Separator(plugins_frame, orient=tk.HORIZONTAL).grid(
-                columnspan=3, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=row.get()
+                columnspan=3, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=next(row)
             )
             nb.Label(
                 plugins_frame,
                 # LANG: Label on list of user-disabled plugins
                 text=tr.tl('Disabled Plugins')+':'  # List of plugins in settings
-            ).grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get())
+            ).grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=next(row))
 
             for plugin in disabled_plugins:
-                curr_row = row.get()
+                curr_row = next(row)
                 nb.Label(plugins_frame, text=plugin.name).grid(
                     column=0, columnspan=2, padx=self.LISTX, pady=self.PADY, sticky=tk.W, row=curr_row
                 )
@@ -1084,17 +1043,17 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
         ############################################################
         if plug.PLUGINS_broken:
             ttk.Separator(plugins_frame, orient=tk.HORIZONTAL).grid(
-                columnspan=3, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=row.get()
+                columnspan=3, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=next(row)
             )
             # LANG: Plugins - Label for list of 'broken' plugins that failed to load
             nb.Label(plugins_frame, text=tr.tl('Broken Plugins')+':').grid(
-                padx=self.PADX, pady=self.PADY, sticky=tk.W, row=row.get()
+                padx=self.PADX, pady=self.PADY, sticky=tk.W, row=next(row)
             )
 
             for plugin in plug.PLUGINS_broken:
                 if plugin.folder:  # 'system' ones have this set to None to suppress listing in Plugins prefs tab
                     nb.Label(plugins_frame, text=plugin.name).grid(
-                        columnspan=2, padx=self.LISTX, pady=self.PADY, sticky=tk.W, row=row.get()
+                        columnspan=2, padx=self.LISTX, pady=self.PADY, sticky=tk.W, row=next(row)
                     )
 
         # LANG: Label on Settings > Plugins tab

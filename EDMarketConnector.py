@@ -1244,7 +1244,7 @@ class AppWindow:
                 logger.error(msg)
                 raise ValueError(msg)
 
-            if capi_response.capi_data.source_endpoint == companion.session.FRONTIER_CAPI_PATH_FLEETCARRIER:
+            if capi_response.capi_data.source_endpoint == companion.CAPIEndpoint.FLEETCARRIER:
                 # Fleetcarrier CAPI response
                 # Validation
                 if 'name' not in capi_response.capi_data:
