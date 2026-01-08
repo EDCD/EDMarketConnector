@@ -748,7 +748,25 @@ class Session:
                 # May also fail here if token expired since response is empty
                 # r.status_code = 401
                 # raise requests.HTTPError
-                capi_json = r.json()
+                if not r.content or not r.content.strip():
+                    logger.error(
+                        "CAPI returned empty response body\n"
+                        "Endpoint: %s\nStatus: %s\nHeaders: %s",
+                        capi_endpoint, r.status_code, r.headers
+                    )
+                    raise ServerError("Frontier CAPI returned empty response body")
+
+                try:
+                    capi_json = r.json()
+                except ValueError as e:
+                    body = r.content.decode(encoding="utf-8", errors="replace")
+                    logger.error(
+                        "CAPI returned non-JSON response\n"
+                        "Endpoint: %s\nStatus: %s\nHeaders: %s\nBody:\n%s",
+                        capi_endpoint, r.status_code, r.headers, body
+                    )
+                    raise ServerError("Frontier CAPI returned invalid JSON") from e
+
                 capi_data = CAPIData(capi_json, capi_host, capi_endpoint, monitor.cmdr)
                 self.capi_raw_data.record_endpoint(
                     capi_endpoint, r.content.decode(encoding='utf-8'),
