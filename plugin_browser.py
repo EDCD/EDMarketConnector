@@ -56,7 +56,7 @@ def open_plugin_main(plugin) -> None:
 def report_plugin(plugin) -> None:
     """Open the Webbrowser to the new plugin issue report."""
     webbrowser.open(
-        f"https://github.com/EDCD/EDMC_Plugin_Registry/issues/new?"
+        f"https://github.com/EDCD/EDMC-Plugin-Registry/issues/new?"
         f"template=report_plugin.md&title=Plugin Report: "
         f"{plugin.get('pluginName')} ({plugin.get('pluginHash')[:8]})"
     )
@@ -117,7 +117,7 @@ class PluginBrowserMixIn:
             plugins_frame,
             text="EDMC Plugin Browser",
             background=nb.Label().cget("background"),
-            url="https://github.com/EDCD/EDMC_Plugin_Registry",
+            url="https://github.com/EDCD/EDMC-Plugin-Registry",
             underline=True,
         ).grid(row=next(row), padx=self.PADX, pady=(self.PADY, 1), sticky=tk.W)
 
