@@ -175,7 +175,7 @@ def check_for_datafile_updates(silent: bool = False, local: bool = False) -> Non
         'modules.json': 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/refs/heads/releases/modules.json',
         'ships.json': 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/refs/heads/releases/ships.json',
         'master_plugin_list.json': 'https://raw.githubusercontent.com/EDCD/'
-                                   'EDMC_Plugin_Registry/refs/heads/master/master_plugin_list.json'
+                                   'EDMC-Plugin-Registry/refs/heads/main/master_plugin_list.json'
     }
     if not silent:
         logger.info(f"Checking for {'local ' if local else ''}datafile file updates...")
