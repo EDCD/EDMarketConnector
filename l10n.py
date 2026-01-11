@@ -83,7 +83,7 @@ class Translations:
 
         :param lang: The language to translate to, defaults to the preferred language
         """
-        available = self.available()
+        available: set[str] = self.available()
         available.add(Translations.FALLBACK)
         if not lang:
             # Choose the default language
@@ -331,33 +331,3 @@ class _Locale:
 # singletons
 Locale = _Locale()
 translations = Translations()
-
-# generate template strings file - like xgettext
-# parsing is limited - only single ' or " delimited strings, and only one string per line
-if __name__ == "__main__":
-    regexp = re.compile(r'''_\([ur]?(['"])(((?<!\\)\\\1|.)+?)\1\)[^#]*(#.+)?''')  # match a single line python literal
-    seen: dict[str, str] = {}
-    plugin_dir = pathlib.Path('plugins')
-    for f in (
-        sorted(x for x in listdir('.') if x.endswith('.py')) +
-        sorted(plugin_dir.glob('*.py')) if plugin_dir.is_dir() else []
-    ):
-        with open(f, encoding='utf-8') as h:
-            lineno = 0
-            for line in h:
-                lineno += 1
-                match = regexp.search(line)
-                if match and not seen.get(match.group(2)):  # only record first commented instance of a string
-                    seen[match.group(2)] = (
-                            (match.group(4) and (match.group(4)[1:].strip()) + '. ' or '') + f'[{pathlib.Path(f).name}]'
-                    )
-    if seen:
-        target_path = LOCALISATION_DIR / 'en.template.new'
-        target_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(target_path, 'w', encoding='utf-8') as target_file:
-            target_file.write(f'/* Language name */\n"{LANGUAGE_ID}" = "English";\n\n')
-            for thing in sorted(seen, key=str.lower):
-                if seen[thing]:
-                    target_file.write(f'/* {seen[thing]} */\n')
-
-                target_file.write(f'"{thing}" = "{thing}";\n\n')
