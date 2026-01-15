@@ -430,7 +430,7 @@ class _Theme:
         # Switch menus
         for pair, gridopts in self.widgets_pair:
             for widget in pair:
-                if isinstance(widget, tk.Widget) and not widget.winfo_exists():
+                if isinstance(widget, tk.Widget):
                     widget.grid_remove()
 
             if isinstance(pair[0], tk.Menu):
