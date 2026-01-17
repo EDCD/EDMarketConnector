@@ -60,7 +60,7 @@ COMMENT_OWN_LINE_RE is for a comment on its own line.
 The difference is necessary in order to tell if a 'above' LANG comment is for
 its own line (SAME_LINE), or meant to be for this following line (OWN_LINE).
 """
-COMMENT_SAME_LINE_RE = re.compile(r"^.*?(#.*)$")
+COMMENT_SAME_LINE_RE = re.compile(r"^.*(#.*)$")
 COMMENT_OWN_LINE_RE = re.compile(r"^\s*?(#.*)$")
 
 
@@ -245,6 +245,8 @@ def generate_lang_template(data: dict[pathlib.Path, list[ast.Call]]) -> str:
     entries: list[LangEntry] = []
     for path, calls in data.items():
         for c in calls:
+            if getattr(c, "comment") == "Ignore":
+                continue
             entries.append(
                 LangEntry(
                     [FileLocation.from_call(path, c)],
@@ -259,7 +261,8 @@ def generate_lang_template(data: dict[pathlib.Path, list[ast.Call]]) -> str:
 
 """
     print(f"Done Deduping entries {len(entries)=}  {len(deduped)=}", file=sys.stderr)
-    for entry in deduped:
+
+    for entry in sorted(deduped, key=lambda e: e.string.lower()):
         if len(entry.comments) != len(entry.locations):
             raise ValueError("Mismatch: 'comments' and 'locations' must have the same length.")
 
