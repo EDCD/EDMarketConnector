@@ -1,12 +1,20 @@
+/* edsm.py:Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:316; */
+"Send flight log and CMDR status to EDSM" = "Send flight log and CMDR status to EDSM";
+
+/* prefs.py:Label on button used to open a filesystem folder; In files: prefs.py:706; */
+"Open Log Folder" = "Open Log Folder";
+
+/* inara.py:Text Inara Show API key; In files: inara.py:305; */
+"Show API Key" = "Show API Key";
 /* Language name */
 "!Language" = "Español";
 
 /* companion.py: Frontier CAPI didn't respond; In files: companion.py:226; */
 "Error: Frontier CAPI didn't respond" = "Error: El CAPI de Frontier no respondió";
 
-
 /* companion.py: Frontier CAPI data doesn't agree with latest Journal game location; In files: companion.py:245; */
-"Error: Frontier server is lagging" = "Error: El servidor de Frontier está retrasado";
+"Error: Frontier CAPI data out of sync" = "Error: Frontier CAPI data out of sync";
+
 /* companion.py: Commander is docked at an EDO settlement, got out and back in, we forgot the station; In files: companion.py:261; */
 "Docked but unknown station: EDO Settlement?" = "Atracado pero estación desconocida: ¿Asentamiento EDO?";
 
@@ -19,14 +27,20 @@
 /* companion.py: Generic error prefix - following text is from Frontier auth service; In files: companion.py:432; companion.py:517; */
 "Error" = "Error";
 
-/* companion.py: Frontier auth, no 'usr' section in returned data; companion.py: Frontier auth, no 'customer_id' in 'usr' section in returned data; In files: companion.py:475; companion.py:480; */
-"Error: Couldn't check token customer_id" = "Error: No se pudo comprobar el token customer_id";
-
 /* companion.py: Frontier auth customer_id doesn't match game session FID; In files: companion.py:486; */
 "Error: customer_id doesn't match!" = "Error: ¡customer_id no coincide!";
 
 /* companion.py: Failed to get Access Token from Frontier Auth service; In files: companion.py:508; */
 "Error: unable to get token" = "Error: no se pudo conseguir el token";
+
+/* EDMarketConnector.py: EDMC Critical Error Notification; */
+"EDMC encountered a critical error, and cannot recover. EDMC is shutting down for its own protection!" = "EDMC encountered a critical error, and cannot recover. EDMC is shutting down for its own protection!";
+
+/* EDMarketConnector.py: EDMC Critical Error Details; */
+"Here's what EDMC Detected:\r\n\r\n{ERR}\r\n\r\nDo you want to file a Bug Report on GitHub?" = "Here's what EDMC Detected:\r\n\r\n{ERR}\r\n\r\nDo you want to file a Bug Report on GitHub?";
+
+/* companion.py: Frontier CAPI returned 418, meaning down for maintenance; In files: companion.py:844; */
+"Frontier CAPI down for maintenance" = "Frontier CAPI down for maintenance";
 
 /* companion.py: Frontier CAPI data retrieval failed; In files: companion.py:856; */
 "Frontier CAPI query failure" = "Fallo de consulta del CAPI de Frontier";
@@ -61,6 +75,9 @@
 /* EDMarketConnector.py: Label for 'Station' line in main UI; prefs.py: Configuration - Label for selection of 'Station' provider website; prefs.py: Appearance - Example 'Normal' text; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:918; prefs.py:632; prefs.py:770; stats.py:408; */
 "Station" = "Estación";
 
+/* prefs.py: Appearance option for Windows "Disable Systray"; */
+"Disable Systray" = "Disable Systray";
+
 /* EDMarketConnector.py: 'File' menu title on OSX; EDMarketConnector.py: 'File' menu title; EDMarketConnector.py: 'File' menu; In files: EDMarketConnector.py:921; EDMarketConnector.py:939; EDMarketConnector.py:942; EDMarketConnector.py:2264; */
 "File" = "Archivo";
 
@@ -76,6 +93,9 @@
 /* EDMarketConnector.py: Help > Check for Updates...; In files: EDMarketConnector.py:930; EDMarketConnector.py:958; */
 "Check for Updates..." = "Buscar Actualizaciones...";
 
+/* EDMarketConnector.py: Help > Open System Profiler; In files: EDMarketConnector.py:888; */
+"Open System Profiler" = "Open System Profiler";
+
 /* EDMarketConnector.py: File > Save Raw Data...; In files: EDMarketConnector.py:931; EDMarketConnector.py:948; */
 "Save Raw Data..." = "Guardar Datos Sin Procesar...";
 
@@ -84,6 +104,12 @@
 
 /* EDMarketConnector.py: Help > Documentation; In files: EDMarketConnector.py:933; EDMarketConnector.py:953; */
 "Documentation" = "Documentación";
+
+/* EDMarketConnector.py: Help > Troubleshooting; In files: EDMarketConnector.py:934; EDMarketConnector.py:954; */
+"Troubleshooting" = "Troubleshooting";
+
+/* EDMarketConnector.py: Help > Report A Bug; In files: EDMarketConnector.py:935; EDMarketConnector.py:955; */
+"Report A Bug" = "Report A Bug";
 
 /* EDMarketConnector.py: Help > Privacy Policy; In files: EDMarketConnector.py:936; EDMarketConnector.py:956; */
 "Privacy Policy" = "Política de Privacidad";
@@ -100,6 +126,18 @@
 /* EDMarketConnector.py: Label for 'Copy' as in 'Copy and Paste'; ttkHyperlinkLabel.py: Label for 'Copy' as in 'Copy and Paste'; In files: EDMarketConnector.py:962; ttkHyperlinkLabel.py:53; */
 "Copy" = "Copiar";
 
+/* myNotebook.py: Label for 'Cut' as in 'Cut and Paste'; */
+"Cut" = "Cut";
+
+/* myNotebook.py: Label for 'Paste' as in 'Copy and Paste'; */
+"Paste" = "Paste";
+
+/* myNotebook.py: Label for 'Select All'; */
+"Select All" = "Select All";
+
+/* EDMarketConnector.py: CAPI auth aborted because of killswitch; EDMarketConnector.py: CAPI auth query aborted because of killswitch; In files: EDMarketConnector.py:973; EDMarketConnector.py:1067; */
+"CAPI auth disabled by killswitch" = "CAPI auth disabled by killswitch";
+
 /* EDMarketConnector.py: Status - Attempting to get a Frontier Auth Access Token; In files: EDMarketConnector.py:978; */
 "Logging in..." = "Identificándose...";
 
@@ -115,8 +153,35 @@
 /* EDMarketConnector.py: Status - No station market data from Frontier CAPI; In files: EDMarketConnector.py:1038; */
 "Station doesn't have a market!" = "¡La estación no tiene mercado!";
 
+/* EDMarketConnector.py: CAPI queries aborted because Cmdr name is unknown; EDMarketConnector.py: CAPI fleetcarrier query aborted because Cmdr name is unknown; In files: EDMarketConnector.py:1077; EDMarketConnector.py:1164; */
+"CAPI query aborted: Cmdr name unknown" = "CAPI query aborted: Cmdr name unknown";
+
+/* EDMarketConnector.py: CAPI queries aborted because game mode unknown; In files: EDMarketConnector.py:1083; */
+"CAPI query aborted: Game mode unknown" = "CAPI query aborted: Game mode unknown";
+
+/* EDMarketConnector.py: CAPI queries aborted because GameVersion unknown; EDMarketConnector.py: CAPI fleetcarrier query aborted because GameVersion unknown; In files: EDMarketConnector.py:1089; EDMarketConnector.py:1170; */
+"CAPI query aborted: GameVersion unknown" = "CAPI query aborted: GameVersion unknown";
+
+/* EDMarketConnector.py: CAPI queries aborted because current star system name unknown; In files: EDMarketConnector.py:1095; */
+"CAPI query aborted: Current system unknown" = "CAPI query aborted: Current system unknown";
+
+/* EDMarketConnector.py: CAPI queries aborted because player is in multi-crew on other Cmdr's ship; In files: EDMarketConnector.py:1101; */
+"CAPI query aborted: In other-ship multi-crew" = "CAPI query aborted: In other-ship multi-crew";
+
+/* EDMarketConnector.py: CAPI queries aborted because player is in CQC (Arena); In files: EDMarketConnector.py:1107; */
+"CAPI query aborted: CQC (Arena) detected" = "CAPI query aborted: CQC (Arena) detected";
+
 /* EDMarketConnector.py: Status - Attempting to retrieve data from Frontier CAPI; In files: EDMarketConnector.py:1128; EDMarketConnector.py:1179; */
 "Fetching data..." = "Recopilando datos...";
+
+/* EDMarketConnector.py: CAPI fleetcarrier query aborted because of killswitch; In files: EDMarketConnector.py:1157; */
+"CAPI fleetcarrier disabled by killswitch" = "CAPI fleetcarrier disabled by killswitch";
+
+/* EDMarketConnector.py: No data was returned for the Fleet Carrier from the Frontier CAPI; In files: EDMarketConnector.py:1219; */
+"CAPI: No Fleet Carrier data returned" = "CAPI: No Fleet Carrier data returned";
+
+/* EDMarketConnector.py: We didn't have the Fleet Carrier callsign when we should have; In files: EDMarketConnector.py:1223; */
+"CAPI: Fleet Carrier data incomplete" = "CAPI: Fleet Carrier data incomplete";
 
 /* EDMarketConnector.py: No data was returned for the commander from the Frontier CAPI; In files: EDMarketConnector.py:1242; */
 "CAPI: No commander data returned" = "CAPI: No se devolvió datos de comandante";
@@ -132,6 +197,9 @@
 
 /* EDMarketConnector.py: Frontier CAPI server error when fetching data; In files: EDMarketConnector.py:1384; */
 "Frontier CAPI server error" = "Error de servidor CAPI de Frontier";
+
+/* EDMarketConnector.py: Frontier CAPI Access Token expired, trying to get a new one; In files: EDMarketConnector.py:1390; */
+"CAPI: Refreshing access token..." = "CAPI: Refreshing access token...";
 
 /* EDMarketConnector.py: Time when we last obtained Frontier CAPI data; In files: EDMarketConnector.py:1434; */
 "Last updated at %H:%M:%S" = "Última actualización: %H:%M:%S";
@@ -162,6 +230,24 @@
 
 /* EDMarketConnector.py: Popup window title for list of 'enabled' plugins that don't work with Python 3.x; In files: EDMarketConnector.py:2274; */
 "EDMC: Plugins Without Python 3.x Support" = "EDMC: Plugins Sin Soporte para Python 3.x";
+
+/* EDMarketConnector.py: Popup window title for list of 'broken' plugins that failed to load; In files: EDMarketConnector.py:2285; */
+"EDMC: Broken Plugins" = "EDMC: Broken Plugins";
+
+/* EDMarketConnector.py: Popup-text about 'broken' plugins that failed to load; In files: EDMarketConnector.py:2266; */
+"One or more of your enabled plugins failed to load. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. This could be caused by a wrong folder structure. The load.py file should be located under plugins/PLUGIN_NAME/load.py.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "One or more of your enabled plugins failed to load. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. This could be caused by a wrong folder structure. The load.py file should be located under plugins/PLUGIN_NAME/load.py.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name.";
+
+/* EDMarketConnector.py: Popup-text about Reset Providers; In files: EDMarketConnector.py:2146; */
+"One or more of your URL Providers were invalid, and have been reset:\r\n\r\n" = "One or more of your URL Providers were invalid, and have been reset:\r\n\r\n";
+
+/* EDMarketConnector.py: Text About What Provider Was Reset; In files: EDMarketConnector.py:2148; */
+"{PROVIDER} was set to {OLDPROV}, and has been reset to {NEWPROV}\r\n" = "{PROVIDER} was set to {OLDPROV}, and has been reset to {NEWPROV}\r\n";
+
+/* EDMarketConnector.py: Popup window title for Reset Providers; In files: EDMarketConnector.py:2161; */
+"EDMC: Default Providers Reset" = "EDMC: Default Providers Reset";
+
+/* EDMarketConnector.py: Await Full CMDR Login to Game; In files: EDMarketConnector.py:813; */
+"Awaiting Full CMDR Login" = "Awaiting Full CMDR Login";
 
 /* journal_lock.py: Title text on popup when Journal directory already locked; In files: journal_lock.py:208; */
 "Journal directory already locked" = "El Directorio Journal ya está bloqueado";
@@ -247,6 +333,9 @@
 /* edsm.py: EDSM plugin - Journal handling disabled by killswitch; In files: edsm.py:516; */
 "EDSM Handler disabled. See Log." = "Manejo de Journal para EDSM desactivado. Ver Log.";
 
+/* edsm.py: EDSM - Only Live data; In files: edsm.py:632; */
+"EDSM only accepts Live galaxy data" = "EDSM only accepts Live galaxy data";
+
 /* edsm.py: EDSM Plugin - Error message from EDSM API; In files: edsm.py:916; edsm.py:1048; */
 "Error: EDSM {MSG}" = "Error: EDSM {MSG}";
 
@@ -258,6 +347,9 @@
 
 /* inara.py: Text for INARA API keys link ( goes to https://inara.cz/settings-api ); In files: inara.py:269; */
 "Inara credentials" = "Credenciales de Inara";
+
+/* inara.py: The Inara API only accepts Live galaxy data, not Legacy galaxy data; inara.py: Inara - Only Live data; In files: inara.py:384; inara.py:386; */
+"Inara only accepts Live galaxy data" = "Inara only accepts Live galaxy data";
 
 /* inara.py: INARA support disabled via killswitch; In files: inara.py:395; */
 "Inara disabled. See Log." = "Inara desactivado. Ver Log.";
@@ -292,6 +384,12 @@
 /* prefs.py: Settings > Configuration - Label for Journal files location; In files: prefs.py:431; prefs.py:446; */
 "E:D journal file location" = "Localización del archivo de Journal de E:D";
 
+/* prefs.py: Settings > Configuration - Label for CAPI section; In files: prefs.py:469; */
+"CAPI Settings" = "CAPI Settings";
+
+/* prefs.py: Configuration - Enable or disable the Fleet Carrier CAPI calls; In files: prefs.py:475; */
+"Enable Fleet Carrier CAPI Queries" = "Enable Fleet Carrier CAPI Queries";
+
 /* prefs.py: Hotkey/Shortcut settings prompt on Windows; In files: prefs.py:492; */
 "Hotkey" = "Tecla de acceso directo";
 
@@ -318,6 +416,15 @@
 
 /* prefs.py: Label for 'Configuration' tab in Settings; In files: prefs.py:681; */
 "Configuration" = "Configuración";
+
+/* prefs.py: UI elements privacy section header in privacy tab of preferences; In files: prefs.py:690; */
+"Main UI privacy options" = "Main UI privacy options";
+
+/* prefs.py: Hide private group owner name from UI checkbox; In files: prefs.py:695; */
+"Hide private group name in UI" = "Hide private group name in UI";
+
+/* prefs.py: Hide multicrew captain name from main UI checkbox; In files: prefs.py:699; */
+"Hide multi-crew captain name" = "Hide multi-crew captain name";
 
 /* prefs.py: Preferences privacy tab title; In files: prefs.py:703; */
 "Privacy" = "Privacidad";
@@ -361,6 +468,12 @@
 /* prefs.py: Label for location of third-party plugins folder; In files: prefs.py:908; */
 "Plugins folder" = "Carpeta de Plugins";
 
+/* prefs.py: Label on button used to open the Plugin Folder; */
+"Open Plugins Folder" = "Open Plugins Folder";
+
+/* prefs.py: Selecting the Location of the Plugin Directory on the Filesystem; */
+"Plugin Directory Location" = "Plugin Directory Location";
+
 /* prefs.py: Tip/label about how to disable plugins; In files: prefs.py:923; */
 "Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "Puedes desactivar un plugin añadiendo{CR}'{EXT}' al nombre de su carpeta";
 
@@ -373,8 +486,23 @@
 /* prefs.py: Plugins - Label on URL to documentation about migrating plugins from Python 2.7; In files: prefs.py:962; */
 "Information on migrating plugins" = "Información sobre migración de plugins";
 
+/* prefs.py: Plugins - Label for list of 'broken' plugins that failed to load; In files: prefs.py:1039; */
+"Broken Plugins" = "Broken Plugins";
+
 /* prefs.py: Lable on list of user-disabled plugins; In files: prefs.py:977; */
 "Disabled Plugins" = "Plugins Desactivados";
+
+/* prefs.py: Catch & Record Profiler Errors; */
+"Error in System Profiler" = "Error in System Profiler";
+
+/* prefs.py: Disabling a Plugin. */
+"Disabling plugin {PLUGIN}. This will cause a restart. Click OK to continue..." = "Disabling plugin {PLUGIN}. This will cause a restart. Click OK to continue...";
+
+/* prefs.py: Enable a Disabled Plugin */
+"Enable" = "Enable";
+
+/* prefs.py: Disable an Enabled Plugin */
+"Disable" = "Disable";
 
 /* stats.py: Cmdr stats; In files: stats.py:58; */
 "Balance" = "Saldo";
@@ -385,6 +513,21 @@
 /* stats.py: Top rank; In files: stats.py:63; */
 "Elite" = "Élite";
 
+/* stats.py: Top rank +1; In files: stats.py:64; */
+"Elite I" = "Elite I";
+
+/* stats.py: Top rank +2; In files: stats.py:65; */
+"Elite II" = "Elite II";
+
+/* stats.py: Top rank +3; In files: stats.py:66; */
+"Elite III" = "Elite III";
+
+/* stats.py: Top rank +4; In files: stats.py:67; */
+"Elite IV" = "Elite IV";
+
+/* stats.py: Top rank +5; In files: stats.py:68; */
+"Elite V" = "Elite V";
+
 /* stats.py: Ranking; In files: stats.py:74; */
 "Combat" = "Combate";
 
@@ -393,6 +536,12 @@
 
 /* stats.py: Ranking; In files: stats.py:76; */
 "Explorer" = "Exploración";
+
+/* stats.py: Ranking; In files: stats.py:77; */
+"Mercenary" = "Mercenary";
+
+/* stats.py: Ranking; In files: stats.py:78; */
+"Exobiologist" = "Exobiologist";
 
 /* stats.py: Ranking; In files: stats.py:79; */
 "CQC" = "CQC";
@@ -477,6 +626,51 @@
 
 /* stats.py: Explorer rank; In files: stats.py:118; */
 "Pioneer" = "Pionero";
+
+/* stats.py: Mercenary rank; In files: stats.py:122; */
+"Defenceless" = "Defenceless";
+
+/* stats.py: Mercenary rank; In files: stats.py:123; */
+"Mostly Defenceless" = "Mostly Defenceless";
+
+/* stats.py: Mercenary rank; In files: stats.py:124; */
+"Rookie" = "Rookie";
+
+/* stats.py: Mercenary rank; In files: stats.py:125; */
+"Soldier" = "Soldier";
+
+/* stats.py: Mercenary rank; In files: stats.py:126; stats.py:128; */
+"Gunslinger" = "Gunslinger";
+
+/* stats.py: Mercenary rank; In files: stats.py:127; */
+"Warrior" = "Warrior";
+
+/* stats.py: Mercenary rank; In files: stats.py:129; */
+"Deadeye" = "Deadeye";
+
+/* stats.py: Exobiologist rank; In files: stats.py:132; */
+"Directionless" = "Directionless";
+
+/* stats.py: Exobiologist rank; In files: stats.py:133; */
+"Mostly Directionless" = "Mostly Directionless";
+
+/* stats.py: Exobiologist rank; In files: stats.py:134; */
+"Compiler" = "Compiler";
+
+/* stats.py: Exobiologist rank; In files: stats.py:135; */
+"Collector" = "Collector";
+
+/* stats.py: Exobiologist rank; In files: stats.py:136; */
+"Cataloguer" = "Cataloguer";
+
+/* stats.py: Exobiologist rank; In files: stats.py:137; */
+"Taxonomist" = "Taxonomist";
+
+/* stats.py: Exobiologist rank; In files: stats.py:138; */
+"Ecologist" = "Ecologist";
+
+/* stats.py: Exobiologist rank; In files: stats.py:139; */
+"Geneticist" = "Geneticist";
 
 /* stats.py: CQC rank; In files: stats.py:142; */
 "Helpless" = "Indefenso";
@@ -598,8 +792,104 @@
 /* stats.py: Power rank; In files: stats.py:197; */
 "Rating 5" = "Nivel 5";
 
+/* stats.py: Current commander unknown when trying to use 'File' > 'Status'; In files: stats.py:315; */
+"Status: Don't yet know your Commander name" = "Status: Don't yet know your Commander name";
+
+/* stats.py: No Frontier CAPI data yet when trying to use 'File' > 'Status'; In files: stats.py:323; */
+"Status: No CAPI data yet" = "Status: No CAPI data yet";
+
 /* stats.py: Status dialog subtitle - CR value of ship; In files: stats.py:409; */
 "Value" = "Valor";
 
 /* stats.py: Status dialog title; In files: stats.py:418; */
 "Ships" = "Naves";
+
+/* update.py: Update Available Text; In files: update.py:229; */
+"{NEWVER} is available" = "{NEWVER} is available";
+
+/* prefs.py: Stable Version of EDMC; */
+"Stable" = "Stable";
+
+/* prefs.py: Select the Update Track (Beta, Stable); */
+"Update Track" = "Update Track";
+
+/* EDMarketConnector.py: Inform the user the Update Track has changed; */
+"Update Track Changed to {TRACK}" = "Update Track Changed to {TRACK}";
+
+/* EDMarketConnector.py: Inform User of Beta -> Stable Transition Risks; */
+"Update track changed to Stable from Beta. You will no longer receive Beta updates. You will stay on your current Beta version until the next Stable release.\r\n\r\nYou can manually revert to the latest Stable version. To do so, you must download and install the latest Stable version manually. Note that this may introduce bugs or break completely if downgrading between major versions with significant changes.\r\n\r\nDo you want to open GitHub to download the latest release?" = "Update track changed to Stable from Beta. You will no longer receive Beta updates. You will stay on your current Beta version until the next Stable release.\r\n\r\nYou can manually revert to the latest Stable version. To do so, you must download and install the latest Stable version manually. Note that this may introduce bugs or break completely if downgrading between major versions with significant changes.\r\n\r\nDo you want to open GitHub to download the latest release?";
+
+/* EDMarketConnector.py: Title of Notification Popup for EDMC Restart; */
+"Restart Required" = "Restart Required";
+
+/* EDMarketConnector.py: Text of Notification Popup for EDMC Restart; */
+"A restart of EDMC is required. EDMC will now restart." = "A restart of EDMC is required. EDMC will now restart.";
+
+/* myNotebook.py: Can't Paste Images or Files in Text; */
+"Cannot paste non-text content." = "Cannot paste non-text content.";
+
+/* ttkHyperlinkLabel.py: Open Element In Selected Provider; */
+"Open in {URL}" = "Open in {URL}";
+
+/* ttkHyperlinkLabel.py: Copy the Inara SLEF Format of the active ship to the clipboard; */
+"Copy Inara SLEF" = "Copy Inara SLEF";
+
+/* edastro_core.py: Settings>EDAstro - Label on checkbox for 'send data'; */
+"Send data to EDAstro" = "Send data to EDAstro";
+
+/* common_coreutils.py: Colonisation ship name, with title; In files: common_coreutils.py:81:81 */
+"System Colonisation Ship {NAME}" = "System Colonisation Ship {NAME}";
+
+/* common_coreutils.py: Unidentified colonisation ship; In files: common_coreutils.py:84:84 */
+"System Colonisation Ship" = "System Colonisation Ship";
+
+/* plugin_browser.py: Filter Plugin Categories */
+"Filter by Category:" = "Filter by Category:";
+
+/* plugin_browser.py: Plugin Browser Plug Name */
+"Name" = "Name";
+
+/* plugin_browser.py: Plugin Browser Plug Ver */
+"Version" = "Version";
+
+/* plugin_browser.py: Plugin Browser Last Update */
+"Last Updated" = "Last Updated";
+
+/* plugin_browser.py: Plugin Browser Category */
+"Categories" = "Categories";
+
+/* plugin_browser.py: Plugin Browser Description */
+"Description" = "Description";
+
+/* plugin_browser.py: Plugin Browser Stars */
+"Stars" = "Stars";
+
+/* plugin_browser.py: Plugin Browser Title */
+"Plugin Browser" = "Plugin Browser";
+
+/* plugin_browser.py: Open Plugin Repo */
+"Open Plugin Repository" = "Open Plugin Repository";
+
+/* plugin_browser.py: Report a Malfunctioning Plugin */
+"Report Plugin" = "Report Plugin";
+
+/* plugin_browser.py: Plugin Browser Authors */
+"Authors" = "Authors";
+
+/* plugin_browser.py: Plugin Browser License */
+"License" = "License";
+
+/* plugin_browser.py: Plugin Browser Reqs */
+"Requirements" = "Requirements";
+
+/* plugin_browser.py: Last Tested EDMC Version  */
+"Last Tested EDMC: {last_tested}" = "Last Tested EDMC: {last_tested}";
+
+/* plugin_browser.py: Plugin Project Link */
+"Main Project Link" = "Main Project Link";
+
+/* plugin_browser.py: Plugin VT Link */
+"VirusTotal Link" = "VirusTotal Link";
+
+/* prefs.py: Settings > Output - choose delimiter/format for market export files */
+"Market export format:" = "Market export format:";
