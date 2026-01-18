@@ -1,6 +1,10 @@
 # Translations in Elite Dangerous Market Connector
 
-Translations are handled on [OneSky](https://oneskyapp.com/), specifically in [this project](https://marginal.oneskyapp.com/collaboration/project/52710).
+The application supports translations for most of the text you will see in its UI.
+
+Translations are handled on [Crowdin](https://crowdin.com/), specifically in [this project](https://crowdin.com/project/edmarketconnector).
+
+If you'd like to contribute then please sign in or make an account there.
 
 ---
 
@@ -58,7 +62,7 @@ and
 which matches with:
 
 	nb.Label(plugsframe, text=tr.tl("Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name").format(EXT='.disabled')).grid(     # Help text in settings
-`{CR}` is handled in `l10n.py`, translating to a unicode `\n`.  See the code in`l10n.py` for any other such special substitutions.
+`{CR}` is handled in `l10n.py`, translating to a Unicode `\n`.  See the code in`l10n.py` for any other such special substitutions.
 
 You can even use other translations within a given string, e.g.:
 
@@ -66,16 +70,17 @@ You can even use other translations within a given string, e.g.:
 	/* Popup body: Warning about plugins without Python 3.x support [EDMarketConnector.py] */
 "One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name." = "One or more of your enabled plugins do not yet have support for Python 3.x. Please see the list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an updated version available, else alert the developer that they need to update the code for Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on the end of the name.";
 
-## Adding it to the OneSky project
+## Contributing Translations
 
-You will, of course, need admin access to the project.  Jonathan Harris (aka Maringal, aka Otis) still handles this.  Check for this email address in github commits if you need to get in touch.
+**We do not accept GitHub Pull Requests for any changes to translations, except for "silly" languages.** Pull Requests on GitHub will be closed and not included.
 
-1. Copy `L10n/en.template` to `en.strings` somewhere.  It needs to be this name for OneSky to accept it as an upload.
-1. In [the project](https://marginal.oneskyapp.com/admin/page/list/project/52710) click the `+` next to "Files"
-	1. Select the copied `en.strings` file.
-	1. **Make sure that you select "Deprecate" for the "Do you want to deprecate phrases uploaded before but not in this batch? " option.**
-	1. Click the "Import files now" button.
-1. Check that the new phrases are listed properly on [the phrases list](https://marginal.oneskyapp.com/admin/phrase/list/project/52710).  Use the search dialogue on the 'code text' to find them.
+The exception to this is funny languages like "UwU", "Klingon", or other not-real languages if people want to have fun.
+
+Users requesting to join the translation team can submit a request on the Crowdin page, or contact Rixxan to request to be added to the translation page.
+
+1. Periodically, the en.template file will be synced with Crowdin.
+   1. If Crowdin is significantly out of date compared to the template, please open a Bug Report or contact Rixxan.
+2. Translations can be submitted directly to Crowdin.
 
 All project admins will get a notification of the new upload.  Now you wait for translators to work on the new/changed phrases.
 
@@ -83,28 +88,82 @@ All project admins will get a notification of the new upload.  Now you wait for 
 
 ## Updating Translations In The Code
 
-Once you have new/changed translations on OneSky you'll want to update the code to use them.
+Once you have new/changed translations on Crowdin, you'll want to update the code to use them.
 
-1. Navigate to the [Translation Overview](https://marginal.oneskyapp.com/admin/project/dashboard/project/52710) then click on "Download Translation" which should bring you to [Download](https://marginal.oneskyapp.com/admin/export/phrases/project/52710).
-1. In "File format" select ".strings (iOS/MacOS)".
-1. "All languages" should already be selected in the "Languages filter".  If not, select it.
-1. Likewise "All files" should already be selected in "File Filter".
-1. Click "Export".  After a short delay you should be offered a file "EDMarketConnector.zip" for download.
-1. Access the contents of this zip file, extracting *all* the files into `L10n/` in the code.
-1. Rename the "en.strings" file to "en.template".
-1. Commit the changes to git.
+1. All approved translations can be exported as a ZIP file from [this page](https://crowdin.com/project/edmarketconnector/translations.)
+2. Users should "build and download" the zip file, then replace the new file in the project.
+3. Alternatively, individual translation files can be downloaded from the Dashboard page.
+4. Changed files should be submitted to Git
 
 ---
 
 ## Adding a New Language
 
-To add a new language to the app:
+If you feel able to contribute a full translation for an additional language then please [open an issue](https://github.com/EDCD/EDMarketConnector/issues/new?assignees=&labels=Translations&template=new-translation-language.md&title=%5BTranslations%5D+New+language+-+)
+to request the language be added. If approved, you'll be invited to join the Crowdin page. Then, follow these directions:
 
-1. Add it to the OneSkyApp project:
-    1. open [EDMarketConnector - Miscellaneous Manage Languages](https://marginal.oneskyapp.com/admin/project/languages/project/52710)
-    1. Search for the language.
-    1. Ensure you have the correct one if there are variants.
-    1. Click the `+` on the right hand side to add the language.
-    1. Be sure to go through and Finalize any phrases that shouldn't be translated.  See [Translations]() in the Wiki.
+1. Request the new language on Crowdin.
+2. Provide relevant translations. 
+3. Remember that until there are translations all strings will default to the default version (Generally, English).
 
-    Remember that until there are translations all strings will default to the English version (actually the key, which is always specified in English).
+Guidelines
+---
+There are a number of things about the phrases on Crowdin that might seem confusing at first.
+
+1. The 'Language name' phrase should have 'English' changed to the word for the target language in
+  that language.  This should *not* be the word for 'English' in the target language.  e.g., for
+  the German translation this is "Deutsch" *not* "Englisch".
+
+2. Any text of the form `{THING}`, i.e., curly braces around a word, should be left as is in the
+  translation.  These words are *not* translated, but have the fixed text substituted in by the
+  application.
+  
+    As part of this, `{CR}` becomes a newline, i.e., text continues on the next line.
+
+    An example of this is the phrase `About {APP}` which should have 'About' translated, but keep
+    the '{APP}' intact as it would be replaced with the text 'E:D Market Connector' to make the
+    entire phrase "About E:D Market Connector" in the original English.
+
+3. In addition to the previous point, there's at least one instance of the string `%H:%M:%S` which
+  should be left as-is, not translated.  The comment on the relevant phrase calls this out, so
+  in general, pay attention to those comments.
+
+4. Any phrase that matches an in-game name should be left as it shows in-game.  If the
+  game has a translation for your language, then do use the in-game translation for this.
+  Examples include:
+    1. The name of any rank category, e.g., "Combat", "CQC", "Powerplay".
+    2. Combat Ranks, e.g., "Harmless".
+    3. Trade Ranks.
+    4. Exploration Ranks.
+    5. CQC Ranks.
+    6. Ranks with the Superpowers (Empire and Federation).
+ 
+    If we're on the ball, we'll have finalized these phrases when we add the language.
+
+Testing Changes
+---
+Whether it be for a new language, an additional phrase in an existing translation, or changing
+a translation, the only way to test the changes is to obtain the corresponding `<lang>.strings` file
+and copy it into the `L10n\` folder in your install of EDMC.
+
+If you are comfortable [running from source](https://github.com/EDCD/EDMarketConnector#running-from-source), 
+that is probably easiest. Just replace the appropriate file.
+
+If you want to test with the currently installed application, then you'll need to find its
+install folder (default `C:\Program Files x(86)\EDMarketConnector`) and replace the appropriate
+file in the `L10n` sub-folder.
+
+If your changes have been committed to GitHub, then you should be able to find the updated strings
+file in the [L10n folder of the develop branch](https://github.com/EDCD/EDMarketConnector/tree/develop/L10n).  Click
+into the appropriate file, then:
+
+1. Right-click the `Raw` button top-right of the file contents.
+2. `Save Link As...` from the context menu.
+
+NB: This is correct for Firefox; the menu entry and method might vary in other browsers. 
+If all else fails, click into `Raw`, then select all the text and paste it into a file.
+
+You'll need to restart the application to be sure it's entirely picked up the new translations.
+
+If your changes are not yet in the `develop` branch, then ask a maintainer to create a new, temporary,
+branch with your changes so you can access them from there.
