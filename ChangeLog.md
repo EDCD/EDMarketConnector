@@ -2,6 +2,36 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
 ---
 * We currently test against, and package with, Python 3.13, 64-bit.
 ---
+Pre-Release 6.1.0-beta1
+===
+This release includes the new EDMC Plugin Browser, which allows plugin authors to register their plugins. 
+These registered plugins will be able to be browsed and discovered by all EDMC Users!
+
+This release also fixes dark-mode not being able to be resized (a bug for over 5 years!) and adds code to 
+prevent various unexpected situations which could prevent updates or contacting Frontier.
+
+**Changes and Enhancements**
+* Added the new EDMC Plugin Browser and EDMC Plugin Registration System.
+* Added a series of new Commodity Export File Types for increased flexibilty.
+* Added the ability to have EDMC automatically update ships.json, modules.json, and the Plugin Master List.
+* Added the ability to send Journal events to Plugins from before LoadGame has been parsed.
+* Migrated the Translation Submission System from OneSky to Crowdin.
+* Updates a series of internal actions and dependencies to latest versions.
+* Improved the speed of EDMC startup when checking for updated datafiles.
+* Improved the handling of Lang comment detection.
+* Improved the utility of the various core plugin System and Station providers.
+* Migrates the Translations wiki page to docs/Translations.md.
+* Minor code improvements.
+* Simplified handling code for EDDN messages.
+
+**Bug Fixes**
+* Fixed a series of minor bugs.
+
+**Plugin Developers**
+* Consider registring your plugins! 
+* EDMC strongly encourages consistant plugin versioning. Please review PLUGINS.md for more information.
+* util.gzip is deprecated and will be removed in a later version.
+
 Release 6.0.2
 ===
 This release adds additional safety checks for the writing of the new config file on first write for Windows installs.
