@@ -12,12 +12,12 @@ prevent various unexpected situations which could prevent updates or contacting 
 
 **Changes and Enhancements**
 * Added the new EDMC Plugin Browser and EDMC Plugin Registration System.
-* Added a series of new Commodity Export File Types for increased flexibilty.
+* Added a series of new Commodity Export File Types for increased flexibility.
 * Added the ability to have EDMC automatically update ships.json, modules.json, and the Plugin Master List.
 * Added the ability to send Journal events to Plugins from before LoadGame has been parsed.
 * Migrated the Translation Submission System from OneSky to Crowdin.
 * Updates a series of internal actions and dependencies to latest versions.
-* Improved the speed of EDMC startup when checking for updated datafiles.
+* Improved the speed of EDMC startup when checking for updated data files.
 * Improved the handling of Lang comment detection.
 * Improved the utility of the various core plugin System and Station providers.
 * Migrates the Translations wiki page to docs/Translations.md.
@@ -28,8 +28,8 @@ prevent various unexpected situations which could prevent updates or contacting 
 * Fixed a series of minor bugs.
 
 **Plugin Developers**
-* Consider registring your plugins! 
-* EDMC strongly encourages consistant plugin versioning. Please review PLUGINS.md for more information.
+* Consider registering your plugins! 
+* EDMC strongly encourages consistent plugin versioning. Please review PLUGINS.md for more information.
 * util.gzip is deprecated and will be removed in a later version.
 
 Release 6.0.2
