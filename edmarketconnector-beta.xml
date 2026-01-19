@@ -6,10 +6,11 @@
       <description>Most recent changes with links to updates.</description>
       <!-- Windows -->
       <item>
-         <title>Pre-Release 6.1.0-beta1</title>
+         <title>Pre-Release 6.1.0-beta2</title>
          <description><![CDATA[<style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
 <p>We now test against, and package with, Python 3.13.</p>
-<h2>Release 6.1.0-beta1</h2>
+<h2>Release 6.1.0-beta2</h2>
+<p>This release is identical to 6.1.0-beta1 with an additional bug fix that would cause the plugin registry to crash.</p>
 <p>This release includes the new EDMC Plugin Browser, which allows plugin authors to register their plugins.
 These registered plugins will be able to be browsed and discovered by all EDMC Users!</p>
 <p>This release also fixes dark-mode not being able to be resized (a bug for over 5 years!) and adds code to
@@ -3149,7 +3150,7 @@ about this:
 <a href="https://issues.frontierstore.net/issue-detail/28638" rel="nofollow">PTS CAPI saying Commander is Docked after jumping to new system</a>.</p>
 </li>
 </ul>]]></description>
-         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F6.1.0-beta1/EDMarketConnector_Installer_6.1.0-beta1_x64.exe" sparkle:os="windows" sparkle:version="6.1.0-beta1" length="0" type="application/x-ms-dos-executable" />
+         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F6.1.0-beta2/EDMarketConnector_Installer_6.1.0-beta2_x64.exe" sparkle:os="windows" sparkle:version="6.1.0-beta2" length="0" type="application/x-ms-dos-executable" />
       </item>
    </channel>
 </rss>
