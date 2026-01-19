@@ -2,8 +2,10 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
 ---
 * We currently test against, and package with, Python 3.13, 64-bit.
 ---
-Pre-Release 6.1.0-beta1
+Pre-Release 6.1.0-beta2
 ===
+This release is identical to 6.1.0-beta1 with an additional bug fix that would cause the plugin registry to crash.
+
 This release includes the new EDMC Plugin Browser, which allows plugin authors to register their plugins. 
 These registered plugins will be able to be browsed and discovered by all EDMC Users!
 

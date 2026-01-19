@@ -20,7 +20,7 @@ from io import BytesIO
 from datetime import datetime
 import myNotebook as nb  # noqa: N813
 import plug
-from config import appversion_nobuild
+from config import appversion_nobuild, config
 from EDMCLogging import get_main_logger
 from l10n import translations as tr
 from ttkHyperlinkLabel import HyperlinkLabel
@@ -42,7 +42,8 @@ def get_plugins():
 
 def read_plugin_list():
     """Read the Plugin List distributed by EDMC."""
-    with open("master_plugin_list.json", encoding="utf-8") as plugin_list_file:
+    plugin_file_path = config.respath_path / "master_plugin_list.json"
+    with open(plugin_file_path, encoding="utf-8") as plugin_list_file:
         plugin_list = json.load(plugin_list_file)
         plugins_by_id = {p["pluginName"]: p for p in plugin_list}
     return plugin_list, plugins_by_id
