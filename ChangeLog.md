@@ -2,10 +2,8 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
 ---
 * We currently test against, and package with, Python 3.13, 64-bit.
 ---
-Pre-Release 6.1.0-beta2
+Pre-Release 6.1.0-beta3
 ===
-This release is identical to 6.1.0-beta1 with an additional bug fix that would cause the plugin registry to crash.
-
 This release includes the new EDMC Plugin Browser, which allows plugin authors to register their plugins. 
 These registered plugins will be able to be browsed and discovered by all EDMC Users!
 
@@ -23,6 +21,7 @@ prevent various unexpected situations which could prevent updates or contacting 
 * Improved the handling of Lang comment detection.
 * Improved the utility of the various core plugin System and Station providers.
 * Migrates the Translations wiki page to docs/Translations.md.
+* Simplified the location that modules.json and ships.json should be expected to be.
 * Minor code improvements.
 * Simplified handling code for EDDN messages.
 
@@ -33,6 +32,7 @@ prevent various unexpected situations which could prevent updates or contacting 
 * Consider registering your plugins! 
 * EDMC strongly encourages consistent plugin versioning. Please review PLUGINS.md for more information.
 * util.gzip is deprecated and will be removed in a later version.
+* ships.json and modules.json are no longer bundled with EDMC by default, and will be downloaded automatically to the app_dir location.
 
 Release 6.0.2
 ===

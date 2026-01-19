@@ -77,8 +77,6 @@ def generate_data_files(
                 "ChangeLog.md",
                 "snd_good.wav",
                 "snd_bad.wav",
-                "modules.json",
-                "ships.json",
                 f"{app_name}.ico",
                 f"resources/{appcmdname}.ico",
                 "EDMarketConnector - TRACE.bat",

@@ -42,7 +42,7 @@ def get_plugins():
 
 def read_plugin_list():
     """Read the Plugin List distributed by EDMC."""
-    plugin_file_path = config.respath_path / "master_plugin_list.json"
+    plugin_file_path = config.app_dir_path / "master_plugin_list.json"
     with open(plugin_file_path, encoding="utf-8") as plugin_list_file:
         plugin_list = json.load(plugin_list_file)
         plugins_by_id = {p["pluginName"]: p for p in plugin_list}
@@ -72,7 +72,7 @@ class PluginBrowserMixIn:
         self.BUTTONX = 12  # indent Checkbuttons and Radiobuttons
         self.LISTX = 25  # indent listed items
         self.PADY = 1  # close spacing
-        self.BOXY = 2  # box spacing
+        self.BOXY = 4  # box spacing
         self.SEPY = 10  # separator line spacing
 
         # Setup Plugin Browser Options
