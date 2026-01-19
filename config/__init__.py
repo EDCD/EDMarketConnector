@@ -608,7 +608,7 @@ config_logger.propagate = False
 config = get_config()
 
 
-# Wiki: https://github.com/EDCD/EDMarketConnector/wiki/Participating-in-Open-Betas-of-EDMC
+# Wiki: https://github.com/EDCD/EDMarketConnector/blob/main/docs/Participating%20in%20Open%20Betas%20of%20EDMC.md
 def get_update_feed() -> str:
     """Select the proper update feed for the current update track."""
     if config.get_bool("beta_optin"):

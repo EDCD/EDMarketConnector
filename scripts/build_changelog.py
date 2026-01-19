@@ -83,7 +83,7 @@ def build_fdev(
         fdev_out += (
             f'This is a release candidate for {version}. It has been pushed to the "Beta" track for updates!\n\n'
             'For more information on the "Beta" update track, please read '
-            "[URL='https://github.com/EDCD/EDMarketConnector/wiki/Participating-in-Open-Betas-of-EDMC']"
+            "[URL='https://github.com/EDCD/EDMarketConnector/blob/develop/docs/Participating%20in%20Open%20Betas%20of%20EDMC.md']"
             "This Wiki Article[/URL]. Questions and comments are welcome!\n\n"
         )
 
