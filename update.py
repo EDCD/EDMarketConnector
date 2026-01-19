@@ -242,15 +242,6 @@ class Updater:
         # Always trigger FDEV checks here too
         check_for_fdev_updates()
         check_for_datafile_updates()
-        try:
-            check_for_fdev_updates(local=True)
-            check_for_datafile_updates(local=True)
-        except Exception as e:
-            logger.info(
-                "Tried to update bundle files but failed. Don't worry, "
-                "this likely isn't important and can be ignored unless "
-                f"you run into other issues. If you're curious: {e}"
-            )
 
     def shutdown_request(self) -> None:
         """Receive (Win)Sparkle shutdown request and send it to parent."""
@@ -318,13 +309,6 @@ class Updater:
 
         check_for_fdev_updates()
         check_for_datafile_updates()
-        try:
-            check_for_fdev_updates(local=True)
-            check_for_datafile_updates(local=True)
-        except Exception as e:
-            logger.info("Tried to update bundle files but failed. Don't worry, "
-                        "this likely isn't important and can be ignored unless"
-                        f" you run into other issues. If you're curious: {e}")
 
     def check_appcast(self) -> EDMCVersion | None:
         """

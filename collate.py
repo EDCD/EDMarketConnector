@@ -18,10 +18,10 @@ import os
 import pathlib
 import sys
 from traceback import print_exc
-
 import companion
 import outfitting
 from config import config
+from update import check_for_fdev_updates
 from edmc_data import companion_category_map, ship_name_map
 
 
@@ -50,10 +50,11 @@ def addcommodities(data) -> None:  # noqa: CCR001
     if not data['lastStarport'].get('commodities'):
         return
 
-    try:
-        commodityfile = config.app_dir_path / 'FDevIDs' / 'commodity.csv'
-    except FileNotFoundError:
-        commodityfile = pathlib.Path('FDevIDs/commodity.csv')
+    commodityfile = config.app_dir_path / 'FDevIDs' / 'commodity.csv'
+    if not commodityfile.is_file():
+        check_for_fdev_updates()
+        commodityfile = config.app_dir_path / 'FDevIDs' / 'commodity.csv'  # Probably first boot. Force update.
+
     commodities = {}
 
     # slurp existing
