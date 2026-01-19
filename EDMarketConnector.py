@@ -471,6 +471,32 @@ def _config_plugins(frame: tk.Frame, ui_row: int) -> tk.Frame:
     return frame
 
 
+def help_privacy() -> None:
+    """Open Privacy Policy docs page in browser."""
+    webbrowser.open('https://github.com/EDCD/EDMarketConnector/blob/main/docs/PRIVACY.md')
+
+
+def help_general() -> None:
+    """Open Wiki Help page in browser."""
+    webbrowser.open('https://github.com/EDCD/EDMarketConnector/tree/main/docs')
+
+
+def help_troubleshooting() -> None:
+    """Open Troubleshooting docs page in browser."""
+    webbrowser.open("https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting")
+
+
+def help_report_a_bug() -> None:
+    """Open GitHub Bug Report."""
+    webbrowser.open("https://github.com/EDCD/EDMarketConnector/issues/new?assignees=&labels=bug%2C+unconfirmed"
+                    "&template=bug_report.md&title=")
+
+
+def help_releases() -> None:
+    """Open Releases page in browser."""
+    webbrowser.open('https://github.com/EDCD/EDMarketConnector/releases')
+
+
 class AppWindow:
     """Define the main application window."""
 
@@ -510,7 +536,7 @@ class AppWindow:
             logfile_loc = pathlib.Path(config.app_dir_path / 'logs')
             menu_options = (
                 ("Open", None, open_window),
-                ("Report a Bug", None, self.help_report_a_bug),
+                ("Report a Bug", None, help_report_a_bug),
                 ("About EDMC", None, lambda: not self.HelpAbout.showing and self.HelpAbout(self.w)),
                 ("Open Log Folder", None, lambda: prefs.open_folder(logfile_loc)),
                 ("Open System Profiler", None, lambda: prefs.help_open_system_profiler(self)),
@@ -638,11 +664,11 @@ class AppWindow:
         self.edit_menu.add_command(accelerator='Ctrl+C', state=tk.DISABLED, command=self.copy)
         self.menubar.add_cascade(menu=self.edit_menu)
         self.help_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)  # type: ignore
-        self.help_menu.add_command(command=self.help_general)  # Documentation
-        self.help_menu.add_command(command=self.help_troubleshooting)  # Troubleshooting
-        self.help_menu.add_command(command=self.help_report_a_bug)  # Report A Bug
-        self.help_menu.add_command(command=self.help_privacy)  # Privacy Policy
-        self.help_menu.add_command(command=self.help_releases)  # Release Notes
+        self.help_menu.add_command(command=help_general)  # Documentation
+        self.help_menu.add_command(command=help_troubleshooting)  # Troubleshooting
+        self.help_menu.add_command(command=help_report_a_bug)  # Report A Bug
+        self.help_menu.add_command(command=help_privacy)  # Privacy Policy
+        self.help_menu.add_command(command=help_releases)  # Release Notes
         self.help_menu.add_command(command=lambda: self.updater.check_for_updates())  # Check for Updates...
         # About E:D Market Connector
         self.help_menu.add_command(command=lambda: not self.HelpAbout.showing and self.HelpAbout(self.w))
@@ -1832,27 +1858,6 @@ class AppWindow:
                 'StationName'] else monitor.state['SystemName']
             self.w.clipboard_clear()
             self.w.clipboard_append(clipboard_text)
-
-    def help_general(self, event=None) -> None:
-        """Open Wiki Help page in browser."""
-        webbrowser.open('https://github.com/EDCD/EDMarketConnector/wiki')
-
-    def help_troubleshooting(self, event=None) -> None:
-        """Open Wiki Privacy page in browser."""
-        webbrowser.open("https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting")
-
-    def help_report_a_bug(self, event=None) -> None:
-        """Open Wiki Privacy page in browser."""
-        webbrowser.open("https://github.com/EDCD/EDMarketConnector/issues/new?assignees=&labels=bug%2C+unconfirmed"
-                        "&template=bug_report.md&title=")
-
-    def help_privacy(self, event=None) -> None:
-        """Open Wiki Privacy page in browser."""
-        webbrowser.open('https://github.com/EDCD/EDMarketConnector/wiki/Privacy-Policy')
-
-    def help_releases(self, event=None) -> None:
-        """Open Releases page in browser."""
-        webbrowser.open('https://github.com/EDCD/EDMarketConnector/releases')
 
     class HelpAbout(tk.Toplevel):
         """The applications Help > About popup."""

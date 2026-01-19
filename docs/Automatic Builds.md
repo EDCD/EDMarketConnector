@@ -9,7 +9,7 @@ you can build the EDMarketConnector installer using GitHub actions.
 ### Automatically on tag push
 Once you are sure you have a branch all ready for release as a new version you
 should be adding a `Release/<semantic version>` tag at that HEAD.  Pushing 
-such a tag to GitHub will cause the
+such a tag to GitHub will cause
 [the GitHub Windows Build Action file](../.github/workflows/windows-build.yml)
 to build an installer and create a draft release, with the pre-release box
 pre-ticked.  This ensures you don't accidentally create a new non-pre 
@@ -34,7 +34,7 @@ python versions)
 
 1. Select the Actions tab at the top of the main GitHub interface
 2. Select the `Build EDMC for Windows` workflow on the left
-3. Click the "Run workflow" button at the right side of the blue banner
+3. Click the "Run workflow" button on the right side of the blue banner
    1. Select the branch you want to build
    2. Click the "Run Workflow"
 

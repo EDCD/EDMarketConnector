@@ -17,5 +17,5 @@ to inspect or change an executable's manifest.
 To set a whole new manifest:
 
 1. Make a copy of the relevant manifest file, e.g. `EDMarketConnector.manifest`.
-1. Edit this file.
-1. Run mt.exe thus: `mt.exe -manifest EDMarketConnector-new.manifest -outputresource:EDMarketConnector.exe`.
+2. Edit this file.
+3. Run mt.exe thus: `mt.exe -manifest EDMarketConnector-new.manifest -outputresource:EDMarketConnector.exe`.

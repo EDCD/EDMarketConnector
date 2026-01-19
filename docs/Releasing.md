@@ -12,8 +12,8 @@ in order to test changes and/or diagnose build issues.  As such
 this document aims to enable anyone to quickly get up to speed on how to:
 
 1. Build a Windows .exe for the application
-1. Package that .exe into an .msi file for distribution
-1. Handle the files generated so the application automatically detects new
+2. Package that .exe into an .msi file for distribution
+3. Handle the files generated so the application automatically detects new
  available versions and asks the user to upgrade.
 
 Note that for Windows only a 32-bit application is supported at this time.
@@ -30,7 +30,7 @@ You will need several pieces of software installed, or the files from their
  `winsparkle.pdb` from the release's .zip file.  v0.7.0 is the most recently
  tested version.  Copy the two files, found at `<zip file>\<version>\Release`,
  into your checkout of the EDMC git files.
-1. [Windows SDK](https://developer.microsoft.com/en-US/windows/downloads/windows-10-sdk/).
+2. [Windows SDK](https://developer.microsoft.com/en-US/windows/downloads/windows-10-sdk/).
  This is needed for the internationalisation support in EDMC.
  [Windows 10 SDK, version 2004 (10.0.19041.0)](https://go.microsoft.com/fwlink/p/?linkid=2120843)
  is the most recently tested version.  Technically you only need the following
@@ -38,45 +38,44 @@ You will need several pieces of software installed, or the files from their
  auto-select some others).  NB: If you have need to uninstall this it's
  "Windows Software Development Kit - Windows 10.0.19041.1" in
  "Apps & Features", *not* "Windows SDK AddOn".
-1. [Python](https://python.org): 32-bit version of Python 3.13 for Windows.
+3. [Python](https://python.org): 32-bit version of Python 3.13 for Windows.
  [v3.13.9](https://www.python.org/downloads/release/python-3139/) is the most
  recently tested version.  You need the `Windows x86 executable installer`
  file, for the 32-bit version.  Double-check the version against the
    `.python.version` file, as it should always contain the intended version.
-1. [py2exe](https://github.com/albertosottile/py2exe) - Now available via PyPi,
+4. [py2exe](https://github.com/albertosottile/py2exe) - Now available via PyPi,
  so will be picked up with the `pip install` below.  Latest tested as per
  `requirements-dev.txt`.
 
-1. You'll now need to 'pip install' several python modules.
-    1. Ensure you have `pip` installed. If needs be see
+5. You'll now need to 'pip install' several python modules.
+    1. Ensure you have `pip` installed. For more information, see
      [Installing pip](https://pip.pypa.io/en/stable/installing/)
-    1. The easiest way is to utilise the `requirements-dev.txt` file:
+    2. The easiest way is to utilise the `requirements-dev.txt` file:
      `python -m pip install --user -r requirements-dev.txt`. This will install
      all dependencies plus anything required for development.
-    1. Else check the contents of both `requirements.txt` and `requirements-dev.txt`,
+    3. Else check the contents of both `requirements.txt` and `requirements-dev.txt`,
      and ensure the modules listed there are installed as per the version
      requirements.
 
-If you are using different versions of any of these tools then please ensure
+If you are using different versions of these tools then please ensure
 that the paths where they're installed match the associated lines in
 `build.py`.  i.e. if you're using later Windows SDK kit you might need to edit
 the SDKPATH line.
 
 # Version Strings
 
-This project now uses strict [Semantic Version](https://semver.org/#semantic-versioning-specification-semver)
-version strings.
+This project now uses strict [Semantic Version](https://semver.org/#semantic-versioning-specification-semver) strings.
 
 1. **Version strings should always be referred to as, e.g. `Major.Minor.Patch`
  not the old `A.BC` scheme, nor the pre-Semantic Version `A.B.C.D` scheme.**
-1. Any stable release should have a version of **only** `Major.Minor.Patch`,
+2. Any stable release should have a version of **only** `Major.Minor.Patch`,
  correctly incrementing depending on the changes since the last stable release.
-1. For any pre-release again increment the `Major.Minor.Patch` as fits the
+3. For any pre-release again increment the `Major.Minor.Patch` as fits the
  changes since the last *stable* release.
-1. Any pre-release should have a <pre-release> component of either:
+4. Any pre-release should have a <pre-release> component of either:
     1. `-beta<serial>`, i.e. `-beta1`.  This should be used when first asking
      a wider audience to test forthcoming changes.
-    1. `-rc<serial>`, i.e. `-rc1`.  This is used when testing has shown this
+    2. `-rc<serial>`, i.e. `-rc1`.  This is used when testing has shown this
      code should be ready for full release, but you want even wider testing.
 
     In both these cases simply increment `<serial>` for each new release.  *Do*
@@ -101,7 +100,7 @@ that.
  is what appears in the EXE properties, and is also used as the location of
  WinSparkle registry entries on Windows.
 
-1. Application names, version and URL of the file with latest release
+2. Application names, version and URL of the file with latest release
  information. These are all in the `config/__init__.py` file.  See the
  `from config import ...` lines in `build.py`:
     1. `appname`: The short appname, e.g. 'EDMarketConnector'
@@ -119,7 +118,7 @@ that.
      appcast_win_<version>.xml file.  The original upstream value is
      `https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml`.
 
-2. Location of release files.  This needs to be cited correctly in the
+3. Location of release files.  This needs to be cited correctly in the
    `edmarketconnector.xml` file, which is what the application queries to
    see if there is a newer version.
    Look for the `url="...` line in the `<enclosure ...` that is like:
@@ -168,14 +167,14 @@ Before you create a new install each time you should:
 We'll use an old version string, `4.0.2`, as an example throughout the
 following.
 
-1. You should by this time know what changes are going into the release, and
+1. You should know what changes are going into the release, and
 which branch (stable or beta) you'll be ultimately updating.
-2. So as to make backing out any mistakes easier create a new branch for this
+2. To make backing out any mistakes easier create a new branch for this
 release, using a name like `release-4.0.2`.  Do not use the tag
 `Release/4.0.2` form, that could cause confusion.
     1. `git checkout stable` # Or whichever other branch is appropriate.
-    1. `git pull origin` # Ensures local branch is up to date.
-    1. `git checkout -b release-4.0.2`
+    2. `git pull origin` # Ensures local branch is up to date.
+    3. `git checkout -b release-4.0.2`
 
 3. Get all the relevant code changes into this branch.  This might mean
 merging from another branch, such as an issue-specific one, or possibly
@@ -190,16 +189,16 @@ git commit for this change.**
 5. Prepare a changelog text for the release.  You'll need this both for the
 GitHub release and the contents of the `edmarketconnector.xml` file if making
 a `stable` release, as well as any social media posts you make.
-    1. The primary location of the changelog is [Changelog.md](../Changelog.md) -
+    1. The primary location of the changelog is [Changelog.md](/ChangeLog.md) -
     update this first.
-    1. To be sure you include all the changes look at the git log since the
+    2. To be sure you include all the changes look at the git log since the
     prior appropriate (pre-)release.
-    1. As you're working in a version-specific branch, `release-4.0.2`, you
+    3. As you're working in a version-specific branch, `release-4.0.2`, you
     can safely commit these changes and push to GitHub.
      **Do not merge the branch with `releases` until the GitHub release is in place.**
 
 If you're wondering, you needed to get the changelog prepared before building
-the .exe and .msi because ChangeLog.md is bundled with the install.
+the .exe and .msi because ChangeLog.md is bundled with the installation.
 
 
 # Adding killswitches 
@@ -247,7 +246,7 @@ Building 'dist.win32\EDMarketConnector.exe'.
 ```
 
 **Do check the output** for things like not properly specifying extra files
-to be included in the install.  If they're not picked up by current rules in
+to be included in the installation.  If they're not picked up by current rules in
 `build.py` then you will need to add them to the `win32`
 `DATA_FILES` array.
 
@@ -297,27 +296,27 @@ Once that is done then for manually built installers:
     But, **again, you should just be using the auto-build
     mechanism**.
 
-3. Now push the release-specific branch to GitHub.
-    1. Check which of your remotes is for github with `git remotes -v`. It
+2. Now push the release-specific branch to GitHub.
+    1. Check which of your remotes is for GitHub with `git remotes -v`. It
     should really be `origin` and the following assumes that.
-    1. `git push --set-upstream --tags origin release-4.0.2`
+    2. `git push --set-upstream --tags origin release-4.0.2`
 
-4. Merge the release-specific branch into the appropriate `stable` or `beta`
+3. Merge the release-specific branch into the appropriate `stable` or `beta`
 branch.  You can either do this locally and push the changes, or do it on
 GitHub.  You'll want to reference `stable` or `beta` in the next step, *not
 the release-4.0.2 branch, as it's temporary.*
 
-5. **You should no longer need to manually create a release, due to 
+4. **You should no longer need to manually create a release, due to 
     auto-building of any release tag, but you'll probably still need to edit
     in the ChangeLog, so...**
 
-    Craft a [new github Release](https://github.com/EDCD/EDMarketConnector/releases/new),
-    1. Use the new tag so as to reference the correct commit, along with the
+    Craft a [new GitHub Release](https://github.com/EDCD/EDMarketConnector/releases/new),
+    1. Use the new tag to reference the correct commit, along with the
     appropriate `stable` or `beta` branch as the 'Target'.
     2. Use the changelog text you already prepared to fill in the 'Release
     title' and description.
     3. Attach the `EDMarketConnector_win_<version>.msi` file for Windows (the
-    Source Code files are added by github based on the release tag).
+    Source Code files are added by GitHub based on the release tag).
     4. **If you are making a `beta` or otherwise pre-release you MUST tick the
     `[ ] This is a pre-release` box.**  Not doing so will cause this release
     to be pointed to by the 'latest' URL.
@@ -336,7 +335,7 @@ changelog text to the correct section(s):
     `grip --export ChangeLog.md`
 
 4. Open `edmarketconnector.xml` in your editor.
-5. If there's still a Mac OS section croll down past it to the Windows
+5. If there's still a macOS section croll down past it to the Windows
   section.
 6. You'll need to change the `<title>` and `<description>` texts to
   reflect the latest version and the additional changelog.
@@ -373,25 +372,24 @@ If you are making a pre-release then:
 1. **DO NOT** Edit `edmarketconnector.xml` at all.  No, not even if you 
   think you won't accidentally merge it into `releases`. Just don't change it
    at all.
-1. **DO NOT** merge into `releases`.
-1. **DO NOT** merge into `stable`.
-1. *Do* merge the code into `beta` after you have made a 'pre-release' on
+2. **DO NOT** merge into `releases`.
+3. **DO NOT** merge into `stable`.
+4. *Do* merge the code into `beta` after you have made a 'pre-release' on
  GitHub.
 
 # Changing Python version
 
 When changing the Python version (Major.Minor.Patch) used:
 
-1. Change the contents of `.python-version` so that pyenv notices.  All of
-  the GitHub workflows now reference this via the `setup-python`
-  `python-version-file` directive.
+1. Change the contents of `.python-version` so that pyenv notices. 
+  All the GitHub workflows now reference this via the `setup-python` `python-version-file` directive.
 
-1. Any version change:
+2. Any version change:
 
    1. `ChangeLog.md` - The `We now test against, and package with, Python
        M.m.` line.
 
-1. Major or Minor level changes:
+3. Major or Minor level changes:
 
     1. `build.py` will need its version check updating.
     2. `.pre-commit-config.yaml` will need the `default_language_version`

@@ -634,7 +634,7 @@ This release contains the data information for the new SCO modules added in Elit
 This should represent full support for the new Python Mk II.
 
 We now sign our code! This does mean that built EXEs are now slightly modified on our developer's machines.
-For information on what this means, and opt-out options, please visit https://github.com/EDCD/EDMarketConnector/wiki/Code-Signing-and-EDMC
+For information on what this means, and opt-out options, please visit https://github.com/EDCD/EDMarketConnector/blob/main/docs/Code Signing and EDMC.md
 
 **Changes and Enhancements**
 * Added new SCO Module Details
@@ -658,7 +658,7 @@ Please note that this does not offer full support for the new SCO modules or the
 be added in a future update.
 
 We now sign our code! This does mean that built EXEs are now slightly modified on our developer's machines.
-For information on what this means, and opt-out options, please visit https://github.com/EDCD/EDMarketConnector/wiki/Code-Signing-and-EDMC
+For information on what this means, and opt-out options, please visit https://github.com/EDCD/EDMarketConnector/blob/main/docs/Code Signing and EDMC.md
 
 **Changes and Enhancements**
 * Updated Translations
@@ -681,7 +681,7 @@ This release contains updated dependencies, modules files, translations, and add
 adds Turkish translations to EDMC!
 
 We now sign our code! This does mean that built EXEs are now slightly modified on our developer's machines.
-For information on what this means, and opt-out options, please visit https://github.com/EDCD/EDMarketConnector/wiki/Code-Signing-and-EDMC
+For information on what this means, and opt-out options, please visit https://github.com/EDCD/EDMarketConnector/blob/main/docs/Code Signing and EDMC.md
 
 **Changes and Enhancements**
 * Adds Turkish Translations to EDMC
@@ -704,7 +704,7 @@ Release 5.10.3
 This release contains a bugfix for the shipyard outfitting parsing system and an update to the French translations. 
 
 We now sign our code! This does mean that built EXEs are now slightly modified on our developer's machines.
-For information on what this means, and opt-out options, please visit https://github.com/EDCD/EDMarketConnector/wiki/Code-Signing-and-EDMC
+For information on what this means, and opt-out options, please visit https://github.com/EDCD/EDMarketConnector/blob/main/docs/Code Signing and EDMC.md
 
 **Changes and Enhancements**
 * Updated French Translations
@@ -724,7 +724,7 @@ This release contains updated dependencies, some bug fixes, a few minor enhancem
 and some resorted resources as well as a new image for some of the built EXEs.
 
 We now sign our code! This does mean that built EXEs are now slightly modified on our developer's machines.
-For information on what this means, and opt-out options, please visit https://github.com/EDCD/EDMarketConnector/wiki/Code-Signing-and-EDMC
+For information on what this means, and opt-out options, please visit https://github.com/EDCD/EDMarketConnector/blob/main/docs/Code Signing and EDMC.md
 
 **Changes and Enhancements**
 * Added additional logging to the Python build string in the case of missing files
@@ -1955,7 +1955,7 @@ Release 5.2.0
   causing a fresh query.  This will write an empty JSON `{}` if no data is
   yet available.
  
-* New [docs/Licenses/](docs/Licenses/) directory containing all relevant 
+* New [docs/Licenses/](/docs/Licenses/) directory containing all relevant 
   third-party licenses for the software this application uses.
 
 * `Settings` > `Output` > `File Location` 'Browse' button will now always be
@@ -2168,8 +2168,8 @@ Plugin Developers
 * We've updated [Contributing.md](./Contributing.md) including:
 
   1. Re-ordered the sections to be in a more logcial and helpful order.
-  1. Added a section about choosing an appropriate log level for messages.
-  1. fstrings now mandatory, other than some use of `.format()` with respect to
+  2. Added a section about choosing an appropriate log level for messages.
+  3. fstrings now mandatory, other than some use of `.format()` with respect to
   translated strings.
 
 * [docs/Translations.md](./docs/Translations.md) updated about a forthcoming 
@@ -2192,8 +2192,8 @@ Release 5.1.0
      Note that we can't reliably track this on the fly, so it will only 
      update when we see a full `ShipLockerMaterials` Journal event, such as 
      at login or when you disembark from any vehicle.
-  1. Odyssey Suits and their Loadouts will now be sent.
-  1. When you land on a body surface, be that in your own ship, in a Taxi, 
+  2. Odyssey Suits and their Loadouts will now be sent.
+  3. When you land on a body surface, be that in your own ship, in a Taxi, 
      or in a Dropship.  Depending on the exact scenario a Station might be 
      sent along with this.
      
@@ -2729,24 +2729,24 @@ if not hasattr(config, 'get_list'):
   official Journal documentation erroneously labels it) Journal event and
   its associated file `NavRoute.json`.  See [PLUGINS.md:Events documentation](https://github.com/EDCD/EDMarketConnector/blob/main/PLUGINS.md#journal-entry)
 
-    1. Similarly, there is now support for the `ModuleInfo` event and its
+    2. Similarly, there is now support for the `ModuleInfo` event and its
   associated `ModulesInfo.json` file.
 
-    1. `state['Credits']` - until now no effort was made to keep this 
+    3. `state['Credits']` - until now no effort was made to keep this 
     record of the credits balance up to date after the initial `LoadGame`
     event.  This has now been addressed, and the balance should stay in sync
     as best it can from the available Journal events.  It will always correct
     back to the actual balance on each CAPI data pull or game relog/restart.
 
-    1. `state['Cargo']` now takes account of any `CargoTransfer` events.
+    4. `state['Cargo']` now takes account of any `CargoTransfer` events.
     This was added to the game in the Fleet Carriers update, but also covers
     transfers to/from an SRV.
 
-    1. `state['OnFoot']` is a new boolean, set true whenever we detect
+    5. `state['OnFoot']` is a new boolean, set true whenever we detect
      the Cmdr is on-foot, i.e. not in any type of vehicle (Cmdr's own ship,
      SRV, multi-crew in another Cmdr's ship, Apex taxi, or a Dropship).
 
-    1. `state['Suits']` and `state['SuitLoadouts']` added as `dict`s containing
+    6. `state['Suits']` and `state['SuitLoadouts']` added as `dict`s containing
     information about the Cmdr's owned Suits and the Loadouts the Cmdr has
     defined to utilise them (and on-foot weapons).
     Note that in the raw CAPI data these are arrays if all members 
@@ -2761,15 +2761,15 @@ if not hasattr(config, 'get_list'):
     data pull, as the current Journal events don't allow for updating it on the
     fly (this should change in a future Odyssey patch).
        
-    1. `state['SuitCurrent']` and `state['SuitLoadoutCurrent']` contain the
+    7. `state['SuitCurrent']` and `state['SuitLoadoutCurrent']` contain the
        obvious "currently in use" data as per the Suits/SuitLoadouts.
        
-    1. Tracking of the new Odyssey 'Microresources' has been added:
+    8. Tracking of the new Odyssey 'Microresources' has been added:
        1. `Component` - `dict` for 'Ship Locker' inventory.
-       1. `Item` - `dict` for 'Ship Locker' inventory.
-       1. `Consumable` - `dict` for 'Ship Locker' inventory.
-       1. `Data` - `dict` for 'Ship Locker' inventory.
-       1. `BackPack` - on-foot inventory, a `dict` containing again 
+       2. `Item` - `dict` for 'Ship Locker' inventory.
+       3. `Consumable` - `dict` for 'Ship Locker' inventory.
+       4. `Data` - `dict` for 'Ship Locker' inventory.
+       5. `BackPack` - on-foot inventory, a `dict` containing again 
           dicts for `Component`, `Item`, `Consumable` and `Data`.
     However note that the lack of a Journal event when throwing a grenade, 
     along with no `BackPackMaterials` event if logging in on-foot means that
@@ -3176,7 +3176,7 @@ broken something.
   specifies they're Unicode applications so that they default to using the
   UTF-8 codepage.
   
-  1. We are now explicitly setting a UTF8 encoding at startup.  NB: This is
+  2. We are now explicitly setting a UTF8 encoding at startup.  NB: This is
   still necessary so that users running from source code are also using the
   UTF-8 encoding, there's no manifest in that scenario.
   
@@ -3196,12 +3196,12 @@ broken something.
    
 * New UI Scaling option!  Find the setting on the 'Appearance' tab of Settings.
     1. This will only actually take effect after restarting the application.
-    1. The 'Default' theme's menu names won't be resized due to using the
+    2. The 'Default' theme's menu names won't be resized due to using the
        default font.  The other two themes work properly though as they use
        a custom font for those texts.
-    1. As per the note next to the settings bar, "100" means "default", so set
+    3. As per the note next to the settings bar, "100" means "default", so set
        it to that if you decide you don't need the UI scaling.
-    1. If you select 0 it will become 100 on the next startup.
+    4. If you select 0 it will become 100 on the next startup.
        
     Plugin Authors: If you are doing per-pixel things in your UI then you'll
     want to check `config.get('ui_scale')` and adjust accordingly.  `100`
@@ -3228,35 +3228,35 @@ broken something.
     Explorer window to where EDMarketConnector.exe is installed then
     double-click this `.bat` file.
 
-  1. EDMC.py has a new `--loglevel` command-line argument.  See `EDMC.py -h`
+  2. EDMC.py has a new `--loglevel` command-line argument.  See `EDMC.py -h`
   for the possible values.  It defaults to 'INFO', which, unless there's an
   error, should yield the same output as before.
    
-  1. EDMC.exe will now log useful startup state information if run with the
+  3. EDMC.exe will now log useful startup state information if run with the
   `--loglevel DEBUG` arguments.
   
-  1. EDMarketConnector has a new 'Loglevel' setting on the 'Configuration' tab
+  4. EDMarketConnector has a new 'Loglevel' setting on the 'Configuration' tab
   to change the loglevel.  Default is 'INFO' and advised for normal use.
   If reporting a bug it will be very helpful to change this to 'DEBUG' and
   then reproduce the bug.  Changes to this will take effect immediately, no
   need for a restart.
   
-  1. Both programs not only log to their old locations (console for EDMC, and
+  5. Both programs not only log to their old locations (console for EDMC, and
   `%TEMP%\EDMarketConnector.log` for the main application), but now also to
   a size-limited and rotated logfile inside the folder
   `%TEMP%\EDMarketConnector\ `.
      1. The base filename inside there is `EDMarketConnector-debug.log` for the
      main program and `EDMC-debug.log` for the command-line program.
-     1. A new file is only started if/when it reaches the 1 MiB size limit.
-     1. We'll keep at most 10 backups of each file, so the maximum disk space
+     2. A new file is only started if/when it reaches the 1 MiB size limit.
+     3. We'll keep at most 10 backups of each file, so the maximum disk space
      used by this will be 22 MiB.
-     1. Only actually *logged* output goes to these files, which currently is
+     4. Only actually *logged* output goes to these files, which currently is
      far from all the traditional output that goes to the old file/console.
      Anything using `print(...)` will not appear in these new files.
-     1. These files always default to DEBUG level, whereas the old log file
+     5. These files always default to DEBUG level, whereas the old log file
      continues to follow the user-set logging level.
    
-  1. Default `logging` level for plugins is DEBUG.  This won't change what's
+  6. Default `logging` level for plugins is DEBUG.  This won't change what's
   actually logged, it just ensures that everything gets through to the two
   channels that then decide what is output.
 
@@ -3505,9 +3505,9 @@ Developers please note the new [Contributing.md](https://github.com/EDCD/EDMarke
    
    Now the only files the application will take note of must:
     1. Start with `Journal.` or `JournalBeta.`.
-    1. Have the 12-digit date/timestamp, followed by a `.`
-    1. Have the 2 digit serial number, followed by a `.`
-    1. Nothing else before the trailing `log`.
+    2. Have the 12-digit date/timestamp, followed by a `.`
+    3. Have the 2 digit serial number, followed by a `.`
+    4. Nothing else before the trailing `log`.
     
  * Fixed the location of Registry keys for the update checker, WinSparkle:
    * To be under the new `EDCD` Registry key in
