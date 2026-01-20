@@ -2,7 +2,7 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
 ---
 * We currently test against, and package with, Python 3.13, 64-bit.
 ---
-Pre-Release 6.1.0-beta4
+Pre-Release 6.1.0-beta5
 ===
 This release includes the new EDMC Plugin Browser, which allows plugin authors to register their plugins. 
 These registered plugins will be able to be browsed and discovered by all EDMC Users!
@@ -15,6 +15,7 @@ prevent various unexpected situations which could prevent updates or contacting 
 * Added a series of new Commodity Export File Types for increased flexibility.
 * Added the ability to have EDMC automatically update ships.json, modules.json, and the Plugin Master List.
 * Added the ability to send Journal events to Plugins from before LoadGame has been parsed.
+* Added additional guarding for expired CAPI authentication in EDMC.exe
 * Migrated the Translation Submission System from OneSky to Crowdin.
 * Updates a series of internal actions and dependencies to latest versions.
 * Improved the speed of EDMC startup when checking for updated data files.
@@ -27,6 +28,7 @@ prevent various unexpected situations which could prevent updates or contacting 
 
 **Bug Fixes**
 * Fixed a series of minor bugs.
+* Fixed an error where missing modules could cause EDMC.exe to crash
 
 **Plugin Developers**
 * Consider registering your plugins! 
