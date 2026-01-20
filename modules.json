@@ -1433,6 +1433,9 @@
     "int_engine_size7_class5": {
         "mass": 80
     },
+    "int_engine_size7_class5_gravityoptimised_mkii": {
+        "mass": 80
+    },
     "int_engine_size8_class1": {
         "mass": 160
     },
@@ -2061,6 +2064,48 @@
         "maxfuel": 13.1,
         "fuelmul": 0.013,
         "fuelpower": 2.75
+    },
+    "int_hyperdrive_overcharge_size8_class5": {
+        "mass": 160,
+        "optmass": 4670,
+        "maxfuel": 20.7,
+        "fuelmul": 0.013,
+        "fuelpower": 2.90
+    },
+    "int_hyperdrive_overcharge_size8_class3": {
+        "mass": 160,
+        "optmass": 4200,
+        "maxfuel": 20.4,
+        "fuelmul": 0.012,
+        "fuelpower": 2.90
+    },
+    "int_hyperdrive_overcharge_size8_class5_overchargebooster_mkii": {
+        "mass": 160,
+        "optmass": 4670,
+        "maxfuel": 6.80,
+        "fuelmul": 0.011,
+        "fuelpower": 2.5025
+    },
+    "int_hyperdrive_overcharge_size8_class4": {
+        "mass": 160,
+        "optmass": 4200,
+        "maxfuel": 20.40,
+        "fuelmul": 0.012,
+        "fuelpower": 2.9
+    },
+    "int_hyperdrive_overcharge_size8_class2": {
+        "mass": 64,
+        "optmass": 4200,
+        "maxfuel": 20.40,
+        "fuelmul": 0.012,
+        "fuelpower": 2.9
+    },
+    "int_hyperdrive_overcharge_size8_class1": {
+        "mass": 160,
+        "optmass": 2800,
+        "maxfuel": 13.60,
+        "fuelmul": 0.008,
+        "fuelpower": 2.9
     },
     "int_hyperdrive_size2_class1": {
         "mass": 2.5,

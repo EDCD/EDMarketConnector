@@ -355,6 +355,7 @@ outfitting_standard_map = {
     # 'armour':                     handled separately
     'engine':                       'Thrusters',
     ('engine', 'fast'):             'Enhanced Performance Thrusters',
+    ('engine', 'gravityoptimised'): 'Gravity Optimized Thrusters',
     'fueltank':                     'Fuel Tank',
     'guardianpowerdistributor':     'Guardian Hybrid Power Distributor',
     'guardianpowerplant':           'Guardian Hybrid Power Plant',

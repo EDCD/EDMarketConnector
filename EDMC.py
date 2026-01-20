@@ -273,8 +273,10 @@ def main() -> None:  # noqa: C901, CCR001
                 cmdrs = config.get_list('cmdrs', default=[])
                 if monitor.cmdr not in cmdrs:
                     raise companion.CredentialsError()
-
-                companion.session.login(monitor.cmdr, monitor.is_beta)
+                try:
+                    companion.session.login(monitor.cmdr, monitor.is_beta)
+                except AttributeError:
+                    raise companion.CredentialsError()
 
             ###################################################################
             # Initiate CAPI queries
