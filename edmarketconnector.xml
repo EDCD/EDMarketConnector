@@ -5,9 +5,45 @@
       <link>https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/edmarketconnector.xml</link>
       <description>Most recent changes with links to updates.</description>
       <item>
-         <title>Release 6.0.2</title>
+         <title>Release 6.1.0</title>
          <description><![CDATA[<style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
 <p>We now test against, and package with, Python 3.13.</p>
+<h2>Release 6.1.0</h2>
+<p>This release includes the new EDMC Plugin Browser, which allows plugin authors to register their plugins.
+These registered plugins will be able to be browsed and discovered by all EDMC Users!</p>
+<p>This release also fixes dark-mode not being able to be resized (a bug for over 5 years!) and adds code to
+prevent various unexpected situations which could prevent updates or contacting Frontier.</p>
+<p><strong>Changes and Enhancements</strong></p>
+<ul>
+<li>Added the new EDMC Plugin Browser and EDMC Plugin Registration System.</li>
+<li>Added a series of new Commodity Export File Types for increased flexibility.</li>
+<li>Added the ability to have EDMC automatically update ships.json, modules.json, and the Plugin Master List.</li>
+<li>Added the ability to send Journal events to Plugins from before LoadGame has been parsed.</li>
+<li>Added additional guarding for expired CAPI authentication in EDMC.exe</li>
+<li>Migrated the Translation Submission System from OneSky to Crowdin.</li>
+<li>Updates a series of internal actions and dependencies to latest versions.</li>
+<li>Improved the speed of EDMC startup when checking for updated data files.</li>
+<li>Improved the handling of Lang comment detection.</li>
+<li>Improved the utility of the various core plugin System and Station providers.</li>
+<li>Migrates the Translations wiki page to docs/Translations.md.</li>
+<li>Simplified the location that modules.json and ships.json should be expected to be for update simplicity.</li>
+<li>Minor code improvements.</li>
+<li>Simplified handling code for EDDN messages.</li>
+</ul>
+<p><strong>Bug Fixes</strong></p>
+<ul>
+<li>Fixed a series of minor bugs.</li>
+<li>Fixed an error where missing modules could cause EDMC.exe to crash</li>
+</ul>
+<p><strong>Plugin Developers</strong></p>
+<ul>
+<li>Consider registering your plugins!</li>
+<li>EDMC strongly encourages consistent plugin versioning. Please review PLUGINS.md for more information.</li>
+<li>util.gzip is deprecated and will be removed in a later version.</li>
+<li>ships.json and modules.json are no longer bundled with EDMC by default, and will be downloaded automatically to the app_dir location.</li>
+<li>The build system now lists all available non-EDMC imports. Check the docs!</li>
+</ul>
+<hr>
 <h2>Release 6.0.2</h2>
 <p>This release adds additional safety checks for the writing of the new config file on first write for Windows installs.</p>
 <p><strong>Bug Fixes</strong></p>
@@ -2696,7 +2732,12 @@ about this:
 <a href="https://issues.frontierstore.net/issue-detail/28638" rel="nofollow">PTS CAPI saying Commander is Docked after jumping to new system</a>.</p>
 </li>
 </ul>]]></description>
-         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F6.0.2/EDMarketConnector_Installer_6.0.2_x64.exe" sparkle:os="windows" sparkle:version="6.0.2" length="0" type="application/x-ms-dos-executable" />
+         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F6.1.0/EDMarketConnector_Installer_6.1.0_x64.exe"
+                    sparkle:os="windows"
+                    sparkle:version="6.1.0"
+                    type="application/x-ms-dos-executable"
+                    sparkle:edSignature="TLq46ef0tlrT3mac27uZ83IgpXTPATnoxCiML/mdpl8VmmlW1HZWxqlTNAFqS8TlVND7LGWPUmp9glqFbOKfBw==" length="23860400"
+         />
       </item>
    </channel>
 </rss>
