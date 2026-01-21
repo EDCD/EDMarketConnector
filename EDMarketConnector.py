@@ -22,7 +22,7 @@ import threading
 import webbrowser
 from os import chdir, environ
 from time import localtime, strftime, time
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, MutableMapping
 from constants import applongname, appname, protocolhandler_redirect
 
 # Have this as early as possible for people running EDMarketConnector.exe
@@ -67,7 +67,6 @@ from config import appversion, appversion_nobuild, config, copyright
 
 from EDMCLogging import edmclogger, logger, logging
 from journal_lock import JournalLock, JournalLockResult
-from update import check_for_fdev_updates
 from common_utils import log_locale, SERVER_RETRY
 
 if __name__ == '__main__':  # noqa: C901
@@ -435,7 +434,6 @@ import prefs
 import protocol
 import stats
 import td
-from commodity import COMMODITY_CSV
 from dashboard import dashboard
 from edmc_data import ship_name_map
 from hotkey import hotkeymgr
@@ -443,6 +441,60 @@ from l10n import translations as tr
 from monitor import monitor
 from theme import theme
 from ttkHyperlinkLabel import HyperlinkLabel, SHIPYARD_HTML_TEMPLATE
+
+
+def _config_plugins(frame: tk.Frame, ui_row: int) -> tk.Frame:
+    for idx, plugin in enumerate(plug.PLUGINS, start=1):
+        plugin_frame = tk.Frame(frame, name=f"plugin_{idx}")
+        appitem = plugin.get_app(plugin_frame)
+        if not appitem:
+            plugin_frame.destroy()
+            continue
+
+        # Per plugin separator
+        plugin_sep = tk.Frame(frame, highlightthickness=1, name=f"plugin_hr_{idx}")
+        plugin_sep.grid(row=ui_row, columnspan=2, sticky=tk.EW)
+        ui_row += 1
+
+        # Plugin frame
+        plugin_frame.grid(row=ui_row, columnspan=2, sticky=tk.NSEW)
+        plugin_frame.columnconfigure(1, weight=1)
+        ui_row += 1
+
+        # Add plugin widgets
+        if isinstance(appitem, tuple) and len(appitem) == 2:
+            appitem[0].grid(row=ui_row - 1, column=0, sticky=tk.W)
+            appitem[1].grid(row=ui_row - 1, column=1, sticky=tk.EW)
+        else:
+            appitem.grid(row=ui_row - 1, column=0, columnspan=2, sticky=tk.EW)
+
+    return frame
+
+
+def help_privacy() -> None:
+    """Open Privacy Policy docs page in browser."""
+    webbrowser.open('https://github.com/EDCD/EDMarketConnector/blob/main/docs/PRIVACY.md')
+
+
+def help_general() -> None:
+    """Open Wiki Help page in browser."""
+    webbrowser.open('https://github.com/EDCD/EDMarketConnector/tree/main/docs')
+
+
+def help_troubleshooting() -> None:
+    """Open Troubleshooting docs page in browser."""
+    webbrowser.open("https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting")
+
+
+def help_report_a_bug() -> None:
+    """Open GitHub Bug Report."""
+    webbrowser.open("https://github.com/EDCD/EDMarketConnector/issues/new?assignees=&labels=bug%2C+unconfirmed"
+                    "&template=bug_report.md&title=")
+
+
+def help_releases() -> None:
+    """Open Releases page in browser."""
+    webbrowser.open('https://github.com/EDCD/EDMarketConnector/releases')
 
 
 class AppWindow:
@@ -456,11 +508,13 @@ class AppWindow:
 
     PADX = 5
 
-    def __init__(self, master: tk.Tk):  # noqa: C901, CCR001 # TODO - can possibly factor something out
+    def __init__(self, master: tk.Tk):  # noqa: CCR001 TODO - can possibly factor something out
 
-        self.capi_query_holdoff_time = config.get_int('querytime', default=0) + companion.capi_query_cooldown
-        self.capi_fleetcarrier_query_holdoff_time = config.get_int('fleetcarrierquerytime', default=0) \
-            + companion.capi_fleetcarrier_query_cooldown
+        self.early_journal_events: list[MutableMapping[str, Any]] = []
+        query_time = config.get_int('querytime', default=0)
+        fleetcarrier_time = config.get_int('fleetcarrierquerytime', default=0)
+        self.capi_query_holdoff_time = query_time + companion.capi_query_cooldown
+        self.capi_fleetcarrier_query_holdoff_time = fleetcarrier_time + companion.capi_fleetcarrier_query_cooldown
 
         self.w = master
         self.w.title(applongname)
@@ -482,7 +536,7 @@ class AppWindow:
             logfile_loc = pathlib.Path(config.app_dir_path / 'logs')
             menu_options = (
                 ("Open", None, open_window),
-                ("Report a Bug", None, self.help_report_a_bug),
+                ("Report a Bug", None, help_report_a_bug),
                 ("About EDMC", None, lambda: not self.HelpAbout.showing and self.HelpAbout(self.w)),
                 ("Open Log Folder", None, lambda: prefs.open_folder(logfile_loc)),
                 ("Open System Profiler", None, lambda: prefs.help_open_system_profiler(self)),
@@ -503,9 +557,9 @@ class AppWindow:
         # TODO: Export to files and merge from them in future ?
         self.theme_icon = tk.PhotoImage(
             data='R0lGODlhFAAQAMZQAAoKCQoKCgsKCQwKCQsLCgwLCg4LCQ4LCg0MCg8MCRAMCRANChINCREOChIOChQPChgQChgRCxwTCyYVCSoXCS0YCTkdCTseCT0fCTsjDU0jB0EnDU8lB1ElB1MnCFIoCFMoCEkrDlkqCFwrCGEuCWIuCGQvCFs0D1w1D2wyCG0yCF82D182EHE0CHM0CHQ1CGQ5EHU2CHc3CHs4CH45CIA6CIE7CJdECIdLEolMEohQE5BQE41SFJBTE5lUE5pVE5RXFKNaFKVbFLVjFbZkFrxnFr9oFsNqFsVrF8RsFshtF89xF9NzGNh1GNl2GP+KG////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////yH5BAEKAH8ALAAAAAAUABAAAAeegAGCgiGDhoeIRDiIjIZGKzmNiAQBQxkRTU6am0tPCJSGShuSAUcLoIIbRYMFra4FAUgQAQCGJz6CDQ67vAFJJBi0hjBBD0w9PMnJOkAiJhaIKEI7HRoc19ceNAolwbWDLD8uAQnl5ga1I9CHEjEBAvDxAoMtFIYCBy+kFDKHAgM3ZtgYSLAGgwkp3pEyBOJCC2ELB31QATGioAoVAwEAOw==')  # noqa: E501
-        self.theme_minimize = tk.BitmapImage(
+        self.img_theme_minimize = tk.BitmapImage(
             data='#define im_width 16\n#define im_height 16\nstatic unsigned char im_bits[] = {\n   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,\n   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfc, 0x3f,\n   0xfc, 0x3f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };\n')  # noqa: E501
-        self.theme_close = tk.BitmapImage(
+        self.img_theme_close = tk.BitmapImage(
             data='#define im_width 16\n#define im_height 16\nstatic unsigned char im_bits[] = {\n   0x00, 0x00, 0x00, 0x00, 0x0c, 0x30, 0x1c, 0x38, 0x38, 0x1c, 0x70, 0x0e,\n   0xe0, 0x07, 0xc0, 0x03, 0xc0, 0x03, 0xe0, 0x07, 0x70, 0x0e, 0x38, 0x1c,\n   0x1c, 0x38, 0x0c, 0x30, 0x00, 0x00, 0x00, 0x00 };\n')  # noqa: E501
 
         frame = tk.Frame(self.w, name=appname.lower())
@@ -530,58 +584,27 @@ class AppWindow:
 
         ui_row = 1
 
-        self.cmdr_label.grid(row=ui_row, column=0, sticky=tk.W)
-        self.cmdr.grid(row=ui_row, column=1, sticky=tk.EW)
-        ui_row += 1
+        label_value_pairs = [
+            (self.cmdr_label, self.cmdr),
+            (self.ship_label, self.ship),
+        ]
 
-        self.ship_label.grid(row=ui_row, column=0, sticky=tk.W)
-        self.ship.grid(row=ui_row, column=1, sticky=tk.EW)
-        ui_row += 1
-
-        self.suit_grid_row = ui_row
+        self.suit_grid_row = ui_row + len(label_value_pairs)
         self.suit_shown = False
-        ui_row += 1
+        label_value_pairs.append((self.suit_label, self.suit))
 
-        self.system_label.grid(row=ui_row, column=0, sticky=tk.W)
-        self.system.grid(row=ui_row, column=1, sticky=tk.EW)
-        ui_row += 1
+        label_value_pairs.extend([
+            (self.system_label, self.system),
+            (self.station_label, self.station),
+        ])
 
-        self.station_label.grid(row=ui_row, column=0, sticky=tk.W)
-        self.station.grid(row=ui_row, column=1, sticky=tk.EW)
-        ui_row += 1
+        for label, value in label_value_pairs:
+            label.grid(row=ui_row, column=0, sticky=tk.W)
+            value.grid(row=ui_row, column=1, sticky=tk.EW)  # type: ignore
+            ui_row += 1
 
-        plugin_no = 0
-        for plugin in plug.PLUGINS:
-            # Per plugin separator
-            plugin_sep = tk.Frame(
-                frame, highlightthickness=1, name=f"plugin_hr_{plugin_no + 1}"
-            )
-            # Per plugin frame, for it to use as its parent for own widgets
-            plugin_frame = tk.Frame(
-                frame,
-                name=f"plugin_{plugin_no + 1}"
-            )
-            appitem = plugin.get_app(plugin_frame)
-            if appitem:
-                plugin_no += 1
-                plugin_sep.grid(columnspan=2, sticky=tk.EW)
-                ui_row = frame.grid_size()[1]
-                plugin_frame.grid(
-                    row=ui_row, columnspan=2, sticky=tk.NSEW
-                )
-                plugin_frame.columnconfigure(1, weight=1)
-                if isinstance(appitem, tuple) and len(appitem) == 2:
-                    ui_row = frame.grid_size()[1]
-                    appitem[0].grid(row=ui_row, column=0, sticky=tk.W)
-                    appitem[1].grid(row=ui_row, column=1, sticky=tk.EW)
-
-                else:
-                    appitem.grid(columnspan=2, sticky=tk.EW)
-
-            else:
-                # This plugin didn't provide any UI, so drop the frames
-                plugin_frame.destroy()
-                plugin_sep.destroy()
+        ui_row = frame.grid_size()[1]  # start row
+        frame = _config_plugins(frame, ui_row)
 
         # LANG: Update button in main window
         self.button = ttk.Button(
@@ -612,8 +635,8 @@ class AppWindow:
         self.status.grid(columnspan=2, sticky=tk.EW)
 
         for child in frame.winfo_children():
-            child.grid_configure(padx=self.PADX, pady=(  # type: ignore
-                sys.platform != 'win32' or isinstance(child, tk.Frame)) and 2 or 0)
+            pad_y = 2 if sys.platform != 'win32' or isinstance(child, tk.Frame) else 0
+            child.grid_configure(padx=self.PADX, pady=pad_y)  # type: ignore
 
         self.menubar = tk.Menu()
 
@@ -641,11 +664,11 @@ class AppWindow:
         self.edit_menu.add_command(accelerator='Ctrl+C', state=tk.DISABLED, command=self.copy)
         self.menubar.add_cascade(menu=self.edit_menu)
         self.help_menu = tk.Menu(self.menubar, tearoff=tk.FALSE)  # type: ignore
-        self.help_menu.add_command(command=self.help_general)  # Documentation
-        self.help_menu.add_command(command=self.help_troubleshooting)  # Troubleshooting
-        self.help_menu.add_command(command=self.help_report_a_bug)  # Report A Bug
-        self.help_menu.add_command(command=self.help_privacy)  # Privacy Policy
-        self.help_menu.add_command(command=self.help_releases)  # Release Notes
+        self.help_menu.add_command(command=help_general)  # Documentation
+        self.help_menu.add_command(command=help_troubleshooting)  # Troubleshooting
+        self.help_menu.add_command(command=help_report_a_bug)  # Report A Bug
+        self.help_menu.add_command(command=help_privacy)  # Privacy Policy
+        self.help_menu.add_command(command=help_releases)  # Release Notes
         self.help_menu.add_command(command=lambda: self.updater.check_for_updates())  # Check for Updates...
         # About E:D Market Connector
         self.help_menu.add_command(command=lambda: not self.HelpAbout.showing and self.HelpAbout(self.w))
@@ -690,12 +713,12 @@ class AppWindow:
         theme_titlebar.bind('<Button-1>', self.drag_start)
         theme_titlebar.bind('<B1-Motion>', self.drag_continue)
         theme_titlebar.bind('<ButtonRelease-1>', self.drag_end)
-        theme_minimize = tk.Label(self.theme_menubar, image=self.theme_minimize)
+        theme_minimize = tk.Label(self.theme_menubar, image=self.img_theme_minimize)
         theme_minimize.grid(row=0, column=3, padx=2)
-        theme.button_bind(theme_minimize, self.oniconify, image=self.theme_minimize)
-        theme_close = tk.Label(self.theme_menubar, image=self.theme_close)
+        theme.button_bind(theme_minimize, self.oniconify, image=self.img_theme_minimize)
+        theme_close = tk.Label(self.theme_menubar, image=self.img_theme_close)
         theme_close.grid(row=0, column=4, padx=2)
-        theme.button_bind(theme_close, self.onexit, image=self.theme_close)
+        theme.button_bind(theme_close, self.onexit, image=self.img_theme_close)
         self.theme_file_menu = tk.Label(self.theme_menubar, anchor=tk.W)
         self.theme_file_menu.grid(row=1, column=0, padx=self.PADX, sticky=tk.W)
         theme.button_bind(self.theme_file_menu,
@@ -715,15 +738,15 @@ class AppWindow:
                                                             e.widget.winfo_rooty()
                                                             + e.widget.winfo_height()))
         tk.Frame(self.theme_menubar, highlightthickness=1).grid(columnspan=5, padx=self.PADX, sticky=tk.EW)
-        theme.register(self.theme_minimize)  # images aren't automatically registered
-        theme.register(self.theme_close)
+        theme.register(self.img_theme_minimize)  # images aren't automatically registered
+        theme.register(self.img_theme_close)
         self.blank_menubar = tk.Frame(frame, name="blank_menubar")
         tk.Label(self.blank_menubar).grid()
         tk.Label(self.blank_menubar).grid()
         tk.Frame(self.blank_menubar, height=2).grid()
         theme.register_alternate((self.menubar, self.theme_menubar, self.blank_menubar),
                                  {'row': 0, 'columnspan': 2, 'sticky': tk.NSEW})
-        self.w.resizable(tk.TRUE, tk.FALSE)
+        self.w.resizable(True, True)
 
         # update geometry
         if config.get_str('geometry'):
@@ -769,12 +792,75 @@ class AppWindow:
             self.status['text'] = tr.tl("Awaiting Full CMDR Login")  # LANG: Await Full CMDR Login to Game
 
         # Start a protocol handler to handle cAPI registration. Requires main loop to be running.
-        self.w.after_idle(lambda: protocol.protocolhandler.start(self.w))
-        self.w.after_idle(lambda: self.postprefs(False))  # Companion login happens in callback from monitor
+        self.w.after_idle(self._after_idle_init)
         self.toggle_suit_row(visible=False)
         if args.start_min:
             logger.warning("Trying to start minimized")
             self.oniconify() if root.overrideredirect() else self.w.wm_iconify()
+
+    def _after_idle_init(self):
+        """Combine after_idle tasks for startup to ensure only one queue."""
+        protocol.protocolhandler.start(self.w)
+        self.postprefs(False)  # Companion login happens in callback from monitor
+
+    def _set_grabber(self, frame: tk.Frame | ttk.Frame) -> None:
+        if config.get_int("theme") != theme.THEME_DEFAULT:
+            grip_size = 14
+
+            self.resize_grip = tk.Canvas(
+                self.w,
+                width=grip_size,
+                height=grip_size,
+                highlightthickness=0,
+                bg=frame.cget("background"),
+            )
+
+            # draw diagonal grip lines
+            for i in range(4, grip_size, 4):
+                self.resize_grip.create_line(i, grip_size, grip_size, i, fill="#404040")
+
+            self.resize_grip.bind(
+                "<Enter>",
+                lambda e: self.resize_grip.configure(bg=frame.cget("background")),
+            )
+            self.resize_grip.bind(
+                "<Leave>",
+                lambda e: self.resize_grip.configure(bg=frame.cget("background")),
+            )
+
+            self.resize_grip.place(relx=1.0, rely=1.0, anchor="se")
+
+            def _resize_drag(event: tk.Event):
+                dx = event.x_root - self._resize_start_x
+                dy = event.y_root - self._resize_start_y
+
+                # calculate proposed size
+                new_w = self._resize_start_w + dx
+                new_h = self._resize_start_h + dy
+
+                # enforce minimum size
+                min_w, min_h = 50, 50
+                if new_w < min_w:
+                    new_w = min_w
+                if new_h < min_h:
+                    new_h = min_h
+
+                self.w.geometry(f"{new_w}x{new_h}")
+
+            def _resize_start(event: tk.Event):
+                self._resize_start_x = event.x_root
+                self._resize_start_y = event.y_root
+                self._resize_start_w = self.w.winfo_width()
+                self._resize_start_h = self.w.winfo_height()
+
+            self.resize_grip.bind("<Button-1>", _resize_start)
+            self.resize_grip.bind("<B1-Motion>", _resize_drag)
+        else:
+            try:
+                if self.resize_grip:
+                    self.resize_grip.place_forget()
+            except AttributeError:
+                pass
 
     def update_suit_text(self) -> None:
         """Update the suit text for current type and loadout."""
@@ -845,6 +931,8 @@ class AppWindow:
 
         if dologin and monitor.cmdr:
             self.login()  # Login if not already logged in with this Cmdr
+
+        self._set_grabber(root.nametowidget(".edmarketconnector"))
 
         if postargs.get('Update') and postargs.get('Track'):
             track = postargs.get('Track')
@@ -987,7 +1075,19 @@ class AppWindow:
                 # Fixup anomalies in the comodity data
                 fixed = companion.fixup(data)
                 if output_flags & config.OUT_MKT_CSV:
-                    commodity.export(fixed, COMMODITY_CSV)
+                    # Determine user-selected market export type (CSV, TAB, PIPE, SEMICOLON)
+                    mkt_type = config.get_str('mkt_export_type', default='SEMICOLON')
+                    if mkt_type == 'CSV':
+                        kind = commodity.COMMODITY_CSV
+                    elif mkt_type == 'CSV_NEW':
+                        kind = commodity.COMMODITY_CSV_NEW
+                    elif mkt_type == 'TAB':
+                        kind = commodity.COMMODITY_TAB
+                    elif mkt_type == 'PIPE':
+                        kind = commodity.COMMODITY_PIPE
+                    else:
+                        kind = commodity.COMMODITY_SEMICOLON
+                    commodity.export(fixed, kind)
 
                 if output_flags & config.OUT_MKT_TD:
                     td.export(fixed)
@@ -1170,7 +1270,7 @@ class AppWindow:
                 logger.error(msg)
                 raise ValueError(msg)
 
-            if capi_response.capi_data.source_endpoint == companion.session.FRONTIER_CAPI_PATH_FLEETCARRIER:
+            if capi_response.capi_data.source_endpoint == companion.CAPIEndpoint.FLEETCARRIER:
                 # Fleetcarrier CAPI response
                 # Validation
                 if 'name' not in capi_response.capi_data:
@@ -1401,6 +1501,19 @@ class AppWindow:
         self.cooldown()
         logger.trace_if('capi.worker', '...done')
 
+    def handle_plugin_event_error(self, err: str | None) -> None:
+        """
+        Display a plugin's error message at the bottom of the main window.
+
+        If there was no error message passed in, nothing will be done.
+
+        :param err: Message to display, or None for no error.
+        """
+        if err:
+            self.status['text'] = err
+            if not config.get_int('hotkey_mute'):
+                hotkeymgr.play_bad()
+
     def journal_event(self, event: str):  # noqa: C901, CCR001 # Currently not easily broken up.
         """
         Handle a Journal event passed through event queue from monitor.py.
@@ -1514,15 +1627,21 @@ class AppWindow:
 
             if monitor.cmdr and monitor.mode == 'CQC' and entry['event']:
                 err = plug.notify_journal_entry_cqc(monitor.cmdr, monitor.is_beta, entry, monitor.state)
-                if err:
-                    self.status['text'] = err
-                    if not config.get_int('hotkey_mute'):
-                        hotkeymgr.play_bad()
+                self.handle_plugin_event_error(err)
 
                 return  # in CQC
 
             if not entry['event'] or not monitor.mode:
+                # Game session has not fully loaded yet. We may be receiving events from the
+                # journal, but don't know which game mode (Open/CQC/solo etc) we're running in.
                 logger.trace_if('journal.queue', 'Startup, returning')
+
+                if entry['event']:
+                    # Since we don't know which mode the game is in (and therefore whether to send
+                    # the event to a plugin's `journal_event` or `journal_event_cqc` function),
+                    # temporarily queue it so we can pass it on once the mode is known.
+                    self.early_journal_events.append(entry)
+
                 return  # Startup
 
             if entry['event'] in ('StartUp', 'LoadGame') and monitor.started:
@@ -1531,6 +1650,7 @@ class AppWindow:
                 # Disable WinSparkle automatic update checks, IFF configured to do so when in-game
                 if config.get_int('disable_autoappupdatecheckingame'):
                     if self.updater is not None:
+                        config.set("core_updater_disable_in_game", self.updater.get_update_check())
                         self.updater.set_automatic_updates_check(False)
 
                     logger.info('Monitor: Disable WinSparkle automatic update checks')
@@ -1538,6 +1658,25 @@ class AppWindow:
                 # Can't start dashboard monitoring
                 if not dashboard.start(self.w, monitor.started):
                     logger.info("Can't start Status monitoring")
+
+            # monitor.cmdr should always be set if monitor.mode is set (and monitor.mode must be set
+            # if we reach this point in the function), but we check monitor.cmdr here so the mypy
+            # doesn't complain about passing str|None where str is required.
+            if self.early_journal_events and monitor.cmdr:
+                for early_entry in self.early_journal_events:
+                    if monitor.mode == 'CQC':
+                        err = plug.notify_journal_entry_cqc(monitor.cmdr, monitor.is_beta, early_entry, monitor.state)
+                    else:
+                        err = plug.notify_journal_entry(
+                            monitor.cmdr,
+                            monitor.is_beta,
+                            monitor.state['SystemName'],
+                            monitor.state['StationName'],
+                            early_entry,
+                            monitor.state
+                        )
+                    self.handle_plugin_event_error(err)
+                self.early_journal_events.clear()
 
             # Export loadout
             if entry['event'] == 'Loadout' and not monitor.state['Captain'] \
@@ -1554,10 +1693,7 @@ class AppWindow:
                     monitor.state
                 )
 
-                if err:
-                    self.status['text'] = err
-                    if not config.get_int('hotkey_mute'):
-                        hotkeymgr.play_bad()
+                self.handle_plugin_event_error(err)
 
             auto_update = False
             # Only if auth callback is not pending
@@ -1640,11 +1776,7 @@ class AppWindow:
         # Currently we don't do anything with these events
         if monitor.cmdr:
             err = plug.notify_dashboard_entry(monitor.cmdr, monitor.is_beta, entry)
-
-            if err:
-                self.status['text'] = err
-                if not config.get_int('hotkey_mute'):
-                    hotkeymgr.play_bad()
+            self.handle_plugin_event_error(err)
 
     def plugin_error(self, event=None) -> None:
         """Display asynchronous error from plugin."""
@@ -1726,27 +1858,6 @@ class AppWindow:
                 'StationName'] else monitor.state['SystemName']
             self.w.clipboard_clear()
             self.w.clipboard_append(clipboard_text)
-
-    def help_general(self, event=None) -> None:
-        """Open Wiki Help page in browser."""
-        webbrowser.open('https://github.com/EDCD/EDMarketConnector/wiki')
-
-    def help_troubleshooting(self, event=None) -> None:
-        """Open Wiki Privacy page in browser."""
-        webbrowser.open("https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting")
-
-    def help_report_a_bug(self, event=None) -> None:
-        """Open Wiki Privacy page in browser."""
-        webbrowser.open("https://github.com/EDCD/EDMarketConnector/issues/new?assignees=&labels=bug%2C+unconfirmed"
-                        "&template=bug_report.md&title=")
-
-    def help_privacy(self, event=None) -> None:
-        """Open Wiki Privacy page in browser."""
-        webbrowser.open('https://github.com/EDCD/EDMarketConnector/wiki/Privacy-Policy')
-
-    def help_releases(self, event=None) -> None:
-        """Open Releases page in browser."""
-        webbrowser.open('https://github.com/EDCD/EDMarketConnector/releases')
 
     class HelpAbout(tk.Toplevel):
         """The applications Help > About popup."""
@@ -2349,7 +2460,6 @@ sys.path: {sys.path}'''
     root.after(2, show_killswitch_poppup, root)
     # Start the main event loop
     try:
-        check_for_fdev_updates()
         root.mainloop()
     except KeyboardInterrupt:
         logger.info("Ctrl+C Detected, Attempting Clean Shutdown")

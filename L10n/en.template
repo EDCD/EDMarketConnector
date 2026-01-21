@@ -27,9 +27,6 @@
 /* companion.py: Generic error prefix - following text is from Frontier auth service; In files: companion.py:432; companion.py:517; */
 "Error" = "Error";
 
-/* companion.py: Frontier auth, no 'usr' section in returned data; companion.py: Frontier auth, no 'customer_id' in 'usr' section in returned data; In files: companion.py:475; companion.py:480; */
-"Error: Couldn't check token customer_id" = "Error: Couldn't check token customer_id";
-
 /* companion.py: Frontier auth customer_id doesn't match game session FID; In files: companion.py:486; */
 "Error: customer_id doesn't match!" = "Error: customer_id doesn't match!";
 
@@ -845,3 +842,54 @@
 
 /* common_coreutils.py: Unidentified colonisation ship; In files: common_coreutils.py:84:84 */
 "System Colonisation Ship" = "System Colonisation Ship";
+
+/* plugin_browser.py: Filter Plugin Categories */
+"Filter by Category:" = "Filter by Category:";
+
+/* plugin_browser.py: Plugin Browser Plug Name */
+"Name" = "Name";
+
+/* plugin_browser.py: Plugin Browser Plug Ver */
+"Version" = "Version";
+
+/* plugin_browser.py: Plugin Browser Last Update */
+"Last Updated" = "Last Updated";
+
+/* plugin_browser.py: Plugin Browser Category */
+"Categories" = "Categories";
+
+/* plugin_browser.py: Plugin Browser Description */
+"Description" = "Description";
+
+/* plugin_browser.py: Plugin Browser Stars */
+"Stars" = "Stars";
+
+/* plugin_browser.py: Plugin Browser Title */
+"Plugin Browser" = "Plugin Browser";
+
+/* plugin_browser.py: Open Plugin Repo */
+"Open Plugin Repository" = "Open Plugin Repository";
+
+/* plugin_browser.py: Report a Malfunctioning Plugin */
+"Report Plugin" = "Report Plugin";
+
+/* plugin_browser.py: Plugin Browser Authors */
+"Authors" = "Authors";
+
+/* plugin_browser.py: Plugin Browser License */
+"License" = "License";
+
+/* plugin_browser.py: Plugin Browser Reqs */
+"Requirements" = "Requirements";
+
+/* plugin_browser.py: Last Tested EDMC Version  */
+"Last Tested EDMC: {last_tested}" = "Last Tested EDMC: {last_tested}";
+
+/* plugin_browser.py: Plugin Project Link */
+"Main Project Link" = "Main Project Link";
+
+/* plugin_browser.py: Plugin VT Link */
+"VirusTotal Link" = "VirusTotal Link";
+
+/* prefs.py: Settings > Output - choose delimiter/format for market export files */
+"Market export format:" = "Market export format:";

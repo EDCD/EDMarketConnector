@@ -41,7 +41,7 @@ Steps to reproduce the behavior:
 **Please Confirm the Following...**
 
 [//]: # (Add any other context about the problem here.)
-- [ ] I have checked the [Known Issues](https://github.com/EDCD/EDMarketConnector/issues/618) list to ensure this is not a duplicate
+- [ ] I have checked [Open Issues](https://github.com/EDCD/EDMarketConnector/issues/) to ensure this is not a duplicate
 - [ ] I have checked the [Troubleshooting Guide](https://github.com/EDCD/EDMarketConnector/wiki/Troubleshooting) to check for known workarounds
 
 **Logs**

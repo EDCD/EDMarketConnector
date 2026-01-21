@@ -1,9 +1,3 @@
-/* companion.py: Frontier CAPI data doesn't agree with latest Journal game location; In files: companion.py:245; */
-"Error: Frontier CAPI data out of sync" = "Frontier CAPI datası senkronize değil";
-
-/* prefs.py: Appearance option for Windows "Disable Systray"; */
-"Disable Systray" = "Sistem tepsisi ikonunu devre dışı bırak";
-
 /* edsm.py:Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:316; */
 "Send flight log and CMDR status to EDSM" = "Uçuş günlüğünü ve CMDR durumunu EDSM'e gönder";
 
@@ -18,9 +12,9 @@
 /* companion.py: Frontier CAPI didn't respond; In files: companion.py:226; */
 "Error: Frontier CAPI didn't respond" = "Hata: Frontier CAPI yanıt vermedi";
 
-
 /* companion.py: Frontier CAPI data doesn't agree with latest Journal game location; In files: companion.py:245; */
-"Error: Frontier server is lagging" = "Hata: Frontier sunucusu gecikmesi";
+"Error: Frontier CAPI data out of sync" = "Frontier CAPI datası senkronize değil";
+
 /* companion.py: Commander is docked at an EDO settlement, got out and back in, we forgot the station; In files: companion.py:261; */
 "Docked but unknown station: EDO Settlement?" = "Kenetlendi ancak bilinmeyen istasyon: EDO yerleşimi?";
 
@@ -32,9 +26,6 @@
 
 /* companion.py: Generic error prefix - following text is from Frontier auth service; In files: companion.py:432; companion.py:517; */
 "Error" = "Hata";
-
-/* companion.py: Frontier auth, no 'usr' section in returned data; companion.py: Frontier auth, no 'customer_id' in 'usr' section in returned data; In files: companion.py:475; companion.py:480; */
-"Error: Couldn't check token customer_id" = "Hata: token kontrol edilemedi customer_id";
 
 /* companion.py: Frontier auth customer_id doesn't match game session FID; In files: companion.py:486; */
 "Error: customer_id doesn't match!" = "Hata: customer_id uyuşmuyor!";
@@ -83,6 +74,9 @@
 
 /* EDMarketConnector.py: Label for 'Station' line in main UI; prefs.py: Configuration - Label for selection of 'Station' provider website; prefs.py: Appearance - Example 'Normal' text; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:918; prefs.py:632; prefs.py:770; stats.py:408; */
 "Station" = "İstasyon";
+
+/* prefs.py: Appearance option for Windows "Disable Systray"; */
+"Disable Systray" = "Sistem tepsisi ikonunu devre dışı bırak";
 
 /* EDMarketConnector.py: 'File' menu title on OSX; EDMarketConnector.py: 'File' menu title; EDMarketConnector.py: 'File' menu; In files: EDMarketConnector.py:921; EDMarketConnector.py:939; EDMarketConnector.py:942; EDMarketConnector.py:2264; */
 "File" = "Dosya";
@@ -501,6 +495,15 @@
 /* prefs.py: Catch & Record Profiler Errors; */
 "Error in System Profiler" = "Sistem Profilcisinde Hata oluştu";
 
+/* prefs.py: Disabling a Plugin. */
+"Disabling plugin {PLUGIN}. This will cause a restart. Click OK to continue..." = "Disabling plugin {PLUGIN}. This will cause a restart. Click OK to continue...";
+
+/* prefs.py: Enable a Disabled Plugin */
+"Enable" = "Enable";
+
+/* prefs.py: Disable an Enabled Plugin */
+"Disable" = "Disable";
+
 /* stats.py: Cmdr stats; In files: stats.py:58; */
 "Balance" = "Bakiye";
 
@@ -830,3 +833,63 @@
 
 /* ttkHyperlinkLabel.py: Copy the Inara SLEF Format of the active ship to the clipboard; */
 "Copy Inara SLEF" = "Inara SLEF kopyala";
+
+/* edastro_core.py: Settings>EDAstro - Label on checkbox for 'send data'; */
+"Send data to EDAstro" = "Send data to EDAstro";
+
+/* common_coreutils.py: Colonisation ship name, with title; In files: common_coreutils.py:81:81 */
+"System Colonisation Ship {NAME}" = "System Colonisation Ship {NAME}";
+
+/* common_coreutils.py: Unidentified colonisation ship; In files: common_coreutils.py:84:84 */
+"System Colonisation Ship" = "System Colonisation Ship";
+
+/* plugin_browser.py: Filter Plugin Categories */
+"Filter by Category:" = "Filter by Category:";
+
+/* plugin_browser.py: Plugin Browser Plug Name */
+"Name" = "Name";
+
+/* plugin_browser.py: Plugin Browser Plug Ver */
+"Version" = "Version";
+
+/* plugin_browser.py: Plugin Browser Last Update */
+"Last Updated" = "Last Updated";
+
+/* plugin_browser.py: Plugin Browser Category */
+"Categories" = "Categories";
+
+/* plugin_browser.py: Plugin Browser Description */
+"Description" = "Description";
+
+/* plugin_browser.py: Plugin Browser Stars */
+"Stars" = "Stars";
+
+/* plugin_browser.py: Plugin Browser Title */
+"Plugin Browser" = "Plugin Browser";
+
+/* plugin_browser.py: Open Plugin Repo */
+"Open Plugin Repository" = "Open Plugin Repository";
+
+/* plugin_browser.py: Report a Malfunctioning Plugin */
+"Report Plugin" = "Report Plugin";
+
+/* plugin_browser.py: Plugin Browser Authors */
+"Authors" = "Authors";
+
+/* plugin_browser.py: Plugin Browser License */
+"License" = "License";
+
+/* plugin_browser.py: Plugin Browser Reqs */
+"Requirements" = "Requirements";
+
+/* plugin_browser.py: Last Tested EDMC Version  */
+"Last Tested EDMC: {last_tested}" = "Last Tested EDMC: {last_tested}";
+
+/* plugin_browser.py: Plugin Project Link */
+"Main Project Link" = "Main Project Link";
+
+/* plugin_browser.py: Plugin VT Link */
+"VirusTotal Link" = "VirusTotal Link";
+
+/* prefs.py: Settings > Output - choose delimiter/format for market export files */
+"Market export format:" = "Market export format:";

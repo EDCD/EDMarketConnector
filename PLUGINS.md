@@ -30,7 +30,7 @@ If you're running from source (which allows for debugging with e.g.
 then you'll need to be using an appropriate version of Python.  The current
 version is listed in the
 [Environment section of Releasing.md](https://github.com/EDCD/EDMarketConnector/blob/main/docs/Releasing.md#environment).
-If you're developing your plugin simply against an install of EDMarketConnector
+If you're developing your plugin simply against an installation of EDMarketConnector
 then you'll be relying on the bundled version of Python (it's baked
 into the .exe via the py2exe build process).
 
@@ -61,6 +61,16 @@ You should also keep an eye on [our GitHub Discussions](https://github.com/EDCD/
 in case there are any proposed changes to EDMC plugin functionality.  You can
 do this by ensuring 'Discussions' is also ticked when following the steps
 above to set up a 'Custom' watch on this repository.
+---
+
+## Plugin Versioning
+
+We strongly encourage the use of [Semantic Version](https://semver.org/#semantic-versioning-specification-semver)
+for plugins. This should be done by establishing a `VERSION` constant or `__version__` dunder as a string with the value `Major.Minor.Patch`.
+
+This version is used by the EDMC Plugin Browser to compare versions of plugins and allow plugins to use upcoming 
+planned features such as the Plugin Auto-Updater. While this is not a required part of the Plugin spec, it is highly 
+recommended and may become required at a later date.
 
 ---
 
@@ -101,8 +111,7 @@ liable to change without notice.
 `from companion import CAPIData, SERVER_LIVE, SERVER_LEGACY, SERVER_BETA` -
 `CAPIData` is the actual type of `data` as passed into `cmdr_data()`,
 `cmdr_data_legacy()` and `capi_fleetcarrier()`.
-See [Commander Data from Frontier CAPI](#commander-data-from-frontier-capi)
-for further information.
+See Commander Data from Frontier CAPI for further information.
 
 `import edmc_data` (or specific 'from' imports) - This contains various static
 data that used to be in other files.  You should **not** now import anything
@@ -145,12 +154,15 @@ modules for plugin use:
 Unfortunately we cannot promise to include every part of the
 [Python Standard Library](https://docs.python.org/3/library/) due to issues
 with correctly detecting all the modules, and if they're single file or a
-package, and perhaps have sub-modules.  For now, if you find something is
+package, and perhaps have submodules.  For now, if you find something is
 missing that you need for your plugin, ask us to add it in, and we'll do so on
 a 'best efforts' basis.
 
 See [#1327 - ModuleNotFound when creating a new plugin.](https://github.com/EDCD/EDMarketConnector/issues/1327)
 for some discussion.
+
+A list of most available imports that are likely included with distributions 
+of EDMC can be found in the [docs](/docs/Bundled_Python_Dependencies.md).
 
 
 ## Common Resources
@@ -255,7 +267,7 @@ Replace all `print(...)` statements with one of the following:
         ...
     except Exception:
         # This logs at 'ERROR' level.
-        # Also automatically includes exception information.
+        # Also, automatically includes exception information.
         logger.exception('An exception occurred')
 
     try:
@@ -294,7 +306,7 @@ from config import appversion
         # From 5.0.0-beta1 it's a function, returning semantic_version.Version
         core_version = appversion()
 
-    # Yes, just blow up if config.appverison is neither str or callable
+    # Yes, just blow up if config.appverison is neither str nor callable
 
     logger.info(f'Core EDMarketConnector version: {core_version}')
     # And then compare like this
@@ -328,7 +340,7 @@ Any errors or print statements from your plugin will appear in
 Mac, and `$TMP/EDMarketConnector.log` on Linux.
 
 | Parameter    | Type  | Description                                             |
-| :----------- | :---: | :------------------------------------------------------ |
+|:-------------|:-----:|:--------------------------------------------------------|
 | `plugin_dir` | `str` | The directory that your plugin is located in.           |
 | `RETURN`     | `str` | The name you want to be used for your plugin internally |
 
@@ -508,7 +520,7 @@ def plugin_prefs(parent: nb.Notebook, cmdr: str, is_beta: bool) -> Optional[tk.F
 ```
 
 | Parameter |     Type      | Description                                      |
-| :-------- | :-----------: | :----------------------------------------------- |
+|:----------|:-------------:|:-------------------------------------------------|
 | `parent`  | `nb.Notebook` | Root Notebook object the preferences window uses |
 | `cmdr`    |     `str`     | The current commander                            |
 | `is_beta` |    `bool`     | If the game is currently a beta version          |
@@ -524,7 +536,7 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
 ```
 
 | Parameter |  Type  | Description                             |
-| :-------- | :----: | :-------------------------------------- |
+|:----------|:------:|:----------------------------------------|
 | `cmdr`    | `str`  | The current commander                   |
 | `is_beta` | `bool` | If the game is currently a beta version |
 
@@ -554,7 +566,7 @@ def plugin_app(parent: tk.Frame) -> Tuple[tk.Label, tk.Label]:
     Create a pair of TK widgets for the EDMarketConnector main window
     """
     global status
-    label = tk.Label(parent, text="Status:")  # By default widgets inherit the current theme's colors
+    label = tk.Label(parent, text="Status:")  # By default, widgets inherit the current theme's colors
     status = tk.Label(parent, text="", foreground="yellow")  # Override theme's foreground color
     return label, status
 
@@ -566,7 +578,7 @@ def some_other_function() -> None:
 ```
 
 | Parameter |                      Type                       | Description                                                 |
-| :-------- | :---------------------------------------------: | :---------------------------------------------------------- |
+|:----------|:-----------------------------------------------:|:------------------------------------------------------------|
 | `parent`  |                   `tk.Frame`                    | The root EDMarketConnector window                           |
 | `RETURN`  | `Union[tk.Widget, Tuple[tk.Widget, tk.Widget]]` | A widget to add to the main window. See below for more info |
 
@@ -654,7 +666,7 @@ def journal_entry(
 This gets called when EDMarketConnector sees a new entry in the game's journal.
 
 | Parameter |       Type       | Description                                                            |
-| :-------- | :--------------: | :--------------------------------------------------------------------- |
+|:----------|:----------------:|:-----------------------------------------------------------------------|
 | `cmdr`    |      `str`       | Current commander name                                                 |
 | `is_beta` |      `bool`      | Is the game currently in beta                                          |
 | `system`  | `Optional[str]`  | Current system, if known                                               |
@@ -725,7 +737,7 @@ Content of `state` (updated to the current journal entry):
 | `StationName`[3]      |       `Optional[str]`       | Name of the station we're docked at, if applicable                                                              |
 | `MarketID`[3]         |       `Optional[str]`       | MarketID of the station we're docked at, if applicable                                                          |
 | `StationType`[3]      |       `Optional[str]`       | Type of the station we're docked at, if applicable                                                              |
-| `Powerplay`           |           `dict`            | `dict` of information on Powerplay
+| `Powerplay`           |           `dict`            | `dict` of information on Powerplay                                                                              |
 
 [1] - Contents of `NavRoute` not changed if a `NavRouteClear` event is seen,
 but plugins will see the `NavRouteClear` event.
@@ -760,15 +772,14 @@ Secondly there is an issue with close-orbiting binary bodies.  If the player:
   and the tracking will update to reflect this.
 2. If the player then flies *in Orbital Cruise without entering Supercruise
   proper* to the close-orbiting binary partner of the Body then *there is no
-  new 'ApproachBody' event to indicate the new Body's details*.  **Thus this
+  new 'ApproachBody' event to indicate the new Body's details*.  **Thus, this
   tracking will incorrectly indicate the first Body still**.
 
-So, before making use of any of this Body state a plugin should:
+So, before making use of this Body state a plugin should:
 
 1. Have a `dashboard_entry()` method and track the Body name present in its
   data.
-2. Cross-check that Body name with `state['Body']` before making use of any
- of `state'`s Body data.
+2. Cross-check that Body name with `state['Body']` before making use of `state'`s Body data.
 
 See `plugins/eddn.py` for an example of this in `export_journal_codexentry()`.
 
@@ -850,7 +861,7 @@ default value) for an `Undocked` event.  Being on-foot in a station at login
 time does *not* count as docked for this.
 
 In general on-foot, including being in a taxi, might not set this 100%
-correctly.  Its main use in core code is to detect being docked so as to send
+correctly.  Its main use in core code is to detect being docked to send
 any stored EDDN messages due to "Delay sending until docked" option.
 
 
@@ -897,7 +908,7 @@ to the Journal without writing a "Shutdown" event.
 This might happen, for example, when the game client crashes.
 Note that this is distinct in (letter) case from the "Shutdown" event that
 the game itself writes to the Journal when you exit normally.  If you want to
-react to either in your plugin code then either compare in a case insensitive
+react to either in your plugin code then either compare in a case-insensitive
 manner or check for both.  The difference in case allows you to differentiate
 between the two scenarios.
 
@@ -917,7 +928,7 @@ Examples of this are:
 1. Every `Cargo` event passed to plugins contains the data from
    `Cargo.json` (but see above for caveats).
 
-1. Every `NavRoute` event contains the full `Route` array as loaded from
+2. Every `NavRoute` event contains the full `Route` array as loaded from
     `NavRoute.json`.
 
     *NB: There is no indication available when a player cancels a route.*  The
@@ -925,7 +936,7 @@ Examples of this are:
    `Status.json` flag.
 
     The Journal documentation v28 is incorrect about the event
-    and file being `Route(.json)` the word is `NavRoute`.  Also the format of
+    and file being `Route(.json)` the word is `NavRoute`.  Also, the format of
     the data is, e.g.
 
     ```json
@@ -940,7 +951,7 @@ Examples of this are:
    }
     ```
 
-1. Every `ModuleInfo` event contains the full data as loaded from the
+3. Every `ModuleInfo` event contains the full data as loaded from the
   `ModulesInfo.json` file.  Note that we use the singular form here to
    stay consistent with the Journal event name.
 
@@ -966,7 +977,7 @@ This is called for new journal entries, instead of `journal_entry()`, when the
 player is in Arena (CQC).
 
 | Parameter |       Type       | Description                                                            |
-| :-------- | :--------------: | :--------------------------------------------------------------------- |
+|:----------|:----------------:|:-----------------------------------------------------------------------|
 | `cmdr`    |      `str`       | Current commander name                                                 |
 | `is_beta` |      `bool`      | Is the game currently in beta                                          |
 | `entry`   | `Dict[str, Any]` | The journal event                                                      |
@@ -1010,7 +1021,7 @@ This will be when something on the player's cockpit display changes -
 typically about once a second when in orbital flight.
 
 | Parameter |  Type  | Description                       |
-| :-------- | :----: | :-------------------------------- |
+|:----------|:------:|:----------------------------------|
 | `cmdr`    | `str`  | Current command name              |
 | `is_beta` | `bool` | if the game is currently in beta  |
 | `entry`   | `dict` | Data from status.json (see below) |
@@ -1051,10 +1062,10 @@ def cmdr_data(data, is_beta):
         ...
 ```
 
-| Parameter |       Type       | Description                                                                                              |
-| :-------- | :--------------: | :------------------------------------------------------------------------------------------------------- |
-| `data`    |     `CAPIData`   | `/profile` API response, with `/market` and `/shipyard` added under the keys `marketdata` and `shipdata` |
-| `is_beta` |      `bool`      | If the game is currently in beta                                                                         |
+| Parameter |    Type    | Description                                                                                              |
+|:----------|:----------:|:---------------------------------------------------------------------------------------------------------|
+| `data`    | `CAPIData` | `/profile` API response, with `/market` and `/shipyard` added under the keys `marketdata` and `shipdata` |
+| `is_beta` |   `bool`   | If the game is currently in beta                                                                         |
 
 #### Fleet Carrier Data
 
@@ -1083,9 +1094,9 @@ def capi_fleetcarrier(data):
         ...
 ```
 
-| Parameter |       Type       | Description                                                                                              |
-| :-------- | :--------------: | :------------------------------------------------------------------------------------------------------- |
-| `data`    |     `CAPIData`   | `/fleetcarrier` API response                                                                             |
+| Parameter |    Type    | Description                  |
+|:----------|:----------:|:-----------------------------|
+| `data`    | `CAPIData` | `/fleetcarrier` API response |
 
 #### CAPIData and Available Properties
 
@@ -1093,11 +1104,11 @@ def capi_fleetcarrier(data):
 
 Plugin authors are free to use the following properties of `CAPIData`, **but MUST NOT rely on any other extra properties, they are for internal use only.**
 
-| Property       | Type             | Description                                                                                              |
-| :------------- | :--------------: | :------------------------------------------------------------------------------------------------------- |
-| `data`         | `Dict`            | The data returned by the CAPI query.  For the `cmdr_data()` callback, if the player is docked at a station, and the relevant services are available then the `lastStarport` key's value will have been augmented with `/market` and/or `/shipyard` data.  **Do not assume this will always be the case**. |
-| `source_host`  | `str`            | `SERVER_LIVE` \| `SERVER_BETA` \| `SERVER_LEGACY` the current galaxy mode. |
-| `request_cmdr` | `str`            | The name of the active CMDR _at the point the request was made_. In the case of a CAPI request taking a long time to return, the user may have switched CMDR during the request, so this may be different to the current CMDR. |
+| Property       |  Type  | Description                                                                                                                                                                                                                                                                                               |
+|:---------------|:------:|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `data`         | `Dict` | The data returned by the CAPI query.  For the `cmdr_data()` callback, if the player is docked at a station, and the relevant services are available then the `lastStarport` key's value will have been augmented with `/market` and/or `/shipyard` data.  **Do not assume this will always be the case**. |
+| `source_host`  | `str`  | `SERVER_LIVE` \| `SERVER_BETA` \| `SERVER_LEGACY` the current galaxy mode.                                                                                                                                                                                                                                |
+| `request_cmdr` | `str`  | The name of the active CMDR _at the point the request was made_. In the case of a CAPI request taking a long time to return, the user may have switched CMDR during the request, so this may be different to the current CMDR.                                                                            |
 
 See [this documentation](https://github.com/Athanasius/fd-api/blob/main/docs/FrontierDevelopments-CAPI-endpoints.md) for details of the expected content structure and data for CAPI queries.
 
@@ -1174,7 +1185,7 @@ called when the player starts the game or enters a new system. It is called
 some time after the corresponding `journal_entry()` event.
 
 | Parameter |       Type       | Description                                                                                    |
-| :-------- | :--------------: | :--------------------------------------------------------------------------------------------- |
+|:----------|:----------------:|:-----------------------------------------------------------------------------------------------|
 | `reply`   | `Dict[str, Any]` | Response to an API call to [EDSM's journal API target](https://www.edsm.net/en/api-journal-v1) |
 
 #### Inara Notify Location
@@ -1201,7 +1212,7 @@ undocks. It is called some time after the corresponding `journal_entry()`
 event.
 
 | Parameter    |       Type       | Description                                                                                                  |
-| :----------- | :--------------: | :----------------------------------------------------------------------------------------------------------- |
+|:-------------|:----------------:|:-------------------------------------------------------------------------------------------------------------|
 | `event_data` | `Dict[str, Any]` | Response to an API call to [INARA's `Commander Flight Log` event](https://inara.cz/inara-api-docs/#event-29) |
 
 #### Inara Notify Ship
@@ -1219,7 +1230,7 @@ gets called when the player starts the game or switches ship. It is called some
 time after the corresponding `journal_entry()` event.
 
 | Parameter    |       Type       | Description                                                                                                                    |
-| :----------- | :--------------: | :----------------------------------------------------------------------------------------------------------------------------- |
+|:-------------|:----------------:|:-------------------------------------------------------------------------------------------------------------------------------|
 | `event_data` | `Dict[str, Any]` | Response to an API call to [INARA's `addCommanderShip` or `setCommanderShip` event](https://inara.cz/inara-api-docs/#event-11) |
 
 ---
@@ -1305,9 +1316,9 @@ package by name in the usual way.
 To package your plugin for distribution simply create a `.zip` archive of your
 plugin's folder:
 
-- Windows: In Explorer right click on your plugin's folder and choose Send to
+- Windows: In Explorer right-click on your plugin's folder and choose Send to
     &rarr; Compressed (zipped) folder.
-- Mac: In Finder right click on your plugin's folder and choose Compress.
+- Mac: In Finder right-click on your plugin's folder and choose Compress.
 
 If there are any external dependencies then
 [include them](#packaging-extra-modules) in the plugin's folder.
@@ -1349,7 +1360,7 @@ actually testing the plugin.  This is so that you can be sure it is working
 plugin, and not because they are installed within the Python site-packages
 in some applicable location (system level or user level).
 
-So, setup a virtual environment to use when running EDMarketConnector
+So, set up a virtual environment to use when running EDMarketConnector
 code to test your plugin, and use the 'system' non-virtual Python to
 install modules in order to have somewhere to copy them from.
 
@@ -1370,10 +1381,10 @@ We'll use `xml_dataclasses` for this example.
 ### Copy the module files into your plugin directory
 
 1. Assuming it's a 'simple' module with no caveats, now we copy:
-  1. `pip show xml_dataclasses` - `Location` is where it was installed.
-  1. If you have a POSIX-compliant command-line environment:
+2. `pip show xml_dataclasses` - `Location` is where it was installed.
+3. If you have a POSIX-compliant command-line environment:
 
-         cp -pr <Location> <plugin_dir>
+       cp -pr <Location> <plugin_dir>
 
   or just use Windows File Explorer, or other GUI means, to copy.
 
@@ -1382,7 +1393,7 @@ You're going to have to refer to your plugin directory in order to import
 anything within it.  This means it should be compatible with such.
 
 1. Do **not** use hyphens (`-`) as word separators, or full-stops (`.`).
-1. You can use underscore (`_`) as a word separator.
+2. You can use underscore (`_`) as a word separator.
 
 So:
 

@@ -54,7 +54,7 @@ appcmdname = "EDMC"
 # <https://semver.org/#semantic-versioning-specification-semver>
 # Major.Minor.Patch(-prerelease)(+buildmetadata)
 # NB: Do *not* import this, use the functions appversion() and appversion_nobuild()
-_static_appversion = "6.0.2"
+_static_appversion = "6.1.0"
 _cached_version: semantic_version.Version | None = None
 copyright = "© 2015-2019 Jonathan Harris, 2020-2025 EDCD"
 
@@ -608,7 +608,7 @@ config_logger.propagate = False
 config = get_config()
 
 
-# Wiki: https://github.com/EDCD/EDMarketConnector/wiki/Participating-in-Open-Betas-of-EDMC
+# Wiki: https://github.com/EDCD/EDMarketConnector/blob/main/docs/Participating%20in%20Open%20Betas%20of%20EDMC.md
 def get_update_feed() -> str:
     """Select the proper update feed for the current update track."""
     if config.get_bool("beta_optin"):

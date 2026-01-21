@@ -8,7 +8,7 @@ import re
 import time
 from collections import defaultdict
 from typing import Union
-
+from update import check_for_datafile_updates
 import outfitting
 import util_ships
 from config import config
@@ -24,7 +24,10 @@ __Module = dict[str, Union[str, list[str]]]  # Have to keep old-style here for c
 ship_map = ship_name_map.copy()
 
 # Ship masses
-ships_file = config.respath_path / "ships.json"
+ships_file = config.app_dir_path / "ships.json"
+if not ships_file.is_file():
+    check_for_datafile_updates()
+    ships_file = config.app_dir_path / "ships.json"  # Probably first boot. Force update.
 with open(ships_file, encoding="utf-8") as ships_file_handle:
     ships = json.load(ships_file_handle)
 

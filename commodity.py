@@ -10,10 +10,18 @@ from edmc_data import commodity_bracketmap as bracketmap
 
 # DEFAULT means semi-colon separation
 # CSV means comma separation
-(COMMODITY_DEFAULT, COMMODITY_CSV) = range(2)
+# TAB and PIPE are also supported
+(
+    COMMODITY_SEMICOLON,
+    COMMODITY_CSV,
+    COMMODITY_CSV_NEW,
+    COMMODITY_TAB,
+    COMMODITY_PIPE,
+) = range(5)
+mkt_out_types = ('CSV', 'CSV_NEW', 'TAB', 'PIPE', 'SEMICOLON')
 
 
-def export(data, kind=COMMODITY_DEFAULT, filename=None) -> None:  # noqa: CCR001
+def export(data, kind=COMMODITY_SEMICOLON, filename=None) -> None:  # noqa: CCR001
     """
     Export commodity data from the given CAPI data.
 
@@ -24,11 +32,22 @@ def export(data, kind=COMMODITY_DEFAULT, filename=None) -> None:  # noqa: CCR001
     """
     querytime = config.get_int("querytime", default=int(time.time()))
 
+    # Map kind to delimiter
+    if kind == COMMODITY_CSV or kind == COMMODITY_CSV_NEW:
+        mkt_out_delim = ','
+    elif kind == COMMODITY_TAB:
+        mkt_out_delim = '\t'
+    elif kind == COMMODITY_PIPE:
+        mkt_out_delim = '|'
+    else:
+        mkt_out_delim = ';'  # COMMODITY_SEMICOLON or default
+
     if not filename:
         sysname = data["lastSystem"]["name"].strip()
         station = data["lastStarport"]["name"].strip()
         timestamp = time.strftime("%Y-%m-%dT%H.%M.%S", time.localtime(querytime))
-        ext = "csv" if kind == COMMODITY_CSV else "scsv"
+        # Use .csv for comma-separated files; use .txt for other text formats
+        ext = 'csv' if mkt_out_delim == ',' else 'txt'
         filename = (
             Path(config.get_str("outdir")) / f"{sysname}.{station}.{timestamp}.{ext}"
         )
@@ -37,14 +56,15 @@ def export(data, kind=COMMODITY_DEFAULT, filename=None) -> None:  # noqa: CCR001
     station = data["lastStarport"]["name"]
 
     if kind == COMMODITY_CSV:
-        header = ["System", "Station", "Commodity", "Sell", "Buy", "Demand",
-                  "", "Supply", "", "Date"]
+        # maintain old compatibility
+        header = ['System', 'Station', 'Commodity', 'Sell', 'Buy', 'Demand',
+                  'demandBracket', 'Supply', 'stockBracket', 'Date']
     else:
-        header = ["System", "Station", "Commodity", "Sell", "Buy", "Demand",
-                  "", "Supply", "", "Average", "FDevID", "Date"]
+        header = ['System', 'Station', 'Commodity', 'Sell', 'Buy', 'Demand',
+                  'demandBracket', 'Supply', 'stockBracket', 'Average', 'FDevID', 'Date']
 
     with open(filename, "w", newline="", encoding="utf-8") as output_file:
-        writer = csv.writer(output_file, delimiter=";" if kind == COMMODITY_DEFAULT else ",")
+        writer = csv.writer(output_file, delimiter=mkt_out_delim)
 
         writer.writerow(header)
 
@@ -61,7 +81,8 @@ def export(data, kind=COMMODITY_DEFAULT, filename=None) -> None:  # noqa: CCR001
                 bracketmap.get(commodity.get("stockBracket"), ""),
             ]
 
-            if kind == COMMODITY_DEFAULT:
+            # newer export fields format
+            if kind != COMMODITY_CSV:
                 mean = int(commodity["meanPrice"]) if commodity.get("meanPrice") is not None else ""
                 row.extend([mean, commodity["id"]])
 

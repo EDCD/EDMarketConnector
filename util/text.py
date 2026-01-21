@@ -8,10 +8,12 @@ See LICENSE file.
 from __future__ import annotations
 
 from gzip import compress
+from warnings import deprecated
 
 __all__ = ['gzip']
 
 
+@deprecated("text.gzip is deprecated and will be removed in a later version!")
 def gzip(data: str | bytes, max_size: int = 512, encoding='utf-8') -> tuple[bytes, bool]:
     """
     Compress the given data if the max size is greater than specified.

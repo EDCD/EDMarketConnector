@@ -63,7 +63,7 @@ could still utilise [Journal files](https://forums.frontier.co.uk/threads/comman
 
 Acknowledgements
 --------
-Please see the [Acknowledgements](https://github.com/EDCD/EDMarketConnector/wiki/Acknowledgements-&-License) wiki page.
+Please see the [Acknowledgements](https://github.com/EDCD/EDMarketConnector/blob/main/docs/Acknowledgements%20and%20License.md) wiki page.
 
 License
 -------

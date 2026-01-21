@@ -1,9 +1,3 @@
-/* companion.py: Frontier CAPI data doesn't agree with latest Journal game location; In files: companion.py:245; */
-"Error: Frontier CAPI data out of sync" = "Fehler: Frontier CAPI-Daten nicht synchron";
-
-/* prefs.py: Appearance option for Windows "Disable Systray"; */
-"Disable Systray" = "Infobereich-Icon deaktivieren";
-
 /* edsm.py:Settings>EDSM - Label on checkbox for 'send data'; In files: edsm.py:316; */
 "Send flight log and CMDR status to EDSM" = "Sende Fluglog und CMDR-Status an EDSM";
 
@@ -18,9 +12,9 @@
 /* companion.py: Frontier CAPI didn't respond; In files: companion.py:226; */
 "Error: Frontier CAPI didn't respond" = "Fehler: Frontier CAPI antwortet nicht";
 
-
 /* companion.py: Frontier CAPI data doesn't agree with latest Journal game location; In files: companion.py:245; */
-"Error: Frontier server is lagging" = "Fehler: Frontier-Server ist überlastet";
+"Error: Frontier CAPI data out of sync" = "Fehler: Frontier CAPI-Daten nicht synchron";
+
 /* companion.py: Commander is docked at an EDO settlement, got out and back in, we forgot the station; In files: companion.py:261; */
 "Docked but unknown station: EDO Settlement?" = "Angedockt aber unbekannte Station: EDO-Siedlung?";
 
@@ -32,9 +26,6 @@
 
 /* companion.py: Generic error prefix - following text is from Frontier auth service; In files: companion.py:432; companion.py:517; */
 "Error" = "Fehler";
-
-/* companion.py: Frontier auth, no 'usr' section in returned data; companion.py: Frontier auth, no 'customer_id' in 'usr' section in returned data; In files: companion.py:475; companion.py:480; */
-"Error: Couldn't check token customer_id" = "Fehler: Konnte das Token customer_id nicht prüfen";
 
 /* companion.py: Frontier auth customer_id doesn't match game session FID; In files: companion.py:486; */
 "Error: customer_id doesn't match!" = "Fehler: customer_id stimmt nicht überein!";
@@ -83,6 +74,9 @@
 
 /* EDMarketConnector.py: Label for 'Station' line in main UI; prefs.py: Configuration - Label for selection of 'Station' provider website; prefs.py: Appearance - Example 'Normal' text; stats.py: Status dialog subtitle; In files: EDMarketConnector.py:918; prefs.py:632; prefs.py:770; stats.py:408; */
 "Station" = "Station";
+
+/* prefs.py: Appearance option for Windows "Disable Systray"; */
+"Disable Systray" = "Infobereich-Icon deaktivieren";
 
 /* EDMarketConnector.py: 'File' menu title on OSX; EDMarketConnector.py: 'File' menu title; EDMarketConnector.py: 'File' menu; In files: EDMarketConnector.py:921; EDMarketConnector.py:939; EDMarketConnector.py:942; EDMarketConnector.py:2264; */
 "File" = "Datei";
@@ -474,6 +468,12 @@
 /* prefs.py: Label for location of third-party plugins folder; In files: prefs.py:908; */
 "Plugins folder" = "Plugin-Ordner";
 
+/* prefs.py: Label on button used to open the Plugin Folder; */
+"Open Plugins Folder" = "Open Plugins Folder";
+
+/* prefs.py: Selecting the Location of the Plugin Directory on the Filesystem; */
+"Plugin Directory Location" = "Plugin Directory Location";
+
 /* prefs.py: Tip/label about how to disable plugins; In files: prefs.py:923; */
 "Tip: You can disable a plugin by{CR}adding '{EXT}' to its folder name" = "Tipp: Du kannst ein Plugin deaktivieren, indem{CR}du '{EXT}' zu seinem Ordnernamen hinzufügst";
 
@@ -494,6 +494,15 @@
 
 /* prefs.py: Catch & Record Profiler Errors; */
 "Error in System Profiler" = "Fehler im System Profiler";
+
+/* prefs.py: Disabling a Plugin. */
+"Disabling plugin {PLUGIN}. This will cause a restart. Click OK to continue..." = "Disabling plugin {PLUGIN}. This will cause a restart. Click OK to continue...";
+
+/* prefs.py: Enable a Disabled Plugin */
+"Enable" = "Enable";
+
+/* prefs.py: Disable an Enabled Plugin */
+"Disable" = "Disable";
 
 /* stats.py: Cmdr stats; In files: stats.py:58; */
 "Balance" = "Kontostand";
@@ -636,11 +645,32 @@
 /* stats.py: Mercenary rank; In files: stats.py:127; */
 "Warrior" = "Krieger";
 
+/* stats.py: Mercenary rank; In files: stats.py:129; */
+"Deadeye" = "Deadeye";
+
 /* stats.py: Exobiologist rank; In files: stats.py:132; */
 "Directionless" = "Ziellos";
 
 /* stats.py: Exobiologist rank; In files: stats.py:133; */
 "Mostly Directionless" = "Überwiegend Ziellos";
+
+/* stats.py: Exobiologist rank; In files: stats.py:134; */
+"Compiler" = "Compiler";
+
+/* stats.py: Exobiologist rank; In files: stats.py:135; */
+"Collector" = "Collector";
+
+/* stats.py: Exobiologist rank; In files: stats.py:136; */
+"Cataloguer" = "Cataloguer";
+
+/* stats.py: Exobiologist rank; In files: stats.py:137; */
+"Taxonomist" = "Taxonomist";
+
+/* stats.py: Exobiologist rank; In files: stats.py:138; */
+"Ecologist" = "Ecologist";
+
+/* stats.py: Exobiologist rank; In files: stats.py:139; */
+"Geneticist" = "Geneticist";
 
 /* stats.py: CQC rank; In files: stats.py:142; */
 "Helpless" = "Hilflos";
@@ -789,8 +819,77 @@
 /* EDMarketConnector.py: Inform User of Beta -> Stable Transition Risks; */
 "Update track changed to Stable from Beta. You will no longer receive Beta updates. You will stay on your current Beta version until the next Stable release.\r\n\r\nYou can manually revert to the latest Stable version. To do so, you must download and install the latest Stable version manually. Note that this may introduce bugs or break completely if downgrading between major versions with significant changes.\r\n\r\nDo you want to open GitHub to download the latest release?" = "Update-Kanal von Beta auf Stabil geändert. Du wirst keine weiteren Beta-Updates erhalten. Du wirst bis zum nächsten stabilen Release auf der aktuellen Beta-Version bleiben.\n\nDu kannst manuell zur aktuellen stabilen Version zurückkehren. Um dies zu tun, musst du die aktuelle stabile Version manuell herunterladen und installieren. Beachte, dass dies Fehler verursachen oder gar nicht funktionieren könnte, wenn du von einem größeren Versionssprung mit signifikanten Änderungen downgradest.\n\nMöchtest du GitHub öffnen, um den neuesten Release herunterzuladen?";
 
+/* EDMarketConnector.py: Title of Notification Popup for EDMC Restart; */
+"Restart Required" = "Restart Required";
+
+/* EDMarketConnector.py: Text of Notification Popup for EDMC Restart; */
+"A restart of EDMC is required. EDMC will now restart." = "A restart of EDMC is required. EDMC will now restart.";
+
 /* myNotebook.py: Can't Paste Images or Files in Text; */
 "Cannot paste non-text content." = "Kann keinen non-Text-Inhalt einfügen.";
 
 /* ttkHyperlinkLabel.py: Open Element In Selected Provider; */
 "Open in {URL}" = "Öffnen in {URL}";
+
+/* ttkHyperlinkLabel.py: Copy the Inara SLEF Format of the active ship to the clipboard; */
+"Copy Inara SLEF" = "Copy Inara SLEF";
+
+/* edastro_core.py: Settings>EDAstro - Label on checkbox for 'send data'; */
+"Send data to EDAstro" = "Send data to EDAstro";
+
+/* common_coreutils.py: Colonisation ship name, with title; In files: common_coreutils.py:81:81 */
+"System Colonisation Ship {NAME}" = "System Colonisation Ship {NAME}";
+
+/* common_coreutils.py: Unidentified colonisation ship; In files: common_coreutils.py:84:84 */
+"System Colonisation Ship" = "System Colonisation Ship";
+
+/* plugin_browser.py: Filter Plugin Categories */
+"Filter by Category:" = "Filter by Category:";
+
+/* plugin_browser.py: Plugin Browser Plug Name */
+"Name" = "Name";
+
+/* plugin_browser.py: Plugin Browser Plug Ver */
+"Version" = "Version";
+
+/* plugin_browser.py: Plugin Browser Last Update */
+"Last Updated" = "Last Updated";
+
+/* plugin_browser.py: Plugin Browser Category */
+"Categories" = "Categories";
+
+/* plugin_browser.py: Plugin Browser Description */
+"Description" = "Description";
+
+/* plugin_browser.py: Plugin Browser Stars */
+"Stars" = "Stars";
+
+/* plugin_browser.py: Plugin Browser Title */
+"Plugin Browser" = "Plugin Browser";
+
+/* plugin_browser.py: Open Plugin Repo */
+"Open Plugin Repository" = "Open Plugin Repository";
+
+/* plugin_browser.py: Report a Malfunctioning Plugin */
+"Report Plugin" = "Report Plugin";
+
+/* plugin_browser.py: Plugin Browser Authors */
+"Authors" = "Authors";
+
+/* plugin_browser.py: Plugin Browser License */
+"License" = "License";
+
+/* plugin_browser.py: Plugin Browser Reqs */
+"Requirements" = "Requirements";
+
+/* plugin_browser.py: Last Tested EDMC Version  */
+"Last Tested EDMC: {last_tested}" = "Last Tested EDMC: {last_tested}";
+
+/* plugin_browser.py: Plugin Project Link */
+"Main Project Link" = "Main Project Link";
+
+/* plugin_browser.py: Plugin VT Link */
+"VirusTotal Link" = "VirusTotal Link";
+
+/* prefs.py: Settings > Output - choose delimiter/format for market export files */
+"Market export format:" = "Market export format:";

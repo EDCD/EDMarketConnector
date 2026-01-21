@@ -807,9 +807,6 @@
 /* EDMarketConnector.py: Inform the user the Update Track has changed; */
 "Update Track Changed to {TRACK}" = "更新通道已更改为 {TRACK}";
 
-/* EDMarketConnector.py: Inform User of Beta -> Stable Transition Risks; */
-"Update track changed to Stable from Beta. You will no longer receive Beta updates. You will stay on your current Beta version until the next Stable release.\r\n\r\nYou can manually revert to the latest Stable version. To do so, you must download and install the latest Stable version manually. Note that this may introduce bugs or break completely if downgrading between major versions with significant changes.\r\n\r\nDo you want to open GitHub to download the latest release?" = "更新通道已从 \\"测试版\\" 更改为 \\"稳定版\\"。您将不再收到 \\"测试版\\" 更新。您将保持在当前的 \\"测试版\\" 版本，直到下一个 \\"稳定版\\" 版本发布。\n\n您可以手动恢复到最新的 \\"稳定版\\" 版本。为此，您必须手动下载并安装最新的 \\"稳定版\\" 版本。请注意，如果在有重大更改的主要版本之间降级，可能会引入错误或完全无法使用。\n\n您是否要打开 GitHub 以下载最新版本？";
-
 /* EDMarketConnector.py: Title of Notification Popup for EDMC Restart; */
 "Restart Required" = "需要重新启动";
 

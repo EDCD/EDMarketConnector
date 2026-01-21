@@ -8,10 +8,13 @@ See LICENSE file.
 from __future__ import annotations
 
 import pathlib
+import hashlib
 import shutil
 import sys
 import threading
 import os
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from tkinter import messagebox
 from traceback import print_exc
@@ -28,33 +31,126 @@ if TYPE_CHECKING:
 
 logger = get_main_logger()
 
+HTTP_TIMEOUT = (5, 20)          # (connect, read)
+HTTP_RETRIES = 3
+RETRY_BACKOFF = 1.5             # seconds multiplier
+MAX_WORKERS = 8
 
-def read_normalized_file(path: pathlib.Path) -> str:
+
+def read_normalized_file(path: pathlib.Path) -> tuple[str, str, str] | None:
     """Read a UTF-8 (with BOM-safe) file and normalize line endings and whitespace."""
     try:
-        return path.read_bytes().decode('utf-8-sig').replace('\r\n', '\n').strip()
+        raw = path.read_bytes()
     except FileNotFoundError:
-        return ''
+        return None
+    newline = '\r\n' if b'\r\n' in raw else '\n'
+    text = raw.decode('utf-8-sig')
+    normalized = text.replace('\r\n', '\n').strip()
+
+    return normalized, hashlib.sha256(normalized.encode()).hexdigest(), newline
 
 
-def copy_bundle_file(filename: str, dest_dir: pathlib.Path) -> str:
-    """Attempt to copy a missing file from the bundled FDevIDs folder."""
+def copy_bundle_file(filename: str, dest_dir: pathlib.Path) -> tuple[str, str] | None:
+    """
+    Attempt to copy a missing file from the bundled FDevIDs folder.
+
+    Returns (content, hash) or None.
+    """
     try:
-        shutil.copy(f"FDevIDs/{filename}", dest_dir)
-        return read_normalized_file(dest_dir / filename)
+        dest = dest_dir / filename
+        shutil.copy(f"FDevIDs/{filename}", dest)
+        return read_normalized_file(dest)  # type: ignore
     except (FileNotFoundError, shutil.SameFileError):
         logger.info("Bundle copy failed or identical; continuing with empty content.")
-        return ''
-
-
-def fetch_remote_file(url: str) -> str | None:
-    """Fetch a remote file and normalize its content."""
-    try:
-        response = requests.get(url, timeout=20)
-        response.raise_for_status()
-        return response.text.replace('\r\n', '\n').strip()
-    except requests.RequestException:
         return None
+
+
+def fetch_remote_file(url: str) -> tuple[str, str] | None:
+    """
+    Fetch a remote file with retries.
+
+    Returns (normalized_text, hash) or None on failure.
+    """
+    delay = 1.0
+
+    for attempt in range(1, HTTP_RETRIES + 1):
+        try:
+            response = requests.get(url, timeout=HTTP_TIMEOUT)
+            response.raise_for_status()
+
+            text = response.text.replace('\r\n', '\n').strip()
+            return text, hashlib.sha256(text.encode()).hexdigest()
+
+        except requests.RequestException as exc:
+            if attempt >= HTTP_RETRIES:
+                logger.debug("Download failed after %d attempts: %s", attempt, exc)
+                return None
+
+            time.sleep(delay)
+            delay *= RETRY_BACKOFF
+    return None
+
+
+def update_single_file(
+    directory: pathlib.Path,
+    filename: str,
+    url: str,
+    silent: bool = False,
+) -> None:
+    """Update a single bundle file."""
+    file_path = directory / filename
+
+    local = read_normalized_file(file_path)
+    if local is None:
+        local = copy_bundle_file(filename, directory)  # type: ignore
+
+    if local:
+        local_text, local_hash, newline = local
+    else:
+        local_text, local_hash, newline = '', '', '\n'  # noqa: F841
+
+    remote = fetch_remote_file(url)
+    if not remote:
+        if not silent:
+            logger.error(f'Failed to download {filename}! Unable to continue.')
+        return
+
+    remote_text, remote_hash = remote
+
+    if local_hash == remote_hash:
+        if not silent:
+            logger.info(f'{filename} already up to date.')
+        return
+
+    if not silent:
+        logger.info(f'Updating file {filename}...')
+
+    # Restore original newline style
+    output = remote_text.replace('\n', newline)
+    file_path.write_text(output, encoding='utf-8', newline='')
+
+
+def update_files(
+    directory: pathlib.Path,
+    files_urls: dict[str, str],
+    silent: bool = False,
+) -> None:
+    """Start threads to update bundle files."""
+    directory.mkdir(parents=True, exist_ok=True)
+
+    max_workers = min(MAX_WORKERS, len(files_urls))
+
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = [
+            executor.submit(update_single_file, directory, filename, url, silent)
+            for filename, url in files_urls.items()
+        ]
+
+        for future in as_completed(futures):
+            try:
+                future.result()
+            except Exception:
+                logger.exception("Unexpected error while updating files")
 
 
 def check_for_fdev_updates(silent: bool = False, local: bool = False) -> None:
@@ -67,24 +163,23 @@ def check_for_fdev_updates(silent: bool = False, local: bool = False) -> None:
         'commodity.csv': 'https://raw.githubusercontent.com/EDCD/FDevIDs/master/commodity.csv',
         'rare_commodity.csv': 'https://raw.githubusercontent.com/EDCD/FDevIDs/master/rare_commodity.csv'
     }
+    if not silent:
+        logger.info(f"Checking for {'local ' if local else ''}FDEVID file updates...")
+    update_files(fdevid_dir, files_urls, silent)
 
-    for filename, url in files_urls.items():
-        file_path = fdevid_dir / filename
-        local_content = read_normalized_file(file_path) or copy_bundle_file(filename, fdevid_dir)
-        remote_content = fetch_remote_file(url)
-        if not remote_content:
-            if not silent:
-                logger.error(f'Failed to download {filename}! Unable to continue.')
-            continue
 
-        if local_content == remote_content:
-            if not silent:
-                logger.info(f'FDEV ID file {filename} already up to date.')
-            continue
-
-        if not silent:
-            logger.info(f'Updating FDEV ID file {filename}...')
-        file_path.write_text(remote_content, encoding='utf-8', newline='\n')
+def check_for_datafile_updates(silent: bool = False, local: bool = False) -> None:
+    """Check for and download data file updates."""
+    base_path = config.respath_path if local else config.app_dir_path
+    files_urls = {
+        'modules.json': 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/refs/heads/releases/modules.json',
+        'ships.json': 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/refs/heads/releases/ships.json',
+        'master_plugin_list.json': 'https://raw.githubusercontent.com/EDCD/'
+                                   'EDMC-Plugin-Registry/refs/heads/main/master_plugin_list.json'
+    }
+    if not silent:
+        logger.info(f"Checking for {'local ' if local else ''}datafile file updates...")
+    update_files(pathlib.Path(base_path), files_urls, silent)
 
 
 @dataclass(slots=True)
@@ -129,6 +224,7 @@ class Updater:
 
         if not self.use_internal() and sys.platform == 'win32':
             self._init_winsparkle()
+            self.set_automatic_updates_check(config.get_bool("core_updater_disable_in_game", default=False))
 
     def start_check_thread(self) -> None:
         """Start the background update worker thread safely."""
@@ -145,14 +241,7 @@ class Updater:
 
         # Always trigger FDEV checks here too
         check_for_fdev_updates()
-        try:
-            check_for_fdev_updates(local=True)
-        except Exception as e:
-            logger.info(
-                "Tried to update bundle FDEV files but failed. Don't worry, "
-                "this likely isn't important and can be ignored unless "
-                f"you run into other issues. If you're curious: {e}"
-            )
+        check_for_datafile_updates()
 
     def shutdown_request(self) -> None:
         """Receive (Win)Sparkle shutdown request and send it to parent."""
@@ -219,12 +308,7 @@ class Updater:
             self.updater.win_sparkle_check_update_with_ui()
 
         check_for_fdev_updates()
-        try:
-            check_for_fdev_updates(local=True)
-        except Exception as e:
-            logger.info("Tried to update bundle FDEV files but failed. Don't worry, "
-                        "this likely isn't important and can be ignored unless"
-                        f" you run into other issues. If you're curious: {e}")
+        check_for_datafile_updates()
 
     def check_appcast(self) -> EDMCVersion | None:
         """
@@ -295,6 +379,12 @@ class Updater:
         # LANG: Update Available Text
         status['text'] = tr.tl("{NEWVER} is available").format(NEWVER=newver_title)
         self.root.update_idletasks()
+
+    def get_update_check(self):
+        """Check the current value of the WinSparkle Registry Key."""
+        if sys.platform == 'win32' and self.updater:
+            return self.updater.win_sparkle_set_automatic_check_for_updates()
+        return None
 
     def close(self) -> None:
         """

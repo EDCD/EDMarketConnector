@@ -39,10 +39,9 @@ import loadout
 import outfitting
 import shipyard
 import stats
-from commodity import COMMODITY_CSV
 from config import appcmdname, appversion, config
 from monitor import monitor
-from update import EDMCVersion, Updater, check_for_fdev_updates
+from update import EDMCVersion, Updater, check_for_fdev_updates, check_for_datafile_updates
 
 sys.path.append(config.internal_plugin_dir)
 # This import must be after the sys.path.append.
@@ -274,8 +273,10 @@ def main() -> None:  # noqa: C901, CCR001
                 cmdrs = config.get_list('cmdrs', default=[])
                 if monitor.cmdr not in cmdrs:
                     raise companion.CredentialsError()
-
-                companion.session.login(monitor.cmdr, monitor.is_beta)
+                try:
+                    companion.session.login(monitor.cmdr, monitor.is_beta)
+                except AttributeError:
+                    raise companion.CredentialsError()
 
             ###################################################################
             # Initiate CAPI queries
@@ -402,7 +403,19 @@ def main() -> None:  # noqa: C901, CCR001
             if data['lastStarport'].get('commodities'):
                 # Fixup anomalies in the commodity data
                 fixed = companion.fixup(data)
-                commodity.export(fixed, COMMODITY_CSV, args.m)
+                # Determine user-selected market export type (CSV, TAB, PIPE, SEMICOLON)
+                mkt_type = config.get_str('mkt_export_type', default='CSV')
+                if mkt_type == 'CSV':
+                    kind = commodity.COMMODITY_CSV
+                elif mkt_type == 'CSV_NEW':
+                    kind = commodity.COMMODITY_CSV_NEW
+                elif mkt_type == 'TAB':
+                    kind = commodity.COMMODITY_TAB
+                elif mkt_type == 'PIPE':
+                    kind = commodity.COMMODITY_PIPE
+                else:
+                    kind = commodity.COMMODITY_SEMICOLON
+                commodity.export(fixed, kind, args.m)
 
             else:
                 logger.error("Station doesn't have a market")
@@ -502,6 +515,7 @@ def main() -> None:  # noqa: C901, CCR001
 if __name__ == '__main__':
     try:
         check_for_fdev_updates(silent=True)
+        check_for_datafile_updates(silent=True)
         main()
     except KeyboardInterrupt:
         logger.info("Ctrl+C Detected, Attempting Clean Shutdown")

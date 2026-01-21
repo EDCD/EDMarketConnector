@@ -1,9 +1,9 @@
 requests==2.32.5
-pillow==12.0.0
+pillow==12.1.0
 watchdog==6.0.0
 simplesystray==0.1.0; sys_platform == 'win32'
 semantic-version==2.10.0
 # For manipulating folder permissions and the like.
 pywin32==311; sys_platform == 'win32'
-psutil==7.1.3
+psutil==7.2.1
 tomli-w==1.2.0

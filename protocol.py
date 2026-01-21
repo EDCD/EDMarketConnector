@@ -377,6 +377,24 @@ else:  # Linux / Run from source
     class HTTPRequestHandler(BaseHTTPRequestHandler):
         """Simple HTTP server to handle IPC from protocol handler."""
 
+        AUTH_RESPONSE_HTML = """\
+        <html>
+        <head>
+        <title>Authentication successful - Elite: Dangerous</title>
+        <style>
+        body { background-color: #000; color: #fff; font-family: "Helvetica Neue", Arial, sans-serif; }
+        h1 { text-align: center; margin-top: 100px; }
+        p { text-align: center; }
+        </style>
+        </head>
+        <body>
+        <h1>Authentication successful</h1>
+        <p>Thank you for authenticating.</p>
+        <p>Please close this browser tab now.</p>
+        </body>
+        </html>
+        """
+
         def parse(self) -> bool:
             """Parse a request."""
             logger.trace_if("frontier-auth.http", f"Got message on path: {self.path}")
@@ -401,37 +419,13 @@ else:  # Linux / Run from source
             if self.parse():
                 self.send_header("Content-Type", "text/html")
                 self.end_headers()
-                self.wfile.write(self._generate_auth_response().encode())
+                self.wfile.write(self.AUTH_RESPONSE_HTML.encode())
             else:
                 self.send_response(404)
                 self.end_headers()
 
         def log_request(self, code: int | str = "-", size: int | str = "-") -> None:
             """Override to prevent logging."""
-
-        def _generate_auth_response(self) -> str:
-            """
-            Generate the authentication response HTML.
-
-            :return: The HTML content of the authentication response.
-            """
-            return (
-                "<html>"
-                "<head>"
-                "<title>Authentication successful - Elite: Dangerous</title>"
-                "<style>"
-                'body { background-color: #000; color: #fff; font-family: "Helvetica Neue", Arial, sans-serif; }'
-                "h1 { text-align: center; margin-top: 100px; }"
-                "p { text-align: center; }"
-                "</style>"
-                "</head>"
-                "<body>"
-                "<h1>Authentication successful</h1>"
-                "<p>Thank you for authenticating.</p>"
-                "<p>Please close this browser tab now.</p>"
-                "</body>"
-                "</html>"
-            )
 
 
 def get_handler_impl() -> type[GenericProtocolHandler]:

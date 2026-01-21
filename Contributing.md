@@ -36,17 +36,17 @@ with the
 ## General workflow
 
 1. You will need a GitHub account.
-1. Fork the repository on GitHub into your account there (hereafter referred to as 'your fork').
-1. In your local copy of *your* fork create an appropriate WIP branch.
-1. Develop the changes, testing as you go (no we don't have any actual tests yet).
+2. Fork the repository on GitHub into your account there (hereafter referred to as 'your fork').
+3. In your local copy of *your* fork create an appropriate WIP branch.
+4. Develop the changes, testing as you go (no we don't have any actual tests yet).
     1. Be as sure as you can that the code works as you intend and hasn't introduced any other bugs or regressions.
-    1. Test the codebase as a whole against any unit tests that do exist, and add your own as you can.
-    1. Check your code against flake8 periodically.
-1. When you're sure the work is final:
+    2. Test the codebase as a whole against any unit tests that do exist, and add your own as you can.
+    3. Check your code against flake8 periodically.
+5. When you're sure the work is final:
     1. Push your WIP branch to your fork (you probably should have been doing this as you worked as a form of backup).
-    1. Access the WIP branch on your fork on GitHub and create a Pull Request.  Mention any Issue number(s) that it
+    2. Access the WIP branch on your fork on GitHub and create a Pull Request.  Mention any Issue number(s) that it
        addresses.
-1. Await feedback in the form of comments on the Pull Request.
+6. Await feedback in the form of comments on the Pull Request.
 
 **IMPORTANT**: Once you have created the Pull Request *any changes you make to that WIP branch and push to your fork
 will be reflected in the Pull Request*.  Ensure that *only* the changes for the issue(s) you are addressing are in
@@ -112,7 +112,7 @@ for instructions on ensuring you're cleanly using it in any local clone.
 
 #### `releases`
 
-Currently the version of the `edmarketconnector.xml` 'appcast' file in this branch is what live
+Currently, the version of the `edmarketconnector.xml` 'appcast' file in this branch is what live
 clients check to be notified of new versions.  This can potentially be replaced with the `stable` branch's version,
 but some care will be necessary to ensure no users are left behind (their client checking the `releases` branch which
 then no longer exists).  For the time being this should always be kept in sync with `stable` as each new release is
@@ -214,7 +214,7 @@ An example, when using Python 3.11.x would be:
 ```bash
 python -m venv ../edmc-venv-3.11
 ```
-Note how the 'venv' is placed in a sub-directory *of the parent directory* of
+Note how the 'venv' is placed in a subdirectory *of the parent directory* of
 the project.  This avoids any issues with scripts working recursively picking
 up your 'venv' files.
 
@@ -309,7 +309,7 @@ re-introduce a bug down the line.
 
 We use the [`pytest`](https://docs.pytest.org/en/stable/) for unit testing.
 
-The files for a test should go in a sub-directory of `tests/` named after the
+The files for a test should go in a subdirectory of `tests/` named after the
 (principal) file or directory that contains the code they are testing.
 For example:
 
@@ -320,7 +320,7 @@ For example:
 - Tests for `config/` code are located in `tests/config/test_config.py`, not
    `tests/config.py/test_config.py`
 
-The sub-directory avoids having a mess of files in `tests`, particularly when
+The subdirectory avoids having a mess of files in `tests`, particularly when
 there might be supporting files, e.g. `tests/config/_old_config.py` or files
 containing test data.
 
@@ -442,7 +442,7 @@ r = this.requests_session.post(TARGET_URL, data=data, timeout=_TIMEOUT)
 
    Be sure to set a URL path in the `TARGET_URL` that denotes where the data
    would normally be sent to.
-4. The output will go into a file in `%TEMP%\EDMarketConnector\http_debug` 
+1. The output will go into a file in `%TEMP%\EDMarketConnector\http_debug` 
   whose name is based on the path component of the URL.  In the code example 
   above it will come out as `edsm.log` due to how `TARGET_URL` is set.
 
@@ -545,7 +545,7 @@ in `logging.Formatter()` strings:
 
 1. `%(qualname)s` which gets the full `<module>.ClassA(.ClassB...).func`
   of the calling function.
-1. `%(class)s` which gets just the enclosing class name(s) of the calling
+2. `%(class)s` which gets just the enclosing class name(s) of the calling
   function.
 
 If you want to see how we did this, check `EDMCLogging.py`.
@@ -555,7 +555,7 @@ logging from, it's taken care of.
 
 *Do use a pertinent message, even when using `exc_info=...` to log an
 exception*.  e.g. Logging will know you were in your `get_foo()` function
-but you should still tell it what actually (failed to have) happened
+but, you should still tell it what actually (failed to have) happened
 in there.
 
 ### Use the appropriate logging level

@@ -6,6 +6,7 @@
 #define MyAppURL "https://edcd.github.io/"
 #define SuppURL "https://github.com/EDCD/EDMarketConnector/"
 #define MyAppExeName "EDMarketConnector.exe"
+#define MyAppCopyright "Copyright (C) 2015-2019 Jonathan Harris, 2020-2026 EDCD"
 
 [Setup]
 AppId={{5E9AD4D3-0365-41D5-9586-9368745DD109}
@@ -16,7 +17,7 @@ AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#SuppURL}
 AppUpdatesURL={#SuppURL}
-AppCopyright=Copyright (C) 2015-2019 Jonathan Harris, 2020-2024 EDCD
+AppCopyright={#MyAppCopyright}
 AllowUNCPath=no
 AllowNetworkDrive=no
 DefaultDirName={autopf}\{#MyAppName}
@@ -36,6 +37,10 @@ UninstallDisplayIcon={app}\{#MyAppExeName}
 MinVersion=6.2
 ChangesAssociations = yes
 UsedUserAreasWarning = no
+VersionInfoCompany={#MyAppPublisher}
+VersionInfoDescription={#MyAppLongName}
+VersionInfoCopyright={#MyAppCopyright}
+
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -44,7 +49,6 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "dist.win32\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "dist.win32\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]

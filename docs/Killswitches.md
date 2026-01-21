@@ -10,7 +10,7 @@ Killswitches are stored in a JSON file that is queried by EDMC on startup.
 The format is as follows:
 
 |             Key |   Type   | Description                                                                                  |
-| --------------: | :------: | :------------------------------------------------------------------------------------------- |
+|----------------:|:--------:|:---------------------------------------------------------------------------------------------|
 |       `version` |  `int`   | the version of the Kill Switch JSON file, always 2, 1 exists and will be upgraded if needed. |
 |  `last_updated` | `string` | When last the kill switches were updated (for human use only)                                |
 | `kill_switches` | `array`  | The kill switches this file contains (expanded below)                                        |
@@ -19,7 +19,7 @@ The `kill_switches` array contains kill switch objects. Each contains the
 following fields:
 
 |       Key |             Type              | Description                                                                  |
-| --------: | :---------------------------: | :--------------------------------------------------------------------------- |
+|----------:|:-----------------------------:|:-----------------------------------------------------------------------------|
 | `version` | `version spec (see Versions)` | The version of EDMC these kill switches apply to (Must be valid semver spec) |
 |   `kills` |    `Dict[str, Dict[...]]`     | The various keys disabled -> definition of the killswitch behaviour          |
 
@@ -28,7 +28,7 @@ killswitch was added. EDMC will show this to the user
 (for internal killswitches, anyway).
 
 | Key (* = required) |       Type       | Description                                                                                   |
-| -----------------: | :--------------: | :-------------------------------------------------------------------------------------------- |
+|-------------------:|:----------------:|:----------------------------------------------------------------------------------------------|
 |          `reason`* |      `str`       | The reason that this killswitch was added                                                     |
 |       `set_fields` | `Dict[str, Any]` | A map of key -> contents to update (or overwrite) existing data with                          |
 |    `redact_fields` |   `List[str]`    | A list of traversal paths to redact. This is the same as using set with a value of "REDACTED" |
@@ -66,7 +66,7 @@ An example follows:
 ```
 
 - `plugins.edsm.send` will have fields deleted, set, and redacted, and then
-  will *not* be halted, the send will continue with the modified data.
+  will *not* be halted. Sending will continue with the modified data.
 - `plugins.some_plugin.some_thing` will never be allowed to continue
   (as all fields are blank)
 
@@ -88,7 +88,7 @@ When following paths, there are some caveats one should know.
   resolve conflicts, even if the dotted field name is not at the end of a key.
 
 - Traversal can and will error, especially if you attempt to pass though keys
-  that do not exist (eg past the end of a `Sequence` or a key that does not
+  that do not exist (e.g. past the end of a `Sequence` or a key that does not
   exist in a `Mapping`).
 
 - If any exception occurs during your traversal, **the entire killswitch is**
@@ -135,7 +135,7 @@ applicable.
 
 Versions are checked using contains checks on `semantic_version.SimpleSpec`
 instances. SimpleSpec supports both specific versions (`1.2.3`), non-specific
-ranges (`1.0` will match `1.0.1` and `1.0.5` etc), wildcards (`1.2.*`),
+ranges (`1.0` will match `1.0.1` and `1.0.5` etc.), wildcards (`1.2.*`),
 and ranges (`<1.0.0`, `>=2.0.0`)
 
 ## Plugin support
@@ -163,7 +163,7 @@ The current recognised (to EDMC and its internal plugins) killswitch strings are
 as follows:
 
 | Kill Switch                                  | Supported Plugins | Description                                                                               |
-| :------------------------------------------- |:-----------------:| :---------------------------------------------------------------------------------------- |
+|:---------------------------------------------|:-----------------:|:------------------------------------------------------------------------------------------|
 | `plugins.eddn.send`                          |       eddn        | Disables all use of the send method on EDDN (effectively disables EDDN updates)           |
 | `plugins.<plugin>.journal`                   | eddn, inara, edsm | Disables all journal processing for the plugin                                            |
 | `plugins.<plugin>.worker`                    |   edsm, *inara    | Disables the plugins worker thread (effectively disables updates) (does not close thread) |
@@ -181,7 +181,7 @@ would not be in a form that could be easily understood (except to blank it)
 ## File location
 
 The main killswitch file (`killswitches_v2.json`) is kept in the `releases`
-branch on the EDMC github repo. The file should NEVER be committed to any other
+branch on the EDMC GitHub repo. The file should NEVER be committed to any other
 repos. In the case that the killswitch file is found in other repos, the one in
 releases should always be taken as correct regardless of others.
 
@@ -227,6 +227,7 @@ example at the top of this file)
         }
     }]
 }
+```
 Running the above example though `killswitch_test.py` returns:
 
 ```plaintext
