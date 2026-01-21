@@ -145,6 +145,9 @@ well then you will need to properly add it to the build process.
 You'll need to add it in `build.py` so that py2exe includes it in
 the build.  Add the file to the DATA_FILES statement.
 
+To update the documentation of bundled modules, use the optional 
+`--audit_deps` argument, such as `build.py --audit_deps`
+
 # Pre-Packaging Steps
 
 Before you create a new install each time you should:
