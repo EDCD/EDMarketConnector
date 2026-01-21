@@ -161,6 +161,9 @@ a 'best efforts' basis.
 See [#1327 - ModuleNotFound when creating a new plugin.](https://github.com/EDCD/EDMarketConnector/issues/1327)
 for some discussion.
 
+A list of most available imports that are likely included with distributions 
+of EDMC can be found in the [docs](/docs/Bundled_Python_Dependencies.md).
+
 
 ## Common Resources
 
