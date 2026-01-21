@@ -35,6 +35,7 @@ prevent various unexpected situations which could prevent updates or contacting 
 * EDMC strongly encourages consistent plugin versioning. Please review PLUGINS.md for more information.
 * util.gzip is deprecated and will be removed in a later version.
 * ships.json and modules.json are no longer bundled with EDMC by default, and will be downloaded automatically to the app_dir location.
+* The build system now lists all available non-EDMC imports. Check the docs!
 
 Release 6.0.2
 ===
