@@ -56,7 +56,7 @@ appcmdname = "EDMC"
 # NB: Do *not* import this, use the functions appversion() and appversion_nobuild()
 _static_appversion = "6.1.0"
 _cached_version: semantic_version.Version | None = None
-copyright = "© 2015-2019 Jonathan Harris, 2020-2025 EDCD"
+copyright = "© 2015-2019 Jonathan Harris, 2020-2026 EDCD"
 
 
 update_interval = 8 * 60 * 60  # 8 Hours
