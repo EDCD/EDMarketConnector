@@ -264,8 +264,15 @@ class Config:
                 tomli_w.dump(default_data, f)
 
         # Load the TOML file
-        with self.toml_path.open("rb") as f:
-            data = tomllib.load(f)
+        try:
+            with self.toml_path.open("rb") as f:
+                data = tomllib.load(f)
+        except tomllib.TOMLDecodeError:
+            # rename broken file
+            self.toml_path.rename(self.toml_path.with_suffix(".toml.broken"))
+            # regenerate defaults
+            data = {"generated": "", "source": "", "settings": {}}
+            self.save()
 
         # Capture metadata, fallback to empty string if missing
         self.generated = data.get("generated", "")
@@ -516,8 +523,14 @@ class Config:
             "settings": self.settings,
         }
 
-        with self.toml_path.open("wb") as f:
+        tmp = self.toml_path.with_suffix(".toml.tmp")
+
+        with tmp.open("wb") as f:
             tomli_w.dump(data, f)
+            f.flush()
+            os.fsync(f.fileno())
+
+        tmp.replace(self.toml_path)
 
     def close(self) -> None:
         """Save config changes before closing."""
