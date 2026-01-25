@@ -6,9 +6,24 @@
       <description>Most recent changes with links to updates.</description>
       <!-- Windows -->
       <item>
-         <title>Release 6.1.0</title>
+         <title>Release 6.1.1</title>
          <description><![CDATA[<style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
 <p>We now test against, and package with, Python 3.13.</p>
+<h2>Release 6.1.1</h2>
+<p>This release contains a handful of bugfixes for 6.1, including updates for the new Config system.</p>
+<p><strong>Changes and Enhancements</strong></p>
+<ul>
+<li>Added a backup and autorecovery system for the Config file.</li>
+<li>Improved the stability of the Config system management.</li>
+<li>Updated Italian translations.</li>
+</ul>
+<p><strong>Bug Fixes</strong></p>
+<ul>
+<li>Fixed a bug where datafiles and FDEV ID files would not be updated on program start.</li>
+<li>Fixed a series of bugs where the Config system could be corrupted on data interruption (such as a power loss).</li>
+<li>Fixed a bug where the Plugin Browser could display rows too thin, causing title clipping.</li>
+</ul>
+<hr>
 <h2>Release 6.1.0</h2>
 <p>This release includes the new EDMC Plugin Browser, which allows plugin authors to register their plugins.
 These registered plugins will be able to be browsed and discovered by all EDMC Users!</p>
@@ -3154,11 +3169,11 @@ about this:
 <a href="https://issues.frontierstore.net/issue-detail/28638" rel="nofollow">PTS CAPI saying Commander is Docked after jumping to new system</a>.</p>
 </li>
 </ul>]]></description>
-         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F6.1.0/EDMarketConnector_Installer_6.1.0_x64.exe"
+         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F6.1.1/EDMarketConnector_Installer_6.1.1_x64.exe"
                     sparkle:os="windows"
-                    sparkle:version="6.1.0"
+                    sparkle:version="6.1.1"
                     type="application/x-ms-dos-executable"
-                    sparkle:edSignature="TLq46ef0tlrT3mac27uZ83IgpXTPATnoxCiML/mdpl8VmmlW1HZWxqlTNAFqS8TlVND7LGWPUmp9glqFbOKfBw==" length="23860400"
+                    sparkle:edSignature="DCNnIhWqkaKzkeeZ3i8GS9bYx3uHp/SYUlWydsnuf+LnOHSHO804Q4rQ4mDeB5RTVdZKDXl9fjI1czVZ9i/PCQ==" length="23873504"
          />
       </item>
    </channel>
