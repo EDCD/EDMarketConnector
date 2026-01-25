@@ -42,8 +42,8 @@ import subprocess
 import sys
 import tomllib
 import tomli_w
+import time
 from typing import Any, TypeVar
-from collections.abc import Callable
 from collections import defaultdict
 import semantic_version
 from constants import GITVERSION_FILE, applongname, appname
@@ -54,9 +54,9 @@ appcmdname = "EDMC"
 # <https://semver.org/#semantic-versioning-specification-semver>
 # Major.Minor.Patch(-prerelease)(+buildmetadata)
 # NB: Do *not* import this, use the functions appversion() and appversion_nobuild()
-_static_appversion = "6.1.0"
+_static_appversion = "6.1.1"
 _cached_version: semantic_version.Version | None = None
-copyright = "© 2015-2019 Jonathan Harris, 2020-2025 EDCD"
+copyright = "© 2015-2019 Jonathan Harris, 2020-2026 EDCD"
 
 
 update_interval = 8 * 60 * 60  # 8 Hours
@@ -219,11 +219,13 @@ class Config:
         self._load()
         self.default_plugin_dir_path = self.app_dir_path / "plugins"
         plugdir_str = self.get_str("plugin_dir")
-        if not self.get_str("plugin_dir"):
-            plugdir_str = str(self.default_plugin_dir)
+
+        if not plugdir_str:
+            plugdir_str = str(self.default_plugin_dir_path)
             self.plugin_dir_path = self.default_plugin_dir_path
             self.set("plugin_dir", plugdir_str)
-        if plugdir_str is None or not pathlib.Path(plugdir_str).is_dir():
+
+        if not pathlib.Path(plugdir_str).is_dir():
             self.set("plugin_dir", str(self.default_plugin_dir_path))
             plugdir_str = self.default_plugin_dir
         self.plugin_dir_path = pathlib.Path(self.get('plugin_dir'))
@@ -248,31 +250,106 @@ class Config:
         """Set flag denoting we're in the shutdown sequence."""
         self.__in_shutdown = True
 
+    def _default_data(self) -> dict:
+        return {
+            "generated": "",
+            "source": "",
+            "settings": {},
+        }
+
+    def _validate_data(self, data: dict) -> dict:
+        if not isinstance(data, dict):
+            raise ValueError("Config root is not a table")
+
+        settings = data.get("settings", {})
+        if not isinstance(settings, dict):
+            raise ValueError("Config 'settings' is not a table")
+
+        return {
+            "generated": data.get("generated", ""),
+            "source": data.get("source", ""),
+            "settings": dict(settings),
+        }
+
     def _load(self):
         """Load TOML from disk and store fields. Create file if missing."""
+        self.toml_path.parent.mkdir(parents=True, exist_ok=True)
+
         if not self.toml_path.exists():
-            # Ensure parent directories exist
-            self.toml_path.parent.mkdir(parents=True, exist_ok=True)
+            data = self._default_data()
+            self._write_atomic(data)
+            self._apply_loaded(data)
+            return
 
-            # Replace None with TOML-serializable defaults
-            default_data = {
-                "generated": "",  # empty string instead of None
-                "source": "",  # empty string instead of None
-                "settings": {}  # empty table
-            }
-            with self.toml_path.open("wb") as f:
-                tomli_w.dump(default_data, f)
+        try:
+            with self.toml_path.open("rb") as f:
+                data = tomllib.load(f)
+            data = self._validate_data(data)
+            self._apply_loaded(data)
+            return
 
-        # Load the TOML file
-        with self.toml_path.open("rb") as f:
-            data = tomllib.load(f)
+        except (tomllib.TOMLDecodeError, OSError, ValueError) as e:
+            logger.error(f"Config load failed, attempting recovery: {e!r}")
 
-        # Capture metadata, fallback to empty string if missing
+        # Attempt Recovery
+
+        broken = self.toml_path.with_suffix(f".toml.broken.{int(time.time())}")
+        with contextlib.suppress(Exception):
+            self.toml_path.replace(broken)
+
+        # Try backup
+        bak = self.toml_path.with_suffix(".toml.bak")
+        if bak.exists():
+            try:
+                with bak.open("rb") as f:
+                    data = tomllib.load(f)
+                data = self._validate_data(data)
+
+                # Restore backup as main
+                bak.replace(self.toml_path)
+                self._apply_loaded(data)
+                logger.warning("Recovered config from backup.")
+                return
+            except Exception as e:
+                logger.error(f"Backup recovery failed: {e!r}")
+
+        # Fallback: regenerate defaults
+        logger.error("All config recovery failed, regenerating defaults.")
+        data = self._default_data()
+        self._write_atomic(data)
+        self._apply_loaded(data)
+
+    def _apply_loaded(self, data: dict):
         self.generated = data.get("generated", "")
         self.source = data.get("source", "")
 
         # Settings dict created by write_registry_to_toml()
         self.settings = dict(data.get("settings", {}))
+
+    def _write_atomic(self, data: dict):
+        tmp = self.toml_path.with_suffix(".toml.tmp")
+        bak = self.toml_path.with_suffix(".toml.bak")
+
+        with tmp.open("wb") as f:
+            tomli_w.dump(data, f)
+            f.flush()
+            os.fsync(f.fileno())
+
+        # Rotate backup
+        if self.toml_path.exists():
+            with contextlib.suppress(Exception):
+                self.toml_path.replace(bak)
+
+        tmp.replace(self.toml_path)
+
+        # Best-effort directory fsync
+        with contextlib.suppress(Exception):
+            try:
+                # POSIX: Open as Directory
+                with self.toml_path.parent.open("rb") as d:
+                    os.fsync(d.fileno())
+            except (IsADirectoryError, PermissionError, OSError):
+                pass
 
     def get(self, key: str, default=None):
         """Return raw stored value."""
@@ -321,9 +398,7 @@ class Config:
     def get_list(self, key: str, default=None):
         """Return the list referred to by the given key if it exists, or the default."""
         val = self.get(key.lower())
-        return (
-            val if isinstance(val, list) else (default if default is not None else [])
-        )
+        return val if isinstance(val, list) else (default if default is not None else [])
 
     @property
     def shutting_down(self) -> bool:
@@ -462,7 +537,7 @@ class Config:
         # Re-run plugin_dir logic
         plugdir_str = self.get_str("plugin_dir")
         if not plugdir_str:
-            plugdir_str = str(self.default_plugin_dir)
+            plugdir_str = str(self.default_plugin_dir_path)
             self.plugin_dir_path = self.default_plugin_dir_path
             self.set("plugin_dir", plugdir_str)
         elif not pathlib.Path(plugdir_str).is_dir():
@@ -472,32 +547,13 @@ class Config:
         self.plugin_dir_path = pathlib.Path(plugdir_str)
         self.plugin_dir_path.mkdir(exist_ok=True)
 
-    @staticmethod
-    def _suppress_call(
-        func: Callable[..., _T],
-        exceptions: type[BaseException] | list[type[BaseException]] = Exception,
-        *args: Any,
-        **kwargs: Any,
-    ) -> _T | None:
-        if exceptions is None:
-            exceptions = [Exception]
-
-        if not isinstance(exceptions, list):
-            exceptions = [exceptions]
-
-        with contextlib.suppress(*exceptions):
-            return func(*args, **kwargs)
-
-        return None
-
     def delete(self, key: str, *, suppress=False) -> None:
         """Delete the given key from the config."""
         try:
             self.settings.pop(key.lower(), None)
-        except (KeyError, IndexError):
-            if suppress:
-                return
-            raise
+        except Exception:
+            if not suppress:
+                raise
         self.save()
 
     def set(self, key: str, value: Any):
@@ -515,9 +571,7 @@ class Config:
             "source": self.source,
             "settings": self.settings,
         }
-
-        with self.toml_path.open("wb") as f:
-            tomli_w.dump(data, f)
+        self._write_atomic(data)
 
     def close(self) -> None:
         """Save config changes before closing."""

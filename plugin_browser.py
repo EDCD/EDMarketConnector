@@ -159,6 +159,7 @@ class PluginBrowserMixIn:
         tree_container = nb.Frame(plugins_frame)  # type: ignore
         tree_row = next(row)
         tree_container.grid(row=tree_row, column=0, sticky=tk.NSEW, padx=self.PADX)
+        plugins_frame.rowconfigure(tree_row, weight=1)
 
         plugins_frame.columnconfigure(0, weight=1)
 
@@ -214,7 +215,7 @@ class PluginBrowserMixIn:
         scrollbar.grid(row=0, column=1, sticky=tk.NS)
 
         tree_container.columnconfigure(0, weight=1)
-        tree_container.rowconfigure(0, weight=0)
+        tree_container.rowconfigure(0, weight=1)
 
         ttk.Separator(plugins_frame, orient=tk.HORIZONTAL).grid(
             columnspan=4, padx=self.PADX, pady=self.SEPY, sticky=tk.EW, row=next(row)
