@@ -2,6 +2,20 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
 ---
 * We currently test against, and package with, Python 3.13, 64-bit.
 ---
+Release 6.1.1
+===
+This release contains a handful of bugfixes for 6.1, including updates for the new Config system.
+
+**Changes and Enhancements**
+* Added a backup and autorecovery system for the Config file.
+* Improved the stability of the Config system management.
+* Updated Italian translations.
+
+**Bug Fixes**
+* Fixed a bug where datafiles and FDEV ID files would not be updated on program start.
+* Fixed a series of bugs where the Config system could be corrupted on data interruption (such as a power loss).
+* Fixed a bug where the Plugin Browser could display rows too thin, causing title clipping.
+
 Release 6.1.0
 ===
 This release includes the new EDMC Plugin Browser, which allows plugin authors to register their plugins. 

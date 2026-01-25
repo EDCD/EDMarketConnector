@@ -496,13 +496,13 @@
 "Error in System Profiler" = "Errore nel Sistema di Profilazione";
 
 /* prefs.py: Disabling a Plugin. */
-"Disabling plugin {PLUGIN}. This will cause a restart. Click OK to continue..." = "Disabling plugin {PLUGIN}. This will cause a restart. Click OK to continue...";
+"Disabling plugin {PLUGIN}. This will cause a restart. Click OK to continue..." = "Disabilitare il plugin {PLUGIN}. Questo causerà il riavvio. Fai clic su OK per continuare...";
 
 /* prefs.py: Enable a Disabled Plugin */
-"Enable" = "Enable";
+"Enable" = "Attiva";
 
 /* prefs.py: Disable an Enabled Plugin */
-"Disable" = "Disable";
+"Disable" = "Disattiva";
 
 /* stats.py: Cmdr stats; In files: stats.py:58; */
 "Balance" = "Saldo";
@@ -835,61 +835,61 @@
 "Copy Inara SLEF" = "Copia Inara SLEF";
 
 /* edastro_core.py: Settings>EDAstro - Label on checkbox for 'send data'; */
-"Send data to EDAstro" = "Send data to EDAstro";
+"Send data to EDAstro" = "Invia dati a EDAstro";
 
 /* common_coreutils.py: Colonisation ship name, with title; In files: common_coreutils.py:81:81 */
-"System Colonisation Ship {NAME}" = "System Colonisation Ship {NAME}";
+"System Colonisation Ship {NAME}" = "Nave di Colonizzazione del Sistema {NAME}";
 
 /* common_coreutils.py: Unidentified colonisation ship; In files: common_coreutils.py:84:84 */
-"System Colonisation Ship" = "System Colonisation Ship";
+"System Colonisation Ship" = "Nave di colonizzazione del Sistema";
 
 /* plugin_browser.py: Filter Plugin Categories */
-"Filter by Category:" = "Filter by Category:";
+"Filter by Category:" = "Filtra per Categoria:";
 
 /* plugin_browser.py: Plugin Browser Plug Name */
-"Name" = "Name";
+"Name" = "Nome";
 
 /* plugin_browser.py: Plugin Browser Plug Ver */
-"Version" = "Version";
+"Version" = "Versione";
 
 /* plugin_browser.py: Plugin Browser Last Update */
-"Last Updated" = "Last Updated";
+"Last Updated" = "Ultimo aggiornamento";
 
 /* plugin_browser.py: Plugin Browser Category */
-"Categories" = "Categories";
+"Categories" = "Categorie";
 
 /* plugin_browser.py: Plugin Browser Description */
-"Description" = "Description";
+"Description" = "Descrizione";
 
 /* plugin_browser.py: Plugin Browser Stars */
-"Stars" = "Stars";
+"Stars" = "Stelle";
 
 /* plugin_browser.py: Plugin Browser Title */
-"Plugin Browser" = "Plugin Browser";
+"Plugin Browser" = "Browser Plugin";
 
 /* plugin_browser.py: Open Plugin Repo */
-"Open Plugin Repository" = "Open Plugin Repository";
+"Open Plugin Repository" = "Apri Repository Plugin";
 
 /* plugin_browser.py: Report a Malfunctioning Plugin */
-"Report Plugin" = "Report Plugin";
+"Report Plugin" = "Plugin Report";
 
 /* plugin_browser.py: Plugin Browser Authors */
-"Authors" = "Authors";
+"Authors" = "Autori";
 
 /* plugin_browser.py: Plugin Browser License */
-"License" = "License";
+"License" = "Licenza";
 
 /* plugin_browser.py: Plugin Browser Reqs */
-"Requirements" = "Requirements";
+"Requirements" = "Requisiti";
 
 /* plugin_browser.py: Last Tested EDMC Version  */
-"Last Tested EDMC: {last_tested}" = "Last Tested EDMC: {last_tested}";
+"Last Tested EDMC: {last_tested}" = "Ultimo EDMC testato: {last_tested}";
 
 /* plugin_browser.py: Plugin Project Link */
-"Main Project Link" = "Main Project Link";
+"Main Project Link" = "Link del Progetto Principale";
 
 /* plugin_browser.py: Plugin VT Link */
 "VirusTotal Link" = "VirusTotal Link";
 
 /* prefs.py: Settings > Output - choose delimiter/format for market export files */
-"Market export format:" = "Market export format:";
+"Market export format:" = "Formato esportazione mercato:";
