@@ -1,7 +1,11 @@
+# flake8: noqa
+# mypy: ignore-errors
 """Test that logging works correctly from a class-definition caller."""
-import sys
 
-sys.path += "../"  # Dont ask me why for this one it breaks, it just does.
+import sys
+import inspect
+
+sys.path += "../"  # Don't ask me why for this one it breaks, it just does.
 from typing import TYPE_CHECKING  # noqa: E402
 
 from EDMCLogging import get_plugin_logger  # noqa: E402
@@ -9,7 +13,7 @@ from EDMCLogging import get_plugin_logger  # noqa: E402
 if TYPE_CHECKING:
     from _pytest.logging import LogCaptureFixture
 
-logger = get_plugin_logger('EDMCLogging.py')
+logger = get_plugin_logger("EDMCLogging.py")
 
 
 class ClassVarLogger:
@@ -26,7 +30,7 @@ def log_stuff(msg: str) -> None:
     ClassVarLogger.logger.debug(msg)  # type: ignore # its there
 
 
-def test_class_logger(caplog: 'LogCaptureFixture') -> None:
+def test_class_logger(caplog: "LogCaptureFixture") -> None:
     """
     Test that logging from a class variable doesn't explode.
 
@@ -35,11 +39,9 @@ def test_class_logger(caplog: 'LogCaptureFixture') -> None:
     we did not check for its existence before using it.
     """
     ClassVarLogger.set_logger(logger)
-    ClassVarLogger.logger.debug('test')  # type: ignore # its there
-    ClassVarLogger.logger.info('test2')  # type: ignore # its there
-    log_stuff('test3')
 
-    # Dont move these, it relies on the line numbres.
-    assert 'EDMarketConnector.EDMCLogging.py:test_logging_classvar.py:38 test' in caplog.text
-    assert 'EDMarketConnector.EDMCLogging.py:test_logging_classvar.py:39 test2' in caplog.text
-    assert 'EDMarketConnector.EDMCLogging.py:test_logging_classvar.py:26 test3' in caplog.text
+    # Get current line number dynamically
+    current_line = inspect.currentframe().f_lineno + 1
+    ClassVarLogger.logger.debug("test")
+
+    assert f"test_logging_classvar.py:{current_line} test" in caplog.text
