@@ -43,6 +43,7 @@ import sys
 import tomllib
 import tomli_w
 import time
+import threading
 from typing import Any, TypeVar
 from collections import defaultdict
 import semantic_version
@@ -213,6 +214,9 @@ class Config:
         # Set Needed Platform Var for app_dir_path
         self.app_dir_path = app_path
         self.toml_path: pathlib.Path = self.app_dir_path / "config.toml"
+        self._write_lock = threading.Lock()
+        self._dirty = False
+        self._batch_depth = 0
         self.generated: str | None = None
         self.source: str | None = None
         self.settings: dict[str, Any] = {}
@@ -327,29 +331,28 @@ class Config:
         self.settings = dict(data.get("settings", {}))
 
     def _write_atomic(self, data: dict):
-        tmp = self.toml_path.with_suffix(".toml.tmp")
-        bak = self.toml_path.with_suffix(".toml.bak")
+        with self._write_lock:
+            tmp = self.toml_path.with_suffix(".toml.tmp")
+            bak = self.toml_path.with_suffix(".toml.bak")
 
-        with tmp.open("wb") as f:
-            tomli_w.dump(data, f)
-            f.flush()
-            os.fsync(f.fileno())
+            with tmp.open("wb") as f:
+                tomli_w.dump(data, f)
+                f.flush()
+                os.fsync(f.fileno())
 
-        # Rotate backup
-        if self.toml_path.exists():
+            if self.toml_path.exists():
+                with contextlib.suppress(Exception):
+                    self.toml_path.replace(bak)
+
+            tmp.replace(self.toml_path)
+
+            # Best-effort directory fsync
             with contextlib.suppress(Exception):
-                self.toml_path.replace(bak)
-
-        tmp.replace(self.toml_path)
-
-        # Best-effort directory fsync
-        with contextlib.suppress(Exception):
-            try:
-                # POSIX: Open as Directory
-                with self.toml_path.parent.open("rb") as d:
-                    os.fsync(d.fileno())
-            except (IsADirectoryError, PermissionError, OSError):
-                pass
+                try:
+                    with self.toml_path.parent.open("rb") as d:
+                        os.fsync(d.fileno())
+                except (IsADirectoryError, PermissionError, OSError):
+                    pass
 
     def get(self, key: str, default=None):
         """Return raw stored value."""
@@ -516,36 +519,37 @@ class Config:
         This allows the main application (after argparse) to override the
         config file used without needing to recreate the Config instance.
         """
-        new_path = pathlib.Path(new_config_path)
+        with self._write_lock:
+            new_path = pathlib.Path(new_config_path)
 
-        if not new_path.is_file():
-            logger.error(f"Config file not found: {new_config_path}")
-            return  # Use the default config.
+            if not new_path.is_file():
+                logger.error(f"Config file not found: {new_config_path}")
+                return  # Use the default config.
 
-        logger.info(f"Reloading config from alternate path: {new_path}")
+            logger.info(f"Reloading config from alternate path: {new_path}")
 
-        # Update path and reload
-        self.toml_path = new_path
-        self.generated = None
-        self.source = None
-        self.settings = {}
+            # Update path and reload
+            self.toml_path = new_path
+            self.generated = None
+            self.source = None
+            self.settings = {}
 
-        # Load TOML content from the new file and setup system.
-        self._load()
-        self._init_platform()
+            # Load TOML content from the new file and setup system.
+            self._load()
+            self._init_platform()
 
-        # Re-run plugin_dir logic
-        plugdir_str = self.get_str("plugin_dir")
-        if not plugdir_str:
-            plugdir_str = str(self.default_plugin_dir_path)
-            self.plugin_dir_path = self.default_plugin_dir_path
-            self.set("plugin_dir", plugdir_str)
-        elif not pathlib.Path(plugdir_str).is_dir():
-            self.set("plugin_dir", str(self.default_plugin_dir_path))
-            plugdir_str = self.default_plugin_dir
+            # Re-run plugin_dir logic
+            plugdir_str = self.get_str("plugin_dir")
+            if not plugdir_str:
+                plugdir_str = str(self.default_plugin_dir_path)
+                self.plugin_dir_path = self.default_plugin_dir_path
+                self.set("plugin_dir", plugdir_str)
+            elif not pathlib.Path(plugdir_str).is_dir():
+                self.set("plugin_dir", str(self.default_plugin_dir_path))
+                plugdir_str = self.default_plugin_dir
 
-        self.plugin_dir_path = pathlib.Path(plugdir_str)
-        self.plugin_dir_path.mkdir(exist_ok=True)
+            self.plugin_dir_path = pathlib.Path(plugdir_str)
+            self.plugin_dir_path.mkdir(exist_ok=True)
 
     def delete(self, key: str, *, suppress=False) -> None:
         """Delete the given key from the config."""
@@ -554,24 +558,48 @@ class Config:
         except Exception:
             if not suppress:
                 raise
-        self.save()
+        self._dirty = True
+        if self._batch_depth == 0:
+            self.save()
 
     def set(self, key: str, value: Any):
         """Modify a setting and save to disk."""
-        if isinstance(value, list):
-            self.settings[key.lower()] = value
-        else:
-            self.settings[key.lower()] = str(value)
-        self.save()
+        if not isinstance(value, (str, int, float, bool, list, dict, type(None))):
+            raise TypeError(
+                f"Unsupported config value type for {key!r}: {type(value).__name__}"
+            )
+
+        key = key.lower().strip()
+        with self._write_lock:
+            self.settings[key] = value
+            self._dirty = True
+
+        if self._batch_depth == 0:
+            self.save()
+
+    def begin_batch(self):
+        self._batch_depth += 1
+
+    def end_batch(self):
+        if self._batch_depth == 0:
+            raise RuntimeError("end_batch() called without matching begin_batch()")
+
+        self._batch_depth -= 1
+
+        if self._batch_depth == 0 and self._dirty:
+            self.save()
 
     def save(self):
         """Write updated config back to TOML."""
+        if self._batch_depth > 0:
+            return
         data = {
             "generated": self.generated,
             "source": self.source,
             "settings": self.settings,
         }
         self._write_atomic(data)
+        self._dirty = False
 
     def close(self) -> None:
         """Save config changes before closing."""
