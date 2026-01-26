@@ -155,7 +155,7 @@ def appversion() -> semantic_version.Version:
     return _cached_version
 
 
-user_agent = f"EDCD-{appname}-{appversion()}"
+user_agent: str = f"EDCD-{appname}-{appversion()}"
 
 
 def appversion_nobuild() -> semantic_version.Version:
@@ -577,10 +577,12 @@ class Config:
         if self._batch_depth == 0:
             self.save()
 
-    def begin_batch(self):
+    def begin_batch(self) -> None:
+        """Start Batch Processing of Config Writes."""
         self._batch_depth += 1
 
-    def end_batch(self):
+    def end_batch(self) -> None:
+        """End Batch Processing of Config Writes."""
         if self._batch_depth == 0:
             raise RuntimeError("end_batch() called without matching begin_batch()")
 
@@ -589,7 +591,7 @@ class Config:
         if self._batch_depth == 0 and self._dirty:
             self.save()
 
-    def save(self):
+    def save(self) -> None:
         """Write updated config back to TOML."""
         if self._batch_depth > 0:
             return
@@ -606,7 +608,7 @@ class Config:
         self.save()
 
 
-def get_appdirpath():
+def get_appdirpath() -> pathlib.Path:
     """Grab the Application Directory early."""
     app_dir_path = None
     if sys.platform == "win32":
