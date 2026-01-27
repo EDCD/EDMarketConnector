@@ -6,9 +6,21 @@
       <description>Most recent changes with links to updates.</description>
       <!-- Windows -->
       <item>
-         <title>Release 6.1.1</title>
+         <title>Release 6.1.2-beta1</title>
          <description><![CDATA[<style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
 <p>We now test against, and package with, Python 3.13.</p>
+<h2>Release 6.1.2-beta1</h2>
+<p>This release includes refinements on the patches for 6.1.1, and a series of new tests for development.</p>
+<p><strong>Changes and Enhancements</strong></p>
+<ul>
+<li>Added a series of new PyTest tests for development checking.</li>
+<li>Improves the config write system to ensure two simultaneous writes don't corrupt the config file.</li>
+</ul>
+<p><strong>Bug Fixes</strong></p>
+<ul>
+<li>Fixed a bug on Linux where the Plugin Browser would still display rows too thin.</li>
+</ul>
+<hr>
 <h2>Release 6.1.1</h2>
 <p>This release contains a handful of bugfixes for 6.1, including updates for the new Config system.</p>
 <p><strong>Changes and Enhancements</strong></p>
@@ -3169,11 +3181,11 @@ about this:
 <a href="https://issues.frontierstore.net/issue-detail/28638" rel="nofollow">PTS CAPI saying Commander is Docked after jumping to new system</a>.</p>
 </li>
 </ul>]]></description>
-         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F6.1.1/EDMarketConnector_Installer_6.1.1_x64.exe"
+         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F6.1.2-beta1/EDMarketConnector_Installer_6.1.2-beta1_x64.exe"
                     sparkle:os="windows"
-                    sparkle:version="6.1.1"
+                    sparkle:version="6.1.2-beta1"
                     type="application/x-ms-dos-executable"
-                    sparkle:edSignature="DCNnIhWqkaKzkeeZ3i8GS9bYx3uHp/SYUlWydsnuf+LnOHSHO804Q4rQ4mDeB5RTVdZKDXl9fjI1czVZ9i/PCQ==" length="23873504"
+                    sparkle:edSignature="9Rem4Sj1NVPCc76FO4ow3EnzkrtIXKENQh15DTkX1f+gMyL00dUQCCQoRm/iANAaoLKvF5yebgOhFseaRrAyCA==" length="23855800"
          />
       </item>
    </channel>
