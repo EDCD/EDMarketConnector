@@ -3,6 +3,7 @@
 """Test myNotebook with Pytest."""
 
 import pytest
+import sys
 import tkinter as tk
 from tkinter import ttk
 from unittest.mock import MagicMock, patch
@@ -19,6 +20,7 @@ def root():
 
 
 class TestWidgetHacks:
+    @pytest.mark.skipif(sys.platform != "win32", reason="Windows-specific logic")
     def test_notebook_colors_windows(self, root):
         """Verify that on Windows, specific styles are configured with PAGEBG."""
         with patch("sys.platform", "win32"):
@@ -28,6 +30,7 @@ class TestWidgetHacks:
             assert style.lookup("nb.TFrame", "background") == "SystemWindow"
             nb.destroy()
 
+    @pytest.mark.skipif(sys.platform != "win32", reason="Windows-specific logic")
     def test_label_colors_windows(self, root):
         """Verify Label uses system window colors on Windows."""
         with patch("sys.platform", "win32"):
