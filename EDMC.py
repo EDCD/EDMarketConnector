@@ -126,6 +126,12 @@ def main() -> None:  # noqa: C901, CCR001
         )
 
         parser.add_argument(
+            "--trace-help",
+            help="Open the documentation to view all possible trace-on values",
+            action='store_true'
+        )
+
+        parser.add_argument(
             '--refresh-all',
             help='Iterate over all known CMDRs to try and refresh access tokens',
             action='store_true',
@@ -194,6 +200,12 @@ def main() -> None:  # noqa: C901, CCR001
                 logger.info(f'marked {d} for TRACE')
 
         log_locale('Initial Locale')
+
+        if args.trace_help:
+            import webbrowser
+            logger.info("Opening Trace Help Documentation")
+            webbrowser.open("https://github.com/EDCD/EDMarketConnector/blob/main/docs/Available-Traces.md")
+
         if args.refresh_all:
             # Attempt to refresh all known CMDRs. This MAY cause additional output if a token is invalid.
             logger.debug("Refreshing all known CMDRs")

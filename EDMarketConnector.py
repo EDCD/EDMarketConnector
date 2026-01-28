@@ -128,6 +128,12 @@ if __name__ == '__main__':  # noqa: C901
     )
 
     parser.add_argument(
+        "--trace-help",
+        help="Open the documentation to view all possible trace-on values",
+        action='store_true'
+    )
+
+    parser.add_argument(
         '--debug-sender',
         help='Mark the selected sender as in debug mode. This generally results in data being written to disk',
         action='append',
@@ -231,6 +237,10 @@ if __name__ == '__main__':  # noqa: C901
     if level_to_set is not None:
         logger.setLevel(level_to_set)
         edmclogger.set_channels_loglevel(level_to_set)
+
+    if args.trace_help:
+        logger.info("Opening Trace Help Documentation")
+        webbrowser.open("https://github.com/EDCD/EDMarketConnector/blob/main/docs/Available-Traces.md")
 
     if args.force_localserver_for_auth:
         config.set_auth_force_localserver()
