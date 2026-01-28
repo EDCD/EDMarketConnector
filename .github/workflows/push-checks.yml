@@ -32,6 +32,7 @@ jobs:
         python-version-file: '.python-version'
     - name: Install dependencies
       run: |
+        sudo apt-get install -y xvfb
         python -m pip install --upgrade pip
         pip install flake8 pytest
         if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
@@ -79,4 +80,4 @@ jobs:
       ####################################################################
     - name: PyTest tests
       run: |
-        pytest
+        xvfb-run pytest

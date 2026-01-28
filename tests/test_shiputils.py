@@ -2,6 +2,8 @@
 # mypy: ignore-errors
 """Test util_ships."""
 
+import pytest
+import sys
 from unittest.mock import patch
 import util_ships
 
@@ -22,6 +24,7 @@ class TestShipUtils:
         assert util_ships.ship_file_name("MyShip.txt", "Sidewinder") == "MyShip"
         assert util_ships.ship_file_name("Config.json", "CobraMkIII") == "Config"
 
+    @pytest.mark.skipif(sys.platform != "win32", reason="Windows-specific logic")
     @patch("sys.platform", "win32")
     @patch("os.path.isreserved")
     def test_ship_file_name_reserved_windows(self, mock_isreserved):

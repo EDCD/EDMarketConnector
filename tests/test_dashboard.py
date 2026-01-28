@@ -4,6 +4,7 @@
 
 import pytest
 import json
+import sys
 from unittest.mock import MagicMock, patch
 import dashboard
 
@@ -30,6 +31,7 @@ class TestDashboard:
         )
         return d
 
+    @pytest.mark.skipif(sys.platform != "win32", reason="Windows-specific logic")
     def test_start_logic_windows(self, mock_root, temp_journal_dir):
         """Verify observer setup on Windows platform."""
         with patch("sys.platform", "win32"), patch(

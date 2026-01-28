@@ -4,6 +4,7 @@
 
 import pytest
 from unittest.mock import patch
+import sys
 import l10n
 
 
@@ -101,6 +102,7 @@ class TestLocaleUtils:
         assert l10n.Locale.number_from_string("100") == 100
         assert l10n.Locale.number_from_string("not_a_number") is None
 
+    @pytest.mark.skipif(sys.platform != "win32", reason="Windows-specific logic")
     def test_preferred_languages_mapping(self):
         """Verify the zh-CN to zh-Hans hack works."""
         with patch("sys.platform", "win32"):
