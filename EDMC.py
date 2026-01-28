@@ -204,7 +204,7 @@ def main() -> None:  # noqa: C901, CCR001
         if args.trace_help:
             import webbrowser
             logger.info("Opening Trace Help Documentation")
-            webbrowser.open("https://github.com/EDCD/EDMarketConnector/blob/main/docs/Available-Traces.md")
+            webbrowser.open("https://github.com/EDCD/EDMarketConnector/blob/main/docs/Available%20Traces.md")
 
         if args.refresh_all:
             # Attempt to refresh all known CMDRs. This MAY cause additional output if a token is invalid.

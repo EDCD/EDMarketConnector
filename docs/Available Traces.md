@@ -20,49 +20,49 @@ This document lists all of the available `--trace-on` options to enable addition
 | `CMDR_EVENTS`                     | `f'False as default: this.newgame_docked={this.newgame_docked!r}' if not should_send_result else ''`                            | plugins\edsm.py:974       |
 | `STARTUP`                         | `f""""Commander" event, monitor.cmdr={monitor.cmdr!r}, monitor.state["FID"]={monitor.state['FID']!r}"""`                        | monitor.py:594            |
 | `STARTUP`                         | `f""""LoadGame" event, monitor.cmdr={monitor.cmdr!r}, monitor.state["FID"]={monitor.state['FID']!r}"""`                         | monitor.py:645            |
-| `capi.auth.refresh`               | `f'Found CMDRs: {cmdrs} in config.'`                                                                                            | companion.py:328          |
-| `capi.auth.refresh`               | `f'Found tokens: {tokens} in config.'`                                                                                          | companion.py:337          |
-| `capi.auth.refresh`               | `f'Session Data: {r.json()}'`                                                                                                   | companion.py:353          |
-| `capi.auth.refresh`               | `f'Status Code: {r.status_code}'`                                                                                               | companion.py:354          |
-| `capi.auth.refresh`               | `f'Token Data: {token_data}'`                                                                                                   | companion.py:357          |
-| `capi.auth.refresh`               | `f'Challenge: {challenge}'`                                                                                                     | companion.py:376          |
-| `capi.auth.refresh`               | `f'OAuth callback params: {data}'`                                                                                              | companion.py:397          |
-| `capi.auth.refresh`               | `f'Token Data: {data_token}'`                                                                                                   | companion.py:422          |
-| `capi.auth.refresh`               | `f'Decode Token: {data_decode}'`                                                                                                | companion.py:434          |
-| `capi.worker`                     | `f'Sending HTTP request for {capi_endpoint} ...'`                                                                               | companion.py:735          |
-| `capi.worker`                     | `'... got result...'`                                                                                                           | companion.py:746          |
-| `capi.worker`                     | `'De-queued request'`                                                                                                           | companion.py:918          |
-| `capi.worker`                     | `f'Processing query: {query.endpoint}'`                                                                                         | companion.py:927          |
-| `capi.worker`                     | `'Sending <<CAPIResponse>>'`                                                                                                    | companion.py:963          |
-| `capi.worker`                     | `'Enqueueing request'`                                                                                                          | companion.py:996          |
-| `capi.worker`                     | `'Enqueueing Fleet Carrier request'`                                                                                            | companion.py:1025         |
-| `capi.worker`                     | `'Begin'`                                                                                                                       | EDMarketConnector.py:1116 |
-| `capi.worker`                     | `'Aborting Query: Cmdr unknown'`                                                                                                | EDMarketConnector.py:1131 |
-| `capi.worker`                     | `'Aborting Query: Game Mode unknown'`                                                                                           | EDMarketConnector.py:1137 |
-| `capi.worker`                     | `'Aborting Query: GameVersion unknown'`                                                                                         | EDMarketConnector.py:1143 |
-| `capi.worker`                     | `'Aborting Query: Current star system unknown'`                                                                                 | EDMarketConnector.py:1149 |
-| `capi.worker`                     | `'Aborting Query: In multi-crew'`                                                                                               | EDMarketConnector.py:1155 |
-| `capi.worker`                     | `'Aborting Query: In CQC'`                                                                                                      | EDMarketConnector.py:1161 |
-| `capi.worker`                     | `'Auth in progress? Aborting query'`                                                                                            | EDMarketConnector.py:1167 |
-| `capi.worker`                     | `'Requesting full station data'`                                                                                                | EDMarketConnector.py:1189 |
-| `capi.worker`                     | `'Calling companion.session.station'`                                                                                           | EDMarketConnector.py:1191 |
-| `capi.worker`                     | `'Begin'`                                                                                                                       | EDMarketConnector.py:1206 |
-| `capi.worker`                     | `'Aborting Query: Cmdr unknown'`                                                                                                | EDMarketConnector.py:1219 |
-| `capi.worker`                     | `'Aborting Query: GameVersion unknown'`                                                                                         | EDMarketConnector.py:1225 |
-| `capi.worker`                     | `'Requesting Fleet Carrier data'`                                                                                               | EDMarketConnector.py:1240 |
-| `capi.worker`                     | `'Calling companion.session.fleetcarrier'`                                                                                      | EDMarketConnector.py:1242 |
-| `capi.worker`                     | `'Handling response'`                                                                                                           | EDMarketConnector.py:1253 |
-| `capi.worker`                     | `'Pulling answer off queue'`                                                                                                    | EDMarketConnector.py:1259 |
-| `capi.worker`                     | `f'Failed Request: {capi_response.message}'`                                                                                    | EDMarketConnector.py:1262 |
-| `capi.worker`                     | `'Answer is not a Failure'`                                                                                                     | EDMarketConnector.py:1268 |
-| `capi.worker`                     | `'Raising CmdrError()'`                                                                                                         | EDMarketConnector.py:1323 |
-| `capi.worker`                     | `'Updating suit and cooldown...'`                                                                                               | EDMarketConnector.py:1499 |
-| `capi.worker`                     | `'...done'`                                                                                                                     | EDMarketConnector.py:1503 |
-| `capi.worker`                     | `f'Failed Request: {capi_response.message}'`                                                                                    | EDMC.py:301               |
-| `capi.worker`                     | `'Answer is not a Failure'`                                                                                                     | EDMC.py:306               |
+| `capi.auth.refresh`               | `f'Found CMDRs: {cmdrs} in config.'`                                                                                            | companion.py:327          |
+| `capi.auth.refresh`               | `f'Found tokens: {tokens} in config.'`                                                                                          | companion.py:336          |
+| `capi.auth.refresh`               | `f'Session Data: {r.json()}'`                                                                                                   | companion.py:352          |
+| `capi.auth.refresh`               | `f'Status Code: {r.status_code}'`                                                                                               | companion.py:353          |
+| `capi.auth.refresh`               | `f'Token Data: {token_data}'`                                                                                                   | companion.py:356          |
+| `capi.auth.refresh`               | `f'Challenge: {challenge}'`                                                                                                     | companion.py:375          |
+| `capi.auth.refresh`               | `f'OAuth callback params: {data}'`                                                                                              | companion.py:396          |
+| `capi.auth.refresh`               | `f'Token Data: {data_token}'`                                                                                                   | companion.py:421          |
+| `capi.auth.refresh`               | `f'Decode Token: {data_decode}'`                                                                                                | companion.py:433          |
+| `capi.worker`                     | `f'Sending HTTP request for {capi_endpoint} ...'`                                                                               | companion.py:734          |
+| `capi.worker`                     | `'... got result...'`                                                                                                           | companion.py:745          |
+| `capi.worker`                     | `'De-queued request'`                                                                                                           | companion.py:917          |
+| `capi.worker`                     | `f'Processing query: {query.endpoint}'`                                                                                         | companion.py:926          |
+| `capi.worker`                     | `'Sending <<CAPIResponse>>'`                                                                                                    | companion.py:962          |
+| `capi.worker`                     | `'Enqueueing request'`                                                                                                          | companion.py:995          |
+| `capi.worker`                     | `'Enqueueing Fleet Carrier request'`                                                                                            | companion.py:1024         |
+| `capi.worker`                     | `'Begin'`                                                                                                                       | EDMarketConnector.py:1119 |
+| `capi.worker`                     | `'Aborting Query: Cmdr unknown'`                                                                                                | EDMarketConnector.py:1134 |
+| `capi.worker`                     | `'Aborting Query: Game Mode unknown'`                                                                                           | EDMarketConnector.py:1140 |
+| `capi.worker`                     | `'Aborting Query: GameVersion unknown'`                                                                                         | EDMarketConnector.py:1146 |
+| `capi.worker`                     | `'Aborting Query: Current star system unknown'`                                                                                 | EDMarketConnector.py:1152 |
+| `capi.worker`                     | `'Aborting Query: In multi-crew'`                                                                                               | EDMarketConnector.py:1158 |
+| `capi.worker`                     | `'Aborting Query: In CQC'`                                                                                                      | EDMarketConnector.py:1164 |
+| `capi.worker`                     | `'Auth in progress? Aborting query'`                                                                                            | EDMarketConnector.py:1170 |
+| `capi.worker`                     | `'Requesting full station data'`                                                                                                | EDMarketConnector.py:1192 |
+| `capi.worker`                     | `'Calling companion.session.station'`                                                                                           | EDMarketConnector.py:1194 |
+| `capi.worker`                     | `'Begin'`                                                                                                                       | EDMarketConnector.py:1209 |
+| `capi.worker`                     | `'Aborting Query: Cmdr unknown'`                                                                                                | EDMarketConnector.py:1222 |
+| `capi.worker`                     | `'Aborting Query: GameVersion unknown'`                                                                                         | EDMarketConnector.py:1228 |
+| `capi.worker`                     | `'Requesting Fleet Carrier data'`                                                                                               | EDMarketConnector.py:1243 |
+| `capi.worker`                     | `'Calling companion.session.fleetcarrier'`                                                                                      | EDMarketConnector.py:1245 |
+| `capi.worker`                     | `'Handling response'`                                                                                                           | EDMarketConnector.py:1256 |
+| `capi.worker`                     | `'Pulling answer off queue'`                                                                                                    | EDMarketConnector.py:1262 |
+| `capi.worker`                     | `f'Failed Request: {capi_response.message}'`                                                                                    | EDMarketConnector.py:1265 |
+| `capi.worker`                     | `'Answer is not a Failure'`                                                                                                     | EDMarketConnector.py:1271 |
+| `capi.worker`                     | `'Raising CmdrError()'`                                                                                                         | EDMarketConnector.py:1326 |
+| `capi.worker`                     | `'Updating suit and cooldown...'`                                                                                               | EDMarketConnector.py:1502 |
+| `capi.worker`                     | `'...done'`                                                                                                                     | EDMarketConnector.py:1506 |
+| `capi.worker`                     | `f'Failed Request: {capi_response.message}'`                                                                                    | EDMC.py:313               |
+| `capi.worker`                     | `'Answer is not a Failure'`                                                                                                     | EDMC.py:318               |
 | `frontier-auth`                   | `f'Payload: {self.lastpayload}'`                                                                                                | protocol.py:50            |
 | `frontier-auth.http`              | `f'Got message on path: {self.path}'`                                                                                           | protocol.py:400           |
-| `frontier-auth.windows`           | `'Begin...'`                                                                                                                    | EDMarketConnector.py:276  |
+| `frontier-auth.windows`           | `'Begin...'`                                                                                                                    | EDMarketConnector.py:286  |
 | `frontier-auth.windows`           | `f'DDE message of type: {msg.message}'`                                                                                         | protocol.py:281           |
 | `frontier-auth.windows`           | `f'args are: {args}'`                                                                                                           | protocol.py:291           |
 | `journal-lock`                    | `f'journal_dir_lockfile_name = {self.journal_dir_lockfile_name!r}'`                                                             | journal_lock.py:62        |
@@ -91,8 +91,8 @@ This document lists all of the available `--trace-on` options to enable addition
 | `journal.locations`               | `f'Event: {p!r}'`                                                                                                               | plugins\edsm.py:899       |
 | `journal.locations`               | `f"""Attempting API call for "Location" event with timestamp: {p['timestamp']}"""`                                              | plugins\edsm.py:901       |
 | `journal.locations`               | `f'Overall POST data (elided) is:\n{json.dumps(data_elided, indent=2)}'`                                                        | plugins\edsm.py:905       |
-| `journal.queue`                   | `'No entry from monitor.get_entry()'`                                                                                           | EDMarketConnector.py:1548 |
-| `journal.queue`                   | `'Startup, returning'`                                                                                                          | EDMarketConnector.py:1638 |
+| `journal.queue`                   | `'No entry from monitor.get_entry()'`                                                                                           | EDMarketConnector.py:1551 |
+| `journal.queue`                   | `'Startup, returning'`                                                                                                          | EDMarketConnector.py:1641 |
 | `journal.queue`                   | `'Sending <<JournalEvent>>'`                                                                                                    | monitor.py:461            |
 | `journal.queue`                   | `'Sending <<JournalEvent>>'`                                                                                                    | monitor.py:500            |
 | `journal.queue`                   | `'Begin'`                                                                                                                       | monitor.py:2169           |
@@ -124,4 +124,4 @@ This document lists all of the available `--trace-on` options to enable addition
 | `plugin.edsm.api`                 | `'Overall OK'`                                                                                                                  | plugins\edsm.py:756       |
 | `plugin.edsm.api`                 | `'Event(s) not currently processed, but saved for later'`                                                                       | plugins\edsm.py:759       |
 | `plugin.inara.events`             | `f'Events:\n{json.dumps(data)}\n'`                                                                                              | plugins\inara.py:1538     |
-| `tk`                              | `f'Default tk scaling = {theme.default_ui_scale}'`                                                                              | EDMarketConnector.py:2362 |
+| `tk`                              | `f'Default tk scaling = {theme.default_ui_scale}'`                                                                              | EDMarketConnector.py:2365 |

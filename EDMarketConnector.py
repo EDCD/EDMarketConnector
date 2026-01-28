@@ -240,7 +240,7 @@ if __name__ == '__main__':  # noqa: C901
 
     if args.trace_help:
         logger.info("Opening Trace Help Documentation")
-        webbrowser.open("https://github.com/EDCD/EDMarketConnector/blob/main/docs/Available-Traces.md")
+        webbrowser.open("https://github.com/EDCD/EDMarketConnector/blob/main/docs/Available%20Traces.md")
 
     if args.force_localserver_for_auth:
         config.set_auth_force_localserver()

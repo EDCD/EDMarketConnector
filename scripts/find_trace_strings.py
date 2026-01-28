@@ -1,5 +1,5 @@
 r"""
-Search paths for trace_if calls, validate TRACEDOC comments, and optionally generate /docs/Available-Traces.md.
+Search paths for trace_if calls, validate TRACEDOC comments, and optionally generate /docs/Available Traces.md.
 
 Example usage: python .\scripts\find_trace_strings.py --directory . --ignore dist.win32 --ignore tests
 """
@@ -34,7 +34,7 @@ def find_trace_calls(statement: ast.AST) -> list[ast.Call]:
 
 
 def generate_markdown(all_found_data: list[dict], project_root: pathlib.Path):
-    """Generate the Available-Traces.md file with fixed-width column formatting."""
+    """Generate the Available Traces.md file with fixed-width column formatting."""
     docs_dir = project_root / "docs"
     docs_dir.mkdir(exist_ok=True)
 
@@ -60,8 +60,7 @@ def generate_markdown(all_found_data: list[dict], project_root: pathlib.Path):
 
     lines = [
         "# Available Traces",
-        f"This file was last updated on {datetime.date.today()}."
-        "",
+        f"This file was last updated on {datetime.date.today()}." "",
         "This document lists all of the available `--trace-on` options to enable additional debug logging.",
         "",
         f"| {h_key:<{w_key}} | {h_msg:<{w_msg}} | {h_loc:<{w_loc}} |",
@@ -73,7 +72,7 @@ def generate_markdown(all_found_data: list[dict], project_root: pathlib.Path):
             f"| {r['key']:<{w_key}} | {r['msg']:<{w_msg}} | {r['loc']:<{w_loc}} |"
         )
 
-    output_path = docs_dir / "Available-Traces.md"
+    output_path = docs_dir / "Available Traces.md"
     output_path.write_text("\n".join(lines), encoding="utf-8")
     print(f"\nDocumentation updated: {output_path}")
 
