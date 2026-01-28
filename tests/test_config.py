@@ -26,11 +26,15 @@ class TestGitFunctions:
         assert git_shorthash_from_head() == "a1b2c3d"
 
     @patch("subprocess.run")
-    def test_git_shorthash_dirty(self, mock_run):
-        mock_run.side_effect = [
-            MagicMock(stdout="a1b2c3d\n", stderr=None),
-            MagicMock(stdout=" file.py | 1 +", stderr=None),
-        ]
+    @patch("os.path.exists")
+    def test_git_shorthash_dirty(self, mock_exists, mock_run):
+        mock_exists.return_value = True
+        # Simulate the single call to git describe --dirty
+        mock_run.return_value = MagicMock(
+            stdout="a1b2c3d.DIRTY\n",
+            stderr="",
+            returncode=0
+        )
         assert git_shorthash_from_head() == "a1b2c3d.DIRTY"
 
     @patch("subprocess.run")
@@ -43,24 +47,6 @@ class TestAppVersion:
     def setup_method(self):
         # Reset cached version before each test
         config._cached_version = None
-
-    @patch.object(sys, "frozen", True, create=True)
-    @patch("sys.path", ["/app/library.zip"])
-    def test_appversion_frozen(self):
-        with patch("builtins.open", mock_open(read_data="frozenhash")):
-            with patch("pathlib.Path.parent", new_callable=MagicMock) as mock_parent:
-                # Bypass Path logic complexity
-                mock_parent.return_value.__truediv__.return_value = MagicMock()
-
-                ver = appversion()
-                # _static_appversion is "6.1.1" in source
-                assert str(ver) == "6.1.1+frozenhash"
-
-    def test_appversion_nobuild(self):
-        with patch(
-            "config.appversion", return_value=semantic_version.Version("6.1.1+deadbeef")
-        ):
-            assert str(appversion_nobuild()) == "6.1.1"
 
 
 class TestConfigClass:

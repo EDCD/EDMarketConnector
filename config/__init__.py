@@ -89,34 +89,31 @@ def git_shorthash_from_head() -> str | None:
 
     :return: str | None: None if we couldn't determine the short hash.
     """
+    if getattr(sys, 'frozen', False) or not os.path.exists(".git"):
+        return None
+
     try:
         result = subprocess.run(
-            ["git", "rev-parse", "--short", "HEAD"],
+            ["git", "describe", "--always", "--dirty=.DIRTY", "--exclude=*", "--abbrev=7"],
             capture_output=True,
             text=True,
             check=True,
+            encoding='utf-8'
         )
         shorthash = result.stdout.strip()
+
+        if not re.fullmatch(r"[0-9a-f]{7,}(\.DIRTY)?", shorthash):
+            logger.error(f"'{shorthash}' is not a valid git short hash format.")
+            return None
+
+        # Log stderr if git had complaints but still exited 0
+        if result.stderr:
+            logger.warning(f"Git stderr: {result.stderr.strip()}")
+        return shorthash
+
     except (subprocess.CalledProcessError, FileNotFoundError) as e:
-        logger.info(f"Couldn't run git command for short hash: {e!r}")
+        logger.info(f"Could not retrieve git hash: {e!r}")
         return None
-
-    if not re.fullmatch(r"[0-9a-f]{7,}", shorthash):
-        logger.error(
-            f"'{shorthash}' doesn't look like a valid git short hash, forcing to None"
-        )
-        return None
-
-    with contextlib.suppress(Exception):
-        diff_result = subprocess.run(
-            ["git", "diff", "--stat", "HEAD"], capture_output=True, check=True
-        )
-        if diff_result.stdout:
-            shorthash += ".DIRTY"
-        if diff_result.stderr:
-            logger.warning(f"Data from git on stderr:\n{diff_result.stderr.decode()}")
-
-    return shorthash
 
 
 def appversion() -> semantic_version.Version:
