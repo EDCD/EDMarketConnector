@@ -17,7 +17,7 @@ from collections.abc import Callable
 import plugin_browser
 import myNotebook as nb  # noqa: N813
 import plug
-from config import appversion_nobuild, config
+from config import appversion_nobuild, config, IS_FROZEN
 from EDMCLogging import edmclogger, get_main_logger
 from hotkey import hotkeymgr
 from l10n import translations as tr
@@ -50,16 +50,15 @@ def open_folder(file: Path) -> None:
 
 def help_open_system_profiler(parent) -> None:
     """Open the EDMC System Profiler."""
-    profiler_path = config.respath_path
+    if IS_FROZEN:
+        cmd = [str(Path(config.respath_path) / 'EDMCSystemProfiler.exe')]
+    else:
+        cmd = [sys.executable, str(Path(config.respath_path) / "EDMCSystemProfiler.py")]
     try:
-        if getattr(sys, 'frozen', False):
-            profiler_path /= 'EDMCSystemProfiler.exe'
-            subprocess.run(profiler_path, check=True)
-        else:
-            subprocess.run(['python', "EDMCSystemProfiler.py"], shell=False, check=True)
+        subprocess.Popen(cmd, shell=False)
     except Exception as err:
         parent.status["text"] = tr.tl("Error in System Profiler")  # LANG: Catch & Record Profiler Errors
-        logger.exception(err)
+        logger.exception(f"Failed to launch System Profiler: {err}")
 
 
 class PrefsVersion:

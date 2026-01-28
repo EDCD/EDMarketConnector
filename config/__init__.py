@@ -31,6 +31,7 @@ __all__ = [
     "config",
     "get_update_feed",
     "config_logger",
+    "IS_FROZEN",
 ]
 
 import contextlib
@@ -58,6 +59,7 @@ appcmdname = "EDMC"
 _static_appversion = "6.1.2-beta1"
 _cached_version: semantic_version.Version | None = None
 copyright = "© 2015-2019 Jonathan Harris, 2020-2026 EDCD"
+IS_FROZEN = getattr(sys, 'frozen', False)
 
 
 update_interval = 8 * 60 * 60  # 8 Hours
@@ -89,7 +91,7 @@ def git_shorthash_from_head() -> str | None:
 
     :return: str | None: None if we couldn't determine the short hash.
     """
-    if getattr(sys, 'frozen', False) or not os.path.exists(".git"):
+    if IS_FROZEN or not os.path.exists(".git"):
         return None
 
     try:
@@ -126,7 +128,7 @@ def appversion() -> semantic_version.Version:
     if _cached_version is not None:
         return _cached_version
 
-    if getattr(sys, "frozen", False):
+    if IS_FROZEN:
         # Running frozen, so we should have a .gitversion file
         # Yes, .parent because if frozen we're inside library.zip
         with open(

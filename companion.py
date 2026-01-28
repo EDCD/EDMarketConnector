@@ -20,7 +20,6 @@ import json
 import numbers
 import os
 import random
-import sys
 import threading
 import time
 import tkinter as tk
@@ -39,7 +38,7 @@ from urllib3.util.retry import Retry
 import config as conf_module
 import killswitch
 import protocol
-from config import config, user_agent
+from config import config, user_agent, IS_FROZEN
 from edmc_data import companion_category_map as category_map
 from EDMCLogging import get_main_logger
 from monitor import monitor
@@ -668,7 +667,7 @@ class Session:
             self.state = Session.STATE_INIT  # Will try to authorize again on next login or query
             self.auth = None
             raise  # Bad thing happened
-        if getattr(sys, 'frozen', False):
+        if IS_FROZEN:
             tk.messagebox.showinfo(title="Authentication Successful",  # type: ignore
                                    message="Authentication with cAPI Successful.\n"
                                            "You may now close the Frontier login tab if it is still open.")
