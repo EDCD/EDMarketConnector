@@ -10,7 +10,6 @@ import argparse
 import ast
 import datetime
 import pathlib
-import re
 import sys
 
 
@@ -32,17 +31,6 @@ def find_trace_calls(statement: ast.AST) -> list[ast.Call]:
     if isinstance(statement, ast.Call) and get_func_name(statement.func) == "trace_if":
         out.append(statement)
     return out
-
-
-COMMENT_SAME_LINE_RE = re.compile(r"^.*(#.*)$")
-COMMENT_OWN_LINE_RE = re.compile(r"^\s*?(#.*)$")
-
-
-def _has_tracedoc(line: str, pattern: re.Pattern) -> bool:
-    match = pattern.match(line)
-    if match:
-        return match.group(1).strip().startswith("# TRACEDOC:")
-    return False
 
 
 def generate_markdown(all_found_data: list[dict], project_root: pathlib.Path):
