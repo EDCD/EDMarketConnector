@@ -73,3 +73,10 @@ jobs:
     - name: translation checks
       run: |
           python ./scripts/find_localised_strings.py --compare-lang L10n/en.template --directory . --ignore coriolis-data
+
+      ####################################################################
+      # Ensure all tests pass
+      ####################################################################
+    - name: PyTest tests
+      run: |
+        pytest
