@@ -2,6 +2,20 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
 ---
 * We currently test against, and package with, Python 3.13, 64-bit.
 ---
+Release 6.1.2
+===
+This release includes refinements on the patches for 6.1.1, and a series of new tests for development.
+
+**Changes and Enhancements**
+* Added a series of new PyTest tests for development checking.
+* Added documentation on all the available trace-on commands, as well as what their log output will look like.
+* Improved the check for Git branch existence to be more efficient.
+* Improves the config write system to ensure two simultaneous writes don't corrupt the config file.
+* Simplified the check for if the program is frozen or not to a single check.
+
+**Bug Fixes**
+* Fixed a bug on Linux where the Plugin Browser would still display rows too thin.
+
 Release 6.1.1
 ===
 This release contains a handful of bugfixes for 6.1, including updates for the new Config system.

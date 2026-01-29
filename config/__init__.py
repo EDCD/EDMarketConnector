@@ -31,6 +31,7 @@ __all__ = [
     "config",
     "get_update_feed",
     "config_logger",
+    "IS_FROZEN",
 ]
 
 import contextlib
@@ -43,6 +44,7 @@ import sys
 import tomllib
 import tomli_w
 import time
+import threading
 from typing import Any, TypeVar
 from collections import defaultdict
 import semantic_version
@@ -54,9 +56,10 @@ appcmdname = "EDMC"
 # <https://semver.org/#semantic-versioning-specification-semver>
 # Major.Minor.Patch(-prerelease)(+buildmetadata)
 # NB: Do *not* import this, use the functions appversion() and appversion_nobuild()
-_static_appversion = "6.1.1"
+_static_appversion = "6.1.2"
 _cached_version: semantic_version.Version | None = None
 copyright = "© 2015-2019 Jonathan Harris, 2020-2026 EDCD"
+IS_FROZEN = getattr(sys, 'frozen', False)
 
 
 update_interval = 8 * 60 * 60  # 8 Hours
@@ -88,34 +91,31 @@ def git_shorthash_from_head() -> str | None:
 
     :return: str | None: None if we couldn't determine the short hash.
     """
+    if IS_FROZEN or not os.path.exists(".git"):
+        return None
+
     try:
         result = subprocess.run(
-            ["git", "rev-parse", "--short", "HEAD"],
+            ["git", "describe", "--always", "--dirty=.DIRTY", "--exclude=*", "--abbrev=7"],
             capture_output=True,
             text=True,
             check=True,
+            encoding='utf-8'
         )
         shorthash = result.stdout.strip()
+
+        if not re.fullmatch(r"[0-9a-f]{7,}(\.DIRTY)?", shorthash):
+            logger.error(f"'{shorthash}' is not a valid git short hash format.")
+            return None
+
+        # Log stderr if git had complaints but still exited 0
+        if result.stderr:
+            logger.warning(f"Git stderr: {result.stderr.strip()}")
+        return shorthash
+
     except (subprocess.CalledProcessError, FileNotFoundError) as e:
-        logger.info(f"Couldn't run git command for short hash: {e!r}")
+        logger.info(f"Could not retrieve git hash: {e!r}")
         return None
-
-    if not re.fullmatch(r"[0-9a-f]{7,}", shorthash):
-        logger.error(
-            f"'{shorthash}' doesn't look like a valid git short hash, forcing to None"
-        )
-        return None
-
-    with contextlib.suppress(Exception):
-        diff_result = subprocess.run(
-            ["git", "diff", "--stat", "HEAD"], capture_output=True, check=True
-        )
-        if diff_result.stdout:
-            shorthash += ".DIRTY"
-        if diff_result.stderr:
-            logger.warning(f"Data from git on stderr:\n{diff_result.stderr.decode()}")
-
-    return shorthash
 
 
 def appversion() -> semantic_version.Version:
@@ -128,7 +128,7 @@ def appversion() -> semantic_version.Version:
     if _cached_version is not None:
         return _cached_version
 
-    if getattr(sys, "frozen", False):
+    if IS_FROZEN:
         # Running frozen, so we should have a .gitversion file
         # Yes, .parent because if frozen we're inside library.zip
         with open(
@@ -154,7 +154,7 @@ def appversion() -> semantic_version.Version:
     return _cached_version
 
 
-user_agent = f"EDCD-{appname}-{appversion()}"
+user_agent: str = f"EDCD-{appname}-{appversion()}"
 
 
 def appversion_nobuild() -> semantic_version.Version:
@@ -213,6 +213,9 @@ class Config:
         # Set Needed Platform Var for app_dir_path
         self.app_dir_path = app_path
         self.toml_path: pathlib.Path = self.app_dir_path / "config.toml"
+        self._write_lock = threading.Lock()
+        self._dirty = False
+        self._batch_depth = 0
         self.generated: str | None = None
         self.source: str | None = None
         self.settings: dict[str, Any] = {}
@@ -327,29 +330,28 @@ class Config:
         self.settings = dict(data.get("settings", {}))
 
     def _write_atomic(self, data: dict):
-        tmp = self.toml_path.with_suffix(".toml.tmp")
-        bak = self.toml_path.with_suffix(".toml.bak")
+        with self._write_lock:
+            tmp = self.toml_path.with_suffix(".toml.tmp")
+            bak = self.toml_path.with_suffix(".toml.bak")
 
-        with tmp.open("wb") as f:
-            tomli_w.dump(data, f)
-            f.flush()
-            os.fsync(f.fileno())
+            with tmp.open("wb") as f:
+                tomli_w.dump(data, f)
+                f.flush()
+                os.fsync(f.fileno())
 
-        # Rotate backup
-        if self.toml_path.exists():
+            if self.toml_path.exists():
+                with contextlib.suppress(Exception):
+                    self.toml_path.replace(bak)
+
+            tmp.replace(self.toml_path)
+
+            # Best-effort directory fsync
             with contextlib.suppress(Exception):
-                self.toml_path.replace(bak)
-
-        tmp.replace(self.toml_path)
-
-        # Best-effort directory fsync
-        with contextlib.suppress(Exception):
-            try:
-                # POSIX: Open as Directory
-                with self.toml_path.parent.open("rb") as d:
-                    os.fsync(d.fileno())
-            except (IsADirectoryError, PermissionError, OSError):
-                pass
+                try:
+                    with self.toml_path.parent.open("rb") as d:
+                        os.fsync(d.fileno())
+                except (IsADirectoryError, PermissionError, OSError):
+                    pass
 
     def get(self, key: str, default=None):
         """Return raw stored value."""
@@ -516,36 +518,37 @@ class Config:
         This allows the main application (after argparse) to override the
         config file used without needing to recreate the Config instance.
         """
-        new_path = pathlib.Path(new_config_path)
+        with self._write_lock:
+            new_path = pathlib.Path(new_config_path)
 
-        if not new_path.is_file():
-            logger.error(f"Config file not found: {new_config_path}")
-            return  # Use the default config.
+            if not new_path.is_file():
+                logger.error(f"Config file not found: {new_config_path}")
+                return  # Use the default config.
 
-        logger.info(f"Reloading config from alternate path: {new_path}")
+            logger.info(f"Reloading config from alternate path: {new_path}")
 
-        # Update path and reload
-        self.toml_path = new_path
-        self.generated = None
-        self.source = None
-        self.settings = {}
+            # Update path and reload
+            self.toml_path = new_path
+            self.generated = None
+            self.source = None
+            self.settings = {}
 
-        # Load TOML content from the new file and setup system.
-        self._load()
-        self._init_platform()
+            # Load TOML content from the new file and setup system.
+            self._load()
+            self._init_platform()
 
-        # Re-run plugin_dir logic
-        plugdir_str = self.get_str("plugin_dir")
-        if not plugdir_str:
-            plugdir_str = str(self.default_plugin_dir_path)
-            self.plugin_dir_path = self.default_plugin_dir_path
-            self.set("plugin_dir", plugdir_str)
-        elif not pathlib.Path(plugdir_str).is_dir():
-            self.set("plugin_dir", str(self.default_plugin_dir_path))
-            plugdir_str = self.default_plugin_dir
+            # Re-run plugin_dir logic
+            plugdir_str = self.get_str("plugin_dir")
+            if not plugdir_str:
+                plugdir_str = str(self.default_plugin_dir_path)
+                self.plugin_dir_path = self.default_plugin_dir_path
+                self.set("plugin_dir", plugdir_str)
+            elif not pathlib.Path(plugdir_str).is_dir():
+                self.set("plugin_dir", str(self.default_plugin_dir_path))
+                plugdir_str = self.default_plugin_dir
 
-        self.plugin_dir_path = pathlib.Path(plugdir_str)
-        self.plugin_dir_path.mkdir(exist_ok=True)
+            self.plugin_dir_path = pathlib.Path(plugdir_str)
+            self.plugin_dir_path.mkdir(exist_ok=True)
 
     def delete(self, key: str, *, suppress=False) -> None:
         """Delete the given key from the config."""
@@ -554,31 +557,57 @@ class Config:
         except Exception:
             if not suppress:
                 raise
-        self.save()
+        self._dirty = True
+        if self._batch_depth == 0:
+            self.save()
 
     def set(self, key: str, value: Any):
         """Modify a setting and save to disk."""
-        if isinstance(value, list):
-            self.settings[key.lower()] = value
-        else:
-            self.settings[key.lower()] = str(value)
-        self.save()
+        if not isinstance(value, (str, int, float, bool, list, dict, type(None))):
+            raise TypeError(
+                f"Unsupported config value type for {key!r}: {type(value).__name__}"
+            )
 
-    def save(self):
+        key = key.lower().strip()
+        with self._write_lock:
+            self.settings[key] = value
+            self._dirty = True
+
+        if self._batch_depth == 0:
+            self.save()
+
+    def begin_batch(self) -> None:
+        """Start Batch Processing of Config Writes."""
+        self._batch_depth += 1
+
+    def end_batch(self) -> None:
+        """End Batch Processing of Config Writes."""
+        if self._batch_depth == 0:
+            raise RuntimeError("end_batch() called without matching begin_batch()")
+
+        self._batch_depth -= 1
+
+        if self._batch_depth == 0 and self._dirty:
+            self.save()
+
+    def save(self) -> None:
         """Write updated config back to TOML."""
+        if self._batch_depth > 0:
+            return
         data = {
             "generated": self.generated,
             "source": self.source,
             "settings": self.settings,
         }
         self._write_atomic(data)
+        self._dirty = False
 
     def close(self) -> None:
         """Save config changes before closing."""
         self.save()
 
 
-def get_appdirpath():
+def get_appdirpath() -> pathlib.Path:
     """Grab the Application Directory early."""
     app_dir_path = None
     if sys.platform == "win32":

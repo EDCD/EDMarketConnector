@@ -19,7 +19,7 @@ from os import listdir, sep
 from typing import TextIO, cast
 from collections.abc import Iterable
 import pathlib
-from config import config
+from config import config, IS_FROZEN
 from EDMCLogging import get_main_logger
 
 # Note that this is also done in EDMarketConnector.py, and thus removing this here may not have a desired effect
@@ -212,7 +212,7 @@ class Translations:
 
     def respath(self) -> pathlib.Path:
         """Path to localisation files."""
-        if getattr(sys, 'frozen', False):
+        if IS_FROZEN:
             return pathlib.Path(sys.executable).parent.joinpath(LOCALISATION_DIR).resolve()
 
         if __file__:

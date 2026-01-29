@@ -13,6 +13,7 @@ import sys
 import webbrowser
 import tkinter as tk
 from tkinter import ttk
+import tkinter.font as tkfont
 from PIL import Image, ImageTk
 from typing import Callable, cast
 import requests
@@ -172,6 +173,11 @@ class PluginBrowserMixIn:
             selectmode="browse",
             height=12,
         )
+
+        # Configure row height to prevent text clipping
+        row_font = tkfont.Font(family='TkDefaultFont')
+        style = ttk.Style()
+        style.configure("Treeview", rowheight=int(row_font.metrics()['linespace'] * 1.1))
 
         self.plugins_tree.heading(
             "name",

@@ -14,7 +14,7 @@ import uuid
 import winreg
 import datetime
 import tomli_w
-from config import config_logger
+from config import config_logger, IS_FROZEN
 from win32comext.shell import shell
 from typing import Any, TYPE_CHECKING
 
@@ -117,7 +117,7 @@ class WinConfigMinimal:
 def win_helper(config: Config) -> Config:
     """Set Environment Specific Variables for Windows Config."""
     config_logger.debug("Windows environment detected. Setting platform-specific variables.")
-    if getattr(sys, "frozen", False):
+    if IS_FROZEN:
         config.respath_path = pathlib.Path(sys.executable).parent
         config.internal_plugin_dir_path = config.respath_path / "plugins"
     else:

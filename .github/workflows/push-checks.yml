@@ -32,6 +32,7 @@ jobs:
         python-version-file: '.python-version'
     - name: Install dependencies
       run: |
+        sudo apt-get install -y xvfb
         python -m pip install --upgrade pip
         pip install flake8 pytest
         if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
@@ -73,3 +74,10 @@ jobs:
     - name: translation checks
       run: |
           python ./scripts/find_localised_strings.py --compare-lang L10n/en.template --directory . --ignore coriolis-data
+
+      ####################################################################
+      # Ensure all tests pass
+      ####################################################################
+    - name: PyTest tests
+      run: |
+        xvfb-run pytest

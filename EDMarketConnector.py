@@ -128,6 +128,12 @@ if __name__ == '__main__':  # noqa: C901
     )
 
     parser.add_argument(
+        "--trace-help",
+        help="Open the documentation to view all possible trace-on values",
+        action='store_true'
+    )
+
+    parser.add_argument(
         '--debug-sender',
         help='Mark the selected sender as in debug mode. This generally results in data being written to disk',
         action='append',
@@ -231,6 +237,10 @@ if __name__ == '__main__':  # noqa: C901
     if level_to_set is not None:
         logger.setLevel(level_to_set)
         edmclogger.set_channels_loglevel(level_to_set)
+
+    if args.trace_help:
+        logger.info("Opening Trace Help Documentation")
+        webbrowser.open("https://github.com/EDCD/EDMarketConnector/blob/main/docs/Available%20Traces.md")
 
     if args.force_localserver_for_auth:
         config.set_auth_force_localserver()
@@ -392,26 +402,19 @@ if __name__ == '__main__':  # noqa: C901
         logger.trace('Truncating plain logfile')
         sys.stdout.seek(0)
         sys.stdout.truncate()
-
-    git_branch = ""
-    try:
-        git_cmd = subprocess.Popen('git branch --show-current'.split(),
-                                   stdout=subprocess.PIPE,
-                                   stderr=subprocess.STDOUT
-                                   )
-        out, err = git_cmd.communicate()
-        git_branch = out.decode().strip()
-
-    except Exception:
-        pass
-
-    if (
-        git_branch == 'develop'
-        or (
-            git_branch == '' and '-alpha0' in str(appversion())
-        )
-    ):
-        print("You're running in a DEVELOPMENT branch build. You might encounter bugs!")
+    else:
+        # Potential Git Repo?
+        if os.path.exists(".git"):
+            try:
+                git_branch = subprocess.check_output(
+                    ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+                    stderr=subprocess.DEVNULL,
+                    encoding='utf-8'
+                ).strip()
+            except (subprocess.CalledProcessError, FileNotFoundError):
+                git_branch = None  # type: ignore
+            if git_branch == "develop" or (git_branch is not None and '-alpha0' in str(appversion())):
+                print("You're running in a DEVELOPMENT branch build. You might encounter bugs!")
 
 
 # See EDMCLogging.py docs.
