@@ -89,9 +89,9 @@ this = This()
 
 def set_config_first_run() -> None:
     """Enable EDAstro if the config key does not exist."""
-    if config.get_int("edastro_send") is None:
+    if config.get_bool("edastro_send") is None:
         logger.info("EDAstro First Run. Enabling")
-        config.set("edastro_send", 1)
+        config.set("edastro_send", True)
 
 
 # Plugin callbacks
@@ -104,6 +104,19 @@ def plugin_start3(plugin_dir: str) -> str:
     """
     set_config_first_run()
     return "EDAstro"
+
+
+def plugin_app(parent: tk.Tk) -> None:
+    """
+    Set up any plugin-specific UI.
+
+    In this case we only create the tkinter variable for the user setting
+    since this can only be done after the root tk.Tk object is created.
+
+    :param parent: tkinter parent frame.
+    :return: See PLUGINS.md#display
+    """
+    this.log = tk.BooleanVar(value=config.get_bool("edastro_send"))
 
 
 def plugin_prefs(parent, cmdr: str, is_beta: bool) -> nb.Frame:
@@ -129,7 +142,7 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> nb.Frame:
         row=cur_row, padx=PADX, pady=PADY, sticky=tk.W
     )  # Don't translate
     cur_row += 1
-    this.log = tk.IntVar(value=config.get_int("edastro_send") and 1)
+    this.log = tk.IntVar(value=config.get_bool("edastro_send"))
     this.log_button = nb.Checkbutton(
         edastroframe,
         # LANG: Settings>EDAstro - Label on checkbox for 'send data'
@@ -224,7 +237,10 @@ def journal_entry(
     :param state: `monitor.state`
     :return: None if no error, else an error string.
     """
-    if this.log and entry["event"] in ["CarrierStats", "CarrierJumpRequest", "ScanOrganic"]:
+    if (
+        this.log is not None and this.log.get()
+        and entry["event"] in ["CarrierStats", "CarrierJumpRequest", "ScanOrganic"]
+    ):
         edastro_update(system, entry, state)
 
     return None
