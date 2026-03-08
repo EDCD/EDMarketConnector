@@ -80,7 +80,7 @@ class This:
     }
 
     def __init__(self):
-        self.log: tk.IntVar | None = None
+        self.log: tk.BooleanVar | None = None
         self.log_button: ttk.Checkbutton | None = None
 
 
@@ -142,7 +142,6 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> nb.Frame:
         row=cur_row, padx=PADX, pady=PADY, sticky=tk.W
     )  # Don't translate
     cur_row += 1
-    this.log = tk.IntVar(value=config.get_bool("edastro_send"))
     this.log_button = nb.Checkbutton(
         edastroframe,
         # LANG: Settings>EDAstro - Label on checkbox for 'send data'
