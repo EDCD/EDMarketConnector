@@ -1,4 +1,4 @@
-requests==2.32.5
+requests==2.33.0
 pillow==12.1.0
 watchdog==6.0.0
 simplesystray==0.1.0; sys_platform == 'win32'
