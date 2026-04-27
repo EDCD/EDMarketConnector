@@ -1,7 +1,7 @@
 # We can't rely on just picking this up from either the base (not venv),
 # or venv-init-time version.  Specify here so that dependabot will prod us
 # about new versions.
-setuptools==80.10.2
+setuptools==82.0.0
 
 # Static analysis tools
 flake8==7.3.0
