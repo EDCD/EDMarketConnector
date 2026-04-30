@@ -409,17 +409,6 @@ class EDLogs(FileSystemEventHandler):
 
                 self.event_queue.put(json.dumps(entry, separators=(', ', ':')))
 
-                # If state['Modules'] is populated from catch-up replay (e.g. a
-                # Loadout event was in the journal), synthesize a Loadout event so
-                # plugins see the current ship loadout on startup.  Without this,
-                # plugins that wait for a Loadout event (like Inara's shipswap
-                # handler) will never receive one after an EDMC restart.
-                if self.state['Modules']:
-                    loadout_entry = self.ship(timestamped=True)
-                    if loadout_entry:
-                        logger.info("Synthesizing Loadout event for plugins (state has modules from catch-up)")
-                        self.event_queue.put(json.dumps(loadout_entry, separators=(', ', ':')))
-
             else:
                 # Generate null event to update the display (with possibly out-of-date info)
                 self.event_queue.put(None)
