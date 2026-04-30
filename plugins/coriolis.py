@@ -22,8 +22,8 @@ referenced in this file (or only in any other core plugin), and if so...
 # pylint: disable=import-error
 from __future__ import annotations
 
-import json
 import threading
+from datetime import datetime, timezone
 from typing import Any
 from collections.abc import Mapping
 import tkinter as tk
@@ -480,6 +480,190 @@ def _send_to_cmdr_api(cmdr: str, api_key: str, payload: dict[str, Any]) -> None:
     threading.Thread(target=_do_send, name='CoriolisCMDR sender', daemon=True).start()
 
 
+def _build_loadout_from_capi(ship: dict[str, Any]) -> dict[str, Any] | None:
+    """
+    Build a loadout dict from CAPI data['ship'].
+
+    CAPI module structure per slot::
+
+        { 'module': {'id': ..., 'name': 'Int_Engine', ...},
+          'on': True, 'priority': 1, 'health': 10000,
+          'value': {'base': ..., 'current': ...},
+          'modifications': {...} }
+    """
+    capi_modules = ship.get('modules')
+    if not capi_modules:
+        return None
+
+    modules = []
+    for slot, m in capi_modules.items():
+        if not isinstance(m, dict):
+            continue
+
+        mod_info = m.get('module', {})
+        if not isinstance(mod_info, dict):
+            continue
+
+        item_name = mod_info.get('name', '')
+        if not item_name:
+            continue
+
+        module: dict[str, Any] = {
+            'slot': slot,
+            'item': item_name,
+            'on': m.get('on', True),
+            'priority': m.get('priority', 1),
+        }
+        health = m.get('health')
+        if health is not None:
+            module['health'] = health / 10000.0  # CAPI uses 0-10000 scale
+
+        value = m.get('value', {})
+        if isinstance(value, dict) and value.get('base'):
+            module['value'] = value['base']
+
+        # Engineering: CAPI uses 'modifications' key
+        mods_raw = m.get('modifications') or m.get('WorkInProgress_modifications') or {}
+        if mods_raw and isinstance(mods_raw, dict):
+            engineering: dict[str, Any] = {
+                'blueprintName': mod_info.get('engineering', {}).get('recipeName', ''),
+                'level': mod_info.get('engineering', {}).get('recipeLevel', 0),
+                'quality': mod_info.get('engineering', {}).get('recipeQuality', 0),
+            }
+            mods = []
+            for label, mod in mods_raw.items():
+                if not isinstance(mod, dict):
+                    continue
+
+                modifier: dict[str, Any] = {'label': label}
+                if 'value' in mod and 'originalValue' in mod:
+                    modifier['value'] = mod['value']
+                    modifier['originalValue'] = mod['originalValue']
+                    modifier['lessIsGood'] = mod.get('lessIsGood', 0)
+                elif 'valueStr' in mod:
+                    modifier['valueStr'] = mod['valueStr']
+                mods.append(modifier)
+
+            if mods:
+                engineering['modifiers'] = mods
+
+            module['engineering'] = engineering
+
+        modules.append(module)
+
+    if not modules:
+        return None
+
+    return {
+        'shipType': ship.get('name', ''),
+        'shipID': ship.get('id'),
+        'shipName': ship.get('shipName') or '',
+        'shipIdent': ship.get('shipIdent') or '',
+        'modules': modules,
+        'hullValue': ship.get('hullValue'),
+        'modulesValue': ship.get('modulesValue'),
+        'rebuy': ship.get('rebuy'),
+    }
+
+
+def cmdr_data(data: Any, is_beta: bool) -> str | None:
+    """
+    CAPI data hook -- called by EDMC after a successful Frontier API query.
+
+    Fires automatically on docking and when the user presses the EDMC sync
+    button.  ``data['ship']`` contains the full current ship loadout from
+    Frontier's servers -- the most authoritative source available.
+
+    This is the primary mechanism for detecting ship changes after a
+    ShipyardSwap, because the game's Loadout journal event may not be
+    forwarded to plugins by EDMC after a catch-up replay.
+    """
+    if not coriolis_config.cmdr_sync.get():
+        return None
+
+    if is_beta:
+        return None
+
+    if not monitor.is_live_galaxy():
+        return None
+
+    cmdr = getattr(monitor, 'cmdr', None)
+    if not cmdr:
+        return None
+
+    api_key = _cmdr_api_key(cmdr)
+    if not api_key:
+        return None
+
+    ship = data.get('ship') if hasattr(data, 'get') else None
+    if not ship:
+        return None
+
+    loadout = _build_loadout_from_capi(ship)
+    if not loadout:
+        return None
+
+    logger.info(f'cmdr_data: sending loadout from CAPI for {cmdr!r}')
+    payload: dict[str, Any] = {
+        'event': 'Loadout',
+        'timestamp': datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
+        'commander': cmdr,
+        'ship': loadout,
+    }
+    _send_to_cmdr_api(cmdr, api_key, payload)
+    return None
+
+
+def _handle_ship_event(
+    cmdr: str, api_key: str, event_name: str,
+    entry: dict[str, Any], state: dict[str, Any],
+) -> None:
+    """Build and send a ship loadout payload for a ship event."""
+    loadout = _build_loadout(state)
+    if not loadout:
+        return
+
+    payload: dict[str, Any] = {
+        'event': event_name,
+        'timestamp': entry.get('timestamp', ''),
+        'commander': cmdr,
+        'ship': loadout,
+    }
+    # Include extra context from the journal entry itself
+    if event_name == 'ShipyardBuy':
+        payload['storeShipID'] = entry.get('StoreShipID')
+        payload['sellShipID'] = entry.get('SellShipID')
+        payload['newShipType'] = entry.get('ShipType', '')
+    elif event_name in ('ShipyardSell', 'SellShipOnRebuy'):
+        payload['soldShipType'] = entry.get('ShipType', '')
+        payload['soldShipID'] = entry.get('SellShipID') or entry.get('ShipID')
+    elif event_name == 'ShipyardSwap':
+        payload['storeShipID'] = entry.get('StoreOldShip')
+        payload['storeShipType'] = entry.get('ShipType', '')
+
+    _send_to_cmdr_api(cmdr, api_key, payload)
+
+
+def _handle_module_event(
+    cmdr: str, api_key: str, event_name: str,
+    entry: dict[str, Any], state: dict[str, Any],
+) -> None:
+    """Build and send a module/engineering event payload."""
+    loadout = _build_loadout(state)
+    payload: dict[str, Any] = {
+        'event': event_name,
+        'timestamp': entry.get('timestamp', ''),
+        'commander': cmdr,
+        'journalEntry': {
+            k: v for k, v in entry.items()
+            if k not in ('event', 'timestamp')
+        },
+    }
+    if loadout:
+        payload['ship'] = loadout
+    _send_to_cmdr_api(cmdr, api_key, payload)
+
+
 def journal_entry(
     cmdr: str,
     is_beta: bool,
@@ -525,59 +709,11 @@ def journal_entry(
 
     # --- Ship events: send full loadout ---
     if event_name in SHIP_EVENTS:
-        loadout = _build_loadout(state)
-        if loadout:
-            payload: dict[str, Any] = {
-                'event': event_name,
-                'timestamp': entry.get('timestamp', ''),
-                'commander': cmdr,
-                'ship': loadout,
-            }
-            # Include extra context from the journal entry itself
-            if event_name == 'ShipyardBuy':
-                payload['storeShipID'] = entry.get('StoreShipID')
-                payload['sellShipID'] = entry.get('SellShipID')
-                payload['newShipType'] = entry.get('ShipType', '')
-            elif event_name in ('ShipyardSell', 'SellShipOnRebuy'):
-                payload['soldShipType'] = entry.get('ShipType', '')
-                payload['soldShipID'] = entry.get('SellShipID') or entry.get('ShipID')
-            elif event_name == 'ShipyardSwap':
-                payload['storeShipID'] = entry.get('StoreOldShip')
-                payload['storeShipType'] = entry.get('ShipType', '')
+        _handle_ship_event(cmdr, api_key, event_name, entry, state)
 
-            _send_to_cmdr_api(cmdr, api_key, payload)
-
-    # --- Module events: send the journal entry + current loadout ---
-    elif event_name in MODULE_EVENTS:
-        loadout = _build_loadout(state)
-        payload = {
-            'event': event_name,
-            'timestamp': entry.get('timestamp', ''),
-            'commander': cmdr,
-            'journalEntry': {
-                k: v for k, v in entry.items()
-                if k not in ('event', 'timestamp')
-            },
-        }
-        if loadout:
-            payload['ship'] = loadout
-        _send_to_cmdr_api(cmdr, api_key, payload)
-
-    # --- Engineering events: send the journal entry + updated loadout ---
-    elif event_name in ENGINEERING_EVENTS:
-        loadout = _build_loadout(state)
-        payload = {
-            'event': event_name,
-            'timestamp': entry.get('timestamp', ''),
-            'commander': cmdr,
-            'journalEntry': {
-                k: v for k, v in entry.items()
-                if k not in ('event', 'timestamp')
-            },
-        }
-        if loadout:
-            payload['ship'] = loadout
-        _send_to_cmdr_api(cmdr, api_key, payload)
+    # --- Module / Engineering events: send journal entry + current loadout ---
+    elif event_name in MODULE_EVENTS or event_name in ENGINEERING_EVENTS:
+        _handle_module_event(cmdr, api_key, event_name, entry, state)
 
     # --- Material events: send the full material inventory ---
     if event_name in MATERIAL_EVENTS:
