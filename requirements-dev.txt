@@ -23,7 +23,7 @@ types-setuptools==82.0.0.20260210
 autopep8==2.3.2
 
 # Git pre-commit checking
-pre-commit==4.5.1
+pre-commit==4.6.0
 
 # HTML changelogs
 mistune==3.2.0
