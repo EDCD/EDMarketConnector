@@ -668,9 +668,13 @@ class Session:
             self.auth = None
             raise  # Bad thing happened
         if IS_FROZEN:
-            tk.messagebox.showinfo(title="Authentication Successful",  # type: ignore
-                                   message="Authentication with cAPI Successful.\n"
-                                           "You may now close the Frontier login tab if it is still open.")
+            tk.messagebox.showinfo(  # type: ignore
+                title=tr.tl("Authentication Successful"),  # LANG: Messagebox title authentication successful
+                message=tr.tl(
+                    "Authentication with cAPI Successful.{CR}"
+                    "You may now close the Frontier login tab if it is still open."
+                ).format(CR="\n")  # LANG: Messagebox body after successful CAPI authentication
+            )
 
     def close(self) -> None:
         """Close the `request.Session()."""
