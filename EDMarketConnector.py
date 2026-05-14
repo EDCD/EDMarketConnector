@@ -69,6 +69,7 @@ from EDMCLogging import edmclogger, logger, logging
 from journal_lock import JournalLock, JournalLockResult
 from update import check_for_datafile_updates, check_for_fdev_updates
 from common_utils import log_locale, SERVER_RETRY
+from l10n import translations as tr
 
 if __name__ == '__main__':  # noqa: C901
     # Command-line arguments
@@ -361,7 +362,10 @@ if __name__ == '__main__':  # noqa: C901
     def skip_journallock_popup():
         """Create the "skipping Journal Lock" popup."""
         from tkinter import messagebox
-        lockmsg = "Ignoring failed Journal Lock. Continuing at your own risk.\nConsider also using a debug sender."
+        lockmsg = tr.tl(
+            "Ignoring failed Journal Lock. Continuing at your own risk."
+            "{CR}Consider also using a debug sender."
+        ).format(CR="\n")  # LANG: Popup message when user tries to start a second instance of the application with --skip-journallock, warning them of potential consequences
         messagebox.showwarning(title=appname, message=lockmsg)
 
     def already_running_popup():
@@ -371,7 +375,10 @@ if __name__ == '__main__':  # noqa: C901
         if args.suppress_dupe_process_popup:
             sys.exit(0)
 
-        messagebox.showerror(title=appname, message="An EDMarketConnector process was already running, exiting.")
+        messagebox.showerror(
+            title=appname,
+            message=tr.tl("An EDMarketConnector process was already running, exiting.")  # LANG: Popup message when user tries to start a second instance of the application
+        )
         sys.exit(0)
 
     journal_lock = JournalLock()
@@ -441,7 +448,6 @@ import td
 from dashboard import dashboard
 from edmc_data import ship_name_map
 from hotkey import hotkeymgr
-from l10n import translations as tr
 from monitor import monitor
 from theme import theme
 from ttkHyperlinkLabel import HyperlinkLabel, SHIPYARD_HTML_TEMPLATE
@@ -949,13 +955,12 @@ class AppWindow:
                 update_msg = tr.tl(  # LANG: Inform User of Beta -> Stable Transition Risks
                     'Update track changed to Stable from Beta. '
                     'You will no longer receive Beta updates. You will stay on your current Beta '
-                    r'version until the next Stable release.\r\n\r\n'
+                    'version until the next Stable release.{LF}{CR}{LF}{CR}'
                     'You can manually revert to the latest Stable version. To do so, you must download and install '
                     'the latest Stable version manually. Note that this may introduce bugs or break completely'
-                    r' if downgrading between major versions with significant changes.\r\n\r\n'
+                    ' if downgrading between major versions with significant changes.{LF}{CR}{LF}{CR}'
                     'Do you want to open GitHub to download the latest release?'
-                )
-                update_msg = update_msg.replace('\\n', '\n').replace('\\r', '\r')
+                ).format(CR="\n", LF="\r")
                 stable_popup = tk.messagebox.askyesno(title=title, message=update_msg)
                 if stable_popup:
                     webbrowser.open("https://github.com/EDCD/eDMarketConnector/releases/latest")
@@ -2198,16 +2203,20 @@ def validate_providers():
         return
 
     # LANG: Popup-text about Reset Providers
-    popup_text = tr.tl(r'One or more of your URL Providers were invalid, and have been reset:\r\n\r\n')
+    popup_text = tr.tl(
+        'One or more of your URL Providers were invalid, and have been reset:{LF}{CR}{LF}{CR}'
+    ).format(LF='{LF}', CR='{CR}')
     for provider, (old_prov, new_prov) in reset_providers.items():
         # LANG: Text About What Provider Was Reset
-        popup_text += tr.tl(r'{PROVIDER} was set to {OLDPROV}, and has been reset to {NEWPROV}\r\n').format(
+        popup_text += tr.tl(
+            '{PROVIDER} was set to {OLDPROV}, and has been reset to {NEWPROV}{LF}{CR}'
+        ).format(
             PROVIDER=provider,
             OLDPROV=old_prov,
-            NEWPROV=new_prov
+            NEWPROV=new_prov,
+            LF='{LF}',  # Line Feed
+            CR='{CR}'  # Carriage Return
         )
-    # And now we do need these to be actual \r\n
-    popup_text = popup_text.replace('\\n', '\n').replace('\\r', '\r')
 
     tk.messagebox.showinfo(
         # LANG: Popup window title for Reset Providers
@@ -2373,13 +2382,14 @@ sys.path: {sys.path}'''
         logger.exception(f"EDMC Critical Error: {err}")
         title = tr.tl("Error")  # LANG: Generic error prefix
         message = tr.tl(  # LANG: EDMC Critical Error Notification
-            "EDMC encountered a critical error, and cannot recover. EDMC is shutting down for its own protection!"
+            "EDMC encountered a critical error, and cannot recover. "
+            "EDMC is shutting down for its own protection!"
         )
         err = f"{err.__class__.__name__}: {err}"  # type: ignore # hijacking the existing exception detection
         detail = tr.tl(  # LANG: EDMC Critical Error Details
-            r"Here's what EDMC Detected:\r\n\r\n{ERR}\r\n\r\nDo you want to file a Bug Report on GitHub?"
-        ).format(ERR=err)
-        detail = detail.replace('\\n', '\n').replace('\\r', '\r')
+            "Here's what EDMC Detected:{LF}{CR}{LF}{CR}"
+            "{ERR}{LF}{CR}{LF}{CR}Do you want to file a Bug Report on GitHub?"
+        ).format(ERR=err, CR="\n", LF="\r")
         msg = tk.messagebox.askyesno(
             title=title, message=message, detail=detail, icon=tkinter.messagebox.ERROR, type=tkinter.messagebox.YESNO,
             parent=root
@@ -2398,7 +2408,7 @@ sys.path: {sys.path}'''
             popup_text = tr.tl(
                 "One or more of your enabled plugins failed to load. Please see the list on the '{PLUGINS}' "
                 "tab of '{FILE}' > '{SETTINGS}'. This could be caused by a wrong folder structure. The load.py "
-                r"file should be located under plugins/PLUGIN_NAME/load.py.\r\n\r\nYou can disable a plugin by "
+                "file should be located under plugins/PLUGIN_NAME/load.py.{LF}{CR}{LF}{CR}You can disable a plugin by "
                 "renaming its folder to have '{DISABLED}' on the end of the name."
             )
 
@@ -2407,10 +2417,10 @@ sys.path: {sys.path}'''
                 PLUGINS=tr.tl('Plugins'),  # LANG: Settings > Plugins tab
                 FILE=tr.tl('File'),  # LANG: 'File' menu
                 SETTINGS=tr.tl('Settings'),  # LANG: File > Settings
-                DISABLED='.disabled'
+                DISABLED='.disabled',
+                LF='{LF}',  # Line Feed
+                CR='{CR}'  # Carriage Return
             )
-            # And now we do need these to be actual \r\n
-            popup_text = popup_text.replace('\\n', '\n').replace('\\r', '\r')
 
             tk.messagebox.showinfo(
                 # LANG: Popup window title for list of 'broken' plugins that failed to load
@@ -2428,7 +2438,7 @@ sys.path: {sys.path}'''
                 "One or more of your enabled plugins do not yet have support for Python 3.x. Please see the "
                 "list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an "
                 "updated version available, else alert the developer that they need to update the code for "
-                r"Python 3.x.\r\n\r\nYou can disable a plugin by renaming its folder to have '{DISABLED}' on "
+                "Python 3.x.{LF}{CR}{LF}{CR}You can disable a plugin by renaming its folder to have '{DISABLED}' on "
                 "the end of the name."
             )
 
@@ -2437,10 +2447,10 @@ sys.path: {sys.path}'''
                 PLUGINS=tr.tl('Plugins'),  # LANG: Settings > Plugins tab
                 FILE=tr.tl('File'),  # LANG: 'File' menu
                 SETTINGS=tr.tl('Settings'),  # LANG: File > Settings
-                DISABLED='.disabled'
+                DISABLED='.disabled',
+                LF='{LF}',  # Line Feed
+                CR='{CR}'  # Carriage Return
             )
-            # And now we do need these to be actual \r\n
-            popup_text = popup_text.replace('\\n', '\n').replace('\\r', '\r')
 
             tk.messagebox.showinfo(
                 # LANG: Popup window title for list of 'enabled' plugins that don't work with Python 3.x
