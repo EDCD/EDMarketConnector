@@ -29,9 +29,9 @@ from EDMCLogging import get_main_logger
 logger = get_main_logger()
 
 # List of loaded Plugins
-PLUGINS = []
-PLUGINS_not_py3 = []
-PLUGINS_broken = []
+PLUGINS: list[Plugin] = []
+PLUGINS_not_py3: list[Plugin] = []
+PLUGINS_broken: list[Plugin] = []
 
 
 # For asynchronous error display
