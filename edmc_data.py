@@ -525,6 +525,8 @@ ship_name_map = {
     'viper_mkiv':                   'Viper MkIV',
     'vulture':                      'Vulture',
     'explorer_nx':                  'Caspian Explorer',
+    'SmallCombat01_NX':             'Kestrel Mk II',
+    'MediumTransport01':            'Lynx Highliner'
 }
 
 # Odyssey Suit Names
