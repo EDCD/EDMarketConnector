@@ -172,12 +172,13 @@ class PluginBrowserMixIn:
             show="headings",
             selectmode="browse",
             height=12,
+            style="PluginBrowser.Treeview"
         )
 
         # Configure row height to prevent text clipping
-        row_font = tkfont.Font(family='TkDefaultFont')
+        row_font = tkfont.nametofont('TkDefaultFont')
         style = ttk.Style()
-        style.configure("Treeview", rowheight=int(row_font.metrics()['linespace'] * 1.1))
+        style.configure("PluginBrowser.Treeview", rowheight=int(row_font.metrics()['linespace'] * 1.1))
 
         self.plugins_tree.heading(
             "name",
