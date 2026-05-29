@@ -276,6 +276,12 @@
 /* coriolis.py: 'Normal' label for Coriolis site override selection; coriolis.py: Coriolis normal/beta selection - normal; In files: coriolis.py:49; coriolis.py:75; coriolis.py:95; coriolis.py:121; coriolis.py:137; coriolis.py:180; */
 "Normal" = "Normal";
 
+/* coriolis.py: Settings>Coriolis: API key label */
+"Coriolis CMDR API Key" = "Coriolis CMDR API Key";
+
+/* coriolis.py: Settings>Coriolis: checkbox to enable sending data to Coriolis CMDR */
+"Send ship, module, and material data to Coriolis CMDR" = "Send ship, module, and material data to Coriolis CMDR";
+
 /* coriolis.py: 'Beta' label for Coriolis site override selection; coriolis.py: Coriolis normal/beta selection - beta; In files: coriolis.py:50; coriolis.py:76; coriolis.py:96; coriolis.py:122; coriolis.py:138; coriolis.py:181; */
 "Beta" = "Beta";
 

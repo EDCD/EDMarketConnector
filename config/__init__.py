@@ -563,7 +563,11 @@ class Config:
 
     def set(self, key: str, value: Any):
         """Modify a setting and save to disk."""
-        if not isinstance(value, (str, int, float, bool, list, dict, type(None))):
+        if value is None:
+            self.delete(key, suppress=True)
+            return
+
+        if not isinstance(value, (str, int, float, bool, list, dict)):
             raise TypeError(
                 f"Unsupported config value type for {key!r}: {type(value).__name__}"
             )

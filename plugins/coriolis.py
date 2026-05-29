@@ -202,10 +202,10 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str | None, is_beta: bool) -> nb.Fr
     )
     cur_row += 1
 
-    # LANG: Settings>Coriolis: checkbox to enable sending data to Coriolis CMDR
     coriolis_config.cmdr_sync_button = nb.Checkbutton(
         conf_frame,
-        text=tr.tl('Send ship, module and material data to Coriolis CMDR'),
+        # LANG: Settings>Coriolis: checkbox to enable sending data to Coriolis CMDR
+        text=tr.tl('Send ship, module, and material data to Coriolis CMDR'),
         variable=coriolis_config.cmdr_sync,
         command=_prefs_cmdr_sync_changed,
     )

@@ -171,3 +171,23 @@ def test_init_platform_calls_linux_helper(mock_app_dir):
         Config(mock_app_dir)
 
         mock_module.linux_helper.assert_called_once()
+
+
+def test_set_none_deletes_key(mock_app_dir):
+    """Test that calling set(key, None) deletes the key from config."""
+    with patch("config.Config._init_platform"):
+        cfg = Config(mock_app_dir)
+
+    # Set a key first
+    cfg.set("some_temp_key", "value")
+    assert cfg.get("some_temp_key") == "value"
+
+    # Set it to None, which should delete it
+    cfg.set("some_temp_key", None)
+    assert cfg.get("some_temp_key") is None
+
+    # Verify disk persistence does not have it either
+    with open(cfg.toml_path, "rb") as f:
+        import tomllib
+        data = tomllib.load(f)
+    assert "some_temp_key" not in data["settings"]

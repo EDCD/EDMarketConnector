@@ -670,10 +670,10 @@ class Session:
         if IS_FROZEN:
             tk.messagebox.showinfo(  # type: ignore
                 title=tr.tl("Authentication Successful"),  # LANG: Messagebox title authentication successful
-                message=tr.tl(
+                message=tr.tl(  # LANG: Messagebox body after successful CAPI authentication
                     "Authentication with cAPI Successful.{CR}"
                     "You may now close the Frontier login tab if it is still open."
-                ).format(CR="\n")  # LANG: Messagebox body after successful CAPI authentication
+                ).format(CR="\n")
             )
 
     def close(self) -> None:

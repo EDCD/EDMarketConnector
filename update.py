@@ -384,7 +384,7 @@ class Updater:
         """Check the current value of the WinSparkle Registry Key."""
         if sys.platform == 'win32' and self.updater:
             return self.updater.win_sparkle_set_automatic_check_for_updates()
-        return None
+        return False
 
     def close(self) -> None:
         """
