@@ -33,6 +33,12 @@
 /* companion.py: Failed to get Access Token from Frontier Auth service; In files: companion.py:508; */
 "Error: unable to get token" = "Error: unable to get token";
 
+/* companion.py: Messagebox title authentication successful; In files: companion.py:672; */
+"Authentication Successful" = "Authentication Successful";
+
+/* companion.py: Messagebox body after successful CAPI authentication; In files: companion.py:676; */
+"Authentication with cAPI Successful.{CR}You may now close the Frontier login tab if it is still open." = "Authentication with cAPI Successful.{CR}You may now close the Frontier login tab if it is still open.";
+
 /* EDMarketConnector.py: EDMC Critical Error Notification; */
 "EDMC encountered a critical error, and cannot recover. EDMC is shutting down for its own protection!" = "EDMC encountered a critical error, and cannot recover. EDMC is shutting down for its own protection!";
 
