@@ -60,7 +60,7 @@ jobs:
 
       - name: Create pull request against target branch
         if: steps.check_for_changes.outputs.changes == 'true'
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
           script: |

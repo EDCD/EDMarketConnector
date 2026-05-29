@@ -15,7 +15,7 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - name: Setting global variables
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         id: var
         with:
           script: |
@@ -65,7 +65,7 @@ jobs:
             mv "../EDMarketConnector-release-${SAFE_SEMVER}.tar.gz" .
 
       - name: Upload build files
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: built-files-linux
           path: |
@@ -142,7 +142,7 @@ jobs:
                   "EDMarketConnector_Installer_Unsigned_${rest}_x86.exe"
               }
       - name: Upload build files
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: built-files-windows-x86
           path: |
@@ -220,7 +220,7 @@ jobs:
               }
 
       - name: Upload build files
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: built-files-windows-64
           path: |
@@ -231,7 +231,7 @@ jobs:
     needs: [ windows_build_64, windows_build_86, linux_build ]
     steps:
       - name: Merge Artifacts
-        uses: actions/upload-artifact/merge@v6
+        uses: actions/upload-artifact/merge@v7
         with:
           name: Built files
           pattern: built-files-*
@@ -244,7 +244,7 @@ jobs:
 
     steps:
       - name: Download binary
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: Built files
           path: ./
@@ -253,7 +253,7 @@ jobs:
         run: sha256sum EDMarketConnector_Installer_*.exe EDMarketConnector-release-*.{zip,tar.gz} > ./hashes.sum
 
       - name: Create Draft Release
-        uses: "softprops/action-gh-release@v2"
+        uses: "softprops/action-gh-release@v3"
         with:
           token: "${{secrets.GITHUB_TOKEN}}"
           draft: true
