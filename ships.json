@@ -107,6 +107,10 @@
         "hullMass": 180,
         "reserveFuelCapacity": 0.39
     },
+    "Kestrel Mk II": {
+        "hullMass": 190,
+        "reserveFuelCapacity": 0.57
+    },
     "Krait MkII": {
         "hullMass": 320,
         "reserveFuelCapacity": 0.63
@@ -114,6 +118,10 @@
     "Krait Phantom": {
         "hullMass": 270,
         "reserveFuelCapacity": 0.63
+    },
+    "Lynx Highliner": {
+        "hullMass": 260,
+        "reserveFuelCapacity": 0.61
     },
     "Mamba": {
         "hullMass": 250,
