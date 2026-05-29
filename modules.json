@@ -3798,5 +3798,68 @@
     },
     "explorer_nx_armour_reactive": {
         "mass": 53
+    },
+    "SmallCombat01_NX_Armour_Grade1": {
+        "mass": 0
+    },
+    "SmallCombat01_NX_Armour_Grade2": {
+        "mass": 17
+    },
+    "SmallCombat01_NX_Armour_Grade3": {
+        "mass": 35
+    },
+    "SmallCombat01_NX_Armour_Mirrored": {
+        "mass": 35
+    },
+    "SmallCombat01_NX_Armour_Reactive": {
+        "mass": 35
+    },
+    "Hpt_MkIIPlasmaShockAutocannon_Fixed_Large": {
+        "mass": 8
+    },
+    "Int_MkIIAgileBoost_Engine_Size5_Class5": {
+        "mass": 20
+    },
+    "MediumTransport01_Armour_Grade1": {
+        "mass": 0
+    },
+    "MediumTransport01_Armour_Grade2": {
+        "mass": 26
+    },
+    "MediumTransport01_Armour_Grade3": {
+        "mass": 53
+    },
+    "MediumTransport01_Armour_Mirrored": {
+        "mass": 53
+    },
+    "MediumTransport01_Armour_Reactive": {
+        "mass": 53
+    },
+    "Int_MkII_PassengerCabin_Size2_Class1": {
+        "mass": 2.5
+    },
+    "Int_MkII_PassengerCabin_Size3_Class1": {
+        "mass": 5
+    },
+    "Int_MkII_PassengerCabin_Size3_Class2": {
+        "mass": 5
+    },
+    "Int_MkII_PassengerCabin_Size4_Class1": {
+        "mass": 10
+    },
+    "Int_MkII_PassengerCabin_Size4_Class2": {
+        "mass": 10
+    },
+    "Int_MkII_PassengerCabin_Size5_Class1": {
+        "mass": 20
+    },
+    "Int_MkII_PassengerCabin_Size5_Class2": {
+        "mass": 20
+    },
+    "Int_MkII_PassengerCabin_Size6_Class1": {
+        "mass": 40
+    },
+    "Int_MkII_PassengerCabin_Size6_Class2": {
+        "mass": 40
     }
 }
