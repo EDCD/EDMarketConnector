@@ -265,9 +265,10 @@ def plugin_prefs(parent: ttk.Notebook, cmdr: str, is_beta: bool) -> nb.Frame:
     # Section heading in settings
     this.label = HyperlinkLabel(
         frame,
-        text=tr.tl('Inara credentials'),  # LANG: Text for INARA API keys link ( goes to https://inara.cz/settings-api )
+        # LANG: Text for INARA API keys link ( goes to https://inara.cz/elite/cmdr-settings-api/ )
+        text=tr.tl('Inara credentials'),
         background=nb.Label().cget('background'),
-        url='https://inara.cz/settings-api',
+        url='https://inara.cz/elite/cmdr-settings-api/',
         underline=True
     )
 

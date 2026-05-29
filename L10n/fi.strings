@@ -345,7 +345,7 @@
 /* inara.py: Checkbox to enable INARA API Usage; In files: inara.py:257; */
 "Send flight log and Cmdr status to Inara" = "Lähetä lentoloki ja komentajatiedot Inaraan";
 
-/* inara.py: Text for INARA API keys link ( goes to https://inara.cz/settings-api ); In files: inara.py:269; */
+/* inara.py: Text for INARA API keys link ( goes to https://inara.cz/elite/cmdr-settings-api/ ); In files: inara.py:269; */
 "Inara credentials" = "Inaran kirjautuminen";
 
 /* inara.py: The Inara API only accepts Live galaxy data, not Legacy galaxy data; inara.py: Inara - Only Live data; In files: inara.py:384; inara.py:386; */
