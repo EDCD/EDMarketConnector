@@ -2,9 +2,13 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
 ---
 * We currently test against, and package with, Python 3.13, 64-bit.
 ---
-Release 6.1.3-beta2
+Release 6.1.3-beta3
 ===
 This is a BETA for EDMC 6.1.3, now available on the Beta update track! 
+
+Betas 1 and 2 did not compile properly and are not being provided.
+
+NOTE: only an UNSIGNED release is available for this beta.
 
 This release includes a series of bugfixes, as well as full support for the Kestrel Mk II and Lynx Highliner.
 

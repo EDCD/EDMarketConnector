@@ -7,3 +7,6 @@ semantic-version==2.10.0
 pywin32==311; sys_platform == 'win32'
 psutil==7.2.2
 tomli-w==1.2.0
+
+# https://github.com/py2exe/py2exe/issues/241, REMOVE WHEN FIXED.
+charset-normalizer==3.4.4
