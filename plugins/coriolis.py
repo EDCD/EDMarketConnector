@@ -352,7 +352,7 @@ def shipyard_url(loadout: Mapping[str, Any], is_beta: bool) -> bool | str:
 # Coriolis CMDR – real-time data sync via journal events
 # ---------------------------------------------------------------------------
 
-def _build_loadout(state: dict[str, Any]) -> dict[str, Any] | None:
+def _build_loadout(state: dict[str, Any]) -> dict[str, Any] | None:  # noqa: CCR001
     """
     Build a loadout dict from EDMC state, similar to Inara's make_loadout.
 
@@ -480,7 +480,7 @@ def _send_to_cmdr_api(cmdr: str, api_key: str, payload: dict[str, Any]) -> None:
     threading.Thread(target=_do_send, name='CoriolisCMDR sender', daemon=True).start()
 
 
-def _build_loadout_from_capi(ship: dict[str, Any]) -> dict[str, Any] | None:
+def _build_loadout_from_capi(ship: dict[str, Any]) -> dict[str, Any] | None:  # noqa: CCR001
     """
     Build a loadout dict from CAPI data['ship'].
 
