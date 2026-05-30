@@ -2,6 +2,25 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
 ---
 * We currently test against, and package with, Python 3.13, 64-bit.
 ---
+Release 6.1.3-beta1
+===
+This is a BETA for EDMC 6.1.3, now available on the Beta update track! 
+
+This release includes a series of bugfixes, as well as full support for the Kestrel Mk II and Lynx Highliner.
+
+**Changes and Enhancements**
+* Added Kestrel Mk II and Lynx Highliner Ship and Modules Data.
+* Added additional minor type hint improvements.
+* Added new translation candidates to Frontier CAPI dialog boxes.
+* Added support to the Coriolis Accounts API.
+* Updated a series of dependencies and scripts.
+* Updated the inara.cz API link.
+* Fixed a bug that could cause "None" values in the config to crash on Linux.
+* Fixed a bug that could cause relative or '~' links in the config to crash on Linux.
+* Fixed a bug where UI-Rescaled instances of EDMC would not display the Plugin Browser properly.
+* Fixed a bug where EDAstro wouldn't respect "Do-Not-Send" choices in the config.
+
+
 Release 6.1.2
 ===
 This release includes refinements on the patches for 6.1.1, and a series of new tests for development.
