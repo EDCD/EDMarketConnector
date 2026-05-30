@@ -121,7 +121,7 @@ jobs:
 
       - name: Download winsparkle
         run: |
-          Invoke-Webrequest -UseBasicParsing https://github.com/vslavik/winsparkle/releases/download/v0.9.2/WinSparkle-0.9.2.zip -OutFile out.zip
+          Invoke-Webrequest -UseBasicParsing https://github.com/vslavik/winsparkle/releases/download/v0.9.3/WinSparkle-0.9.3.zip -OutFile out.zip
           Expand-Archive out.zip
           Move-Item 'out\WinSparkle-0.9.2\Release\*' '.\'
 
@@ -198,7 +198,7 @@ jobs:
 
       - name: Download winsparkle
         run: |
-          Invoke-Webrequest -UseBasicParsing https://github.com/vslavik/winsparkle/releases/download/v0.9.2/WinSparkle-0.9.2.zip -OutFile out.zip
+          Invoke-Webrequest -UseBasicParsing https://github.com/vslavik/winsparkle/releases/download/v0.9.3/WinSparkle-0.9.3.zip -OutFile out.zip
           Expand-Archive out.zip
           Move-Item 'out\WinSparkle-0.9.2\x64\Release\*' '.\'
 
