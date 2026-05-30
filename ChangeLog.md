@@ -2,7 +2,7 @@ This is the master changelog for Elite Dangerous Market Connector.  Entries are 
 ---
 * We currently test against, and package with, Python 3.13, 64-bit.
 ---
-Release 6.1.3-beta1
+Release 6.1.3-beta2
 ===
 This is a BETA for EDMC 6.1.3, now available on the Beta update track! 
 

@@ -123,7 +123,7 @@ jobs:
         run: |
           Invoke-Webrequest -UseBasicParsing https://github.com/vslavik/winsparkle/releases/download/v0.9.3/WinSparkle-0.9.3.zip -OutFile out.zip
           Expand-Archive out.zip
-          Move-Item 'out\WinSparkle-0.9.2\Release\*' '.\'
+          Move-Item 'out\WinSparkle-0.9.3\Release\*' '.\'
 
       - name: Build EDMC
         run: |
@@ -200,7 +200,7 @@ jobs:
         run: |
           Invoke-Webrequest -UseBasicParsing https://github.com/vslavik/winsparkle/releases/download/v0.9.3/WinSparkle-0.9.3.zip -OutFile out.zip
           Expand-Archive out.zip
-          Move-Item 'out\WinSparkle-0.9.2\x64\Release\*' '.\'
+          Move-Item 'out\WinSparkle-0.9.3\x64\Release\*' '.\'
 
       - name: Build EDMC
         run: |
