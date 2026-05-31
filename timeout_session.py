@@ -16,7 +16,11 @@ REQUEST_TIMEOUT = 10  # Kept for backwards compatibility
 
 
 class TimeoutAdapter(HTTPAdapter):
-    """DEPRECATED: An HTTP Adapter that enforces an overridable default timeout on HTTP requests."""
+    """
+    DEPRECATED: An HTTP Adapter that enforces an overridable default timeout on HTTP requests.
+
+    This will be removed in a future version (6.3 or later).
+    """
 
     def __init__(self, timeout: int, *args, **kwargs):
         warnings.warn(
