@@ -2,6 +2,7 @@
 # mypy: ignore-errors
 """Test the Updater."""
 
+import sys
 import pytest
 import pathlib
 import hashlib
@@ -144,12 +145,12 @@ class TestVersionChecking:
 
 
 class TestWinSparkleInit:
-    @patch("sys.platform", "win32")
-    @patch("ctypes.cdll.WinSparkle", create=True)
-    def test_winsparkle_init_success(self, mock_ws):
+    @pytest.mark.skipif(sys.platform != "win32", reason="WinSparkle update logic is Windows-only")
+    def test_winsparkle_init_success(self):
         """Verify WinSparkle initialization logic on Windows."""
-        with patch("update.get_update_feed", return_value="http://feed"):
-            with patch("update.appversion_nobuild", return_value="5.0.0"):
-                updater = update.Updater(provider="external")
-                assert mock_ws.win_sparkle_init.called
-                assert mock_ws.win_sparkle_set_appcast_url.called
+        with patch("ctypes.cdll.WinSparkle", create=True) as mock_ws:
+            with patch("update.get_update_feed", return_value="http://feed"):
+                with patch("update.appversion_nobuild", return_value="5.0.0"):
+                    updater = update.Updater(provider="external")
+                    assert mock_ws.win_sparkle_init.called
+                    assert mock_ws.win_sparkle_set_appcast_url.called
