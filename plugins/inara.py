@@ -38,9 +38,8 @@ import edmc_data
 import killswitch
 import myNotebook as nb  # noqa: N813
 import plug
-import timeout_session
 from companion import CAPIData
-from config import applongname, appname, appversion, config, debug_senders
+from config import applongname, appname, appversion, config, debug_senders, user_agent
 from EDMCLogging import get_main_logger
 from monitor import monitor
 from ttkHyperlinkLabel import HyperlinkLabel
@@ -84,7 +83,8 @@ class This:
     """Holds module globals."""
 
     def __init__(self):
-        self.session = timeout_session.new_session()
+        self.session = requests.Session()
+        self.session.headers.setdefault("User-Agent", user_agent)
         self.thread: Thread
         self.parent: tk.Tk
 

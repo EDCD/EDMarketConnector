@@ -3,6 +3,7 @@
 """Test timeout session system."""
 
 from unittest.mock import MagicMock, patch
+import pytest
 from requests import Session
 import timeout_session
 
@@ -11,7 +12,9 @@ class TestTimeoutSession:
 
     def test_adapter_injects_default_timeout(self):
         """Verify the adapter sets the timeout if none is provided in the send call."""
-        adapter = timeout_session.TimeoutAdapter(timeout=42)
+        # Wrap in pytest.warns to assert the deprecation warning is thrown
+        with pytest.warns(DeprecationWarning):
+            adapter = timeout_session.TimeoutAdapter(timeout=42)
 
         # We mock the parent HTTPAdapter.send method
         with patch("requests.adapters.HTTPAdapter.send") as mock_send:
@@ -24,7 +27,8 @@ class TestTimeoutSession:
 
     def test_adapter_respects_explicit_timeout(self):
         """Verify the adapter doesn't override a timeout if the user explicitly provided one."""
-        adapter = timeout_session.TimeoutAdapter(timeout=42)
+        with pytest.warns(DeprecationWarning):
+            adapter = timeout_session.TimeoutAdapter(timeout=42)
 
         with patch("requests.adapters.HTTPAdapter.send") as mock_send:
             # User explicitly wants 5 seconds
@@ -36,7 +40,10 @@ class TestTimeoutSession:
     def test_new_session_configuration(self):
         """Verify that new_session correctly mounts the adapter and sets headers."""
         custom_timeout = 15
-        session = timeout_session.new_session(timeout=custom_timeout)
+
+        # Expecting DeprecationWarnings from both new_session and TimeoutAdapter init
+        with pytest.warns(DeprecationWarning):
+            session = timeout_session.new_session(timeout=custom_timeout)
 
         # Check User-Agent
         assert "User-Agent" in session.headers
@@ -52,7 +59,8 @@ class TestTimeoutSession:
         existing_session = Session()
         existing_session.headers["X-Test"] = "Existing"
 
-        wrapped_session = timeout_session.new_session(session=existing_session)
+        with pytest.warns(DeprecationWarning):
+            wrapped_session = timeout_session.new_session(session=existing_session)
 
         assert wrapped_session.headers["X-Test"] == "Existing"
         assert isinstance(
