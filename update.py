@@ -18,7 +18,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from tkinter import messagebox
 from traceback import print_exc
-from typing import TYPE_CHECKING, cast, Any
+from typing import TYPE_CHECKING
 from xml.etree import ElementTree
 import requests
 import semantic_version
@@ -28,6 +28,9 @@ from l10n import translations as tr
 
 if TYPE_CHECKING:
     import tkinter as tk
+
+if sys.platform == "win32":
+    import winsparkle
 
 logger = get_main_logger()
 
@@ -220,11 +223,11 @@ class Updater:
         self.root: tk.Tk | None = tkroot
         self.provider: str = provider
         self.thread: threading.Thread | None = None
-        self.updater: Any | None = None  # ensure attribute exists
 
         if not self.use_internal() and sys.platform == 'win32':
             self._init_winsparkle()
-            self.set_automatic_updates_check(config.get_bool("core_updater_disable_in_game", default=False))
+            disable_in_game = config.get_bool("core_updater_disable_in_game", default=False)
+            winsparkle.set_automatic_check_for_updates(disable_in_game)
 
     def start_check_thread(self) -> None:
         """Start the background update worker thread safely."""
@@ -236,8 +239,8 @@ class Updater:
             )
             self.thread.start()
         else:
-            if sys.platform == 'win32' and self.updater:
-                self.updater.win_sparkle_check_update_with_ui()
+            if sys.platform == 'win32':
+                winsparkle.check_update_with_ui()
 
         # Always trigger FDEV checks here too
         check_for_fdev_updates()
@@ -257,30 +260,20 @@ class Updater:
         return self.provider == 'internal'
 
     def _init_winsparkle(self) -> None:
-        """Initialize WinSparkle updater for Windows."""
-        import ctypes
+        """Initialize WinSparkle updater for Windows using the winsparkle module."""
         try:
-            self.updater = cast(ctypes.CDLL, ctypes.cdll.WinSparkle)
-            self.updater.win_sparkle_set_appcast_url(get_update_feed().encode())  # Set the appcast URL
+            # Set appversion without build metadata, WinSparkle doesn't do full SemVer Checks.
+            # Does support pre-release due to splitting and string comparison.
+            # https://github.com/vslavik/winsparkle/issues/214
+            winsparkle.set_appcast_url(get_update_feed())
+            winsparkle.set_app_build_version(str(appversion_nobuild()))
+            winsparkle.set_shutdown_request_callback(self.shutdown_request)
 
-            # Set the appversion *without* build metadata, as WinSparkle
-            # doesn't do proper Semantic Version checks.
-            # NB: It 'accidentally' supports pre-release due to how it
-            # splits and compares strings:
-            # <https://github.com/vslavik/winsparkle/issues/214>
-            self.updater.win_sparkle_set_app_build_version(str(appversion_nobuild()))
-
-            # set up shutdown callback
-            self.callback_t = ctypes.CFUNCTYPE(None)  # keep reference
-            self.callback_fn = self.callback_t(self.shutdown_request)
-            self.updater.win_sparkle_set_shutdown_request_callback(self.callback_fn)
-
-            # Get WinSparkle running
-            self.updater.win_sparkle_init()
+            # Fire up the engine
+            winsparkle.init()
 
         except Exception:
             print_exc()
-            self.updater = None
             msg = "Updater Failed to Initialize. Please file a bug report!"
             if not os.getenv("EDMC_NO_UI"):
                 messagebox.showerror(title=appname, message=msg)
@@ -295,17 +288,16 @@ class Updater:
         """
         if self.use_internal():
             return
-
-        if sys.platform == 'win32' and self.updater:
-            self.updater.win_sparkle_set_automatic_check_for_updates(onoroff)
+        if sys.platform == 'win32':
+            winsparkle.set_automatic_check_for_updates(onoroff)
 
     def check_for_updates(self) -> None:
         """Trigger the requisite method to check for an update."""
         if self.use_internal():
             self.thread = threading.Thread(target=self.worker, name='update worker', daemon=True)
             self.thread.start()
-        elif sys.platform == 'win32' and self.updater:
-            self.updater.win_sparkle_check_update_with_ui()
+        elif sys.platform == 'win32':
+            winsparkle.check_update_with_ui()
 
         check_for_fdev_updates()
         check_for_datafile_updates()
@@ -318,7 +310,6 @@ class Updater:
         running version.
         :return: EDMCVersion or None if no newer version found
         """
-        newversion = None
         items = {}
         try:
             request = requests.get(get_update_feed(), timeout=10)
@@ -380,11 +371,15 @@ class Updater:
         status['text'] = tr.tl("{NEWVER} is available").format(NEWVER=newver_title)
         self.root.update_idletasks()
 
-    def get_update_check(self):
-        """Check the current value of the WinSparkle Registry Key."""
-        if sys.platform == 'win32' and self.updater:
-            return self.updater.win_sparkle_set_automatic_check_for_updates()
-        return False
+    def get_update_check(self) -> int:
+        """
+        Check the current value of the WinSparkle Registry Key.
+
+        Guarantees an int return (1 or 0) to keep TOML configuration safe on all platforms.
+        """
+        if sys.platform == 'win32':
+            return winsparkle.get_automatic_check_for_updates()
+        return 0  # Safe integer fallback for Linux/macOS source runs
 
     def close(self) -> None:
         """
