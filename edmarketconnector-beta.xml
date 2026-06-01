@@ -6,9 +6,28 @@
       <description>Most recent changes with links to updates.</description>
       <!-- Windows -->
       <item>
-         <title>Release 6.1.2</title>
+         <title>Release 6.1.3-beta3</title>
          <description><![CDATA[<style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
 <p>We now test against, and package with, Python 3.13.</p>
+<h2>Release 6.1.3-beta3</h2>
+<p>This is a BETA for EDMC 6.1.3, now available on the Beta update track!</p>
+<p>Betas 1 and 2 did not compile properly and are not being provided.</p>
+<p>NOTE: only an UNSIGNED release is available for this beta.</p>
+<p>This release includes a series of bugfixes, as well as full support for the Kestrel Mk II and Lynx Highliner.</p>
+<p><strong>Changes and Enhancements</strong></p>
+<ul>
+<li>Added Kestrel Mk II and Lynx Highliner Ship and Modules Data.</li>
+<li>Added additional minor type hint improvements.</li>
+<li>Added new translation candidates to Frontier CAPI dialog boxes.</li>
+<li>Added support to the Coriolis Accounts API.</li>
+<li>Updated a series of dependencies and scripts.</li>
+<li>Updated the inara.cz API link.</li>
+<li>Fixed a bug that could cause &quot;None&quot; values in the config to crash on Linux.</li>
+<li>Fixed a bug that could cause relative or '~' links in the config to crash on Linux.</li>
+<li>Fixed a bug where UI-Rescaled instances of EDMC would not display the Plugin Browser properly.</li>
+<li>Fixed a bug where EDAstro wouldn't respect &quot;Do-Not-Send&quot; choices in the config.</li>
+</ul>
+<hr>
 <h2>Release 6.1.2</h2>
 <p>This release includes refinements on the patches for 6.1.1, and a series of new tests for development.</p>
 <p><strong>Changes and Enhancements</strong></p>
@@ -3184,11 +3203,11 @@ about this:
 <a href="https://issues.frontierstore.net/issue-detail/28638" rel="nofollow">PTS CAPI saying Commander is Docked after jumping to new system</a>.</p>
 </li>
 </ul>]]></description>
-         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F6.1.2/EDMarketConnector_Installer_6.1.2_x64.exe"
+         <enclosure url="https://github.com/EDCD/EDMarketConnector/releases/download/Release%2F6.1.3-beta3/EDMarketConnector_Installer_Unsigned_6.1.3-beta3_x64.exe"
                     sparkle:os="windows"
-                    sparkle:version="6.1.2"
+                    sparkle:version="6.1.3-beta3"
                     type="application/x-ms-dos-executable"
-                    sparkle:edSignature="z3s2VDpLmGcaWtkeOJaHwzvlf0+LQSU4ORIL4OGtQZbvSbC2SW8gBc5RC3c9/aTwblZmTzkKbAX++7eveGdiBA==" length="23841592"
+                    sparkle:edSignature="9Wo6mUgd3icYkNYCTOi+K7BOO1pGAUk0kYGzSWDdrWkeOgE4Umil8lkDeuZK2fkP6cjPKOIrsQMxJwv/w/svBg==" length="24078859"
          />
       </item>
    </channel>
