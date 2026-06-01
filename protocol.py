@@ -158,6 +158,9 @@ if config.auth_force_edmc_protocol or (  # noqa: C901
     GlobalUnlock = windll.kernel32.GlobalUnlock
     GlobalUnlock.argtypes = [HGLOBAL]
     GlobalUnlock.restype = BOOL
+    GlobalFree = windll.kernel32.GlobalFree
+    GlobalFree.argtypes = [HGLOBAL]
+    GlobalFree.restype = HGLOBAL
 
     # Windows Message handler stuff (IPC)
     # https://docs.microsoft.com/en-us/previous-versions/windows/desktop/legacy/ms633573(v=vs.85)
@@ -286,6 +289,7 @@ if config.auth_force_edmc_protocol or (  # noqa: C901
                     # https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-globallock
                     args = wstring_at(GlobalLock(msg.lParam)).strip()
                     GlobalUnlock(msg.lParam)  # Unlocks the GlobalLock-ed object
+                    GlobalFree(msg.lParam)
 
                     if args.lower().startswith('open("') and args.endswith('")'):
                         logger.trace_if("frontier-auth.windows", f"args are: {args}")
@@ -325,7 +329,7 @@ if config.auth_force_edmc_protocol or (  # noqa: C901
 
 else:  # Linux / Run from source
 
-    from http.server import BaseHTTPRequestHandler, HTTPServer
+    from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
     class LinuxProtocolHandler(GenericProtocolHandler):
         """
@@ -336,7 +340,7 @@ else:  # Linux / Run from source
 
         def __init__(self) -> None:
             super().__init__()
-            self.httpd = HTTPServer(("localhost", 0), HTTPRequestHandler)
+            self.httpd = ThreadingHTTPServer(("localhost", 0), HTTPRequestHandler)
             self.redirect = f"http://localhost:{self.httpd.server_port}/auth"
             if not os.getenv("EDMC_NO_UI"):
                 logger.info(f"Web server listening on {self.redirect}")
