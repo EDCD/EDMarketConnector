@@ -1,6 +1,6 @@
 This is the master changelog for Elite Dangerous Market Connector.  Entries are in reverse chronological order (latest first).
 ---
-* We currently test against, and package with, Python 3.13, 64-bit.
+* We currently test against, and package with, Python 3.14, 64-bit.
 ---
 Release 6.1.3-beta3
 ===

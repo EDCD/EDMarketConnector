@@ -507,6 +507,12 @@ No:
 
 ---
 
+## AI Contributions
+
+For a full breakdown on the use of AI tooling and assistance, see our [AI Policy](/docs/AI%20Policy.md)
+
+---
+
 ## Use Type hints
 
 Please do place [type hints](https://docs.python.org/3/library/typing.html) on the declarations of your functions,

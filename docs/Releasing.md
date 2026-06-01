@@ -38,10 +38,11 @@ You will need several pieces of software installed, or the files from their
  auto-select some others).  NB: If you have need to uninstall this it's
  "Windows Software Development Kit - Windows 10.0.19041.1" in
  "Apps & Features", *not* "Windows SDK AddOn".
-3. [Python](https://python.org): 32-bit version of Python 3.13 for Windows.
- [v3.13.9](https://www.python.org/downloads/release/python-3139/) is the most
- recently tested version.  You need the `Windows x86 executable installer`
- file, for the 32-bit version.  Double-check the version against the
+3. [Python](https://python.org): 32-bit version of Python 3.14 for Windows.
+ Refer to [Python.org](https://www.python.org/downloads/) for the latest
+ version.  You need the `Windows installer (32-bit)` file
+ for the 32-bit version, or `Windows installer (64-bit)` for 64-bit.
+ Double-check the version against the
    `.python.version` file, as it should always contain the intended version.
 4. [py2exe](https://github.com/albertosottile/py2exe) - Now available via PyPi,
  so will be picked up with the `pip install` below.  Latest tested as per
