@@ -374,7 +374,7 @@ if __name__ == '__main__':  # noqa: C901
         lockmsg = tr.tl(
             "Ignoring failed Journal Lock. Continuing at your own risk."
             "{CR}Consider also using a debug sender."
-        ).format(CR="\n")  # LANG: Popup message when user tries to start a second instance of the application with --skip-journallock, warning them of potential consequences
+        )  # LANG: Popup message when user tries to start a second instance of the application with --skip-journallock, warning them of potential consequences
         messagebox.showwarning(title=appname, message=lockmsg)
 
     def already_running_popup():
@@ -2137,7 +2137,7 @@ def show_killswitch_popup(root=None):
     text = tr.tl(
         "Some EDMC Features have been disabled due to known issues.{CR}"
         "Please update EDMC as soon as possible to resolve any issues."
-    ).format(CR="\n")  # LANG: Body text of killswitch warning popup
+    )  # LANG: Body text of killswitch warning popup
 
     tl = tk.Toplevel(root)
     tl.attributes('-topmost', True)
