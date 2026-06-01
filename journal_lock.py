@@ -71,12 +71,25 @@ class JournalLock:
         self.lock = FileLock(self.journal_dir_lockfile_name)
 
         try:
+            # Write PID metadata into the lockfile for transparency
+            try:
+                with open(self.journal_dir_lockfile_name, mode='w', encoding='utf-8') as f:
+                    f.write(f"Path: {self.journal_dir}\nPID: {os_getpid()}\n")
+            except (PermissionError, OSError):
+                try:
+                    self.lock.acquire(timeout=0)
+                    logger.trace_if('journal-lock', 'Done')
+                    self.locked = True
+                    return JournalLockResult.LOCKED
+                except Timeout:
+                    logger.info(f"Couldn't lock journal directory \"{self.journal_dir}\","
+                                f" assuming another process running.")
+                    return JournalLockResult.ALREADY_LOCKED
+                except (PermissionError, OSError):
+                    return JournalLockResult.JOURNALDIR_READONLY
+
             # Immediately fail if another process holds the lock
             self.lock.acquire(timeout=0)
-
-            # Write PID metadata into the lockfile for transparency
-            with open(self.journal_dir_lockfile_name, mode='w', encoding='utf-8') as f:
-                f.write(f"Path: {self.journal_dir}\nPID: {os_getpid()}\n")
 
             logger.trace_if('journal-lock', 'Done')
             self.locked = True
