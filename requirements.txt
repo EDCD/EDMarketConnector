@@ -7,3 +7,4 @@ semantic-version==2.10.0
 pywin32==311; sys_platform == 'win32'
 psutil==7.2.2
 tomli-w==1.2.0
+filelock==3.29.0
