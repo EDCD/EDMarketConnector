@@ -359,7 +359,7 @@ def build(audit_deps: bool = False) -> None:
         "py2exe": {
             "dist_dir": dist_dir,
             "optimize": 2,
-            "packages": ["asyncio", "multiprocessing", "sqlite3", "util", "plugins"],
+            "packages": ["asyncio", "multiprocessing", "sqlite3", "plugins"],
             "includes": ["dataclasses", "shutil", "timeout_session", "zipfile"],
             "excludes": [
                 "distutils",
