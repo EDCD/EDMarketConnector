@@ -960,15 +960,15 @@ class AppWindow:
             if track == "Stable":
                 # LANG: Inform the user the Update Track has changed
                 title = tr.tl('Update Track Changed to {TRACK}').format(TRACK=track)
-                update_msg = tr.tl(  # LANG: Inform User of Beta -> Stable Transition Risks
+                update_msg = tr.tl(  # LANG: Inform User of Beta -> Stable Transition Risks, EOL: End of Line
                     'Update track changed to Stable from Beta. '
                     'You will no longer receive Beta updates. You will stay on your current Beta '
-                    'version until the next Stable release.{LF}{CR}{LF}{CR}'
+                    'version until the next Stable release.{EOL}{EOL}'
                     'You can manually revert to the latest Stable version. To do so, you must download and install '
                     'the latest Stable version manually. Note that this may introduce bugs or break completely'
-                    ' if downgrading between major versions with significant changes.{LF}{CR}{LF}{CR}'
+                    ' if downgrading between major versions with significant changes.{EOL}{EOL}'
                     'Do you want to open GitHub to download the latest release?'
-                ).format(CR="\n", LF="\r")
+                ).format(EOL="\r\n")  # Carriage Return + Line Feed = End of Line
                 stable_popup = tk.messagebox.askyesno(title=title, message=update_msg)
                 if stable_popup:
                     webbrowser.open("https://github.com/EDCD/eDMarketConnector/releases/latest")
@@ -2134,17 +2134,17 @@ def show_killswitch_popup(root=None):
     if not (kills := killswitch.kills_for_version()):
         return
 
-    text = (
-        "Some EDMC Features have been disabled due to known issues.\n"
+    text = tr.tl(
+        "Some EDMC Features have been disabled due to known issues.{CR}"
         "Please update EDMC as soon as possible to resolve any issues."
-    )
+    ).format(CR="\n")  # LANG: Body text of killswitch warning popup
 
     tl = tk.Toplevel(root)
     tl.attributes('-topmost', True)
     if root:
         tl.geometry(f'+{root.winfo_rootx()}+{root.winfo_rooty()}')
     tl.columnconfigure(1, weight=1)
-    tl.title("EDMC Features have been disabled")
+    tl.title(tr.tl("EDMC Features have been disabled"))  # LANG: Title of killswitch warning popup
 
     frame = tk.Frame(tl)
     frame.grid(sticky=tk.NSEW)
@@ -2153,7 +2153,11 @@ def show_killswitch_popup(root=None):
     idx = 1
     for version in kills:
         tk.Label(
-            frame, text=f'Version: {version.version}', font=('Helvetica', 10, 'bold')
+            frame,
+            text=tr.tl(
+                "Version: {VERSION}"  # LANG: Label prefix for killswitch version number
+            ).format(VERSION=version.version),
+            font=('Helvetica', 10, 'bold')
         ).grid(row=idx, column=0, sticky=tk.W)
         idx += 1
         for kill_id, kill in version.kills.items():
@@ -2162,7 +2166,7 @@ def show_killswitch_popup(root=None):
             idx += 1
         idx += 1
 
-    ok_button = ttk.Button(frame, text="Ok", command=tl.destroy)
+    ok_button = ttk.Button(frame, text=tr.tl('OK'), command=tl.destroy)  # LANG: Killswitch popup dismiss button
     ok_button.grid(row=idx, column=0, columnspan=2, sticky=tk.EW, pady=(10, 0))
 
 
@@ -2188,18 +2192,17 @@ def validate_providers():
 
     lines = [
         # LANG: Popup-text about Reset Providers
-        tr.tl('One or more of your URL Providers were invalid, and have been reset:{LF}{CR}{LF}{CR}'
-            ).format(LF='{LF}', CR='{CR}')
+        tr.tl('One or more of your URL Providers were invalid, and have been reset:{EOL}{EOL}'
+    ).format(EOL="\r\n")  # Carriage Return + Line Feed = End of Line
     ]
 
     for provider, (old_prov, new_prov) in reset_providers.items():
         # LANG: Text About What Provider Was Reset
-        msg = tr.tl(r'{PROVIDER} was set to {OLDPROV}, and has been reset to {NEWPROV}{LF}{CR}').format(
+        msg = tr.tl('{PROVIDER} was set to {OLDPROV}, and has been reset to {NEWPROV}{EOL}').format(
             PROVIDER=provider,
             OLDPROV=old_prov,
             NEWPROV=new_prov,
-            LF='{LF}',  # Line Feed
-            CR='{CR}'  # Carriage Return
+            EOL="\r\n"  # Carriage Return + Line Feed = End of Line
         )
 
     tk.messagebox.showinfo(
@@ -2339,10 +2342,10 @@ sys.path: {sys.path}'''
             "EDMC is shutting down for its own protection!"
         )
         err = f"{err.__class__.__name__}: {err}"  # type: ignore # hijacking the existing exception detection
-        detail = tr.tl(  # LANG: EDMC Critical Error Details
-            "Here's what EDMC Detected:{LF}{CR}{LF}{CR}"
-            "{ERR}{LF}{CR}{LF}{CR}Do you want to file a Bug Report on GitHub?"
-        ).format(ERR=err, CR="\n", LF="\r")
+        detail = tr.tl(  # LANG: EDMC Critical Error Details, EOL: End of Line
+            "Here's what EDMC Detected:{EOL}{EOL}"
+            "{ERR}{EOL}{EOL}Do you want to file a Bug Report on GitHub?"
+        ).format(ERR=err, EOL="\r\n")  # Carriage Return + Line Feed = End of Line
         msg = tk.messagebox.askyesno(
             title=title, message=message, detail=detail, icon=tk.messagebox.ERROR, type=tk.messagebox.YESNO,
             parent=root
@@ -2358,11 +2361,11 @@ sys.path: {sys.path}'''
     def messagebox_broken_plugins():
         """Display message about 'broken' plugins that failed to load."""
         if plug.PLUGINS_broken:
-            # LANG: Popup-text about 'broken' plugins that failed to load
+            # LANG: Popup-text about 'broken' plugins that failed to load, EOL: End of Line
             popup_text = tr.tl(
                 "One or more of your enabled plugins failed to load. Please see the list on the '{PLUGINS}' "
                 "tab of '{FILE}' > '{SETTINGS}'. This could be caused by a wrong folder structure. The load.py "
-                "file should be located under plugins/PLUGIN_NAME/load.py.{LF}{CR}{LF}{CR}You can disable a plugin by "
+                "file should be located under plugins/PLUGIN_NAME/load.py.{EOL}{EOL}You can disable a plugin by "
                 "renaming its folder to have '{DISABLED}' on the end of the name."
             )
 
@@ -2372,8 +2375,7 @@ sys.path: {sys.path}'''
                 FILE=tr.tl('File'),  # LANG: 'File' menu
                 SETTINGS=tr.tl('Settings'),  # LANG: File > Settings
                 DISABLED='.disabled',
-                LF='{LF}',  # Line Feed
-                CR='{CR}'  # Carriage Return
+                EOL="\r\n"  # Carriage Return + Line Feed = End of Line
             )
 
             tk.messagebox.showinfo(
@@ -2387,12 +2389,11 @@ sys.path: {sys.path}'''
         """Display message about plugins not updated for Python 3.x."""
         plugins_not_py3_last = config.get_int('plugins_not_py3_last', default=0)
         if (plugins_not_py3_last + 86400) < int(datetime.now(timezone.utc).timestamp()) and plug.PLUGINS_not_py3:
-            # LANG: Popup-text about 'active' plugins without Python 3.x support
-            popup_text = tr.tl(
+            popup_text = tr.tl(  # LANG: Popup-text about 'active' plugins without Python 3.x support, EOL: End of Line
                 "One or more of your enabled plugins do not yet have support for Python 3.x. Please see the "
                 "list on the '{PLUGINS}' tab of '{FILE}' > '{SETTINGS}'. You should check if there is an "
                 "updated version available, else alert the developer that they need to update the code for "
-                "Python 3.x.{LF}{CR}{LF}{CR}You can disable a plugin by renaming its folder to have '{DISABLED}' on "
+                "Python 3.x.{EOL}{EOL}You can disable a plugin by renaming its folder to have '{DISABLED}' on "
                 "the end of the name."
             )
 
@@ -2402,8 +2403,7 @@ sys.path: {sys.path}'''
                 FILE=tr.tl('File'),  # LANG: 'File' menu
                 SETTINGS=tr.tl('Settings'),  # LANG: File > Settings
                 DISABLED='.disabled',
-                LF='{LF}',  # Line Feed
-                CR='{CR}'  # Carriage Return
+                EOL="\r\n"  # Carriage Return + Line Feed = End of Line
             )
 
             tk.messagebox.showinfo(
