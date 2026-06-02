@@ -55,6 +55,18 @@ class JournalLock:
             except Exception:  # pragma: no cover
                 logger.exception("Couldn't make pathlib.Path from journal_dir")
 
+    def open_journal_dir_lockfile(self) -> bool:
+        """Open journal_dir lockfile ready for locking."""
+        self.journal_dir_lockfile_name = self.journal_dir_path / 'edmc-journal-lock.txt'  # type: ignore
+        logger.trace_if('journal-lock', f'journal_dir_lockfile_name = {self.journal_dir_lockfile_name!r}')
+        try:
+            self.lock = FileLock(self.journal_dir_lockfile_name)
+            return True
+        except Exception as e:
+            logger.warning(f"Couldn't prepare lockfile \"{self.journal_dir_lockfile_name}\". "
+                           f"Aborting duplicate process checks: {e!r}")
+            return False
+
     def obtain_lock(self) -> JournalLockResult:
         """
         Attempt to obtain a lock on the journal directory.
@@ -64,44 +76,40 @@ class JournalLock:
         if self.journal_dir_path is None:
             return JournalLockResult.JOURNALDIR_IS_NONE
 
-        self.journal_dir_lockfile_name = self.journal_dir_path / 'edmc-journal-lock.txt'
-        logger.trace_if('journal-lock', f'journal_dir_lockfile_name = {self.journal_dir_lockfile_name!r}')
+        if not self.open_journal_dir_lockfile():
+            return JournalLockResult.JOURNALDIR_READONLY
+        return self._obtain_lock()
 
-        # Instantiate filelock engine (abstracts win32/fcntl natively)
-        self.lock = FileLock(self.journal_dir_lockfile_name)
+    def _obtain_lock(self) -> JournalLockResult:
+        """
+        Obtain the lock.
+
+        :return: LockResult - See the class Enum definition
+        """
+        if not self.lock:
+            return JournalLockResult.JOURNALDIR_READONLY
 
         try:
-            # Write PID metadata into the lockfile for transparency
-            try:
-                with open(self.journal_dir_lockfile_name, mode='w', encoding='utf-8') as f:
-                    f.write(f"Path: {self.journal_dir}\nPID: {os_getpid()}\n")
-            except (PermissionError, OSError):
-                try:
-                    self.lock.acquire(timeout=0)
-                    logger.trace_if('journal-lock', 'Done')
-                    self.locked = True
-                    return JournalLockResult.LOCKED
-                except Timeout:
-                    logger.info(f"Couldn't lock journal directory \"{self.journal_dir}\","
-                                f" assuming another process running.")
-                    return JournalLockResult.ALREADY_LOCKED
-                except (PermissionError, OSError):
-                    return JournalLockResult.JOURNALDIR_READONLY
-
             # Immediately fail if another process holds the lock
             self.lock.acquire(timeout=0)
-
-            logger.trace_if('journal-lock', 'Done')
-            self.locked = True
-            return JournalLockResult.LOCKED
-
         except Timeout:
             logger.info(f"Couldn't lock journal directory \"{self.journal_dir}\", assuming another process running.")
             return JournalLockResult.ALREADY_LOCKED
         except (PermissionError, OSError) as e:
-            logger.warning(f"Couldn't open/lock \"{self.journal_dir_lockfile_name}\". "
-                           f"Aborting duplicate process checks: {e!r}")
+            # Catches read-only filesystems or directory permission denials natively via filelock
+            logger.warning(f"Couldn't acquire lock on \"{self.journal_dir_lockfile_name}\": {e!r}")
             return JournalLockResult.JOURNALDIR_READONLY
+
+        # Write PID metadata into the lockfile after successful lock
+        try:
+            with open(self.journal_dir_lockfile_name, mode='w', encoding='utf-8') as f:  # type: ignore
+                f.write(f"Path: {self.journal_dir}\nPID: {os_getpid()}\n")
+        except Exception as e:
+            # If writing metadata fails but the OS lock is held, log it but keep going
+            logger.warning(f"Lock acquired, but couldn't write PID metadata: {e!r}")
+        logger.trace_if('journal-lock', 'Done')
+        self.locked = True
+        return JournalLockResult.LOCKED
 
     def release_lock(self) -> bool:
         """
