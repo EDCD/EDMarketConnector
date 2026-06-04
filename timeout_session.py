@@ -40,7 +40,11 @@ class TimeoutAdapter(HTTPAdapter):
 
 
 def new_session(timeout: int = REQUEST_TIMEOUT, session: Session | None = None) -> Session:
-    """DEPRECATED: Create a new requests.Session."""
+    """
+    Create a new requests.Session.
+
+    DEPRECATED. Will be removed in a future version (6.3 or later).
+    """
     warnings.warn(
         "timeout_session.new_session() is deprecated and will be removed. "
         "Use requests.Session() directly and pass explicit timeouts to request methods.",

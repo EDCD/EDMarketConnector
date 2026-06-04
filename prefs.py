@@ -8,7 +8,6 @@ from pathlib import Path
 import subprocess
 import sys
 import tkinter as tk
-from os import system
 from tkinter import colorchooser as tkColorChooser  # type: ignore # noqa: N812
 from tkinter import ttk
 from itertools import count
@@ -40,12 +39,14 @@ logger = get_main_logger()
 
 def open_folder(file: Path) -> None:
     """Open the given file in the OS file explorer."""
+    # Ensure we are working with a resolved Path object
+    file_path = Path(file).resolve()
     if sys.platform.startswith('win'):
         # On Windows, use the "start" command to open the folder
-        system(f'start "" "{file}"')
+        subprocess.run(['start', '', file_path], shell=True)
     elif sys.platform.startswith('linux'):
         # On Linux, use the "xdg-open" command to open the folder
-        system(f'xdg-open "{file}"')
+        subprocess.run(['xdg-open', str(file_path)])
 
 
 def help_open_system_profiler(parent) -> None:

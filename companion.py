@@ -182,7 +182,7 @@ def listify(thing: list | dict | None) -> list[Any]:
     JSON objects indexed by integers. Sparse arrays are converted to
     lists with gaps filled with None.
     """
-    if thing is None:
+    if not thing:
         return []
 
     if isinstance(thing, list):
@@ -1295,13 +1295,10 @@ def index_possibly_sparse_list(data: Mapping[str, V] | list[V], key: int) -> V:
     >>> index_possibly_sparse_list(data, 0)
     'test_list'
     """
-    if isinstance(data, list):
-        return data[key]
-
-    if isinstance(data, dict):
-        return data[str(key)]
-
-    raise ValueError(f'Unexpected data type {type(data)}')
+    try:
+        return data[key] if isinstance(data, list) else data[str(key)]
+    except (KeyError, IndexError) as e:
+        raise ValueError(f'Unexpected data type or missing key: {type(data)}') from e
 ######################################################################
 
 
