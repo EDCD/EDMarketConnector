@@ -1,9 +1,11 @@
 # flake8: noqa
 # mypy: ignore-errors
-"""Test that logging works correctly from a class-definition caller."""
+"""Test that logging works correctly from various calling contexts."""
 
 import sys
 import inspect
+from pathlib import Path
+from loguru import logger as loguru_logger
 
 sys.path += "../"  # Don't ask me why for this one it breaks, it just does.
 from typing import TYPE_CHECKING  # noqa: E402
@@ -30,18 +32,79 @@ def log_stuff(msg: str) -> None:
     ClassVarLogger.logger.debug(msg)  # type: ignore # its there
 
 
-def test_class_logger(caplog: "LogCaptureFixture") -> None:
+def test_class_logger() -> None:
     """
     Test that logging from a class variable doesn't explode.
 
-    In writting a plugin that uses a class variable to hold the logger, EDMCLoggings cleverness to extract data
-    regarding the qualified name of a function falls flat, as a class variable does not have a qualname, and at the time
-    we did not check for its existence before using it.
+    Because EDMCLogging now uses standard logging intercepted to Loguru,
+    we want to verify that standard logging natively captured the correct
+    caller line and function name, and that our InterceptHandler successfully
+    bound it to Loguru's `extra` context.
     """
     ClassVarLogger.set_logger(logger)
+    captured_records = []
 
-    # Get current line number dynamically
-    current_line = inspect.currentframe().f_lineno + 1
-    ClassVarLogger.logger.debug("test")
+    sink_id = loguru_logger.add(
+        lambda msg: captured_records.append(msg.record),
+        format="{message}"
+    )
 
-    assert f"test_logging_classvar.py:{current_line} test" in caplog.text
+    try:
+        current_line = inspect.currentframe().f_lineno + 1
+        ClassVarLogger.logger.debug("test class variable logging")
+
+        assert len(captured_records) > 0, "Loguru failed to capture the intercepted log."
+        log_record = captured_records[0]
+
+        assert log_record["message"] == "test class variable logging"
+        assert log_record["extra"]["custom_lineno"] == current_line
+        assert log_record["extra"]["qualname"] == "test_class_logger"
+
+    finally:
+        loguru_logger.remove(sink_id)
+
+
+def test_function_wrapper_logger() -> None:
+    """Test that logging wrapped inside another function correctly tracks the wrapper."""
+    ClassVarLogger.set_logger(logger)
+    captured_records = []
+
+    sink_id = loguru_logger.add(
+        lambda msg: captured_records.append(msg.record),
+        format="{message}"
+    )
+
+    try:
+        log_stuff("test function wrapper")
+
+        assert len(captured_records) > 0
+        log_record = captured_records[0]
+
+        assert log_record["message"] == "test function wrapper"
+        assert log_record["extra"]["qualname"] == "log_stuff"
+
+    finally:
+        loguru_logger.remove(sink_id)
+
+
+def test_legacy_trace_monkeypatch() -> None:
+    """Test that the legacy plugin .trace() command translates to Loguru."""
+    ClassVarLogger.set_logger(logger)
+    captured_records = []
+
+    sink_id = loguru_logger.add(
+        lambda msg: captured_records.append(msg.record),
+        level="TRACE_ALL",
+        format="{message}"
+    )
+
+    try:
+        ClassVarLogger.logger.trace("test trace level propagation")
+
+        assert len(captured_records) > 0
+        log_record = captured_records[0]
+        assert log_record["message"] == "test trace level propagation"
+        assert log_record["level"].name == "TRACE"
+
+    finally:
+        loguru_logger.remove(sink_id)

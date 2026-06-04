@@ -48,11 +48,19 @@ if __name__ == '__main__':
     # output until after this redirect is done, if needed.
     if getattr(sys, 'frozen', False):
         from config import config
+        from loguru import logger as loguru_logger
+        from EDMCLogging import file_filter, enhanced_formatter
+
         # By default py2exe tries to write log to dirname(sys.executable) which fails when installed
         # unbuffered not allowed for text in python3, so use `1 for line buffering
         log_file_path = pathlib.Path(config.app_dir_path / 'logs')
         log_file_path.mkdir(exist_ok=True)
         log_file_path /= f'{appname}.log'
+
+        file_sink_id = loguru_logger.add(
+            log_file_path, filter=file_filter, format=enhanced_formatter,
+            colorize=False, enqueue=True, rotation="1 MB"
+        )
 
         sys.stdout = sys.stderr = open(log_file_path, mode='w', buffering=1)  # Do NOT use WITH here.
     # TODO: Test: Make *sure* this redirect is working, else py2exe is going to cause an exit popup
@@ -420,7 +428,9 @@ if __name__ == '__main__':  # noqa: C901
 # See EDMCLogging.py docs.
 # isort: off
 if TYPE_CHECKING:
-    from logging import TRACE  # type: ignore # noqa: F401 # Needed to update mypy
+    import logging as standard_logging
+    # Tell mypy that TRACE exists as an integer literal or type
+    TRACE: int = standard_logging.TRACE  # type: ignore
 
     if sys.platform == 'win32':
         from simplesystray import SysTrayIcon
