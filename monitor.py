@@ -13,7 +13,7 @@ import queue
 import re
 import sys
 import threading
-from calendar import timegm
+from datetime import datetime
 from collections import defaultdict
 from os import SEEK_END, SEEK_SET, listdir
 from os.path import basename, expanduser, getctime, isdir, join
@@ -620,7 +620,7 @@ class EDLogs(FileSystemEventHandler):
                 self.state['MarketID'] = None
                 self.state['StationType'] = None
                 self.stationservices = None
-                self.started = timegm(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
+                self.started = int(datetime.fromisoformat(entry['timestamp']).timestamp())
                 # Don't set Ship, ShipID etc since this will reflect Fighter or SRV if starting in those
                 self.state.update({
                     'Captain':              None,
