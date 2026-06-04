@@ -18,13 +18,15 @@ import tkinter as tk
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from tkinter import ttk
-from typing import Any
+from typing import Any, TYPE_CHECKING
 from collections.abc import Mapping, MutableMapping
-
 import companion
 import myNotebook as nb  # noqa: N813
 from config import config
 from EDMCLogging import get_main_logger
+
+if TYPE_CHECKING:
+    from EDMCLogging import LoggerMixin
 
 logger = get_main_logger()
 
@@ -53,7 +55,7 @@ class Plugin:
         self,
         name: str,
         loadfile: Path | None,
-        plugin_logger: logging.Logger | None,
+        plugin_logger: LoggerMixin | logging.Logger | None,  # Accepts both seamlessly
         internal: bool = False
     ):
         """
@@ -68,8 +70,7 @@ class Plugin:
         self.name: str = name  # Display name.
         self.folder: str | None = name  # basename of plugin folder. None for internal plugins.
         self.module = None  # None for disabled plugins.
-        self.logger: logging.Logger | None = plugin_logger
-
+        self.logger: LoggerMixin | logging.Logger | None = plugin_logger
         if not loadfile:
             logger.info(f'plugin {name} disabled')
             return

@@ -420,7 +420,9 @@ if __name__ == '__main__':  # noqa: C901
 # See EDMCLogging.py docs.
 # isort: off
 if TYPE_CHECKING:
-    from logging import TRACE  # type: ignore # noqa: F401 # Needed to update mypy
+    import logging as standard_logging
+    # Tell mypy that TRACE exists as an integer literal or type
+    TRACE: int = standard_logging.TRACE  # type: ignore
 
     if sys.platform == 'win32':
         from simplesystray import SysTrayIcon

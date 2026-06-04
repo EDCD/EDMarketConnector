@@ -2,9 +2,10 @@
 Set up required logging for the application.
 
 This module provides for a common logging-powered log facility.
-Mostly it implements a logging.Filter() in order to get two extra
-members on the logging.LogRecord instance for use in logging.Formatter()
-strings.
+This module uses Loguru for the backend, to handle more complex
+situations (like log rotation, compression, and async multi-threading),
+while still using the default logging library conventions to ensure strict
+drop-in compatibility with legacy plugins.
 
 If type checking, e.g. mypy, objects to `logging.trace(...)` then include this
 stanza:
@@ -37,45 +38,21 @@ To utilise logging in a 'found' (third-party) plugin, include this:
 """
 from __future__ import annotations
 
-import inspect
 import logging
 import logging.handlers
 import os
 import pathlib
+import sys
 import warnings
-from contextlib import suppress
+import datetime
 from fnmatch import fnmatch
 # So that any warning about accessing a protected member is only in one place.
-from sys import _getframe as getframe
 from threading import get_native_id as thread_native_id
 from time import gmtime
-from traceback import print_exc
 from typing import TYPE_CHECKING, cast
+from loguru import logger as loguru_logger
 import config as config_mod  # This has to be imported separately for trace_if to work... for some reason.
 from config import appcmdname, appname, config, config_logger
-
-# TODO: Tests:
-#
-#       1. Call from bare function in file.
-#       2. Call from `if __name__ == "__main__":` section
-#
-#       3. Call from 1st level function in 1st level Class in file
-#       4. Call from 2nd level function in 1st level Class in file
-#       5. Call from 3rd level function in 1st level Class in file
-#
-#       6. Call from 1st level function in 2nd level Class in file
-#       7. Call from 2nd level function in 2nd level Class in file
-#       8. Call from 3rd level function in 2nd level Class in file
-#
-#       9. Call from 1st level function in 3rd level Class in file
-#      10. Call from 2nd level function in 3rd level Class in file
-#      11. Call from 3rd level function in 3rd level Class in file
-#
-#      12. Call from 2nd level file, all as above.
-#
-#      13. Call from *module*
-#
-#      14. Call from *package*
 
 _default_loglevel = logging.DEBUG
 
@@ -86,6 +63,7 @@ logging.addLevelName(LEVEL_TRACE, "TRACE")
 logging.addLevelName(LEVEL_TRACE_ALL, "TRACE_ALL")
 logging.TRACE = LEVEL_TRACE  # type: ignore
 logging.TRACE_ALL = LEVEL_TRACE_ALL  # type: ignore
+# Legacy Monkey-Patch for plugins calling logger.trace()
 logging.Logger.trace = lambda self, message, *args, **kwargs: self._log(  # type: ignore
     logging.TRACE,  # type: ignore
     message,
@@ -93,13 +71,35 @@ logging.Logger.trace = lambda self, message, *args, **kwargs: self._log(  # type
     **kwargs
 )
 
-# MAGIC n/a | 2022-01-20: We want logging timestamps to be in UTC, not least because the game journals log in UTC.
-# MAGIC-CONT: Note that the game client uses the ED server's idea of UTC, which can easily be different from machine
-# MAGIC-CONT: local idea of it.  So don't expect our log timestamps to perfectly match Journal ones.
-# MAGIC-CONT: See MAGIC tagged comment in Logger.__init__()
-logging.Formatter.converter = gmtime
+# Configure Custom Levels in Loguru
+try:
+    loguru_logger.level("TRACE", no=LEVEL_TRACE, color="<magenta>")
+except ValueError:
+    pass
 
+try:
+    loguru_logger.level("TRACE_ALL", no=LEVEL_TRACE_ALL, color="<magenta><bold>")
+except ValueError:
+    pass
+
+logging.Formatter.converter = gmtime
 warnings.simplefilter('default', DeprecationWarning)
+
+
+LOG_STATE = {
+    "console_level": logging.INFO,
+    "file_level": logging.TRACE  # type: ignore
+}
+
+
+def console_filter(record: 'Record') -> bool:
+    """Dynamic filter for the console sink."""
+    return record["level"].no >= LOG_STATE["console_level"]
+
+
+def file_filter(record: 'Record') -> bool:
+    """Dynamic filter for the file sink."""
+    return record["level"].no >= LOG_STATE["file_level"]
 
 
 def _trace_if(self: logging.Logger, condition: str, message: str, *args, **kwargs) -> None:
@@ -117,6 +117,7 @@ del _trace_if
 
 if TYPE_CHECKING:
     from types import FrameType
+    from loguru import Record
 
     # Fake type that we can use here to tell type checkers that trace exists
 
@@ -134,65 +135,154 @@ if TYPE_CHECKING:
             """
 
 
+def enhanced_formatter(record: 'Record') -> str:
+    """Format log messages using Loguru."""
+    record["time"] = record["time"].astimezone(datetime.timezone.utc)
+    record["extra"]["safe_osthreadid"] = record["extra"].get("osthreadid", thread_native_id())
+    record["extra"]["safe_module"] = record["extra"].get("module", record["name"])
+    record["extra"]["safe_qualname"] = record["extra"].get("qualname", record["function"])
+    record["extra"]["safe_lineno"] = record["extra"].get("custom_lineno", record["line"])
+
+    return (
+        "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}Z</green> | "
+        "<level>{level: <8}</level> | "
+        "<cyan>{process.id}:{thread.id}:{extra[safe_osthreadid]}</cyan> | "
+        "<blue>{extra[safe_module]}.{extra[safe_qualname]}:{extra[safe_lineno]}</blue> - "
+        "<level>{message}</level>\n"
+    )
+
+
+def munge_module_name(pathname: str, default_module: str) -> str:
+    """Adjust module_name based on the file path from standard logging."""
+    file_name = pathlib.Path(pathname).expanduser()
+    plugin_dir = config.plugin_dir_path.expanduser()
+    internal_plugin_dir = config.internal_plugin_dir_path.expanduser()
+    plugin_top = file_name
+
+    while plugin_top and plugin_top.name != '':
+        if plugin_top.parent.name == 'plugins':
+            break
+        plugin_top = plugin_top.parent
+
+    if plugin_top.name != '':
+        if plugin_top.parent == plugin_dir:
+            pt_len = len(plugin_top.parts)
+            name_path = '.'.join(file_name.parts[(pt_len - 1):-1])
+            return f'<plugins>.{name_path}.{default_module}'
+        elif file_name.parent == internal_plugin_dir:
+            pt_len = len(plugin_top.parts)
+            name_path = '.'.join(file_name.parts[(pt_len - 1):-1])
+            if name_path == '':
+                return f'plugins.{default_module}'
+            return f'plugins.{name_path}.{default_module}'
+
+    return default_module
+
+
+class InterceptHandler(logging.Handler):
+    """Intercept standard Python logging and route it to Loguru."""
+
+    def emit(self, record: logging.LogRecord) -> None:
+        """Intercept standard logging and send to Loguru with context."""
+
+        level: str | int
+        try:
+            level = loguru_logger.level(record.levelname).name
+        except ValueError:
+            level = record.levelno
+
+        munged_module = munge_module_name(record.pathname, record.module)
+        extra = {
+            "osthreadid": getattr(record, "osthreadid", thread_native_id()),
+            "qualname": getattr(record, "qualname", record.funcName),
+            "class": getattr(record, "class", ""),
+            "module": munged_module,
+            "custom_lineno": record.lineno,
+        }
+
+        frame, depth = logging.currentframe(), 2
+        while frame and frame.f_code.co_filename == logging.__file__:
+            frame = cast('FrameType', frame.f_back)
+            depth += 1
+
+        loguru_logger.bind(**extra).opt(
+            depth=depth,
+            exception=record.exc_info
+        ).log(level, record.getMessage())
+
+
+class DummyStreamHandler(logging.StreamHandler):
+    """Compatibility shim for plugins that attempt to access and modify the stream handler directly."""
+
+    def __init__(self, logger_instance: Logger):
+        super().__init__(sys.stdout)
+        self._logger_instance = logger_instance
+
+    def setLevel(self, level: int | str) -> None:  # noqa: N802
+        """Set the logging level."""
+        self._logger_instance.set_console_loglevel(level)
+
+    def setFormatter(self, fmt: logging.Formatter | None) -> None:  # noqa: N802
+        """Set the logging format."""
+        warnings.warn(
+            "EDMC now uses Loguru. Direct formatting of StreamHandlers via "
+            "setFormatter is deprecated and will be ignored.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+
+
 class Logger:
-    """
-    Wrapper class for all logging configuration and code.
-
-    Class instantiation requires the 'logger name' and optional loglevel.
-    It is intended that this 'logger name' be re-used in all files/modules
-    that need to log.
-
-    Users of this class should then call getLogger() to get the
-    logging.Logger instance.
-    """
+    """Wrapper class for all logging configuration and code."""
 
     def __init__(self, logger_name: str, loglevel: int | str = _default_loglevel):
         """
         Set up a `logging.Logger` with our preferred configuration.
 
-        This includes using an EDMCContextFilter to add 'class' and 'qualname'
-        expansions for logging.Formatter().
+        This utilizes the InterceptHandler to catch standard logging,
+        extract contextual metadata, and forward it to Loguru.
         """
+        self.logger_name = logger_name
         self.logger = logging.getLogger(logger_name)
-        # Configure the logging.Logger
+
         # This needs to always be TRACE in order to let TRACE level messages
         # through to check the *handler* levels.
         self.logger.setLevel(logging.TRACE)  # type: ignore
+        self.logger.propagate = False
 
-        # Set up filter for adding class name
-        self.logger_filter = EDMCContextFilter()
-        self.logger.addFilter(self.logger_filter)
+        # Clear default Loguru sinks to avoid double-logging
+        loguru_logger.remove()
+        root_logger = logging.getLogger()
+        root_logger.handlers.clear()
 
-        # Our basic channel handling stdout
-        self.logger_channel = logging.StreamHandler()
-        # This should be affected by the user configured log level
-        self.logger_channel.setLevel(loglevel)
+        # Hijack the standard logging pipeline
+        interceptor = InterceptHandler()
+        root_logger.addHandler(interceptor)
+        self.logger.addHandler(interceptor)
 
-        self.logger_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(process)d:%(thread)d:%(osthreadid)d %(module)s.%(qualname)s:%(lineno)d: %(message)s')  # noqa: E501
-        self.logger_formatter.default_time_format = '%Y-%m-%d %H:%M:%S'
-        # MAGIC n/a | 2022-01-20: As of Python 3.10.2 you can *not* use either `%s.%03.d` in default_time_format
-        # MAGIC-CONT: (throws exceptions), *or* use `%Z` in default_time_msec (more exceptions).
-        # MAGIC-CONT: ' UTC' is hard-coded here - we know we're using the local machine's idea of UTC/GMT because we
-        # MAGIC-CONT: cause logging.Formatter() to use `gmtime()` - see MAGIC comment in this file's top-level code.
-        self.logger_formatter.default_msec_format = '%s.%03d UTC'
+        numeric_level = loglevel if isinstance(loglevel, int) else logging.getLevelName(loglevel)
+        LOG_STATE["console_level"] = numeric_level
 
-        self.logger_channel.setFormatter(self.logger_formatter)
-        self.logger.addHandler(self.logger_channel)
+        self.console_sink_id = loguru_logger.add(
+            sys.stdout,
+            filter=console_filter,
+            format=enhanced_formatter,
+            colorize=True, enqueue=True, backtrace=True
+        )
 
-        # Rotating Handler in sub-directory
-        # We want the files in %TEMP%\{appname}\ as {logger_name}-debug.log and
-        # rotated versions.
-        # This is {logger_name} so that EDMC.py logs to a different file.
-        logfile_rotating = pathlib.Path(config.app_dir_path / 'logs')
-        logfile_rotating.mkdir(exist_ok=True)
-        logfile_rotating /= f'{logger_name}-debug.log'
+        logfile_rotating = pathlib.Path(config.app_dir_path / 'logs') / f'{logger_name}-debug.log'
+        logfile_rotating.parent.mkdir(exist_ok=True)
 
-        self.logger_channel_rotating = logging.handlers.RotatingFileHandler(logfile_rotating, maxBytes=1024 * 1024,
-                                                                            backupCount=10, encoding='utf-8')
-        # Yes, we always want these rotated files to be at TRACE level
-        self.logger_channel_rotating.setLevel(logging.TRACE)  # type: ignore
-        self.logger_channel_rotating.setFormatter(self.logger_formatter)
-        self.logger.addHandler(self.logger_channel_rotating)
+        self.file_sink_id = loguru_logger.add(
+            logfile_rotating,
+            filter=file_filter,
+            format=enhanced_formatter,
+            rotation="1 MB", retention=10, compression="zip",
+            encoding="utf-8", colorize=False, enqueue=True, backtrace=True
+        )
+
+        self.logger_channel = DummyStreamHandler(self)
+        self.logger_channel_rotating = DummyStreamHandler(self)
 
     def get_logger(self) -> LoggerMixin:
         """
@@ -217,8 +307,9 @@ class Logger:
         :param level: A valid `logging` level.
         :return: None
         """
-        self.logger_channel.setLevel(level)
-        self.logger_channel_rotating.setLevel(level)
+        self.set_console_loglevel(level)
+        numeric_level = level if isinstance(level, int) else logging.getLevelName(level)
+        LOG_STATE["file_level"] = numeric_level
 
     def set_console_loglevel(self, level: int | str) -> None:
         """
@@ -227,10 +318,12 @@ class Logger:
         :param level: A valid `logging` level.
         :return: None
         """
-        if self.logger_channel.level != logging.TRACE:  # type: ignore
-            self.logger_channel.setLevel(level)
+        numeric_level = level if isinstance(level, int) else logging.getLevelName(level)
+
+        if numeric_level != logging.TRACE:  # type: ignore
+            LOG_STATE["console_level"] = numeric_level
         else:
-            logger.trace("Not changing log level because it's TRACE")  # type: ignore
+            self.logger.trace("Not changing log level because it's TRACE")  # type: ignore
 
 
 def get_plugin_logger(plugin_name: str, loglevel: int = _default_loglevel) -> LoggerMixin:
@@ -244,15 +337,16 @@ def get_plugin_logger(plugin_name: str, loglevel: int = _default_loglevel) -> Lo
     'EDMarketConnector.plugintest', or using appcmdname for EDMC CLI tool.
       Note that `plugin_name` must be the same as the name of the folder the
     plugin resides in.
-      This means that any logging sent through there *also* goes to the channels
-    defined in the 'EDMarketConnector' (or 'EDMC') logger, so we can let that
-    take care of the formatting.
 
-    If we add our own channel then the output gets duplicated (assuming same
-    logLevel set).
+        Because the application now intercepts standard Python logging globally,
+        we no longer need to attach custom filters or handlers directly to this logger.
+        Any logs sent through here automatically propagate up to the root, where
+        they are caught by the `InterceptHandler`, enriched with context (thread IDs,
+        caller names, exact file/line numbers), and safely dispatched to Loguru's
+        asynchronous sinks.
 
-    However we do need to attach our filter to this still.  That's not at
-    the channel level.
+        If we added our own handlers or filters here, the output would get duplicated
+        or double-processed.
 
     :param plugin_name: Name of this Logger.  **Must** be the name of the
         folder the plugin resides in.
@@ -263,261 +357,12 @@ def get_plugin_logger(plugin_name: str, loglevel: int = _default_loglevel) -> Lo
 
     plugin_logger = logging.getLogger(f'{base_logger_name}.{plugin_name}')
     plugin_logger.setLevel(loglevel)
-
-    plugin_logger.addFilter(EDMCContextFilter())
-
     return cast('LoggerMixin', plugin_logger)
 
 
-class EDMCContextFilter(logging.Filter):
-    """
-    Implements filtering to add extra format specifiers, and tweak others.
-
-    logging.Filter sub-class to place extra attributes of the calling site
-    into the record.
-    """
-
-    def filter(self, record: logging.LogRecord) -> bool:
-        """
-        Attempt to set/change fields in the LogRecord.
-
-        1. class = class name(s) of the call site, if applicable
-        2. qualname = __qualname__ of the call site.  This simplifies
-         logging.Formatter() as you can use just this no matter if there is
-         a class involved or not, so you get a nice clean:
-             <file/module>.<classA>[.classB....].<function>
-        3. osthreadid = OS level thread ID.
-
-        If we fail to be able to properly set either then:
-
-        1. Use print() to alert, to be SURE a message is seen.
-        2. But also return strings noting the error, so there'll be
-         something in the log output if it happens.
-
-        :param record: The LogRecord we're "filtering"
-        :return: bool - Always true in order for this record to be logged.
-        """
-        (class_name, qualname, module_name) = self.caller_attributes(module_name=getattr(record, 'module'))
-
-        # Only set if we got a useful value
-        if module_name:
-            setattr(record, 'module', module_name)
-
-        # Only set if not already provided by logging itself
-        if getattr(record, 'class', None) is None:
-            setattr(record, 'class', class_name)
-
-        # Only set if not already provided by logging itself
-        if getattr(record, 'qualname', None) is None:
-            setattr(record, 'qualname', qualname)
-
-        setattr(record, 'osthreadid', thread_native_id())
-
-        return True
-
-    @classmethod
-    def caller_attributes(cls, module_name: str = '') -> tuple[str, str, str]:  # noqa: CCR001, E501, C901 # this is as refactored as is sensible
-        """
-        Determine extra or changed fields for the caller.
-
-        1. qualname finds the relevant object and its __qualname__
-        2. caller_class_names is just the full class names of the calling
-         class if relevant.
-        3. module is munged if we detect the caller is an EDMC plugin,
-         whether internal or found.
-
-        :param module_name: The name of the calling module.
-        :return: Tuple[str, str, str] - class_name, qualname, module_name
-        """
-        frame = cls.find_caller_frame()
-
-        caller_qualname = caller_class_names = ''
-        if frame:
-            # <https://stackoverflow.com/questions/2203424/python-how-to-retrieve-class-information-from-a-frame-object#2220759>
-            try:
-                frame_info = inspect.getframeinfo(frame)
-            except Exception:
-                # Separate from the print below to guarantee we see at least this much.
-                print('EDMCLogging:EDMCContextFilter:caller_attributes(): Failed in `inspect.getframinfo(frame)`')
-
-                # We want to *attempt* to show something about the nature of 'frame',
-                # but at this point we can't trust it will work.
-                try:
-                    print(f'frame: {frame}')
-
-                except Exception:
-                    pass
-
-                # We've given up, so just return '??' to signal we couldn't get the info
-                return '??', '??', module_name
-            try:
-                args, _, _, value_dict = inspect.getargvalues(frame)
-                if len(args) and args[0] in ('self', 'cls'):
-                    frame_class: object = value_dict[args[0]]
-
-                    if frame_class:
-                        # See https://en.wikipedia.org/wiki/Name_mangling#Python for how name mangling works.
-                        # For more detail, see _Py_Mangle in CPython's Python/compile.c.
-                        name = frame_info.function
-                        class_name = frame_class.__class__.__name__.lstrip("_")
-                        if name.startswith("__") and not name.endswith("__") and class_name:
-                            name = f'_{class_name}{frame_info.function}'
-
-                        # Find __qualname__ of the caller
-                        fn = inspect.getattr_static(frame_class, name, None)
-                        if fn is None:
-                            # For some reason getattr_static cant grab this. Try and grab it with getattr, bail out
-                            # if we get a RecursionError indicating a property
-                            try:
-                                fn = getattr(frame_class, name, None)
-                            except RecursionError:
-                                print(
-                                    "EDMCLogging:EDMCContextFilter:caller_attributes():"
-                                    "Failed to get attribute for function info. Bailing out"
-                                )
-                                # class_name is better than nothing for __qualname__
-                                return class_name, class_name, module_name
-
-                        if fn is not None:
-                            if isinstance(fn, property):
-                                class_name = str(frame_class)
-                                # If somehow you make your __class__ or __class__.__qualname__ recursive,
-                                # I'll be impressed.
-                                if hasattr(frame_class, '__class__') and hasattr(frame_class.__class__, "__qualname__"):
-                                    class_name = frame_class.__class__.__qualname__
-                                    caller_qualname = f"{class_name}.{name}(property)"
-
-                                else:
-                                    caller_qualname = f"<property {name} on {class_name}>"
-
-                            elif not hasattr(fn, '__qualname__'):
-                                caller_qualname = name
-
-                            elif hasattr(fn, '__qualname__') and fn.__qualname__:
-                                caller_qualname = fn.__qualname__
-
-                        # Find containing class name(s) of caller, if any
-                        if (
-                            frame_class.__class__ and hasattr(frame_class.__class__, '__qualname__')
-                            and frame_class.__class__.__qualname__
-                        ):
-                            caller_class_names = frame_class.__class__.__qualname__
-
-                # It's a call from the top level module file
-                elif frame_info.function == '<module>':
-                    caller_class_names = '<none>'
-                    caller_qualname = value_dict['__name__']
-
-                elif frame_info.function != '':
-                    caller_class_names = '<none>'
-                    caller_qualname = frame_info.function
-
-                module_name = cls.munge_module_name(frame_info, module_name)
-
-            except Exception as e:
-                print('ALERT!  Something went VERY wrong in handling finding info to log')
-                print('ALERT!  Information is as follows')
-                with suppress(Exception):
-
-                    print(f'ALERT!  {e=}')
-                    print_exc()
-                    print(f'ALERT!  {frame=}')
-                    with suppress(Exception):
-                        print(f'ALERT!  {fn=}')  # type: ignore
-                    with suppress(Exception):
-                        print(f'ALERT!  {cls=}')
-
-            finally:  # Ensure this always happens
-                # https://docs.python.org/3.7/library/inspect.html#the-interpreter-stack
-                del frame
-
-        if caller_qualname == '':
-            print('ALERT!  Something went wrong with finding caller qualname for logging!')
-            caller_qualname = '<ERROR in EDMCLogging.caller_class_and_qualname() for "qualname">'
-
-        if caller_class_names == '':
-            print('ALERT!  Something went wrong with finding caller class name(s) for logging!')
-            caller_class_names = '<ERROR in EDMCLogging.caller_class_and_qualname() for "class">'
-
-        return caller_class_names, caller_qualname, module_name
-
-    @classmethod
-    def find_caller_frame(cls):
-        """
-        Find the stack frame of the logging caller.
-
-        :returns: 'frame' object such as from sys._getframe()
-        """
-        # Go up through stack frames until we find the first with a
-        # type(f_locals.self) of logging.Logger.  This should be the start
-        # of the frames internal to logging.
-        frame: FrameType = getframe(0)
-        while frame:
-            if isinstance(frame.f_locals.get('self'), logging.Logger):
-                frame = cast('FrameType', frame.f_back)  # Want to start on the next frame below
-                break
-            frame = cast('FrameType', frame.f_back)
-        # Now continue up through frames until we find the next one where
-        # that is *not* true, as it should be the call site of the logger
-        # call
-        while frame:
-            if not isinstance(frame.f_locals.get('self'), logging.Logger):
-                break  # We've found the frame we want
-            frame = cast('FrameType', frame.f_back)
-        return frame
-
-    @classmethod
-    def munge_module_name(cls, frame_info: inspect.Traceback, module_name: str) -> str:
-        """
-        Adjust module_name based on the file path for the given frame.
-
-        We want to distinguish between other code and both our internal plugins
-        and the 'found' ones.
-
-        For internal plugins we want "plugins.<filename>".
-        For 'found' plugins we want "<plugins>.<plugin_name>...".
-
-        :param frame_info: The frame_info of the caller.
-        :param module_name: The module_name string to munge.
-        :return: The munged module_name.
-        """
-        file_name = pathlib.Path(frame_info.filename).expanduser()
-        plugin_dir = config.plugin_dir_path.expanduser()
-        internal_plugin_dir = config.internal_plugin_dir_path.expanduser()
-        # Find the first parent called 'plugins'
-        plugin_top = file_name
-        while plugin_top and plugin_top.name != '':
-            if plugin_top.parent.name == 'plugins':
-                break
-
-            plugin_top = plugin_top.parent
-
-        # Check we didn't walk up to the root/anchor
-        if plugin_top.name != '':
-            # Check we're still inside config.plugin_dir
-            if plugin_top.parent == plugin_dir:
-                # In case of deeper callers we need a range of the file_name
-                pt_len = len(plugin_top.parts)
-                name_path = '.'.join(file_name.parts[(pt_len - 1):-1])
-                module_name = f'<plugins>.{name_path}.{module_name}'
-
-            # Check we're still inside the installation folder.
-            elif file_name.parent == internal_plugin_dir:
-                # Is this a deeper caller ?
-                pt_len = len(plugin_top.parts)
-                name_path = '.'.join(file_name.parts[(pt_len - 1):-1])
-
-                # Pre-pend 'plugins.<plugin folder>.' to module
-                if name_path == '':
-                    # No sub-folder involved so module_name is sufficient
-                    module_name = f'plugins.{module_name}'
-
-                else:
-                    # Sub-folder(s) involved, so include them
-                    module_name = f'plugins.{name_path}.{module_name}'
-
-        return module_name
-
+# Note: June 2026, removed EDMCContextFilter. Logging handles the stack walk fine,
+# munged into InterceptHandler. Logger/Loguru both are handling this complex logic
+# without sys._getframe() calls.
 
 def get_main_logger(sublogger_name: str = '') -> LoggerMixin:
     """Return the correct logger for how the program is being run."""
