@@ -364,6 +364,27 @@ def get_plugin_logger(plugin_name: str, loglevel: int = _default_loglevel) -> Lo
 # munged into InterceptHandler. Logger/Loguru both are handling this complex logic
 # without sys._getframe() calls.
 
+class EDMCContextFilter(logging.Filter):
+    """
+    Legacy compatibility shim.
+    EDMC now intercepts standard logging globally via Loguru,
+    making manual context filtering obsolete.
+    """
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        warnings.warn(
+            "EDMCContextFilter is deprecated and no longer performs log enrichment. "
+            "It will be completely removed in a future major version release.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        """Establish Compatibilty Shim."""
+        # Pass everything through cleanly without altering the record
+        return True
+
+
 def get_main_logger(sublogger_name: str = '') -> LoggerMixin:
     """Return the correct logger for how the program is being run."""
     if not os.getenv("EDMC_NO_UI"):

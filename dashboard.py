@@ -11,6 +11,7 @@ import json
 import sys
 import time
 import tkinter as tk
+import warnings
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -158,6 +159,20 @@ class Dashboard(FileSystemEventHandler):
             logger.debug('Status.json was caught in a partially written state. Skipping frame.')
         except Exception:
             logger.exception('Processing Status.json')
+
+    def poll(self, first_time: bool = False) -> None:
+        """
+        Legacy compatibility shim for backwards compatibility with plugins.
+        Status.json is now handled entirely via filesystem event observers.
+        """
+        warnings.warn(
+            "Dashboard.poll() is deprecated as EDMC now leverages unified Watchdog observers. "
+            "This method is a no-op and will be removed in a future major version.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        # Safely run process once just in case the plugin was using it to force a refresh
+        self.process()
 
 
 # singleton
