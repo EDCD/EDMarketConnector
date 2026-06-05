@@ -258,6 +258,12 @@ class ServerError(BaseCAPIException):
     # LANG: Frontier CAPI didn't respond
     DEFAULT_MSG = tr.tl("Error: Frontier CAPI didn't respond")
 
+    def __init__(self, *args: Any, response: requests.Response | None = None,
+                 exception: Exception | None = None) -> None:
+        super().__init__(*args)
+        self.response = response
+        self.exception = exception
+
 
 class ServerConnectionError(ServerError):
     """Raised for CAPI connection errors."""
@@ -826,7 +832,7 @@ class Session:
                 raise ServerError(tr.tl("Frontier CAPI down for maintenance"))
 
             logger.exception('Frontier CAPI: Misc. Error')
-            raise ServerError('Frontier CAPI: Misc. Error')
+            raise ServerError('Frontier CAPI: Misc. Error', response=response)
 
         def capi_station_queries(  # noqa: CCR001
             capi_host: str, timeout: int = capi_default_requests_timeout
@@ -933,8 +939,15 @@ class Session:
                     capi_data = capi_station_queries(query.capi_host)
 
                 elif query.endpoint == CAPIEndpoint.FLEETCARRIER:
-                    capi_data = capi_single_query(query.capi_host, CAPIEndpoint.FLEETCARRIER,
-                                                  timeout=capi_fleetcarrier_requests_timeout)
+                    try:
+                        capi_data = capi_single_query(query.capi_host, CAPIEndpoint.FLEETCARRIER,
+                                                      timeout=capi_fleetcarrier_requests_timeout)
+                    except ServerError as e:
+                        # If status is 204, do nothing. Log only.
+                        if e.response is not None and e.response.status_code == 204:
+                            logger.debug(f'Fleet Carrier endpoint returned 204: No Carrier found for {monitor.cmdr}')
+                        else:
+                            raise
 
                 else:
                     capi_data = capi_single_query(query.capi_host, CAPIEndpoint.PROFILE)

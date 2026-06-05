@@ -37,65 +37,88 @@ class TestDashboard:
         with patch("sys.platform", "win32"), patch(
             "dashboard.Observer"
         ) as mock_obs_cls, patch("dashboard.config") as mock_config:
+            mock_config.shutting_down = False
             mock_config.get_str.return_value = str(temp_journal_dir)
             db = dashboard.Dashboard()
-
             success = db.start(mock_root, started=0)
 
-            assert success is True
-            assert db.observer is not None
-            mock_obs_cls.return_value.start.assert_called_once()
-            # Ensure a poll is scheduled to catch pre-existing data
-            mock_root.after.assert_called()
+            try:
+                assert success is True
+                assert db.observer is not None
+                mock_obs_cls.return_value.start.assert_called_once()
+                assert db.status["event"] == "Status"
+                mock_root.event_generate.assert_called_with(
+                    "<<DashboardEvent>>", when="tail"
+                )
+            finally:
+                db.stop()
 
     def test_start_logic_linux_polling(self, mock_root, temp_journal_dir):
         """Verify polling behavior on Linux/non-Windows platforms."""
-        with patch("sys.platform", "linux"), patch("dashboard.config") as mock_config:
+        with patch("sys.platform", "linux"), patch(
+            "dashboard.PollingObserver"
+        ) as mock_poll_obs_cls, patch("dashboard.config") as mock_config:
+            mock_config.shutting_down = False
             mock_config.get_str.return_value = str(temp_journal_dir)
             db = dashboard.Dashboard()
 
             success = db.start(mock_root, started=0)
 
-            assert success is True
-            assert db.observer is None  # Should be None on Linux
-            # Ensure the polling loop is started
-            mock_root.after.assert_called()
+            try:
+                assert success is True
+                assert db.observer is not None
+                mock_poll_obs_cls.return_value.start.assert_called_once()
+                assert db.status["event"] == "Status"
+            finally:
+                db.stop()
 
     def test_process_valid_json(self, mock_root, temp_journal_dir):
         """Verify Status.json content is parsed and triggers a UI event."""
-        db = dashboard.Dashboard()
-        db.currentdir = str(temp_journal_dir)
-        db.root = mock_root
-        db.session_start = 0  # Ensure timestamp check passes
+        with patch("dashboard.config") as mock_config:
+            mock_config.shutting_down = False
+            db = dashboard.Dashboard()
+            db.currentdir = temp_journal_dir
+            db.root = mock_root
+            db.session_start = 0
 
-        db.process()
+            db.process()
 
-        assert db.status["event"] == "Status"
-        mock_root.event_generate.assert_called_with("<<DashboardEvent>>", when="tail")
+            assert db.status["event"] == "Status"
+            mock_root.event_generate.assert_called_with(
+                "<<DashboardEvent>>", when="tail"
+            )
 
     def test_process_stale_data_filter(self, mock_root, temp_journal_dir):
         """Verify that status updates from previous sessions are ignored."""
-        db = dashboard.Dashboard()
-        db.currentdir = str(temp_journal_dir)
-        db.root = mock_root
+        with patch("dashboard.config") as mock_config:
+            mock_config.shutting_down = False
+            db = dashboard.Dashboard()
+            db.currentdir = temp_journal_dir
+            db.root = mock_root
 
-        # Set session start to a future date relative to the file timestamp
-        db.session_start = 2000000000
+            # Set session start to a future date relative to the file timestamp
+            db.session_start = 2000000000
 
-        db.process()
+            db.process()
 
-        # Status should remain empty because file timestamp < session_start
-        assert db.status == {}
-        mock_root.event_generate.assert_not_called()
+            # Status should remain empty because file timestamp < session_start
+            assert db.status == {}
+            mock_root.event_generate.assert_not_called()
 
-    def test_poll_recursion(self, mock_root):
-        """Verify that poll schedules itself for the next interval."""
-        db = dashboard.Dashboard()
-        db.root = mock_root
-        db.currentdir = "/fake/dir"
+    def test_process_midpoint_flush_resilience(self, mock_root, temp_journal_dir):
+        """Verify resilience against json.JSONDecodeError when catching partial writes."""
+        with patch("dashboard.config") as mock_config:
+            mock_config.shutting_down = False
+            db = dashboard.Dashboard()
+            db.currentdir = temp_journal_dir
+            db.root = mock_root
+            db.session_start = 0
+            status_file = temp_journal_dir / "Status.json"
+            status_file.write_text(
+                '{ "timestamp": "2026-01-25T12:00:00Z", truncated_json...'
+            )
 
-        with patch.object(db, "process"):
-            db.poll(first_time=False)
+            db.process()
 
-            # Should call after() to schedule the next poll in 1000ms
-            mock_root.after.assert_called_with(1000, db.poll)
+            assert db.status == {}
+            mock_root.event_generate.assert_not_called()
