@@ -13,6 +13,7 @@ from tkinter import ttk
 from itertools import count
 from typing import Any
 from collections.abc import Callable
+from functools import partial
 import plugin_browser
 import myNotebook as nb  # noqa: N813
 import plug
@@ -979,11 +980,8 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
 
                 label.grid(column=0, columnspan=2, padx=self.LISTX, pady=self.PADY, sticky=tk.W, row=curr_row)
 
-                btn = ttk.Button(
-                    plugins_frame,
-                    text=tr.tl("Disable"),  # LANG: Disable an Enabled Plugin
-                    command=lambda plugin=plugin: self.disable_plugin(plugin)  # type: ignore
-                )
+                btn = ttk.Button(plugins_frame, text=tr.tl("Disable"))  # LANG: Disable an Enabled Plugin
+                btn.configure(command=partial(self.disable_plugin, plugin, btn))
                 btn.grid(column=3, padx=self.LISTX, pady=self.PADY, sticky=tk.W, row=curr_row)
 
         ############################################################
@@ -1032,10 +1030,9 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
                 )
 
                 btn = ttk.Button(
-                    plugins_frame,
-                    text=tr.tl("Enable"),  # LANG: Enable a Disabled Plugin
-                    command=lambda plugin=plugin: self.enable_plugin(plugin)  # type: ignore
+                    plugins_frame, text=tr.tl("Enable"),  # LANG: Enable a Disabled Plugin
                 )
+                btn.configure(command=partial(self.enable_plugin, plugin, btn))
                 btn.grid(column=3, padx=self.LISTX, pady=self.PADY, sticky=tk.W, row=curr_row)
 
         ############################################################
@@ -1059,15 +1056,23 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
         # LANG: Label on Settings > Plugins tab
         notebook.add(plugins_frame, text=tr.tl('Plugins'))		# Tab heading in settings
 
-    def disable_plugin(self, plugin):
+    def disable_plugin(self, plugin, button_widget=None):
         """Disable an existing plugin and restart."""
+        if button_widget:
+            button_widget['state'] = tk.DISABLED
+            self.update_idletasks()
+
         logger.debug(f"Calling plugin_stop() for {plugin.name}")
         if plugin._get_func('plugin_stop'):  # Try to stop cleanly. We're going regardless...
-            plugin.module.plugin_stop()
-        # LANG: Text of Notification Popup for EDMC Restart
+            try:
+                plugin.module.plugin_stop()
+            except Exception as e:
+                logger.error(f"Plugin {plugin.name} failed to stop cleanly: {e}")
+
         restart_msg = tr.tl(  # LANG: Disabling a Plugin
             r"Disabling plugin {PLUGIN}. This will cause a restart. Click OK to continue..."
         ).format(PLUGIN=plugin.name)
+
         restart_box = tk.messagebox.Message(
             title=tr.tl('Restart Required'),  # LANG: Title of Notification Popup for EDMC Restart
             message=restart_msg,
@@ -1075,20 +1080,39 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
         )
         restart_box.show()
         time.sleep(2)  # Give plugin stop time to work.
-        plug.PLUGINS.remove(plugin)  # Remove PLugin from active list
+
         try:
             folder = Path(config.plugin_dir_path / plugin.folder)
             new_name = f"{folder}.disabled"
-            folder.rename(new_name)
-            logger.info(f"Disabled {plugin.name}.")
+
+            if not folder.exists() and Path(new_name).exists():
+                logger.warning(f"Plugin {plugin.name} appears to already be disabled on disk.")
+            else:
+                folder.rename(new_name)
+                logger.info(f"Disabled {plugin.name}.")
+
+            if plugin in plug.PLUGINS:
+                plug.PLUGINS.remove(plugin)  # Remove PLugin from active list
+
         except FileExistsError:
-            logger.warning("Unable to disable the plugin!")
+            logger.warning(f"Unable to disable the plugin! Target directory {new_name} already exists.")
             return
+        except PermissionError:
+            logger.error(f"Permission denied when renaming {plugin.folder}. A file lock may be active.")
+            return
+        except Exception as e:
+            logger.error(f"Unexpected error while disabling {plugin.name}: {e}")
+            return
+
         self.req_restart = True
         self.apply()
 
-    def enable_plugin(self, plugin):
+    def enable_plugin(self, plugin, button_widget=None):
         """Enable an existing plugin and restart."""
+        if button_widget:
+            button_widget['state'] = tk.DISABLED
+            self.update_idletasks()
+
         logger.debug(f"Attempting to enable {plugin.name}")
         localfolder = plugin.folder + ".disabled"
         folder = Path(config.plugin_dir_path) / localfolder
@@ -1102,6 +1126,12 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
         try:
             folder.rename(new_folder)
             logger.info(f"Enabled {plugin.name}.")
+        except FileNotFoundError:
+            logger.warning(f"Unable to enable the plugin! Source directory {folder} was not found.")
+            return
+        except PermissionError:
+            logger.error(f"Permission denied when enabling {plugin.name}. A file lock may be active.")
+            return
         except Exception as e:
             logger.error(f"Failed to enable plugin {plugin.name}: {e}")
             return
