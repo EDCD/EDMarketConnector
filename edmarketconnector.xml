@@ -6,7 +6,20 @@
       <description>Most recent changes with links to updates.</description>
       <item>
          <title>Release 6.1.2</title>
-         <description><![CDATA[<style>body { font-family:"Segoe UI","Tahoma"; font-size: 75%; } h2 { font-family:"Segoe UI","Tahoma"; font-size: 105%; }</style>
+         <description><![CDATA[<style>
+            body { 
+               font-family: "Segoe UI", "Tahoma", sans-serif; 
+               font-size: 75%; 
+               background-color: #ffffff !important;
+               color: #000000 !important;
+               margin: 8px;
+            } 
+            h2 { 
+               font-family: "Segoe UI", "Tahoma", sans-serif; 
+               font-size: 105%; 
+               color: #000000 !important;
+            }
+         </style>
 <p>We now test against, and package with, Python 3.13.</p>
 <h2>Release 6.1.2</h2>
 <p>This release includes refinements on the patches for 6.1.1, and a series of new tests for development.</p>
