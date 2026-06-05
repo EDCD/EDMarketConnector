@@ -11,54 +11,44 @@ import json
 import sys
 import time
 import tkinter as tk
-from calendar import timegm
-from os.path import expanduser
+from datetime import datetime
 from pathlib import Path
-from typing import Any, cast
-from watchdog.observers.api import BaseObserver
+from typing import Any
+from watchdog.events import FileSystemEventHandler
+from watchdog.observers import Observer
+from watchdog.observers.polling import PollingObserver
 from config import config
 from EDMCLogging import get_main_logger
 
 logger = get_main_logger()
 
-if sys.platform == 'win32':
-    from watchdog.events import FileSystemEventHandler
-    from watchdog.observers import Observer
-else:
-    # Linux's inotify doesn't work over CIFS or NFS, so poll
-    class FileSystemEventHandler:  # type: ignore
-        """Dummy class to represent a file system event handler on platforms other than Windows."""
-
 
 class Dashboard(FileSystemEventHandler):
-    """Status.json handler."""
-
-    _POLL = 1  # Fallback polling interval
+    """Status.json handler leveraging unified Watchdog observers."""
 
     def __init__(self) -> None:
-        FileSystemEventHandler.__init__(self)  # futureproofing - not need for current version of watchdog
+        super().__init__()
         self.session_start: int = int(time.time())
         self.root: tk.Tk = None  # type: ignore
-        self.currentdir: str = None                 # type: ignore # The actual logdir that we're monitoring
-        self.observer: Observer | None = None  # type: ignore
-        self.observed = None                   # a watchdog ObservedWatch, or None if polling
-        self.status: dict[str, Any] = {}       # Current status for communicating status back to main thread
+        self.currentdir: Path | None = None  # The actual logdir that we're monitoring
+        self.observer: Observer | PollingObserver | None = None  # type: ignore
+        self.status: dict[str, Any] = {}  # Current status for communicating back to main thread
 
     def start(self, root: tk.Tk, started: int) -> bool:
         """
         Start monitoring of Journal directory.
 
         :param root: tkinter parent window.
-        :param started: unix epoch timestamp of LoadGame event.  Ref: monitor.started.
+        :param started: unix epoch timestamp of LoadGame event. Ref: monitor.started.
         :return: Successful start.
         """
         logger.debug('Starting...')
         self.root = root
         self.session_start = started
 
-        logdir = expanduser(config.get_str('journaldir', default=config.default_journal_dir))
-        logdir = logdir or config.default_journal_dir
-        if not Path.is_dir(Path(logdir)):
+        logdir_str = config.get_str('journaldir', default=config.default_journal_dir)
+        logdir = Path(logdir_str).expanduser() if logdir_str else Path(config.default_journal_dir).expanduser()
+        if not logdir.is_dir():
             logger.info(f"No logdir, or it isn't a directory: {logdir=}")
             self.stop()
             return False
@@ -70,34 +60,26 @@ class Dashboard(FileSystemEventHandler):
         self.currentdir = logdir
 
         # Set up a watchdog observer.
-        # File system events are unreliable/non-existent over network drives on Linux.
-        # We can't easily tell whether a path points to a network drive, so assume
-        # any non-standard logdir might be on a network drive and poll instead.
-        if sys.platform == 'win32' and not self.observer:
+        # Native file system events are unreliable over network drives (CIFS/NFS).
+        # We use standard native Observer on Windows, and PollingObserver everywhere else
+        # to ensure seamless cross-platform compatibility without manual tkinter loops.
+        if not self.observer:
             logger.debug('Setting up observer...')
-            self.observer = Observer()
+            if sys.platform == 'win32':
+                self.observer = Observer()
+            else:
+                self.observer = PollingObserver(timeout=1.0)
+
             self.observer.daemon = True
+            self.observer.schedule(self, path=str(self.currentdir), recursive=False)
             self.observer.start()
             logger.debug('Done')
 
-        elif (sys.platform != 'win32') and self.observer:
-            logger.debug('Using polling, stopping observer...')
-            self.observer.stop()
-            self.observer = None  # type: ignore
-            logger.debug('Done')
+        logger.info(f'{"Monitoring" if sys.platform == "win32" else "Polling"} Dashboard "{self.currentdir}"')
 
-        if not self.observed and sys.platform == 'win32':
-            logger.debug('Starting observer...')
-            self.observed = cast(BaseObserver, self.observer).schedule(self, self.currentdir)  # type: ignore
-            logger.debug('Done')
-
-        logger.info(f'{(sys.platform != "win32") and "Polling" or "Monitoring"} Dashboard "{self.currentdir}"')
-
-        # Even if we're not intending to poll, poll at least once to process pre-existing
-        # data and to check whether the watchdog thread has crashed due to events not
-        # being supported on this filesystem.
-        logger.debug('Polling once to process pre-existing data, and check whether watchdog thread crashed...')
-        self.root.after(int(self._POLL * 1000/2), self.poll, True)
+        # Process the initial file state immediately to catch pre-existing data
+        logger.debug('Processing initial state...')
+        self.process()
         logger.debug('Done.')
 
         return True
@@ -105,13 +87,16 @@ class Dashboard(FileSystemEventHandler):
     def stop(self) -> None:
         """Stop monitoring dashboard."""
         logger.debug('Stopping monitoring Dashboard')
-        self.currentdir = None  # type: ignore
+        self.currentdir = None
 
-        if self.observed:
-            logger.debug('Was observed')
-            self.observed = None
-            logger.debug('Unscheduling all observer')
-            self.observer.unschedule_all()
+        if self.observer:
+            logger.debug('Stopping observer thread...')
+            try:
+                self.observer.stop()
+                self.observer.join(timeout=2.0)
+            except Exception:
+                logger.exception('Error tearing down observer')
+            self.observer = None
             logger.debug('Done.')
 
         self.status = {}
@@ -121,74 +106,56 @@ class Dashboard(FileSystemEventHandler):
         """Close down dashboard."""
         logger.debug('Calling self.stop()')
         self.stop()
-
-        if self.observer:
-            logger.debug('Calling self.observer.stop()')
-            self.observer.stop()  # type: ignore
-            logger.debug('Done')
-
-        if self.observer:
-            logger.debug('Joining self.observer...')
-            self.observer.join()  # type: ignore
-            logger.debug('Done')
-            self.observer = None  # type: ignore
-
         logger.debug('Done.')
-
-    def poll(self, first_time: bool = False) -> None:
-        """
-        Poll Status.json via calling self.process() once a second.
-
-        :param first_time: True if first call of this.
-        """
-        if not self.currentdir:
-            # Stopped
-            self.status = {}
-
-        else:
-            self.process()
-
-            if first_time:
-                emitter = None
-                # Watchdog thread
-                if self.observed:
-                    emitter = self.observer._emitter_for_watch[self.observed]  # Note: Uses undocumented attribute
-
-                if emitter and emitter.is_alive():  # type: ignore
-                    return  # Watchdog thread still running - stop polling
-
-            self.root.after(self._POLL * 1000, self.poll)  # keep polling
 
     def on_modified(self, event) -> None:
         """
-        Watchdog callback - FileModifiedEvent on Windows.
+        Watchdog callback - FileModifiedEvent.
 
         :param event: Watchdog event.
         """
+        if event.is_directory:
+            self.process()
+            return
+
         modpath = Path(event.src_path)
-        if event.is_directory or (modpath.is_file() and modpath.stat().st_size):
-            # Can get on_modified events when the file is emptied
-            self.process(event.src_path if not event.is_directory else None)
+        if modpath.name == 'Status.json' and modpath.stat().st_size > 0:
+            self.process()
 
     def process(self, logfile: str | None = None) -> None:
         """
         Process the contents of current Status.json file.
 
-        Can be called either in watchdog thread or, if polling, in main thread.
+        Safely handles intermittent race conditions from concurrent game writes.
         """
-        if config.shutting_down:
+        if config.shutting_down or not self.currentdir:
+            return
+
+        status_json_path = self.currentdir / 'Status.json'
+        if not status_json_path.is_file():
             return
         try:
-            status_json_path = expanduser(Path(self.currentdir) / 'Status.json')
             with open(status_json_path, 'rb') as h:
                 data = h.read().strip()
-                if data:  # Can be empty if polling while the file is being re-written
-                    entry = json.loads(data)
-                    # Status file is shared between beta and live. Filter out status not in this game session.
-                    entry_timestamp = timegm(time.strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
-                    if entry_timestamp >= self.session_start and self.status != entry:
-                        self.status = entry
+
+            if not data:
+                return  # File is currently empty/being rewritten by the game
+
+            entry = json.loads(data)
+            timestamp_str = entry.get('timestamp', '')
+
+            if timestamp_str:
+                dt = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+                entry_timestamp = int(dt.timestamp())
+
+                # Filter out status changes not relevant to the active game session
+                if entry_timestamp >= self.session_start and self.status != entry:
+                    self.status = entry
+                    if self.root:
                         self.root.event_generate('<<DashboardEvent>>', when="tail")
+
+        except (json.JSONDecodeError, KeyError):
+            logger.debug('Status.json was caught in a partially written state. Skipping frame.')
         except Exception:
             logger.exception('Processing Status.json')
 
