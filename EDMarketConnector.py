@@ -437,6 +437,7 @@ if TYPE_CHECKING:
     # isort: on
 
 
+from concurrent.futures import ThreadPoolExecutor
 import tkinter as tk
 import tkinter.filedialog
 import tkinter.font
@@ -525,6 +526,7 @@ class AppWindow:
     def __init__(self, master: tk.Tk):  # noqa: CCR001 TODO - can possibly factor something out
 
         self.early_journal_events: list[MutableMapping[str, Any]] = []
+        self.journal_bg_executor = ThreadPoolExecutor(max_workers=2, thread_name_prefix="JournalBG")
         query_time = config.get_int('querytime', default=0)
         fleetcarrier_time = config.get_int('fleetcarrierquerytime', default=0)
         self.capi_query_holdoff_time = query_time + companion.capi_query_cooldown
@@ -1528,6 +1530,15 @@ class AppWindow:
             if not config.get_int('hotkey_mute'):
                 hotkeymgr.play_bad()
 
+    def _safe_export_ship_worker(self) -> None:
+        """Background worker handling the file-system heavy ship export to protect the UI thread."""
+        try:
+            monitor.export_ship()
+        except FileNotFoundError as e:
+            logger.error(f"Failed to export ship loadout: Output directory not found. {e}")
+        except Exception as e:
+            logger.error(f"Unexpected error during ship loadout export: {e}", exc_info=True)
+
     def journal_event(self, event: str):  # noqa: C901, CCR001 # Currently not easily broken up.
         """
         Handle a Journal event passed through event queue from monitor.py.
@@ -1614,30 +1625,22 @@ class AppWindow:
 
             self.edit_menu.entryconfigure(0, state=monitor.state['SystemName'] and tk.NORMAL or tk.DISABLED)  # Copy
 
-            if entry['event'] in (
-                    'Undocked',
-                    'StartJump',
-                    'SetUserShipName',
-                    'ShipyardBuy',
-                    'ShipyardSell',
-                    'ShipyardSwap',
-                    'ModuleBuy',
-                    'ModuleSell',
-                    'MaterialCollected',
-                    'MaterialDiscarded',
-                    'ScientificResearch',
-                    'EngineerCraft',
-                    'Synthesis',
-                    'JoinACrew'):
-                self.status['text'] = ''  # Periodically clear any old error
+            # Extracted string matching statement using modern pattern evaluation rules
+            match entry.get('event'):
+                case ('Undocked' | 'StartJump' | 'SetUserShipName' | 'ShipyardBuy' |
+                      'ShipyardSell' | 'ShipyardSwap' | 'ModuleBuy' | 'ModuleSell' |
+                      'MaterialCollected' | 'MaterialDiscarded' | 'ScientificResearch' |
+                      'EngineerCraft' | 'Synthesis' | 'JoinACrew'):
+                    self.status['text'] = ''  # Periodically clear any old error
 
             self.w.update_idletasks()
 
-            # Companion login
-            if entry['event'] in (None, 'StartUp', 'NewCommander', 'LoadGame') and monitor.cmdr:
-                if not config.get_list('cmdrs') or monitor.cmdr not in config.get_list('cmdrs'):
-                    config.set('cmdrs', config.get_list('cmdrs', default=[]) + [monitor.cmdr])
-                self.login()
+            match entry.get('event'):
+                # Companion login
+                case (None | 'StartUp' | 'NewCommander' | 'LoadGame') if monitor.cmdr:
+                    if not config.get_list('cmdrs') or monitor.cmdr not in config.get_list('cmdrs'):
+                        config.set('cmdrs', config.get_list('cmdrs', default=[]) + [monitor.cmdr])
+                    self.login()
 
             if monitor.cmdr and monitor.mode == 'CQC' and entry['event']:
                 err = plug.notify_journal_entry_cqc(monitor.cmdr, monitor.is_beta, entry, monitor.state)
@@ -1658,20 +1661,21 @@ class AppWindow:
 
                 return  # Startup
 
-            if entry['event'] in ('StartUp', 'LoadGame') and monitor.started:
-                logger.info('StartUp or LoadGame event')
+            match entry.get('event'):
+                case ('StartUp' | 'LoadGame') if monitor.started:
+                    logger.info('StartUp or LoadGame event')
 
-                # Disable WinSparkle automatic update checks, IFF configured to do so when in-game
-                if config.get_int('disable_autoappupdatecheckingame'):
-                    if self.updater is not None:
-                        config.set("core_updater_disable_in_game", self.updater.get_update_check())
-                        self.updater.set_automatic_updates_check(False)
+                    # Disable WinSparkle automatic update checks, IFF configured to do so when in-game
+                    if config.get_int('disable_autoappupdatecheckingame'):
+                        if self.updater is not None:
+                            config.set("core_updater_disable_in_game", self.updater.get_update_check())
+                            self.updater.set_automatic_updates_check(False)
 
-                    logger.info('Monitor: Disable WinSparkle automatic update checks')
+                        logger.info('Monitor: Disable WinSparkle automatic update checks')
 
-                # Can't start dashboard monitoring
-                if not dashboard.start(self.w, monitor.started):
-                    logger.info("Can't start Status monitoring")
+                    # Can't start dashboard monitoring
+                    if not dashboard.start(self.w, monitor.started):
+                        logger.info("Can't start Status monitoring")
 
             # monitor.cmdr should always be set if monitor.mode is set (and monitor.mode must be set
             # if we reach this point in the function), but we check monitor.cmdr here so the mypy
@@ -1692,22 +1696,25 @@ class AppWindow:
                     self.handle_plugin_event_error(err)
                 self.early_journal_events.clear()
 
-            # Export loadout
-            if entry['event'] == 'Loadout' and not monitor.state['Captain'] \
-                    and config.get_int('output') & config.OUT_SHIP:
-                monitor.export_ship()
+            match entry.get('event'):
+                # Export loadout
+                case 'Loadout' if not monitor.state['Captain'] and (config.get_int('output') & config.OUT_SHIP):
+                    # Safely offload to background ThreadPool to shield Tkinter from disk delays
+                    self.journal_bg_executor.submit(self._safe_export_ship_worker)
 
             if monitor.cmdr:
-                err = plug.notify_journal_entry(
-                    monitor.cmdr,
-                    monitor.is_beta,
-                    monitor.state['SystemName'],
-                    monitor.state['StationName'],
-                    entry,
-                    monitor.state
-                )
-
-                self.handle_plugin_event_error(err)
+                try:
+                    err = plug.notify_journal_entry(
+                        monitor.cmdr,
+                        monitor.is_beta,
+                        monitor.state['SystemName'],
+                        monitor.state['StationName'],
+                        entry,
+                        monitor.state
+                    )
+                    self.handle_plugin_event_error(err)
+                except Exception as e:
+                    logger.error(f"Error notifying plugins of journal entry: {e}", exc_info=True)
 
             auto_update = False
             # Only if auth callback is not pending
@@ -1715,21 +1722,22 @@ class AppWindow:
                 # Only if configured to do so
                 if (not config.get_int('output') & config.OUT_MKT_MANUAL
                         and config.get_int('output') & config.OUT_STATION_ANY):
-                    if entry['event'] in ('StartUp', 'Location', 'Docked') and monitor.state['StationName']:
-                        # TODO: Can you log out in a docked Taxi and then back in to
-                        #       the taxi, so 'Location' should be covered here too ?
-                        if entry['event'] == 'Docked' and entry.get('Taxi'):
-                            # In Odyssey there's a 'Docked' event for an Apex taxi,
-                            # but the CAPI data isn't updated until you Disembark.
-                            auto_update = False
 
-                        else:
+                    match entry.get('event'):
+                        case ('StartUp' | 'Location' | 'Docked') if monitor.state['StationName']:
+                            # TODO: Can you log out in a docked Taxi and then back in to
+                            #       the taxi, so 'Location' should be covered here too ?
+                            if entry.get('event') == 'Docked' and entry.get('Taxi'):
+                                # In Odyssey there's a 'Docked' event for an Apex taxi,
+                                # but the CAPI data isn't updated until you Disembark.
+                                auto_update = False
+                            else:
+                                auto_update = True
+
+                        # In Odyssey if you are in a Taxi the `Docked` event for it is before
+                        # the CAPI data is updated, but CAPI *is* updated after you `Disembark`.
+                        case 'Disembark' if entry.get('Taxi') and entry.get('OnStation'):
                             auto_update = True
-
-                    # In Odyssey if you are in a Taxi the `Docked` event for it is before
-                    # the CAPI data is updated, but CAPI *is* updated after you `Disembark`.
-                    elif entry['event'] == 'Disembark' and entry.get('Taxi') and entry.get('OnStation'):
-                        auto_update = True
 
             should_return: bool
             new_data: dict[str, Any]
@@ -1739,19 +1747,20 @@ class AppWindow:
                 if not should_return:
                     self.w.after(int(SERVER_RETRY * 1000), self.capi_request_data)
 
-            if entry['event'] in ('CarrierBuy', 'StartUp', 'CarrierLocation', 'CarrierStats',
-                                  'CargoTransfer', 'MarketBuy') and config.get_bool('capi_fleetcarrier'):
-                should_return, new_data = killswitch.check_killswitch('capi.request.fleetcarrier', {})
-                if not should_return:
-                    self.w.after(int(SERVER_RETRY * 1000), self.capi_request_fleetcarrier_data)
+            match entry.get('event'):
+                case ('CarrierBuy' | 'StartUp' | 'CarrierLocation' | 'CarrierStats' |
+                      'CargoTransfer' | 'MarketBuy') if config.get_bool('capi_fleetcarrier'):
+                    should_return, new_data = killswitch.check_killswitch('capi.request.fleetcarrier', {})
+                    if not should_return:
+                        self.w.after(int(SERVER_RETRY * 1000), self.capi_request_fleetcarrier_data)
 
-            if entry['event'] == 'ShutDown':
-                # Enable WinSparkle automatic update checks
-                # NB: Do this blindly, in case option got changed whilst in-game
-                if self.updater is not None:
-                    self.updater.set_automatic_updates_check(True)
+                case 'ShutDown':
+                    # Enable WinSparkle automatic update checks
+                    # NB: Do this blindly, in case option got changed whilst in-game
+                    if self.updater is not None:
+                        self.updater.set_automatic_updates_check(True)
 
-                logger.info('Monitor: Enable WinSparkle automatic update checks')
+                    logger.info('Monitor: Enable WinSparkle automatic update checks')
 
     def auth(self, event=None) -> None:
         """
@@ -2068,6 +2077,9 @@ class AppWindow:
         # Now anything else.
         logger.info('Closing config...')
         config.close()
+
+        logger.info('Shutting down background executor')
+        self.journal_bg_executor.shutdown(wait=True)
 
         logger.info('Destroying app window...')
         self.w.destroy()
