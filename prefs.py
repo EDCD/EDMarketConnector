@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import logging
 import time
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -374,13 +375,17 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
         self.out_auto_button.grid(columnspan=2, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=next(row))
 
         self.outdir = tk.StringVar()
-        self.outdir.set(str(config.get_str('outdir')))
+        outdir_saved = str(config.get_str('outdir') or '')
+        self.outdir.set(self.resolve_path_str(outdir_saved))
+        self.attach_path_resolver(self.outdir)
+
         # LANG: Settings > Output - Label for "where files are located"
-        self.outdir_label = nb.Label(output_frame, text=tr.tl('File location')+':')  # Section heading in settings
+        self.outdir_label = nb.Label(output_frame, text=tr.tl('File location') + ':')  # Section heading in settings
         # Type ignored due to incorrect type annotation. a 2 tuple does padding for each side
         self.outdir_label.grid(padx=self.PADX, pady=self.PADY, sticky=tk.W, row=next(row))  # type: ignore
 
-        self.outdir_entry = ttk.Entry(output_frame, takefocus=False)
+        # Linked to self.outdir via textvariable and set takefocus=True to allow direct typing
+        self.outdir_entry = ttk.Entry(output_frame, textvariable=self.outdir, takefocus=True)
         self.outdir_entry.grid(columnspan=2, padx=self.PADX, pady=self.BOXY, sticky=tk.EW, row=next(row))
 
         text = tr.tl('Browse...')  # LANG: NOT-macOS Settings - files location selection button
@@ -415,14 +420,17 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
         if logdir is None or logdir == '':
             logdir = default
 
-        self.logdir.set(logdir)
-        self.logdir_entry = ttk.Entry(config_frame, takefocus=False)
+        self.logdir.set(self.resolve_path_str(logdir))
+        self.attach_path_resolver(self.logdir)
+
+        # takefocus=True allows for typing
+        self.logdir_entry = ttk.Entry(config_frame, textvariable=self.logdir, takefocus=True)
 
         # Location of the Journal files
         nb.Label(
             config_frame,
             # LANG: Settings > Configuration - Label for Journal files location
-            text=tr.tl('E:D journal file location')+':'
+            text=tr.tl('E:D journal file location') + ':'
         ).grid(columnspan=4, padx=self.PADX, pady=self.PADY, sticky=tk.W, row=next(row))
 
         self.logdir_entry.grid(columnspan=4, padx=self.PADX, pady=self.BOXY, sticky=tk.EW, row=next(row))
@@ -1160,9 +1168,6 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
 
     def outvarchanged(self, event: tk.Event | None = None) -> None:
         """Handle Output tab variable changes."""
-        self.displaypath(self.outdir, self.outdir_entry)
-        self.displaypath(self.logdir, self.logdir_entry)
-
         self.out_label['state'] = tk.NORMAL
         self.out_csv_button['state'] = tk.NORMAL
         self.out_td_button['state'] = tk.NORMAL
@@ -1412,3 +1417,43 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
 
         self.parent.wm_attributes('-topmost', config.get_bool('always_ontop'))
         self.destroy()
+
+    def attach_path_resolver(self, string_var: tk.StringVar) -> None:
+        """Establish Path resolution for Tkinter StringVars.
+
+        Args:
+            string_var (tk.StringVar): The Tkinter string variable to monitor and resolve.
+        """
+        trace_id = [""]
+
+        def on_path_change(*args: Any) -> None:
+            """Internal trace callback."""
+            if trace_id[0]:
+                string_var.trace_remove("write", trace_id[0])
+            current_val: str = string_var.get()
+            resolved_val: str = self.resolve_path_str(current_val)
+            if current_val != resolved_val:
+                string_var.set(resolved_val)
+            trace_id[0] = string_var.trace_add("write", on_path_change)
+
+        trace_id[0] = string_var.trace_add("write", on_path_change)
+
+    @staticmethod
+    def resolve_path_str(path_str: str) -> str:
+        """Expand ENV vars and Linux shortcuts (~) to abs paths.
+
+        Args:
+            path_str (str): The input by the user or configuration file.
+
+        Returns:
+            str: A resolved filesystem path.
+        """
+        if not path_str:
+            return ''
+        try:
+            if '%' in path_str or '$' in path_str:
+                for key, value in os.environ.items():
+                    path_str = path_str.replace(f'%{key}%', value).replace(f'${key}', value)
+            return str(Path(path_str).expanduser().resolve())
+        except Exception:
+            return path_str
