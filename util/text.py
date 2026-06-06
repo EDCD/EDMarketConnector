@@ -1,5 +1,6 @@
 """
 text.py - Dealing with Text and Bytes.
+
 Copyright (c) EDCD, All Rights Reserved
 Licensed under the GNU General Public License v2 or later.
 See LICENSE file.
@@ -16,6 +17,7 @@ __all__ = ['gzip']
 def gzip(data: str | bytes, max_size: int = 512, encoding='utf-8') -> tuple[bytes, bool]:
     """
     Compress the given data if the max size is greater than specified.
+
     The default was chosen somewhat arbitrarily, see eddn.py for some more careful
     work towards keeping the data almost always compressed
     :param data: The data to compress

@@ -14,7 +14,6 @@ file, copy it over the local one.
 
 import csv
 import json
-import os
 import pathlib
 import sys
 from traceback import print_exc
@@ -33,11 +32,8 @@ def __make_backup(file_name: pathlib.Path, suffix: str = '.bak') -> None:
     :param suffix: The suffix to use for backup files (default '.bak')
     """
     backup_name = file_name.parent / (file_name.name + suffix)
-
-    if pathlib.Path.is_file(backup_name):
-        os.unlink(backup_name)
-
-    os.rename(file_name, backup_name)
+    backup_name.unlink(missing_ok=True)
+    file_name.rename(backup_name)
 
 
 def addcommodities(data) -> None:  # noqa: CCR001

@@ -11,7 +11,7 @@ import locale
 import webbrowser
 import platform
 import sys
-from os import chdir, environ, path
+from os import chdir, environ
 import pathlib
 import logging
 from journal_lock import JournalLock
@@ -19,10 +19,11 @@ from journal_lock import JournalLock
 if getattr(sys, "frozen", False):
     # Under py2exe sys.path[0] is the executable name
     if sys.platform == "win32":
-        chdir(path.dirname(sys.path[0]))
+        exe_dir = pathlib.Path(sys.path[0]).parent
+        chdir(exe_dir)
         # Allow executable to be invoked from any cwd
-        environ["TCL_LIBRARY"] = path.join(path.dirname(sys.path[0]), "lib", "tcl")
-        environ["TK_LIBRARY"] = path.join(path.dirname(sys.path[0]), "lib", "tk")
+        environ["TCL_LIBRARY"] = str(exe_dir / "lib" / "tcl")
+        environ["TK_LIBRARY"] = str(exe_dir / "lib" / "tk")
 
 else:
     # We still want to *try* to have CWD be where the main script is, even if
@@ -115,12 +116,12 @@ def main(active_config: config.Config) -> None:
     root.withdraw()  # Hide the window initially to calculate the dimensions
     try:
         icon_image = tk.PhotoImage(
-            file=path.join(active_config.respath_path, "io.edcd.EDMarketConnector.png")
+            file=pathlib.Path(active_config.respath_path) / "io.edcd.EDMarketConnector.png"
         )
 
         root.iconphoto(True, icon_image)
     except tk.TclError:
-        root.iconbitmap(path.join(active_config.respath_path, "EDMarketConnector.ico"))
+        root.iconbitmap(pathlib.Path(active_config.respath_path) / "EDMarketConnector.ico")
 
     sys_report = get_sys_report(active_config)
 

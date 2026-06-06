@@ -6,8 +6,8 @@ Licensed under the GNU General Public License v2 or later.
 See LICENSE file.
 """
 
+from collections.abc import Sequence
 import datetime
-import os
 import shutil
 import sys
 import pathlib
@@ -73,9 +73,9 @@ def system_check(dist_dir: pathlib.Path) -> str:
 
 def generate_data_files(
     app_name: str, gitversion_file: str, plugins: list[str]
-) -> list[tuple[object, object]]:
+) -> Sequence[tuple[object, object]]:
     """Create the required datafiles to build."""
-    l10n_dir = "L10n"
+    l10n_dir = pathlib.Path("L10n")
     fdevids_dir = pathlib.Path("FDevIDs")
     license_dir = pathlib.Path("docs/Licenses")
     data_files = [
@@ -97,26 +97,22 @@ def generate_data_files(
             ],
         ),
         (
-            l10n_dir,
-            [
-                pathlib.Path(l10n_dir) / x
-                for x in os.listdir(l10n_dir)
-                if x.endswith(".strings")
-            ],
+            str(l10n_dir),
+            [str(x) for x in l10n_dir.iterdir() if x.suffix == ".strings"],
         ),
         (
-            fdevids_dir,
+            str(fdevids_dir),
             [
-                pathlib.Path(fdevids_dir / "commodity.csv"),
-                pathlib.Path(fdevids_dir / "rare_commodity.csv"),
+                str(fdevids_dir / "commodity.csv"),
+                str(fdevids_dir / "rare_commodity.csv"),
             ],
         ),
         ("plugins", plugins),
     ]
     # Add all files recursively from license directories
-    for root, dirs, files in os.walk(license_dir):
-        file_list = [os.path.join(root, f) for f in files]
-        dest_dir = os.path.join(license_dir, os.path.relpath(root, license_dir))
+    for root, dirs, files in license_dir.walk():
+        file_list = [str(root / f) for f in files]
+        dest_dir = str(license_dir / root.relative_to(license_dir))
         data_files.append((dest_dir, file_list))
 
     return data_files
@@ -131,9 +127,9 @@ def _scan_dist_for_modules(  # noqa: C901, CCR001
     def add(name: str, origin: str):
         modules.setdefault(name, set()).add(origin)
 
-    for root, dirs, files in os.walk(dist_dir):
+    for root, dirs, files in dist_dir.walk():
         for name in files:
-            path = pathlib.Path(root) / name
+            path = root / name  # root is a Path object, name is a string
 
             # Loose files
             if path.suffix in (".py", ".pyc"):
@@ -153,12 +149,12 @@ def _scan_dist_for_modules(  # noqa: C901, CCR001
                 add(top, str(rel))
 
             # Zips
-            if path.suffix == ".zip":
+            elif path.suffix == ".zip":
                 try:
                     with zipfile.ZipFile(path) as z:
                         for info in z.infolist():
                             if info.filename.endswith((".py", ".pyc")):
-                                parts = info.filename.split("/")  # type: ignore
+                                parts = tuple(info.filename.split("/"))
                                 if not parts:
                                     continue
 

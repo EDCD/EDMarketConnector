@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import json
-import os
 import pathlib
 import re
 import time
@@ -199,7 +198,11 @@ def export(data, filename=None) -> None:  # noqa: C901, CCR001
     # Look for last ship of this type
     ship = util_ships.ship_file_name(data['ship'].get('shipName'), data['ship']['name'])
     regexp = re.compile(re.escape(ship) + r'\.\d{4}-\d\d-\d\dT\d\d\.\d\d\.\d\d\.txt')
-    oldfiles = sorted([x for x in os.listdir(config.get_str('outdir')) if regexp.match(x)])
+    out_dir = pathlib.Path(config.get_str('outdir'))
+    oldfiles = sorted(
+        [x for x in out_dir.iterdir() if regexp.match(x.name)],
+        key=lambda p: p.name  # Sort based on the filename string
+    )
     if oldfiles:
         with (pathlib.Path(config.get_str('outdir')) / oldfiles[-1]).open() as h:
             if h.read() == string:

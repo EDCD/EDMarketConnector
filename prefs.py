@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import logging
 import time
-from os.path import join, normpath
 from pathlib import Path
 import subprocess
 import sys
@@ -171,7 +170,7 @@ if sys.platform == 'win32':
         start_idx = len(config_home.split('\\')) if path.lower().startswith(config_home.lower()) else 0
 
         # Split path into components
-        components = normpath(path).split('\\')
+        components = Path(path).parts
         display_components = []
 
         # Process each path component
@@ -1340,10 +1339,8 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
             _val = 'SEMICOLON'
         config.set('mkt_export_type', _val)
 
-        config.set(
-            'outdir',
-            join(config.home_path, self.outdir.get()[2:]) if self.outdir.get().startswith('~') else self.outdir.get()
-        )
+        out_path = Path(self.outdir.get())
+        config.set('outdir', str(out_path.expanduser()))
 
         logdir = self.logdir.get()
         if config.default_journal_dir_path and logdir.lower() == config.default_journal_dir.lower():
@@ -1386,11 +1383,8 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
         config.set('dark_highlight', self.theme_colors[1])
         theme.apply(self.parent)
         if self.plugdir.get() != config.get_str('plugin_dir'):
-            config.set(
-                'plugin_dir',
-                join(config.home_path, self.plugdir.get()[2:]) if self.plugdir.get().startswith(
-                    '~') else self.plugdir.get()
-            )
+            plug_path = Path(self.plugdir.get())
+            config.set('plugin_dir', str(plug_path.expanduser()))
             self.req_restart = True
 
         # Notify
