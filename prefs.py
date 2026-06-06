@@ -1419,15 +1419,17 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
         self.destroy()
 
     def attach_path_resolver(self, string_var: tk.StringVar) -> None:
-        """Establish Path resolution for Tkinter StringVars.
+        """
+        Establish Path resolution for Tkinter StringVars.
 
+        ___
         Args:
             string_var (tk.StringVar): The Tkinter string variable to monitor and resolve.
         """
         trace_id = [""]
 
         def on_path_change(*args: Any) -> None:
-            """Internal trace callback."""
+            """Handle the internal trace callback."""
             if trace_id[0]:
                 string_var.trace_remove("write", trace_id[0])
             current_val: str = string_var.get()
@@ -1440,14 +1442,7 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
 
     @staticmethod
     def resolve_path_str(path_str: str) -> str:
-        """Expand ENV vars and Linux shortcuts (~) to abs paths.
-
-        Args:
-            path_str (str): The input by the user or configuration file.
-
-        Returns:
-            str: A resolved filesystem path.
-        """
+        """Expand ENV vars and Linux shortcuts (~) to abs paths."""
         if not path_str:
             return ''
         try:

@@ -6,7 +6,6 @@ import pathlib
 import re
 import time
 from collections import defaultdict
-from typing import Union
 from update import check_for_datafile_updates
 import outfitting
 import util_ships
@@ -17,7 +16,7 @@ from EDMCLogging import get_main_logger
 
 logger = get_main_logger()
 
-__Module = dict[str, Union[str, list[str]]]  # Have to keep old-style here for compatibility
+__Module = dict[str, str | list[str]]
 
 # Map API ship names to ED Shipyard names
 ship_map = ship_name_map.copy()
