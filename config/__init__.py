@@ -91,7 +91,7 @@ def git_shorthash_from_head() -> str | None:
 
     :return: str | None: None if we couldn't determine the short hash.
     """
-    if IS_FROZEN or not os.path.exists(".git"):
+    if IS_FROZEN or not pathlib.Path(".git").exists():
         return None
 
     try:

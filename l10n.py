@@ -15,7 +15,6 @@ import numbers
 import re
 import sys
 from contextlib import suppress
-from os import listdir, sep
 from typing import TextIO, cast
 from collections.abc import Iterable
 import pathlib
@@ -106,7 +105,7 @@ class Translations:
             return
 
         self.translations = {None: self.contents(cast(str, lang))}
-        for plugin in listdir(config.plugin_dir_path):
+        for plugin in (x.name for x in pathlib.Path(config.plugin_dir_path).iterdir()):
             plugin_path = config.plugin_dir_path / plugin / LOCALISATION_DIR
             if pathlib.Path.is_dir(plugin_path):
                 try:
@@ -162,9 +161,11 @@ class Translations:
         plugin_path: pathlib.Path | None = None
 
         if context:
-            # TODO: There is probably a better way to go about this now.
-            plugin_name = context[len(config.plugin_dir)+1:].split(sep)[0]
-            plugin_path = config.plugin_dir_path / plugin_name / LOCALISATION_DIR
+            context_path = pathlib.Path(context)
+            # .is_relative_to() prevents crashes if context isn't actually in the plugin dir
+            if context_path.is_relative_to(config.plugin_dir_path):
+                plugin_name = context_path.relative_to(config.plugin_dir_path).parts[0]
+                plugin_path = config.plugin_dir_path / plugin_name / LOCALISATION_DIR
 
         if lang:
             contents: dict[str, str] = self.contents(lang=lang, plugin_path=plugin_path)
@@ -192,7 +193,7 @@ class Translations:
         """Return a list of available language codes."""
         path = self.respath()
 
-        available = {x[:-len('.strings')] for x in listdir(path) if x.endswith('.strings')}
+        available = {x.stem for x in pathlib.Path(path).iterdir() if x.suffix == '.strings'}
 
         return available
 

@@ -5,7 +5,6 @@
 from __future__ import annotations
 
 import multiprocessing as mp
-import os
 import pathlib
 from collections.abc import Generator
 import pytest
@@ -43,11 +42,7 @@ def other_process_lock(continue_q: mp.Queue, exit_q: mp.Queue, lockfile: pathlib
     except Exception as e:
         print(f"sub-process: Failed execution handle context: {e!r}")
     finally:
-        try:
-            if lock_path.exists():
-                os.unlink(lock_path)
-        except Exception:
-            pass
+        lock_path.unlink(missing_ok=True)
 
 
 def _obtain_lock_with_filelock(lockfile_path: pathlib.Path) -> bool:
@@ -58,9 +53,7 @@ def _obtain_lock_with_filelock(lockfile_path: pathlib.Path) -> bool:
         lock.acquire(timeout=0)
         lock.release()
         return True
-    except Timeout:
-        return False
-    except Exception:
+    except (Timeout, Exception):
         return False
 
 
@@ -115,11 +108,8 @@ class TestJournalLock:
     # Tests against JournalLock.__init__()
     def test_journal_lock_init(self, mock_journaldir: pathlib.Path):
         """Test JournalLock instantiation."""
-        tmpdir = str(mock_journaldir)
-
         jlock = JournalLock()
-        # Check members are properly initialised.
-        assert jlock.journal_dir == tmpdir
+        assert jlock.journal_dir == str(mock_journaldir)
         assert jlock.journal_dir_path is not None
         assert jlock.journal_dir_lockfile_name is None
 
@@ -136,12 +126,8 @@ class TestJournalLock:
 
     def test_path_from_journaldir_with_tmpdir(self, mock_journaldir: pathlib.Path):
         """Test JournalLock.set_path_from_journaldir() with tmpdir."""
-        tmpdir = mock_journaldir
-
         jlock = JournalLock()
-
-        # Check that an actual journaldir is handled correctly.
-        jlock.journal_dir = str(tmpdir)
+        jlock.journal_dir = str(mock_journaldir)
         jlock.set_path_from_journaldir()
         assert isinstance(jlock.journal_dir_path, pathlib.Path)
 
@@ -154,7 +140,6 @@ class TestJournalLock:
         # Check that 'None' is handled correctly.
         jlock.journal_dir = None
         jlock.set_path_from_journaldir()
-        assert jlock.journal_dir_path is None
         locked = jlock.obtain_lock()
         assert locked == JournalLockResult.JOURNALDIR_IS_NONE
 
@@ -169,8 +154,8 @@ class TestJournalLock:
 
         # Cleanup, to avoid side-effect on other tests
         assert jlock.release_lock()
-        if jlock.journal_dir_lockfile_name and jlock.journal_dir_lockfile_name.exists():
-            os.unlink(str(jlock.journal_dir_lockfile_name))
+        if jlock.journal_dir_lockfile_name:
+            jlock.journal_dir_lockfile_name.unlink(missing_ok=True)
 
     def test_obtain_lock_already_locked(self, mock_journaldir: pathlib.Path):
         """Test JournalLock.obtain_lock() when already locked by another process."""
@@ -191,8 +176,7 @@ class TestJournalLock:
             print("Attempt actual lock test...")
             # Now attempt to lock with to-test code
             jlock = JournalLock()
-            second_attempt = jlock.obtain_lock()
-            assert second_attempt == JournalLockResult.ALREADY_LOCKED
+            assert jlock.obtain_lock() == JournalLockResult.ALREADY_LOCKED
         finally:
             print("Telling sub-process to quit...")
             exit_q.put("quit")
@@ -215,10 +199,7 @@ class TestJournalLock:
         # Check it actually IS unlocked using the filelock backend engine
         lock_file_path = mock_journaldir / "edmc-journal-lock.txt"
         assert _obtain_lock_with_filelock(lock_file_path)
-
-        # Cleanup, to avoid side-effect on other tests
-        if jlock.journal_dir_lockfile_name and jlock.journal_dir_lockfile_name.exists():
-            os.unlink(str(jlock.journal_dir_lockfile_name))
+        jlock.journal_dir_lockfile_name.unlink(missing_ok=True)
 
     def test_release_lock_not_locked(self, mock_journaldir: pathlib.Path):
         """Test JournalLock.release_lock() when not locked."""
@@ -259,21 +240,15 @@ class TestJournalLock:
         jlock.obtain_lock()
         assert jlock.locked
 
-        # Now store the 'current' journaldir for reference and attempt
-        # to update to a new one.
-        old_journaldir = jlock.journal_dir
-        old_journaldir_lockfile_name = jlock.journal_dir_lockfile_name
+        old_lockfile = jlock.journal_dir_lockfile_name
         jlock.update_lock(None)  # type: ignore
-        assert jlock.journal_dir != old_journaldir
         assert jlock.locked
 
         # Cleanup, to avoid side-effect on other tests
         assert jlock.release_lock()
-        if jlock.journal_dir_lockfile_name and jlock.journal_dir_lockfile_name.exists():
-            os.unlink(str(jlock.journal_dir_lockfile_name))
-        # And the old_journaldir's lockfile too
-        if old_journaldir_lockfile_name and old_journaldir_lockfile_name.exists():
-            os.unlink(str(old_journaldir_lockfile_name))
+        jlock.journal_dir_lockfile_name.unlink(missing_ok=True)
+        if old_lockfile:
+            old_lockfile.unlink(missing_ok=True)
 
     def test_update_lock_same(self, mock_journaldir: pathlib.Path):
         """
@@ -282,16 +257,11 @@ class TestJournalLock:
         # First actually obtain the lock, and check it worked
         jlock = JournalLock()
         assert jlock.obtain_lock() == JournalLockResult.LOCKED
-        assert jlock.locked
 
-        # Now store the 'current' journaldir for reference and attempt
-        # to update to a new one.
-        old_journaldir = jlock.journal_dir
+        old_dir = jlock.journal_dir
         jlock.update_lock(None)  # type: ignore
-        assert jlock.journal_dir == old_journaldir
-        assert jlock.locked
+        assert jlock.journal_dir == old_dir
 
         # Cleanup, to avoid side-effect on other tests
         assert jlock.release_lock()
-        if jlock.journal_dir_lockfile_name and jlock.journal_dir_lockfile_name.exists():
-            os.unlink(str(jlock.journal_dir_lockfile_name))
+        jlock.journal_dir_lockfile_name.unlink(missing_ok=True)

@@ -10,7 +10,6 @@ from __future__ import annotations
 import json
 import re
 import time
-from os import listdir
 from pathlib import Path
 import companion
 import util_ships
@@ -43,7 +42,7 @@ def export(data: companion.CAPIData, requested_filename: str | None = None) -> N
     # Look for last ship of this type
     ship = util_ships.ship_file_name(data['ship'].get('shipName'), data['ship']['name'])
     regexp = re.compile(re.escape(ship) + r'\.\d\d\d\d-\d\d-\d\dT\d\d\.\d\d\.\d\d\.txt')
-    oldfiles = sorted([x for x in listdir(config.get_str('outdir')) if regexp.match(x)])
+    oldfiles = sorted([x.name for x in Path(config.get_str('outdir')).iterdir() if regexp.match(x.name)])
     if oldfiles:
         with open(Path(config.get_str('outdir')) / Path(oldfiles[-1])) as h:
             if h.read() == string:

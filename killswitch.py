@@ -12,7 +12,7 @@ import threading
 from copy import deepcopy
 from typing import (
     TYPE_CHECKING, Any, NamedTuple,
-    TypedDict, TypeVar, cast, Union
+    TypedDict, TypeVar, cast
 )
 from collections.abc import Callable, Mapping, MutableMapping, MutableSequence, Sequence
 import requests
@@ -26,7 +26,7 @@ logger = EDMCLogging.get_main_logger()
 OLD_KILLSWITCH_URL = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/killswitches.json'
 DEFAULT_KILLSWITCH_URL = 'https://raw.githubusercontent.com/EDCD/EDMarketConnector/releases/killswitches_v2.json'
 CURRENT_KILLSWITCH_VERSION = 2
-UPDATABLE_DATA = Union[Mapping, Sequence]  # Have to keep old-style
+UPDATABLE_DATA = Mapping | Sequence
 _current_version: semantic_version.Version = config.appversion_nobuild()
 
 T = TypeVar('T', bound=UPDATABLE_DATA)

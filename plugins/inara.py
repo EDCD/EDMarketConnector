@@ -31,7 +31,7 @@ from datetime import datetime, timedelta, timezone
 from operator import itemgetter
 from threading import Lock, Thread
 from tkinter import ttk
-from typing import Any, Deque, NamedTuple, cast, Union
+from typing import Any, Deque, NamedTuple, cast
 from collections.abc import Callable, Mapping, Sequence
 import requests
 import edmc_data
@@ -67,7 +67,7 @@ class Credentials(NamedTuple):
     api_key: str
 
 
-EVENT_DATA = Union[Mapping[str, Any], Sequence[Mapping[str, Any]]]
+EVENT_DATA = Mapping[str, Any] | Sequence[Mapping[str, Any]]
 
 
 @dataclass

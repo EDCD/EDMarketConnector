@@ -30,7 +30,7 @@ from email.utils import parsedate
 from enum import StrEnum
 from pathlib import Path
 from queue import Queue
-from typing import TYPE_CHECKING, Any, TypeVar, Union, Iterator
+from typing import TYPE_CHECKING, Any, TypeVar, Iterator
 from collections.abc import Mapping
 from dataclasses import dataclass
 from requests.adapters import HTTPAdapter
@@ -73,7 +73,7 @@ class CAPIData(UserDict):
 
     def __init__(
         self,
-        data: Union[str, dict[str, Any], 'CAPIData', None] = None,
+        data: "str | dict[str, Any] | 'CAPIData' | None" = None,
         source_host: str | None = None,
         source_endpoint: str | None = None,
         request_cmdr: str | None = None

@@ -20,7 +20,7 @@ import subprocess
 import sys
 import threading
 import webbrowser
-from os import chdir, environ
+from os import environ
 from time import localtime, strftime, time
 from typing import TYPE_CHECKING, Any, Literal, MutableMapping
 from constants import applongname, appname, protocolhandler_redirect
@@ -39,7 +39,7 @@ if getattr(sys, 'frozen', False):
 else:
     # We still want to *try* to have CWD be where the main script is, even if
     # not frozen.
-    chdir(pathlib.Path(__file__).parent)
+    os.chdir(pathlib.Path(__file__).parent)
 
 # config will now cause an appname logger to be set up, so we need the
 # console redirect before this
@@ -412,7 +412,7 @@ if __name__ == '__main__':  # noqa: C901
         sys.stdout.truncate()
     else:
         # Potential Git Repo?
-        if os.path.exists(".git"):
+        if pathlib.Path(".git").exists():
             try:
                 git_branch = subprocess.check_output(
                     ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],

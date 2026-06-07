@@ -11,7 +11,6 @@ import copy
 import importlib.util
 import logging
 import operator
-import os
 import sys
 from dataclasses import dataclass, field
 import tkinter as tk
@@ -204,7 +203,9 @@ def load_plugins(master: tk.Tk) -> None:
 
 def _load_internal_plugins():
     internal = []
-    for name in sorted(os.listdir(config.internal_plugin_dir_path)):
+    plugin_dir = Path(config.internal_plugin_dir_path)
+    for plugin_path in sorted(plugin_dir.iterdir(), key=lambda p: p.name):
+        name = plugin_path.name
         if name.endswith('.py') and name[0] not in ('.', '_'):
             try:
                 plugin_name = name[:-3]

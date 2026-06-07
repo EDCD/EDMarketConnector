@@ -7,11 +7,11 @@ See LICENSE file.
 """
 
 from __future__ import annotations
-import os
 import json
 import sys
 import webbrowser
 import tkinter as tk
+import pathlib
 from tkinter import ttk
 import tkinter.font as tkfont
 from PIL import Image, ImageTk
@@ -545,10 +545,8 @@ class PluginBrowserMixIn:
     def _update_plugin_icon(self, plugin_id: str, plugin: dict) -> None:
         icon_url = plugin.get("pluginIcon")
         icon_key = plugin_id if icon_url else "__fallback__"
-        url = icon_url or os.path.join(
-            os.path.dirname(sys.argv[0]),
-            "io.edcd.EDMarketConnector.png",
-        )
+        script_dir = pathlib.Path(sys.argv[0]).parent
+        url = icon_url or str(script_dir / "io.edcd.EDMarketConnector.png")
         self.__load_plugin_icon(icon_key, url)
 
     def __clear_plugin_details(self) -> None:
@@ -583,13 +581,12 @@ class PluginBrowserMixIn:
 
         try:
             # Open PIL image
-            pil_image = (
-                Image.open(url).convert("RGBA")
-                if os.path.isfile(url)
-                else Image.open(BytesIO(requests.get(url, timeout=5).content)).convert(
-                    "RGBA"
-                )
-            )
+            url_path = pathlib.Path(url)
+            if url_path.is_file():
+                pil_image = Image.open(url_path).convert("RGBA")
+            else:
+                response = requests.get(url, timeout=5)
+                pil_image = Image.open(BytesIO(response.content)).convert("RGBA")
 
             # Resize while maintaining aspect ratio
             pil_image.thumbnail((64, 64), Image.Resampling.LANCZOS)

@@ -7,7 +7,6 @@ See LICENSE file.
 """
 from __future__ import annotations
 
-import os
 import pathlib
 import sys
 import tkinter as tk
@@ -125,10 +124,10 @@ class JournalLock:
             self.locked = False
 
             # Physically remove the lockfile from disk on a clean exit
-            if self.journal_dir_lockfile_name and self.journal_dir_lockfile_name.exists():
+            if self.journal_dir_lockfile_name:
                 try:
-                    os.remove(self.journal_dir_lockfile_name)
-                except Exception:
+                    self.journal_dir_lockfile_name.unlink(missing_ok=True)
+                except OSError:
                     pass  # Prevent crashing if a file hook holds it open briefly during shutdown
 
             return True

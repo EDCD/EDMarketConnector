@@ -184,7 +184,6 @@ class InterceptHandler(logging.Handler):
 
     def emit(self, record: logging.LogRecord) -> None:
         """Intercept standard logging and send to Loguru with context."""
-
         level: str | int
         try:
             level = loguru_logger.level(record.levelname).name
@@ -367,9 +366,11 @@ def get_plugin_logger(plugin_name: str, loglevel: int = _default_loglevel) -> Lo
 class EDMCContextFilter(logging.Filter):
     """
     Legacy compatibility shim.
+
     EDMC now intercepts standard logging globally via Loguru,
     making manual context filtering obsolete.
     """
+
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         warnings.warn(

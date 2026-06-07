@@ -163,6 +163,7 @@ class Dashboard(FileSystemEventHandler):
     def poll(self, first_time: bool = False) -> None:
         """
         Legacy compatibility shim for backwards compatibility with plugins.
+
         Status.json is now handled entirely via filesystem event observers.
         """
         warnings.warn(
