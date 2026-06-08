@@ -5,9 +5,12 @@ Copyright (c) EDCD, All Rights Reserved
 Licensed under the GNU General Public License v2 or later.
 See LICENSE file.
 """
+
 from __future__ import annotations
 
+import csv
 import json
+from typing import Any
 from config import config
 from edmc_data import (
     outfitting_armour_map as armour_map,
@@ -34,10 +37,12 @@ from EDMCLogging import get_main_logger
 logger = get_main_logger()
 
 # Module mass, FSD data etc
-moduledata: dict = {}
+moduledata: dict[str, Any] = {}
 
 
-def lookup(module, ship_map, entitled=False) -> dict | None:  # noqa: C901, CCR001
+def lookup(  # noqa: C901, CCR001
+    module: dict, ship_map: dict, entitled: bool = False
+) -> dict | None:
     """
     Produce a standard dict description of the given module.
 
@@ -58,216 +63,283 @@ def lookup(module, ship_map, entitled=False) -> dict | None:  # noqa: C901, CCR0
         modules_path = config.app_dir_path / "modules.json"
         moduledata.update(json.loads(modules_path.read_text()))
 
-    if not module.get('name'):
+    if not module.get("name"):
         raise ValueError(f"Module with ID {module['id']} is missing a 'name' field")
 
-    name = module['name'].lower().split('_')
-    new = {'id': module['id'], 'symbol': module['name']}
+    raw_name = module["name"]
+    name = raw_name.lower().split("_")
+    new: dict[str, Any] = {"id": module["id"], "symbol": raw_name}
 
     # Armour - e.g. Federation_Dropship_Armour_Grade2
-    if name[-2] == 'armour':
+    if len(name) >= 3 and name[-2] == "armour":
         # Armour is ship-specific, and ship names can have underscores
-        ship_name, armour, armour_grade = module["name"].lower().rsplit("_", 2)[0:3]
+        ship_name, armour, armour_grade = raw_name.lower().rsplit("_", 2)[0:3]
         if ship_name not in ship_map:
             raise ValueError(f"Unknown ship: {ship_name}")
-        new['category'] = 'standard'
+        new["category"] = "standard"
         new["name"] = armour_map[armour_grade]
         new["ship"] = ship_map[ship_name]
-        new['class'] = '1'
-        new['rating'] = 'I'
+        new["class"] = "1"
+        new["rating"] = "I"
 
     # Skip uninteresting stuff - some no longer present in ED 3.1 cAPI data
-    elif (name[0] in (
-                      'bobble',
-                      'decal',
-                      'nameplate',
-                      'paintjob',
-                      'enginecustomisation',
-                      'voicepack',
-                      'weaponcustomisation'
-                     )
-            or name[1].startswith('shipkit')):
+    elif name[0] in (
+        "bobble",
+        "decal",
+        "nameplate",
+        "paintjob",
+        "enginecustomisation",
+        "voicepack",
+        "weaponcustomisation",
+    ) or name[1].startswith("shipkit"):
         return None
 
     # Shouldn't be listing player-specific paid stuff or broker/powerplay-specific modules in outfitting,
     # other than Horizons
-    elif not entitled and module.get('sku') and module['sku'] != 'ELITE_HORIZONS_V_PLANETARY_LANDINGS':
+    elif (
+        not entitled
+        and module.get("sku")
+        and module["sku"] != "ELITE_HORIZONS_V_PLANETARY_LANDINGS"
+    ):
         return None
 
     # Don't report Planetary Approach Suite in outfitting
-    elif not entitled and name[1] == 'planetapproachsuite':
+    elif not entitled and name[1] == "planetapproachsuite":
         return None
 
-    # V2 Shutdown Field Neutralizer - Hpt_AntiUnknownShutdown_Tiny_V2
-    elif name[0] == 'hpt' and name[1] in countermeasure_map and len(name) == 4 and name[3] == 'v2':
-        new['category'] = 'utility'
-        new['name'], new['rating'] = countermeasure_map[name[1]]
-        new['class'] = weaponclass_map[name[-2]]
-
-    # Countermeasures - e.g. Hpt_PlasmaPointDefence_Turret_Tiny
-    elif name[0] == 'hpt' and name[1] in countermeasure_map:
-        new['category'] = 'utility'
-        new['name'], new['rating'] = countermeasure_map[name[1]]
-        new['class'] = weaponclass_map[name[-1]]
-
-    # Utility - e.g. Hpt_CargoScanner_Size0_Class1
-    elif name[0] == 'hpt' and name[1] in utility_map:
-        new['category'] = 'utility'
-        new['name'] = utility_map[name[1]]
-        if not name[2].startswith('size') or not name[3].startswith('class'):
-            raise ValueError(f'{module["id"]}: Unknown class/rating "{name[2]}/{name[3]}"')
-
-        new['class'] = str(name[2][4:])
-        new['rating'] = rating_map[name[3][5:]]
-
-    # Hardpoints - e.g. Hpt_Slugshot_Fixed_Medium
-    elif name[0] == 'hpt':
-        # Hack 'Guardian' and 'Mining' prefixes
-        if len(name) > 3 and name[3] in weaponmount_map:
-            prefix = name.pop(1)
-            name[1] = f'{prefix}_{name[1]}'
-
-        if name[1] not in weapon_map:
-            raise ValueError(f'{module["id"]}: Unknown weapon "{name[0]}"')
-
-        if name[2] not in weaponmount_map:
-            raise ValueError(f'{module["id"]}: Unknown weapon mount "{name[2]}"')
-
-        if name[3] not in weaponclass_map:
-            raise ValueError(f'{module["id"]}: Unknown weapon class "{name[3]}"')
-
-        new['category'] = 'hardpoint'
-        if len(name) > 4:
-            if name[4] in weaponoldvariant_map:  # Old variants e.g. Hpt_PulseLaserBurst_Turret_Large_OC
-                new['name'] = weapon_map[name[1]] + ' ' + weaponoldvariant_map[name[4]]
-                new['rating'] = '?'
-
-            elif '_'.join(name[:4]) not in weaponrating_map:
-                raise ValueError(f'{module["id"]}: Unknown weapon rating "{module["name"]}"')
-
-            else:
-                # PP faction-specific weapons e.g. Hpt_Slugshot_Fixed_Large_Range
-                new['name'] = weapon_map[(name[1], name[4])]
-                new['rating'] = weaponrating_map['_'.join(name[:4])]  # assumes same rating as base weapon
-
-        elif module['name'].lower() not in weaponrating_map:
-            raise ValueError(f'{module["id"]}: Unknown weapon rating "{module["name"]}"')
-
-        else:
-            new['name'] = weapon_map[name[1]]
-            new['rating'] = weaponrating_map[module['name'].lower()]  # no obvious rule - needs lookup table
-
-        new['mount'] = weaponmount_map[name[2]]
-        if name[1] in missiletype_map:
-            # e.g. Hpt_DumbfireMissileRack_Fixed_Small
-            new['guidance'] = missiletype_map[name[1]]
-
-        new['class'] = weaponclass_map[name[3]]
-
-    elif name[0] != 'int':
-        raise ValueError(f'{module["id"]}: Unknown prefix "{name[0]}"')
-
-    # Miscellaneous Class 1
-    # e.g. Int_PlanetApproachSuite, Int_StellarBodyDiscoveryScanner_Advanced, Int_DockingComputer_Standard
-    elif name[1] in misc_internal_map:
-        new['category'] = 'internal'
-        new['name'], new['rating'] = misc_internal_map[name[1]]
-        new['class'] = '1'
-
-    elif len(name) > 2 and (name[1], name[2]) in misc_internal_map:
-        # Reported category is not necessarily helpful. e.g. "Int_DockingComputer_Standard" has category "utility"
-        new['category'] = 'internal'
-        new['name'], new['rating'] = misc_internal_map[(name[1], name[2])]
-        new['class'] = '1'
-
     else:
-        # Standard & Internal
-        if name[1] == 'dronecontrol':  # e.g. Int_DroneControl_Collection_Size1_Class1
-            name.pop(0)
+        # Match pattern routing for utility, countermeasures, and hardpoints
+        match name:
+            # V2 Shutdown Field Neutralizer - Hpt_AntiUnknownShutdown_Tiny_V2
+            case ["hpt", cm_type, _, "v2"] if cm_type in countermeasure_map:
+                new["category"] = "utility"
+                new["name"], new["rating"] = countermeasure_map[cm_type]
+                new["class"] = weaponclass_map[name[-2]]
 
-        elif name[1] == 'multidronecontrol':  # e.g. Int_MultiDroneControl_Rescue_Size3_Class3
-            name.pop(0)
+            # Countermeasures - e.g. Hpt_PlasmaPointDefence_Turret_Tiny
+            case ["hpt", cm_type, *_, size] if cm_type in countermeasure_map:
+                new["category"] = "utility"
+                new["name"], new["rating"] = countermeasure_map[cm_type]
+                new["class"] = weaponclass_map[size]
 
-        elif name[-1] == 'free':  # Starter Sidewinder or Freagle modules - just treat them like vanilla modules
-            name.pop()
+            # Utility - e.g. Hpt_CargoScanner_Size0_Class1
+            case ["hpt", ut_type, size, rating_val] if ut_type in utility_map:
+                if not size.startswith("size") or not rating_val.startswith("class"):
+                    raise ValueError(
+                        f'{module["id"]}: Unknown class/rating "{size}/{rating_val}"'
+                    )
+                new["category"] = "utility"
+                new["name"] = utility_map[ut_type]
+                new["class"] = str(size[4:])
+                new["rating"] = rating_map[rating_val[5:]]
 
-        if name[1] in standard_map:  # e.g. Int_Engine_Size2_Class1, Int_ShieldGenerator_Size8_Class5_Strong
-            new['category'] = 'standard'
-            if name[2] == 'overcharge':
-                new['name'] = standard_map[(name[1], name[2])]
-            else:
-                new['name'] = standard_map[len(name) > 4 and (name[1], name[4]) or name[1]]
+            # Hardpoints - e.g. Hpt_Slugshot_Fixed_Medium
+            case ["hpt", *weapons_info]:
+                # Hack 'Guardian' and 'Mining' prefixes
+                if len(weapons_info) > 2 and weapons_info[2] in weaponmount_map:
+                    weapons_info = [f"{weapons_info[0]}_{weapons_info[1]}"] + weapons_info[2:]
+                    # Re-sync local 'name' slice representation for downline logic dependency compatibility
+                    name = ["hpt", weapons_info[0]] + weapons_info[1:]
 
-        elif name[1] in internal_map:  # e.g. Int_CargoRack_Size8_Class1
-            new['category'] = 'internal'
-            if name[1] == 'passengercabin':
-                new['name'] = cabin_map[name[3][5:]]
+                w_name, w_mount, w_class, *extra = weapons_info
 
-            else:
-                new['name'] = internal_map[len(name) > 4 and (name[1], name[4]) or name[1]]
+                if w_name not in weapon_map:
+                    raise ValueError(f'{module["id"]}: Unknown weapon "hpt"')
 
-        else:
-            raise ValueError(f'{module["id"]}: Unknown module "{name[1]}"')
+                if w_mount not in weaponmount_map:
+                    raise ValueError(
+                        f'{module["id"]}: Unknown weapon mount "{w_mount}"'
+                    )
 
-        if len(name) < 4 and name[1] == 'unkvesselresearch':  # Hack! No size or class.
-            (new['class'], new['rating']) = ('1', 'E')
+                if w_class not in weaponclass_map:
+                    raise ValueError(
+                        f'{module["id"]}: Unknown weapon class "{w_class}"'
+                    )
 
-        elif len(name) < 4 and name[1] == 'resourcesiphon':  # Hack! 128066402 has no size or class.
-            (new['class'], new['rating']) = ('1', 'I')
+                new["category"] = "hardpoint"
 
-        elif len(name) < 4 and name[1] in ('guardianpowerdistributor', 'guardianpowerplant'):  # Hack! No class.
-            (new['class'], new['rating']) = (str(name[2][4:]), 'A')
+                if extra:
+                    variant = extra[0]
+                    # Old variants e.g. Hpt_PulseLaserBurst_Turret_Large_OC
+                    if variant in weaponoldvariant_map:
+                        new["name"] = (weapon_map[w_name] + " " + weaponoldvariant_map[variant])
+                        new["rating"] = "?"
 
-        elif len(name) < 4 and name[1] == 'guardianfsdbooster':  # Hack! No class.
-            (new['class'], new['rating']) = (str(name[2][4:]), 'H')
+                    elif "_".join(name[:4]) not in weaponrating_map:
+                        raise ValueError(f'{module["id"]}: Unknown weapon rating "{raw_name}"')
 
-        elif len(name) > 4 and name[1] == 'hyperdrive':  # e.g. Int_Hyperdrive_Overcharge_Size6_Class3
-            (new['class'], new['rating']) = (str(name[3][-1:]), rating_map[name[4][-1:]])
+                    else:
+                        # PP faction-specific weapons e.g. Hpt_Slugshot_Fixed_Large_Range
+                        new["name"] = weapon_map[(w_name, variant)]
+                        # assumes same rating as base weapon
+                        new["rating"] = weaponrating_map["_".join(name[:4])]
 
-        else:
-            if len(name) < 3:
-                raise ValueError(f'{name}: length < 3]')
+                elif raw_name.lower() not in weaponrating_map:
+                    raise ValueError(f'{module["id"]}: Unknown weapon rating "{raw_name}"')
 
-            if not name[2].startswith('size') or not name[3].startswith('class'):
-                raise ValueError(f'{module["id"]}: Unknown class/rating "{name[2]}/{name[3]}"')
+                else:
+                    new["name"] = weapon_map[w_name]
+                    new["rating"] = weaponrating_map[raw_name.lower()]
+                    # no obvious rule - needs lookup table
 
-            new['class'] = str(name[2][4:])
-            new['rating'] = (name[1] == 'buggybay' and planet_rating_map or
-                             name[1] == 'fighterbay' and fighter_rating_map or
-                             name[1] == 'corrosionproofcargorack' and corrosion_rating_map or
-                             rating_map)[name[3][5:]]
+                new["mount"] = weaponmount_map[w_mount]
+                if w_name in missiletype_map:
+                    # e.g. Hpt_DumbfireMissileRack_Fixed_Small
+                    new["guidance"] = missiletype_map[w_name]
+
+                new["class"] = weaponclass_map[w_class]
+
+            case [prefix, *_] if prefix != "int":
+                raise ValueError(f'{module["id"]}: Unknown prefix "{prefix}"')
+
+            # Fallback handling for Standard & Internal sub-branches
+            case _:
+                # Miscellaneous Class 1
+                # e.g. Int_PlanetApproachSuite, Int_StellarBodyDiscoveryScanner_Advanced, Int_DockingComputer_Standard
+                if name[1] in misc_internal_map:
+                    new["category"] = "internal"
+                    new["name"], new["rating"] = misc_internal_map[name[1]]
+                    new["class"] = "1"
+
+                elif len(name) > 2 and (name[1], name[2]) in misc_internal_map:
+                    # Reported category is not necessarily helpful.
+                    # e.g. "Int_DockingComputer_Standard" has category "utility"
+                    new["category"] = "internal"
+                    new["name"], new["rating"] = misc_internal_map[(name[1], name[2])]
+                    new["class"] = "1"
+
+                else:
+                    # Standard & Internal
+                    if (
+                        name[1] == "dronecontrol"
+                    ):  # e.g. Int_DroneControl_Collection_Size1_Class1
+                        name.pop(0)
+
+                    elif (
+                        name[1] == "multidronecontrol"
+                    ):  # e.g. Int_MultiDroneControl_Rescue_Size3_Class3
+                        name.pop(0)
+
+                    elif (
+                        name[-1] == "free"
+                    ):  # Starter Sidewinder or Freagle modules - just treat them like vanilla modules
+                        name.pop()
+
+                    if (
+                        name[1] in standard_map
+                    ):  # e.g. Int_Engine_Size2_Class1, Int_ShieldGenerator_Size8_Class5_Strong
+                        new["category"] = "standard"
+                        if name[2] == "overcharge":
+                            new["name"] = standard_map[(name[1], name[2])]
+                        else:
+                            new["name"] = standard_map[
+                                len(name) > 4 and (name[1], name[4]) or name[1]
+                            ]
+
+                    elif name[1] in internal_map:  # e.g. Int_CargoRack_Size8_Class1
+                        new["category"] = "internal"
+                        if name[1] == "passengercabin":
+                            new["name"] = cabin_map[name[3][5:]]
+
+                        else:
+                            new["name"] = internal_map[
+                                len(name) > 4 and (name[1], name[4]) or name[1]
+                            ]
+
+                        if (
+                            len(name) > 4 and name[1] == "hyperdrive"
+                        ):  # e.g. Int_Hyperdrive_Overcharge_Size6_Class3
+                            new["class"], new["rating"] = (
+                                str(name[3][-1:]),
+                                rating_map[name[4][-1:]],
+                            )
+                    else:
+                        raise ValueError(f'{module["id"]}: Unknown module "{name[1]}"')
+
+                    if (
+                        len(name) < 4 and name[1] == "unkvesselresearch"
+                    ):  # Hack! No size or class.
+                        new["class"], new["rating"] = ("1", "E")
+
+                    elif (
+                        len(name) < 4 and name[1] == "resourcesiphon"
+                    ):  # Hack! 128066402 has no size or class.
+                        new["class"], new["rating"] = ("1", "I")
+
+                    elif len(name) < 4 and name[1] in (
+                        "guardianpowerdistributor",
+                        "guardianpowerplant",
+                    ):  # Hack! No class.
+                        new["class"], new["rating"] = (str(name[2][4:]), "A")
+
+                    elif (
+                        len(name) < 4 and name[1] == "guardianfsdbooster"
+                    ):  # Hack! No class.
+                        new["class"], new["rating"] = (str(name[2][4:]), "H")
+
+                    elif (
+                        len(name) > 4 and name[1] == "hyperdrive"
+                    ):  # e.g. Int_Hyperdrive_Overcharge_Size6_Class3
+                        new["class"], new["rating"] = (
+                            str(name[3][-1:]),
+                            rating_map[name[4][-1:]],
+                        )
+
+                    else:
+                        if len(name) < 3:
+                            raise ValueError(f"{name}: length < 3]")
+
+                        if not name[2].startswith("size") or not name[3].startswith(
+                            "class"
+                        ):
+                            raise ValueError(
+                                f'{module["id"]}: Unknown class/rating "{name[2]}/{name[3]}"'
+                            )
+
+                        new["class"] = str(name[2][4:])
+                        new["rating"] = (
+                            name[1] == "buggybay"
+                            and planet_rating_map
+                            or name[1] == "fighterbay"
+                            and fighter_rating_map
+                            or name[1] == "corrosionproofcargorack"
+                            and corrosion_rating_map
+                            or rating_map
+                        )[name[3][5:]]
 
     # Disposition of fitted modules
-    if 'on' in module and 'priority' in module:
-        new['enabled'], new['priority'] = module['on'], module['priority']  # priority is zero-based
+    if "on" in module and "priority" in module:
+        new["enabled"], new["priority"] = (
+            module["on"],
+            module["priority"],
+        )  # priority is zero-based
 
     # Entitlements
-    if module.get('sku'):
-        new['entitlement'] = module['sku']
+    if module.get("sku"):
+        new["entitlement"] = module["sku"]
 
     # Extra module data
-    if module['name'].endswith('_free'):
-        key = module['name'][:-5].lower()  # starter modules - treated like vanilla modules
-
+    if raw_name.endswith("_free"):
+        key = raw_name[:-5].lower()  # starter modules - treated like vanilla modules
     else:
-        key = module['name'].lower()
+        key = raw_name.lower()
 
     if __debug__:
         m = moduledata.get(key, {})
         if not m:
-            print(f'No data for module {key}')
+            print(f"No data for module {key}")
 
-        elif new['name'] == 'Frame Shift Drive' or new['name'] == 'Frame Shift Drive (SCO)':
-            required_keys = ['mass', 'optmass', 'maxfuel', 'fuelmul', 'fuelpower']
+        elif new["name"] in ("Frame Shift Drive", "Frame Shift Drive (SCO)"):
+            required_keys = ["mass", "optmass", "maxfuel", "fuelmul", "fuelpower"]
             missing_keys = [key for key in required_keys if key not in m]
 
             if missing_keys:
                 raise KeyError(f"Missing keys: {', '.join(missing_keys)} in {m}")
         else:
-            if 'mass' not in m:
+            if "mass" not in m:
                 raise KeyError(f"Missing key 'mass' in {m}")
 
-    new.update(moduledata.get(module['name'].lower(), {}))
+    new.update(moduledata.get(raw_name.lower(), {}))
 
     # Check we've filled out mandatory fields
     mandatory_fields = ["id", "symbol", "category", "name", "class", "rating"]
@@ -275,37 +347,55 @@ def lookup(module, ship_map, entitled=False) -> dict | None:  # noqa: C901, CCR0
         if not new.get(field):
             raise ValueError(f'{module["id"]}: failed to set {field}')
 
-    if new['category'] == 'hardpoint' and not new.get('mount'):
+    if new["category"] == "hardpoint" and not new.get("mount"):
         raise ValueError(f'{module["id"]}: failed to set mount')
 
     return new
 
 
-def export(data, filename) -> None:
+def export(data: dict, filename: str) -> None:
     """
     Export given data about module availability.
 
     :param data: CAPI data to export.
     :param filename: Filename to export into.
     """
-    if "name" not in data["lastSystem"]:
+    if "name" not in data.get("lastSystem", {}):
         raise KeyError("Missing 'name' key in 'lastSystem'")
-    if "name" not in data["lastStarport"]:
+    if "name" not in data.get("lastStarport", {}):
         raise KeyError("Missing 'name' key in 'lastStarport'")
 
-    header = 'System,Station,Category,Name,Mount,Guidance,Ship,Class,Rating,FDevID,Date\n'
-    rowheader = f'{data["lastSystem"]["name"]},{data["lastStarport"]["name"]}'
+    header = [
+        "System", "Station", "Category", "Name", "Mount",
+        "Guidance", "Ship", "Class", "Rating", "FDevID", "Date",
+    ]
+    system_name = data["lastSystem"]["name"]
+    starport_name = data["lastStarport"]["name"]
+    timestamp = data["timestamp"]
 
-    with open(filename, 'w') as h:
-        h.write(header)
+    with open(filename, "w", newline="", encoding="utf-8") as h:
+        writer = csv.writer(h)
+        writer.writerow(header)
         for v in data["lastStarport"].get("modules", {}).values():
             try:
                 m = lookup(v, ship_name_map)
                 if m:
-                    h.write(f'{rowheader}, {m["category"]}, {m["name"]}, {m.get("mount", "")},'
-                            f'{m.get("guidance", "")}, {m.get("ship", "")}, {m["class"]}, {m["rating"]},'
-                            f'{m["id"]}, {data["timestamp"]}\n')
+                    writer.writerow(
+                        [
+                            system_name,
+                            starport_name,
+                            m["category"],
+                            m["name"],
+                            m.get("mount", ""),
+                            m.get("guidance", ""),
+                            m.get("ship", ""),
+                            m["class"],
+                            m["rating"],
+                            m["id"],
+                            timestamp,
+                        ]
+                    )
 
             except ValueError as e:
                 # Log unrecognised modules
-                logger.debug('Outfitting', exc_info=e)
+                logger.debug("Outfitting", exc_info=e)
