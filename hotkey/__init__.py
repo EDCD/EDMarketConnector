@@ -1,14 +1,11 @@
 """Handle keyboard input for manual update triggering."""
 from __future__ import annotations
 
-# -*- coding: utf-8 -*-
-
-import abc
 import sys
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 
 
-class AbstractHotkeyMgr(abc.ABC):
+class AbstractHotkeyMgr(ABC):
     """Abstract root class of all platforms specific HotKeyMgr."""
 
     @abstractmethod

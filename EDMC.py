@@ -14,7 +14,8 @@ import os
 import queue
 import sys
 from pathlib import Path
-from time import sleep, time
+from time import sleep
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any
 from common_utils import log_locale, SERVER_RETRY
 
@@ -293,7 +294,7 @@ def main() -> None:  # noqa: C901, CCR001
 
             ###################################################################
             # Initiate CAPI queries
-            querytime = int(time())
+            querytime = int(datetime.now(timezone.utc).timestamp())
             companion.session.station(query_time=querytime)
 
             # Wait for the response
@@ -418,16 +419,12 @@ def main() -> None:  # noqa: C901, CCR001
                 fixed = companion.fixup(data)
                 # Determine user-selected market export type (CSV, TAB, PIPE, SEMICOLON)
                 mkt_type = config.get_str('mkt_export_type', default='CSV')
-                if mkt_type == 'CSV':
-                    kind = commodity.COMMODITY_CSV
-                elif mkt_type == 'CSV_NEW':
-                    kind = commodity.COMMODITY_CSV_NEW
-                elif mkt_type == 'TAB':
-                    kind = commodity.COMMODITY_TAB
-                elif mkt_type == 'PIPE':
-                    kind = commodity.COMMODITY_PIPE
-                else:
-                    kind = commodity.COMMODITY_SEMICOLON
+                try:
+                    # Convert 'CSV' directly to CommodityExportKind.CSV (1)
+                    kind = commodity.CommodityExportKind[mkt_type]
+                except KeyError:
+                    # Fallback to default if the string doesn't match
+                    kind = commodity.CommodityExportKind.SEMICOLON
                 commodity.export(fixed, kind, args.m)
 
             else:
@@ -446,7 +443,7 @@ def main() -> None:  # noqa: C901, CCR001
 
             # Retry for shipyard
             sleep(SERVER_RETRY)
-            companion.session.station(int(time()))
+            companion.session.station(int(datetime.now(timezone.utc).timestamp()))
             # Wait for the response
             _capi_request_timeout = 60
             try:

@@ -306,55 +306,56 @@ def main():  # noqa: CCR001
 
     output = []
 
-    if args.compare_lang:
-        seen = set()
-        template = parse_template(args.compare_lang)
-        for file, calls in res.items():
-            for c in calls:
-                arg = get_arg(c)
-                if arg in template:
-                    seen.add(arg)
-                else:
-                    output.append(f"NEW! {file}:{c.lineno}: {arg!r}")
+    match vars(args):
+        case {"compare_lang": str() as compare_file}:
+            seen = set()
+            template = parse_template(compare_file)
+            for file, calls in res.items():
+                for c in calls:
+                    arg = get_arg(c)
+                    if arg in template:
+                        seen.add(arg)
+                    else:
+                        output.append(f"NEW! {file}:{c.lineno}: {arg!r}")
+            for old in set(template) ^ seen:
+                output.append(f"No longer used: {old!r}")
 
-        for old in set(template) ^ seen:
-            output.append(f"No longer used: {old!r}")
+        case {"json": True}:
+            to_print_data = [
+                {
+                    "path": str(path),
+                    "string": get_arg(c),
+                    "reconstructed": ast.unparse(c),
+                    "start_line": c.lineno,
+                    "start_offset": c.col_offset,
+                    "end_line": c.end_lineno,
+                    "end_offset": c.end_col_offset,
+                    "comment": getattr(c, "comment", None),
+                }
+                for path, calls in res.items()
+                for c in calls
+            ]
+            output.append(json.dumps(to_print_data, indent=2))
 
-    elif args.json:
-        to_print_data = [
-            {
-                "path": str(path),
-                "string": get_arg(c),
-                "reconstructed": ast.unparse(c),
-                "start_line": c.lineno,
-                "start_offset": c.col_offset,
-                "end_line": c.end_lineno,
-                "end_offset": c.end_col_offset,
-                "comment": getattr(c, "comment", None),
-            }
-            for path, calls in res.items()
-            for c in calls
-        ]
-        output.append(json.dumps(to_print_data, indent=2))
+        case {"lang": str() as lang_dest}:
+            lang_template = generate_lang_template(res)
+            if lang_dest == "-":
+                output.append(lang_template)
+            else:
+                with open(lang_dest, mode="w+", newline="\n", encoding="UTF-8") as langfile:
+                    langfile.writelines(lang_template)
 
-    elif args.lang:
-        lang_template = generate_lang_template(res)
-        if args.lang == "-":
-            output.append(lang_template)
-        else:
-            with open(args.lang, mode="w+", newline="\n", encoding="UTF-8") as langfile:
-                langfile.writelines(lang_template)
-
-    else:
-        for path, calls in res.items():
-            if not calls:
-                continue
-            output.append(str(path))
-            for c in calls:
-                output.append(
-                    f"    {c.lineno:4d}({c.col_offset:3d}):{c.end_lineno:4d}({c.end_col_offset:3d})\t{ast.unparse(c)}"
-                )
-            output.append("")
+        case _:
+            for path, calls in res.items():
+                if not calls:
+                    continue
+                output.append(str(path))
+                for c in calls:
+                    output.append(
+                        f"    {c.lineno:4d}({c.col_offset:3d}):{c.end_lineno:4d}"
+                        f"({c.end_col_offset:3d})\t{ast.unparse(c)}"
+                    )
+                output.append("")
 
     # Print all collected output at the end
     if output:

@@ -15,7 +15,8 @@ import pathlib
 from tkinter import ttk
 import tkinter.font as tkfont
 from PIL import Image, ImageTk
-from typing import Callable, cast
+from typing import cast
+from collections.abc import Callable
 import requests
 from io import BytesIO
 from datetime import datetime

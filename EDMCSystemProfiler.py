@@ -85,21 +85,22 @@ def get_sys_report(active_config: config.Config) -> str:
     journal_lock = JournalLock()
     lockable = journal_lock.open_journal_dir_lockfile()
 
-    report = f"EDMC Version: \n - {appversion()}\n\n"
-    report += "OS Details:\n"
-    report += f"- Operating System: {plt.system} {plt.release}\n"
-    report += f"- Version: {plt.version}\n"
-    report += f"- Machine: {plt.machine}\n"
-    report += f"- Python Version: {platform.python_version()}\n"
-    report += "\nEnvironment Details\n"
-    report += f"- Detected Locale: {lcl[0]}\n"
-    report += f"- Detected Encoding: {lcl[1]}\n"
-    report += f"- Journal Directory: {monitor.currentdir}\n"
-    report += f"- Game Version: {monitor.state['GameVersion']}\n"
-    report += f"- Game Build: {monitor.state['GameBuild']}\n"
-    report += f"- Using Odyssey: {monitor.state['Odyssey']}\n"
-    report += f"- Journal Dir Lockable: {lockable}\n"
-    return report
+    return (
+        f"EDMC Version: \n - {appversion()}\n\n"
+        f"OS Details:\n"
+        f"- Operating System: {plt.system} {plt.release}\n"
+        f"- Version: {plt.version}\n"
+        f"- Machine: {plt.machine}\n"
+        f"- Python Version: {platform.python_version()}\n\n"
+        f"Environment Details\n"
+        f"- Detected Locale: {lcl[0]}\n"
+        f"- Detected Encoding: {lcl[1]}\n"
+        f"- Journal Directory: {monitor.currentdir}\n"
+        f"- Game Version: {monitor.state.get('GameVersion', 'Unknown')}\n"
+        f"- Game Build: {monitor.state.get('GameBuild', 'Unknown')}\n"
+        f"- Using Odyssey: {monitor.state.get('Odyssey', 'Unknown')}\n"
+        f"- Journal Dir Lockable: {lockable}\n"
+    )
 
 
 def copy_sys_report(root: tk.Tk, report: str) -> None:

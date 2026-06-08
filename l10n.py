@@ -87,16 +87,13 @@ class Translations:
         if not lang:
             # Choose the default language
             for preferred in Locale.preferred_languages():
-                components = preferred.split('-')
-                if preferred in available:
-                    lang = preferred
-
-                elif '-'.join(components[0:2]) in available:
-                    lang = '-'.join(components[0:2])  # language-script
-
-                elif components[0] in available:
-                    lang = components[0]  # just base language
-
+                match preferred.split('-'):
+                    case [lang_code, script_code, *_] if f"{lang_code}-{script_code}" in available:
+                        lang = f"{lang_code}-{script_code}"
+                    case [base_lang, *_] if base_lang in available:
+                        lang = base_lang
+                    case _ if preferred in available:
+                        lang = preferred
                 if lang:
                     break
 

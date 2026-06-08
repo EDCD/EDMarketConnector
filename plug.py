@@ -50,7 +50,7 @@ last_error = LastError()
 class Plugin:
     """An EDMC plugin."""
 
-    def __init__(  # noqa: CCR001
+    def __init__(
         self,
         name: str,
         loadfile: Path | None,
@@ -103,18 +103,18 @@ class Plugin:
                         logger.error(f'Plugin "{name}" could not be loaded, even via fallback path.')
                         raise ImportError(f"Cannot load plugin {name} from {loadfile}")
             # Plugin startup logic
-            if module:
-                if getattr(module, 'plugin_start3', None):
+            match module:
+                case None:
+                    logger.error(f'Failed to load Plugin "{name}" from file "{loadfile}"')
+                case _ if hasattr(module, 'plugin_start3'):
                     newname = module.plugin_start3(Path(loadfile).resolve().parent)
                     self.name = str(newname) if newname else self.name
                     self.module = module
-                elif getattr(module, 'plugin_start', None):
+                case _ if hasattr(module, 'plugin_start'):
                     logger.warning(f'plugin {name} needs migrating\n')
                     PLUGINS_not_py3.append(self)
-                else:
+                case _:
                     logger.error(f'plugin {name} has no plugin_start3() function')
-            else:
-                logger.error(f'Failed to load Plugin "{name}" from file "{loadfile}"')
         except Exception:
             logger.exception(f': Failed for Plugin "{name}"')
             raise

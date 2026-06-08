@@ -43,9 +43,9 @@ import subprocess
 import sys
 import tomllib
 import tomli_w
-import time
 import threading
-from typing import Any, TypeVar
+from datetime import datetime, timezone
+from typing import Any
 from collections import defaultdict
 import semantic_version
 from constants import GITVERSION_FILE, applongname, appname
@@ -78,9 +78,6 @@ logger = (
     if os.getenv("EDMC_NO_UI")
     else logging.getLogger(appname)
 )
-
-
-_T = TypeVar("_T")
 
 
 def git_shorthash_from_head() -> str | None:
@@ -296,7 +293,7 @@ class Config:
 
         # Attempt Recovery
 
-        broken = self.toml_path.with_suffix(f".toml.broken.{int(time.time())}")
+        broken = self.toml_path.with_suffix(f".toml.broken.{int(datetime.now(timezone.utc).timestamp())}")
         with contextlib.suppress(Exception):
             self.toml_path.replace(broken)
 
