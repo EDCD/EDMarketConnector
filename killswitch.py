@@ -12,7 +12,7 @@ import threading
 from copy import deepcopy
 from typing import (
     TYPE_CHECKING, Any, NamedTuple,
-    TypedDict, TypeVar, cast
+    TypedDict, cast
 )
 from collections.abc import Callable, Mapping, MutableMapping, MutableSequence, Sequence
 import requests
@@ -29,10 +29,8 @@ CURRENT_KILLSWITCH_VERSION = 2
 UPDATABLE_DATA = Mapping | Sequence
 _current_version: semantic_version.Version = config.appversion_nobuild()
 
-T = TypeVar('T', bound=UPDATABLE_DATA)
 
-
-class SingleKill(NamedTuple):
+class SingleKill[T: Mapping[Any, Any] | Sequence[Any]](NamedTuple):  # noqa: D101
     """A single KillSwitch. Possibly with additional rules."""
 
     match: str
@@ -78,30 +76,27 @@ def _apply(target: UPDATABLE_DATA, key: str, to_set: Any = None, delete: bool = 
     :raises ValueError: when an unexpected target type is passed
     :raises IndexError: when an invalid index is set or deleted
     """
-    if isinstance(target, MutableMapping):
-        if delete:
-            target.pop(key, None)
-        else:
-            target[key] = to_set
+    match target:
+        case MutableMapping():
+            if delete:
+                target.pop(key, None)
+            else:
+                target[key] = to_set
+        case MutableSequence():
+            idx = _get_int(key)
+            if idx is None:
+                raise ValueError(f'Cannot use string {key!r} as int for index into Sequence')
 
-    elif isinstance(target, MutableSequence):
-        idx = _get_int(key)
-        if idx is None:
-            raise ValueError(f'Cannot use string {key!r} as int for index into Sequence')
-
-        if delete and len(target) > 0:
-            length = len(target)
-            if idx in range(-length, length):
-                target.pop(idx)
-
-        elif len(target) == idx:
-            target.append(to_set)
-
-        else:
-            target[idx] = to_set  # this can raise, that's fine
-
-    else:
-        raise ValueError(f'Dont know how to apply data to {type(target)} {target!r}')
+            if delete and len(target) > 0:
+                length = len(target)
+                if idx in range(-length, length):
+                    target.pop(idx)
+            elif len(target) == idx:
+                target.append(to_set)
+            else:
+                target[idx] = to_set  # this can raise, that's fine
+        case _:
+            raise ValueError(f'Dont know how to apply data to {type(target)} {target!r}')
 
 
 def _deep_apply(target: UPDATABLE_DATA, path: str, to_set=None, delete=False):  # noqa: CCR001 # Recursive silliness.
@@ -144,18 +139,17 @@ def _deep_apply(target: UPDATABLE_DATA, path: str, to_set=None, delete=False):  
         else:
             key, _, path = path.partition('.')
 
-        if isinstance(current, Mapping):
-            current = current[key]  # type: ignore # I really don't know at this point what you want from me mypy.
-
-        elif isinstance(current, Sequence):
-            target_idx = _get_int(key)  # mypy is broken. doesn't like := here.
-            if target_idx is not None:
-                current = current[target_idx]
-            else:
-                raise ValueError(f'Cannot index sequence with non-int key {key!r}')
-
-        else:
-            raise ValueError(f'Dont know how to index a {type(current)} ({current!r})')
+        match current:
+            case Mapping():
+                current = current[key]  # type: ignore # I really don't know at this point what you want from me mypy.
+            case Sequence():
+                target_idx = _get_int(key)  # mypy is broken. doesn't like := here.
+                if target_idx is not None:
+                    current = current[target_idx]
+                else:
+                    raise ValueError(f'Cannot index sequence with non-int key {key!r}')
+            case _:
+                raise ValueError(f'Dont know how to index a {type(current)} ({current!r})')
 
     _apply(current, path, to_set, delete)
 
@@ -212,7 +206,7 @@ class DisabledResult(NamedTuple):
         return self.has_kill() and self.kill.has_rules  # type: ignore
 
 
-class KillSwitchSet:
+class KillSwitchSet[T]:
     """Queryable set of kill switches."""
 
     def __init__(self, kill_switches: list[KillSwitches]) -> None:
@@ -504,12 +498,12 @@ def get_disabled(id: str, *, version: semantic_version.Version = _current_versio
     return active.get_disabled(id, version=version)
 
 
-def check_killswitch(name: str, data: T, log=logger) -> tuple[bool, T]:
+def check_killswitch[T](name: str, data: T, log=logger) -> tuple[bool, T]:  # noqa: D103
     """Query the global KillSwitchSet#check_killswitch method."""
     return active.check_killswitch(name, data, log)
 
 
-def check_multiple_killswitches(data: T, *names: str, log=logger) -> tuple[bool, T]:
+def check_multiple_killswitches[T](data: T, *names: str, log=logger) -> tuple[bool, T]:  # noqa: D103
     """Query the global KillSwitchSet#check_multiple method."""
     return active.check_multiple_killswitches(data, *names, log=log)
 

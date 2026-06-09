@@ -19,7 +19,6 @@ referenced in this file (or only in any other core plugin), and if so...
     IN AN END-USER INSTALLATION ON WINDOWS.
 """
 
-import json
 from typing import Any
 from tkinter import ttk
 import requests
@@ -34,57 +33,50 @@ from plugins.common_coreutils import PADX, PADY, BUTTONX
 
 logger = get_main_logger()
 
+# Module-level globals (Replacing the "This" class architecture)
+APP_NAME = "EDAstro"
+EDASTRO_PUSH = "https://edastro.com/api/journal"
 
-class This:
-    """Holds module globals."""
+LOG_ENABLED_VAR: tk.BooleanVar | None = None
+LOG_BUTTON: ttk.Checkbutton | None = None
 
-    app_name = "EDAstro"
-    edastro_push = "https://edastro.com/api/journal"
-
-    event_filters = {
-        "CarrierStats": [
-            "timestamp",
-            "event",
-            "Callsign",
-            "Name",
-            "CarrierID",
-            "AllowNotorious",
-            "PendingDecommission",
-            "DockingAccess",
-            "FuelLevel",
-            "Crew",
-        ],
-        "CarrierJumpRequest": [
-            "timestamp",
-            "event",
-            "SystemName",
-            "SystemAddress",
-            "CarrierID",
-            "Body",
-            "BodyID"
-            "DepartureTime"
-        ],
-        "ScanOrganic": [
-            "timestamp",
-            "ScanType",
-            "Genus_Localised",
-            "Species_Localised",
-            "Genus",
-            "event",
-            "Body",
-            "Species",
-            "Variant",
-            "SystemAddress",
-            "Variant_Localised",
-        ]
-    }
-
-    def __init__(self):
-        self.log: tk.BooleanVar | None = None
-        self.log_button: ttk.Checkbutton | None = None
-
-
-this = This()
+EVENT_FILTERS: dict[str, list[str]] = {
+    "CarrierStats": [
+        "timestamp",
+        "event",
+        "Callsign",
+        "Name",
+        "CarrierID",
+        "AllowNotorious",
+        "PendingDecommission",
+        "DockingAccess",
+        "FuelLevel",
+        "Crew",
+    ],
+    "CarrierJumpRequest": [
+        "timestamp",
+        "event",
+        "SystemName",
+        "SystemAddress",
+        "CarrierID",
+        "Body",
+        "BodyID",
+        "DepartureTime",
+    ],
+    "ScanOrganic": [
+        "timestamp",
+        "ScanType",
+        "Genus_Localised",
+        "Species_Localised",
+        "Genus",
+        "event",
+        "Body",
+        "Species",
+        "Variant",
+        "SystemAddress",
+        "Variant_Localised",
+    ]
+}
 
 
 def set_config_first_run() -> None:
@@ -116,10 +108,11 @@ def plugin_app(parent: tk.Tk) -> None:
     :param parent: tkinter parent frame.
     :return: See PLUGINS.md#display
     """
-    this.log = tk.BooleanVar(value=config.get_bool("edastro_send"))
+    global LOG_ENABLED_VAR
+    LOG_ENABLED_VAR = tk.BooleanVar(value=config.get_bool("edastro_send"))
 
 
-def plugin_prefs(parent, cmdr: str, is_beta: bool) -> nb.Frame:
+def plugin_prefs(parent: Any, cmdr: str, is_beta: bool) -> nb.Frame:
     """
     Set up Preferences pane for this plugin.
 
@@ -128,6 +121,7 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> nb.Frame:
     :param is_beta: `bool` - True if this is a beta version of the Game.
     :return: The tkinter frame we created.
     """
+    global LOG_BUTTON
     edastroframe = nb.Frame(parent)
     edastroframe.columnconfigure(0, weight=1)
 
@@ -138,18 +132,18 @@ def plugin_prefs(parent, cmdr: str, is_beta: bool) -> nb.Frame:
         background=nb.Label().cget("background"),
         url="https://edastro.com",
         underline=True,
-    ).grid(
-        row=cur_row, padx=PADX, pady=PADY, sticky=tk.W
-    )  # Don't translate
+    ).grid(row=cur_row, padx=PADX, pady=PADY, sticky=tk.W)  # Don't translate
+
     cur_row += 1
-    this.log_button = nb.Checkbutton(
+    LOG_BUTTON = nb.Checkbutton(
         edastroframe,
         # LANG: Settings>EDAstro - Label on checkbox for 'send data'
         text=tr.tl("Send data to EDAstro"),
-        variable=this.log,
+        variable=LOG_ENABLED_VAR,
     )
-    if this.log_button:
-        this.log_button.grid(
+
+    if LOG_BUTTON:
+        LOG_BUTTON.grid(
             row=cur_row, columnspan=2, padx=BUTTONX, pady=PADY, sticky=tk.W
         )
         cur_row += 1
@@ -164,55 +158,57 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
     :param cmdr: Name of Commander.
     :param is_beta: Whether game beta was detected.
     """
-    if this.log:
-        config.set("edastro_send", this.log.get())
+    if LOG_ENABLED_VAR:
+        config.set("edastro_send", LOG_ENABLED_VAR.get())
 
 
-def filter_event_data(entry) -> dict[str, Any]:
-    """Format Journal Data for EDAstro."""
-    if entry["event"] in this.event_filters:
-        return {
-            key: entry[key]
-            for key in this.event_filters[entry["event"]]
-            if key in entry
-        }
+def filter_event_data(entry: dict[str, Any]) -> dict[str, Any]:
+    """Format Journal Data for EDAstro using specific element structures."""
+    event_name = entry.get("event")
+    if event_name in EVENT_FILTERS:
+        allowed_keys = EVENT_FILTERS[event_name]
+        return {key: entry[key] for key in allowed_keys if key in entry}
     return entry
 
 
-def edastro_update(system, entry, state):
+def edastro_update(system: str, entry: dict[str, Any], state: dict[str, Any]) -> None:
     """Send a processed event to EDAstro."""
-    event_name = str(entry["event"])
+    event_name = str(entry.get("event", "UnknownEvent"))
     filtered_entry = filter_event_data(entry)
+
     app_header = {
-        "appName": this.app_name,
+        "appName": APP_NAME,
         "odyssey": state.get("Odyssey"),
         "system": system,
     }
     event_object = [app_header, filtered_entry]
-    event_data = json.dumps(event_object)
+
     try:
-        json_header = {"Content-Type": "application/json"}
+        # Use requests json conversion instead of manual
         response = requests.post(
-            url=this.edastro_push, headers=json_header, data=event_data, timeout=20
+            url=EDASTRO_PUSH, json=event_object, timeout=20
         )
+
         if response.status_code == 200:
-            edastro = json.loads(response.text)
-            if str(edastro["status"]) == "200" or str(edastro["status"]) == "401":
+            edastro = response.json()
+            status = edastro.get("status")
+
+            if status in (200, "200", 401, "401"):
                 # 200 = at least one event accepted, 401 = none were accepted, but no errors either
                 logger.info(f"EDAstro: Data sent! ({event_name})")
             else:
                 logger.debug(
-                    f"Error Response:\nRequest: {this.edastro_push}\n "
-                    f'Response ({edastro["status"]}): \n{edastro["message"]}'
+                    f"Error Response:\nRequest: {EDASTRO_PUSH}\n "
+                    f'Response ({status}): \n{edastro.get("message")}'
                 )
         else:
             logger.debug(
-                f"Unexpected Response:\nRequest: {this.edastro_push}\n "
+                f"Unexpected Response:\nRequest: {EDASTRO_PUSH}\n "
                 f"Response ({response.status_code}):\n{response.text}"
             )
     except Exception as ex:
         logger.warning(
-            f"Failed to submit EDAstro data:\nRequest: {this.edastro_push}",
+            f"Failed to submit EDAstro data:\nRequest: {EDASTRO_PUSH}",
             exc_info=ex,
         )
 
@@ -237,8 +233,9 @@ def journal_entry(
     :return: None if no error, else an error string.
     """
     if (
-        this.log is not None and this.log.get()
-        and entry["event"] in ["CarrierStats", "CarrierJumpRequest", "ScanOrganic"]
+        LOG_ENABLED_VAR is not None
+        and LOG_ENABLED_VAR.get()
+        and entry.get("event") in EVENT_FILTERS
     ):
         edastro_update(system, entry, state)
 
