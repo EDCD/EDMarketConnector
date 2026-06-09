@@ -13,10 +13,10 @@ import queue
 import re
 import sys
 import threading
-from datetime import datetime
+from datetime import datetime, timezone
 from collections import defaultdict
-from os import SEEK_END, SEEK_SET
-from time import gmtime, localtime, mktime, sleep, strftime, strptime, time
+from os import SEEK_SET
+from time import sleep
 from typing import TYPE_CHECKING, Any, BinaryIO
 from collections.abc import MutableMapping
 import psutil
@@ -371,11 +371,11 @@ class EDLogs(FileSystemEventHandler):
         # https://mail.python.org/pipermail/tkinter-discuss/2013-November/003522.html
 
         logger.debug(f'Starting on logfile "{self.logfile}"')
-        # Seek to the end of the latest log file
-        log_pos = -1  # make this bound, but with something that should go bang if its misused
+        log_pos = 0
         logfile = self.logfile
+        loghandle: BinaryIO | None = None
         if logfile:
-            loghandle: BinaryIO = open(logfile, 'rb', 0)  # unbuffered
+            loghandle = open(logfile, 'rb', 0)  # unbuffered
 
             self.catching_up = True
             for line in loghandle:
@@ -389,16 +389,12 @@ class EDLogs(FileSystemEventHandler):
                     logger.debug(f'Invalid journal entry:\n{line!r}\n', exc_info=ex)
 
             # One-shot attempt to read in latest NavRoute, if present
-            navroute_data = self._parse_navroute_file()
-            if navroute_data is not None:
+            if (navroute_data := self._parse_navroute_file()) is not None:
                 # If it's NavRouteClear contents, just keep those anyway.
                 self.state['NavRoute'] = navroute_data
 
             self.catching_up = False
             log_pos = loghandle.tell()
-
-        else:
-            loghandle = None  # type: ignore
 
         logger.debug('Now at end of latest file.')
 
@@ -409,8 +405,7 @@ class EDLogs(FileSystemEventHandler):
                 logger.info("Game is/was running, so synthesizing StartUp event for plugins")
                 # Game is running locally
                 entry = self.synthesize_startup_event()
-
-                self.event_queue.put(json.dumps(entry, separators=(', ', ':')))
+                self.event_queue.put(json.dumps(entry, separators=(',', ':')))
 
             else:
                 # Generate null event to update the display (with possibly out-of-date info)
@@ -418,95 +413,94 @@ class EDLogs(FileSystemEventHandler):
                 self.live = False
 
         emitter = None
-        # Watchdog thread -- there is a way to get this by using self.observer.emitters and checking for an attribute:
-        # watch, but that may have unforseen differences in behaviour.
+        # Watchdog thread -- extract internal emitter via safe dictionary query
         if self.observed:
             if self.observer is None:
                 raise RuntimeError("Observer was None but is it in use?")
-            # Note: Uses undocumented attribute
-            emitter = self.observed and self.observer._emitter_for_watch[self.observed]
+            emitter = self.observer._emitter_for_watch.get(self.observed)
 
         logger.debug('Entering loop...')
-        while True:
+        try:
+            while True:
+                current_thread = threading.current_thread()
 
-            # Check whether new log file started, e.g. client (re)started.
-            if emitter and emitter.is_alive():
-                new_journal_file: str | None = self.logfile  # updated by on_created watchdog callback
+                if current_thread != self.thread:
+                    logger.info("We're not meant to be running, exiting...")
+                    return
 
-            else:
-                # Poll
-                try:
-                    new_journal_file = self.journal_newest_filename(self.currentdir)
+                if emitter and emitter.is_alive():
+                    new_journal_file = self.logfile  # updated by on_created watchdog callback
+                else:
+                    # Poll
+                    try:
+                        new_journal_file = self.journal_newest_filename(self.currentdir)
+                    except Exception:
+                        logger.exception('Failed to find latest logfile')
+                        new_journal_file = None
 
-                except Exception:
-                    logger.exception('Failed to find latest logfile')
-                    new_journal_file = None
+                if logfile and loghandle:
+                    # Update, June 2026:Removed `loghandle.seek(0, SEEK_END)`. This was only needed for macOS
+                    # SMB network filesystem updates. macOS is explicitly deprecated, native Linux and Windows work.
+                    loghandle.seek(log_pos, SEEK_SET)  # reset EOF flag
 
-            if logfile:
-                loghandle.seek(0, SEEK_END)  # required for macOS to notice log change over SMB. TODO: Do we need this?
-                loghandle.seek(log_pos, SEEK_SET)  # reset EOF flag # TODO: log_pos reported as possibly unbound
-                for line in loghandle:
-                    # Paranoia check to see if we're shutting down
-                    if threading.current_thread() != self.thread:
-                        logger.info("We're not meant to be running, exiting...")
-                        return  # Terminate
+                    for line in loghandle:
+                        # Paranoia check to see if we're shutting down
+                        if current_thread != self.thread:
+                            logger.info("We're not meant to be running, exiting...")
+                            return  # Terminate
 
-                    if b'"event":"Continue"' in line:
-                        for _ in range(10):
-                            logger.trace_if('journal.continuation', "****")
-                        logger.trace_if('journal.continuation', 'Found a Continue event, its being added to the list, '
-                                        'we will finish this file up and then continue with the next')
+                        if b'"event":"Continue"' in line:
+                            for _ in range(10):
+                                logger.trace_if('journal.continuation', "****")
+                            logger.trace_if('journal.continuation', 'Found a Continue event...')
 
-                    self.event_queue.put(line)
+                        self.event_queue.put(line)
 
-                if not self.event_queue.empty():
-                    if not config.shutting_down:
+                    if not self.event_queue.empty() and not config.shutting_down:
                         logger.trace_if('journal.queue', 'Sending <<JournalEvent>>')
                         self.root.event_generate('<<JournalEvent>>', when="tail")
 
-                log_pos = loghandle.tell()
+                    log_pos = loghandle.tell()
 
-            if logfile != new_journal_file:
-                for _ in range(10):
-                    logger.trace_if('journal.file', "****")
-                logger.info(f'New Journal File. Was "{logfile}", now "{new_journal_file}"')
-                logfile = new_journal_file
-                if loghandle:
-                    loghandle.close()
+                if logfile != new_journal_file:
+                    for _ in range(10):
+                        logger.trace_if('journal.file', "****")
+                    logger.info(f'New Journal File. Was "{logfile}", now "{new_journal_file}"')
 
-                if logfile:
-                    loghandle = open(logfile, 'rb', 0)  # unbuffered
-                    log_pos = 0
+                    logfile = new_journal_file
+                    if loghandle:
+                        loghandle.close()
+                        loghandle = None
 
-            if self.game_was_running:
-                sleep(self._POLL)
-            else:
-                sleep(self._INACTIVE_POLL)
+                    if logfile:
+                        loghandle = open(logfile, 'rb', 0)  # unbuffered
+                        log_pos = 0
 
-            # Check whether we're still supposed to be running
-            if threading.current_thread() != self.thread:
-                logger.info("We're not meant to be running, exiting...")
-                if loghandle:
-                    loghandle.close()
+                sleep(self._POLL if self.game_was_running else self._INACTIVE_POLL)
 
-                return  # Terminate
+                # Check whether we're still supposed to be running post-sleep
+                if current_thread != self.thread:
+                    logger.info("We're not meant to be running, exiting...")
+                    return  # Terminate
 
-            if self.game_was_running:
-                if not self.game_running():
-                    logger.info('Detected exit from game, synthesising ShutDown event')
-                    timestamp = strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())
-                    self.event_queue.put(
-                        f'{{ "timestamp":"{timestamp}", "event":"ShutDown" }}'
-                    )
+                if self.game_was_running:
+                    if not self.game_running():
+                        logger.info('Detected exit from game, synthesising ShutDown event')
+                        timestamp = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+                        self.event_queue.put(
+                            f'{{ "timestamp":"{timestamp}", "event":"ShutDown" }}'
+                        )
 
-                    if not config.shutting_down:
-                        logger.trace_if('journal.queue', 'Sending <<JournalEvent>>')
-                        self.root.event_generate('<<JournalEvent>>', when="tail")
+                        if not config.shutting_down:
+                            logger.trace_if('journal.queue', 'Sending <<JournalEvent>>')
+                            self.root.event_generate('<<JournalEvent>>', when="tail")
 
-                    self.game_was_running = False
-
-            else:
-                self.game_was_running = self.game_running()
+                        self.game_was_running = False
+                else:
+                    self.game_was_running = self.game_running()
+        finally:
+            if loghandle:
+                loghandle.close()
 
     def synthesize_startup_event(self) -> dict[str, Any]:
         """
@@ -519,12 +513,12 @@ class EDLogs(FileSystemEventHandler):
         :return: Synthesized event as a dict
         """
         entry: dict[str, Any] = {
-            'timestamp':        strftime('%Y-%m-%dT%H:%M:%SZ', gmtime()),
-            'event':            'StartUp',
-            'StarSystem':       self.state['SystemName'],
-            'StarPos':          self.state['StarPos'],
-            'SystemAddress':    self.state['SystemAddress'],
-            'Population':       self.state['SystemPopulation'],
+            'timestamp': datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'event': 'StartUp',
+            'StarSystem': self.state['SystemName'],
+            'StarPos': self.state['StarPos'],
+            'SystemAddress': self.state['SystemAddress'],
+            'Population': self.state['SystemPopulation'],
         }
 
         if self.state['Body']:
@@ -1568,7 +1562,7 @@ class EDLogs(FileSystemEventHandler):
 
             elif event_type == 'navroute' and not self.catching_up:
                 # assume we've failed out the gate, then pull it back if things are fine
-                self._last_navroute_journal_timestamp = mktime(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
+                self._last_navroute_journal_timestamp = datetime.fromisoformat(entry['timestamp']).timestamp()
                 self._navroute_retries_remaining = 11
 
                 # Added in ED 3.7 - multi-hop route details in NavRoute.json
@@ -1578,7 +1572,7 @@ class EDLogs(FileSystemEventHandler):
 
             elif event_type == 'fcmaterials' and not self.catching_up:
                 # assume we've failed out the gate, then pull it back if things are fine
-                self._last_fcmaterials_journal_timestamp = mktime(strptime(entry['timestamp'], '%Y-%m-%dT%H:%M:%SZ'))
+                self._last_fcmaterials_journal_timestamp = datetime.fromisoformat(entry['timestamp']).timestamp()
                 self._fcmaterials_retries_remaining = 11
 
                 # Added in ED 4.0.0.1300 - Fleet Carrier Materials market in FCMaterials.json
@@ -2188,7 +2182,7 @@ class EDLogs(FileSystemEventHandler):
             self.event_queue.put(json.dumps(entry, separators=(', ', ':')))
 
         elif self.live and entry['event'] == 'Music' and entry.get('MusicTrack') == 'MainMenu':
-            ts = strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())
+            ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
             self.event_queue.put(
                 f'{{ "timestamp":"{ts}", "event":"ShutDown" }}'
             )
@@ -2242,7 +2236,7 @@ class EDLogs(FileSystemEventHandler):
 
         d: MutableMapping[str, Any] = {}
         if timestamped:
-            d['timestamp'] = strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())
+            d['timestamp'] = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
 
         d['event'] = 'Loadout'
         d['Ship'] = self.state['ShipType']
@@ -2274,89 +2268,69 @@ class EDLogs(FileSystemEventHandler):
 
         return d
 
-    def export_ship(self, filename=None) -> None:  # noqa: C901, CCR001
+    def export_ship(self, filename: str | None = None) -> None:  # noqa: C901, CCR001
         """
         Export ship loadout as a Loadout event.
 
         Writes either to the specified filename or to a formatted filename based on
         the ship name and a date+timestamp.
-
-        :param filename: Name of file to write to, if not default.
         """
-        # TODO(A_D): Some type checking has been disabled in here due to config.get getting weird outputs
-        string = json.dumps(self.ship(False), ensure_ascii=False, indent=2, separators=(',', ': '))  # pretty print
+        string = json.dumps(self.ship(False), ensure_ascii=False, indent=2, separators=(',', ': '))
+        outdir_str = config.get_str('outdir')
+        outdir = pathlib.Path(outdir_str) if outdir_str else pathlib.Path('.')
+
         if filename:
             try:
                 with open(filename, 'w', encoding='utf-8') as h:
                     h.write(string)
-
-            except UnicodeError:
-                logger.exception("UnicodeError writing ship loadout to specified filename with utf-8 encoding"
-                                 ", trying without..."
-                                 )
-
+            except (UnicodeError, OSError) as e:
+                logger.exception(f"Error writing ship loadout to specified filename: {e}")
                 try:
                     with open(filename, 'w') as h:
                         h.write(string)
-
                 except OSError:
-                    logger.exception("OSError writing ship loadout to specified filename with default encoding"
-                                     ", aborting."
-                                     )
-
-            except OSError:
-                logger.exception("OSError writing ship loadout to specified filename with utf-8 encoding, aborting.")
-
+                    logger.exception(
+                        "Fatal OSError writing ship loadout to specified filename with default encoding, aborting.")
             return
 
         ship = util_ships.ship_file_name(self.state['ShipName'], self.state['ShipType'])
         regexp = re.compile(re.escape(ship) + r'\.\d{4}-\d\d-\d\dT\d\d\.\d\d\.\d\d\.txt')
-        oldfiles = sorted(x.name for x in pathlib.Path(config.get_str('outdir')).iterdir() if regexp.match(x.name))
+
+        try:
+            oldfiles = sorted(x.name for x in outdir.iterdir() if regexp.match(x.name))
+        except OSError:
+            oldfiles = []
+
         if oldfiles:
+            target_file = outdir / oldfiles[-1]
             try:
-                with (pathlib.Path(config.get_str('outdir')) / oldfiles[-1]).open(encoding='utf-8') as h:
+                with target_file.open(encoding='utf-8') as h:
                     if h.read() == string:
-                        return  # same as last time - don't write
-
-            except UnicodeError:
-                logger.exception("UnicodeError reading old ship loadout with utf-8 encoding, trying without...")
+                        return  # Contents match, don't write again.
+            except (UnicodeError, OSError, ValueError) as e:
+                logger.trace_if('capi.worker',
+                                f"Failed to read old ship loadout natively ({e}), attempting fallback...")
                 try:
-                    with (pathlib.Path(config.get_str('outdir')) / oldfiles[-1]).open(encoding='utf-8') as h:
+                    with target_file.open() as h:
                         if h.read() == string:
-                            return  # same as last time - don't write
-
+                            return
                 except OSError:
-                    logger.exception("OSError reading old ship loadout default encoding.")
-
-                except ValueError:
-                    # User was on $OtherEncoding, updated windows to be sane and use utf8 everywhere, thus
-                    # the above open() fails, likely with a UnicodeDecodeError, which subclasses UnicodeError which
-                    # subclasses ValueError, this catches ValueError _instead_ of UnicodeDecodeError just to be sure
-                    # that if some other encoding error crops up we grab it too.
-                    logger.exception('ValueError when reading old ship loadout default encoding')
-
-            except OSError:
-                logger.exception("OSError reading old ship loadout with default encoding")
+                    logger.exception("OSError reading old ship loadout with default system encoding.")
 
         # Write
-        ts = strftime('%Y-%m-%dT%H.%M.%S', localtime(time()))
-        filename = str(pathlib.Path(config.get_str('outdir')) / f'{ship}.{ts}.txt')
+        ts = datetime.now().strftime('%Y-%m-%dT%H.%M.%S')
+        filename = str(outdir / f'{ship}.{ts}.txt')
 
         try:
             with open(filename, 'w', encoding='utf-8') as h:
                 h.write(string)
-
-        except UnicodeError:
-            logger.exception("UnicodeError writing ship loadout to new filename with utf-8 encoding, trying without...")
+        except (UnicodeError, OSError):
+            logger.exception("Error writing ship loadout to new filename with utf-8 encoding, trying fallback...")
             try:
                 with open(filename, 'w') as h:
                     h.write(string)
-
             except OSError:
-                logger.exception("OSError writing ship loadout to new filename with default encoding, aborting.")
-
-        except OSError:
-            logger.exception("OSError writing ship loadout to new filename with utf-8 encoding, aborting.")
+                logger.exception("Fatal OSError writing ship loadout to new filename with default encoding, aborting.")
 
     def coalesce_cargo(self, raw_cargo: list[MutableMapping[str, Any]]) -> list[MutableMapping[str, Any]]:
         """
@@ -2474,7 +2448,8 @@ class EDLogs(FileSystemEventHandler):
 
     @staticmethod
     def _parse_journal_timestamp(source: str) -> float:
-        return mktime(strptime(source, '%Y-%m-%dT%H:%M:%SZ'))
+        """Parse a UTC ISO 8601 journal timestamp string into a local Unix epoch float."""
+        return datetime.fromisoformat(source).timestamp()
 
     def __navroute_retry(self) -> bool:
         """Retry reading navroute files."""

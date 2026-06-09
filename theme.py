@@ -15,6 +15,7 @@ import sys
 import tkinter as tk
 from tkinter import font as tk_font
 from tkinter import ttk
+from typing import Any
 from collections.abc import Callable
 from l10n import translations as tr
 from config import config
@@ -26,14 +27,12 @@ logger = get_main_logger()
 if __debug__:
     from traceback import print_exc
 
-if sys.platform == "linux":
-    from ctypes import POINTER, Structure, byref, c_char_p, c_int, c_long, c_uint, c_ulong, c_void_p, cdll
-
-
-if sys.platform == 'win32':
+# Can't use Case matching here due to bug in flake8-naming
+if sys.platform == "win32":
     import ctypes
     from ctypes.wintypes import DWORD, LPCVOID, LPCWSTR
     import win32gui
+    import win32con
     AddFontResourceEx = ctypes.windll.gdi32.AddFontResourceExW
     AddFontResourceEx.argtypes = [LPCWSTR, DWORD, LPCVOID]
     AddFontResourceEx.restype = ctypes.c_int
@@ -42,19 +41,20 @@ if sys.platform == 'win32':
     font_path = str(config.respath_path / 'EUROCAPS.TTF')
     if not AddFontResourceEx(font_path, FR_PRIVATE, None):
         raise RuntimeError(f"Failed to load font {font_path}")
+    dpy = None
 
-elif sys.platform == 'linux':
-    # pyright: reportUnboundVariable=false
-    XID = c_ulong 	# from X.h: typedef unsigned long XID
+elif sys.platform == "linux":
+    from ctypes import POINTER, Structure, byref, c_char_p, c_int, c_long, c_uint, c_ulong, c_void_p, cdll
+
+    XID = c_ulong
     Window = XID
     Atom = c_ulong
-    Display = c_void_p  # Opaque
+    Display = c_void_p
 
     PropModeReplace = 0
     PropModePrepend = 1
     PropModeAppend = 2
 
-    # From xprops.h
     MWM_HINTS_FUNCTIONS = 1 << 0
     MWM_HINTS_DECORATIONS = 1 << 1
     MWM_HINTS_INPUT_MODE = 1 << 2
@@ -102,8 +102,8 @@ elif sys.platform == 'linux':
             XOpenDisplay.argtypes = [c_char_p]
             XOpenDisplay.restype = POINTER(Display)
             XQueryTree = xlib.XQueryTree
-            XQueryTree.argtypes = [POINTER(Display), Window, POINTER(
-                Window), POINTER(Window), POINTER(Window), POINTER(c_uint)]
+            XQueryTree.argtypes = [POINTER(Display), Window, POINTER(Window),
+                                   POINTER(Window), POINTER(Window), POINTER(c_uint)]
             XQueryTree.restype = c_int
             dpy = xlib.XOpenDisplay(None)
             if not dpy:
@@ -116,14 +116,19 @@ elif sys.platform == 'linux':
                 MWM_DECOR_BORDER | MWM_DECOR_RESIZEH | MWM_DECOR_TITLE | MWM_DECOR_MENU | MWM_DECOR_MINIMIZE,
                 0, 0
             )
-            motif_wm_hints_dark = MotifWmHints(MWM_HINTS_FUNCTIONS | MWM_HINTS_DECORATIONS,
-                                               MWM_FUNC_RESIZE | MWM_FUNC_MOVE | MWM_FUNC_MINIMIZE | MWM_FUNC_CLOSE,
-                                               0, 0, 0)
+            motif_wm_hints_dark = MotifWmHints(
+                MWM_HINTS_FUNCTIONS | MWM_HINTS_DECORATIONS,
+                MWM_FUNC_RESIZE | MWM_FUNC_MOVE | MWM_FUNC_MINIMIZE | MWM_FUNC_CLOSE,
+                0, 0, 0
+            )
         except Exception:
             if __debug__:
                 print_exc()
-
             dpy = None
+    else:
+        dpy = None
+else:
+    dpy = None
 
 
 class _Theme:
@@ -138,20 +143,19 @@ class _Theme:
     def __init__(self) -> None:
         self.active: int | None = None  # Starts out with no theme
         self.minwidth: int | None = None
-        self.widgets: dict[tk.Widget | tk.BitmapImage, set] = {}
-        self.widgets_pair: list = []
-        self.defaults: dict = {}
-        self.current: dict = {}
+        self.widgets: dict[tk.Widget | tk.BitmapImage, set[str]] = {}
+        self.widgets_pair: list[tuple[tuple[Any, ...], dict[str, Any]]] = []
+        self.defaults: dict[str, Any] = {}
+        self.current: dict[str, Any] = {}
         self.default_ui_scale: float | None = None  # None == not yet known
         self.startup_ui_scale: int | None = None
 
-    def register(self, widget: tk.Widget | tk.BitmapImage) -> None:  # noqa: CCR001, C901
+    def register(self, widget: tk.Widget | tk.BitmapImage) -> None:  # noqa: CCR001
         # Note widget and children for later application of a theme. Note if
         # the widget has explicit fg or bg attributes.
         if not isinstance(widget, (tk.Widget, tk.BitmapImage)):
             raise TypeError(f'Expected widget, got {type(widget)}')
         if not self.defaults:
-            # Can't initialise this til window is created       # Windows
             self.defaults = {
                 'fg': tk.Label()['foreground'],         # SystemButtonText, systemButtonText
                 'bg': tk.Label()['background'],         # SystemButtonFace, White
@@ -170,40 +174,40 @@ class _Theme:
         if widget not in self.widgets:
             # No general way to tell whether the user has overridden, so compare against widget-type specific defaults
             attribs = set()
-            if isinstance(widget, tk.BitmapImage):
-                if widget['foreground'] not in ['', self.defaults['bitmapfg']]:
-                    attribs.add('fg')
-                if widget['background'] not in ['', self.defaults['bitmapbg']]:
-                    attribs.add('bg')
-            elif isinstance(widget, (tk.Entry, ttk.Entry)):
-                if widget['foreground'] not in ['', self.defaults['entryfg']]:
-                    attribs.add('fg')
-                if widget['background'] not in ['', self.defaults['entrybg']]:
-                    attribs.add('bg')
-                if 'font' in widget.keys() and str(widget['font']) not in ['', self.defaults['entryfont']]:
-                    attribs.add('font')
-            elif isinstance(widget, (tk.Canvas, tk.Frame, ttk.Frame)):
-                if (
-                    ('background' in widget.keys() or isinstance(widget, tk.Canvas))
-                    and widget['background'] not in ['', self.defaults['frame']]
-                ):
-                    attribs.add('bg')
-            elif isinstance(widget, HyperlinkLabel):
-                pass    # Hack - HyperlinkLabel changes based on state, so skip
-            elif isinstance(widget, tk.Menu):
-                if widget['foreground'] not in ['', self.defaults['menufg']]:
-                    attribs.add('fg')
-                if widget['background'] not in ['', self.defaults['menubg']]:
-                    attribs.add('bg')
-                if widget['font'] not in ['', self.defaults['menufont']]:
-                    attribs.add('font')
-            else:      # tk.Button, tk.Label
-                if 'foreground' in widget.keys() and widget['foreground'] not in ['', self.defaults['fg']]:
-                    attribs.add('fg')
-                if 'background' in widget.keys() and widget['background'] not in ['', self.defaults['bg']]:
-                    attribs.add('bg')
-                if 'font' in widget.keys() and widget['font'] not in ['', self.defaults['font']]:
-                    attribs.add('font')
+            match widget:
+                case tk.BitmapImage():
+                    if widget['foreground'] not in ('', self.defaults['bitmapfg']):
+                        attribs.add('fg')
+                    if widget['background'] not in ('', self.defaults['bitmapbg']):
+                        attribs.add('bg')
+                case tk.Entry() | ttk.Entry():
+                    if widget['foreground'] not in ('', self.defaults['entryfg']):
+                        attribs.add('fg')
+                    if widget['background'] not in ('', self.defaults['entrybg']):
+                        attribs.add('bg')
+                    if 'font' in widget.keys() and str(widget['font']) not in ('', self.defaults['entryfont']):
+                        attribs.add('font')
+                case tk.Canvas() | tk.Frame() | ttk.Frame():
+                    if (('background' in widget.keys() or isinstance(widget, tk.Canvas))
+                            and widget['background'] not in ('', self.defaults['frame'])):
+                        attribs.add('bg')
+                case HyperlinkLabel():
+                    pass
+                case tk.Menu():
+                    if widget['foreground'] not in ('', self.defaults['menufg']):
+                        attribs.add('fg')
+                    if widget['background'] not in ('', self.defaults['menubg']):
+                        attribs.add('bg')
+                    if widget['font'] not in ('', self.defaults['menufont']):
+                        attribs.add('font')
+                case _:
+                    w_keys = widget.keys() if hasattr(widget, 'keys') else []
+                    if 'foreground' in w_keys and widget['foreground'] not in ('', self.defaults['fg']):
+                        attribs.add('fg')
+                    if 'background' in w_keys and widget['background'] not in ('', self.defaults['bg']):
+                        attribs.add('bg')
+                    if 'font' in w_keys and widget['font'] not in ('', self.defaults['font']):
+                        attribs.add('font')
             self.widgets[widget] = attribs
 
         if isinstance(widget, (tk.Frame, ttk.Frame)):
@@ -213,68 +217,66 @@ class _Theme:
     def register_alternate(self, pair: tuple, gridopts: dict) -> None:
         self.widgets_pair.append((pair, gridopts))
 
-    def button_bind(
-        self, widget: tk.Widget, command: Callable, image: tk.BitmapImage | None = None
-    ) -> None:
+    def button_bind(self, widget: tk.Widget, command: Callable, image: tk.BitmapImage | None = None) -> None:
         widget.bind('<Button-1>', command)
-        widget.bind('<Enter>', lambda e: self._enter(e, image))
-        widget.bind('<Leave>', lambda e: self._leave(e, image))
+        widget.bind('<Enter>', lambda e: self._enter(e, widget=widget, image=image))
+        widget.bind('<Leave>', lambda e: self._leave(e, widget=widget, image=image))
 
-    def _enter(self, event, widget=None, image=None):  # noqa: CCR001
+    def _enter(self, event: tk.Event, widget: tk.Widget | None = None,  # noqa: CCR001
+               image: tk.BitmapImage | None = None) -> None:
         """Handle mouse entering a widget or image."""
         if widget is not None:
             # Only apply foreground/background if the widget supports them
             config_keys = widget.keys() if hasattr(widget, 'keys') else []
             kwargs = {}
-            if 'foreground' in config_keys:
-                kwargs['foreground'] = self.current.get('highlightforeground', '')
-            if 'background' in config_keys:
-                kwargs['background'] = self.current.get('highlightbackground', '')
+            if 'foreground' in config_keys and self.current.get('highlightforeground'):
+                kwargs['foreground'] = self.current['highlightforeground']
+            if 'background' in config_keys and self.current.get('highlightbackground'):
+                kwargs['background'] = self.current['highlightbackground']
             if kwargs:
                 widget.configure(**kwargs)
 
-        if image is not None:
+        if image is not None and not isinstance(image, tk.PhotoImage):
             # PhotoImage cannot be configured with fg/bg, skip safely
-            if not isinstance(image, tk.PhotoImage):
-                try:
-                    config_keys = image.keys() if hasattr(image, 'keys') else []
-                    kwargs = {}
-                    if 'foreground' in config_keys:
-                        kwargs['foreground'] = self.current.get('highlightforeground', '')
-                    if 'background' in config_keys:
-                        kwargs['background'] = self.current.get('highlightbackground', '')
-                    if kwargs:
-                        image.configure(**kwargs)
-                except tk.TclError:
-                    # silently ignore unsupported image types
-                    pass
+            try:
+                config_keys = image.keys() if hasattr(image, 'keys') else []
+                kwargs = {}
+                if 'foreground' in config_keys and self.current.get('highlightforeground'):
+                    kwargs['foreground'] = self.current['highlightforeground']
+                if 'background' in config_keys and self.current.get('highlightbackground'):
+                    kwargs['background'] = self.current['highlightbackground']
+                if kwargs:
+                    image.configure(**kwargs)
+            except tk.TclError:
+                # silently ignore unsupported image types
+                pass
 
-    def _leave(self, event, widget=None, image=None):  # noqa: CCR001
+    def _leave(self, event: tk.Event, widget: tk.Widget | None = None,   # noqa: CCR001
+               image: tk.BitmapImage | None = None) -> None:
         """Handle mouse leaving a widget or image."""
         if widget is not None:
             config_keys = widget.keys() if hasattr(widget, 'keys') else []
             kwargs = {}
-            if 'foreground' in config_keys:
-                kwargs['foreground'] = self.current.get('foreground', '')
-            if 'background' in config_keys:
-                kwargs['background'] = self.current.get('background', '')
+            if 'foreground' in config_keys and self.current.get('foreground'):
+                kwargs['foreground'] = self.current['foreground']
+            if 'background' in config_keys and self.current.get('background'):
+                kwargs['background'] = self.current['background']
             if kwargs:
                 widget.configure(**kwargs)
 
-        if image is not None:
+        if image is not None and not isinstance(image, tk.PhotoImage):
             # Skip PhotoImage objects; safely handle other types
-            if not isinstance(image, tk.PhotoImage):
-                try:
-                    config_keys = image.keys() if hasattr(image, 'keys') else []
-                    kwargs = {}
-                    if 'foreground' in config_keys:
-                        kwargs['foreground'] = self.current.get('foreground', '')
-                    if 'background' in config_keys:
-                        kwargs['background'] = self.current.get('background', '')
-                    if kwargs:
-                        image.configure(**kwargs)
-                except tk.TclError:
-                    pass
+            try:
+                config_keys = image.keys() if hasattr(image, 'keys') else []
+                kwargs = {}
+                if 'foreground' in config_keys and self.current.get('foreground'):
+                    kwargs['foreground'] = self.current['foreground']
+                if 'background' in config_keys and self.current.get('background'):
+                    kwargs['background'] = self.current['background']
+                if kwargs:
+                    image.configure(**kwargs)
+            except tk.TclError:
+                pass
 
     # Set up colors
     def _colors(self, root: tk.Tk, theme: int) -> None:
@@ -289,35 +291,37 @@ class _Theme:
             config.set('dark_highlight', 'white')
 
         if theme == self.THEME_DEFAULT:
-            # (Mostly) system colors
-            style = ttk.Style()
             self.current = {
-                'background': (style.lookup('TLabel', 'background')),
+                'background': style.lookup('TLabel', 'background'),
                 'foreground': style.lookup('TLabel', 'foreground'),
-                'activebackground': (sys.platform == 'win32' and 'SystemHighlight' or
-                                     style.lookup('TLabel', 'background', ['active'])),
-                'activeforeground': (sys.platform == 'win32' and 'SystemHighlightText' or
-                                     style.lookup('TLabel', 'foreground', ['active'])),
+                'activebackground': 'SystemHighlight' if sys.platform == 'win32' else style.lookup('TLabel',
+                                                                                                   'background',
+                                                                                                   ['active']),
+                'activeforeground': 'SystemHighlightText' if sys.platform == 'win32' else style.lookup('TLabel',
+                                                                                                       'foreground',
+                                                                                                       ['active']),
                 'disabledforeground': style.lookup('TLabel', 'foreground', ['disabled']),
                 'highlight': 'blue',
                 'font': 'TkDefaultFont',
             }
+        else:
+            r, g, b = root.winfo_rgb(config.get_str('dark_text'))
 
-        else:  # Dark *or* Transparent
-            (r, g, b) = root.winfo_rgb(config.get_str('dark_text'))
+            # Font only supports Latin 1 / Supplement / Extended, and a
+            # few General Punctuation and Mathematical Operators
+            # LANG: Label for commander name in main window
+            use_euro_caps = theme > 1 and not (0x250 < ord(tr.tl('Cmdr')[0]) < 0x3000)
+            chosen_font = tk_font.Font(family='Euro Caps', size=10,
+                                       weight=tk_font.NORMAL) if use_euro_caps else 'TkDefaultFont'
+
             self.current = {
-                'background': 'grey4',  # OSX inactive dark titlebar color
+                'background': 'grey4',
                 'foreground': config.get_str('dark_text'),
                 'activebackground': config.get_str('dark_text'),
                 'activeforeground': 'grey4',
-                'disabledforeground': f'#{int(r/384):02x}{int(g/384):02x}{int(b/384):02x}',
+                'disabledforeground': f'#{int(r / 384):02x}{int(g / 384):02x}{int(b / 384):02x}',
                 'highlight': config.get_str('dark_highlight'),
-                # Font only supports Latin 1 / Supplement / Extended, and a
-                # few General Punctuation and Mathematical Operators
-                # LANG: Label for commander name in main window
-                'font': (theme > 1 and not 0x250 < ord(tr.tl('Cmdr')[0]) < 0x3000 and
-                         tk_font.Font(family='Euro Caps', size=10, weight=tk_font.NORMAL) or
-                         'TkDefaultFont'),
+                'font': chosen_font,
             }
 
     def update(self, widget: tk.Widget) -> None:
@@ -341,42 +345,30 @@ class _Theme:
     # Apply current theme to a single widget
     def _update_widget(self, widget: tk.Widget | tk.BitmapImage) -> None:  # noqa: CCR001, C901
         if widget not in self.widgets:
-            if isinstance(widget, tk.Widget):
-                w_class = widget.winfo_class()
-                w_keys: list[str] = widget.keys()
+            w_class = widget.winfo_class() if isinstance(widget, tk.Widget) else ''
+            w_keys = widget.keys() if isinstance(widget, tk.Widget) else []
+            w_text = widget["text"] if "text" in w_keys else ""
+            raise ValueError(f'{w_class} {widget} "{w_text}"')
 
-            else:
-                # There is no tk.BitmapImage.winfo_class()
-                w_class = ''
-                # There is no tk.BitmapImage.keys()
-                w_keys = []
-
-            assert_str = f'{w_class} {widget} "{"text" in w_keys and widget["text"]}"'
-            raise ValueError(assert_str)
-
-        attribs: set = self.widgets.get(widget, set())
+        attribs = self.widgets.get(widget, set())
 
         try:
             if isinstance(widget, tk.BitmapImage):
-                # not a widget
                 if 'fg' not in attribs:
                     widget['foreground'] = self.current['foreground']
-
                 if 'bg' not in attribs:
                     widget['background'] = self.current['background']
 
-            elif 'cursor' in widget.keys() and str(widget['cursor']) not in ['', 'arrow']:
+            elif 'cursor' in widget.keys() and str(widget['cursor']) not in ('', 'arrow'):
                 # Hack - highlight widgets like HyperlinkLabel with a non-default cursor
                 if 'fg' not in attribs:
                     widget['foreground'] = self.current['highlight']
                     if 'insertbackground' in widget.keys():  # tk.Entry
                         widget['insertbackground'] = self.current['foreground']
-
                 if 'bg' not in attribs:
                     widget['background'] = self.current['background']
                     if 'highlightbackground' in widget.keys():  # tk.Entry
                         widget['highlightbackground'] = self.current['background']
-
                 if 'font' not in attribs:
                     widget['font'] = self.current['font']
 
@@ -386,11 +378,9 @@ class _Theme:
                     widget['foreground'] = self.current['foreground']
                     widget['activeforeground'] = self.current['activeforeground']
                     widget['disabledforeground'] = self.current['disabledforeground']
-
                 if 'bg' not in attribs:
                     widget['background'] = self.current['background']
                     widget['activebackground'] = self.current['activebackground']
-
                 if 'font' not in attribs:
                     widget['font'] = self.current['font']
 
@@ -398,10 +388,8 @@ class _Theme:
                 # e.g. ttk.Label
                 if 'fg' not in attribs:
                     widget['foreground'] = self.current['foreground']
-
                 if 'bg' not in attribs:
                     widget['background'] = self.current['background']
-
                 if 'font' not in attribs:
                     widget['font'] = self.current['font']
 
@@ -412,16 +400,15 @@ class _Theme:
                     widget['highlightbackground'] = self.current['disabledforeground']
 
         except Exception:
-            logger.exception(f'Plugin widget issue ? {widget=}')
+            logger.exception(f'Plugin widget issue? {widget=}')
 
     # Apply configured theme
-
-    def apply(self, root: tk.Tk) -> None:  # noqa: CCR001, C901
+    def apply(self, root: tk.Tk) -> None:  # noqa: CCR001
         theme = config.get_int('theme')
         self._colors(root, theme)
 
         # Apply colors
-        for widget in set(self.widgets):
+        for widget in list(self.widgets.keys()):
             if isinstance(widget, tk.Widget) and not widget.winfo_exists():
                 self.widgets.pop(widget)  # has been destroyed
             else:
@@ -436,11 +423,9 @@ class _Theme:
             if isinstance(pair[0], tk.Menu):
                 if theme == self.THEME_DEFAULT:
                     root['menu'] = pair[0]
-
                 else:  # Dark *or* Transparent
                     root['menu'] = ''
                     pair[theme].grid(**gridopts)
-
             else:
                 pair[theme].grid(**gridopts)
 
@@ -449,66 +434,38 @@ class _Theme:
         self.active = theme
 
         if sys.platform == 'win32':
-            import win32con
-
-            # FIXME: Lose the "treat this like a boolean" bullshit
-            if theme == self.THEME_DEFAULT:
-                root.overrideredirect(False)
-
-            else:
-                root.overrideredirect(True)
-
-            if theme == self.THEME_TRANSPARENT:
-                root.attributes("-transparentcolor", 'grey4')
-
-            else:
-                root.attributes("-transparentcolor", '')
+            root.overrideredirect(theme != self.THEME_DEFAULT)
+            root.attributes("-transparentcolor", 'grey4' if theme == self.THEME_TRANSPARENT else '')
 
             root.withdraw()
             root.update_idletasks()  # Size and windows styles get recalculated here
             hwnd = win32gui.GetParent(root.winfo_id())
-            win32gui.SetWindowLong(hwnd, win32con.GWL_STYLE,
-                                   win32gui.GetWindowLong(hwnd, win32con.GWL_STYLE)
-                                   & ~win32con.WS_MAXIMIZEBOX)  # disable maximize
+            win32gui.SetWindowLong(
+                hwnd,
+                win32con.GWL_STYLE,
+                win32gui.GetWindowLong(hwnd, win32con.GWL_STYLE) & ~win32con.WS_MAXIMIZEBOX
+            )
 
+            ex_style = win32con.WS_EX_APPWINDOW
             if theme == self.THEME_TRANSPARENT:
-                win32gui.SetWindowLong(hwnd, win32con.GWL_EXSTYLE,
-                                       win32con.WS_EX_APPWINDOW | win32con.WS_EX_LAYERED)  # Add to taskbar
+                ex_style |= win32con.WS_EX_LAYERED
 
-            else:
-                win32gui.SetWindowLong(hwnd, win32con.GWL_EXSTYLE, win32con.WS_EX_APPWINDOW)  # Add to taskbar
-
+            win32gui.SetWindowLong(hwnd, win32con.GWL_EXSTYLE, ex_style)
             root.deiconify()
             root.wait_visibility()  # need main window to be displayed before returning
-
         else:
             root.withdraw()
             root.update_idletasks()  # Size gets recalculated here
             if dpy:
-                xroot = Window()
-                parent = Window()
-                children = Window()
+                xroot, parent, children = Window(), Window(), Window()
                 nchildren = c_uint()
                 XQueryTree(dpy, root.winfo_id(), byref(xroot), byref(parent), byref(children), byref(nchildren))
-                if theme == self.THEME_DEFAULT:
-                    wm_hints = motif_wm_hints_normal
-
-                else:  # Dark *or* Transparent
-                    wm_hints = motif_wm_hints_dark
-
-                XChangeProperty(
-                    dpy, parent, motif_wm_hints_property, motif_wm_hints_property, 32, PropModeReplace, wm_hints, 5
-                )
-
+                wm_hints = motif_wm_hints_normal if theme == self.THEME_DEFAULT else motif_wm_hints_dark
+                XChangeProperty(dpy, parent, motif_wm_hints_property, motif_wm_hints_property, 32, PropModeReplace,
+                                wm_hints, 5)
                 XFlush(dpy)
-
             else:
-                if theme == self.THEME_DEFAULT:
-                    root.overrideredirect(False)
-
-                else:  # Dark *or* Transparent
-                    root.overrideredirect(True)
-
+                root.overrideredirect(theme != self.THEME_DEFAULT)
             root.deiconify()
             root.wait_visibility()  # need main window to be displayed before returning
 
@@ -517,5 +474,5 @@ class _Theme:
             root.minsize(self.minwidth, -1)
 
 
-# singleton
+# Singleton
 theme = _Theme()
