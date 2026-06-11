@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import base64
 import csv
-import datetime
 import hashlib
 import json
 import numbers
@@ -23,6 +22,7 @@ import threading
 import tkinter as tk
 import webbrowser
 import requests
+from datetime import datetime, timezone
 from enum import StrEnum
 from pathlib import Path
 from queue import Queue
@@ -141,7 +141,7 @@ class CAPIDataRawEndpoint:
     """Represents the last received CAPI response for a specific endpoint."""
 
     raw_data: str
-    query_time: datetime.datetime
+    query_time: datetime
     # TODO: Maybe requests.response status ?
 
 
@@ -151,7 +151,7 @@ class CAPIDataRaw:
     def __init__(self) -> None:
         self.raw_data: dict[str, CAPIDataRawEndpoint] = {}
 
-    def record_endpoint(self, endpoint: str, raw_data: str, query_time: datetime.datetime) -> None:
+    def record_endpoint(self, endpoint: str, raw_data: str, query_time: datetime) -> None:
         """Record the latest raw data for the given endpoint."""
         self.raw_data[endpoint] = CAPIDataRawEndpoint(raw_data, query_time)
 
@@ -784,7 +784,7 @@ class Session:
                 capi_data = CAPIData(capi_json, capi_host, capi_endpoint, monitor.cmdr)
                 self.capi_raw_data.record_endpoint(
                     capi_endpoint, r.content.decode(encoding='utf-8'),
-                    datetime.datetime.now(datetime.timezone.utc)
+                    datetime.now(timezone.utc)
                 )
 
             except requests.ConnectionError as e:
@@ -809,10 +809,10 @@ class Session:
             if 'timestamp' not in capi_data:
                 http_date = r.headers.get('Date')
                 if http_date:
-                    dt = datetime.datetime.strptime(http_date, "%a, %d %b %Y %H:%M:%S %Z")
-                    capi_data['timestamp'] = dt.replace(tzinfo=datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+                    dt = datetime.strptime(http_date, "%a, %d %b %Y %H:%M:%S %Z")
+                    capi_data['timestamp'] = dt.replace(tzinfo=timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
                 else:
-                    capi_data['timestamp'] = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+                    capi_data['timestamp'] = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
             return capi_data
 
         def handle_http_error(response: requests.Response, endpoint: str):
@@ -995,7 +995,7 @@ class Session:
             EDMCCAPIRequest(
                 capi_host='',
                 endpoint=EDMCCAPIRequest.REQUEST_WORKER_SHUTDOWN,
-                query_time=int(datetime.datetime.now(datetime.timezone.utc).timestamp())
+                query_time=int(datetime.now(timezone.utc).timestamp())
             )
         )
 
@@ -1124,7 +1124,7 @@ class Session:
                 except (KeyError, ValueError):
                     file_name += '.unknown station'
 
-            file_name += datetime.datetime.now().strftime('.%Y-%m-%dT%H.%M.%S')
+            file_name += datetime.now().strftime('.%Y-%m-%dT%H.%M.%S')
             file_name += '.json'
             with open(f'dump/{file_name}', 'wb') as h:
                 h.write(json.dumps(data, cls=CAPIDataEncoder,

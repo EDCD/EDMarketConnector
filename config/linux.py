@@ -17,8 +17,8 @@ if sys.platform != "linux":
 
 import pathlib
 from configparser import ConfigParser
-import datetime
 import tomli_w
+from datetime import datetime, timezone
 from typing import Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -123,7 +123,7 @@ class LinuxConfigMinimal:
         """Dump existing config to TOML file."""
         config_logger.debug("Generating New Config File")
         config_data: dict[str, Any] = {
-            "generated": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "generated": datetime.now(timezone.utc).isoformat(),
             "source": "linux_ini",
             "section": self.SECTION,
             "settings": self._get_settings_dict(),
