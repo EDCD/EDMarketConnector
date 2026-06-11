@@ -15,14 +15,14 @@ import os
 import pathlib
 import queue
 import re
-import signal
 import subprocess
 import sys
 import threading
 import webbrowser
 from os import environ
-from time import localtime, strftime, time
-from typing import TYPE_CHECKING, Any, Literal, MutableMapping
+from datetime import datetime, timezone
+from typing import TYPE_CHECKING, Any, Literal
+from collections.abc import MutableMapping
 from constants import applongname, appname, protocolhandler_redirect
 
 # Have this as early as possible for people running EDMarketConnector.exe
@@ -64,7 +64,6 @@ if __name__ == '__main__':
 
         sys.stdout = sys.stderr = open(log_file_path, mode='w', buffering=1)  # Do NOT use WITH here.
     # TODO: Test: Make *sure* this redirect is working, else py2exe is going to cause an exit popup
-
 
 # These need to be after the stdout/err redirect because they will cause
 # logging to be set up.
@@ -225,11 +224,13 @@ if __name__ == '__main__':  # noqa: C901
 
     if args.capi_pretend_down:
         import config as conf_module
+
         logger.info('Pretending CAPI is down')
         conf_module.capi_pretend_down = True
 
     if args.capi_use_debug_access_token:
         import config as conf_module
+
         with open(conf_module.config.app_dir_path / 'access_token.txt') as at:
             conf_module.capi_debug_access_token = at.readline().strip()
 
@@ -309,7 +310,7 @@ if __name__ == '__main__':  # noqa: C901
                     try:
                         # Get thread and process IDs
                         _, process_id = win32process.GetWindowThreadProcessId(hwnd)
-                    # Get the process handle
+                        # Get the process handle
                         return win32api.OpenProcess(win32con.PROCESS_QUERY_LIMITED_INFORMATION, False, process_id)
                     except Exception:
                         return None
@@ -359,6 +360,7 @@ if __name__ == '__main__':  # noqa: C901
                             return False  # Indicate window found, so stop iterating
                     # Indicate that EnumWindows() needs to continue iterating
                     return True  # Do not remove, else this function as a callback breaks
+
                 # This performs the edmc://auth check and forward
                 # EnumWindows() will iterate through all open windows, calling
                 # enumwindwsproc() on each.  When an invocation returns False it
@@ -424,18 +426,17 @@ if __name__ == '__main__':  # noqa: C901
             if git_branch == "develop" or (git_branch is not None and '-alpha0' in str(appversion())):
                 print("You're running in a DEVELOPMENT branch build. You might encounter bugs!")
 
-
 # See EDMCLogging.py docs.
 # isort: off
 if TYPE_CHECKING:
     import logging as standard_logging
+
     # Tell mypy that TRACE exists as an integer literal or type
     TRACE: int = standard_logging.TRACE  # type: ignore
 
     if sys.platform == 'win32':
         from simplesystray import SysTrayIcon
     # isort: on
-
 
 from concurrent.futures import ThreadPoolExecutor
 import tkinter as tk
@@ -787,7 +788,6 @@ class AppWindow:
         theme.register(frame)
         theme.apply(self.w)
 
-        self.w.bind('<Map>', self.onmap)  # Special handling for overrideredict
         self.w.bind('<Enter>', self.onenter)  # Special handling for transparency
         self.w.bind('<FocusIn>', self.onenter)  # Special handling for transparency
         self.w.bind('<Leave>', self.onleave)  # Special handling for transparency
@@ -1093,16 +1093,10 @@ class AppWindow:
                 if output_flags & config.OUT_MKT_CSV:
                     # Determine user-selected market export type (CSV, TAB, PIPE, SEMICOLON)
                     mkt_type = config.get_str('mkt_export_type', default='SEMICOLON')
-                    if mkt_type == 'CSV':
-                        kind = commodity.COMMODITY_CSV
-                    elif mkt_type == 'CSV_NEW':
-                        kind = commodity.COMMODITY_CSV_NEW
-                    elif mkt_type == 'TAB':
-                        kind = commodity.COMMODITY_TAB
-                    elif mkt_type == 'PIPE':
-                        kind = commodity.COMMODITY_PIPE
-                    else:
-                        kind = commodity.COMMODITY_SEMICOLON
+                    try:
+                        kind = commodity.CommodityExportKind[mkt_type]
+                    except KeyError:
+                        kind = commodity.CommodityExportKind.SEMICOLON
                     commodity.export(fixed, kind)
 
                 if output_flags & config.OUT_MKT_TD:
@@ -1185,9 +1179,9 @@ class AppWindow:
             return
 
         if not companion.session.retrying:
-            if time() < self.capi_query_holdoff_time:
+            if datetime.now(timezone.utc).timestamp() < self.capi_query_holdoff_time:
                 # Invoked by key while in cooldown
-                time_remaining = self.capi_query_holdoff_time - time()
+                time_remaining = self.capi_query_holdoff_time - datetime.now(timezone.utc).timestamp()
                 if play_sound and time_remaining < companion.capi_query_cooldown * 0.75:
                     self.status['text'] = ''
                     hotkeymgr.play_bad()
@@ -1200,7 +1194,7 @@ class AppWindow:
             self.button['state'] = self.theme_button['state'] = tk.DISABLED
             self.w.update_idletasks()
 
-        query_time = int(time())
+        query_time = int(datetime.now(timezone.utc).timestamp())
         logger.trace_if('capi.worker', 'Requesting full station data')
         config.set('querytime', query_time)
         logger.trace_if('capi.worker', 'Calling companion.session.station')
@@ -1243,7 +1237,8 @@ class AppWindow:
             return
 
         if not companion.session.retrying:
-            if time() < self.capi_fleetcarrier_query_holdoff_time:  # Was invoked while in cooldown
+            # Was invoked while in cooldown
+            if datetime.now(timezone.utc).timestamp() < self.capi_fleetcarrier_query_holdoff_time:
                 logger.debug('CAPI fleetcarrier query aborted, too soon since last request')
                 return
 
@@ -1251,7 +1246,7 @@ class AppWindow:
             self.status['text'] = tr.tl('Fetching data...')
             self.w.update_idletasks()
 
-        query_time = int(time())
+        query_time = int(datetime.now(timezone.utc).timestamp())
         logger.trace_if('capi.worker', 'Requesting Fleet Carrier data')
         config.set('fleetcarrierquerytime', query_time)
         logger.trace_if('capi.worker', 'Calling companion.session.fleetcarrier')
@@ -1286,170 +1281,171 @@ class AppWindow:
                 logger.error(msg)
                 raise ValueError(msg)
 
-            if capi_response.capi_data.source_endpoint == companion.CAPIEndpoint.FLEETCARRIER:
-                # Fleetcarrier CAPI response
-                # Validation
-                if 'name' not in capi_response.capi_data:
-                    # LANG: No data was returned for the fleetcarrier from the Frontier CAPI
-                    err = self.status['text'] = tr.tl('CAPI: No Fleet Carrier data returned')
+            match capi_response.capi_data.source_endpoint:
+                case companion.CAPIEndpoint.FLEETCARRIER:
+                    # Fleetcarrier CAPI response
+                    # Validation
+                    if 'name' not in capi_response.capi_data:
+                        # LANG: No data was returned for the fleetcarrier from the Frontier CAPI
+                        err = self.status['text'] = tr.tl('CAPI: No Fleet Carrier data returned')
 
-                elif not capi_response.capi_data.get('name', {}).get('callsign'):
-                    # LANG: We didn't have the fleetcarrier callsign when we should have
-                    err = self.status['text'] = tr.tl("CAPI: Fleet Carrier data incomplete")  # Shouldn't happen
+                    elif not capi_response.capi_data.get('name', {}).get('callsign'):
+                        # LANG: We didn't have the fleetcarrier callsign when we should have
+                        err = self.status['text'] = tr.tl("CAPI: Fleet Carrier data incomplete")  # Shouldn't happen
 
-                else:
-                    if __debug__:  # Recording
-                        companion.session.dump_capi_data(capi_response.capi_data)
+                    else:
+                        if __debug__:  # Recording
+                            companion.session.dump_capi_data(capi_response.capi_data)
 
-                    err = plug.notify_capi_fleetcarrierdata(capi_response.capi_data)
-                    self.status['text'] = err and err or ''
-                    if err:
-                        play_bad = True
+                        err = plug.notify_capi_fleetcarrierdata(capi_response.capi_data)
+                        self.status['text'] = err and err or ''
+                        if err:
+                            play_bad = True
 
-                    self.capi_fleetcarrier_query_holdoff_time = capi_response.query_time \
-                        + companion.capi_fleetcarrier_query_cooldown
+                        self.capi_fleetcarrier_query_holdoff_time = (capi_response.query_time
+                                                                     + companion.capi_fleetcarrier_query_cooldown)
 
-            # Other CAPI response
-            # Validation
-            elif 'commander' not in capi_response.capi_data:
-                # This can happen with EGS Auth if no commander created yet
-                # LANG: No data was returned for the commander from the Frontier CAPI
-                err = self.status['text'] = tr.tl('CAPI: No commander data returned')
+                case _:
+                    # Other CAPI response
+                    # Validation
+                    if 'commander' not in capi_response.capi_data:
+                        # This can happen with EGS Auth if no commander created yet
+                        # LANG: No data was returned for the commander from the Frontier CAPI
+                        err = self.status['text'] = tr.tl('CAPI: No commander data returned')
 
-            elif not capi_response.capi_data.get('commander', {}).get('name'):
-                # LANG: We didn't have the commander name when we should have
-                err = self.status['text'] = tr.tl("Who are you?!")  # Shouldn't happen
+                    elif not capi_response.capi_data.get('commander', {}).get('name'):
+                        # LANG: We didn't have the commander name when we should have
+                        err = self.status['text'] = tr.tl("Who are you?!")  # Shouldn't happen
 
-            elif (not capi_response.capi_data.get('lastSystem', {}).get('name')
-                  or (capi_response.capi_data['commander'].get('docked')
-                      and not capi_response.capi_data.get('lastStarport', {}).get('name'))):
-                # LANG: We don't know where the commander is, when we should
-                err = self.status['text'] = tr.tl("Where are you?!")  # Shouldn't happen
+                    elif (not capi_response.capi_data.get('lastSystem', {}).get('name')
+                          or (capi_response.capi_data['commander'].get('docked')
+                              and not capi_response.capi_data.get('lastStarport', {}).get('name'))):
+                        # LANG: We don't know where the commander is, when we should
+                        err = self.status['text'] = tr.tl("Where are you?!")  # Shouldn't happen
 
-            elif (
-                not capi_response.capi_data.get('ship', {}).get('name')
-                or not capi_response.capi_data.get('ship', {}).get('modules')
-            ):
-                # LANG: We don't know what ship the commander is in, when we should
-                err = self.status['text'] = tr.tl("What are you flying?!")  # Shouldn't happen
+                    elif (
+                            not capi_response.capi_data.get('ship', {}).get('name')
+                            or not capi_response.capi_data.get('ship', {}).get('modules')
+                    ):
+                        # LANG: We don't know what ship the commander is in, when we should
+                        err = self.status['text'] = tr.tl("What are you flying?!")  # Shouldn't happen
 
-            elif monitor.cmdr and capi_response.capi_data['commander']['name'] != monitor.cmdr:
-                # Companion API Commander doesn't match Journal
-                logger.trace_if('capi.worker', 'Raising CmdrError()')
-                raise companion.CmdrError()
+                    elif monitor.cmdr and capi_response.capi_data['commander']['name'] != monitor.cmdr:
+                        # Companion API Commander doesn't match Journal
+                        logger.trace_if('capi.worker', 'Raising CmdrError()')
+                        raise companion.CmdrError()
 
-            elif (
-                capi_response.auto_update and not monitor.state['OnFoot']
-                and not capi_response.capi_data['commander'].get('docked')
-            ):
-                # auto update is only when just docked
-                logger.warning(f"{capi_response.auto_update!r} and not {monitor.state['OnFoot']!r} and "
-                               f"not {capi_response.capi_data['commander'].get('docked')!r}")
-                raise companion.ServerLagging()
+                    elif (
+                            capi_response.auto_update and not monitor.state['OnFoot']
+                            and not capi_response.capi_data['commander'].get('docked')
+                    ):
+                        # auto update is only when just docked
+                        logger.warning(f"{capi_response.auto_update!r} and not {monitor.state['OnFoot']!r} and "
+                                       f"not {capi_response.capi_data['commander'].get('docked')!r}")
+                        raise companion.ServerLagging()
 
-            elif capi_response.capi_data['lastSystem']['name'] != monitor.state['SystemName']:
-                # CAPI system must match last journal one
-                logger.warning(f"{capi_response.capi_data['lastSystem']['name']!r} != "
-                               f"{monitor.state['SystemName']!r}")
-                raise companion.ServerLagging()
+                    elif capi_response.capi_data['lastSystem']['name'] != monitor.state['SystemName']:
+                        # CAPI system must match last journal one
+                        logger.warning(f"{capi_response.capi_data['lastSystem']['name']!r} != "
+                                       f"{monitor.state['SystemName']!r}")
+                        raise companion.ServerLagging()
 
-            elif capi_response.capi_data['lastStarport']['name'] != monitor.state['StationName']:
-                if monitor.state['OnFoot'] and monitor.state['StationName']:
-                    logger.warning(f"({capi_response.capi_data['lastStarport']['name']!r} != "
-                                   f"{monitor.state['StationName']!r}) AND "
-                                   f"{monitor.state['OnFoot']!r} and {monitor.state['StationName']!r}")
-                    raise companion.ServerLagging()
+                    elif capi_response.capi_data['lastStarport']['name'] != monitor.state['StationName']:
+                        if monitor.state['OnFoot'] and monitor.state['StationName']:
+                            logger.warning(f"({capi_response.capi_data['lastStarport']['name']!r} != "
+                                           f"{monitor.state['StationName']!r}) AND "
+                                           f"{monitor.state['OnFoot']!r} and {monitor.state['StationName']!r}")
+                            raise companion.ServerLagging()
 
-                if capi_response.capi_data['commander']['docked'] and monitor.state['StationName'] is None:
-                    # Likely (re-)Embarked on ship docked at an EDO settlement.
-                    # Both Disembark and Embark have `"Onstation": false` in Journal.
-                    # So there's nothing to tell us which settlement we're (still,
-                    # or now, if we came here in Apex and then recalled ship) docked at.
-                    logger.debug("docked AND monitor.state['StationName'] is None - so EDO settlement?")
-                    raise companion.NoMonitorStation()
+                        if capi_response.capi_data['commander']['docked'] and monitor.state['StationName'] is None:
+                            # Likely (re-)Embarked on ship docked at an EDO settlement.
+                            # Both Disembark and Embark have `"Onstation": false` in Journal.
+                            # So there's nothing to tell us which settlement we're (still,
+                            # or now, if we came here in Apex and then recalled ship) docked at.
+                            logger.debug("docked AND monitor.state['StationName'] is None - so EDO settlement?")
+                            raise companion.NoMonitorStation()
 
-                self.capi_query_holdoff_time = capi_response.query_time + companion.capi_query_cooldown
+                        self.capi_query_holdoff_time = capi_response.query_time + companion.capi_query_cooldown
 
-            elif capi_response.capi_data['lastStarport']['id'] != monitor.state['MarketID']:
-                logger.warning(f"MarketID mis-match: {capi_response.capi_data['lastStarport']['id']!r} !="
-                               f" {monitor.state['MarketID']!r}")
-                raise companion.ServerLagging()
+                    elif capi_response.capi_data['lastStarport']['id'] != monitor.state['MarketID']:
+                        logger.warning(f"MarketID mis-match: {capi_response.capi_data['lastStarport']['id']!r} !="
+                                       f" {monitor.state['MarketID']!r}")
+                        raise companion.ServerLagging()
 
-            elif not monitor.state['OnFoot'] and capi_response.capi_data['ship']['id'] != monitor.state['ShipID']:
-                # CAPI ship must match
-                logger.warning(f"not {monitor.state['OnFoot']!r} and "
-                               f"{capi_response.capi_data['ship']['id']!r} != {monitor.state['ShipID']!r}")
-                raise companion.ServerLagging()
+                    elif (not monitor.state['OnFoot'] and
+                          capi_response.capi_data['ship']['id'] != monitor.state['ShipID']):
+                        # CAPI ship must match
+                        logger.warning(f"not {monitor.state['OnFoot']!r} and "
+                                       f"{capi_response.capi_data['ship']['id']!r} != {monitor.state['ShipID']!r}")
+                        raise companion.ServerLagging()
 
-            elif (
-                not monitor.state['OnFoot']
-                and capi_response.capi_data['ship']['name'].lower() != monitor.state['ShipType']
-            ):
-                # CAPI ship type must match
-                logger.warning(f"not {monitor.state['OnFoot']!r} and "
-                               f"{capi_response.capi_data['ship']['name'].lower()!r} != "
-                               f"{monitor.state['ShipType']!r}")
-                raise companion.ServerLagging()
+                    elif (
+                            not monitor.state['OnFoot']
+                            and capi_response.capi_data['ship']['name'].lower() != monitor.state['ShipType']
+                    ):
+                        # CAPI ship type must match
+                        logger.warning(f"not {monitor.state['OnFoot']!r} and "
+                                       f"{capi_response.capi_data['ship']['name'].lower()!r} != "
+                                       f"{monitor.state['ShipType']!r}")
+                        raise companion.ServerLagging()
 
-            else:
-                # TODO: Change to depend on its own CL arg
-                if __debug__:  # Recording
-                    companion.session.dump_capi_data(capi_response.capi_data)
+                    else:
+                        # TODO: Change to depend on its own CL arg
+                        if __debug__:  # Recording
+                            companion.session.dump_capi_data(capi_response.capi_data)
 
-                if not monitor.state['ShipType']:  # Started game in SRV or fighter
-                    self.ship['text'] = ship_name_map.get(
-                        capi_response.capi_data['ship']['name'].lower(),
-                        capi_response.capi_data['ship']['name']
-                    )
-                    monitor.state['ShipID'] = capi_response.capi_data['ship']['id']
-                    monitor.state['ShipType'] = capi_response.capi_data['ship']['name'].lower()
+                        if not monitor.state['ShipType']:  # Started game in SRV or fighter
+                            self.ship['text'] = ship_name_map.get(
+                                capi_response.capi_data['ship']['name'].lower(),
+                                capi_response.capi_data['ship']['name']
+                            )
+                            monitor.state['ShipID'] = capi_response.capi_data['ship']['id']
+                            monitor.state['ShipType'] = capi_response.capi_data['ship']['name'].lower()
 
-                    if not monitor.state['Modules']:
-                        self.ship.configure(state=tk.DISABLED)
+                            if not monitor.state['Modules']:
+                                self.ship.configure(state=tk.DISABLED)
 
-                # We might have disabled this in the conditional above.
-                if monitor.state['Modules']:
-                    self.ship.configure(state=True)
+                        # We might have disabled this in the conditional above.
+                        if monitor.state['Modules']:
+                            self.ship.configure(state=True)
 
-                if monitor.state.get('SuitCurrent') is not None:
-                    if (loadout := capi_response.capi_data.get('loadout')) is not None:
-                        if (suit := loadout.get('suit')) is not None:
-                            if (suitname := suit.get('edmcName')) is not None:
-                                # We've been paranoid about loadout->suit->suitname, now just assume loadouts is there
-                                loadout_name = index_possibly_sparse_list(
-                                    capi_response.capi_data['loadouts'], loadout['loadoutSlotId']
-                                )['name']
+                        if monitor.state.get('SuitCurrent') is not None:
+                            match capi_response.capi_data:
+                                case {
+                                    'loadout': {'suit': {'edmcName': str(suitname)}, 'loadoutSlotId': slot_id},
+                                    'loadouts': list() as loadouts
+                                }:
+                                    loadout_name = index_possibly_sparse_list(loadouts, slot_id)['name']
+                                    self.suit['text'] = f'{suitname} ({loadout_name})'
 
-                                self.suit['text'] = f'{suitname} ({loadout_name})'
+                        self.suit_show_if_set()
+                        # Update Odyssey Suit data
+                        companion.session.suit_update(capi_response.capi_data)
 
-                self.suit_show_if_set()
-                # Update Odyssey Suit data
-                companion.session.suit_update(capi_response.capi_data)
+                        if capi_response.capi_data['commander'].get('credits') is not None:
+                            monitor.state['Credits'] = capi_response.capi_data['commander']['credits']
+                            monitor.state['Loan'] = capi_response.capi_data['commander'].get('debt', 0)
 
-                if capi_response.capi_data['commander'].get('credits') is not None:
-                    monitor.state['Credits'] = capi_response.capi_data['commander']['credits']
-                    monitor.state['Loan'] = capi_response.capi_data['commander'].get('debt', 0)
+                        # stuff we can do when not docked
+                        err = plug.notify_capidata(capi_response.capi_data, monitor.is_beta)
+                        self.status['text'] = err and err or ''
+                        if err:
+                            play_bad = True
 
-                # stuff we can do when not docked
-                err = plug.notify_capidata(capi_response.capi_data, monitor.is_beta)
-                self.status['text'] = err and err or ''
-                if err:
-                    play_bad = True
+                        should_return: bool
+                        new_data: dict[str, Any]
 
-                should_return: bool
-                new_data: dict[str, Any]
+                        should_return, new_data = killswitch.check_killswitch('capi.request./market', {})
+                        if should_return:
+                            logger.warning("capi.request./market has been disabled by killswitch.  Returning.")
 
-                should_return, new_data = killswitch.check_killswitch('capi.request./market', {})
-                if should_return:
-                    logger.warning("capi.request./market has been disabled by killswitch.  Returning.")
+                        else:
+                            # Export market data
+                            if not self.export_market_data(capi_response.capi_data):
+                                err = 'Error: Exporting Market data'
+                                play_bad = True
 
-                else:
-                    # Export market data
-                    if not self.export_market_data(capi_response.capi_data):
-                        err = 'Error: Exporting Market data'
-                        play_bad = True
-
-                self.capi_query_holdoff_time = capi_response.query_time + companion.capi_query_cooldown
+                        self.capi_query_holdoff_time = capi_response.query_time + companion.capi_query_cooldown
 
         except queue.Empty:
             logger.error('There was no response in the queue!')
@@ -1505,8 +1501,9 @@ class AppWindow:
             play_bad = True
 
         if not err:  # not self.status['text']:  # no errors
-            # LANG: Time when we last obtained Frontier CAPI data
-            self.status['text'] = strftime(tr.tl('Last updated at %H:%M:%S'), localtime(capi_response.query_time))
+            self.status['text'] = datetime.fromtimestamp(capi_response.query_time).strftime(
+                tr.tl('Last updated at %H:%M:%S')  # LANG: Time when we last obtained Frontier CAPI data
+            )
 
         if capi_response.play_sound and play_bad:
             hotkeymgr.play_bad()
@@ -1554,11 +1551,11 @@ class AppWindow:
             Needs to be dynamic to allow for changing language.
             """
             return {
-                None:         '',
-                'Idle':       '',
+                None: '',
+                'Idle': '',
                 'FighterCon': tr.tl('Fighter'),  # LANG: Multicrew role
-                'FireCon':    tr.tl('Gunner'),  # LANG: Multicrew role
-                'FlightCon':  tr.tl('Helm'),  # LANG: Multicrew role
+                'FireCon': tr.tl('Gunner'),  # LANG: Multicrew role
+                'FlightCon': tr.tl('Helm'),  # LANG: Multicrew role
             }.get(role, role)
 
         if monitor.thread is None:
@@ -1575,41 +1572,28 @@ class AppWindow:
             # Update main window
             self.cooldown()
             if monitor.cmdr and monitor.state['Captain']:
-                if not config.get_bool('hide_multicrew_captain', default=False):
-                    self.cmdr['text'] = f'{monitor.cmdr} / {monitor.state["Captain"]}'
-
-                else:
-                    self.cmdr['text'] = f'{monitor.cmdr}'
-
+                # Multicrew layout
+                self.cmdr['text'] = (
+                    monitor.cmdr if config.get_bool('hide_multicrew_captain', default=False)
+                    else f'{monitor.cmdr} / {monitor.state["Captain"]}'
+                )
                 self.ship_label['text'] = tr.tl('Role') + ':'  # LANG: Multicrew role label in main window
                 self.ship.configure(state=tk.NORMAL, text=crewroletext(monitor.state['Role']), url=None)
 
             elif monitor.cmdr:
-                if monitor.group and not config.get_bool("hide_private_group", default=False):
-                    self.cmdr['text'] = f'{monitor.cmdr} / {monitor.group}'
-
-                else:
-                    self.cmdr['text'] = monitor.cmdr
-
+                # Standard Layout
+                self.cmdr['text'] = (
+                    monitor.cmdr if monitor.group and not config.get_bool("hide_private_group", default=False)
+                    else f'{monitor.cmdr} / {monitor.group}'
+                )
                 self.ship_label['text'] = tr.tl('Ship') + ':'  # LANG: 'Ship' label in main UI
 
                 # TODO: Show something else when on_foot
-                if monitor.state['ShipName']:
-                    ship_text = monitor.state['ShipName']
-
-                else:
-                    ship_text = ship_name_map.get(monitor.state['ShipType'], monitor.state['ShipType'])
-
-                if not ship_text:
-                    ship_text = ''
+                ship_text = monitor.state['ShipName'] or ship_name_map.get(monitor.state['ShipType'],
+                                                                           monitor.state['ShipType']) or ''
 
                 # Ensure the ship type/name text is clickable, if it should be.
-                if monitor.state['Modules']:
-                    ship_state: Literal['normal', 'disabled'] = tk.NORMAL
-
-                else:
-                    ship_state = tk.DISABLED
-
+                ship_state: Literal['normal', 'disabled'] = tk.NORMAL if monitor.state['Modules'] else tk.DISABLED
                 self.ship.configure(text=ship_text, url=self.shipyard_url, state=ship_state)
 
             else:
@@ -1851,21 +1835,21 @@ class AppWindow:
 
     def cooldown(self) -> None:
         """Display and update the cooldown timer for 'Update' button."""
-        if time() < self.capi_query_holdoff_time:
+        if datetime.now(timezone.utc).timestamp() < self.capi_query_holdoff_time:
             # Update button in main window
-            cooldown_time = int(self.capi_query_holdoff_time - time())
+            cooldown_time = int(self.capi_query_holdoff_time - datetime.now(timezone.utc).timestamp())
             # LANG: Cooldown on 'Update' button
             self.button['text'] = self.theme_button['text'] = tr.tl('cooldown {SS}s').format(SS=cooldown_time)
             self.w.after(1000, self.cooldown)
         else:
             self.button['text'] = self.theme_button['text'] = tr.tl('Update')  # LANG: Update button in main window
             self.button['state'] = self.theme_button['state'] = (
-                monitor.cmdr and
-                monitor.mode and
-                monitor.mode != 'CQC' and
-                not monitor.state['Captain'] and
-                monitor.state['SystemName'] and
-                tk.NORMAL or tk.DISABLED
+                    monitor.cmdr and
+                    monitor.mode and
+                    monitor.mode != 'CQC' and
+                    not monitor.state['Captain'] and
+                    monitor.state['SystemName'] and
+                    tk.NORMAL or tk.DISABLED
             )
 
     if sys.platform == 'win32':
@@ -1993,7 +1977,7 @@ class AppWindow:
         """
         default_extension: str = ''
 
-        timestamp: str = strftime('%Y-%m-%dT%H.%M.%S', localtime())
+        timestamp: str = datetime.now().strftime('%Y-%m-%dT%H.%M.%S')
         f = tkinter.filedialog.asksaveasfilename(
             parent=self.w,
             defaultextension=default_extension,
@@ -2121,12 +2105,6 @@ class AppWindow:
         self.w.wait_visibility()  # Need main window to be re-created before returning
         theme.active = None  # So theme will be re-applied on map
 
-    # TODO: Confirm this is unused and remove.
-    def onmap(self, event=None) -> None:
-        """Perform a now unused function."""
-        if event.widget == self.w:
-            theme.apply(self.w)
-
     def onenter(self, event=None) -> None:
         """Handle when our window gains focus."""
         if config.get_int('theme') == theme.THEME_TRANSPARENT:
@@ -2142,11 +2120,6 @@ class AppWindow:
             self.blank_menubar.grid(row=0, columnspan=2, sticky=tk.NSEW)
 
 
-def test_logging() -> None:
-    """Simple test of top level logging."""
-    logger.debug('Test from EDMarketConnector.py top-level test_logging()')
-
-
 def setup_killswitches(filename: str | None):
     """Download and setup the main killswitch list."""
     logger.debug('fetching killswitches...')
@@ -2156,85 +2129,84 @@ def setup_killswitches(filename: str | None):
     killswitch.setup_main_list(filename)
 
 
-def show_killswitch_poppup(root=None):
+def show_killswitch_popup(root=None):
     """Show a warning popup if there are any killswitches that match the current version."""
-    if len(kills := killswitch.kills_for_version()) == 0:
+    if not (kills := killswitch.kills_for_version()):
         return
 
     text = (
         "Some EDMC Features have been disabled due to known issues.\n"
-        "Please update EDMC as soon as possible to resolve any issues.\n"
+        "Please update EDMC as soon as possible to resolve any issues."
     )
 
     tl = tk.Toplevel(root)
-    tl.wm_attributes('-topmost', True)
-    tl.geometry(f'+{root.winfo_rootx()}+{root.winfo_rooty()}')
-
+    tl.attributes('-topmost', True)
+    if root:
+        tl.geometry(f'+{root.winfo_rootx()}+{root.winfo_rooty()}')
     tl.columnconfigure(1, weight=1)
     tl.title("EDMC Features have been disabled")
 
     frame = tk.Frame(tl)
-    frame.grid()
-    t = tk.Label(frame, text=text)
-    t.grid(columnspan=2)
-    idx = 1
+    frame.grid(sticky=tk.NSEW)
 
+    tk.Label(frame, text=text, justify=tk.LEFT).grid(row=0, column=0, columnspan=2, pady=(0, 10))
+    idx = 1
     for version in kills:
-        tk.Label(frame, text=f'Version: {version.version}').grid(row=idx, sticky=tk.W)
+        tk.Label(
+            frame, text=f'Version: {version.version}', font=('Helvetica', 10, 'bold')
+        ).grid(row=idx, column=0, sticky=tk.W)
         idx += 1
-        for id, kill in version.kills.items():
-            tk.Label(frame, text=id).grid(column=0, row=idx, sticky=tk.W, padx=(10, 0))
-            tk.Label(frame, text=kill.reason).grid(column=1, row=idx, sticky=tk.E, padx=(0, 10))
+        for kill_id, kill in version.kills.items():
+            tk.Label(frame, text=kill_id).grid(row=idx, column=0, sticky=tk.W, padx=(10, 0))
+            tk.Label(frame, text=kill.reason).grid(row=idx, column=1, sticky=tk.E, padx=(0, 10))
             idx += 1
         idx += 1
 
     ok_button = ttk.Button(frame, text="Ok", command=tl.destroy)
-    ok_button.grid(columnspan=2, sticky=tk.EW)
+    ok_button.grid(row=idx, column=0, columnspan=2, sticky=tk.EW, pady=(10, 0))
 
 
 def validate_providers():
     """Check if Config has an invalid provider set, and reset to default if we do."""
+    provider_schema = {
+        "station_provider": ("station_url", "EDSM", "Station"),
+        "shipyard_provider": ("shipyard_url", "EDSY", "Shipyard"),
+        "system_provider": ("system_url", "EDSM", "System"),
+    }
+
     reset_providers = {}
-    station_provider: str = config.get_str("station_provider")
-    if station_provider not in plug.provides('station_url'):
-        logger.error("Station Provider Not Valid. Setting to Default.")
-        if config.get_str('station_provider'):  # Only generate a pop-up if an invalid entry exists, not no value.
-            reset_providers["Station"] = (station_provider, "EDSM")
-        config.set('station_provider', 'EDSM')
-
-    shipyard_provider: str = config.get_str("shipyard_provider")
-    if shipyard_provider not in plug.provides('shipyard_url'):
-        logger.error("Shipyard Provider Not Valid. Setting to Default.")
-        if config.get_str('shipyard_provider'):  # Only generate a pop-up if an invalid entry exists, not no value.
-            reset_providers["Shipyard"] = (shipyard_provider, "EDSY")
-        config.set('shipyard_provider', 'EDSY')
-
-    system_provider: str = config.get_str("system_provider")
-    if system_provider not in plug.provides('system_url'):
-        logger.error("System Provider Not Valid. Setting to Default.")
-        if config.get_str('system_provider'):  # Only generate a pop-up if an invalid entry exists, not no value.
-            reset_providers["System"] = (system_provider, "EDSM")
-        config.set('system_provider', 'EDSM')
+    for config_key, (plugin_key, default_val, display_name) in provider_schema.items():
+        current_provider = config.get_str(config_key)
+        if current_provider not in plug.provides(plugin_key):
+            logger.error(f"{display_name} Provider Not Valid. Setting to Default.")
+            if current_provider:
+                reset_providers[display_name] = (current_provider, default_val)
+            config.set(config_key, default_val)
 
     if not reset_providers:
         return
 
-    # LANG: Popup-text about Reset Providers
-    popup_text = tr.tl(r'One or more of your URL Providers were invalid, and have been reset:\r\n\r\n')
+    lines = [
+        # LANG: Popup-text about Reset Providers
+        tr.tl(r'One or more of your URL Providers were invalid, and have been reset:\r\n\r\n')
+    ]
+
     for provider, (old_prov, new_prov) in reset_providers.items():
         # LANG: Text About What Provider Was Reset
-        popup_text += tr.tl(r'{PROVIDER} was set to {OLDPROV}, and has been reset to {NEWPROV}\r\n').format(
+        msg = tr.tl(r'{PROVIDER} was set to {OLDPROV}, and has been reset to {NEWPROV}\r\n').format(
             PROVIDER=provider,
             OLDPROV=old_prov,
             NEWPROV=new_prov
         )
-    # And now we do need these to be actual \r\n
-    popup_text = popup_text.replace('\\n', '\n').replace('\\r', '\r')
+        lines.append(msg)
+
+    # Replaces the manual raw literal escaping hacks (\r\n -> actual linebreaks)
+    popup_text = "".join(lines).replace('\\n', '\n').replace('\\r', '\r')
 
     tk.messagebox.showinfo(
         # LANG: Popup window title for Reset Providers
-        tr.tl('EDMC: Default Providers Reset'),
-        popup_text,
+        title=tr.tl('EDMC: Default Providers Reset'),
+        message=popup_text,
         parent=root
     )
 
@@ -2287,18 +2259,12 @@ sys.path: {sys.path}'''
         # Older Windows Versions and builds have issues with UTF-8, so only
         # even attempt this where we think it will be safe.
 
-        if sys.platform == 'win32':
-            windows_ver = sys.getwindowsversion()
-
         # <https://en.wikipedia.org/wiki/Windows_10_version_history#Version_1903_(May_2019_Update)>
         # Windows 19, 1903 was build 18362
         if (
-            sys.platform != 'win32'
-            or (
-                windows_ver.major == 10
-                and windows_ver.build >= 18362
-            )
-            or windows_ver.major > 10  # Paranoid future check
+                sys.platform != 'win32'
+                or (windows_ver := sys.getwindowsversion()).major > 10  # Paranoid future check
+                or (windows_ver.major == 10 and windows_ver.build >= 18362)
         ):
             # Set that same language, but utf8 encoding (it was probably cp1252
             # or equivalent for other languages).
@@ -2331,32 +2297,6 @@ sys.path: {sys.path}'''
     # Create protocol handler
     protocol.protocolhandler = protocol.get_handler_impl()()
 
-    # TODO: unittests in place of these
-    # logger.debug('Test from __main__')
-    # test_logging()
-
-    class A:
-        """Simple top-level class."""
-
-        class B:
-            """Simple second-level class."""
-
-            def __init__(self):
-                logger.debug('A call from A.B.__init__')
-                self.__test()
-                _ = self.test_prop
-
-            def __test(self):
-                logger.debug("A call from A.B.__test")
-
-            @property
-            def test_prop(self):
-                """Test property."""
-                logger.debug("test log from property")
-                return "Test property is testy"
-
-    # abinit = A.B()
-
     # Plain, not via `logger`
     print(f'{applongname} {appversion()}')
 
@@ -2365,8 +2305,9 @@ sys.path: {sys.path}'''
     setup_killswitches(args.killswitches_file)
 
     root = tk.Tk(className=appname.lower())
-    if sys.platform != 'win32' and ((f := config.get_str('font')) is not None or f != ''):
-        size = config.get_int('font_size', default=-1)
+
+    if sys.platform != 'win32' and (f := config.get_str('font')):
+        size = config.get_int('font_size', default=10)
         if size == -1:
             size = 10
 
@@ -2403,7 +2344,7 @@ sys.path: {sys.path}'''
         ).format(ERR=err)
         detail = detail.replace('\\n', '\n').replace('\\r', '\r')
         msg = tk.messagebox.askyesno(
-            title=title, message=message, detail=detail, icon=tkinter.messagebox.ERROR, type=tkinter.messagebox.YESNO,
+            title=title, message=message, detail=detail, icon=tk.messagebox.ERROR, type=tk.messagebox.YESNO,
             parent=root
         )  # type: ignore
         if msg:
@@ -2411,7 +2352,8 @@ sys.path: {sys.path}'''
                 "https://github.com/EDCD/EDMarketConnector/issues/new?"
                 "assignees=&labels=bug%2C+unconfirmed&projects=&template=bug_report.md&title="
             )
-        os.kill(os.getpid(), signal.SIGTERM)
+        root.destroy()
+        sys.exit(1)
 
     def messagebox_broken_plugins():
         """Display message about 'broken' plugins that failed to load."""
@@ -2444,7 +2386,7 @@ sys.path: {sys.path}'''
     def messagebox_not_py3():
         """Display message about plugins not updated for Python 3.x."""
         plugins_not_py3_last = config.get_int('plugins_not_py3_last', default=0)
-        if (plugins_not_py3_last + 86400) < int(time()) and plug.PLUGINS_not_py3:
+        if (plugins_not_py3_last + 86400) < int(datetime.now(timezone.utc).timestamp()) and plug.PLUGINS_not_py3:
             # LANG: Popup-text about 'active' plugins without Python 3.x support
             popup_text = tr.tl(
                 "One or more of your enabled plugins do not yet have support for Python 3.x. Please see the "
@@ -2470,20 +2412,18 @@ sys.path: {sys.path}'''
                 popup_text,
                 parent=root
             )
-            config.set('plugins_not_py3_last', int(time()))
+            config.set('plugins_not_py3_last', int(datetime.now(timezone.utc).timestamp()))
 
     # UI Transparency
-    ui_transparency = config.get_int('ui_transparency')
-    if ui_transparency == 0:
-        ui_transparency = 100
+    ui_transparency = config.get_int('ui_transparency') or 100
 
-    root.wm_attributes('-alpha', ui_transparency / 100)
+    root.attributes('-alpha', ui_transparency / 100)  # Modernized legacy wm_attributes call
     # Display message box about plugins that failed to load
     root.after(0, messagebox_broken_plugins)
     # Display message box about plugins without Python 3.x support
     root.after(1, messagebox_not_py3)
     # Show warning popup for killswitches matching current version
-    root.after(2, show_killswitch_poppup, root)
+    root.after(2, show_killswitch_popup, root)
     # Start the main event loop
     try:
         check_for_datafile_updates()

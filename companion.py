@@ -12,7 +12,6 @@ protocol used for the callback.
 from __future__ import annotations
 
 import base64
-import collections
 import csv
 import datetime
 import hashlib
@@ -21,23 +20,22 @@ import numbers
 import os
 import random
 import threading
-import time
 import tkinter as tk
-import urllib.parse
 import webbrowser
 import requests
-from email.utils import parsedate
 from enum import StrEnum
 from pathlib import Path
 from queue import Queue
-from typing import TYPE_CHECKING, Any, TypeVar, Iterator
+from typing import TYPE_CHECKING, Any, Iterator, Final, ClassVar
+from collections import UserDict
 from collections.abc import Mapping
 from dataclasses import dataclass
 from requests.adapters import HTTPAdapter
+from urllib.parse import parse_qs
 from urllib3.util.retry import Retry
-import config as conf_module
 import killswitch
 import protocol
+import config as conf_module
 from config import config, user_agent, IS_FROZEN
 from edmc_data import companion_category_map as category_map
 from EDMCLogging import get_main_logger
@@ -47,9 +45,9 @@ from l10n import translations as tr
 logger = get_main_logger()
 
 if TYPE_CHECKING:
-    UserDict = collections.UserDict[str, Any]  # indicate to our type checkers what this generic class holds normally
+    CAPIDictBase = UserDict[str, Any]  # indicate to our type checkers what this generic class holds normally
 else:
-    UserDict = collections.UserDict  # Otherwise simply use the actual class
+    CAPIDictBase = UserDict  # Otherwise simply use the actual class
 
 
 capi_query_cooldown = 60  # Minimum time between (sets of) CAPI queries
@@ -78,12 +76,13 @@ class CAPIData(UserDict):
         source_endpoint: str | None = None,
         request_cmdr: str | None = None
     ) -> None:
-        if data is None:
-            super().__init__()
-        elif isinstance(data, str):
-            super().__init__(json.loads(data))
-        else:
-            super().__init__(data)
+        match data:
+            case None:
+                super().__init__()
+            case str() as json_str:
+                super().__init__(json.loads(json_str))
+            case _:
+                super().__init__(data)
 
         self.original_data = self.data.copy()
 
@@ -108,15 +107,15 @@ class CAPIData(UserDict):
         # Check modules
         modules = last_starport.get('modules')
         if not isinstance(modules, dict):
-            if modules is None:
-                logger.debug('modules was None. FC or Damaged Station?')
-            elif isinstance(modules, list):
-                if not modules:
+            match modules:
+                case None:
+                    logger.debug('modules was None. FC or Damaged Station?')
+                case []:
                     logger.debug('modules is empty list. Damaged Station?')
-                else:
-                    logger.error(f'modules is non-empty list: {modules!r}')
-            else:
-                logger.error(f'modules is not None, list, or dict! type: {type(modules)}, content: {modules}')
+                case list(modules_list):
+                    logger.error(f'modules is non-empty list: {modules_list!r}')
+                case _:
+                    logger.error(f'modules is not None, list, or dict! type: {type(modules)}, content: {modules}')
             last_starport['modules'] = {}
 
         # Check ships
@@ -277,38 +276,44 @@ class Auth:
     # Currently the "Elite Dangerous Market Connector (EDCD/Athanasius)" one in
     # Athanasius' Frontier account
     # Obtain from https://auth.frontierstore.net/client/signup
-    CLIENT_ID = os.getenv('CLIENT_ID') or 'fb88d428-9110-475f-a3d2-dc151c2b9c7a'
-    FRONTIER_AUTH_PATH_AUTH = '/auth'
-    FRONTIER_AUTH_PATH_TOKEN = '/token'
-    FRONTIER_AUTH_PATH_DECODE = '/decode'
+    CLIENT_ID: Final[str] = os.getenv('CLIENT_ID') or 'fb88d428-9110-475f-a3d2-dc151c2b9c7a'
+    FRONTIER_AUTH_PATH_AUTH: Final[str] = '/auth'
+    FRONTIER_AUTH_PATH_TOKEN: Final[str] = '/token'
+    FRONTIER_AUTH_PATH_DECODE: Final[str] = '/decode'
 
-    _sessions_lock = threading.Lock()
-    _sessions: dict[str, requests.Session] = {}
+    _sessions_lock: ClassVar[threading.Lock] = threading.Lock()
+    _sessions: ClassVar[dict[str, requests.Session]] = {}
+
+    cmdr: str
+    verifier: bytes | None
+    state: str | None
+    requests_session: requests.Session
 
     def __init__(self, cmdr: str) -> None:
-        self.cmdr: str = cmdr
-        self.verifier: bytes | None = None
-        self.state: str | None = None
+        self.cmdr = cmdr
+        self.verifier = None
+        self.state = None
 
         # Thread-safe session singleton per commander
-        with self._sessions_lock:
-            if cmdr not in self._sessions:
-                session = requests.Session()
-                session.headers['User-Agent'] = user_agent
-                session.mount(
-                    "https://",
-                    HTTPAdapter(
-                        max_retries=Retry(
-                            total=3,
-                            backoff_factor=0.5,  # Exponential backoff: 0.5s, 1s, 2s
-                            status_forcelist=[429, 500, 502, 503, 504],
-                            allowed_methods=["GET", "POST"]
+        if cmdr not in self._sessions:
+            with self._sessions_lock:
+                if cmdr not in self._sessions:
+                    session = requests.Session()
+                    session.headers['User-Agent'] = user_agent
+                    session.mount(
+                        "https://",
+                        HTTPAdapter(
+                            max_retries=Retry(
+                                total=3,
+                                backoff_factor=0.5,  # Exponential backoff: 0.5s, 1s, 2s
+                                status_forcelist=[429, 500, 502, 503, 504],
+                                allowed_methods=["GET", "POST"]
+                            )
                         )
                     )
-                )
-                self._sessions[cmdr] = session
+                    self._sessions[cmdr] = session
 
-            self.requests_session = self._sessions[cmdr]
+        self.requests_session = self._sessions[cmdr]
 
     def refresh(self) -> str | None:
         """
@@ -398,7 +403,7 @@ class Auth:
         if '?' not in payload:
             raise CredentialsError('malformed payload')
 
-        data = urllib.parse.parse_qs(payload.split('?', 1)[1])
+        data = parse_qs(payload.split('?', 1)[1])
         logger.trace_if('capi.auth.refresh', f"OAuth callback params: {data}")
         if not self.state or data.get('state', [None])[0] != self.state:
             raise CredentialsError(f'Unexpected response from authorization {payload!r}')
@@ -716,7 +721,7 @@ class Session:
         """Worker thread that performs actual CAPI queries."""
         logger.debug('CAPI worker thread starting')
 
-        def capi_single_query(
+        def capi_single_query(  # noqa: CCR001
             capi_host: str,
             capi_endpoint: str,
             timeout: int = capi_default_requests_timeout
@@ -802,10 +807,12 @@ class Session:
                 logger.error('No commander in returned data')
 
             if 'timestamp' not in capi_data:
-                capi_data['timestamp'] = time.strftime(
-                    '%Y-%m-%dT%H:%M:%SZ', parsedate(r.headers['Date'])  # type: ignore
-                )
-
+                http_date = r.headers.get('Date')
+                if http_date:
+                    dt = datetime.datetime.strptime(http_date, "%a, %d %b %Y %H:%M:%S %Z")
+                    capi_data['timestamp'] = dt.replace(tzinfo=datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+                else:
+                    capi_data['timestamp'] = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
             return capi_data
 
         def handle_http_error(response: requests.Response, endpoint: str):
@@ -988,7 +995,7 @@ class Session:
             EDMCCAPIRequest(
                 capi_host='',
                 endpoint=EDMCCAPIRequest.REQUEST_WORKER_SHUTDOWN,
-                query_time=int(time.time())
+                query_time=int(datetime.datetime.now(datetime.timezone.utc).timestamp())
             )
         )
 
@@ -1117,7 +1124,7 @@ class Session:
                 except (KeyError, ValueError):
                     file_name += '.unknown station'
 
-            file_name += time.strftime('.%Y-%m-%dT%H.%M.%S', time.localtime())
+            file_name += datetime.datetime.now().strftime('.%Y-%m-%dT%H.%M.%S')
             file_name += '.json'
             with open(f'dump/{file_name}', 'wb') as h:
                 h.write(json.dumps(data, cls=CAPIDataEncoder,
@@ -1156,29 +1163,27 @@ class Session:
         if not self.credentials:
             raise ValueError("No Credentials Provided!")
 
-        cmdr = self.credentials["cmdr"]
-        is_beta = self.credentials["beta"]
-        galaxy = "live" if monitor.is_live_galaxy() else "legacy"
-        key = (cmdr, is_beta, galaxy)
+        key = (
+            self.credentials["cmdr"],
+            self.credentials["beta"],
+            "live" if monitor.is_live_galaxy() else "legacy"
+        )
 
-        with self._sessions_lock:
-            if key not in self._sessions:
-                s = requests.Session()
-                s.headers["User-Agent"] = user_agent
+        if key not in self._sessions:
+            with self._sessions_lock:
+                if key not in self._sessions:
+                    s = requests.Session()
+                    s.headers["User-Agent"] = user_agent
 
-                retry = Retry(total=5, connect=5, read=5, status=5, backoff_factor=0.5,
-                              status_forcelist=(429, 500, 502, 503, 504), allowed_methods=frozenset(["GET"]),
-                              raise_on_status=False)
+                    retry = Retry(
+                        total=5, connect=5, read=5, status=5, backoff_factor=0.5,
+                        status_forcelist=(429, 500, 502, 503, 504),
+                        allowed_methods=frozenset(["GET"]), raise_on_status=False
+                    )
+                    s.mount("https://", HTTPAdapter(max_retries=retry, pool_connections=4, pool_maxsize=8))
 
-                adapter = HTTPAdapter(
-                    max_retries=retry,
-                    pool_connections=4,
-                    pool_maxsize=8,
-                )
-                s.mount("https://", adapter)
-
-                self._sessions[key] = s
-            return self._sessions[key]
+                    self._sessions[key] = s
+        return self._sessions[key]
 
 
 ######################################################################
@@ -1288,10 +1293,7 @@ def ship(data: CAPIData) -> CAPIData:
     return filter_ship(data['ship'])
 
 
-V = TypeVar('V')
-
-
-def index_possibly_sparse_list(data: Mapping[str, V] | list[V], key: int) -> V:
+def index_possibly_sparse_list[V](data: Mapping[str, V] | list[V], key: int) -> V:  # noqa: D103
     """
     Index into a "list" that may or may not be sparseified into a dict.
 
