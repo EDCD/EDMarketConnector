@@ -353,51 +353,52 @@ class _Theme:
         attribs = self.widgets.get(widget, set())
 
         try:
-            if isinstance(widget, tk.BitmapImage):
-                if 'fg' not in attribs:
-                    widget['foreground'] = self.current['foreground']
-                if 'bg' not in attribs:
-                    widget['background'] = self.current['background']
+            match widget:
+                case tk.BitmapImage():
+                    if 'fg' not in attribs:
+                        widget['foreground'] = self.current['foreground']
+                    if 'bg' not in attribs:
+                        widget['background'] = self.current['background']
 
-            elif 'cursor' in widget.keys() and str(widget['cursor']) not in ('', 'arrow'):
-                # Hack - highlight widgets like HyperlinkLabel with a non-default cursor
-                if 'fg' not in attribs:
-                    widget['foreground'] = self.current['highlight']
-                    if 'insertbackground' in widget.keys():  # tk.Entry
-                        widget['insertbackground'] = self.current['foreground']
-                if 'bg' not in attribs:
-                    widget['background'] = self.current['background']
-                    if 'highlightbackground' in widget.keys():  # tk.Entry
-                        widget['highlightbackground'] = self.current['background']
-                if 'font' not in attribs:
-                    widget['font'] = self.current['font']
+                case _ if 'cursor' in widget.keys() and str(widget['cursor']) not in ('', 'arrow'):
+                    # Hack - highlight widgets like HyperlinkLabel with a non-default cursor
+                    if 'fg' not in attribs:
+                        widget['foreground'] = self.current['highlight']
+                        if 'insertbackground' in widget.keys():  # tk.Entry
+                            widget['insertbackground'] = self.current['foreground']
+                    if 'bg' not in attribs:
+                        widget['background'] = self.current['background']
+                        if 'highlightbackground' in widget.keys():  # tk.Entry
+                            widget['highlightbackground'] = self.current['background']
+                    if 'font' not in attribs:
+                        widget['font'] = self.current['font']
 
-            elif 'activeforeground' in widget.keys():
-                # e.g. tk.Button, tk.Label, tk.Menu
-                if 'fg' not in attribs:
-                    widget['foreground'] = self.current['foreground']
-                    widget['activeforeground'] = self.current['activeforeground']
-                    widget['disabledforeground'] = self.current['disabledforeground']
-                if 'bg' not in attribs:
-                    widget['background'] = self.current['background']
-                    widget['activebackground'] = self.current['activebackground']
-                if 'font' not in attribs:
-                    widget['font'] = self.current['font']
+                case _ if 'activeforeground' in widget.keys():
+                    # e.g. tk.Button, tk.Label, tk.Menu
+                    if 'fg' not in attribs:
+                        widget['foreground'] = self.current['foreground']
+                        widget['activeforeground'] = self.current['activeforeground']
+                        widget['disabledforeground'] = self.current['disabledforeground']
+                    if 'bg' not in attribs:
+                        widget['background'] = self.current['background']
+                        widget['activebackground'] = self.current['activebackground']
+                    if 'font' not in attribs:
+                        widget['font'] = self.current['font']
 
-            elif 'foreground' in widget.keys():
-                # e.g. ttk.Label
-                if 'fg' not in attribs:
-                    widget['foreground'] = self.current['foreground']
-                if 'bg' not in attribs:
-                    widget['background'] = self.current['background']
-                if 'font' not in attribs:
-                    widget['font'] = self.current['font']
+                case _ if 'foreground' in widget.keys():
+                    # e.g. ttk.Label
+                    if 'fg' not in attribs:
+                        widget['foreground'] = self.current['foreground']
+                    if 'bg' not in attribs:
+                        widget['background'] = self.current['background']
+                    if 'font' not in attribs:
+                        widget['font'] = self.current['font']
 
-            elif 'background' in widget.keys() or isinstance(widget, tk.Canvas):
-                # e.g. Frame, Canvas
-                if 'bg' not in attribs:
-                    widget['background'] = self.current['background']
-                    widget['highlightbackground'] = self.current['disabledforeground']
+                case _ if 'background' in widget.keys() or isinstance(widget, tk.Canvas):
+                    # e.g. Frame, Canvas
+                    if 'bg' not in attribs:
+                        widget['background'] = self.current['background']
+                        widget['highlightbackground'] = self.current['disabledforeground']
 
         except Exception:
             logger.exception(f'Plugin widget issue? {widget=}')
@@ -421,11 +422,12 @@ class _Theme:
                     widget.grid_remove()
 
             if isinstance(pair[0], tk.Menu):
-                if theme == self.THEME_DEFAULT:
-                    root['menu'] = pair[0]
-                else:  # Dark *or* Transparent
-                    root['menu'] = ''
-                    pair[theme].grid(**gridopts)
+                match theme:
+                    case self.THEME_DEFAULT:
+                        root['menu'] = pair[0]
+                    case _:  # Dark *or* Transparent
+                        root['menu'] = ''
+                        pair[theme].grid(**gridopts)
             else:
                 pair[theme].grid(**gridopts)
 
