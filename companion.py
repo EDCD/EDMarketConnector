@@ -23,7 +23,7 @@ import tkinter as tk
 import webbrowser
 import requests
 from datetime import datetime, timezone
-from enum import StrEnum
+from enum import StrEnum, IntEnum
 from pathlib import Path
 from queue import Queue
 from typing import TYPE_CHECKING, Any, Iterator, Final, ClassVar
@@ -552,10 +552,22 @@ class CAPIEndpoint(StrEnum):
     FLEETCARRIER = "/fleetcarrier"
 
 
+class SessionState(IntEnum):
+    """Enum to maintain known session states."""
+
+    INIT = 0
+    AUTH = 1
+    OK = 2
+
+
 class Session:
     """Methods for handling Frontier Auth and CAPI queries."""
 
-    STATE_INIT, STATE_AUTH, STATE_OK = list(range(3))
+    # COMPATIBILITY
+    STATE_INIT = SessionState.INIT
+    STATE_AUTH = SessionState.AUTH
+    STATE_OK = SessionState.OK
+
     _sessions_lock = threading.Lock()
     _sessions: dict[tuple[str, bool, str], requests.Session] = {}
 
@@ -564,7 +576,7 @@ class Session:
     _CAPI_PATH_STATION = '_edmc_station'
 
     def __init__(self) -> None:
-        self.state = Session.STATE_INIT
+        self.state = SessionState.INIT
         self.credentials: dict[str, Any] | None = None
         self.requests_session: requests.Session | None = None
         self.auth: Auth | None = None
@@ -602,7 +614,7 @@ class Session:
         self.requests_session = self._get_or_create_requests_session()
         self.requests_session.headers['Authorization'] = f'Bearer {access_token}'
 
-        self.state = Session.STATE_OK
+        self.state = SessionState.OK
 
     def login(self, cmdr: str | None = None, is_beta: bool | None = None) -> bool:
         """
@@ -631,13 +643,13 @@ class Session:
                 logger.error('self.credentials is None')
                 raise CredentialsError('Missing credentials')  # Shouldn't happen
 
-            if self.state == Session.STATE_OK:
+            if self.state == SessionState.OK:
                 logger.debug('already logged in (state == STATE_OK)')
                 return True  # already logged in
 
         else:
             credentials = {'cmdr': cmdr, 'beta': is_beta}
-            if self.credentials == credentials and self.state == Session.STATE_OK:
+            if self.credentials == credentials and self.state == SessionState.OK:
                 logger.debug(f'already logged in (is_beta = {is_beta})')
                 return True  # already logged in
 
@@ -645,7 +657,7 @@ class Session:
             self.reinit_session()
             self.credentials = credentials
 
-        self.state = Session.STATE_INIT
+        self.state = SessionState.INIT
         self.auth = Auth(self.credentials['cmdr'])  # type: ignore
 
         access_token = self.auth.refresh()
@@ -656,14 +668,14 @@ class Session:
             return True
 
         logger.debug('We do NOT have an access_token')
-        self.state = Session.STATE_AUTH
+        self.state = SessionState.AUTH
         return False  # Wait for callback
 
     # Callback from protocol handler
     def auth_callback(self) -> None:
         """Handle callback from edmc:// or localhost:/auth handler."""
         logger.debug('Handling auth callback')
-        if self.state != Session.STATE_AUTH:
+        if self.state != SessionState.AUTH:
             # Shouldn't be getting a callback
             logger.debug('Got an auth callback while not doing auth')
             raise CredentialsError('Got an auth callback while not doing auth')
@@ -675,7 +687,7 @@ class Session:
 
         except Exception:
             logger.exception('Failed, will try again next login or query')
-            self.state = Session.STATE_INIT  # Will try to authorize again on next login or query
+            self.state = SessionState.INIT  # Will try to authorize again on next login or query
             self.auth = None
             raise  # Bad thing happened
         if IS_FROZEN:
@@ -702,7 +714,7 @@ class Session:
 
         :param reopen: Whether to open a new session.
         """
-        self.state = Session.STATE_INIT
+        self.state = SessionState.INIT
         self.close()
         self.requests_session = None
 

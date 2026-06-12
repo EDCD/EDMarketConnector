@@ -63,7 +63,6 @@ if __name__ == '__main__':
         )
 
         sys.stdout = sys.stderr = open(log_file_path, mode='w', buffering=1)  # Do NOT use WITH here.
-    # TODO: Test: Make *sure* this redirect is working, else py2exe is going to cause an exit popup
 
 # These need to be after the stdout/err redirect because they will cause
 # logging to be set up.
@@ -901,7 +900,7 @@ class AppWindow:
 
     def suit_show_if_set(self) -> None:
         """Show UI Suit row if we have data, else hide."""
-        self.toggle_suit_row(self.suit['text'] != '')
+        self.toggle_suit_row(visible=bool(self.suit['text']))
 
     def toggle_suit_row(self, visible: bool | None = None) -> None:
         """
@@ -909,20 +908,17 @@ class AppWindow:
 
         :param visible: Force visibility to this.
         """
-        self.suit_shown = not visible
+        should_show = visible if visible is not None else not self.suit_shown
 
-        if not self.suit_shown:
-            pady = 2 if sys.platform != 'win32' else 0
-
+        if should_show:
+            pady = 0 if sys.platform == 'win32' else 2
             self.suit_label.grid(row=self.suit_grid_row, column=0, sticky=tk.W, padx=self.PADX, pady=pady)
             self.suit.grid(row=self.suit_grid_row, column=1, sticky=tk.EW, padx=self.PADX, pady=pady)
-            self.suit_shown = True
-
         else:
-            # Hide the Suit row
             self.suit_label.grid_forget()
             self.suit.grid_forget()
-            self.suit_shown = False
+
+        self.suit_shown = should_show
 
     def postprefs(self, dologin: bool = True, **postargs):
         """Perform necessary actions after the Preferences dialog is applied."""
@@ -1110,8 +1106,7 @@ class AppWindow:
 
         :param message: Status message to display.
         """
-        if not self.status['text']:
-            self.status['text'] = message
+        self.status['text'] = self.status['text'] or message
 
     def capi_request_data(self, event=None) -> None:  # noqa: CCR001
         """
