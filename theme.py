@@ -343,7 +343,7 @@ class _Theme:
                 self._update_widget(child)  # type: ignore
 
     # Apply current theme to a single widget
-    def _update_widget(self, widget: tk.Widget | tk.BitmapImage) -> None:  # noqa: CCR001, C901
+    def _update_widget(self, widget: tk.Widget | tk.BitmapImage) -> None:  # noqa: CCR001
         if widget not in self.widgets:
             w_class = widget.winfo_class() if isinstance(widget, tk.Widget) else ''
             w_keys = widget.keys() if isinstance(widget, tk.Widget) else []
