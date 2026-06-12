@@ -8,7 +8,6 @@ See LICENSE file.
 Because of various ttk limitations this app is an unholy mix of Tk and ttk widgets.
 So can't use ttk's theme support. So have to change colors manually.
 """
-from __future__ import annotations
 
 import os
 import sys
@@ -290,39 +289,40 @@ class _Theme:
         if not config.get_str('dark_highlight'):
             config.set('dark_highlight', 'white')
 
-        if theme == self.THEME_DEFAULT:
-            self.current = {
-                'background': style.lookup('TLabel', 'background'),
-                'foreground': style.lookup('TLabel', 'foreground'),
-                'activebackground': 'SystemHighlight' if sys.platform == 'win32' else style.lookup('TLabel',
-                                                                                                   'background',
-                                                                                                   ['active']),
-                'activeforeground': 'SystemHighlightText' if sys.platform == 'win32' else style.lookup('TLabel',
-                                                                                                       'foreground',
+        match theme:
+            case self.THEME_DEFAULT:
+                self.current = {
+                    'background': style.lookup('TLabel', 'background'),
+                    'foreground': style.lookup('TLabel', 'foreground'),
+                    'activebackground': 'SystemHighlight' if sys.platform == 'win32' else style.lookup('TLabel',
+                                                                                                       'background',
                                                                                                        ['active']),
-                'disabledforeground': style.lookup('TLabel', 'foreground', ['disabled']),
-                'highlight': 'blue',
-                'font': 'TkDefaultFont',
-            }
-        else:
-            r, g, b = root.winfo_rgb(config.get_str('dark_text'))
+                    'activeforeground': 'SystemHighlightText' if sys.platform == 'win32' else style.lookup('TLabel',
+                                                                                                           'foreground',
+                                                                                                           ['active']),
+                    'disabledforeground': style.lookup('TLabel', 'foreground', ['disabled']),
+                    'highlight': 'blue',
+                    'font': 'TkDefaultFont',
+                }
+            case _:
+                r, g, b = root.winfo_rgb(config.get_str('dark_text'))
 
-            # Font only supports Latin 1 / Supplement / Extended, and a
-            # few General Punctuation and Mathematical Operators
-            # LANG: Label for commander name in main window
-            use_euro_caps = theme > 1 and not (0x250 < ord(tr.tl('Cmdr')[0]) < 0x3000)
-            chosen_font = tk_font.Font(family='Euro Caps', size=10,
-                                       weight=tk_font.NORMAL) if use_euro_caps else 'TkDefaultFont'
+                # Font only supports Latin 1 / Supplement / Extended, and a
+                # few General Punctuation and Mathematical Operators
+                # LANG: Label for commander name in main window
+                use_euro_caps = theme > 1 and not (0x250 < ord(tr.tl('Cmdr')[0]) < 0x3000)
+                chosen_font = tk_font.Font(family='Euro Caps', size=10,
+                                           weight=tk_font.NORMAL) if use_euro_caps else 'TkDefaultFont'
 
-            self.current = {
-                'background': 'grey4',
-                'foreground': config.get_str('dark_text'),
-                'activebackground': config.get_str('dark_text'),
-                'activeforeground': 'grey4',
-                'disabledforeground': f'#{int(r / 384):02x}{int(g / 384):02x}{int(b / 384):02x}',
-                'highlight': config.get_str('dark_highlight'),
-                'font': chosen_font,
-            }
+                self.current = {
+                    'background': 'grey4',
+                    'foreground': config.get_str('dark_text'),
+                    'activebackground': config.get_str('dark_text'),
+                    'activeforeground': 'grey4',
+                    'disabledforeground': f'#{int(r / 384):02x}{int(g / 384):02x}{int(b / 384):02x}',
+                    'highlight': config.get_str('dark_highlight'),
+                    'font': chosen_font,
+                }
 
     def update(self, widget: tk.Widget) -> None:
         """
