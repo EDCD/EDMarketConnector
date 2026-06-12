@@ -12,8 +12,8 @@ import sys
 import os
 import uuid
 import winreg
-import datetime
 import tomli_w
+from datetime import datetime, timezone
 from config import config_logger, IS_FROZEN
 from win32comext.shell import shell
 from typing import Any, TYPE_CHECKING
@@ -76,7 +76,7 @@ class WinConfigMinimal:
         _, num_values, _ = winreg.QueryInfoKey(key)
 
         config_data: dict[str, Any] = {
-            "generated": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "generated": datetime.now(timezone.utc).isoformat(),
             "source": "windows_registry",
             "settings": {},
         }

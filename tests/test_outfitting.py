@@ -102,7 +102,7 @@ class TestOutfitting:
 
         content = export_file.read_text()
         assert "System,Station,Category,Name" in content
-        assert "Sol,Daedalus, hardpoint, Laser" in content
+        assert "Sol,Daedalus,hardpoint,Laser" in content
 
 
 @pytest.fixture(autouse=True)

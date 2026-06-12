@@ -1,215 +1,225 @@
 """Export ship loadout in ED Shipyard plain text format."""
+
 from __future__ import annotations
 
+from collections import defaultdict
+from collections.abc import Mapping
 import json
 import pathlib
 import re
-import time
-from collections import defaultdict
-from update import check_for_datafile_updates
-import outfitting
-import util_ships
+from datetime import datetime, timezone
+from typing import Any
 from config import config
 from edmc_data import edshipyard_slot_map as slot_map
 from edmc_data import ship_name_map
 from EDMCLogging import get_main_logger
+import outfitting
+from update import check_for_datafile_updates
+import util_ships
 
 logger = get_main_logger()
 
-__Module = dict[str, str | list[str]]
+type ModuleData = dict[str, Any]
 
-# Map API ship names to ED Shipyard names
 ship_map = ship_name_map.copy()
 
 # Ship masses
 ships_file = config.app_dir_path / "ships.json"
 if not ships_file.is_file():
     check_for_datafile_updates()
-    ships_file = config.app_dir_path / "ships.json"  # Probably first boot. Force update.
+    ships_file = (config.app_dir_path / "ships.json")  # Probably first boot. Force update.
 with open(ships_file, encoding="utf-8") as ships_file_handle:
-    ships = json.load(ships_file_handle)
+    ships: dict[str, Any] = json.load(ships_file_handle)
 
 
-def export(data, filename=None) -> None:  # noqa: C901, CCR001
-    """
-    Export ship loadout in E:D Shipyard plain text format.
+def export(data: Mapping[str, Any], filename: str | pathlib.Path | None = None) -> None:  # noqa: C901, CCR001
+    """Export ship loadout in E:D Shipyard plain text format.
 
     :param data: CAPI data.
     :param filename: Override default file name.
     """
-    def class_rating(module: __Module) -> str:
-        """
-        Return a string representation of the class of the given module.
 
-        :param module: Module data dict.
-        :return: Rating of the module.
-        """
-        mod_class = module['class']
-        mod_rating = module['rating']
-        mod_mount = module.get('mount')
-        mod_guidance: str = str(module.get('guidance'))
+    def class_rating(mod: ModuleData) -> str:
+        """Return a string representation of the class and grading of the given module."""
+        mod_class = mod.get("class", "")
+        mod_rating = mod.get("rating", "")
+        mod_mount = mod.get("mount")
+        mod_guidance = str(mod.get("guidance", ""))
 
-        ret = f'{mod_class}{mod_rating}'
-        if 'guidance' in module:  # Missiles
-            if mod_mount is not None:
-                mount = mod_mount[0]
+        ret = f"{mod_class}{mod_rating}"
 
-            else:
-                mount = 'F'
+        if "guidance" in mod:
+            mount = (mod_mount[0] if isinstance(mod_mount, (list, str)) and mod_mount else "F")
+            guidance = mod_guidance[0] if mod_guidance else ""
+            ret += f"/{mount}{guidance}"
+        elif "mount" in mod:  # Hardpoints
+            ret += f"/{mod_mount}"
+        elif "Cabin" in str(mod.get("name", "")):  # Passenger cabins
+            name_str = str(mod.get("name", ""))
+            ret += f"/{name_str[0]}" if name_str else "/"
 
-            guidance = mod_guidance[0]
-            ret += f'/{mount}{guidance}'
+        return f"{ret} "
 
-        elif 'mount' in module:  # Hardpoints
-            ret += f'/{mod_mount}'
+    querytime = config.get_int("querytime", default=int(datetime.now(timezone.utc).timestamp()))
 
-        elif 'Cabin' in module['name']:  # Passenger cabins
-            ret += f'/{module["name"][0]}'
-
-        return ret + ' '
-
-    querytime = config.get_int('querytime', default=int(time.time()))
-
-    loadout = defaultdict(list)
+    loadout: dict[str, list[str]] = defaultdict(list)
     mass = 0.0
     fuel = 0
     cargo = 0
-    fsd = None
+    fsd: ModuleData | None = None
     jumpboost = 0
 
-    for slot in sorted(data['ship']['modules']):
-        v = data['ship']['modules'][slot]
+    ship_payload = data.get("ship", {})
+    modules_payload = ship_payload.get("modules", {})
+
+    for slot in sorted(modules_payload):
+        v = modules_payload[slot]
         try:
-            if not v:
+            if not v or "module" not in v:
                 continue
 
-            module: __Module | None = outfitting.lookup(v['module'], ship_map)
-            if not module:
+            raw_module = outfitting.lookup(v["module"], ship_map)
+            if not raw_module:
                 continue
+
+            module = dict(raw_module)
 
             cr = class_rating(module)
-            mods = v.get('modifications') or v.get('WorkInProgress_modifications') or {}
-            if mods.get('OutfittingFieldType_Mass'):
-                mass += float(module.get('mass', 0.0) * mods['OutfittingFieldType_Mass']['value'])
+            mods = v.get("modifications") or v.get("WorkInProgress_modifications") or {}
 
+            base_mass = float(module.get("mass", 0.0))
+            if "OutfittingFieldType_Mass" in mods:
+                mass += base_mass * float(mods["OutfittingFieldType_Mass"].get("value", 1.0))
             else:
-                mass += float(module.get('mass', 0.0))  # type: ignore
+                mass += base_mass
+
+            module_name = str(module.get("name", ""))
+            module_class = str(module.get("class", "0"))
 
             # Specials
-            if 'Fuel Tank' in module['name']:
-                fuel += 2**int(module['class'])  # type: ignore
-                name = f'{module["name"]} (Capacity: {2**int(module["class"])})'  # type: ignore
-
-            elif 'Cargo Rack' in module['name']:
-                cargo += 2**int(module['class'])  # type: ignore
-                name = f'{module["name"]} (Capacity: {2**int(module["class"])})'  # type: ignore
-
+            if "Fuel Tank" in module_name:
+                capacity = 2 ** int(module_class) if module_class.isdigit() else 0
+                fuel += capacity
+                name = f"{module_name} (Capacity: {capacity})"
+            elif "Cargo Rack" in module_name:
+                capacity = 2 ** int(module_class) if module_class.isdigit() else 0
+                cargo += capacity
+                name = f"{module_name} (Capacity: {capacity})"
             else:
-                name = module['name']  # type: ignore
+                name = module_name
 
-            if name in ['Frame Shift Drive', 'Frame Shift Drive (SCO)']:
+            if name in ("Frame Shift Drive", "Frame Shift Drive (SCO)"):
                 fsd = module  # save for range calculation
+                if "OutfittingFieldType_FSDOptimalMass" in mods:
+                    fsd["optmass"] = float(fsd.get("optmass", 0.0)) * float(
+                        mods["OutfittingFieldType_FSDOptimalMass"].get("value", 1.0)
+                    )
+                if "OutfittingFieldType_MaxFuelPerJump" in mods:
+                    fsd["maxfuel"] = float(fsd.get("maxfuel", 0.0)) * float(
+                        mods["OutfittingFieldType_MaxFuelPerJump"].get("value", 1.0)
+                    )
 
-                if mods.get('OutfittingFieldType_FSDOptimalMass'):
-                    fsd['optmass'] *= mods['OutfittingFieldType_FSDOptimalMass']['value']
+            jumpboost += int(module.get("jumpboost", 0))
 
-                if mods.get('OutfittingFieldType_MaxFuelPerJump'):
-                    fsd['maxfuel'] *= mods['OutfittingFieldType_MaxFuelPerJump']['value']
-
-            jumpboost += module.get('jumpboost', 0)  # type: ignore
-
+            slot_lower = slot.lower()
             for slot_prefix, index in slot_map.items():
-                if slot.lower().startswith(slot_prefix):
+                if slot_lower.startswith(slot_prefix):
                     loadout[index].append(cr + name)
                     break
-
             else:
-                if slot.lower().startswith('slot'):
+                if slot_lower.startswith("slot"):
                     loadout[slot[-1]].append(cr + name)
-                elif not slot.lower().startswith('planetaryapproachsuite'):
-                    logger.debug(f'EDShipyard: Unknown slot {slot}')
+                elif not slot_lower.startswith("planetaryapproachsuite"):
+                    logger.debug(f"EDShipyard: Unknown slot {slot}")
 
         except ValueError as e:
-            logger.debug(f'EDShipyard: {e!r}')
+            logger.debug(f"EDShipyard: Parsing validation break: {e!r}")
             continue  # Silently skip unrecognized modules
 
-        except Exception:
-            if __debug__:
-                raise
+    raw_ship_name = ship_payload.get("name", "")
+    ship = ship_map.get(raw_ship_name.lower(), raw_ship_name)
+    custom_name = ship_payload.get("shipName")
 
     # Construct description
-    ship = ship_map.get(data['ship']['name'].lower(), data['ship']['name'])
-    if data['ship'].get('shipName') is not None:
-        _ships = f'{ship}, {data["ship"]["shipName"]}'
-
-    else:
-        _ships = ship
-
-    string = f'[{_ships}]\n'
+    _ships = f"{ship}, {custom_name}" if custom_name is not None else ship
+    string = f"[{_ships}]\n"
 
     slot_types = (
         'H', 'L', 'M', 'S', 'U', None, 'BH', 'RB', 'TM', 'FH', 'EC', 'PC', 'SS', 'FS', None, 'MC', None, '9', '8',
         '7', '6', '5', '4', '3', '2', '1'
     )
-    for slot in slot_types:
-        if not slot:
-            string += '\n'
+    for slot_key in slot_types:
+        if not slot_key:
+            string += "\n"
+        elif slot_key in loadout:
+            for name in loadout[slot_key]:
+                string += f"{slot_key}: {name}\n"
 
-        elif slot in loadout:
-            for name in loadout[slot]:
-                string += f'{slot}: {name}\n'
-
-    string += f'---\nCargo : {cargo} T\nFuel  : {fuel} T\n'
+    string += f"---\nCargo : {cargo} T\nFuel  : {fuel} T\n"
 
     # Add mass and range
-    ship_name = data['ship']['name'].lower()
-    if ship_name not in ship_name_map:
-        raise ValueError(f"Ship name '{data['ship']['name']}' not found in ship_name_map")
-    if ship_name_map[ship_name] not in ships:
-        raise ValueError(f"Mapped ship name '{ship_name_map[ship_name]}' not found in ships")
+    ship_lower_name = raw_ship_name.lower()
+    if ship_lower_name not in ship_name_map:
+        raise ValueError(f"Ship name '{raw_ship_name}' not found in ship_name_map")
+
+    mapped_name = ship_name_map[ship_lower_name]
+    if mapped_name not in ships:
+        raise ValueError(
+            f"Mapped ship name '{mapped_name}' not found in ships database"
+        )
 
     try:
-        mass += ships[ship_name_map[data['ship']['name'].lower()]]['hullMass']
-        string += f'Mass  : {mass:.2f} T empty\n        {mass + fuel + cargo:.2f} T full\n'
-        maxfuel = fsd.get('maxfuel', 0)  # type: ignore
-        fuelmul = fsd.get('fuelmul', 0)  # type: ignore
+        mass += ships[mapped_name]["hullMass"]
+        string += (
+            f"Mass  : {mass:.2f} T empty\n        {mass + fuel + cargo:.2f} T full\n"
+        )
 
-        try:
-            multiplier = pow(min(fuel, maxfuel) / fuelmul, 1.0 / fsd['fuelpower']) * fsd['optmass']  # type: ignore
-            range_unladen = multiplier / (mass + fuel) + jumpboost
-            range_laden = multiplier / (mass + fuel + cargo) + jumpboost
-            # As of 2021-04-07 edsy.org says text import not yet implemented, so ignore the possible issue with
-            # a locale that uses comma for decimal separator.
-        except ZeroDivisionError:
+        if fsd is not None:
+            maxfuel = float(fsd.get("maxfuel", 0.0))
+            fuelmul = float(fsd.get("fuelmul", 0.0))
+            optmass = float(fsd.get("optmass", 0.0))
+            fuelpower = float(fsd.get("fuelpower", 1.0))
+
+            try:
+                multiplier = (pow(min(fuel, maxfuel) / fuelmul, 1.0 / fuelpower) * optmass)
+                range_unladen = multiplier / (mass + fuel) + jumpboost
+                range_laden = multiplier / (mass + fuel + cargo) + jumpboost
+            except (ZeroDivisionError, ValueError):
+                range_unladen = range_laden = 0.0
+        else:
             range_unladen = range_laden = 0.0
-        string += (f'Range : {range_unladen:.2f} LY unladen\n'
-                   f'        {range_laden:.2f} LY laden\n')
+
+        string += f"Range : {range_unladen:.2f} LY unladen\n        {range_laden:.2f} LY laden\n"
 
     except Exception:
         if __debug__:
             raise
 
     if filename:
-        with open(filename, 'w') as h:
+        with open(filename, "w", encoding="utf-8") as h:
             h.write(string)
         return
 
     # Look for last ship of this type
-    ship = util_ships.ship_file_name(data['ship'].get('shipName'), data['ship']['name'])
-    regexp = re.compile(re.escape(ship) + r'\.\d{4}-\d\d-\d\dT\d\d\.\d\d\.\d\d\.txt')
-    out_dir = pathlib.Path(config.get_str('outdir'))
-    oldfiles = sorted(
-        [x for x in out_dir.iterdir() if regexp.match(x.name)],
-        key=lambda p: p.name  # Sort based on the filename string
+    ship_filename_base = util_ships.ship_file_name(custom_name, raw_ship_name)
+    regexp = re.compile(
+        re.escape(ship_filename_base) + r"\.\d{4}-\d\d-\d\dT\d\d\.\d\d\.\d\d\.txt"
     )
-    if oldfiles:
-        with (pathlib.Path(config.get_str('outdir')) / oldfiles[-1]).open() as h:
-            if h.read() == string:
-                return  # same as last time - don't write
+    out_dir = pathlib.Path(config.get_str("outdir"))
+
+    if out_dir.is_dir():
+        oldfiles = sorted(
+            [x for x in out_dir.iterdir() if regexp.match(x.name)],
+            key=lambda p: p.name,  # Sort based on the filename string
+        )
+        if oldfiles:
+            with oldfiles[-1].open(encoding="utf-8") as h:
+                if h.read() == string:
+                    return  # same as last time - don't write
 
     # Write
-    timestamp = time.strftime('%Y-%m-%dT%H.%M.%S', time.localtime(querytime))
-    filename = pathlib.Path(config.get_str('outdir')) / f'{ship}.{timestamp}.txt'
+    timestamp = datetime.fromtimestamp(querytime).strftime("%Y-%m-%dT%H.%M.%S")
+    final_output_path = out_dir / f"{ship_filename_base}.{timestamp}.txt"
 
-    with open(filename, 'w') as h:
+    with open(final_output_path, "w", encoding="utf-8") as h:
         h.write(string)

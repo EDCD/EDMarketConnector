@@ -687,22 +687,26 @@ class EDDN:
         :param data: The raw CAPI data.
         :return: Sanity-checked data.
         """
-        modules: dict[str, Any] = data['lastStarport'].get('modules')
-        if modules is None or not isinstance(modules, dict):
-            if modules is None:
+        modules: Any = data['lastStarport'].get('modules')
+        match modules:
+            case dict():
+                pass  # It's already a valid dict, do nothing
+
+            case None:
                 logger.debug('modules was None.  FC or Damaged Station?')
+                modules = {}
 
-            elif isinstance(modules, list):
-                if len(modules) == 0:
-                    logger.debug('modules is empty list. FC or Damaged Station?')
+            case []:
+                logger.debug('modules is empty list. FC or Damaged Station?')
+                modules = {}
 
-                else:
-                    logger.error(f'modules is non-empty list: {modules!r}')
+            case list() as modules_list:  # Use 'as' to capture the variable safely
+                logger.error(f'modules is non-empty list: {modules_list!r}')
+                modules = {}
 
-            else:
+            case _:
                 logger.error(f'modules was not None, a list, or a dict! type = {type(modules)}')
-            # Set a safe value
-            modules = {}
+                modules = {}
 
         ships: dict[str, Any] = data['lastStarport'].get('ships')
         if ships is None or not isinstance(ships, dict):
@@ -2221,18 +2225,15 @@ def filter_localised(d: Mapping[str, Any]) -> dict[str, Any]:
     """
     filtered: dict[str, Any] = {}
     for k, v in d.items():
-        if k.endswith('_Localised'):
-            pass
-
-        elif hasattr(v, 'items'):  # dict -> recurse
-            filtered[k] = filter_localised(v)
-
-        elif isinstance(v, list):  # list of dicts -> recurse
-            filtered[k] = [filter_localised(x) if hasattr(x, 'items') else x for x in v]
-
-        else:
-            filtered[k] = v
-
+        match k, v:
+            case key, _ if key.endswith('_Localised'):
+                pass
+            case _, dict() as dict_val:  # noqa: F841 Keep 'type() as x'
+                filtered[k] = filter_localised(v)
+            case _, list() as list_val:  # noqa: F841
+                filtered[k] = [filter_localised(x) if hasattr(x, 'items') else x for x in v]
+            case _:
+                filtered[k] = v
     return filtered
 
 
@@ -2245,18 +2246,15 @@ def capi_filter_localised(d: Mapping[str, Any]) -> dict[str, Any]:
     """
     filtered: dict[str, Any] = {}
     for k, v in d.items():
-        if EDDN.CAPI_LOCALISATION_RE.search(k):
-            pass
-
-        elif hasattr(v, 'items'):  # dict -> recurse
-            filtered[k] = capi_filter_localised(v)
-
-        elif isinstance(v, list):  # list of dicts -> recurse
-            filtered[k] = [capi_filter_localised(x) if hasattr(x, 'items') else x for x in v]
-
-        else:
-            filtered[k] = v
-
+        match k, v:
+            case key, _ if EDDN.CAPI_LOCALISATION_RE.search(key):
+                pass
+            case _, dict() as dict_val:
+                filtered[k] = capi_filter_localised(dict_val)
+            case _, list() as list_val:
+                filtered[k] = [capi_filter_localised(x) if isinstance(x, dict) else x for x in list_val]
+            case _:
+                filtered[k] = v
     return filtered
 
 
@@ -2506,15 +2504,13 @@ def journal_entry(  # noqa: C901, CCR001
                 event_name_augment = entry_augment['event'].lower()
                 entry_augment['odyssey'] = this.odyssey
 
-                if event_name_augment == 'market':
-                    this.eddn.export_journal_commodities(cmdr, is_beta, entry_augment)
-
-                elif event_name_augment == 'outfitting':
-                    this.eddn.export_journal_outfitting(cmdr, is_beta, entry_augment)
-
-                elif event_name_augment == 'shipyard':
-                    this.eddn.export_journal_shipyard(cmdr, is_beta, entry_augment)
-
+                match event_name_augment:
+                    case 'market':
+                        this.eddn.export_journal_commodities(cmdr, is_beta, entry_augment)
+                    case 'outfitting':
+                        this.eddn.export_journal_outfitting(cmdr, is_beta, entry_augment)
+                    case 'shipyard':
+                        this.eddn.export_journal_shipyard(cmdr, is_beta, entry_augment)
         except requests.exceptions.RequestException as e:
             logger.debug(f'Failed exporting {entry["event"]}', exc_info=e)
             return tr.tl("Error: Can't connect to EDDN")  # LANG: Error while trying to send data to EDDN

@@ -340,7 +340,8 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
         if this.log.get() and changed:
             this.newuser = True  # Send basic info at next Journal event
             new_add_event(
-                'getCommanderProfile', time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), {'searchName': cmdr}
+                'getCommanderProfile', datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
+                {'searchName': cmdr}
             )
 
 

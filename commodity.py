@@ -1,89 +1,114 @@
 """Export various CSV formats."""
 
-# -*- coding: utf-8 -*-
-
-import time
 import csv
+from datetime import datetime
+from enum import IntEnum
 from pathlib import Path
+from typing import Any
+from collections.abc import Mapping
 from config import config
 from edmc_data import commodity_bracketmap as bracketmap
 
-# DEFAULT means semi-colon separation
-# CSV means comma separation
-# TAB and PIPE are also supported
-(
-    COMMODITY_SEMICOLON,
-    COMMODITY_CSV,
-    COMMODITY_CSV_NEW,
-    COMMODITY_TAB,
-    COMMODITY_PIPE,
-) = range(5)
-mkt_out_types = ('CSV', 'CSV_NEW', 'TAB', 'PIPE', 'SEMICOLON')
+
+class CommodityExportKind(IntEnum):
+    """List the various available output forms."""
+
+    SEMICOLON = 0
+    CSV = 1
+    CSV_NEW = 2
+    TAB = 3
+    PIPE = 4
 
 
-def export(data, kind=COMMODITY_SEMICOLON, filename=None) -> None:  # noqa: CCR001
-    """
-    Export commodity data from the given CAPI data.
+# BACKWARD COMPATIBILITY
+COMMODITY_SEMICOLON = CommodityExportKind.SEMICOLON
+COMMODITY_CSV = CommodityExportKind.CSV
+COMMODITY_CSV_NEW = CommodityExportKind.CSV_NEW
+COMMODITY_TAB = CommodityExportKind.TAB
+COMMODITY_PIPE = CommodityExportKind.PIPE
+mkt_out_types = ("CSV", "CSV_NEW", "TAB", "PIPE", "SEMICOLON")
+
+
+def export(
+    data: Mapping[str, Any],
+    kind: CommodityExportKind = CommodityExportKind.SEMICOLON,
+    filename: Path | str | None = None,
+) -> None:
+    """Export commodity data from the given CAPI data.
 
     :param data: CAPI data.
     :param kind: The type of file to write.
     :param filename: Filename to write to, or None for a standard format name.
-    :return:
     """
-    querytime = config.get_int("querytime", default=int(time.time()))
+    query_time_raw = config.get_int("querytime", default=None)
+    query_datetime = (
+        datetime.fromtimestamp(query_time_raw)
+        if query_time_raw is not None
+        else datetime.now()
+    )
 
-    # Map kind to delimiter
-    if kind == COMMODITY_CSV or kind == COMMODITY_CSV_NEW:
-        mkt_out_delim = ','
-    elif kind == COMMODITY_TAB:
-        mkt_out_delim = '\t'
-    elif kind == COMMODITY_PIPE:
-        mkt_out_delim = '|'
-    else:
-        mkt_out_delim = ';'  # COMMODITY_SEMICOLON or default
+    match kind:
+        case CommodityExportKind.CSV | CommodityExportKind.CSV_NEW:
+            mkt_out_delim = ","
+        case CommodityExportKind.TAB:
+            mkt_out_delim = "\t"
+        case CommodityExportKind.PIPE:
+            mkt_out_delim = "|"
+        case _:
+            mkt_out_delim = ";"
+
+    sysname = data["lastSystem"]["name"].strip()
+    station = data["lastStarport"]["name"].strip()
 
     if not filename:
-        sysname = data["lastSystem"]["name"].strip()
-        station = data["lastStarport"]["name"].strip()
-        timestamp = time.strftime("%Y-%m-%dT%H.%M.%S", time.localtime(querytime))
+        timestamp = query_datetime.strftime("%Y-%m-%dT%H.%M.%S")
         # Use .csv for comma-separated files; use .txt for other text formats
-        ext = 'csv' if mkt_out_delim == ',' else 'txt'
+        ext = "csv" if mkt_out_delim == "," else "txt"
         filename = (
             Path(config.get_str("outdir")) / f"{sysname}.{station}.{timestamp}.{ext}"
         )
-
-    system = data["lastSystem"]["name"]
-    station = data["lastStarport"]["name"]
-
-    if kind == COMMODITY_CSV:
-        # maintain old compatibility
-        header = ['System', 'Station', 'Commodity', 'Sell', 'Buy', 'Demand',
-                  'demandBracket', 'Supply', 'stockBracket', 'Date']
     else:
-        header = ['System', 'Station', 'Commodity', 'Sell', 'Buy', 'Demand',
-                  'demandBracket', 'Supply', 'stockBracket', 'Average', 'FDevID', 'Date']
+        filename = Path(filename)
+
+    header = ["System", "Station", "Commodity", "Sell", "Buy", "Demand",
+              "demandBracket", "Supply", "stockBracket"]
+    if kind != CommodityExportKind.CSV:
+        header.extend(["Average", "FDevID"])
+    header.append("Date")
 
     with open(filename, "w", newline="", encoding="utf-8") as output_file:
         writer = csv.writer(output_file, delimiter=mkt_out_delim)
-
         writer.writerow(header)
 
         for commodity in data["lastStarport"]["commodities"]:
+
+            def get_int_field(
+                field_key: str, condition_key: str | None = None
+            ) -> int | str:
+                """Return the integer value of a field from the commodity."""
+                check_key = condition_key or field_key
+                if (
+                    commodity.get(check_key) is not None
+                    and commodity.get(field_key) is not None
+                ):
+                    return int(commodity[field_key])
+                return ""
+
             row = [
-                system,
+                sysname,
                 station,
                 commodity["name"],
-                int(commodity["sellPrice"]) if commodity.get("sellPrice") is not None else "",
-                int(commodity["buyPrice"]) if commodity.get("buyPrice") is not None else "",
-                int(commodity["demand"]) if commodity.get("demandBracket") is not None else "",
+                get_int_field("sellPrice"),
+                get_int_field("buyPrice"),
+                get_int_field("demand", "demandBracket"),
                 bracketmap.get(commodity.get("demandBracket"), ""),
-                int(commodity["stock"]) if commodity.get("stockBracket") is not None else "",
+                get_int_field("stock", "stockBracket"),
                 bracketmap.get(commodity.get("stockBracket"), ""),
             ]
 
             # newer export fields format
-            if kind != COMMODITY_CSV:
-                mean = int(commodity["meanPrice"]) if commodity.get("meanPrice") is not None else ""
+            if kind != CommodityExportKind.CSV:
+                mean = get_int_field("meanPrice")
                 row.extend([mean, commodity["id"]])
 
             row.append(data["timestamp"])

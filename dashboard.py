@@ -9,10 +9,9 @@ from __future__ import annotations
 
 import json
 import sys
-import time
 import tkinter as tk
 import warnings
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 from watchdog.events import FileSystemEventHandler
@@ -29,7 +28,7 @@ class Dashboard(FileSystemEventHandler):
 
     def __init__(self) -> None:
         super().__init__()
-        self.session_start: int = int(time.time())
+        self.session_start: int = int(datetime.now(timezone.utc).timestamp())
         self.root: tk.Tk = None  # type: ignore
         self.currentdir: Path | None = None  # The actual logdir that we're monitoring
         self.observer: Observer | PollingObserver | None = None  # type: ignore

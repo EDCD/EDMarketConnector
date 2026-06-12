@@ -32,7 +32,7 @@ RANK_LINES_END = 9
 POWERPLAY_LINES_START = 9
 
 
-def status(data: dict[str, Any]) -> list[list[str]]:
+def status(data: companion.CAPIData) -> list[list[str]]:
     """
     Get the current status of the cmdr referred to by data.
 
@@ -198,7 +198,7 @@ def status(data: dict[str, Any]) -> list[list[str]]:
     return res
 
 
-def export_status(data: dict[str, Any], filename: AnyStr) -> None:
+def export_status(data: companion.CAPIData, filename: AnyStr) -> None:
     """
     Export status data to a CSV file.
 
@@ -223,7 +223,7 @@ class ShipRet(NamedTuple):
     value: str
 
 
-def ships(companion_data: dict[str, Any]) -> list[ShipRet]:
+def ships(companion_data: companion.CAPIData) -> list[ShipRet]:
     """
     Return a list of 5 tuples of ship information.
 
@@ -271,7 +271,7 @@ def ships(companion_data: dict[str, Any]) -> list[ShipRet]:
     ]
 
 
-def export_ships(companion_data: dict[str, Any], filename: AnyStr) -> None:
+def export_ships(companion_data: companion.CAPIData, filename: AnyStr) -> None:
     """
     Export the current ships to a CSV file.
 
@@ -342,7 +342,7 @@ class StatsDialog:
 class StatsResults(tk.Toplevel):
     """Status window."""
 
-    def __init__(self, parent: tk.Tk, data: dict[str, Any]) -> None:
+    def __init__(self, parent: tk.Tk, data: companion.CAPIData) -> None:
         tk.Toplevel.__init__(self, parent)
 
         self.parent = parent

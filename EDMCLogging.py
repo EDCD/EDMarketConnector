@@ -44,11 +44,10 @@ import os
 import pathlib
 import sys
 import warnings
-import datetime
 from fnmatch import fnmatch
 # So that any warning about accessing a protected member is only in one place.
 from threading import get_native_id as thread_native_id
-from time import gmtime
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING, cast
 from loguru import logger as loguru_logger
 import config as config_mod  # This has to be imported separately for trace_if to work... for some reason.
@@ -82,7 +81,9 @@ try:
 except ValueError:
     pass
 
-logging.Formatter.converter = gmtime
+logging.Formatter.converter = lambda ts: datetime.fromtimestamp(
+    ts, timezone.utc  # type: ignore
+).utctimetuple()
 warnings.simplefilter('default', DeprecationWarning)
 
 
@@ -137,7 +138,7 @@ if TYPE_CHECKING:
 
 def enhanced_formatter(record: 'Record') -> str:
     """Format log messages using Loguru."""
-    record["time"] = record["time"].astimezone(datetime.timezone.utc)
+    record["time"] = record["time"].astimezone(timezone.utc)
     record["extra"]["safe_osthreadid"] = record["extra"].get("osthreadid", thread_native_id())
     record["extra"]["safe_module"] = record["extra"].get("module", record["name"])
     record["extra"]["safe_qualname"] = record["extra"].get("qualname", record["function"])

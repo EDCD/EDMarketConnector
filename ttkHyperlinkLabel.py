@@ -19,11 +19,12 @@ In addition to standard ttk.Label arguments, takes the following arguments:
 May be imported by plugins
 """
 from __future__ import annotations
+
 import html
-from functools import partial
 import sys
 import tkinter as tk
 import webbrowser
+from functools import partial
 from tkinter import font as tk_font
 from tkinter import ttk
 from typing import Any
@@ -36,11 +37,11 @@ SHIPYARD_HTML_TEMPLATE = """
 <!DOCTYPE HTML>
 <html>
     <head>
-        <meta http-equiv="refresh" content="0; url={link}">
+        <meta http-equiv=\"refresh\" content=\"0; url={link}\">
         <title>Redirecting you to your {ship_name} at {provider_name}...</title>
     </head>
     <body>
-        <a href="{link}">
+        <a href=\"{link}\">
             You should be redirected to your {ship_name} at {provider_name} shortly...
         </a>
     </body>
@@ -97,12 +98,14 @@ class HyperlinkLabel(tk.Label or ttk.Label):  # type: ignore
             target = plug.invoke(url, 'EDSY', 'shipyard_url', loadout, monitor.is_beta)
             file_name = config.app_dir_path / "last_shipyard.html"
 
-            with open(file_name, 'w') as f:
-                f.write(SHIPYARD_HTML_TEMPLATE.format(
+            file_name.write_text(
+                SHIPYARD_HTML_TEMPLATE.format(
                     link=html.escape(str(target)),
                     provider_name=html.escape(str(url)),
                     ship_name=html.escape("Ship")
-                ))
+                ),
+                encoding='utf-8'
+            )
 
             webbrowser.open(f'file://localhost/{file_name}')
 
@@ -192,33 +195,35 @@ class HyperlinkLabel(tk.Label or ttk.Label):  # type: ignore
         # LANG: Label for 'Copy' as in 'Copy and Paste'
         menu.add_command(label=tr.tl('Copy'), command=self.copy)  # As in Copy and Paste
 
-        if self.name == 'ship':
-            # LANG: Copy the Inara SLEF Format of the active ship to the clipboard
-            menu.add_command(label=tr.tl('Copy Inara SLEF'), command=self.copy_slef, state=tk.DISABLED)
-            menu.entryconfigure(1, state=monitor.slef and tk.NORMAL or tk.DISABLED)
+        match self.name:
+            case 'ship':
+                state_val = tk.NORMAL if monitor.slef else tk.DISABLED
+                # LANG: Copy the Inara SLEF Format of the active ship to the clipboard
+                menu.add_command(label=tr.tl('Copy Inara SLEF'), command=self.copy_slef, state=tk.DISABLED)
+                menu.entryconfigure(1, state=state_val)
 
-            menu.add_separator()
-            for url in plug.provides('shipyard_url'):
-                menu.add_command(
-                    label=tr.tl("Open in {URL}").format(URL=url),  # LANG: Open Element In Selected Provider
-                    command=partial(self.open_shipyard, url)
-                )
+                menu.add_separator()
+                for url in plug.provides('shipyard_url'):
+                    menu.add_command(
+                        label=tr.tl("Open in {URL}").format(URL=url),  # LANG: Open Element In Selected Provider
+                        command=partial(self.open_shipyard, url)
+                    )
 
-        if self.name == 'station':
-            menu.add_separator()
-            for url in plug.provides('station_url'):
-                menu.add_command(
-                    label=tr.tl("Open in {URL}").format(URL=url),  # LANG: Open Element In Selected Provider
-                    command=partial(self.open_station, url)
-                )
+            case 'station':
+                menu.add_separator()
+                for url in plug.provides('station_url'):
+                    menu.add_command(
+                        label=tr.tl("Open in {URL}").format(URL=url),  # LANG: Open Element In Selected Provider
+                        command=partial(self.open_station, url)
+                    )
 
-        if self.name == 'system':
-            menu.add_separator()
-            for url in plug.provides('system_url'):
-                menu.add_command(
-                    label=tr.tl("Open in {URL}").format(URL=url),  # LANG: Open Element In Selected Provider
-                    command=partial(self.open_system, url)
-                )
+            case 'system':
+                menu.add_separator()
+                for url in plug.provides('system_url'):
+                    menu.add_command(
+                        label=tr.tl("Open in {URL}").format(URL=url),  # LANG: Open Element In Selected Provider
+                        command=partial(self.open_system, url)
+                    )
 
         if self['text'] and (self.popup_copy(self['text']) if callable(self.popup_copy) else self.popup_copy):
             menu.post(event.x_root, event.y_root)

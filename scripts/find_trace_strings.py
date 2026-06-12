@@ -8,9 +8,9 @@ from __future__ import annotations
 
 import argparse
 import ast
-import datetime
 import pathlib
 import sys
+from datetime import date
 
 
 def get_func_name(thing: ast.AST) -> str:
@@ -60,7 +60,7 @@ def generate_markdown(all_found_data: list[dict], project_root: pathlib.Path):
 
     lines = [
         "# Available Traces",
-        f"This file was last updated on {datetime.date.today()}." "",
+        f"This file was last updated on {date.today()}." "",
         "This document lists all of the available `--trace-on` options to enable additional debug logging.",
         "",
         f"| {h_key:<{w_key}} | {h_msg:<{w_msg}} | {h_loc:<{w_loc}} |",
