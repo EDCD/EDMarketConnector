@@ -767,7 +767,9 @@ class EDDN:
         )
 
         outfitting: list[str] = sorted(
-            self.MODULE_RE.sub(lambda match: match.group(0).capitalize(), mod['name'].lower()) for mod in to_search
+            set(
+                self.MODULE_RE.sub(lambda match: match.group(0).capitalize(), mod['name'].lower()) for mod in to_search
+            )
         )
 
         # Don't send empty modules list - schema won't allow it
@@ -934,8 +936,10 @@ class EDDN:
         # outfitting = sorted([self.MODULE_RE.sub(lambda m: m.group(0).capitalize(), module['Name'])
         # for module in modules if module['Name'] != 'int_planetapproachsuite'])
         outfitting: list[str] = sorted(
-            self.MODULE_RE.sub(lambda m: m.group(0).capitalize(), mod['Name']) for mod in
-            filter(lambda m: m['Name'] != 'int_planetapproachsuite', modules)
+            set(
+                self.MODULE_RE.sub(lambda m: m.group(0).capitalize(), mod['Name']) for mod in
+                filter(lambda m: m['Name'] != 'int_planetapproachsuite', modules)
+            )
         )
         # Don't send empty modules list - schema won't allow it
         if outfitting and this.outfitting != (horizons, outfitting):
