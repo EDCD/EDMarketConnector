@@ -4,8 +4,8 @@ watchdog==6.0.0
 simplesystray==0.1.0; sys_platform == 'win32'
 semantic-version==2.10.0
 # For manipulating folder permissions and the like.
-pywin32==311; sys_platform == 'win32'
+pywin32==312; sys_platform == 'win32'
 psutil==7.2.2
 tomli-w==1.2.0
-filelock==3.32.0
+filelock==3.32.3
 loguru==0.7.3
