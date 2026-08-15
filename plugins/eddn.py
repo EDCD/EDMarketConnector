@@ -619,7 +619,7 @@ class EDDN:
             # Check 'marketable' and 'not prohibited'
             if (category_map.get(commodity['categoryname'], True)
                     and not commodity.get('legality')):
-                commodities.append({
+                commodity_entry = {
                     'name': commodity['name'].lower(),
                     'meanPrice': int(commodity['meanPrice']),
                     'buyPrice': int(commodity['buyPrice']),
@@ -628,10 +628,15 @@ class EDDN:
                     'sellPrice': int(commodity['sellPrice']),
                     'demand': int(commodity['demand']),
                     'demandBracket': commodity['demandBracket'],
-                })
+                }
 
-                if commodity['statusFlags']:
-                    commodities[-1]['statusFlags'] = commodity['statusFlags']
+                if commodity.get('statusFlags'):
+                    # Deduplicate statusFlags while preserving order
+                    unique_flags = list(dict.fromkeys(commodity['statusFlags']))
+                    if unique_flags:
+                        commodity_entry['statusFlags'] = unique_flags
+
+                commodities.append(commodity_entry)
 
         commodities.sort(key=lambda c: c['name'])
 
