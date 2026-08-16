@@ -774,6 +774,10 @@ class Session:
                 # May also fail here if token expired since response is empty
                 # r.status_code = 401
                 # raise requests.HTTPError
+
+                # Handle No Fleet Carrier
+                if r.status_code == 204 and capi_endpoint == CAPIEndpoint.FLEETCARRIER:
+                    return None  # type: ignore
                 if not r.content or not r.content.strip():
                     logger.error(
                         "CAPI returned empty response body\n"
@@ -958,15 +962,11 @@ class Session:
                     capi_data = capi_station_queries(query.capi_host)
 
                 elif query.endpoint == CAPIEndpoint.FLEETCARRIER:
-                    try:
-                        capi_data = capi_single_query(query.capi_host, CAPIEndpoint.FLEETCARRIER,
-                                                      timeout=capi_fleetcarrier_requests_timeout)
-                    except ServerError as e:
-                        # If status is 204, do nothing. Log only.
-                        if e.response is not None and e.response.status_code == 204:
-                            logger.debug(f'Fleet Carrier endpoint returned 204: No Carrier found for {monitor.cmdr}')
-                        else:
-                            raise
+                    capi_data = capi_single_query(query.capi_host, CAPIEndpoint.FLEETCARRIER,
+                                                  timeout=capi_fleetcarrier_requests_timeout)
+                    if not capi_data:
+                        logger.debug(f'Fleet Carrier endpoint returned 204: No Carrier found for {monitor.cmdr}')
+                        return
 
                 else:
                     capi_data = capi_single_query(query.capi_host, CAPIEndpoint.PROFILE)
