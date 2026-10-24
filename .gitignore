@@ -5,6 +5,7 @@
 .DS_Store
 
 # Ignore build artifacts
+.build
 build
 dist.win32/
 dist.*
