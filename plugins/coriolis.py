@@ -63,7 +63,11 @@ MATERIAL_EVENTS: set[str] = {
     "Synthesis", "ScientificResearch", "TechnologyBroker", "StartUp",
 }
 STORED_MODULE_EVENTS: set[str] = {"StoredModules"}
-TRACKED_EVENTS: set[str] = (SHIP_EVENTS | MODULE_EVENTS | ENGINEERING_EVENTS | MATERIAL_EVENTS | STORED_MODULE_EVENTS)
+STATISTICS_EVENTS: set[str] = {"Statistics"}
+TRACKED_EVENTS: set[str] = (
+    SHIP_EVENTS | MODULE_EVENTS | ENGINEERING_EVENTS | MATERIAL_EVENTS
+    | STORED_MODULE_EVENTS | STATISTICS_EVENTS
+)
 
 # Module-Level Configuration Cache State Variables
 NORMAL_URL: str = ""
@@ -472,6 +476,25 @@ def _build_stored_modules(entry: dict[str, Any]) -> list[dict[str, Any]]:
     return modules
 
 
+def _build_statistics(state: dict[str, Any]) -> dict[str, Any]:
+    """
+    Build a commander finances/currency summary from EDMC state.
+
+    Sources the spendable credit balance from EDMC's live-tracked
+    ``state['Credits']`` and the Merc Coin balance (an 'operations' currency,
+    not a material) from the ``Statistics`` event's ``Bank_Account`` section
+    (``MercCoins_Current``). Coriolis uses these for the build shopping list
+    to show credits and Merc Coin required versus what the commander owns.
+    """
+    stats = state.get("Statistics") or {}
+    bank = stats.get("Bank_Account") or {}
+    return {
+        "credits": state.get("Credits"),
+        "currentWealth": bank.get("Current_Wealth"),
+        "mercCoins": bank.get("MercCoins_Current", 0),
+    }
+
+
 def _send_to_cmdr_api(cmdr_name: str, api_key: str, payload: dict[str, Any]) -> None:
     """Dispatch telemetry request actions asynchronously inside a background worker."""
 
@@ -759,6 +782,15 @@ def journal_entry(
             "timestamp": entry.get("timestamp", ""),
             "commander": cmdr_name,
             "storedModules": stored,
+        }
+        _send_to_cmdr_api(cmdr_name, api_key, payload)
+
+    elif event_name in STATISTICS_EVENTS:
+        payload = {
+            "event": event_name,
+            "timestamp": entry.get("timestamp", ""),
+            "commander": cmdr_name,
+            "statistics": _build_statistics(state),
         }
         _send_to_cmdr_api(cmdr_name, api_key, payload)
 
