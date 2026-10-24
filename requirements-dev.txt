@@ -17,7 +17,7 @@ mypy==2.3.0
 pep8-naming==0.15.1
 safety==3.8.1
 types-requests==2.33.0.20260518
-types-setuptools==82.0.0.20260518
+types-setuptools==84.0.0.20260812
 
 # Code formatting tools
 autopep8==2.3.2
