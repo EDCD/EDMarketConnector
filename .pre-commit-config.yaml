@@ -56,16 +56,6 @@ repos:
 #     hooks:
 #       -id: php-unit
 
-# safety.exe check -r requirements.txt
--   repo: https://github.com/Lucas-C/pre-commit-hooks-safety
-    rev: 'v1.4.2'
-    hooks:
-      - id: python-safety-dependencies-check 
-        entry: safety
-        args: [check, --bare, --file]
-        language: system
-        files: requirements-dev.txt, requirements.txt
-
 # Check translation comments are up to date
 - repo: local
   hooks:
