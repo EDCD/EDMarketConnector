@@ -29,7 +29,9 @@ import ctypes
 import os
 import sys
 import tkinter as tk
-from ctypes import POINTER, Structure, byref, c_int, c_short, c_uint, c_ulong, c_ushort, c_void_p
+from collections.abc import Callable
+from ctypes import CFUNCTYPE, POINTER, Structure, byref, c_int, c_short, c_ubyte, c_uint, c_ulong, c_ushort, c_void_p
+from typing import Any
 
 from EDMCLogging import get_main_logger
 
@@ -98,6 +100,16 @@ Rect = tuple[int, int, int, int]
 
 class _XRectangle(Structure):
     _fields_ = [('x', c_short), ('y', c_short), ('width', c_ushort), ('height', c_ushort)]
+
+
+class _XErrorEvent(Structure):
+    _fields_ = [
+        ('type', c_int), ('display', c_void_p), ('resourceid', c_ulong), ('serial', c_ulong),
+        ('error_code', c_ubyte), ('request_code', c_ubyte), ('minor_code', c_ubyte),
+    ]
+
+
+_XErrorHandler = CFUNCTYPE(c_int, c_void_p, POINTER(_XErrorEvent))
 
 
 class _XImage(Structure):
@@ -179,6 +191,9 @@ class X11Transparency:
         self._leave_job: str | None = None
         self._available: bool | None = None
         self._tcl_ready = False
+        self._x_error: int | None = None
+        self._previous_error_handler: Callable[[int | None, Any], int] | None = None
+        self._error_handler_ref = _XErrorHandler(self._on_x_error)  # kept alive for as long as it's installed
 
     # Public API ----------------------------------------------------------------------------------------------
 
@@ -237,8 +252,9 @@ class X11Transparency:
     def _clip(self) -> None:
         """Clip the whole window.  It must be un-clipped, i.e. fully painted, at this point."""
         self._leave_job = None
-        if not self.enabled or self.clipped or self.root is None or not self.root.winfo_viewable():
+        if not self.enabled or self.clipped or not self._viewable():
             return
+        assert self.root is not None
         try:
             self.root.update_idletasks()
             window = self._wrapper()
@@ -258,7 +274,7 @@ class X11Transparency:
             logger.exception('Could not clip the window for the transparent theme')
 
     def _repaint_again(self) -> None:
-        if self.clipped:
+        if self.clipped and self._viewable():
             self._force_compositor_repaint(self._wrapper())
 
     def _unclip(self) -> None:
@@ -278,6 +294,9 @@ class X11Transparency:
         """While clipped, find widgets whose look changed and re-clip only their area."""
         self._poll_job = None
         if not self.clipped or self.root is None:
+            return
+        if not self._viewable():  # e.g. minimised: nothing to read back, check again later
+            self._poll_job = self.root.after(POLL_MS, self._poll)
             return
         try:
             snapshot = self._take_snapshot()
@@ -347,6 +366,25 @@ class X11Transparency:
             snapshot[str(flat[i])] = ((x, y, w, h, bool(mapped)), flat[i + 6])
         return snapshot
 
+    def _viewable(self) -> bool:
+        # Reading back or reshaping an unmapped (e.g. minimised) window is an X error
+        return self.root is not None and bool(self.root.winfo_viewable())
+
+    def _on_x_error(self, display: int | None, event) -> int:
+        """
+        Xlib error handler.
+
+        Errors on our own connection (e.g. the window got minimised between the viewability check and reading it
+        back) are recorded and ignored: Xlib's default handler would terminate EDMC.  Everything else goes to the
+        handler that was installed before, i.e. Tk's.
+        """
+        if display == self._dpy:
+            self._x_error = event.contents.error_code
+            return 0
+        if self._previous_error_handler:
+            return self._previous_error_handler(display, event)
+        return 0
+
     # X11 helpers -----------------------------------------------------------------------------------------
 
     def _load(self) -> bool:
@@ -385,7 +423,11 @@ class X11Transparency:
         except Exception as e:
             logger.warning(f'Transparent theme is unavailable on this system: {e!r}')
             return False
+        x11.XSetErrorHandler.argtypes = [_XErrorHandler]
+        x11.XSetErrorHandler.restype = _XErrorHandler
         self._x11, self._xext, self._dpy = x11, xext, dpy
+        previous = x11.XSetErrorHandler(self._error_handler_ref)
+        self._previous_error_handler = previous if previous else None
         self._available = True
         return True
 
@@ -418,9 +460,12 @@ class X11Transparency:
     def _read_rects(self, window: int, x: int, y: int, width: int, height: int) -> list[Rect] | None:
         """Read back an area of the window and return its non-key rectangles, relative to the area."""
         assert self._x11 is not None
+        self._x_error = None
         self._x11.XSync(self._dpy, 0)
         image_p = self._x11.XGetImage(self._dpy, window, x, y, width, height, _ALL_PLANES, _ZPIXMAP)
-        if not image_p:
+        if not image_p or self._x_error is not None:
+            if image_p:
+                self._x11.XDestroyImage(image_p)
             return None
         try:
             image = image_p.contents
