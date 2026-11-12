@@ -2103,14 +2103,20 @@ class AppWindow:
     def onenter(self, event=None) -> None:
         """Handle when our window gains focus."""
         if config.get_int('theme') == theme.THEME_TRANSPARENT:
-            self.w.attributes("-transparentcolor", '')
+            if sys.platform == 'win32':
+                self.w.attributes("-transparentcolor", '')
+            else:
+                theme.x11_transparency.on_enter(event)
             self.blank_menubar.grid_remove()
             self.theme_menubar.grid(row=0, columnspan=2, sticky=tk.NSEW)
 
     def onleave(self, event=None) -> None:
         """Handle when our window loses focus."""
         if config.get_int('theme') == theme.THEME_TRANSPARENT and event.widget == self.w:
-            self.w.attributes("-transparentcolor", 'grey4')
+            if sys.platform == 'win32':
+                self.w.attributes("-transparentcolor", 'grey4')
+            else:
+                theme.x11_transparency.on_leave(event)
             self.theme_menubar.grid_remove()
             self.blank_menubar.grid(row=0, columnspan=2, sticky=tk.NSEW)
 

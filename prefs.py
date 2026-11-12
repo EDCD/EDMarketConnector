@@ -760,7 +760,7 @@ class PreferencesDialog(tk.Toplevel, plugin_browser.PluginBrowserMixIn):
             value=theme.THEME_DARK, command=self.themevarchanged
         ).grid(columnspan=3, padx=self.BUTTONX, pady=self.PADY, sticky=tk.W, row=next(row))
 
-        if sys.platform == 'win32':
+        if sys.platform == 'win32' or theme.x11_transparency.available():
             nb.Radiobutton(
                 appearance_frame,
                 # LANG: Label for 'Transparent' theme radio button

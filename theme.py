@@ -20,6 +20,7 @@ from l10n import translations as tr
 from config import config
 from EDMCLogging import get_main_logger
 from ttkHyperlinkLabel import HyperlinkLabel
+from x11_transparency import X11Transparency
 
 logger = get_main_logger()
 
@@ -148,6 +149,7 @@ class _Theme:
         self.current: dict[str, Any] = {}
         self.default_ui_scale: float | None = None  # None == not yet known
         self.startup_ui_scale: int | None = None
+        self.x11_transparency = X11Transparency()  # Linux implementation of the Transparent theme
 
     def register(self, widget: tk.Widget | tk.BitmapImage) -> None:  # noqa: CCR001
         # Note widget and children for later application of a theme. Note if
@@ -470,6 +472,10 @@ class _Theme:
                 root.overrideredirect(theme != self.THEME_DEFAULT)
             root.deiconify()
             root.wait_visibility()  # need main window to be displayed before returning
+            if theme == self.THEME_TRANSPARENT:
+                self.x11_transparency.enable(root)
+            else:
+                self.x11_transparency.disable()
 
         if not self.minwidth:
             self.minwidth = root.winfo_width()  # Minimum width = width on first creation
