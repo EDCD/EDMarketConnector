@@ -182,6 +182,10 @@ class X11Transparency:
 
     # Public API ----------------------------------------------------------------------------------------------
 
+    def available(self) -> bool:
+        """Return True if the Transparent theme can work here (Linux with the X Shape extension)."""
+        return self._load()
+
     def enable(self, root: tk.Tk) -> None:
         """Switch to transparent mode.  The window must be mapped."""
         if not self._load():
