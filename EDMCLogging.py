@@ -81,9 +81,11 @@ try:
 except ValueError:
     pass
 
-logging.Formatter.converter = lambda ts: datetime.fromtimestamp(
-    ts, timezone.utc  # type: ignore
-).utctimetuple()
+# staticmethod: a plain function set as a class attribute becomes a method, so Formatter.formatTime() would call it
+# with (self, ts) and every stdlib logging.Formatter (e.g. in plugins) would raise TypeError.
+logging.Formatter.converter = staticmethod(lambda ts: datetime.fromtimestamp(  # type: ignore
+    ts, timezone.utc
+).utctimetuple())
 warnings.simplefilter('default', DeprecationWarning)
 
 
