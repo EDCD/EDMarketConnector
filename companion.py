@@ -696,7 +696,7 @@ class Session:
                 message=tr.tl(  # LANG: Messagebox body after successful CAPI authentication
                     "Authentication with cAPI Successful.{CR}"
                     "You may now close the Frontier login tab if it is still open."
-                ).format(CR="\n")
+                )
             )
 
     def close(self) -> None:
