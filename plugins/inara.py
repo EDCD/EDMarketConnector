@@ -515,7 +515,7 @@ def journal_entry(  # noqa: C901, CCR001
                 new_add_event('setCommanderRankPower', entry['timestamp'], power_join_data)
 
             elif event_name == 'PowerplayLeave':
-                power_leave_data = {'powerName': entry['Power'], 'rankValue': 0}
+                power_leave_data = {'powerName': entry['Power'], 'rankValue': -1}
                 new_add_event('setCommanderRankPower', entry['timestamp'], power_leave_data)
 
             elif event_name == 'PowerplayDefect':
